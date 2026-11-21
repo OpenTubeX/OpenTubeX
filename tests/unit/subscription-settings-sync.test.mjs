@@ -304,9 +304,11 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default {', 'globalThis.profileModule = {'), persistenceContext)
   const module = persistenceContext.profileModule
+  const getters = new Proxy({}, { get: (_, name) => module.getters[name](module.state, getters, {}, getters) })
   module.state.profileList[0].subscriptions = [{ id: 'channel', dailyVideoLimit: 1, subscriptionSettingsUpdatedAt: timestamp }]
   const result = await module.actions.updateChannelSettings({
     state: module.state,
+    getters,
     commit: () => assert.fail('A failed write must not commit'),
     dispatch: async () => { timestamp = 200 },
   }, { channelId: 'channel', settings: { dailyVideoLimit: 2 } })
@@ -316,7 +318,7 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
   assert.equal(module.state.profileList[0].subscriptions[0].dailyVideoLimit, 1)
 
   failWrite = false
-  const actionContext = { state: module.state, commit: (name, payload) => module.mutations[name](module.state, payload) }
+  const actionContext = { state: module.state, getters, commit: (name, payload) => module.mutations[name](module.state, payload) }
   assert.equal(await module.actions.updateChannelSettings(actionContext, { channelId: 'channel', settings: { dailyVideoLimit: 2 } }), true)
   assert.equal(persistedChannel.dailyVideoLimit, 2)
   assert.ok(persistedChannel.subscriptionSettingsUpdatedAt > 100)

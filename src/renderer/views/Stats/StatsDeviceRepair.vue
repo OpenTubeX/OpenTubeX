@@ -108,7 +108,7 @@ const preview = computed(() => ({
   currentDeviceName: store.getters.getSyncServerDeviceName || t('Settings.Sync Settings.This Device'),
   localDays: store.getters.getWatchSecondsByDate,
   devices: store.getters.getSyncedWatchStats,
-  localReset: store.getters.getSyncServerWatchStatsReset,
+  localReset: store.getters.getActiveWatchStatsReset,
 }))
 const { currentDeviceId, currentDeviceName, localDays, devices, localReset } = JSON.parse(JSON.stringify(preview.value))
 const target = devices.find(device => containsWatchStatsDevice(device, currentDeviceId))

@@ -102,7 +102,7 @@ export async function refreshPlaylistBookmarks() {
     // or removed in the meantime.
     const metadataById = new Map(results.filter(result => result !== null))
     if (metadataById.size > 0) {
-      const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => {
+      const saved = await store.dispatch('updateActivePlaylistBookmarks', savedBookmarks => {
         if (signal.aborted) return savedBookmarks
         return savedBookmarks.map(bookmark => {
           const metadata = isValidPlaylistBookmark(bookmark) ? metadataById.get(bookmark.playlist.id) : undefined

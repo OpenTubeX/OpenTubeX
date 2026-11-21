@@ -390,7 +390,7 @@ const watchSecondsByDate = computed(() => {
     syncedDevices.value,
     currentDeviceId.value,
     selectedDevice.value,
-    store.getters.getSyncServerWatchStatsReset
+    store.getters.getActiveWatchStatsReset
   )
 })
 const hasData = computed(() => Object.values(watchSecondsByDate.value).some(seconds => seconds > 0))

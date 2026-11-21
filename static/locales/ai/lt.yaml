@@ -1619,6 +1619,7 @@ Settings:
     Remove: Pašalinti
     Blur Blocked Items: Sulieti užblokuotus elementus, užuot juos slėpus
   Data Settings:
+    Backup separate profile data: "Šioje atsarginėje kopijoje taip pat yra {count} atskiro profilio duomenys, kurie atkuriami į tą profilį. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius."
     Subscription cache file: "Šiame faile talpinami tik jūsų prenumeratų vaizdo įrašai, o ne kanalai. Vietoj jo pasirinkite profiles.db arba prenumeratų eksportą."
     Settings could not be imported: "Nepavyko importuoti nustatymų"
     Some settings could not be imported: "Nepavyko importuoti visų nustatymų (nepavyko: {failed} iš {total})"
@@ -1984,6 +1985,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
   Show tutorial: Rodyti mokomąjį vadovą
 Profile:
+  Keep Data Separate: "Laikyti duomenis atskirai"
+  Keep Data Separate Tooltip: "Šiam profiliui suteikia savo prenumeratas, žiūrėjimo istoriją, grojaraščius, paieškos istoriją, žiūrėjimo statistiką ir eilę. Kiti jūsų profiliai jų nemato, o šis profilis nemato jų duomenų. Sukūrus profilį to pakeisti negalima."
+  Separate Profile: "Atskiras profilis"
+  Separate Profile Note: "Šis profilis savo prenumeratas, istoriją ir grojaraščius laiko atskirai nuo kitų jūsų profilių."
+  Separate Profile Deletion Warning: "Bus ištrintos ir jo prenumeratos, žiūrėjimo istorija, grojaraščiai, paieškos istorija, žiūrėjimo statistika bei eilė."
+  Separate Data Notice: "Profilis {profile} savo duomenis laiko atskirai, todėl toliau esantys importai ir eksportai naudoja tik jo prenumeratas, istoriją, grojaraščius ir paieškos istoriją."
+  Separate Data Storage Notice: "Profilis {profile} savo duomenis laiko atskirai. Toliau esantys mygtukai ištrina tik jo duomenis, o dydžiai apima visų profilių duomenis."
   Customization: Tinkinimas
   Manage Profile Subscriptions: Tvarkyti profilio prenumeratas
   Icon Names:

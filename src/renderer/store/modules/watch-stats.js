@@ -1,6 +1,6 @@
-import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBWatchStatsHandlers, getDataScope } from '../../../datastores/handlers/index'
 
-import { createWatchStatsReset } from '../../helpers/sync-watch-stats'
+import { createWatchStatsReset, savedWatchStatsReset } from '../../helpers/sync-watch-stats'
 
 const state = {
   watchSecondsByDate: {},
@@ -13,6 +13,11 @@ const state = {
 }
 
 const getters = {
+  // Separate profiles reset their own statistics.
+  getActiveWatchStatsReset(_state, _getters, rootState, rootGetters) {
+    return savedWatchStatsReset(rootState.settings, rootGetters.getActiveDataScope ?? null)
+  },
+
   getWatchSecondsByDate(state) {
     return state.watchSecondsByDate
   },
@@ -37,11 +42,14 @@ const getters = {
 const actions = {
   async grabWatchStats({ commit }) {
     try {
+      const scope = getDataScope()
       const hasHistoricalEstimate = await DBWatchStatsHandlers.migrateHistory()
       const [records, historicalAdjustment] = await Promise.all([
         DBWatchStatsHandlers.find(),
         DBWatchStatsHandlers.getHistoricalAdjustment(),
       ])
+      // A switch to another profile's data started meanwhile.
+      if (scope !== getDataScope()) return
       commit('setWatchStats', records)
       commit('setHasHistoricalWatchTimeEstimate', hasHistoricalEstimate)
       commit('setHistoricalWatchTimePlaybackSpeed', historicalAdjustment?.defaultSpeed ?? null)
@@ -67,18 +75,20 @@ const actions = {
 
   async clearWatchStats({ commit, dispatch, rootState, state }) {
     try {
-      const previous = rootState.settings.syncServerWatchStatsReset
+      // A separate profile's statistics have their own reset.
+      const scope = getDataScope()
+      const previous = savedWatchStatsReset(rootState.settings, scope)
       // Windows order clears by this time, so it grows even when the clock moved back
       const at = Math.max(Date.now(), (previous?.at ?? 0) + 1)
       const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, at)
-      await dispatch('updateSyncServerWatchStatsReset', reset)
+      await dispatch('updateWatchStatsReset', { scope, reset })
       // Confirm this marker persisted, not just that the write did not fail: a newer
       // write can supersede it. A failed save must not lose local history.
-      if (rootState.settings.syncServerWatchStatsReset?.id !== reset.id) return false
+      if (savedWatchStatsReset(rootState.settings, scope)?.id !== reset.id) return false
       try {
         await DBWatchStatsHandlers.deleteAll(reset.at)
       } catch (error) {
-        await dispatch('updateSyncServerWatchStatsReset', previous)
+        await dispatch('updateWatchStatsReset', { scope, reset: previous })
         throw error
       }
       commit('resetWatchStats', reset.at)

@@ -137,7 +137,17 @@
                     :profile="profile"
                     :fallback="profileInitials[profile._id]"
                   />
-                  <span dir="auto">{{ translateProfileName(profile) }}</span>
+                  <span class="profileOptionName">
+                    <span dir="auto">{{ translateProfileName(profile) }}</span>
+                    <FtIcon
+                      v-if="profile.separate === true"
+                      class="separateProfileIcon"
+                      :icon="['fas', 'user-lock']"
+                      role="img"
+                      :title="t('Profile.Separate Profile')"
+                      :aria-label="t('Profile.Separate Profile')"
+                    />
+                  </span>
                   <FtIcon
                     v-if="profile._id === activeProfile._id"
                     class="activeProfileIcon"

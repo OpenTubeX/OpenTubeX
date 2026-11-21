@@ -3,6 +3,8 @@ import { createWatchQueueState, watchQueueMutations, PERSISTED_MUTATIONS } from 
 import { createSerialQueue } from './serialQueue.js'
 import { readJsonState } from './readJsonState.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
+import { rm } from 'node:fs/promises'
+import { join } from 'node:path'
 
 /** @typedef {{ items: object[], revision: number }} WatchQueueSnapshot */
 
@@ -43,6 +45,42 @@ export function createSharedWatchQueue(storage) {
     return { items: state.items.slice(), revision }
   }
   return request => enqueue(() => apply(request))
+}
+
+/**
+ * One queue for the shared data and one for each separate profile, each in
+ * its own file in `directory`.
+ * @param {string} directory
+ * @param {(scope: string) => string} scopeFilePrefix the file name prefix of a separate profile's data
+ * @returns {{
+ *   update: (request: any, scope?: string | null) => Promise<WatchQueueSnapshot>,
+ *   settled: () => Promise<unknown>,
+ *   forget: (scope: string) => Promise<void>,
+ * }}
+ */
+export function createScopedFileWatchQueues(directory, scopeFilePrefix) {
+  /** @type {Map<string | null, ReturnType<typeof createFileWatchQueue>>} */
+  const queues = new Map()
+  const filename = scope => join(directory, scope === null ? 'watch-queue.json' : `${scopeFilePrefix(scope)}-watch-queue.json`)
+  const queue = scope => {
+    let update = queues.get(scope)
+    if (!update) {
+      update = createFileWatchQueue(filename(scope))
+      queues.set(scope, update)
+    }
+    return update
+  }
+  return {
+    update: (request, scope = null) => queue(scope)(request),
+    // Queue requests run in order, so a read waits for pending queue writes.
+    settled: () => Promise.all([queue(null), ...queues.values()].map(update => update({}))),
+    async forget(scope) {
+      const update = queues.get(scope)
+      queues.delete(scope)
+      await update?.({})
+      await rm(filename(scope), { force: true })
+    },
+  }
 }
 
 export function createFileWatchQueue(filename) {

@@ -1,4 +1,4 @@
-import { DBRecommendationHandlers } from '../../../datastores/handlers/index'
+import { DBRecommendationHandlers, getDataScope } from '../../../datastores/handlers/index'
 
 let loading = null
 export default {
@@ -19,6 +19,12 @@ export default {
       } else return
       state.recommendationRevision = update.revision
     },
+    /** Each profile's evidence has its own epoch and revisions. */
+    clearRecommendationState(state) {
+      state.recommendationRecords = {}
+      state.recommendationEpoch = null
+      state.recommendationRevision = -1
+    },
   },
   actions: {
     async receiveRecommendationUpdate({ state, dispatch, commit }, update) {
@@ -27,8 +33,13 @@ export default {
       } else commit('applyRecommendationUpdate', update)
     },
     async loadRecommendations({ commit }) {
-      loading ??= DBRecommendationHandlers.find().finally(() => { loading = null })
-      commit('applyRecommendationUpdate', await loading)
+      const scope = getDataScope()
+      if (loading?.scope !== scope) {
+        const request = { scope, result: DBRecommendationHandlers.find().finally(() => { if (loading === request) loading = null }) }
+        loading = request
+      }
+      const update = await loading.result
+      if (scope === getDataScope()) commit('applyRecommendationUpdate', update)
     },
     async recordRecommendationEvent({ commit, dispatch, state, rootGetters }, event) {
       if (!rootGetters.getEnableHomeRecommendations || !rootGetters.getRememberHistory) return

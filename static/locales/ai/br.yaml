@@ -1380,6 +1380,7 @@ Settings:
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
     Blur Blocked Items: Lakaat an elfennoù stanket da vezañ dispis e-lec'h o kuzhat
   Data Settings:
+    Backup separate profile data: "Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profil-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} brofil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} a brofiloù distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se."
     Subscription cache file: "Ar restr-mañ a vir ar videoioù eus ho koumanantoù hepken, ket ar chadennoù. Dibabit profiles.db pe un ezporzhiadur koumanantoù en e lec'h."
     Settings could not be imported: "N'eus ket bet gallet enporzhiañ an arventennoù"
     Some settings could not be imported: "N'eus ket bet gallet enporzhiañ an holl arventennoù ({failed} diwar {total} c'hwitet)"
@@ -1703,6 +1704,13 @@ About:
   Email: "Postel"
   Show tutorial: Diskouez ar c’helenn
 Profile:
+  Keep Data Separate: "Derc'hel ar roadennoù a-hent"
+  Keep Data Separate Tooltip: "Roet e vez d'ar profil-mañ e goumanantoù, e istor sellet, e rolloù videoioù, e istor enklask, e stadegoù sellet hag e lost dezhañ e-unan. Ne welfe ket ho profiloù all anezho, ha ne wel ket ar profil-mañ re ar re all. Ne c'hallit ket cheñch kement-se goude krouiñ ar profil."
+  Separate Profile: "Profil distag"
+  Separate Profile Note: "Derc'hel a ra ar profil-mañ e goumanantoù, e istor hag e rolloù videoioù a-hent diouzh ho profiloù all."
+  Separate Profile Deletion Warning: "E goumanantoù, e istor sellet, e rolloù videoioù, e istor enklask, e stadegoù sellet hag e lost a vo dilamet ivez."
+  Separate Data Notice: "Derc'hel a ra {profile} e roadennoù a-hent, setu ma ne implijer nemet e goumanantoù, e istor, e rolloù videoioù hag e istor enklask evit an enporzhiadennoù hag an ezporzhiadennoù a-is."
+  Separate Data Storage Notice: "Derc'hel a ra {profile} e roadennoù a-hent. Ne zilamfe nemet e roadennoù ar boutonoù a-is, met kontañ a ra ar ment roadennoù an holl brofiloù."
   Customization: Personelaat
   Manage Profile Subscriptions: Merañ koumanantoù ar profil
   Icon Names:

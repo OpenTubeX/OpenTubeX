@@ -20,7 +20,7 @@ function playlist(_id, playlistName, protectedValue = false) {
   }
 }
 
-async function fixture(records, { settingsDelay = false, settingsError = null } = {}) {
+async function fixture(records, { settingsDelay = false, settingsError = null, scope, storage = new Map() } = {}) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
@@ -39,11 +39,34 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, ...playlistPreferences, deepCopy: value => structuredClone(value), processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
+    {
+      DBPlaylistHandlers,
+      ...videoCounts,
+      ...playlistPreferences,
+      deepCopy: value => structuredClone(value),
+      processToBeAddedPlaylistVideo: () => {},
+      console: { error: error => errors.push(error) },
+      getDataScope: () => scope?.current ?? null,
+      localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
+      withDataScope: (requested, operation) => {
+        const previous = scope?.current ?? null
+        if (scope) scope.current = requested
+        try { return operation() } finally { if (scope) scope.current = previous }
+      },
+    }
   )
   const context = {
     state: module.state,
     rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]?._id ?? '' } },
+    rootGetters: {
+      getActiveDataScope: null,
+      get getQuickBookmarkTargetPlaylistId() { return context.rootState.settings.quickBookmarkTargetPlaylistId },
+    },
+    getters: {
+      get getActiveQuickBookmarkTargetPlaylistId() {
+        return module.getters.getActiveQuickBookmarkTargetPlaylistId(module.state, context.getters, context.rootState, context.rootGetters)
+      },
+    },
     commit: (name, value) => module.mutations[name](module.state, value),
     dispatch: async (name, value) => {
       if (name !== 'updateQuickBookmarkTargetPlaylistId') return module.actions[name]?.(context, value)
@@ -57,6 +80,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
     db,
     module,
     errors,
+    context,
     handlers: DBPlaylistHandlers,
     rootState: context.rootState,
     dispatch: context.dispatch,
@@ -199,4 +223,40 @@ test('reordering keeps entries another window added or removed meanwhile', async
   await db.playlists.removeAsync({ _id: 'custom' })
   assert.equal(await handlers.reorderVideos('custom', 6, ['item-a']), null)
   assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
+})
+
+test('switching to another profile while its playlists load keeps the other profile’s playlists untouched', async () => {
+  const scope = { current: 'first', writes: [] }
+  const { module, handlers, load } = await fixture([{ _id: 'mine', playlistName: 'Mine', videos: [] }], { scope })
+  const { find, update } = handlers
+  let release
+  handlers.find = (...args) => new Promise(resolve => { release = () => resolve(find.call(handlers, ...args)) })
+  handlers.update = playlist => {
+    scope.writes.push([scope.current, playlist._id])
+    return update.call(handlers, playlist)
+  }
+  module.state.playlists = [{ _id: 'other', playlistName: 'Other', videos: [] }]
+  const loading = load()
+  await new Promise(resolve => setImmediate(resolve))
+  scope.current = 'second'
+  release()
+  await loading
+  // The stored playlist needs repairs, which must neither reach the second
+  // profile's data nor replace its playlists.
+  assert.deepEqual(scope.writes, [])
+  assert.deepEqual(module.state.playlists.map(playlist => playlist._id), ['other'])
+})
+
+test('a playlist created while a profile switch waits sets the quick bookmark target of its own profile', async () => {
+  const scope = { current: null }
+  const storage = new Map()
+  const { module, rootState, context, load } = await fixture([{ _id: 'shared', playlistName: 'Shared', videos: [] }], { scope, storage })
+  await load()
+  rootState.settings.quickBookmarkTargetPlaylistId = 'deleted'
+  // The separate profile is selected, but the switch waits for this write first.
+  context.rootGetters.getActiveDataScope = 'separate'
+
+  assert.equal(await module.actions.addPlaylist(context, { _id: 'created', playlistName: 'Created', videos: [] }), true)
+  assert.equal(rootState.settings.quickBookmarkTargetPlaylistId, 'created')
+  assert.deepEqual([...storage.values()], [])
 })

@@ -123,7 +123,7 @@ export function limitWatchSecondsByDate(getters, devices) {
   const localDays = getters.getWatchSecondsByDate
   if (!syncedWatchStatsAvailable(getters)) return localDays
   return watchSecondsForDevice(localDays, getters.getSyncedWatchStats, getters.getSyncServerDeviceId,
-    devices, getters.getSyncServerWatchStatsReset)
+    devices, getters.getActiveWatchStatsReset)
 }
 
 export function mergeWatchStats(remote, localRecords, deviceId, deviceName, platform, reset = null) {
@@ -152,19 +152,34 @@ export function replaceWatchStatsDevice(devices, currentDeviceId, sourceDeviceId
     : device)
 }
 
-export async function syncWatchStats(client, store) {
-  const { syncServerDeviceId, syncServerDeviceName, syncServerWatchStatsReset } = store.state.settings
+/**
+ * The saved reset of the statistics of a data scope.
+ * @param {Record<string, any>} settings
+ * @param {string | null} dataScope The separate profile, or null for the shared statistics
+ */
+export function savedWatchStatsReset(settings, dataScope) {
+  return dataScope === null
+    ? settings.syncServerWatchStatsReset
+    : settings.syncServerScopedWatchStatsResets?.[dataScope] ?? null
+}
+
+// A separate profile's statistics sync with its own reset.
+export async function syncWatchStats(client, store, { dataScope = null } = {}) {
+  const { syncServerDeviceId, syncServerDeviceName } = store.state.settings
+  const savedReset = savedWatchStatsReset(store.state.settings, dataScope)
   const [remote, localRecords, deviceInfo] = await Promise.all([
     client.getWatchStats(),
     DBWatchStatsHandlers.find(),
     getCurrentSyncServerDeviceInfo(),
   ])
-  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, syncServerWatchStatsReset)
+  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, savedReset)
   const merged = mergeWatchStats(remote, localRecords, syncServerDeviceId, syncServerDeviceName,
     deviceInfo.platform, reset)
   if (JSON.stringify(remote) !== JSON.stringify(merged)) {
     await client.putWatchStats(merged)
   }
+  // After a profile switch, these are no longer the statistics the app shows.
+  store.assertActive?.()
   store.commit('setSyncedWatchStats', merged)
   return merged
 }
@@ -172,11 +187,12 @@ export async function syncWatchStats(client, store) {
 // EncryptedSyncAdapter.putWatchStats only stages data. Persist completion after
 // the server accepts the collection, so failed uploads and revision retries
 // keep the offline reset pending against the refreshed remote history.
-export async function persistUploadedWatchStatsReset(devices, store) {
-  const { syncServerDeviceId, syncServerWatchStatsReset } = store.state.settings
-  if (!syncServerWatchStatsReset?.pending) return
+export async function persistUploadedWatchStatsReset(devices, store, dataScope = null) {
+  const { syncServerDeviceId } = store.state.settings
+  const saved = savedWatchStatsReset(store.state.settings, dataScope)
+  if (!saved?.pending) return
   const uploaded = devices.map(device => findWatchStatsDevice(device, syncServerDeviceId)).find(Boolean)?.reset
-  if (uploaded?.id === syncServerWatchStatsReset.id && !uploaded.pending) {
-    await store.dispatch('updateSyncServerWatchStatsReset', uploaded)
+  if (uploaded?.id === saved.id && !uploaded.pending) {
+    await store.dispatch('updateWatchStatsReset', { scope: dataScope, reset: uploaded })
   }
 }

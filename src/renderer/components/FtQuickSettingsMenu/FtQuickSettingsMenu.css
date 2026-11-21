@@ -180,6 +180,23 @@
   color: var(--accent-color);
 }
 
+.profileOptionName {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.separateProfileIcon {
+  flex-shrink: 0;
+  color: var(--tertiary-text-color);
+  font-size: 0.85em;
+}
+
+.profileOption[aria-selected='true'] .separateProfileIcon {
+  color: inherit;
+}
+
 .profileOption[aria-selected='true'],
 .profileOption[aria-selected='true']:is(:hover, :focus-visible) {
   color: var(--on-selected-container-color);

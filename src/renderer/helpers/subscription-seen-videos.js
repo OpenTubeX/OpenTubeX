@@ -97,13 +97,15 @@ function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids) {
     : { ...cached, [entriesKey]: entries }
 }
 
-export async function syncSubscriptionSeenVideos(client, store) {
+// `updateHistory` is false while a separate profile is active, whose history
+// the videos marked unseen in the shared feed must not change.
+export async function syncSubscriptionSeenVideos(client, store, { updateHistory = true } = {}) {
   const remote = await client.getSeenVideos()
   await store.dispatch('mergeSubscriptionSeenVideos', remote)
   const merged = parseSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos)
   const unseenById = new Map(merged.filter(entry => entry.unseenAt >= entry.seenAt)
     .map(entry => [entry.videoId, entry.unseenAt]))
-  if (unseenById.size > 0) {
+  if (updateHistory && unseenById.size > 0) {
     // History sync runs first. An older completed record must not undo the
     // reverse action, while watching again after it still counts as watched.
     for (const history of store.state.history.historyCacheSorted) {

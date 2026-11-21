@@ -360,7 +360,7 @@ test('loading persisted video caches supplies feed markers without changing know
   const { actions, mutations, state } = context.cacheModule
   await actions.grabAllSubscriptions({
     rootState: { profiles: { profilesLoaded: true } },
-    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    rootGetters: { getAllRootSubscriptions: [{ id: 'channel' }] },
     commit: (type, payload) => mutations[type](state, payload),
   })
   for (const key of ['videoCache', 'shortsCache', 'liveCache']) {
@@ -603,7 +603,7 @@ for (const [description, profilesLoaded, storedSubscriptions, removed] of [
       dispatch: (...args) => dispatched.push(args),
       // A failed profile load leaves only the default main profile, without subscriptions.
       rootState: { profiles: { profilesLoaded } },
-      rootGetters: { getSubscribedChannelIdSet: new Set() },
+      rootGetters: { getAllRootSubscriptions: [] },
     })
     assert.deepEqual(structuredClone(dispatched), removed.length > 0 ? [['clearSubscriptionsCacheForManyChannels', removed]] : [])
     if (storedSubscriptions.length > 0) {
@@ -629,7 +629,7 @@ test('a failed startup cache load can be retried, and a failed reload keeps the 
   const actionContext = {
     state,
     rootState: { profiles: { profilesLoaded: true } },
-    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    rootGetters: { getAllRootSubscriptions: [{ id: 'channel' }] },
     commit: (type, payload) => mutations[type](state, payload),
   }
 

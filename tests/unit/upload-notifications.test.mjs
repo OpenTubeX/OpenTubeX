@@ -91,6 +91,28 @@ test('only channels with notifications turned on are configured', () => {
   assert.deepEqual(createUploadNotificationConfiguration({ ...input, subscriptions: [{ id: 'UC1' }] }), { enabled: false })
 })
 
+test('a channel that several separate profiles follow notifies for each of them', async () => {
+  const { normalizeSubscriptionChannelSettings } = await import('../../src/renderer/helpers/subscription-channels.js')
+  const code = (await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*?from '[^']+'\n/gm, '')
+    .replace('export default', 'const module =')
+  const { getters } = vm.runInNewContext(`${code}\nmodule`, {
+    MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff', DEFAULT_PROFILE_ICON: {}, normalizeSubscriptionChannelSettings
+  })
+  const state = {
+    profileList: [
+      { _id: 'allChannels', subscriptions: [{ id: 'UC1', name: 'One', feedTypes: ['videos', 'posts'], notificationFeedTypes: ['posts'] }] },
+      { _id: 'shared', subscriptions: [] },
+      { _id: 'kids', separate: true, subscriptions: [{ id: 'UC1', name: 'One', feedTypes: ['videos', 'shorts'], notificationFeedTypes: ['videos', 'posts'], showMembersOnly: true }] }
+    ]
+  }
+  const configuration = createUploadNotificationConfiguration({
+    enabled: true, subscriptions: getters.getAllRootSubscriptions(state), showMembersOnly: true, titles: {}
+  })
+  // Posts are hidden in the separate profile, so only All Channels notifies about them.
+  assert.deepEqual(configuration.channels, { UC1: { name: 'One', feedTypes: ['videos', 'posts'], membersOnly: true } })
+})
+
 test('the desktop notifier persists state and shows localized notifications', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
   try {
@@ -422,7 +444,7 @@ test('refreshes of another profile also fetch channels with notifications turned
   const gamma = { id: 'UCc' }
   const context = vm.createContext({
     process: { env: { IS_ELECTRON: true } },
-    store: { getters: { getEnableUploadNotifications: true, getProfileList: [{ subscriptions: [alpha, beta, gamma] }] } },
+    store: { getters: { getEnableUploadNotifications: true, getAllRootSubscriptions: [alpha, beta, gamma] } },
     window: { ftElectron: { subscriptionAutoRefresh: { configureUploadNotifications: async () => {} } } },
   })
   vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)

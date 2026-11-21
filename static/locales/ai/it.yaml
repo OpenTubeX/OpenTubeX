@@ -1380,6 +1380,7 @@ Settings:
     Paused Interface Hide Delay: Ritardo prima di nascondere l'interfaccia in pausa
     Blur Blocked Items: Sfoca gli elementi bloccati invece di nasconderli
   Data Settings:
+    Backup separate profile data: "Questo backup contiene anche i dati di {count} profilo separato, che vengono ripristinati in quel profilo. | Questo backup contiene anche i dati di {count} di profili separati, che vengono ripristinati in quei profili. | Questo backup contiene anche i dati di {count} profili separati, che vengono ripristinati in quei profili."
     Subscription cache file: "Questo file memorizza nella cache solo i video delle tue iscrizioni, non i canali. Scegli invece profiles.db o un'esportazione delle iscrizioni."
     Settings could not be imported: "Impossibile importare le impostazioni"
     Some settings could not be imported: "Non è stato possibile importare tutte le impostazioni (non riuscite: {failed} su {total})"
@@ -1701,6 +1702,13 @@ About:
   Email: Email
   Show tutorial: Mostra il tutorial
 Profile:
+  Keep Data Separate: "Mantieni i dati separati"
+  Keep Data Separate Tooltip: "Dà a questo profilo le sue iscrizioni, cronologia delle visualizzazioni, playlist, cronologia delle ricerche, statistiche di visione e coda. Gli altri tuoi profili non le vedono e questo profilo non vede le loro. Non puoi cambiarlo dopo aver creato il profilo."
+  Separate Profile: "Profilo separato"
+  Separate Profile Note: "Questo profilo tiene le sue iscrizioni, la sua cronologia e le sue playlist separate dagli altri tuoi profili."
+  Separate Profile Deletion Warning: "Verranno eliminate anche le sue iscrizioni, la cronologia delle visualizzazioni, le playlist, la cronologia delle ricerche, le statistiche di visione e la coda."
+  Separate Data Notice: "{profile} tiene i suoi dati separati, quindi le importazioni e le esportazioni qui sotto usano solo le sue iscrizioni, la cronologia, le playlist e la cronologia delle ricerche."
+  Separate Data Storage Notice: "{profile} tiene i suoi dati separati. I pulsanti qui sotto eliminano solo i suoi dati, mentre le dimensioni includono i dati di tutti i profili."
   Customization: Personalizzazione
   Manage Profile Subscriptions: Gestisci le iscrizioni del profilo
   Icon Names:

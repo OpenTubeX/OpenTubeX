@@ -1,5 +1,8 @@
 // @ts-check
 import Datastore from '@seald-io/nedb'
+import { PROFILE_DATASTORES, profileDatastorePrefix } from './profileDatastoreNames.js'
+
+export { profileDatastorePrefix }
 
 const options = {
   // lastViewedPlaylistId keeps deleting a playlist from parsing the whole history
@@ -32,6 +35,8 @@ export function onLegacyDatastoreImported(listener) {
 /** @type {(dbName: string) => string} */
 let dbPath
 let createDatastore
+/** Creates a datastore that has no legacy NeDB file to import */
+let createNewDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { app } = require('electron')
@@ -57,10 +62,15 @@ if (process.env.IS_ELECTRON_MAIN) {
       onLegacyImported: imported => legacyImportListeners.forEach(listener => listener({ name, ...imported })),
     })
   }
+  createNewDatastore = (name, kind) => createDesktopDatastore(join(userDataPath, `${name}.sqlite`), null, {
+    ...options[kind],
+    createDriver,
+  })
 } else {
   const { createBrowserDatastore } = require('./sqliteBrowser.js')
   dbPath = (dbName) => `${dbName}.db`
   createDatastore = (name) => createBrowserDatastore(name, options[name])
+  createNewDatastore = (name, kind) => createBrowserDatastore(name, { ...options[kind], legacy: false })
 }
 
 export const settings = createDatastore('settings')
@@ -87,6 +97,35 @@ export const liveReminders = createDatastore('live-reminders')
 export const videoMetadataCache = createDatastore('video-metadata-cache')
 // The items of followed RSS feeds and channels on other platforms
 export const feedCache = createDatastore('feed-cache')
+
+const profileStores = new Map()
+
+/**
+ * A separate profile's datastores, created on first use.
+ * @param {string} profileId
+ * @returns {Record<keyof typeof PROFILE_DATASTORES, any>}
+ */
+export function profileDatastores(profileId) {
+  let stores = profileStores.get(profileId)
+  if (!stores) {
+    const prefix = profileDatastorePrefix(profileId)
+    stores = Object.fromEntries(Object.entries(PROFILE_DATASTORES).map(([key, kind]) => (
+      [key, createNewDatastore(`${prefix}-${kind}`, kind)]
+    )))
+    profileStores.set(profileId, stores)
+  }
+  return stores
+}
+
+/**
+ * Deletes a separate profile's datastores.
+ * @param {string} profileId
+ */
+export async function dropProfileDatastores(profileId) {
+  const stores = profileDatastores(profileId)
+  profileStores.delete(profileId)
+  await Promise.all(Object.values(stores).map(store => store.dropDatabaseAsync()))
+}
 
 export async function waitForDatastores() {
   const results = await Promise.allSettled([

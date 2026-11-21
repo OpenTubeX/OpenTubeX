@@ -1,7 +1,7 @@
 import { toRaw } from 'vue'
 import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
 import { PlaylistVideoAddResult } from '../../../constants'
-import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
+import { DBPlaylistHandlers, getDataScope, withDataScope } from '../../../datastores/handlers/index'
 import {
   decrementPlaylistVideoCounts,
   incrementPlaylistVideoCounts,
@@ -122,7 +122,37 @@ function processNewPlayist(playlist) {
   }
 }
 
+// A separate profile's quick bookmark target is a choice of this device, as
+// the synced setting names a playlist of the shared data.
+const QUICK_BOOKMARK_TARGET_STORAGE_PREFIX = 'quickBookmarkTarget/'
+
+/** @param {string} scope */
+function readScopedQuickBookmarkTarget(scope) {
+  try {
+    return localStorage.getItem(QUICK_BOOKMARK_TARGET_STORAGE_PREFIX + scope)
+  } catch (error) {
+    console.error('Failed to read the quick bookmark playlist', error)
+    return null
+  }
+}
+
+/**
+ * @param {string} scope
+ * @param {string} playlistId
+ */
+function saveScopedQuickBookmarkTarget(scope, playlistId) {
+  try {
+    localStorage.setItem(QUICK_BOOKMARK_TARGET_STORAGE_PREFIX + scope, playlistId)
+  } catch (error) {
+    console.error('Failed to save the quick bookmark playlist', error)
+  }
+}
+
 const state = {
+  /** The quick bookmark target while a separate profile is active */
+  scopedQuickBookmarkTarget: null,
+  // The separate profile whose playlists the state holds, or null for the shared ones
+  playlistsScope: null,
   // Playlist loading takes time on app load (new windows)
   // This is necessary to let components to know when to start data loading
   // which depends on playlist data being ready
@@ -160,8 +190,15 @@ const getters = {
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
+  /** @returns {string | null} */
+  getActiveQuickBookmarkTargetPlaylistId(state, _getters, _rootState, rootGetters) {
+    // The target of the playlists shown, also while a profile switch waits for their writes
+    return state.playlistsScope === null
+      ? rootGetters.getQuickBookmarkTargetPlaylistId
+      : state.scopedQuickBookmarkTarget
+  },
   getQuickBookmarkPlaylist(state, getters) {
-    const playlistId = getters.getQuickBookmarkTargetPlaylistId
+    const playlistId = getters.getActiveQuickBookmarkTargetPlaylistId
 
     if (!playlistId) {
       return undefined
@@ -193,20 +230,35 @@ const actions = {
     commit('upsertPlaylistToList', playlist)
   },
 
-  async addPlaylist({ state, commit, rootState, dispatch }, payload) {
+  /** Sets the quick bookmark target of the active profile's playlists */
+  async updateActiveQuickBookmarkTarget({ commit, dispatch }, playlistId) {
+    // The selected profile changes before writes in its predecessor's playlists finish.
+    const scope = getDataScope()
+    if (scope === null) {
+      await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId, { root: true })
+    } else {
+      saveScopedQuickBookmarkTarget(scope, playlistId)
+      commit('setScopedQuickBookmarkTarget', playlistId)
+    }
+  },
+
+  async addPlaylist({ state, commit, getters, dispatch }, payload) {
     processNewPlayist(payload)
 
     try {
+      const scope = getDataScope()
       await DBPlaylistHandlers.create([payload])
+      // Saved in a profile whose playlists are no longer shown
+      if (scope !== getDataScope()) return true
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+      const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
       commit('addPlaylist', payload)
       if (noQuickBookmarkSet) {
         // Settings persist asynchronously; wait so a playlist added right after
         // this one sees the new target instead of replacing it. The playlist is
         // already saved, so a failed settings write must not report it as lost.
         try {
-          await dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
+          await dispatch('updateActiveQuickBookmarkTarget', payload._id)
         } catch (error) {
           console.error(error)
         }
@@ -218,16 +270,19 @@ const actions = {
     }
   },
 
-  async addPlaylists({ state, commit, rootState, dispatch }, payload) {
+  async addPlaylists({ state, commit, getters, dispatch }, payload) {
     payload.forEach(processNewPlayist)
 
     try {
+      const scope = getDataScope()
       await DBPlaylistHandlers.create(payload)
+      // Saved in a profile whose playlists are no longer shown
+      if (scope !== getDataScope()) return true
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+      const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
       if (noQuickBookmarkSet) {
         const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-        dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+        dispatch('updateActiveQuickBookmarkTarget', chosenPlaylist._id)
       }
 
       commit('addPlaylists', payload)
@@ -280,16 +335,19 @@ const actions = {
    * @param {object[]} playlists
    * @returns {Promise<boolean>} whether every playlist was saved
    */
-  async mergePlaylistBackup({ commit }, playlists) {
+  // Restores into the data scope active when it is dispatched, see `withDataScope`.
+  async mergePlaylistBackup({ commit, rootGetters }, playlists) {
+    const scope = getDataScope()
     const lastUpdatedAt = Date.now()
     try {
       for (const playlist of playlists) {
-        commit('upsertPlaylistToList', await DBPlaylistHandlers.mergeBackup({
+        const saved = await withDataScope(scope, () => DBPlaylistHandlers.mergeBackup({
           ...playlist,
           playlistName: playlist.playlistName.trim(),
           ...(typeof playlist.description === 'string' ? { description: playlist.description.trim() } : {}),
           lastUpdatedAt,
         }))
+        if (scope === (rootGetters?.getActiveDataScope ?? null)) commit('upsertPlaylistToList', saved)
       }
       return true
     } catch (errMessage) {
@@ -434,16 +492,26 @@ const actions = {
     }
   },
 
-  async grabAllPlaylists({ rootState, commit, dispatch, state }) {
+  async grabAllPlaylists({ commit, dispatch, getters, state }) {
     try {
-      const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
+      // Writes stay in this scope, and a switch to another profile's data
+      // meanwhile leaves the state to that profile's load.
+      const scope = getDataScope()
+      const inScope = operation => withDataScope(scope, operation)
+      const payload = (await DBPlaylistHandlers.find(true)).filter((e) => e != null)
+      if (scope !== getDataScope()) return
+      commit('setScopedQuickBookmarkTarget', scope === null ? null : readScopedQuickBookmarkTarget(scope))
+      commit('setPlaylistsScope', scope)
       if (payload.length === 0) {
+        // Another profile's playlists may be shown until now.
+        commit('setAllPlaylists', [])
         // Not using `addPlaylists` to ensure required attributes with dynamic values added.
         // Create them in order and wait, so the first default becomes the quick
         // bookmark target and the playlists exist before `playlistsReady` is set.
         for (const playlist of state.defaultPlaylists) {
+          if (scope !== getDataScope()) return
           // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
-          await dispatch('addPlaylist', deepCopy(playlist))
+          await inScope(() => dispatch('addPlaylist', deepCopy(playlist)))
         }
       } else {
         const dateNow = Date.now()
@@ -512,7 +580,7 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            repairs.push(DBPlaylistHandlers.update(playlist))
+            repairs.push(inScope(() => DBPlaylistHandlers.update(playlist)))
           }
         })
         // A failed repair write must be logged, not left as an unhandled rejection.
@@ -527,18 +595,20 @@ const actions = {
           if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
             playlist.protected = defaultPlaylist.protected
             try {
-              await DBPlaylistHandlers.update(playlist)
+              await inScope(() => DBPlaylistHandlers.update(playlist))
             } catch (errMessage) {
               console.error(errMessage)
             }
           }
         }
 
+        if (scope !== getDataScope()) return
+
         // if no quick bookmark is set, try to find another playlist
-        const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+        const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
         if (noQuickBookmarkSet && payload.length > 0) {
           const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-          dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+          dispatch('updateActiveQuickBookmarkTarget', chosenPlaylist._id)
         }
 
         commit('setAllPlaylists', payload)
@@ -806,6 +876,14 @@ const mutations = {
 
   setPlaylistsReady(state, payload) {
     state.playlistsReady = payload
+  },
+
+  setPlaylistsScope(state, scope) {
+    state.playlistsScope = scope
+  },
+
+  setScopedQuickBookmarkTarget(state, playlistId) {
+    state.scopedQuickBookmarkTarget = playlistId
   },
 }
 

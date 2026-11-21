@@ -106,8 +106,34 @@ test('rejects malformed watch statistics before a datastore write', () => {
 
 test('rejects backup versions the importer cannot read', async () => {
   const files = Object.fromEntries(BACKUP_SECTIONS.map(section => [`${section}.json`, strToU8(JSON.stringify(data[section]))]))
-  files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":2}')
+  files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":3}')
   await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /Unsupported backup version/)
+})
+
+test('backups keep each separate profile’s data apart from the shared data', async () => {
+  const profileData = {
+    separate: { history: [{ videoId: 'zyxwvutsrqp', timeWatched: 2 }], searchHistory: [{ _id: 'other', query: 'news' }] },
+  }
+  const result = await readUnifiedBackup(createUnifiedBackup({ ...data, profileData }))
+  // Older versions refuse these archives instead of restoring part of them.
+  assert.equal(result.manifest.version, 2)
+  assert.deepEqual(result.data, { ...data, profileData })
+
+  // Only the selected sections of each profile go into the archive.
+  const partial = await readUnifiedBackup(createUnifiedBackup({ history: data.history, profileData }))
+  assert.deepEqual(partial.data, { history: data.history, profileData: { separate: { history: profileData.separate.history } } })
+
+  // Older versions must not restore a separate profile as one that shares its data.
+  const profiles = [...data.profiles, { _id: 'separate', name: 'Kids', separate: true, subscriptions: [] }]
+  const profilesOnly = await readUnifiedBackup(createUnifiedBackup({ profiles }))
+  assert.equal(profilesOnly.manifest.version, 2)
+  assert.deepEqual(profilesOnly.data, { profiles })
+
+  const files = unzipSync(new Uint8Array(await createUnifiedBackup({ ...data, profileData }).arrayBuffer()))
+  files['profile-data/0/history.json'] = strToU8('[{"timeWatched":2}]')
+  await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /Invalid backup history/)
+  delete files['profile-data/0/history.json']
+  await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /missing or unexpected files/)
 })
 
 test('merges subscriptions and playlist videos without dropping local entries', () => {

@@ -8,6 +8,8 @@ import { recordNotification } from './notificationHistory'
 import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
 import { getYouTubeChannelKey, getYouTubeSyncKey } from './youtube-account-state'
 import { setYouTubePlaylistChangeListener } from './youtube-playlist-changes'
+import { getDataScope } from '../../datastores/handlers/dataScope.js'
+import { dataScopeLoading } from './sync-data-scope.js'
 import {
   completeYouTubePlaylistVideos,
   diffYouTubeSubscriptions,
@@ -111,6 +113,25 @@ function throwIfAccountChanged(account) {
 }
 
 /**
+ * Whether the store holds the shared playlists, which the YouTube account
+ * syncs with, as it syncs the shared subscriptions. A separate profile keeps
+ * its playlists to itself.
+ */
+function showsSharedPlaylists() {
+  return getDataScope() === null && dataScopeLoading() === null
+}
+
+/**
+ * Stops playlist sync work that a switch to a separate profile overtook, as
+ * its writes would reach that profile's playlists.
+ * @param {YouTubeAccount} account
+ */
+function throwIfPlaylistsChanged(account) {
+  throwIfAccountChanged(account)
+  if (!showsSharedPlaylists()) throw new AccountChangedError()
+}
+
+/**
  * @param {string} key
  * @returns {YouTubeSyncState}
  */
@@ -148,6 +169,7 @@ function getLinkedPlaylists(key) {
  * @param {YouTubeAccount | null} account
  */
 async function removeUnsyncedPlaylists(account) {
+  if (!showsSharedPlaylists()) return
   const key = store.getters.getYouTubeAccountSyncPlaylists ? getYouTubeSyncKey(account) : null
   const ids = store.getters.getAllPlaylists
     .filter(playlist => playlist.youTube && playlist.youTube.accountKey !== key)
@@ -179,7 +201,10 @@ async function syncSubscriptions(account) {
     // A removal that did not save must come again with the next sync.
     if (!await store.dispatch('removeChannelFromProfiles', {
       channelIds: removedIds,
-      profileIds: profiles.filter(profile => profile.subscriptions.some(channel => removed.has(channel.id))).map(profile => profile._id)
+      // The YouTube account syncs the shared subscriptions, not a separate profile's.
+      profileIds: profiles
+        .filter(profile => profile.separate !== true && profile.subscriptions.some(channel => removed.has(channel.id)))
+        .map(profile => profile._id)
     })) {
       throw new Error('Could not remove the channels unsubscribed from on YouTube')
     }
@@ -286,7 +311,7 @@ async function pullPlaylist(account, summary, force, restore = { name: false, de
   const readAll = summary.playlistId !== LIKED_VIDEOS
   const { title, description, videos } = await getYouTubePlaylistVideos(summary.playlistId, account,
     readAll ? undefined : read => completeYouTubePlaylistVideos(read, savedVideos, summary.videoCount))
-  throwIfAccountChanged(account)
+  throwIfPlaylistsChanged(account)
   if (!store.getters.getYouTubeAccountSyncPlaylists) return
 
   const merged = mergeYouTubePlaylistVideos(savedVideos, videos, {
@@ -347,9 +372,11 @@ async function getSyncedPlaylistSummaries(account) {
 
 /** @param {YouTubeAccount} account */
 async function syncPlaylists(account) {
+  // Synced once the shared playlists show again
+  if (!showsSharedPlaylists()) return
   const key = getYouTubeSyncKey(account)
   const summaries = await getSyncedPlaylistSummaries(account)
-  throwIfAccountChanged(account)
+  throwIfPlaylistsChanged(account)
   if (!store.getters.getYouTubeAccountSyncPlaylists) return
 
   // Deleted on YouTube
@@ -475,7 +502,7 @@ export function refreshYouTubePlaylist(localId, restore = { name: false, descrip
     const account = getSyncAccount()
     if (!account || getYouTubeSyncKey(account) !== playlist.youTube.accountKey) return
     const summary = (await getSyncedPlaylistSummaries(account)).find(entry => entry.playlistId === playlistId)
-    throwIfAccountChanged(account)
+    throwIfPlaylistsChanged(account)
     // Deleted on YouTube, which the next sync handles.
     if (summary) await pullPlaylist(account, summary, true, refresh)
   }).catch(error => {
@@ -642,7 +669,7 @@ export function isRejectedByYouTube(text) {
 
 /** Whether new playlists can be created on YouTube too. */
 export function canCreateYouTubePlaylists() {
-  return store.getters.getYouTubeAccountSyncPlaylists && getSyncAccount() !== null
+  return store.getters.getYouTubeAccountSyncPlaylists && getSyncAccount() !== null && showsSharedPlaylists()
 }
 
 /**
@@ -661,7 +688,7 @@ export async function createYouTubePlaylistWithVideos(playlist) {
       if (description) {
         await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_DESCRIPTION', playlistDescription: description }], account)
       }
-      throwIfAccountChanged(account)
+      throwIfPlaylistsChanged(account)
       /** @type {YouTubePlaylistLink} */
       const youTube = { playlistId, accountKey: getYouTubeSyncKey(account), title: playlist.playlistName, description, signature: null }
       if (!await store.dispatch('addPlaylist', { ...playlist, youTube })) throw new Error('Could not save the playlist')

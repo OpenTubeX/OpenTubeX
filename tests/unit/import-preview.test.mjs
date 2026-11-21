@@ -160,17 +160,20 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     DBProfileHandlers: Profiles,
     normalizeImportedPlaylistThumbnail: async () => {},
     store: {
+      getters: { getActiveDataScope: null },
       async dispatch(action, playlists) {
         if (action === 'mergePlaylistBackup') for (const playlist of playlists) await Playlists.mergeBackup(playlist)
         return true
       },
     },
+    withDataScope: (_scope, operation) => operation(),
     compactAllDatastores: async () => true,
     closeBackupImport() {},
     showToast() {},
     t: key => key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
   await context.importUnifiedBackup()
   assert.deepEqual((await db.profiles.findOneAsync({ _id: 'same-profile' })).subscriptions.map(channel => channel.id), ['A', 'B'])
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
@@ -190,6 +193,7 @@ test('a backup whose settings fail to save reports them instead of the backup as
     t: (key, values) => values ? `${key} ${JSON.stringify(values)}` : key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
   vm.runInContext(componentSection('function settingsImportFailureMessage(', 'async function applyImportedSettings('), context)
   await context.importUnifiedBackup()
   assert.deepEqual(toasts, ['Settings.Data Settings.Some settings could not be imported {"failed":1,"total":2}'])

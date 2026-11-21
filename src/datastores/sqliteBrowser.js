@@ -109,7 +109,8 @@ function legacySource(filename) {
 /**
  * @param {string} name
  * @param {object} [options]
+ * @param {boolean} [options.legacy] false for a datastore no NeDB version ever stored
  */
-export function createBrowserDatastore(name, options = {}) {
-  return new SqliteDatastore({ driver: createDriver(name), legacy: legacySource(`${name}.db`), ...options })
+export function createBrowserDatastore(name, { legacy = true, ...options } = {}) {
+  return new SqliteDatastore({ driver: createDriver(name), legacy: legacy ? legacySource(`${name}.db`) : undefined, ...options })
 }

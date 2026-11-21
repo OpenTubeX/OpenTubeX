@@ -1544,6 +1544,7 @@ Settings:
     Import backup: Sicherung importieren
     Export backup: Sicherung exportieren
     Backup description: Profile, Playlists, Verlauf, Statistiken und übertragbare Einstellungen in einer ZIP-Datei sichern. Beim Import werden sie mit den vorhandenen Daten zusammengeführt.
+    Backup separate profile data: Diese Sicherung enthält auch die Daten von {count} getrennten Profil, die in dieses Profil wiederhergestellt werden. | Diese Sicherung enthält auch die Daten von {count} getrennten Profilen, die in diese Profile wiederhergestellt werden.
     Select backup data: Zu importierende Daten auswählen
     Profiles and subscriptions: Profile und Abonnements
     Backup exported: Sicherung erfolgreich exportiert
@@ -3023,6 +3024,13 @@ Yes: Ja
 No: Nein
 Locale Name: Deutsch
 Profile:
+  Keep Data Separate: Daten getrennt halten
+  Keep Data Separate Tooltip: Gibt diesem Profil eigene Abos, einen eigenen Wiedergabe- und Suchverlauf, eigene Playlists, Wiedergabestatistiken und eine eigene Warteschlange. Deine anderen Profile sehen sie nicht, und dieses Profil sieht ihre nicht. Das lässt sich nach dem Erstellen nicht mehr ändern.
+  Separate Profile: Getrenntes Profil
+  Separate Profile Note: Dieses Profil hält seine Abos, seinen Verlauf und seine Playlists von deinen anderen Profilen getrennt.
+  Separate Profile Deletion Warning: Seine Abos, sein Wiedergabe- und Suchverlauf, seine Playlists, Wiedergabestatistiken und Warteschlange werden ebenfalls gelöscht.
+  Separate Data Notice: '{profile} hält seine Daten getrennt. Die Importe und Exporte unten verwenden daher nur seine Abos, seinen Verlauf, seine Playlists und seinen Suchverlauf.'
+  Separate Data Storage Notice: '{profile} hält seine Daten getrennt. Die Schaltflächen unten löschen nur seine Daten, die Größen umfassen aber die Daten aller Profile.'
   Customization: Anpassung
   Manage Profile Subscriptions: Profil-Abos verwalten
   Icon Names:

@@ -239,7 +239,6 @@ import FtSubscriptionPreferences from '../FtSubscriptionPreferences/FtSubscripti
 import store from '../../store/index'
 import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
-import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
 import {
   isProfileSubscribed as isProfileSubscribedToChannel,
@@ -319,10 +318,17 @@ const profileDropdownAnchor = `--subscription-${id}`
  * @property {boolean|undefined} subscriptions[].showMembersOnly
  */
 
-/** @type {import('vue').ComputedRef<Profile[]>} */
+/**
+ * The profiles that share subscriptions with the active one. A separate
+ * profile keeps its subscriptions to itself.
+ * @type {import('vue').ComputedRef<Profile[]>}
+ */
 const profileList = computed(() => {
-  return store.getters.getProfileList
+  return store.getters.getDataScopeProfiles
 })
+
+/** The profile that every subscription of the other profiles in the list is also in */
+const rootProfileId = computed(() => store.getters.getSubscriptionRootProfile._id)
 
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => {
@@ -336,7 +342,7 @@ const subscribedProfileIdsAtOpen = shallowRef(new Set())
 
 const profileDisplayList = computed(() => [
   profileList.value[0],
-  ...(activeProfile.value._id !== MAIN_PROFILE_ID ? [activeProfile.value] : []),
+  ...(activeProfile.value._id !== rootProfileId.value ? [activeProfile.value] : []),
   ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && subscribedProfileIdsAtOpen.value.has(profile._id)),
   ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !subscribedProfileIdsAtOpen.value.has(profile._id))
 ])

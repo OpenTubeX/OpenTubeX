@@ -13,6 +13,16 @@ import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
 // Includes the legacy NeDB file, which stays for older versions.
 const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sqlite-shm`, `${name}.db`]
 
+// Separate profiles keep these datastores as `profile-<hex ID>-<name>.sqlite`.
+const PROFILE_DATASTORE_FILE = /^profile-[0-9a-f]+-(history|watch-stats|recommendations|playlists|search-history)\.sqlite(?:-wal|-shm)?$/
+const PROFILE_DATASTORE_CATEGORIES = {
+  history: 'history',
+  'watch-stats': 'watchStats',
+  recommendations: 'recommendations',
+  playlists: 'playlists',
+  'search-history': 'searchHistory',
+}
+
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',
   videoMetadata: sqliteFiles('video-metadata-cache'),
@@ -173,6 +183,15 @@ export async function getStorageUsage() {
   const fileEntries = Object.entries(USER_DATA_FILES).map(([key, fileNames]) => (
     [key, sumEntries(entrySizes, [fileNames].flat())]
   ))
+  // Each category includes the data of every separate profile.
+  if (entrySizes instanceof Map) {
+    const totals = Object.fromEntries(fileEntries)
+    for (const [entry, size] of entrySizes) {
+      const kind = PROFILE_DATASTORE_FILE.exec(entry)?.[1]
+      if (kind) totals[PROFILE_DATASTORE_CATEGORIES[kind]] += size
+    }
+    fileEntries.splice(0, fileEntries.length, ...Object.entries(totals))
+  }
   const categorizedUsage = {
     ...Object.fromEntries(fileEntries),
     httpCache: sumEntries(entrySizes, ['Cache']),

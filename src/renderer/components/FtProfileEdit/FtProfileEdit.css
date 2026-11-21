@@ -21,6 +21,21 @@ h3 {
   margin-block-start: 24px;
 }
 
+.separateDataToggle {
+  margin-block-start: 12px;
+  justify-content: center;
+}
+
+.separateDataNote {
+  display: flex;
+  margin-block: 12px 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--tertiary-text-color);
+  text-align: center;
+}
+
 .profileActions {
   margin-block-start: 16px;
   justify-content: center;

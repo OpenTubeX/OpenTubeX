@@ -282,8 +282,9 @@ function handleDeletePromptClick(value) {
     })
 
     // Removing channels from the primary profile unsubscribes from them in every profile
+    // Separate profiles keep their subscriptions.
     const profiles = props.isMainProfile
-      ? profileList.value.filter(profile => profile.subscriptions.some(channel => selected.has(channel.id)))
+      ? profileList.value.filter(profile => profile.separate !== true && profile.subscriptions.some(channel => selected.has(channel.id)))
       : [props.profile]
     const profileIds = profiles.map(profile => profile._id)
 
