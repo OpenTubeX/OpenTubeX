@@ -1453,6 +1453,7 @@ async function animateSettingsElement(elementRef, classRef, className) {
 }
 
 async function openSearchResult(sectionType, match) {
+  clearPendingContentScrollTop()
   settingsSearchQuery.value = ''
   navigateToSection(sectionType)
   await nextTick()
