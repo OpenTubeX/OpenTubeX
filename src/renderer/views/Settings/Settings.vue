@@ -1454,6 +1454,7 @@ async function animateSettingsElement(elementRef, classRef, className) {
 
 async function openSearchResult(sectionType, match) {
   clearPendingContentScrollTop()
+  preservedScrollPositions = preservedScrollPositions.filter(({ element }) => element !== settingsContentRef.value)
   settingsSearchQuery.value = ''
   navigateToSection(sectionType)
   await nextTick()
@@ -1775,6 +1776,7 @@ function restorePreservedScrollPositions() {
   const pending = []
   for (const { element, scrollTop } of preservedScrollPositions) {
     if (!element.isConnected) continue
+    if (element === settingsContentRef.value && props.searchTarget) continue
     if (viewports.has(element)) {
       restoreOverlayScrollTop(element, scrollTop)
       // Sections that expand over the opening frames (for example as labels
