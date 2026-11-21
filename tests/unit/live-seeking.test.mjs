@@ -109,7 +109,7 @@ for (const props of [
     assert.equal(state.video.value.currentTime, 10)
     assert.equal(state.hasPlaybackPosition.value, false)
     // Native media controls then offer no seeking at all.
-    assert.deepEqual(['seekbackward', 'seekforward', 'seekto'].filter(action => action in state.handlers), [])
+    assert.deepEqual(['seekbackward', 'seekforward', 'seekto'].filter(action => typeof state.handlers[action] === 'function'), [])
     state.handlers.stop()
     assert.equal(state.video.value.currentTime, 10)
   })

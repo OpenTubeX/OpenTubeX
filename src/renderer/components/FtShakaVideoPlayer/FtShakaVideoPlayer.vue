@@ -7159,25 +7159,28 @@ function registerMediaSessionHandlers() {
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
       }
     },
-    ...(seekingIsPossible.value && {
-      seekbackward: (details = {}) => {
-        seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
-      },
-      seekforward: (details = {}) => {
-        seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
-      },
-      seekto: (details = {}) => {
-        const videoElement = video.value
-        if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
-        accumulatedSeekSeconds = 0
-        rememberSeekPosition(details.seekTime, true)
-        if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
-          videoElement.fastSeek(details.seekTime)
-        } else {
-          videoElement.currentTime = details.seekTime
+    // Null keys stop another player in the same tab from supplying seek actions this player lacks.
+    ...(seekingIsPossible.value
+      ? {
+          seekbackward: (details = {}) => {
+            seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
+          },
+          seekforward: (details = {}) => {
+            seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
+          },
+          seekto: (details = {}) => {
+            const videoElement = video.value
+            if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
+            accumulatedSeekSeconds = 0
+            rememberSeekPosition(details.seekTime, true)
+            if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
+              videoElement.fastSeek(details.seekTime)
+            } else {
+              videoElement.currentTime = details.seekTime
+            }
+          }
         }
-      }
-    }),
+      : { seekbackward: null, seekforward: null, seekto: null }),
     enterpictureinpicture: () => {
       if (!audioOnlyMedia.value && ui?.getControls?.().isPiPAllowed()) {
         ui.getControls().togglePiP()

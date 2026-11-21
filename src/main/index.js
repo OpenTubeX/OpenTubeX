@@ -1841,7 +1841,8 @@ function runApp() {
         label: toggleAction === 'pause' ? dockMediaLabels.pause : dockMediaLabels.play,
         icon: iconFor(toggleAction),
         enabled: actions.has(toggleAction),
-        click: () => requestDockMediaAction(toggleAction, windowId)
+        // Like the tab's play button, resume the video even when its tab is in the background.
+        click: () => requestDockMediaAction(toggleAction, windowId, toggleAction === 'play' ? { allowBackground: true } : undefined)
       },
       {
         label: dockMediaLabels.next,
