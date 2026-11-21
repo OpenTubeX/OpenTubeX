@@ -126,7 +126,9 @@ final class AppLock {
     }
 
     void onStart() {
-        lockIfDue();
+        // Turning the screen off and on stops and restarts picture-in-picture.
+        // The app is still away then, so leaving picture-in-picture checks instead.
+        if (!activity.isInPictureInPictureMode()) lockIfDue();
     }
 
     void onStop() {
