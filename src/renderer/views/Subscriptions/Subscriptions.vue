@@ -696,8 +696,8 @@ function suppressFeedTabHoldClick(event) {
 }
 
 function handleFeedContextMenu(event) {
-  // Electron opens the feed tab menu in the main process
-  if (isElectron && event.pointerType !== 'touch') return
+  // Electron opens the feed tab menu in the main process, and Shift keeps the browser's menu
+  if ((isElectron || event.shiftKey) && event.pointerType !== 'touch') return
   const tab = event.target.closest(FEED_TAB_SELECTOR)
   if (!tab) return
 

@@ -25,8 +25,9 @@ export function useCardContextMenu({ items, title, thumbnailActions, beforeOpen 
     if (event.target.closest('a.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
     if (event.pointerType !== 'touch' && !process.env.IS_ELECTRON) {
       // Only Electron can merge native image actions into our menu, and the mobile apps can't merge selection actions.
+      // Shift+right-click keeps the browser's menu on the web.
       const selection = window.getSelection()
-      if (event.target.closest('img, video') ||
+      if (event.target.closest('img, video') || (event.type === 'contextmenu' && event.shiftKey) ||
         (process.env.IS_CAPACITOR && selection && !selection.isCollapsed && selection.containsNode(event.target, true))) return
     }
     event.preventDefault()

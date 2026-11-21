@@ -102,7 +102,8 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
       }
     }),
     isEditable && menuItem('Cut', 'Cut', async () => {
-      if (await copyToClipboard(selectionText)) {
+      // Skip the deletion if the selection changed while copying
+      if (await copyToClipboard(selectionText) && getSelectionText(editable) === selectionText) {
         editable.focus()
         // Unlike changing the value, this keeps the undo history and fires input events
         document.execCommand('delete')
