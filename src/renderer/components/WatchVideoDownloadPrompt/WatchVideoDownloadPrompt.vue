@@ -664,8 +664,16 @@ const downloadFolderDisplay = computed(() => displayAndroidPath(downloadFolderPa
   ? t('Downloads.Folder Required')
   : t('Downloads.System Downloads Folder')))
 
-function chooseDownloadFolder() {
-  return ytDlp.ytDlpChooseDownloadFolder()
+async function chooseDownloadFolder() {
+  try {
+    return await ytDlp.ytDlpChooseDownloadFolder()
+  } catch (error) {
+    showToast({
+      message: error?.message || t('Settings.Data Settings.Unable to write file'),
+      icon: ['fas', 'circle-exclamation']
+    })
+    return null
+  }
 }
 async function startDownload() {
   const result = await ytDlp.ytDlpDownload({

@@ -564,10 +564,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                     let names = value["files"] as? [String] ?? []
                     if names.isEmpty { throw NSError(domain: "IOSYtDlp", code: 6, userInfo: [NSLocalizedDescriptionKey: "No file was downloaded"]) }
                     let target = try self.directory(reference)
-                    guard target.startAccessingSecurityScopedResource() else {
+                    let accessed = target.startAccessingSecurityScopedResource()
+                    defer { if accessed { target.stopAccessingSecurityScopedResource() } }
+                    guard accessed || FileManager.default.isWritableFile(atPath: target.path) else {
                         throw NSError(domain: "IOSYtDlp", code: 7, userInfo: [NSLocalizedDescriptionKey: "The download folder is unavailable"])
                     }
-                    defer { target.stopAccessingSecurityScopedResource() }
                     let exported = try IOSYtDlpExporter.copy(names, from: staging, to: target, videoId: videoId)
                     DispatchQueue.main.sync {
                         guard self.records[id]?["status"] as? String == "processing" else { return }
@@ -620,8 +621,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         for id in records.keys where records[id]?["status"] as? String == "completed" {
             guard var files = records[id]?["files"] as? [[String: Any]] else { continue }
             let target = try? directory(records[id]?["folder"] as? String ?? "")
-            let accessible = target?.startAccessingSecurityScopedResource() == true
-            defer { if accessible { target?.stopAccessingSecurityScopedResource() } }
+            let accessed = target?.startAccessingSecurityScopedResource() == true
+            defer { if accessed { target?.stopAccessingSecurityScopedResource() } }
+            let accessible = accessed || (target.map { FileManager.default.isReadableFile(atPath: $0.path) } ?? false)
             var available = 0
             for index in files.indices {
                 let path = files[index]["path"] as? String ?? ""
@@ -709,8 +711,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         guard let record = records[id], !running.contains(id) else { call.resolve(["ok": false]); return }
         do {
             let target = try directory(record["folder"] as? String ?? "")
-            guard target.startAccessingSecurityScopedResource() else { throw URLError(.noPermissionsToReadFile) }
-            defer { target.stopAccessingSecurityScopedResource() }
+            let accessed = target.startAccessingSecurityScopedResource()
+            defer { if accessed { target.stopAccessingSecurityScopedResource() } }
+            guard accessed || FileManager.default.isWritableFile(atPath: target.path) else {
+                throw URLError(.noPermissionsToReadFile)
+            }
             for path in record["destinations"] as? [String] ?? [] where FileManager.default.fileExists(atPath: path) {
                 try FileManager.default.removeItem(atPath: path)
             }
@@ -729,16 +734,19 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
               let controller = bridge?.viewController else {
             call.resolve(["ok": false]); return
         }
-        guard let target = try? directory(record["folder"] as? String ?? ""),
-              target.startAccessingSecurityScopedResource() else {
+        guard let target = try? directory(record["folder"] as? String ?? "") else {
+            call.resolve(["ok": false]); return
+        }
+        let accessed = target.startAccessingSecurityScopedResource()
+        guard accessed || FileManager.default.isReadableFile(atPath: target.path) else {
             call.resolve(["ok": false]); return
         }
         guard FileManager.default.fileExists(atPath: path) else {
-            target.stopAccessingSecurityScopedResource()
+            if accessed { target.stopAccessingSecurityScopedResource() }
             call.resolve(["ok": false]); return
         }
         let activity = UIActivityViewController(activityItems: [URL(fileURLWithPath: path)], applicationActivities: nil)
-        activity.completionWithItemsHandler = { _, _, _, _ in target.stopAccessingSecurityScopedResource() }
+        activity.completionWithItemsHandler = { _, _, _, _ in if accessed { target.stopAccessingSecurityScopedResource() } }
         activity.popoverPresentationController?.sourceView = controller.view
         controller.present(activity, animated: true)
         call.resolve(["ok": true])
@@ -758,16 +766,19 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
               }),
               let path = file["path"] as? String,
               let controller = bridge?.viewController, controller.presentedViewController == nil,
-              let target = try? directory(record["folder"] as? String ?? ""),
-              target.startAccessingSecurityScopedResource() else {
+              let target = try? directory(record["folder"] as? String ?? "") else {
+            call.resolve(["ok": false]); return
+        }
+        let accessed = target.startAccessingSecurityScopedResource()
+        guard accessed || FileManager.default.isReadableFile(atPath: target.path) else {
             call.resolve(["ok": false]); return
         }
         guard FileManager.default.fileExists(atPath: path) else {
-            target.stopAccessingSecurityScopedResource()
+            if accessed { target.stopAccessingSecurityScopedResource() }
             call.resolve(["ok": false]); return
         }
         let player = IOSScopedPlayerController()
-        player.releaseFile = { target.stopAccessingSecurityScopedResource() }
+        player.releaseFile = { if accessed { target.stopAccessingSecurityScopedResource() } }
         player.player = AVPlayer(url: URL(fileURLWithPath: path))
         controller.present(player, animated: true) { player.player?.play() }
         call.resolve(["ok": true])

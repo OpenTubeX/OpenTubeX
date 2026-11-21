@@ -34,7 +34,7 @@
         :supporting-text="downloadFolderRequired ? t('Downloads.Folder Required') : ''"
         :value="displayAndroidPath(ytDlpDownloadFolderPath)"
         :tooltip="t('Tooltips.Download Settings.Download Folder')"
-        @browse="ytDlp.ytDlpChooseDownloadFolder()"
+        @browse="chooseDownloadFolder"
         @clear="store.dispatch('updateYtDlpDownloadFolderPath', '')"
       />
       <FtInput
@@ -75,6 +75,7 @@
 
 <script setup>
 import { displayAndroidPath } from '../../../helpers/androidStorage'
+import { showToast } from '../../../helpers/utils'
 import { ytDlp } from '../../../helpers/ytDlp'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -135,6 +136,17 @@ function updateYtDlpMaxConcurrentDownloads(value) {
 
 function updateYtDlpDownloadBandwidthLimit(value) {
   return updateQueueSetting('updateYtDlpDownloadBandwidthLimit', value)
+}
+
+async function chooseDownloadFolder() {
+  try {
+    await ytDlp.ytDlpChooseDownloadFolder()
+  } catch (error) {
+    showToast({
+      message: error?.message || t('Settings.Data Settings.Unable to write file'),
+      icon: ['fas', 'circle-exclamation']
+    })
+  }
 }
 </script>
 

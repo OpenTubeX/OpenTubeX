@@ -15,6 +15,8 @@
     :force-action-button-icon-name="['fas', 'folder-open']"
     :action-button-label="t('Form Inputs.Browse')"
     @click="emit('browse')"
+    @input-click="emit('browse')"
+    @keydown="handleKeyDown"
   >
     <template #extraAction>
       <button
@@ -56,9 +58,24 @@ defineProps({
 const emit = defineEmits(['browse', 'clear'])
 
 const { t } = useI18n()
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleKeyDown(event) {
+  if (event.key === ' ') {
+    event.preventDefault()
+    emit('browse')
+  }
+}
 </script>
 
 <style scoped>
+.ftPathPicker :deep(.ft-input),
+.ftPathPicker :deep(.selectLabel) {
+  cursor: pointer;
+}
+
 .ftPathPicker.hasPath :deep(.ft-input) {
   padding-inline-end: calc(72px + 6px);
 }
