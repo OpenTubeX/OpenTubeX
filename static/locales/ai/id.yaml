@@ -2739,6 +2739,22 @@ App Icon:
   Title: "Ikon aplikasi"
   Error: "Tidak dapat memuat atau mengubah ikon aplikasi"
 
+App Lock:
+  Title: "Kunci aplikasi"
+  Enable: "Wajibkan kunci layar"
+  Enable Tooltip: "Meminta sidik jari, wajah, PIN, pola, atau sandi Anda saat kembali ke OpenTubeX. Di Android 13 dan yang lebih baru, aplikasi terbaru juga tidak lagi menampilkan pratinjau aplikasi."
+  Lock After: "Kunci setelah"
+  Immediately: "Segera"
+  1 Minute: "1 menit"
+  5 Minutes: "5 menit"
+  15 Minutes: "15 menit"
+  1 Hour: "1 jam"
+  Unavailable: "Setel kunci layar di setelan Android untuk menggunakan kunci aplikasi."
+  Error: "Tidak dapat mengubah kunci aplikasi"
+  Locked: "OpenTubeX terkunci"
+  Unlock: "Buka kunci"
+  Prompt Title: "Buka kunci OpenTubeX"
+
 Tray:
   Hide All Windows: "Sembunyikan semua jendela"
   Show All Windows: "Tampilkan Semua Jendela"

@@ -2712,6 +2712,22 @@ App Icon:
   Title: "应用图标"
   Error: "无法加载或更改应用图标"
 
+App Lock:
+  Title: "应用锁"
+  Enable: "要求屏幕锁定"
+  Enable Tooltip: "返回 OpenTubeX 时，要求验证指纹、面孔、PIN 码、图案或密码。在 Android 13 及更高版本中，最近使用的应用列表也不再显示应用预览。"
+  Lock After: "锁定时间"
+  Immediately: "立即"
+  1 Minute: "1 分钟"
+  5 Minutes: "5 分钟"
+  15 Minutes: "15 分钟"
+  1 Hour: "1 小时"
+  Unavailable: "请在 Android 设置中设置屏幕锁定，以使用应用锁。"
+  Error: "无法更改应用锁"
+  Locked: "OpenTubeX 已锁定"
+  Unlock: "解锁"
+  Prompt Title: "解锁 OpenTubeX"
+
 Tray:
   Hide All Windows: "隐藏所有窗口"
   Show All Windows: "显示所有窗口"

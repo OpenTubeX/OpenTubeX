@@ -2713,6 +2713,22 @@ App Icon:
   Title: "Alkalmazásikon"
   Error: "Nem sikerült betölteni vagy módosítani az alkalmazás ikonját"
 
+App Lock:
+  Title: "Alkalmazászár"
+  Enable: "Képernyőzár megkövetelése"
+  Enable Tooltip: "Ujjlenyomatot, arcot, PIN-kódot, mintát vagy jelszót kér, amikor visszatér az OpenTubeX-be. Android 13 és újabb rendszeren a legutóbbi alkalmazások nézete sem mutat előnézetet az alkalmazásról."
+  Lock After: "Zárolás ennyi idő után"
+  Immediately: "Azonnal"
+  1 Minute: "1 perc"
+  5 Minutes: "5 perc"
+  15 Minutes: "15 perc"
+  1 Hour: "1 óra"
+  Unavailable: "Az alkalmazászár használatához állítson be képernyőzárat az Android beállításaiban."
+  Error: "Nem sikerült módosítani az alkalmazászárat"
+  Locked: "Az OpenTubeX zárolva van"
+  Unlock: "Feloldás"
+  Prompt Title: "OpenTubeX feloldása"
+
 Tray:
   Hide All Windows: "Összes ablak elrejtése"
   Show All Windows: "Összes ablak megjelenítése"

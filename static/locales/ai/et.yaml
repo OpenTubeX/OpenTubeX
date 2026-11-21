@@ -2715,6 +2715,22 @@ App Icon:
   Title: "Rakenduse ikoon"
   Error: "Rakenduse ikooni ei saanud laadida ega muuta"
 
+App Lock:
+  Title: "Rakenduse lukk"
+  Enable: "Nõua ekraanilukku"
+  Enable Tooltip: "Küsib OpenTubeX-i naasmisel sõrmejälge, nägu, PIN-koodi, mustrit või parooli. Androidi versioonis 13 ja uuemas ei näita hiljutiste rakenduste vaade ka rakenduse eelvaadet."
+  Lock After: "Lukusta pärast"
+  Immediately: "Kohe"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minutit"
+  15 Minutes: "15 minutit"
+  1 Hour: "1 tund"
+  Unavailable: "Rakenduse luku kasutamiseks seadke Androidi seadetes ekraanilukk."
+  Error: "Rakenduse lukku ei saanud muuta"
+  Locked: "OpenTubeX on lukus"
+  Unlock: "Ava lukk"
+  Prompt Title: "OpenTubeX-i avamine"
+
 Tray:
   Hide All Windows: "Peida kõik aknad"
   Show All Windows: "Näita kõiki aknaid"

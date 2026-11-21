@@ -2824,6 +2824,22 @@ App Icon:
   Title: "نماد برنامه"
   Error: "بارگیری یا تغییر نماد برنامه ممکن نشد"
 
+App Lock:
+  Title: "قفل برنامه"
+  Enable: "نیاز به قفل صفحه"
+  Enable Tooltip: "هنگام بازگشت به OpenTubeX اثر انگشت، چهره، پین، الگو یا گذرواژه شما را می‌خواهد. در Android 13 و نسخه‌های جدیدتر، برنامه‌های اخیر نیز پیش‌نمایش برنامه را نشان نمی‌دهند."
+  Lock After: "قفل پس از"
+  Immediately: "بلافاصله"
+  1 Minute: "۱ دقیقه"
+  5 Minutes: "۵ دقیقه"
+  15 Minutes: "۱۵ دقیقه"
+  1 Hour: "۱ ساعت"
+  Unavailable: "برای استفاده از قفل برنامه، در تنظیمات Android یک قفل صفحه تنظیم کنید."
+  Error: "تغییر قفل برنامه ممکن نشد"
+  Locked: "OpenTubeX قفل است"
+  Unlock: "باز کردن قفل"
+  Prompt Title: "باز کردن قفل OpenTubeX"
+
 Tray:
   Hide All Windows: "پنهان کردن همهٔ پنجره‌ها"
   Show All Windows: "نمایش همهٔ پنجره‌ها"

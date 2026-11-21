@@ -2723,6 +2723,22 @@ App Icon:
   Title: "Arlun an arload"
   Error: "N'eus ket bet gallet kargañ pe cheñch arlun an arload"
 
+App Lock:
+  Title: "Prenañ an arload"
+  Enable: "Goulenn prenañ ar skramm"
+  Enable Tooltip: "Goulenn ho siell-biz, ho fas, ho PIN, ho c'hoariad pe ho ger-tremen pa zistroit da OpenTubeX. Diwar Android 13, n'ez eus ket ken a rakwel eus an arload e roll an arloadoù nevez."
+  Lock After: "Prenañ goude"
+  Immediately: "Kerkent"
+  1 Minute: "1 munut"
+  5 Minutes: "5 munut"
+  15 Minutes: "15 munut"
+  1 Hour: "1 eur"
+  Unavailable: "Arventennit ur prenañ skramm e arventennoù Android evit implijout prenañ an arload."
+  Error: "N'haller ket cheñch prenañ an arload"
+  Locked: "Prennet eo OpenTubeX"
+  Unlock: "Dibrennañ"
+  Prompt Title: "Dibrennañ OpenTubeX"
+
 Tray:
   Hide All Windows: "Kuzhat an holl brenestroù"
   Show All Windows: "Diskouez an holl brenestroù"

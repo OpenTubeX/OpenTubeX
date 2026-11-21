@@ -2712,6 +2712,22 @@ App Icon:
   Title: "Ikona aplikácie"
   Error: "Ikonu aplikácie sa nepodarilo načítať alebo zmeniť"
 
+App Lock:
+  Title: "Zámok aplikácie"
+  Enable: "Vyžadovať zámku obrazovky"
+  Enable Tooltip: "Pri návrate do OpenTubeX požiada o odtlačok prsta, tvár, PIN, vzor alebo heslo. V Androide 13 a novšom sa v zozname nedávnych aplikácií tiež nezobrazuje ukážka aplikácie."
+  Lock After: "Zamknúť po"
+  Immediately: "Okamžite"
+  1 Minute: "1 minúte"
+  5 Minutes: "5 minútach"
+  15 Minutes: "15 minútach"
+  1 Hour: "1 hodine"
+  Unavailable: "Ak chcete používať zámok aplikácie, nastavte zámku obrazovky v nastaveniach Androidu."
+  Error: "Zámok aplikácie sa nepodarilo zmeniť"
+  Locked: "OpenTubeX je zamknutý"
+  Unlock: "Odomknúť"
+  Prompt Title: "Odomknúť OpenTubeX"
+
 Tray:
   Hide All Windows: "Skryť všetky okná"
   Show All Windows: "Zobraziť všetky okná"

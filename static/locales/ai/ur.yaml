@@ -2843,6 +2843,22 @@ App Icon:
   Saved Message: آئیکن محفوظ ہو گیا۔ آپ کے لانچر کو اپ ڈیٹ ہونے میں کچھ وقت لگ سکتا ہے۔
   Title: ایپ آئیکن
   Error: ایپ آئیکن لوڈ یا تبدیل نہیں ہو سکا
+App Lock:
+  Title: "ایپ لاک"
+  Enable: "اسکرین لاک لازمی کریں"
+  Enable Tooltip: "جب آپ OpenTubeX میں واپس آتے ہیں تو آپ کا فنگر پرنٹ، چہرہ، PIN، پیٹرن یا پاس ورڈ مانگتا ہے۔ Android 13 اور اس کے بعد کے ورژن میں حالیہ ایپس بھی ایپ کا پیش منظر نہیں دکھاتیں۔"
+  Lock After: "لاک ہونے کا وقت"
+  Immediately: "فوراً"
+  1 Minute: "1 منٹ"
+  5 Minutes: "5 منٹ"
+  15 Minutes: "15 منٹ"
+  1 Hour: "1 گھنٹہ"
+  Unavailable: "ایپ لاک استعمال کرنے کے لیے Android کی ترتیبات میں اسکرین لاک سیٹ کریں۔"
+  Error: "ایپ لاک تبدیل نہیں کیا جا سکا"
+  Locked: "OpenTubeX مقفل ہے"
+  Unlock: "غیر مقفل کریں"
+  Prompt Title: "OpenTubeX کو غیر مقفل کریں"
+
 Tray:
   Hide All Windows: تمام ونڈوز چھپائیں
   Show All Windows: تمام ونڈوز دکھائیں

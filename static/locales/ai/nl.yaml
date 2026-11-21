@@ -2790,6 +2790,22 @@ App Icon:
   Title: "App-pictogram"
   Error: "Kan het app-pictogram niet laden of wijzigen"
 
+App Lock:
+  Title: "App-vergrendeling"
+  Enable: "Schermvergrendeling vereisen"
+  Enable Tooltip: "Vraagt om je vingerafdruk, gezicht, pincode, patroon of wachtwoord wanneer je terugkeert naar OpenTubeX. Op Android 13 en hoger tonen recente apps ook geen voorbeeld van de app meer."
+  Lock After: "Vergrendelen na"
+  Immediately: "Onmiddellijk"
+  1 Minute: "1 minuut"
+  5 Minutes: "5 minuten"
+  15 Minutes: "15 minuten"
+  1 Hour: "1 uur"
+  Unavailable: "Stel een schermvergrendeling in via de Android-instellingen om app-vergrendeling te gebruiken."
+  Error: "App-vergrendeling kan niet worden gewijzigd"
+  Locked: "OpenTubeX is vergrendeld"
+  Unlock: "Ontgrendelen"
+  Prompt Title: "OpenTubeX ontgrendelen"
+
 Tray:
   Hide All Windows: "Alle vensters verbergen"
   Show All Windows: "Alle vensters tonen"

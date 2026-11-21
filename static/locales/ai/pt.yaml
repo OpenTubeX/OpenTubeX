@@ -2717,6 +2717,22 @@ App Icon:
   Title: "Ícone da aplicação"
   Error: "Não foi possível carregar ou alterar o ícone da aplicação"
 
+App Lock:
+  Title: "Bloqueio da app"
+  Enable: "Exigir bloqueio de ecrã"
+  Enable Tooltip: "Pede a sua impressão digital, rosto, PIN, padrão ou palavra-passe quando regressa ao OpenTubeX. No Android 13 e posterior, as apps recentes também deixam de mostrar uma pré-visualização da app."
+  Lock After: "Bloquear após"
+  Immediately: "Imediatamente"
+  1 Minute: "1 minuto"
+  5 Minutes: "5 minutos"
+  15 Minutes: "15 minutos"
+  1 Hour: "1 hora"
+  Unavailable: "Defina um bloqueio de ecrã nas definições do Android para usar o bloqueio da app."
+  Error: "Não foi possível alterar o bloqueio da app"
+  Locked: "O OpenTubeX está bloqueado"
+  Unlock: "Desbloquear"
+  Prompt Title: "Desbloquear o OpenTubeX"
+
 Tray:
   Hide All Windows: "Ocultar todas as janelas"
   Show All Windows: "Mostrar todas as janelas"

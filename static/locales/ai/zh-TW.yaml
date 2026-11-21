@@ -2715,6 +2715,22 @@ App Icon:
   Title: "應用程式圖示"
   Error: "無法載入或變更應用程式圖示"
 
+App Lock:
+  Title: "應用程式鎖定"
+  Enable: "要求螢幕鎖定"
+  Enable Tooltip: "返回 OpenTubeX 時，會要求驗證指紋、臉部、PIN 碼、圖案或密碼。在 Android 13 及更新版本中，最近使用的應用程式清單也不再顯示應用程式預覽。"
+  Lock After: "鎖定時間"
+  Immediately: "立即"
+  1 Minute: "1 分鐘"
+  5 Minutes: "5 分鐘"
+  15 Minutes: "15 分鐘"
+  1 Hour: "1 小時"
+  Unavailable: "請在 Android 設定中設定螢幕鎖定，以使用應用程式鎖定。"
+  Error: "無法變更應用程式鎖定"
+  Locked: "OpenTubeX 已鎖定"
+  Unlock: "解鎖"
+  Prompt Title: "解鎖 OpenTubeX"
+
 Tray:
   Hide All Windows: "隱藏所有視窗"
   Show All Windows: "顯示所有視窗"

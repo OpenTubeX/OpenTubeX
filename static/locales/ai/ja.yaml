@@ -2712,6 +2712,22 @@ App Icon:
   Title: "アプリアイコン"
   Error: "アプリアイコンを読み込むか変更することができませんでした"
 
+App Lock:
+  Title: "アプリロック"
+  Enable: "画面ロックを必須にする"
+  Enable Tooltip: "OpenTubeX に戻ったときに、指紋、顔、PIN、パターン、パスワードの入力を求めます。Android 13 以降では、最近使用したアプリにもアプリのプレビューが表示されなくなります。"
+  Lock After: "ロックするまでの時間"
+  Immediately: "すぐに"
+  1 Minute: "1 分"
+  5 Minutes: "5 分"
+  15 Minutes: "15 分"
+  1 Hour: "1 時間"
+  Unavailable: "アプリロックを使うには、Android の設定で画面ロックを設定してください。"
+  Error: "アプリロックを変更できません"
+  Locked: "OpenTubeX はロックされています"
+  Unlock: "ロック解除"
+  Prompt Title: "OpenTubeX のロックを解除"
+
 Tray:
   Hide All Windows: "すべてのウィンドウを非表示"
   Show All Windows: "すべてのウィンドウを表示"

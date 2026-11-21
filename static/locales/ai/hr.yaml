@@ -2758,6 +2758,22 @@ App Icon:
   Title: "Ikona aplikacije"
   Error: "Nije moguće učitati ili promijeniti ikonu aplikacije"
 
+App Lock:
+  Title: "Zaključavanje aplikacije"
+  Enable: "Zahtijevaj zaključavanje zaslona"
+  Enable Tooltip: "Traži otisak prsta, lice, PIN, uzorak ili lozinku kad se vratiš u OpenTubeX. Na Androidu 13 i novijima nedavne aplikacije također ne prikazuju pregled aplikacije."
+  Lock After: "Zaključaj nakon"
+  Immediately: "Odmah"
+  1 Minute: "1 minuta"
+  5 Minutes: "5 minuta"
+  15 Minutes: "15 minuta"
+  1 Hour: "1 sat"
+  Unavailable: "Za korištenje zaključavanja aplikacije postavi zaključavanje zaslona u postavkama Androida."
+  Error: "Zaključavanje aplikacije nije moguće promijeniti"
+  Locked: "OpenTubeX je zaključan"
+  Unlock: "Otključaj"
+  Prompt Title: "Otključaj OpenTubeX"
+
 Tray:
   Hide All Windows: "Sakrij sve prozore"
   Show All Windows: "Prikaži sve prozore"

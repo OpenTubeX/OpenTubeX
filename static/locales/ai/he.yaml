@@ -2781,6 +2781,22 @@ App Icon:
   Title: "סמל היישום"
   Error: "לא ניתן לטעון או לשנות את סמל היישום"
 
+App Lock:
+  Title: "נעילת אפליקציה"
+  Enable: "דרישת נעילת מסך"
+  Enable Tooltip: "מבקש טביעת אצבע, זיהוי פנים, קוד PIN, קו ביטול נעילה או סיסמה כשחוזרים אל OpenTubeX. ב-Android 13 ואילך, גם רשימת האפליקציות האחרונות מפסיקה להציג תצוגה מקדימה של האפליקציה."
+  Lock After: "נעילה לאחר"
+  Immediately: "מיד"
+  1 Minute: "דקה אחת"
+  5 Minutes: "5 דקות"
+  15 Minutes: "15 דקות"
+  1 Hour: "שעה אחת"
+  Unavailable: "הגדירו נעילת מסך בהגדרות Android כדי להשתמש בנעילת אפליקציה."
+  Error: "לא ניתן לשנות את נעילת האפליקציה"
+  Locked: "OpenTubeX נעול"
+  Unlock: "ביטול נעילה"
+  Prompt Title: "ביטול הנעילה של OpenTubeX"
+
 Tray:
   Hide All Windows: "הסתרת כל החלונות"
   Show All Windows: "הצגת כל החלונות"
