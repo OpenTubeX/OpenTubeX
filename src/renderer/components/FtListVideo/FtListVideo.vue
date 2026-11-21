@@ -64,7 +64,10 @@
       </div>
       <div
         class="videoThumbnail"
-        :class="{ downloadedContent: localDownloadId !== undefined }"
+        :class="{
+          downloadedContent: localDownloadId !== undefined,
+          hasSponsorBlockLabel: useSponsorBlock && Boolean(sponsorBlockFullVideoCategory)
+        }"
         draggable="true"
         @dragstart="onDragStart"
       >

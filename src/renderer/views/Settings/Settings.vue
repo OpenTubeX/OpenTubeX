@@ -658,6 +658,7 @@ let boundsSaveTimer = null
 let boundsAnimation = null
 let searchHighlightTimer = null
 let standaloneClampFrame = null
+let pendingContentScrollTop = null
 let downloadsReturnScrollTop = 0
 let draggingPointerId = null
 let resizeSession = null
@@ -1085,6 +1086,7 @@ watch(() => store.getters.getSettingsWindowView, async (view, previousView) => {
   observeStandaloneContent()
 })
 watch(activeSection, (section) => {
+  clearPendingContentScrollTop()
   if (section !== null) {
     store.commit('rememberSettingsWindowSection', section)
   }
@@ -1183,6 +1185,7 @@ function stopObserving() {
   settingsResizeObserver?.disconnect()
   settingsResizeObserver = null
   cancelStandaloneScrollClamp()
+  clearPendingContentScrollTop()
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
@@ -1260,9 +1263,17 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
     if (!protectedSettingsVisible.value) return
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+    const contentGrew = previousHeight !== null && height > previousHeight
     const contentShrank = previousHeight !== null && height < previousHeight
     previousHeight = height
     if (resizeSession !== null) return
+    if (pendingContentScrollTop !== null && contentGrew) {
+      restoreOverlayScrollTop(content, pendingContentScrollTop)
+      if (content.scrollTop >= pendingContentScrollTop - 1) {
+        clearPendingContentScrollTop()
+      }
+      return
+    }
     if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
       clampOverlayScrollTop(content, contentEnd)
     }
@@ -1300,6 +1311,14 @@ function cancelStandaloneScrollClamp() {
     cancelAnimationFrame(standaloneClampFrame)
     standaloneClampFrame = null
   }
+}
+
+let pendingScrollCancelCleanup = null
+
+function clearPendingContentScrollTop() {
+  pendingContentScrollTop = null
+  pendingScrollCancelCleanup?.()
+  pendingScrollCancelCleanup = null
 }
 
 function getSettingsContentEnd(content) {
@@ -1548,6 +1567,7 @@ function getSearchTargetText(element) {
 }
 
 function handleSettingsSearch(value) {
+  clearPendingContentScrollTop()
   // FtInput emits the current text even while the keyboard is composing.
   settingsSearchQuery.value = value
   closeAllSubpages()
@@ -1725,6 +1745,7 @@ function minimizeSettings() {
 }
 
 function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
+  clearPendingContentScrollTop()
   if (!unlocked.value && !standalone) return
   const viewports = getCurrentScrollViewports(standalone)
   preservedScrollPositions = [
@@ -1745,12 +1766,33 @@ function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
 }
 
 function restorePreservedScrollPositions() {
+  if (preservedScrollPositions.length === 0) return
+  clearPendingContentScrollTop()
   const viewports = getCurrentScrollViewports()
   const pending = []
   for (const { element, scrollTop } of preservedScrollPositions) {
     if (!element.isConnected) continue
-    if (viewports.has(element)) restoreOverlayScrollTop(element, scrollTop)
-    else pending.push({ element, scrollTop })
+    if (viewports.has(element)) {
+      restoreOverlayScrollTop(element, scrollTop)
+      // Sections that expand over the opening frames (for example as labels
+      // wrap at a new width or scale) clamp the initial restore early; keep
+      // following their growth until the saved offset is reached or the user
+      // interacts with the pane.
+      if (element === settingsContentRef.value && element.scrollTop < scrollTop - 1) {
+        pendingContentScrollTop = scrollTop
+        const cancel = () => clearPendingContentScrollTop()
+        for (const event of ['wheel', 'pointerdown', 'keydown']) {
+          element.addEventListener(event, cancel, { once: true, passive: true })
+        }
+        pendingScrollCancelCleanup = () => {
+          for (const event of ['wheel', 'pointerdown', 'keydown']) {
+            element.removeEventListener(event, cancel)
+          }
+        }
+      }
+    } else {
+      pending.push({ element, scrollTop })
+    }
   }
   preservedScrollPositions = pending
 }

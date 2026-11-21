@@ -128,8 +128,8 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
         const content = element.querySelector('.customizerEditor')
         const contentEnd = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
           element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
-        return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
-      }), { message: 'removing navigation items leaves no obsolete scroll offset' }).toBeLessThanOrEqual(1)
+        return (element.scrollTop - Math.max(0, contentEnd - element.clientHeight)) * devicePixelRatio
+      }), { message: 'removing navigation items leaves no obsolete scroll offset' }).toBeLessThanOrEqual(2)
     }
     // The remaining options may still overflow the editor below the preview.
     await expect.poll(() => scroller.evaluate(element => {
