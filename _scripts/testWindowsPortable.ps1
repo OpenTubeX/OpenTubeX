@@ -226,7 +226,11 @@ foreach ($requiredFile in @(
   }
 }
 
+$interposerLogsDirectory = Join-Path $portableDirectory '.interposer\Logs'
 $hostStateBefore = @(Get-HostState)
+if (Test-Path $interposerLogsDirectory) {
+  Remove-Item $interposerLogsDirectory -Recurse -Force
+}
 if (Test-Path $dataDirectory) {
   Remove-Item $dataDirectory -Recurse -Force
 }
@@ -297,6 +301,9 @@ $hostStateAfter = @(Get-HostState)
 $hostChanges = @(Compare-Object $hostStateBefore $hostStateAfter)
 if ($hostChanges.Count -gt 0) {
   throw "The portable package changed app-owned host state:`n$($hostChanges | Out-String)"
+}
+if (Test-Path $interposerLogsDirectory) {
+  throw "The portable package created unexpected Interposer logs in $interposerLogsDirectory"
 }
 
 Write-Output 'Windows portable network and application data isolation checks passed.'
