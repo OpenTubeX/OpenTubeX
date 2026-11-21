@@ -2758,6 +2758,22 @@ App Icon:
   Title: "أيقونة التطبيق"
   Error: "تعذر تحميل أيقونة التطبيق أو تغييرها"
 
+App Lock:
+  Title: "قفل التطبيق"
+  Enable: "طلب قفل الشاشة"
+  Enable Tooltip: "يطلب بصمة إصبعك أو وجهك أو رقم PIN أو النمط أو كلمة المرور عند العودة إلى OpenTubeX. في Android 13 والإصدارات الأحدث، لا تعرض التطبيقات الأخيرة معاينة للتطبيق أيضًا."
+  Lock After: "القفل بعد"
+  Immediately: "فورًا"
+  1 Minute: "دقيقة واحدة"
+  5 Minutes: "5 دقائق"
+  15 Minutes: "15 دقيقة"
+  1 Hour: "ساعة واحدة"
+  Unavailable: "عيّن قفل شاشة في إعدادات Android لاستخدام قفل التطبيق."
+  Error: "تعذر تغيير قفل التطبيق"
+  Locked: "OpenTubeX مقفل"
+  Unlock: "فتح القفل"
+  Prompt Title: "فتح قفل OpenTubeX"
+
 Tray:
   Hide All Windows: "إخفاء جميع النوافذ"
   Show All Windows: "إظهار جميع النوافذ"

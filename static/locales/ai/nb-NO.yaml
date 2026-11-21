@@ -2721,6 +2721,22 @@ App Icon:
   Title: "Appikon"
   Error: "Kunne ikke laste inn eller endre appikonet"
 
+App Lock:
+  Title: "Applås"
+  Enable: "Krev skjermlås"
+  Enable Tooltip: "Ber om fingeravtrykk, ansikt, PIN-kode, mønster eller passord når du kommer tilbake til OpenTubeX. På Android 13 og nyere viser heller ikke nylige apper en forhåndsvisning av appen."
+  Lock After: "Lås etter"
+  Immediately: "Umiddelbart"
+  1 Minute: "1 minutt"
+  5 Minutes: "5 minutter"
+  15 Minutes: "15 minutter"
+  1 Hour: "1 time"
+  Unavailable: "Angi en skjermlås i Android-innstillingene for å bruke applås."
+  Error: "Kunne ikke endre applåsen"
+  Locked: "OpenTubeX er låst"
+  Unlock: "Lås opp"
+  Prompt Title: "Lås opp OpenTubeX"
+
 Tray:
   Hide All Windows: "Skjul alle vinduer"
   Show All Windows: "Vis alle vinduer"

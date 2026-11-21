@@ -3324,6 +3324,22 @@ App Icon:
   Title: "Ikona aplikacije"
   Error: "Ikone aplikacije ni bilo mogoče naložiti ali spremeniti"
 
+App Lock:
+  Title: "Zaklep aplikacije"
+  Enable: "Zahtevaj zaklep zaslona"
+  Enable Tooltip: "Ob vrnitvi v OpenTubeX zahteva prstni odtis, obraz, PIN, vzorec ali geslo. V Androidu 13 in novejših najnovejše aplikacije prav tako ne prikazujejo predogleda aplikacije."
+  Lock After: "Zakleni po"
+  Immediately: "Takoj"
+  1 Minute: "1 minuti"
+  5 Minutes: "5 minutah"
+  15 Minutes: "15 minutah"
+  1 Hour: "1 uri"
+  Unavailable: "Če želite uporabljati zaklep aplikacije, nastavite zaklep zaslona v nastavitvah Androida."
+  Error: "Zaklepa aplikacije ni bilo mogoče spremeniti"
+  Locked: "OpenTubeX je zaklenjen"
+  Unlock: "Odkleni"
+  Prompt Title: "Odkleni OpenTubeX"
+
 Tray:
   Hide All Windows: "Skrij vsa okna"
   Show All Windows: "Pokaži vsa okna"

@@ -2775,6 +2775,22 @@ App Icon:
   Title: "Pictograma aplicației"
   Error: "Nu s-a putut încărca sau schimba pictograma aplicației"
 
+App Lock:
+  Title: "Blocarea aplicației"
+  Enable: "Cere blocarea ecranului"
+  Enable Tooltip: "Cere amprenta, fața, PIN-ul, modelul sau parola când revii în OpenTubeX. Pe Android 13 și versiunile ulterioare, nici aplicațiile recente nu mai afișează o previzualizare a aplicației."
+  Lock After: "Blochează după"
+  Immediately: "Imediat"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minute"
+  15 Minutes: "15 minute"
+  1 Hour: "1 oră"
+  Unavailable: "Setează o blocare a ecranului în setările Android pentru a folosi blocarea aplicației."
+  Error: "Blocarea aplicației nu a putut fi modificată"
+  Locked: "OpenTubeX este blocat"
+  Unlock: "Deblochează"
+  Prompt Title: "Deblochează OpenTubeX"
+
 Tray:
   Hide All Windows: "Ascunde toate ferestrele"
   Show All Windows: "Arată toate ferestrele"

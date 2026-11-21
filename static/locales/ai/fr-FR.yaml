@@ -2711,6 +2711,22 @@ App Icon:
   Title: "Icône de l'application"
   Error: "Impossible de charger ou de modifier l'icône de l'application"
 
+App Lock:
+  Title: "Verrouillage de l'application"
+  Enable: "Exiger le verrouillage de l'écran"
+  Enable Tooltip: "Demande votre empreinte digitale, votre visage, votre code PIN, votre schéma ou votre mot de passe quand vous revenez dans OpenTubeX. Sur Android 13 et versions ultérieures, les applications récentes n'affichent plus non plus d'aperçu de l'application."
+  Lock After: "Verrouiller après"
+  Immediately: "Immédiatement"
+  1 Minute: "1 minute"
+  5 Minutes: "5 minutes"
+  15 Minutes: "15 minutes"
+  1 Hour: "1 heure"
+  Unavailable: "Définissez un verrouillage d'écran dans les paramètres Android pour utiliser le verrouillage de l'application."
+  Error: "Impossible de modifier le verrouillage de l'application"
+  Locked: "OpenTubeX est verrouillé"
+  Unlock: "Déverrouiller"
+  Prompt Title: "Déverrouiller OpenTubeX"
+
 Tray:
   Hide All Windows: "Masquer toutes les fenêtres"
   Show All Windows: "Afficher toutes les fenêtres"

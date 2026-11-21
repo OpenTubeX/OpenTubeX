@@ -2723,6 +2723,22 @@ App Icon:
   Title: "Aplikazioaren ikonoa"
   Error: "Ezin izan da aplikazioaren ikonoa kargatu edo aldatu"
 
+App Lock:
+  Title: "Aplikazioaren blokeoa"
+  Enable: "Eskatu pantaila-blokeoa"
+  Enable Tooltip: "Hatz-marka, aurpegia, PINa, eredua edo pasahitza eskatzen du OpenTubeX-era itzultzean. Android 13 eta berriagoetan, azken aplikazioek ere ez dute aplikazioaren aurrebistarik erakusten."
+  Lock After: "Blokeatu hau igarotakoan"
+  Immediately: "Berehala"
+  1 Minute: "1 minutu"
+  5 Minutes: "5 minutu"
+  15 Minutes: "15 minutu"
+  1 Hour: "1 ordu"
+  Unavailable: "Aplikazioaren blokeoa erabiltzeko, ezarri pantaila-blokeoa Androiden ezarpenetan."
+  Error: "Ezin izan da aplikazioaren blokeoa aldatu"
+  Locked: "OpenTubeX blokeatuta dago"
+  Unlock: "Desblokeatu"
+  Prompt Title: "Desblokeatu OpenTubeX"
+
 Tray:
   Hide All Windows: "Ezkutatu leiho guztiak"
   Show All Windows: "Erakutsi leiho guztiak"

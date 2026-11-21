@@ -2726,6 +2726,22 @@ App Icon:
   Title: "Sovelluskuvake"
   Error: "Sovelluskuvaketta ei voitu ladata tai vaihtaa"
 
+App Lock:
+  Title: "Sovelluslukitus"
+  Enable: "Vaadi näytön lukitus"
+  Enable Tooltip: "Kysyy sormenjälkeä, kasvoja, PIN-koodia, kuviota tai salasanaa, kun palaat OpenTubeXiin. Android 13:ssa ja uudemmissa viimeisimpien sovellusten näkymä ei myöskään näytä sovelluksen esikatselua."
+  Lock After: "Lukitse viiveellä"
+  Immediately: "Heti"
+  1 Minute: "1 minuutti"
+  5 Minutes: "5 minuuttia"
+  15 Minutes: "15 minuuttia"
+  1 Hour: "1 tunti"
+  Unavailable: "Aseta näytön lukitus Androidin asetuksissa, jotta voit käyttää sovelluslukitusta."
+  Error: "Sovelluslukitusta ei voitu muuttaa"
+  Locked: "OpenTubeX on lukittu"
+  Unlock: "Avaa lukitus"
+  Prompt Title: "Avaa OpenTubeXin lukitus"
+
 Tray:
   Hide All Windows: "Piilota kaikki ikkunat"
   Show All Windows: "Näytä kaikki ikkunat"

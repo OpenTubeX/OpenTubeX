@@ -2713,6 +2713,22 @@ App Icon:
   Title: "Uygulama simgesi"
   Error: "Uygulama simgesi yüklenemedi veya değiştirilemedi"
 
+App Lock:
+  Title: "Uygulama kilidi"
+  Enable: "Ekran kilidini zorunlu kıl"
+  Enable Tooltip: "OpenTubeX'e döndüğünüzde parmak izi, yüz, PIN, desen veya parola ister. Android 13 ve sonrasında son uygulamalar da uygulamanın önizlemesini göstermez."
+  Lock After: "Şu süre sonra kilitle"
+  Immediately: "Hemen"
+  1 Minute: "1 dakika"
+  5 Minutes: "5 dakika"
+  15 Minutes: "15 dakika"
+  1 Hour: "1 saat"
+  Unavailable: "Uygulama kilidini kullanmak için Android ayarlarında bir ekran kilidi belirleyin."
+  Error: "Uygulama kilidi değiştirilemedi"
+  Locked: "OpenTubeX kilitli"
+  Unlock: "Kilidi aç"
+  Prompt Title: "OpenTubeX kilidini aç"
+
 Tray:
   Hide All Windows: "Tüm pencereleri gizle"
   Show All Windows: "Tüm Pencereleri Göster"

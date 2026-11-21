@@ -2773,6 +2773,22 @@ App Icon:
   Saved Message: Piktogramo konservita. Via lanĉilo eble bezonos momenton por ĝisdatiĝi.
   Title: Piktogramo de la aplikaĵo
   Error: Ne eblas ŝargi aŭ ŝanĝi la piktogramon de la aplikaĵo
+App Lock:
+  Title: "Aplika ŝloso"
+  Enable: "Postuli ekranŝloson"
+  Enable Tooltip: "Petas vian fingrospuron, vizaĝon, PIN-kodon, ŝablonon aŭ pasvorton kiam vi revenas al OpenTubeX. En Android 13 kaj pli novaj, lastaj aplikaĵoj ankaŭ ne plu montras antaŭrigardon de la aplikaĵo."
+  Lock After: "Ŝlosi post"
+  Immediately: "Tuj"
+  1 Minute: "1 minuto"
+  5 Minutes: "5 minutoj"
+  15 Minutes: "15 minutoj"
+  1 Hour: "1 horo"
+  Unavailable: "Agordu ekranŝloson en la agordoj de Android por uzi aplikan ŝloson."
+  Error: "Ne eblas ŝanĝi la aplikan ŝloson"
+  Locked: "OpenTubeX estas ŝlosita"
+  Unlock: "Malŝlosi"
+  Prompt Title: "Malŝlosi OpenTubeX"
+
 Tray:
   Hide All Windows: Kaŝi ĉiujn fenestrojn
   Show All Windows: Montri ĉiujn fenestrojn

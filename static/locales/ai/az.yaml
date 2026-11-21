@@ -2722,6 +2722,22 @@ App Icon:
   Title: "Tətbiq nişanı"
   Error: "Tətbiq nişanını yükləmək və ya dəyişmək mümkün olmadı"
 
+App Lock:
+  Title: "Tətbiq kilidi"
+  Enable: "Ekran kilidi tələb et"
+  Enable Tooltip: "OpenTubeX-ə qayıtdıqda barmaq izi, üz, PIN, qrafik açar və ya parol istəyir. Android 13 və sonrakı versiyalarda son tətbiqlər də tətbiqin önizləməsini göstərmir."
+  Lock After: "Bundan sonra kilidlə"
+  Immediately: "Dərhal"
+  1 Minute: "1 dəqiqə"
+  5 Minutes: "5 dəqiqə"
+  15 Minutes: "15 dəqiqə"
+  1 Hour: "1 saat"
+  Unavailable: "Tətbiq kilidindən istifadə etmək üçün Android parametrlərində ekran kilidi quraşdırın."
+  Error: "Tətbiq kilidini dəyişmək mümkün olmadı"
+  Locked: "OpenTubeX kilidlidir"
+  Unlock: "Kilidi aç"
+  Prompt Title: "OpenTubeX kilidini aç"
+
 Tray:
   Hide All Windows: "Bütün pəncərələri gizlət"
   Show All Windows: "Bütün pəncərələri göstər"

@@ -2984,6 +2984,22 @@ App Icon:
   Saved Message: Ikoon gestoor. U lanseerder kan ’n oomblik neem om by te werk.
   Title: Toepikoon
   Error: Kan nie die toepikoon laai of verander nie
+App Lock:
+  Title: "Toepslot"
+  Enable: "Vereis skermslot"
+  Enable Tooltip: "Vra vir jou vingerafdruk, gesig, PIN, patroon of wagwoord wanneer jy na OpenTubeX terugkeer. Op Android 13 en later wys onlangse toepassings ook nie meer 'n voorskou van die toepassing nie."
+  Lock After: "Sluit na"
+  Immediately: "Onmiddellik"
+  1 Minute: "1 minuut"
+  5 Minutes: "5 minute"
+  15 Minutes: "15 minute"
+  1 Hour: "1 uur"
+  Unavailable: "Stel 'n skermslot in Android-instellings in om die toepslot te gebruik."
+  Error: "Kan nie toepslot verander nie"
+  Locked: "OpenTubeX is gesluit"
+  Unlock: "Ontsluit"
+  Prompt Title: "Ontsluit OpenTubeX"
+
 Tray:
   Hide All Windows: Versteek alle vensters
   Show All Windows: Wys alle vensters

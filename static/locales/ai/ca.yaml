@@ -3374,6 +3374,22 @@ App Icon:
   Title: "Icona de l'aplicació"
   Error: "No s'ha pogut carregar o canviar la icona de l'aplicació"
 
+App Lock:
+  Title: "Bloqueig de l'aplicació"
+  Enable: "Exigeix el bloqueig de pantalla"
+  Enable Tooltip: "Demana l'empremta digital, la cara, el PIN, el patró o la contrasenya quan torneu a OpenTubeX. A Android 13 i posteriors, les aplicacions recents tampoc no mostren una previsualització de l'aplicació."
+  Lock After: "Bloqueja després de"
+  Immediately: "Immediatament"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minuts"
+  15 Minutes: "15 minuts"
+  1 Hour: "1 hora"
+  Unavailable: "Configureu un bloqueig de pantalla a la configuració d'Android per utilitzar el bloqueig de l'aplicació."
+  Error: "No s'ha pogut canviar el bloqueig de l'aplicació"
+  Locked: "OpenTubeX està bloquejat"
+  Unlock: "Desbloqueja"
+  Prompt Title: "Desbloqueja OpenTubeX"
+
 Tray:
   Hide All Windows: "Amaga totes les finestres"
   Show All Windows: "Mostra totes les finestres"

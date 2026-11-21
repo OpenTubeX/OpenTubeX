@@ -3230,6 +3230,22 @@ App Icon:
   Title: "Programėlės piktograma"
   Error: "Nepavyko įkelti ar pakeisti programėlės piktogramos"
 
+App Lock:
+  Title: "Programėlės užraktas"
+  Enable: "Reikalauti ekrano užrakto"
+  Enable Tooltip: "Grįžus į „OpenTubeX“ paprašoma piršto antspaudo, veido, PIN kodo, atrakinimo piešinio arba slaptažodžio. „Android 13“ ir naujesnėje versijoje paskutinių programėlių rodinyje taip pat neberodoma programėlės peržiūra."
+  Lock After: "Užrakinti po"
+  Immediately: "Iš karto"
+  1 Minute: "1 minutės"
+  5 Minutes: "5 minučių"
+  15 Minutes: "15 minučių"
+  1 Hour: "1 valandos"
+  Unavailable: "Norėdami naudoti programėlės užraktą, nustatykite ekrano užraktą „Android“ nustatymuose."
+  Error: "Nepavyko pakeisti programėlės užrakto"
+  Locked: "„OpenTubeX“ užrakinta"
+  Unlock: "Atrakinti"
+  Prompt Title: "Atrakinti „OpenTubeX“"
+
 Tray:
   Hide All Windows: "Slėpti visus langus"
   Show All Windows: "Rodyti visus langus"

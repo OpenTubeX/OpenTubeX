@@ -2756,6 +2756,22 @@ App Icon:
   Title: "Eicon yr ap"
   Error: "Methu llwytho neu newid eicon yr ap"
 
+App Lock:
+  Title: "Clo ap"
+  Enable: "Gofyn am glo sgrin"
+  Enable Tooltip: "Yn gofyn am eich olion bysedd, wyneb, PIN, patrwm neu gyfrinair pan fyddwch yn dychwelyd i OpenTubeX. Ar Android 13 a hwyrach, nid yw apiau diweddar yn dangos rhagolwg o'r ap chwaith."
+  Lock After: "Cloi ar ôl"
+  Immediately: "Ar unwaith"
+  1 Minute: "1 munud"
+  5 Minutes: "5 munud"
+  15 Minutes: "15 munud"
+  1 Hour: "1 awr"
+  Unavailable: "Gosodwch glo sgrin yng ngosodiadau Android i ddefnyddio clo ap."
+  Error: "Methu newid y clo ap"
+  Locked: "Mae OpenTubeX wedi'i gloi"
+  Unlock: "Datgloi"
+  Prompt Title: "Datgloi OpenTubeX"
+
 Tray:
   Hide All Windows: "Cuddio pob ffenestr"
   Show All Windows: "Dangos pob ffenestr"

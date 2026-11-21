@@ -3980,6 +3980,22 @@ App Icon:
   Title: "App-Symbol"
   Error: "Das App-Symbol konnte nicht geladen oder geändert werden"
 
+App Lock:
+  Title: "App-Sperre"
+  Enable: "Displaysperre verlangen"
+  Enable Tooltip: "Fragt nach Fingerabdruck, Gesicht, PIN, Muster oder Passwort, wenn du zu OpenTubeX zurückkehrst. Ab Android 13 zeigen die letzten Apps außerdem keine Vorschau der App mehr."
+  Lock After: "Sperren nach"
+  Immediately: "Sofort"
+  1 Minute: "1 Minute"
+  5 Minutes: "5 Minuten"
+  15 Minutes: "15 Minuten"
+  1 Hour: "1 Stunde"
+  Unavailable: "Richte in den Android-Einstellungen eine Displaysperre ein, um die App-Sperre zu verwenden."
+  Error: "Die App-Sperre konnte nicht geändert werden"
+  Locked: "OpenTubeX ist gesperrt"
+  Unlock: "Entsperren"
+  Prompt Title: "OpenTubeX entsperren"
+
 Tray:
   Hide All Windows: "Alle Fenster ausblenden"
   Show All Windows: "Alle Fenster anzeigen"

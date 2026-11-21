@@ -2735,6 +2735,22 @@ App Icon:
   Title: "Biểu tượng ứng dụng"
   Error: "Không thể tải hoặc thay đổi biểu tượng ứng dụng"
 
+App Lock:
+  Title: "Khóa ứng dụng"
+  Enable: "Yêu cầu khóa màn hình"
+  Enable Tooltip: "Yêu cầu vân tay, khuôn mặt, mã PIN, hình mở khóa hoặc mật khẩu khi bạn quay lại OpenTubeX. Trên Android 13 trở lên, danh sách ứng dụng gần đây cũng không còn hiển thị bản xem trước của ứng dụng."
+  Lock After: "Khóa sau"
+  Immediately: "Ngay lập tức"
+  1 Minute: "1 phút"
+  5 Minutes: "5 phút"
+  15 Minutes: "15 phút"
+  1 Hour: "1 giờ"
+  Unavailable: "Hãy đặt khóa màn hình trong phần cài đặt Android để dùng khóa ứng dụng."
+  Error: "Không thể thay đổi khóa ứng dụng"
+  Locked: "OpenTubeX đã bị khóa"
+  Unlock: "Mở khóa"
+  Prompt Title: "Mở khóa OpenTubeX"
+
 Tray:
   Hide All Windows: "Ẩn tất cả cửa sổ"
   Show All Windows: "Hiển thị tất cả cửa sổ"

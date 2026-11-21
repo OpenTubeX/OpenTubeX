@@ -3990,6 +3990,22 @@ App Icon:
   Title: "App icon"
   Error: "Unable to load or change the app icon"
 
+App Lock:
+  Title: "App lock"
+  Enable: "Require screen lock"
+  Enable Tooltip: "Asks for your fingerprint, face, PIN, pattern, or password when you return to OpenTubeX. On Android 13 and later, recent apps also stop showing a preview of the app."
+  Lock After: "Lock after"
+  Immediately: "Immediately"
+  1 Minute: "1 minute"
+  5 Minutes: "5 minutes"
+  15 Minutes: "15 minutes"
+  1 Hour: "1 hour"
+  Unavailable: "Set a screen lock in Android settings to use app lock."
+  Error: "Unable to change app lock"
+  Locked: "OpenTubeX is locked"
+  Unlock: "Unlock"
+  Prompt Title: "Unlock OpenTubeX"
+
 Tray:
   Hide All Windows: "Hide All Windows"
   Show All Windows: "Show All Windows"

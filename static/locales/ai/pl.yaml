@@ -1905,6 +1905,22 @@ App Icon:
   Title: "Ikona aplikacji"
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
+App Lock:
+  Title: "Blokada aplikacji"
+  Enable: "Wymagaj blokady ekranu"
+  Enable Tooltip: "Prosi o odcisk palca, twarz, kod PIN, wzór lub hasło po powrocie do OpenTubeX. W systemie Android 13 i nowszych lista ostatnich aplikacji również nie pokazuje podglądu aplikacji."
+  Lock After: "Zablokuj po"
+  Immediately: "Natychmiast"
+  1 Minute: "1 minucie"
+  5 Minutes: "5 minutach"
+  15 Minutes: "15 minutach"
+  1 Hour: "1 godzinie"
+  Unavailable: "Aby używać blokady aplikacji, ustaw blokadę ekranu w ustawieniach Androida."
+  Error: "Nie udało się zmienić blokady aplikacji"
+  Locked: "OpenTubeX jest zablokowany"
+  Unlock: "Odblokuj"
+  Prompt Title: "Odblokuj OpenTubeX"
+
 History:
   All Time: Cały czas
   From Date: 'Od'

@@ -3184,6 +3184,22 @@ App Icon:
   Title: "앱 아이콘"
   Error: "앱 아이콘을 불러오거나 변경할 수 없습니다"
 
+App Lock:
+  Title: "앱 잠금"
+  Enable: "화면 잠금 필요"
+  Enable Tooltip: "OpenTubeX로 돌아올 때 지문, 얼굴, PIN, 패턴 또는 비밀번호를 요청합니다. Android 13 이상에서는 최근 앱 목록에서도 앱 미리보기가 표시되지 않습니다."
+  Lock After: "잠금 시간"
+  Immediately: "즉시"
+  1 Minute: "1분"
+  5 Minutes: "5분"
+  15 Minutes: "15분"
+  1 Hour: "1시간"
+  Unavailable: "앱 잠금을 사용하려면 Android 설정에서 화면 잠금을 설정하세요."
+  Error: "앱 잠금을 변경할 수 없습니다"
+  Locked: "OpenTubeX가 잠겨 있습니다"
+  Unlock: "잠금 해제"
+  Prompt Title: "OpenTubeX 잠금 해제"
+
 Tray:
   Hide All Windows: "모든 창 숨기기"
   Show All Windows: "모든 창 표시"
