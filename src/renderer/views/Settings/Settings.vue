@@ -1263,11 +1263,12 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
     if (!protectedSettingsVisible.value) return
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
-    const contentGrew = previousHeight !== null && height > previousHeight
-    const contentShrank = previousHeight !== null && height < previousHeight
+    const isFirstNotification = previousHeight === null
+    const contentGrew = !isFirstNotification && height > previousHeight
+    const contentShrank = !isFirstNotification && height < previousHeight
     previousHeight = height
     if (resizeSession !== null) return
-    if (pendingContentScrollTop !== null && contentGrew) {
+    if (pendingContentScrollTop !== null && (isFirstNotification || contentGrew)) {
       restoreOverlayScrollTop(content, pendingContentScrollTop)
       if (content.scrollTop >= pendingContentScrollTop - 1) {
         clearPendingContentScrollTop()
@@ -1397,6 +1398,7 @@ async function activateSectionTab(tab, focus = false) {
   const section = activeSettingsSection.value
   if (!section?.tabs?.some(({ id }) => id === tab)) return
   const changed = activeSectionTab.value !== tab
+  if (changed) clearPendingContentScrollTop()
   activeSectionTabs.value[section.type] = tab
   await nextTick()
 
