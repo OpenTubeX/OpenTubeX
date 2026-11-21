@@ -221,7 +221,7 @@ test.describe('account activity', () => {
     await expect.poll(() => pageScroller.evaluate(element => element.scrollTop)).toBeLessThan(collapsedPageScrollTop)
   })
 
-  test('clamps activity after resize, replacement, removal, collapse and refresh', { tag: '@scale' }, async ({ app, page }) => {
+  test('clamps activity after resize, replacement, removal, collapse and refresh', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await seedActivity(page)
     const card = sync.locator('.syncActivity')
@@ -233,7 +233,7 @@ test.describe('account activity', () => {
     })
     for (const [width, height] of [[480, 700], [1000, 1000], [1580, 1080]]) {
       await scrollActivityToBottom(scroller)
-      await setWindowSize(app, page, { width, height })
+      await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
       await expectActivityRange(scroller, width !== 480)
       await expectActivityScrollbarGap(scroller)
       expect(await scroller.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)

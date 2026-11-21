@@ -104,6 +104,25 @@ function saveExitDiagnostics() {
   switchAdbUser('unroot', 2000)
 }
 
+/**
+ * Restores emulator Wi-Fi if the guest dropped its wlan0 route mid-shard (for
+ * example after missed virtual AP beacons on a busy runner), so retries of
+ * network-dependent tests do not fail on the same broken network state.
+ */
+function ensureEmulatorWifi() {
+  const hasRoute = () => /default via .* dev wlan0 table/.test(adb('shell', 'ip', 'route', 'show', 'table', 'all').stdout ?? '')
+  if (hasRoute()) return
+  console.log('Emulator Wi-Fi lost its wlan0 default route; re-enabling Wi-Fi before retry')
+  adb('shell', 'cmd', 'wifi', 'set-wifi-enabled', 'disabled')
+  for (let attempt = 0; attempt < 30 && !(adb('shell', 'cmd', 'wifi', 'status').stdout ?? '').includes('Wifi is disabled'); attempt++) {
+    spawnSync('sleep', ['1'])
+  }
+  adb('shell', 'cmd', 'wifi', 'set-wifi-enabled', 'enabled')
+  for (let attempt = 0; attempt < 120 && !hasRoute(); attempt++) {
+    spawnSync('sleep', ['1'])
+  }
+}
+
 // Gradle can report success after the emulator has crashed and skipped the
 // remaining tests, or after test discovery crashed before any test ran, so
 // also require the emulator to still run and the shard to report tests.
@@ -124,6 +143,7 @@ try {
 } catch (error) {
   console.log(`Could not save the app's exit diagnostics: ${error}`)
 }
+ensureEmulatorWifi()
 
 const ids = failed.map(test => `${test.className}#${test.name}`)
 console.log(`Retrying ${ids.length} failed tests once:\n  ${ids.join('\n  ')}`)

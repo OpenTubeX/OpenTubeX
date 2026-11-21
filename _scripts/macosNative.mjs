@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { copyFile, mkdir } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
@@ -9,7 +10,14 @@ const root = fileURLToPath(new URL('../', import.meta.url))
 export async function prepareMacosNative(arch = process.arch, outputDirectory = 'dist') {
   const require = createRequire(import.meta.url)
   const directory = path.join(root, '_scripts/macos-native')
-  const result = spawnSync(process.execPath, [require.resolve('node-gyp/bin/node-gyp.js'), 'rebuild', `--arch=${arch}`], {
+  const nodeDir = path.dirname(path.dirname(process.execPath))
+  const args = [require.resolve('node-gyp/bin/node-gyp.js'), 'rebuild', `--arch=${arch}`]
+  // Use the local Node headers when present so builds do not fail on transient
+  // nodejs.org timeouts.
+  if (existsSync(path.join(nodeDir, 'include/node/node_api.h'))) {
+    args.push(`--nodedir=${nodeDir}`)
+  }
+  const result = spawnSync(process.execPath, args, {
     cwd: directory,
     stdio: 'inherit'
   })
