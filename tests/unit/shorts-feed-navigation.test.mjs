@@ -17,8 +17,6 @@ globalThis.window = {
 }
 globalThis.document = {
   documentElement: { dataset: { reducedMotion: 'reduce' } },
-  expandedPlayer: null,
-  querySelector() { return this.expandedPlayer },
   ...recordListeners(listeners.document),
 }
 const frames = []
@@ -53,6 +51,8 @@ function viewportFixture() {
     animations,
     getBoundingClientRect: () => ({ height: 600 }),
     querySelectorAll: () => [surface('videoPlayer'), surface('shortsSwipePreview')],
+    expandedPlayer: null,
+    querySelector() { return this.expandedPlayer },
   }
 }
 
@@ -112,7 +112,6 @@ function pointer(type, clientY, overrides = {}) {
 test.beforeEach(t => {
   t.mock.timers.enable({ apis: ['Date'], now: 1_000_000 })
   window.scrollY = 0
-  frames.length = 0
 })
 
 test('opens the neighboring Short with a transition preview and briefly ignores repeats', t => {
@@ -228,18 +227,37 @@ test('scrolling the document down advances once and resets the scroll range', ()
 })
 
 test('document scrolling behind a fullscreen or full window player does not navigate', () => {
+  const { navigation, opened, viewport } = fixture()
+  navigation.addListeners()
+  const scroll = listeners.window.get('scroll').listener
+  // Clicking a control in the player's overlay can scroll the hidden document,
+  // also by less than the navigation threshold.
+  viewport.expandedPlayer = {}
+  window.scrollY = 2
+  scroll()
+  assert.equal(window.scrollY, 0, 'resets the document')
+  scroll()
+  window.scrollY = 40
+  scroll()
+  viewport.expandedPlayer = null
+  assert.deepEqual(opened, [])
+  assert.equal(window.scrollY, 0)
+  navigation.removeListeners()
+})
+
+test('a scroll that arrives before the reset scroll event still navigates', () => {
   const { navigation, opened } = fixture()
   navigation.addListeners()
   const scroll = listeners.window.get('scroll').listener
-  // Clicking a control in the player's overlay can scroll the hidden document.
-  document.expandedPlayer = {}
-  window.scrollY = 4
+  window.scrollY = 40
   scroll()
-  document.expandedPlayer = null
-  assert.deepEqual(opened, [])
-  assert.equal(window.scrollY, 0, 'resets the document')
+  assert.deepEqual(opened, ['next'])
+  assert.equal(navigation.scrollResetPending, true)
+  navigation.lockedUntil = 0
+  // The reset event coalesced with a new movement down.
+  window.scrollY = 30
   scroll()
-  assert.deepEqual(opened, [], 'the reset does not navigate either')
+  assert.equal(opened.length, 2)
   navigation.removeListeners()
 })
 

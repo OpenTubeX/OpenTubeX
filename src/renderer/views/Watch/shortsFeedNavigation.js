@@ -92,7 +92,20 @@ export function createShortsFeedNavigation({
 
     if (scrollResetPending) {
       scrollResetPending = false
+      // Another movement can arrive before the reset's own scroll event;
+      // measure it from the top the reset moved to.
+      lastWindowScrollY = 0
+      if (scrollY === 0) {
+        return
+      }
+    }
+
+    // A fullscreen or full window player hides the page and its scrollbar,
+    // so the document only scrolls when the browser brings a focused or
+    // clicked control in the player's overlay into view.
+    if (getViewport()?.querySelector(EXPANDED_PLAYER_SELECTOR)) {
       lastWindowScrollY = scrollY
+      resetDocumentScroll()
       return
     }
 
@@ -103,17 +116,6 @@ export function createShortsFeedNavigation({
 
     const movedDown = scrollY > lastWindowScrollY
     lastWindowScrollY = scrollY
-
-    // A fullscreen or full window player hides the page and its scrollbar,
-    // so the document only scrolls when the browser brings a focused or
-    // clicked control in the player's overlay into view.
-    if (document.querySelector(EXPANDED_PLAYER_SELECTOR)) {
-      if (scrollY !== 0) {
-        scrollResetPending = true
-        window.scrollTo({ top: 0 })
-      }
-      return
-    }
 
     // The document starts at its upper boundary, so native document
     // scrolling can only intentionally advance the feed. A decrease is our
@@ -129,6 +131,10 @@ export function createShortsFeedNavigation({
     // so the page scrollbar and middle-button autoscroll can navigate. Reset
     // it after interpreting the movement; otherwise the next movement at the
     // end of the range cannot emit another scroll event.
+    resetDocumentScroll()
+  }
+
+  function resetDocumentScroll() {
     if (window.scrollY !== 0) {
       scrollResetPending = true
       window.scrollTo({ top: 0 })
