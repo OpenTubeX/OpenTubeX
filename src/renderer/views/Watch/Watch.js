@@ -576,6 +576,7 @@ export default defineComponent({
       queuedPlaybackVideoId: null,
       // The video whose queued copy was last looked for when it started playing
       queueCheckedVideoId: null,
+      openedFromQueue: false,
       playNextCountDownIntervalId: null,
       autoplayCountdown: null,
       waitingForPlaylistContinuation: false,
@@ -1772,6 +1773,7 @@ export default defineComponent({
       openShort: this.openSubscriptionShort,
     })
     this.videoId = this.tabRoute.params.id
+    this.takePlayedQueueVideo()
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
@@ -2778,6 +2780,7 @@ export default defineComponent({
         this.videoId = this.tabRoute.params.id
         const videoIdChanged = this.videoId !== previousVideoId
         if (videoIdChanged) {
+          this.takePlayedQueueVideo()
           this.watchedPlaylistVideoRemoval = null
           this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
@@ -6287,13 +6290,17 @@ export default defineComponent({
       if (this.queueCheckedVideoId === this.videoId) return
       this.queueCheckedVideoId = this.videoId
       // Played from the queue, so a following copy was queued to play it again.
-      // Only that video consumes the marker, as it may still be loading in another tab.
-      const playedFromQueue = this.$store.state.watchQueue.playedVideoIds.includes(this.videoId)
-      if (playedFromQueue) this.$store.commit('consumePlayedQueueVideoId', this.videoId)
+      if (this.openedFromQueue) return
       const nextVideo = this.nextQueuedVideo
-      if (!playedFromQueue && nextVideo?.videoId === this.videoId) {
+      if (nextVideo?.videoId === this.videoId) {
         this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
       }
+    },
+
+    takePlayedQueueVideo: function () {
+      this.openedFromQueue = this.$store.state.watchQueue.playedVideoId === this.videoId
+      // Queue selections open their page right away, so an older one never opened a Watch page.
+      this.$store.commit('setPlayedQueueVideoId', null)
     },
 
     playNextQueuedVideo: function () {
@@ -6313,7 +6320,7 @@ export default defineComponent({
       } else {
         this.queuedPlaybackVideoId = nextVideo.videoId
         // Other media plays on its own page.
-        if (nextFullPath.startsWith('/watch/')) this.$store.commit('addPlayedQueueVideoId', nextVideo.videoId)
+        if (nextFullPath.startsWith('/watch/')) this.$store.commit('setPlayedQueueVideoId', nextVideo.videoId)
         else requestQueuedPlayback(this.tabId, nextFullPath)
         this.tabRouter.push(route)
       }

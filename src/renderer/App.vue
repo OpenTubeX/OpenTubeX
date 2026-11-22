@@ -2831,7 +2831,7 @@ const commandPaletteVideoSources = computed(() => ({
     const videoId = store.getters.getWatchQueue.find(item => item.queueItemId === id)?.videoId
     store.commit('removeVideoFromWatchQueue', id)
     // The command palette removes a queued video to play it
-    if (videoId) store.commit('addPlayedQueueVideoId', videoId)
+    if (videoId) store.commit('setPlayedQueueVideoId', videoId)
   },
 }))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
@@ -2929,6 +2929,8 @@ function playQueuedVideoFromCommandPalette(location) {
     return `${url.pathname}${url.search}${url.hash}`
   }
   if (currentRoute && withoutTimestamp(router.resolve(location).fullPath) === withoutTimestamp(currentRoute.fullPath)) {
+    // No Watch page loads to take the marker, and the current video was already checked.
+    store.commit('setPlayedQueueVideoId', null)
     const mediaTabId = usesLogicalTabs ? presentedTabId.value : 'web'
     tabMediaCoordinator.dispatchAction('seekto', { seekTime: 0 }, mediaTabId)
     tabMediaCoordinator.dispatchAction('play', {}, mediaTabId)

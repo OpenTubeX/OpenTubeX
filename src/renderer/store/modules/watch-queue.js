@@ -144,19 +144,15 @@ export function persistWatchQueue(store, storage, sharedQueue) {
 export default {
   state: () => ({
     ...createWatchQueueState(),
-    // Videos this window played from the queue, until their Watch pages start playing them.
+    // The video this window last opened from the queue, until a Watch page loads.
     // Not shared with other windows.
-    playedVideoIds: []
+    playedVideoId: null
   }),
   getters: watchQueueGetters,
   mutations: {
     ...watchQueueMutations,
-    addPlayedQueueVideoId(state, videoId) {
-      state.playedVideoIds.push(videoId)
-    },
-    consumePlayedQueueVideoId(state, videoId) {
-      const index = state.playedVideoIds.indexOf(videoId)
-      if (index !== -1) state.playedVideoIds.splice(index, 1)
+    setPlayedQueueVideoId(state, videoId) {
+      state.playedVideoId = videoId
     }
   },
   actions: {
