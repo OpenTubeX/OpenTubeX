@@ -2,7 +2,11 @@ import { test, expect } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const now = Date.now()
-const history = Array.from({ length: 3 }, (_, index) => ({
+// One card only: each worker's Xvfb parks the real pointer at the screen
+// center, which rests on the info line of a third grid card. A layout shift
+// there could put its channel link under the pointer and preload the Channel
+// code before a test blocks or watches for it.
+const history = Array.from({ length: 1 }, (_, index) => ({
   _id: index === 0 ? 'jNQXAC9IVRw' : `routePreload${index}`,
   videoId: index === 0 ? 'jNQXAC9IVRw' : `routePreload${index}`,
   title: `Route preload video ${index}`,
@@ -115,6 +119,7 @@ test('a route whose code failed to preload still opens on click', async ({ page 
       }, { capture: true, passive: true })
     }
   })
+  expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
   await link.hover()
   await failedRequest
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
