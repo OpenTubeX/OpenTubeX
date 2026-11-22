@@ -236,7 +236,12 @@ public class YtDlpDownloadsTest {
             JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri).put("concurrency", 2);
             JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "").put("isPlaylist", true)
                 .put("videoIds", new JSONArray(asList("aaaaaaaaaaa", "bbbbbbbbbbb")));
-            JSONArray args = new JSONArray(asList("--output", "%(autonumber)s.%(ext)s", server.url(), server.url() + "?second"));
+            // Like src/ytDlpArguments.js, each part names the video it works on.
+            JSONArray args = new JSONArray(asList("--output", "%(autonumber)s.%(ext)s", "--no-simulate", "--print",
+                "video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_index|)s\t%(playlist_count,n_entries|)s\t%(title)j",
+                server.url(), server.url() + "?second"));
+            List<JSONObject> published = new java.util.concurrent.CopyOnWriteArrayList<>();
+            queue.observe(published::add);
             long id = queue.add(payload, args, config, -1, 2).getLong("id");
             JSONObject single = new JSONObject().put("mode", "video").put("videoId", "___________");
             long next = queue.add(single, new JSONArray(asList("--output", "single.%(ext)s", server.url())), config, -1).getLong("id");
@@ -250,6 +255,16 @@ public class YtDlpDownloadsTest {
             assertNotNull(completed);
             assertEquals(completed.toString(), "completed", completed.getString("status"));
             assertEquals("Each part must keep its own autonumber", 2, completed.getJSONArray("files").length());
+            boolean listedVideos = false;
+            for (JSONObject record : published) {
+                JSONArray videos = record.optJSONArray("activeVideos");
+                for (int i = 0; videos != null && i < videos.length(); i++) {
+                    listedVideos = true;
+                    assertFalse(record.toString(), videos.getJSONObject(i).getString("title").isEmpty());
+                }
+            }
+            assertTrue("Split playlists must list the video of each running part", listedVideos);
+            assertFalse("Finished downloads must not list running videos", completed.has("activeVideos"));
             assertEquals(2, folder.listFiles().length);
             assertEquals("Finished parts must free their slots", asList(next), queue.claim());
         } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
