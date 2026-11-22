@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: 所有平台
     Followed Channels: 在其他平台上追隨的頻道
     Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble、Odysee 和 media.ccc.de 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
+    Platform Description: 追隨 {platform} 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
     Add Channel: 新增頻道
     Search Or Paste Channel: 搜尋或貼上頻道網址
     Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble、Odysee 或 media.ccc.de 上頻道頁面的網址。
     Channel Not Found: 這個網址沒有頻道。
     Channel Already Followed: 您已追隨這個頻道。
     Channel Could Not Be Loaded: 無法載入頻道。
-    No Channels: 您尚未追隨其他平台上的任何頻道。
+    No Platform Channels: 您尚未追隨 {platform} 上的任何頻道。
     Unfollow Channel: 取消追隨 {channel}
     Go To Channel: 前往 {channel}
     Follow: 追隨

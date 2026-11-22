@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: Plataforma guztiak
     Followed Channels: Beste plataformetan jarraitutako kanalak
     Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble, Odysee eta media.ccc.de plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
+    Platform Description: Jarraitu {platform} plataformako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
     Add Channel: Gehitu kanala
     Search Or Paste Channel: Bilatu edo itsatsi kanal baten helbidea
     Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble, Odysee edo media.ccc.de plataformako kanal-orri baten helbidea.
     Channel Not Found: Ez dago kanalik helbide honetan.
     Channel Already Followed: Dagoeneko jarraitzen diozu kanal honi.
     Channel Could Not Be Loaded: Ezin izan da kanala kargatu.
-    No Channels: Oraindik ez diozu beste plataformetako kanalik jarraitzen.
+    No Platform Channels: Oraindik ez diozu {platform} plataformako kanalik jarraitzen.
     Unfollow Channel: Utzi {channel} jarraitzeari
     Go To Channel: Joan {channel} kanalera
     Follow: Jarraitu

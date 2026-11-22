@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: Alle plattformer
     Followed Channels: Fulgte kanaler på andre plattformer
     Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble, Odysee og media.ccc.de for å se opplastingene deres i Plattformer-fanen i abonnementene dine. Finn kanaler med søket, eller legg dem til med adressen til siden deres. Mediene deres spilles av med yt-dlp.
+    Platform Description: Følg kanaler på {platform} for å se opplastingene deres i Plattformer-fanen i abonnementene dine. Finn kanaler med søket, eller legg dem til med adressen til siden deres. Mediene deres spilles av med yt-dlp.
     Add Channel: Legg til kanal
     Search Or Paste Channel: Søk, eller lim inn en kanaladresse
     Invalid Channel: Skriv inn adressen til en kanalside på Twitch, SoundCloud, PeerTube, Rumble, Odysee eller media.ccc.de.
     Channel Not Found: Det finnes ingen kanal på denne adressen.
     Channel Already Followed: Du følger allerede denne kanalen.
     Channel Could Not Be Loaded: Kunne ikke laste inn kanalen.
-    No Channels: Du følger ingen kanaler på andre plattformer ennå.
+    No Platform Channels: Du følger ingen kanaler på {platform} ennå.
     Unfollow Channel: Slutt å følge {channel}
     Go To Channel: Gå til {channel}
     Follow: Følg

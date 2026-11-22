@@ -304,13 +304,14 @@ Subscriptions:
     All Platforms: تمام پلیٹ فارمز
     Followed Channels: دیگر پلیٹ فارمز پر فالو کیے گئے چینلز
     Description: Twitch، SoundCloud، PeerTube، Rumble، Odysee اور media.ccc.de پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
+    Platform Description: '{platform} پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔'
     Add Channel: چینل شامل کریں
     Search Or Paste Channel: تلاش کریں یا کسی چینل کا پتا چسپاں کریں
     Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble، Odysee یا media.ccc.de پر کسی چینل صفحے کا پتا درج کریں۔
     Channel Not Found: اس پتے پر کوئی چینل نہیں ہے۔
     Channel Already Followed: آپ پہلے ہی اس چینل کو فالو کر رہے ہیں۔
     Channel Could Not Be Loaded: چینل لوڈ نہیں ہو سکا۔
-    No Channels: آپ ابھی تک دیگر پلیٹ فارمز پر کسی چینل کو فالو نہیں کرتے۔
+    No Platform Channels: آپ ابھی تک {platform} پر کسی چینل کو فالو نہیں کرتے۔
     Unfollow Channel: '{channel} کو ان فالو کریں'
     Go To Channel: '{channel} پر جائیں'
     Follow: فالو کریں

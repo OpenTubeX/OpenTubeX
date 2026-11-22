@@ -269,13 +269,14 @@ Subscriptions:
     All Platforms: Alle platforms
     Followed Channels: Gevolgde kanalen op andere platforms
     Description: Volg kanalen op Twitch, SoundCloud, PeerTube, Rumble, Odysee en media.ccc.de om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
+    Platform Description: Volg kanalen op {platform} om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
     Add Channel: Kanaal toevoegen
     Search Or Paste Channel: Zoek of plak een kanaaladres
     Invalid Channel: Voer het adres in van een kanaalpagina op Twitch, SoundCloud, PeerTube, Rumble, Odysee of media.ccc.de.
     Channel Not Found: Er is geen kanaal op dit adres.
     Channel Already Followed: Je volgt dit kanaal al.
     Channel Could Not Be Loaded: Het kanaal kon niet worden geladen.
-    No Channels: Je volgt nog geen kanalen op andere platforms.
+    No Platform Channels: Je volgt nog geen kanalen op {platform}.
     Unfollow Channel: '{channel} ontvolgen'
     Go To Channel: '{channel} openen'
     Follow: Volgen
