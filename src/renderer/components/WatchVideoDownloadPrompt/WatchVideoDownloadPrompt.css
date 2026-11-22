@@ -175,6 +175,11 @@
   position: relative;
 }
 
+.videoSelectionContent {
+  /* Keeps the list's margins inside the measured content */
+  display: flow-root;
+}
+
 .videoSelectionList {
   margin-block-start: 0;
 }

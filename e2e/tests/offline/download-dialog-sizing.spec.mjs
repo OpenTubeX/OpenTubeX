@@ -118,4 +118,44 @@ test.describe('download dialog sizing', { tag: '@scale' }, () => {
       await expectFixedSections(prompt)
     }
   })
+
+  test.describe('video selection', () => {
+    test.use({
+      seed: {
+        settings: { baseTheme: 'dark' },
+        playlists: [{
+          _id: 'download-selection-sizing',
+          playlistName: 'Download selection playlist',
+          description: '',
+          protected: false,
+          createdAt: 1700000000000,
+          lastUpdatedAt: 1700000000000,
+          videos: Array.from({ length: 30 }, (_, index) => ({
+            videoId: `video-${String(index).padStart(5, '0')}`,
+            title: `A long video title that wraps onto a second line in narrow dialogs ${index + 1}`,
+            author: 'Channel',
+            lengthSeconds: 120
+          }))
+        }]
+      }
+    })
+
+    test('clamps the video list when wrapped titles unwrap', async ({ page }) => {
+      await goTo(page, 'userplaylists')
+      await page.getByRole('link', { name: 'Download selection playlist', exact: true }).click()
+      await page.setViewportSize({ width: 375, height: 812 })
+      await page.getByTitle('Download Playlist').click()
+      const selection = page.locator('.downloadPromptCard .videoSelection')
+      await selection.locator('summary').click()
+      const list = selection.locator('.videoSelectionScroller')
+      await scrollToBottom(list)
+
+      // Widening unwraps the titles, which shortens the list
+      const wrappedHeight = await list.evaluate(element => element.scrollHeight)
+      await page.setViewportSize({ width: 1100, height: 812 })
+      await expect.poll(() => list.evaluate(element => element.scrollHeight)).toBeLessThan(wrappedHeight)
+      await expectScrollAtRenderedEnd(list)
+      await expectScrollbarMatchesOverflow(list)
+    })
+  })
 })

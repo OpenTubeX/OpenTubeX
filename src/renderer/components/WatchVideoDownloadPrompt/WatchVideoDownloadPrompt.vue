@@ -76,15 +76,21 @@
                 :indeterminate-values="partialVideoSelection && selectedVideos.length > 0 ? ['all'] : []"
               />
               <div
+                ref="videoSelectionScroller"
                 v-overlay-scrollbars
                 class="videoSelectionScroller"
               >
-                <FtCheckboxList
-                  v-model="selectedVideoPositions"
-                  class="videoSelectionList"
-                  :labels="selectableVideos.map(video => `${video.position}. ${video.title || video.videoId}`)"
-                  :values="selectableVideos.map(video => video.position)"
-                />
+                <div
+                  ref="videoSelectionContent"
+                  class="videoSelectionContent"
+                >
+                  <FtCheckboxList
+                    v-model="selectedVideoPositions"
+                    class="videoSelectionList"
+                    :labels="selectableVideos.map(video => `${video.position}. ${video.title || video.videoId}`)"
+                    :values="selectableVideos.map(video => video.position)"
+                  />
+                </div>
               </div>
               <p
                 v-if="videosLoading"
@@ -497,6 +503,8 @@ const optionsScroller = useTemplateRef('optionsScroller')
 const optionsContent = useTemplateRef('optionsContent')
 useScrollClamp(optionsScroller, optionsContent)
 useScrollClamp(useTemplateRef('progressScroller'), useTemplateRef('progressContent'))
+// Titles unwrap when the dialog widens, which shortens the video list
+useScrollClamp(useTemplateRef('videoSelectionScroller'), useTemplateRef('videoSelectionContent'))
 const downloadLabel = computed(() => props.isPlaylist
   ? t('Downloads.Download Playlist')
   : t('Downloads.Download Video'))
