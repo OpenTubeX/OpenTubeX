@@ -182,7 +182,7 @@ for (const [name, route, expected] of [
     }
     assert.equal(playNext.call(watch), true)
     assert.deepEqual(JSON.parse(JSON.stringify(navigations)), [route ?? expected])
-    assert.deepEqual(removed, [['removeVideoFromWatchQueue', 1]])
+    assert.deepEqual(removed, [['removeVideoFromWatchQueue', 1], ['setPlayedQueueVideoId', videoId]])
   })
 }
 
@@ -312,7 +312,7 @@ for (const timestamp of ['', '&timestamp=0.25']) {
       $refs: { player: { setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) } },
     }
     assert.equal(watch.playNextQueuedVideo(), true)
-    assert.deepEqual(actions, [['removeVideoFromWatchQueue', 1], ['seek', 0], ['play']])
+    assert.deepEqual(actions, [['removeVideoFromWatchQueue', 1], ['setPlayedQueueVideoId', 'saved'], ['seek', 0], ['play']])
   })
 }
 

@@ -6287,8 +6287,8 @@ export default defineComponent({
       if (this.queueCheckedVideoId === this.videoId) return
       this.queueCheckedVideoId = this.videoId
       // Played from the queue, so a following copy was queued to play it again
-      const playedFromQueue = this.$store.state.watchQueue.removedVideoId === this.videoId
-      this.$store.commit('clearRemovedQueueVideoId')
+      const playedFromQueue = this.$store.state.watchQueue.playedVideoId === this.videoId
+      this.$store.commit('setPlayedQueueVideoId', null)
       const nextVideo = this.nextQueuedVideo
       if (!playedFromQueue && nextVideo?.videoId === this.videoId) {
         this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
@@ -6302,6 +6302,7 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
+      this.$store.commit('setPlayedQueueVideoId', nextVideo.videoId)
       const route = nextVideo.route ?? this.watchRouteForVideo(nextVideo)
       const nextFullPath = this.tabRouter.resolve(route).fullPath
       if (

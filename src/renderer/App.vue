@@ -2827,7 +2827,12 @@ const commandPaletteVideoSources = computed(() => ({
   playLibraryVideo: playLibraryVideoFromCommandPalette,
   playDownloadedVideo: playDownloadedVideoFromCommandPalette,
   playQueuedVideo: playQueuedVideoFromCommandPalette,
-  removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
+  removeQueuedVideo: id => {
+    const videoId = store.getters.getWatchQueue.find(item => item.queueItemId === id)?.videoId ?? null
+    store.commit('removeVideoFromWatchQueue', id)
+    // The command palette removes a queued video to play it
+    store.commit('setPlayedQueueVideoId', videoId)
+  },
 }))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,

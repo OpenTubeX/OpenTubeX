@@ -144,19 +144,15 @@ export function persistWatchQueue(store, storage, sharedQueue) {
 export default {
   state: () => ({
     ...createWatchQueueState(),
-    // The video of the item this window last removed, which is the one it plays
-    // when the item was played from the queue. Not shared with other windows.
-    removedVideoId: null
+    // The video this window last played from the queue, until it starts playing.
+    // Not shared with other windows.
+    playedVideoId: null
   }),
   getters: watchQueueGetters,
   mutations: {
     ...watchQueueMutations,
-    removeVideoFromWatchQueue(state, queueItemId) {
-      state.removedVideoId = state.items.find(item => item.queueItemId === queueItemId)?.videoId ?? null
-      watchQueueMutations.removeVideoFromWatchQueue(state, queueItemId)
-    },
-    clearRemovedQueueVideoId(state) {
-      state.removedVideoId = null
+    setPlayedQueueVideoId(state, videoId) {
+      state.playedVideoId = videoId
     }
   },
   actions: {
