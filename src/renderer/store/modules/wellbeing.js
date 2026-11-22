@@ -1,4 +1,5 @@
 import { BREAK_RESET_GAP_MS, localDateKey } from '../../helpers/digitalWellbeing.js'
+import { generateRandomUniqueId } from '../../helpers/playlists.js'
 
 const STORAGE_KEY = 'OpenTubeX/digitalWellbeing'
 
@@ -83,8 +84,9 @@ function createDay(date, saved = {}) {
 const saved = loadSaved()
 
 const state = {
-  // Identifies this window's time to the other windows
-  windowId: crypto.randomUUID(),
+  // Identifies this window's time to the other windows. Plain http:// addresses lack
+  // crypto.randomUUID, and failing here would hide the startup error that explains them.
+  windowId: generateRandomUniqueId(),
   // When the watch statistics were last cleared, from the reset marker that every window
   // shares, so windows can tell time from before a clear without comparing their clocks
   resetAt: Number.isFinite(saved.resetAt) ? saved.resetAt : 0,
