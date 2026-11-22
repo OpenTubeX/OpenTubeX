@@ -6286,8 +6286,11 @@ export default defineComponent({
     dropQueuedCopyOfCurrentVideo: function () {
       if (this.queueCheckedVideoId === this.videoId) return
       this.queueCheckedVideoId = this.videoId
+      // Played from the queue, so a following copy was queued to play it again
+      const playedFromQueue = this.$store.state.watchQueue.removedVideoId === this.videoId
+      this.$store.commit('clearRemovedQueueVideoId')
       const nextVideo = this.nextQueuedVideo
-      if (nextVideo?.videoId === this.videoId) {
+      if (!playedFromQueue && nextVideo?.videoId === this.videoId) {
         this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
       }
     },
