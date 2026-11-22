@@ -577,6 +577,12 @@ export default defineComponent({
       // The video whose queued copy was last looked for when it started playing
       queueCheckedVideoId: null,
       openedFromQueue: false,
+      /**
+       * The playlist video to continue with once the watch queue, which interrupted
+       * the playlist, has played its videos
+       * @type {{ route: object, queuedPath: string } | null}
+       */
+      playlistAfterQueue: null,
       playNextCountDownIntervalId: null,
       autoplayCountdown: null,
       waitingForPlaylistContinuation: false,
@@ -1240,7 +1246,14 @@ export default defineComponent({
     autoplayEnabled: function () {
       if (this.isStandaloneShort) { return false }
       if (this.nextQueuedVideo) { return true }
-      return this.watchingPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
+      return this.watchingPlaylist || this.returnsToPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
+    },
+    /**
+     * Whether a queued video plays that interrupted a playlist, which continues after it,
+     * even when the queued video opened with a playlist of its own
+     */
+    returnsToPlaylist: function () {
+      return this.playlistAfterQueue !== null
     },
     nextQueuedVideo: function () {
       return this.$store.getters.getNextQueuedVideo
@@ -1365,7 +1378,7 @@ export default defineComponent({
       // The watch queue takes precedence over the playlist and works without one,
       // see `handleSkipToNext`. Outside a playlist, the buttons and media controls
       // only offer the recommended video while autoplay would play it anyway.
-      if (this.nextQueuedVideo) return true
+      if (this.nextQueuedVideo || this.returnsToPlaylist) return true
       if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayNext
       return this.autoplaysRecommendedVideos && !this.hideRecommendedVideos && !!this.nextRecommendedVideo
     },
@@ -1393,7 +1406,7 @@ export default defineComponent({
     },
     autoplayPossible: function () {
       return !this.isStandaloneShort && (
-        !!this.nextQueuedVideo ||
+        !!this.nextQueuedVideo || this.returnsToPlaylist ||
         (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
         (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
       )
@@ -2742,6 +2755,12 @@ export default defineComponent({
         this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       }
       if (this.queuedPlaybackVideoId !== requestedVideoId) this.queuedPlaybackVideoId = null
+      // Opening anything but the route the queue opened, even the same video from
+      // another playlist, leaves the interrupted playlist behind. Before the first
+      // await, so a skip during the load cannot go back to it.
+      if (this.playlistAfterQueue && this.playlistAfterQueue.queuedPath !== this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)) {
+        this.playlistAfterQueue = null
+      }
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
@@ -6171,6 +6190,10 @@ export default defineComponent({
         return false
       }
 
+      if (this.returnToPlaylistAfterQueue()) {
+        return true
+      }
+
       if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.isWaitingForNextVideo) {
         this.waitingForPlaylistContinuation = true
         return true
@@ -6271,7 +6294,7 @@ export default defineComponent({
     // Skip to the next video if in a playlist
     // else next recommended video if autoplay enabled
     handleSkipToNext: function () {
-      if (this.playNextQueuedVideo()) {
+      if (this.playNextQueuedVideo() || this.returnToPlaylistAfterQueue(false)) {
         return
       }
       if (this.watchingPlaylist) {
@@ -6318,12 +6341,35 @@ export default defineComponent({
       ) {
         this.restartCurrentVideo()
       } else {
+        // The playlist continues after the queue, from where the queue interrupted it.
+        const queuedPath = this.watchRouteWithoutTimestamp(nextFullPath)
+        if (this.playlistAfterQueue) {
+          this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedPath }
+        } else if (this.watchingPlaylist) {
+          const playlistRoute = this.$refs.watchVideoPlaylist?.getNextVideoRoute() ?? null
+          this.playlistAfterQueue = playlistRoute && { route: playlistRoute, queuedPath }
+        }
         this.queuedPlaybackVideoId = nextVideo.videoId
         // Other media plays on its own page.
         if (nextFullPath.startsWith('/watch/')) this.$store.commit('setPlayedQueueVideoId', nextVideo.videoId)
         else requestQueuedPlayback(this.tabId, nextFullPath)
         this.tabRouter.push(route)
       }
+      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+      return true
+    },
+
+    /**
+     * @param {boolean} [autoplay] whether to start the video, which manual skips leave
+     * to Start Videos Automatically like other playlist skips
+     * @returns {boolean} whether it went back to the playlist the watch queue interrupted
+     */
+    returnToPlaylistAfterQueue: function (autoplay = true) {
+      if (!this.returnsToPlaylist) return false
+      const { route } = this.playlistAfterQueue
+      this.playlistAfterQueue = null
+      if (autoplay) this.queuedPlaybackVideoId = route.path.slice('/watch/'.length)
+      this.tabRouter.push(route)
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
     },
@@ -7666,7 +7712,7 @@ export default defineComponent({
         this.abortAutoplayCountdown()
       }
 
-      if (this.watchingPlaylist) {
+      if (this.watchingPlaylist || this.returnsToPlaylist) {
         this.autoplayNextPlaylistVideo = !this.autoplayEnabled
       } else {
         this.autoplayNextRecommendedVideo = !this.autoplayEnabled

@@ -1057,16 +1057,7 @@ function playNextVideo({ autoplay = false } = {}) {
     return null
   }
 
-  const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
-  const routerPushPayload = {
-    path: `/watch/${targetPlaylistItem.videoId}`,
-    query: {
-      playlistId: props.playlistId,
-      playlistType: props.playlistType,
-      playlistItemId: targetPlaylistItem.playlistItemId,
-      ...(downloadId ? { downloadId } : {})
-    }
-  }
+  const routerPushPayload = playlistItemRoute(targetPlaylistItem)
 
   // Looping a single-item playlist can keep the current route, where a push loads
   // nothing. The watch view also ignores a change that only drops the timestamp.
@@ -1107,6 +1098,25 @@ function playNextVideo({ autoplay = false } = {}) {
   return staysOnRoute ? null : targetPlaylistItem.videoId
 }
 
+/** @param {{ videoId: string, playlistItemId?: string }} item */
+function playlistItemRoute(item) {
+  const downloadId = navigationDownloadId(store.getters, item.videoId, props.downloadId)
+  return {
+    path: `/watch/${item.videoId}`,
+    query: {
+      playlistId: props.playlistId,
+      playlistType: props.playlistType,
+      playlistItemId: item.playlistItemId,
+      ...(downloadId ? { downloadId } : {})
+    }
+  }
+}
+
+/** Where autoplay would continue after the current video, or null at the end of the playlist */
+function getNextVideoRoute() {
+  return shouldStopDueToPlaylistEnd.value || !nextVideo.value?.videoId ? null : playlistItemRoute(nextVideo.value)
+}
+
 function playPreviousVideo() {
   if (currentVideoMayBeUnloaded.value) return
   // At the start of the playlist there is nothing to go back to, unless loop wraps us around
@@ -1130,18 +1140,7 @@ function playPreviousVideo() {
 
   showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
 
-  const downloadId = navigationDownloadId(store.getters, targetPlaylistItem.videoId, props.downloadId)
-  router.push(
-    {
-      path: `/watch/${targetPlaylistItem.videoId}`,
-      query: {
-        playlistId: props.playlistId,
-        playlistType: props.playlistType,
-        playlistItemId: targetPlaylistItem.playlistItemId,
-        ...(downloadId ? { downloadId } : {})
-      }
-    }
-  )
+  router.push(playlistItemRoute(targetPlaylistItem))
 }
 
 /**
@@ -1843,6 +1842,7 @@ defineExpose({
   restoreScrollPosition,
   setScrollTop,
   playNextVideo,
+  getNextVideoRoute,
   resetUnavailableSkipChain,
   playPreviousVideo,
   nextVideo,
