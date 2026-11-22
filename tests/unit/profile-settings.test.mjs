@@ -17,7 +17,7 @@ test('profile settings IDs name exactly one profile, also when the server sends 
     assert.equal(profileIdFromSettingsId(profileSettingsId(profileId)), profileId)
   }
   const car = profileSettingsId('car')
-  for (const key of [car.toUpperCase(), `${car}0`, `${car}zz`, 'profileSettings.', `profileSettings.${Buffer.from(MAIN_PROFILE_ID).toString('hex')}`, 'uiScale']) {
+  for (const key of [car.toUpperCase(), `${car}0`, `${car}zz`, 'profileSettings-', `profileSettings-${Buffer.from(MAIN_PROFILE_ID).toString('hex')}`, 'uiScale']) {
     assert.equal(profileIdFromSettingsId(key), null, key)
   }
   // Datastore records with other values hold no own settings.

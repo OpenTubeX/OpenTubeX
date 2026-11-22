@@ -5,11 +5,13 @@ import { NON_TRANSFERABLE_SETTINGS } from './nonTransferableSettings.js'
 
 /*
  * A profile can use its own settings instead of the shared ones. It saves only
- * the values that differ, in the setting `profileSettings.<hex profile ID>`,
+ * the values that differ, in the setting `profileSettings-<hex profile ID>`,
  * which also syncs under that key. Every other setting uses the shared value.
+ * The ID holds no dot, as it also names its edit time in
+ * `syncServerSettingUpdatedAt`, whose field names can't.
  */
 
-const PROFILE_SETTINGS_PREFIX = 'profileSettings.'
+const PROFILE_SETTINGS_PREFIX = 'profileSettings-'
 
 /**
  * Settings that stay the same in every profile. They describe this device,

@@ -21,9 +21,16 @@ h3 {
   margin-block-start: 24px;
 }
 
-.separateDataToggle {
+/* What the profile keeps separate, as one centered column with aligned switches */
+.sharingChoices {
+  display: flex;
+  flex-direction: column;
   margin-block-start: 12px;
-  justify-content: center;
+  margin-inline: auto;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 /* Start-aligned text keeps the icon beside every wrapped line; the narrower

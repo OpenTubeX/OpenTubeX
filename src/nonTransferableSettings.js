@@ -142,7 +142,7 @@ export function getTransferableSettings(settings) {
   // Profiles' own settings are saved under their profile, see `profileSettingsId`.
   const transferable = Object.fromEntries(Object.entries(settings)
     .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key) && !isSeparateProfileSeenMarksSetting(key) &&
-      !key.startsWith('profileSettings.')))
+      !key.startsWith('profileSettings-')))
   // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
   if (typeof transferable.defaultInvidiousInstance === 'string') {
     transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim()

@@ -76,34 +76,37 @@
               @input="profileName = $event"
               @keydown.enter="saveProfile"
             />
-            <FtToggleSwitch
-              v-if="isNew"
-              class="separateDataToggle"
-              :label="$t('Profile.Keep Data Separate')"
-              :tooltip="$t('Profile.Keep Data Separate Tooltip')"
-              compact
-              :default-value="keepDataSeparate"
-              @change="keepDataSeparate = $event"
-            />
-            <p
-              v-else-if="profile.separate === true"
-              class="separateDataNote"
+            <div
+              v-if="!isMainProfile"
+              class="sharingChoices"
             >
-              <FtIcon
-                :icon="['fas', 'user-lock']"
-                aria-hidden="true"
+              <FtToggleSwitch
+                v-if="isNew"
+                :label="$t('Profile.Keep Data Separate')"
+                :tooltip="$t('Profile.Keep Data Separate Tooltip')"
+                compact
+                :default-value="keepDataSeparate"
+                @change="keepDataSeparate = $event"
               />
-              {{ $t('Profile.Separate Profile Note') }}
-            </p>
-            <FtToggleSwitch
-              v-if="!isMainProfile && (isNew || canHaveOwnSettings(profileId))"
-              class="separateDataToggle"
-              :label="$t('Profile.Keep Settings Separate')"
-              :tooltip="$t('Profile.Keep Settings Separate Tooltip')"
-              compact
-              :default-value="keepSettingsSeparate"
-              @change="keepSettingsSeparate = $event"
-            />
+              <p
+                v-else-if="profile.separate === true"
+                class="separateDataNote"
+              >
+                <FtIcon
+                  :icon="['fas', 'user-lock']"
+                  aria-hidden="true"
+                />
+                {{ $t('Profile.Separate Profile Note') }}
+              </p>
+              <FtToggleSwitch
+                v-if="isNew || canHaveOwnSettings(profileId)"
+                :label="$t('Profile.Keep Settings Separate')"
+                :tooltip="$t('Profile.Keep Settings Separate Tooltip')"
+                compact
+                :default-value="keepSettingsSeparate"
+                @change="keepSettingsSeparate = $event"
+              />
+            </div>
             <h3 class="profileIconHeading">
               {{ $t("Profile.Profile Icon") }}
             </h3>

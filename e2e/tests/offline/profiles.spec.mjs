@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
@@ -434,6 +434,53 @@ test.describe('separate profile following a shared channel', () => {
       const latest = id => records.findLast(record => record._id === id)
       return [latest('allChannels').subscriptions.length, latest('e2eprofile').subscriptions.map(channel => channel.id)]
     }).toEqual([0, ['UCboth']])
+  })
+})
+
+test.describe('profile with its own settings', () => {
+  // The own settings of `e2eprofile`, by its ID's UTF-8 bytes as hex
+  const ownSettingsId = 'profileSettings-65326570726f66696c65'
+  test.use({
+    seed: {
+      settings: { defaultProfile: 'e2eprofile', hideComments: false, hideLiveChat: false, [ownSettingsId]: { hideComments: true } },
+      profiles: [mainProfile, { ...secondProfile, name: 'Car' }],
+    }
+  })
+
+  test('keeps its settings apart from the shared ones across profile switches', async ({ app, page }) => {
+    const effective = () => page.evaluate(() => [window.$store.getters.getHideComments, window.$store.getters.getHideLiveChat])
+    const saved = () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return [settings.hideComments, settings.hideLiveChat, settings[ownSettingsId]]
+    }
+    // As the default profile, it starts with its own values.
+    await expect.poll(effective).toEqual([true, false])
+
+    const distraction = await goToSettingsSection(page, 'distraction')
+    await expect(page.locator('.profileSettingsNotice')).toContainText('Car keeps its settings separate')
+    const hideComments = distraction.locator('[data-setting-key="hideComments"]')
+    const hideLiveChat = distraction.locator('[data-setting-key="hideLiveChat"]')
+    await expect(hideComments.getByRole('checkbox')).toBeChecked()
+    await expect(hideComments.locator('.profileSettingIndicator')).toBeVisible()
+    await expect(hideLiveChat.locator('.profileSettingIndicator')).toHaveCount(0)
+
+    // Changes while it is active only apply to it.
+    await hideLiveChat.locator('label.switch-label').click()
+    await expect(hideLiveChat.locator('.profileSettingIndicator')).toBeVisible()
+    await expect.poll(saved).toEqual([false, false, { hideComments: true, hideLiveChat: true }])
+
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await expect.poll(effective).toEqual([false, false])
+    await expect(page.locator('.profileSettingsNotice')).toHaveCount(0)
+    await expect(hideComments.getByRole('checkbox')).not.toBeChecked()
+    await expect(distraction.locator('.profileSettingIndicator')).toHaveCount(0)
+
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
+    await expect.poll(effective).toEqual([true, true])
+    await hideComments.locator('.profileSettingIndicator').click()
+    await expect.poll(effective).toEqual([false, true])
+    await expect(hideComments.locator('.profileSettingIndicator')).toHaveCount(0)
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
   })
 })
 
