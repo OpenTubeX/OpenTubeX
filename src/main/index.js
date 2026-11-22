@@ -2902,6 +2902,22 @@ function runApp() {
     }
   })
 
+  /** @param {unknown} baseTheme */
+  async function applyBaseTheme(baseTheme) {
+    if (typeof baseTheme !== 'string') return
+    if (isCustomThemeValue(baseTheme)) {
+      nativeTheme.themeSource = (await getSelectedCustomTheme(baseTheme))?.isDark ? 'dark' : 'light'
+    } else {
+      updateThemeSource(baseTheme)
+    }
+  }
+
+  // A profile with its own settings can show another base theme than the
+  // saved one, which native controls and the system color scheme follow.
+  onTrusted(IpcChannels.APPLY_PROFILE_BASE_THEME, (_, baseTheme) => {
+    applyBaseTheme(baseTheme).catch(error => console.error('Failed to apply the profile base theme', error))
+  })
+
   /** @param {{ _id: string, value: any }} data */
   async function applyUpdatedSetting(data) {
     switch (data._id) {
@@ -2966,11 +2982,7 @@ function runApp() {
         blurThumbnails = data.value === true
         break
       case 'baseTheme':
-        if (isCustomThemeValue(data.value)) {
-          nativeTheme.themeSource = (await getSelectedCustomTheme(data.value))?.isDark ? 'dark' : 'light'
-        } else {
-          updateThemeSource(data.value)
-        }
+        await applyBaseTheme(data.value)
         break
       case 'ytDlpMaxConcurrentDownloads':
       case 'ytDlpDownloadBandwidthLimit':

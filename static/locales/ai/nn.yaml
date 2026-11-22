@@ -1860,6 +1860,7 @@ Settings:
     Title: "Abonnementsfaner"
     Hint: "Endra rekkjefølgja på fanene på Abonnement-sida. Gøymde faner held på plassen sin til du viser dei att."
     Hidden: "(gøymd)"
+  Profile Setting: "Berre brukt av {profile}. Vel for å bruke den delte verdien i staden."
 Tutorial:
   Skip: Hopp over
   Next: Neste
@@ -1946,6 +1947,12 @@ Profile:
   Close Profile Dropdown: Lukk profilmenyen
   Open Profile Dropdown: Opna profilmenyen
   Go To Profile Manager: Gå til profilhandsaming
+  Keep Settings Separate: "Hald innstillingar skilde"
+  Keep Settings Separate Tooltip: "Gjev denne profilen eigne innstillingar, som i starten er dei same som dei delte innstillingane dine. Medan denne profilen er aktiv, gjeld endringar i Innstillingar berre for han. Innstillingar for denne eininga, som synkronisering, mellomtenar, tryggingskopiar og nedlastingsmapper, forblir delte."
+  Own Settings: "Eigne innstillingar"
+  Own Settings Notice: "{profile} held innstillingane sine skilde, så endringar her gjeld berre for han. Einingsinnstillingar, som synkronisering, mellomtenar og tryggingskopiar, forblir delte."
+  Use Shared Settings: "Bruk delte innstillingar"
+  Use Shared Settings Warning: "{profile} vil bruke dei delte innstillingane dine igjen, og innstillingane du endra for han, vert sletta."
 Channel:
   Hide Watched: Gøym sette
   All Videos Watched: "Du har sett alle desse videoane. Slå av «Gøym sette» for å visa dei."

@@ -318,10 +318,12 @@ const actions = {
     }
   },
 
-  async createProfile({ commit }, profile) {
+  // Takes the profile, with `ownSettings` to give it its own settings.
+  async createProfile({ commit, dispatch }, { ownSettings = false, ...profile }) {
     try {
       const newProfile = await DBProfileHandlers.create(profile)
       commit('addProfileToList', newProfile)
+      if (ownSettings) return await dispatch('setProfileOwnSettingsEnabled', { profileId: newProfile._id, enabled: true })
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -435,6 +437,8 @@ const actions = {
       const separate = getters.profileById(profileId)?.separate === true
       await DBProfileHandlers.delete(profileId)
       commit('removeProfileFromList', profileId)
+      // The datastore deleted its own settings too.
+      commit('setProfileOwnSettings', { profileId, settings: null })
       // The datastores delete the rest of its data. The profile is gone even
       // if its queue or statistics reset can't be deleted.
       if (separate) {

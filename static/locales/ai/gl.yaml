@@ -1716,6 +1716,7 @@ Settings:
     Title: "Lapelas de subscricións"
     Hint: "Cambia a orde das lapelas da páxina Subscricións. As lapelas ocultas conservan o seu lugar para cando as volvas mostrar."
     Hidden: "(oculta)"
+  Profile Setting: "Só o usa {profile}. Selecciona para usar o valor compartido."
 Tutorial:
   Skip: Omitir
   Next: Seguinte
@@ -1791,6 +1792,12 @@ Profile:
   The selected image could not be loaded: Non se puido cargar a imaxe seleccionada
   Theme Color: Cor do tema
   Go To Profile Manager: Ir ao xestor de perfís
+  Keep Settings Separate: "Manter a configuración separada"
+  Keep Settings Separate Tooltip: "Dálle a este perfil a súa propia configuración, que ao principio é igual á túa configuración compartida. Mentres este perfil estea activo, os cambios en Configuración só se aplican a el. A configuración deste dispositivo, como a sincronización, o proxy, as copias de seguranza e os cartafoles de descarga, segue compartida."
+  Own Settings: "Configuración propia"
+  Own Settings Notice: "{profile} mantén a súa configuración separada, así que os cambios aquí só se aplican a el. A configuración do dispositivo, como a sincronización, o proxy e as copias de seguranza, segue compartida."
+  Use Shared Settings: "Usar a configuración compartida"
+  Use Shared Settings Warning: "{profile} volverá usar a túa configuración compartida e eliminarase a configuración que cambiaches para el."
 Channel:
   Hide Watched: Agochar os vistos
   All Videos Watched: "Viches todos estes vídeos. Desactiva «Agochar os vistos» para mostralos."

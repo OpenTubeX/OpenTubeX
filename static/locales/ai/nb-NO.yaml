@@ -1684,6 +1684,7 @@ Settings:
     Title: "Abonnementsfaner"
     Hint: "Endre rekkefølgen på fanene på Abonnementer-siden. Skjulte faner beholder plassen sin til du viser dem igjen."
     Hidden: "(skjult)"
+  Profile Setting: "Brukes bare av {profile}. Velg for å bruke den delte verdien i stedet."
 Tutorial:
   Skip: Hopp over
   Next: Neste
@@ -1758,6 +1759,12 @@ Profile:
   Use Initial: Bruk forbokstav
   The selected image could not be loaded: Det valgte bildet kunne ikke lastes inn
   Theme Color: Temafarge
+  Keep Settings Separate: "Hold innstillinger atskilt"
+  Keep Settings Separate Tooltip: "Gir denne profilen egne innstillinger, som i begynnelsen er de samme som de delte innstillingene dine. Mens denne profilen er aktiv, gjelder endringer i Innstillinger bare for den. Innstillinger for denne enheten, som synkronisering, mellomtjener, sikkerhetskopier og nedlastingsmapper, forblir delte."
+  Own Settings: "Egne innstillinger"
+  Own Settings Notice: "{profile} holder innstillingene sine atskilt, så endringer her gjelder bare for den. Enhetsinnstillinger, som synkronisering, mellomtjener og sikkerhetskopier, forblir delte."
+  Use Shared Settings: "Bruk delte innstillinger"
+  Use Shared Settings Warning: "{profile} vil bruke de delte innstillingene dine igjen, og innstillingene du endret for den, slettes."
 Channel:
   Hide Watched: Skjul sette
   All Videos Watched: "Du har sett alle disse videoene. Slå av «Skjul sette» for å vise dem."

@@ -62,6 +62,8 @@ function fixture () {
     },
     isSettingSyncable: () => false,
     isSettingSyncEnabled: () => false,
+    profileSettingsPlugin: () => {},
+    sharedSettingValue: (settings, key) => settings[key],
     isRemoteSyncDispatch: () => false,
     historyChanges: createHistoryChangeTracker(),
     trackLocalSyncDeletions,

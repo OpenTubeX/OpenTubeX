@@ -1635,6 +1635,7 @@ Settings:
     Title: "Pestañas de suscripciones"
     Hint: "Cambia el orden de las pestañas de la página Suscripciones. Las pestañas ocultas conservan su lugar para cuando vuelvas a mostrarlas."
     Hidden: "(oculta)"
+  Profile Setting: "Solo la usa {profile}. Selecciona para usar el valor compartido."
 Tutorial:
   Skip: Omitir
   Next: Siguiente
@@ -1709,6 +1710,12 @@ Profile:
   Use Initial: Usar inicial
   The selected image could not be loaded: No se pudo cargar la imagen seleccionada
   Theme Color: Color del tema
+  Keep Settings Separate: "Mantener la configuración separada"
+  Keep Settings Separate Tooltip: "Da a este perfil su propia configuración, que al principio es igual a tu configuración compartida. Mientras este perfil esté activo, los cambios en Configuración solo se aplican a él. La configuración de este dispositivo, como la sincronización, el proxy, las copias de seguridad y las carpetas de descarga, sigue compartida."
+  Own Settings: "Configuración propia"
+  Own Settings Notice: "{profile} mantiene su configuración separada, así que los cambios aquí solo se aplican a él. La configuración del dispositivo, como la sincronización, el proxy y las copias de seguridad, sigue compartida."
+  Use Shared Settings: "Usar la configuración compartida"
+  Use Shared Settings Warning: "{profile} volverá a usar tu configuración compartida y se eliminará la configuración que cambiaste para él."
 Channel:
   Hide Watched: Ocultar vistos
   All Videos Watched: "Has visto todos estos vídeos. Desactiva «Ocultar vistos» para mostrarlos."

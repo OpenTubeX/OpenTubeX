@@ -1687,6 +1687,7 @@ Settings:
     Title: "Tilausten välilehdet"
     Hint: "Muuta Tilaukset-sivun välilehtien järjestystä. Piilotetut välilehdet säilyttävät paikkansa, kun näytät ne uudelleen."
     Hidden: "(piilotettu)"
+  Profile Setting: "Vain {profile} käyttää tätä. Valitse käyttääksesi jaettua arvoa."
 Tutorial:
   Skip: Ohita
   Next: Seuraava
@@ -1761,6 +1762,12 @@ Profile:
   Use Initial: Käytä alkukirjainta
   The selected image could not be loaded: Valittua kuvaa ei voitu ladata
   Theme Color: Teemaväri
+  Keep Settings Separate: "Pidä asetukset erillään"
+  Keep Settings Separate Tooltip: "Antaa tälle profiilille omat asetukset, jotka ovat aluksi samat kuin jaetut asetuksesi. Kun tämä profiili on käytössä, Asetuksiin tehdyt muutokset koskevat vain sitä. Tämän laitteen asetukset, kuten synkronointi, välityspalvelin, varmuuskopiot ja latauskansiot, pysyvät jaettuina."
+  Own Settings: "Omat asetukset"
+  Own Settings Notice: "{profile} pitää asetuksensa erillään, joten täällä tehdyt muutokset koskevat vain sitä. Laitteen asetukset, kuten synkronointi, välityspalvelin ja varmuuskopiot, pysyvät jaettuina."
+  Use Shared Settings: "Käytä jaettuja asetuksia"
+  Use Shared Settings Warning: "{profile} käyttää taas jaettuja asetuksiasi, ja sille muuttamasi asetukset poistetaan."
 Channel:
   Hide Watched: Piilota katsotut
   All Videos Watched: "Olet katsonut kaikki nämä videot. Näytä ne poistamalla ”Piilota katsotut” käytöstä."

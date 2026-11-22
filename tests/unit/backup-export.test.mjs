@@ -50,6 +50,7 @@ function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playl
     showBackupExport: { value: true },
     selectedExportSections: { value: sections },
     transferableSettings: { value: {} },
+    backupSettings: () => ({}),
     DBProfileHandlers: { find: read },
     // Writes still being serialized in this window are sent before the archive.
     DBPlaylistHandlers: { find: read, sent: () => sendWrites('playlist') },

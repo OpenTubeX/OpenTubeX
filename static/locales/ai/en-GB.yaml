@@ -1670,6 +1670,7 @@ Settings:
     Title: "Subscription tabs"
     Hint: "Change the order of the tabs on the Subscriptions page. Hidden tabs keep their place for when you show them again."
     Hidden: "(hidden)"
+  Profile Setting: "Only used by {profile}. Select to use the shared value instead."
 Tutorial:
   Skip: Skip
   Next: Next
@@ -1745,6 +1746,12 @@ Profile:
   The selected image could not be loaded: The selected image could not be loaded
   Theme Color: Theme Colour
   Go To Profile Manager: Go to Profile Manager
+  Keep Settings Separate: "Keep settings separate"
+  Keep Settings Separate Tooltip: "Gives this profile its own settings, which start out the same as your shared settings. While this profile is active, changes in Settings only apply to it. Settings of this device, such as sync, proxy, backups, and download folders, stay shared."
+  Own Settings: "Own settings"
+  Own Settings Notice: "{profile} keeps its settings separate, so changes here only apply to it. Device settings, such as sync, proxy, and backups, stay shared."
+  Use Shared Settings: "Use shared settings"
+  Use Shared Settings Warning: "{profile} will use your shared settings again, and the settings you changed for it will be deleted."
 Channel:
   Hide Watched: Hide Watched
   All Videos Watched: "You've watched all of these videos. Turn off Hide Watched to show them."

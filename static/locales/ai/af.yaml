@@ -1907,6 +1907,7 @@ Settings:
     Title: "Intekeningoortjies"
     Hint: "Verander die volgorde van die oortjies op die Intekeninge-bladsy. Versteekte oortjies behou hul plek vir wanneer jy hulle weer wys."
     Hidden: "(versteek)"
+  Profile Setting: "Word net deur {profile} gebruik. Kies om eerder die gedeelde waarde te gebruik."
 Tutorial:
   Skip: Slaan oor
   Next: Volgende
@@ -1985,6 +1986,12 @@ Profile:
   The selected image could not be loaded: Die gekose prent kon nie gelaai word nie
   Theme Color: Temakleur
   Go To Profile Manager: Gaan na profielbestuurder
+  Keep Settings Separate: "Hou instellings apart"
+  Keep Settings Separate Tooltip: "Gee hierdie profiel sy eie instellings, wat aanvanklik dieselfde as jou gedeelde instellings is. Terwyl hierdie profiel aktief is, geld veranderinge in Instellings net daarvoor. Instellings van hierdie toestel, soos sinkronisering, instaanbediener, rugsteun en aflaaigidse, bly gedeel."
+  Own Settings: "Eie instellings"
+  Own Settings Notice: "{profile} hou sy instellings apart, dus geld veranderinge hier net daarvoor. Toestelinstellings, soos sinkronisering, instaanbediener en rugsteun, bly gedeel."
+  Use Shared Settings: "Gebruik gedeelde instellings"
+  Use Shared Settings Warning: "{profile} sal weer jou gedeelde instellings gebruik, en die instellings wat jy daarvoor verander het, sal uitgevee word."
 Channel:
   Hide Watched: Versteek gekykte
   All Videos Watched: "Jy het al hierdie video’s gekyk. Skakel „Versteek gekykte” af om hulle te wys."

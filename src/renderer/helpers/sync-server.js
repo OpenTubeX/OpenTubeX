@@ -29,7 +29,8 @@ import {
   isSessionExpiredError,
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
-import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled } from '../store/modules/settings'
+import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
+import { canHaveOwnSettings, isPlainObject, profileSettingsId } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -1869,10 +1870,30 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     : {}
   const local = Object.fromEntries([
     [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    // A profile with its own settings may show other values, which sync with that profile.
     ...getSyncableSettingKeys(store.state.settings).map(key => (
-      [key, deepCopy(store.state.settings[key])]
+      [key, deepCopy(sharedSettingValue(store.state.settings, key))]
     )),
   ])
+
+  // The own settings of each profile, by their settings key. Those of a
+  // profile this device lacks wait on the server until it syncs the profile.
+  const isSynced = key => isSettingSyncEnabled(store.state.settings, key)
+  const ownSettingsOf = profileId => syncedProfileSettings(store.state.settings.profileSettingsState?.overrides[profileId], isSynced)
+  const profileSettingsProfiles = new Map()
+  for (const profile of store.state.profiles.profileList) {
+    if (!canHaveOwnSettings(profile._id)) continue
+    const key = profileSettingsId(profile._id)
+    const value = ownSettingsOf(profile._id)
+    // Entries that aren't settings, which other versions may write, stay as they are.
+    if (remote[key] && remote[key].value !== null && !isPlainObject(remote[key].value)) continue
+    if (value === null && !previous[key] && !remote[key]) continue
+    profileSettingsProfiles.set(key, profile._id)
+    local[key] = value
+  }
+  for (const id of removedProfileIds) {
+    if (canHaveOwnSettings(id)) delete merged[profileSettingsId(id)]
+  }
 
   // The profiles whose channel settings sync, by their settings key
   const channelSettingsProfiles = new Map()
@@ -1931,7 +1952,9 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       }
       const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
         ? value
-        : store.state.settings[key]
+        : profileSettingsProfiles.has(key)
+          ? ownSettingsOf(profileSettingsProfiles.get(key))
+          : sharedSettingValue(store.state.settings, key)
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)
         : metadataEquals(currentValue, entry.value)
@@ -1949,6 +1972,15 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       if (!valuesEqual) {
         if (channelSettingsProfiles.has(key)) {
           await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
+        } else if (profileSettingsProfiles.has(key)) {
+          // Changed meanwhile: the next sync merges the edit.
+          if (!await store.dispatch('saveSyncedProfileSettings', {
+            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, isSynced,
+          })) {
+            skip()
+            skippedSettings.add(key)
+            continue
+          }
         } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
           await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
         } else if (key === CUSTOM_THEMES_SYNC_KEY) {
@@ -1965,12 +1997,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
           // Another window may save the list after this sync read it. That edit
           // or a failed save keeps the server entry, and the next sync merges it.
           let applied = false
-          const saved = await store.dispatch(settingUpdater(key), current => {
+          const saved = await withSharedSettings(() => store.dispatch(settingUpdater(key), current => {
             applied = metadataEquals(current, value)
             return applied ? deepCopy(entry.value) : current
-          })
+          }))
           if (!applied || saved === false) skip()
-        } else if (await store.dispatch(settingUpdater(key), deepCopy(entry.value)) === false) {
+        } else if (await withSharedSettings(() => store.dispatch(settingUpdater(key), deepCopy(entry.value))) === false) {
           // The local value did not change, so the next sync applies the server entry again
           skip()
           skippedSettings.add(key)

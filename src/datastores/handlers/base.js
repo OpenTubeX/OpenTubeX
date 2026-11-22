@@ -3,6 +3,7 @@ import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { isValidSeparateProfileId } from '../profileDatastoreNames.js'
 import { SCOPED_SEEN_MARK_SETTINGS, seenMarksSettingId } from '../../subscriptionSeenMarkSettings.js'
+import { canHaveOwnSettings, profileSettingsId } from '../../profileSettings.js'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
 import { getSecretCipher } from '../secretCipher'
@@ -1128,6 +1129,8 @@ class Profiles {
       ? id !== MAIN_PROFILE_ID && isValidSeparateProfileId(id)
       : profile.separate === true
     if (separate) await deleteScopeData(id)
+    // Its own settings, see `profileSettingsId`
+    if (canHaveOwnSettings(id)) await db.settings.removeAsync({ _id: profileSettingsId(id) })
     return removed
   }
 }

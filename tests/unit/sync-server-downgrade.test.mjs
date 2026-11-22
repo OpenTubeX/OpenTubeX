@@ -45,6 +45,7 @@ import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
 import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
+import * as profileSettings from '../../src/profileSettings.js'
 
 // These modules use bundler imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
@@ -211,6 +212,9 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
     settingWritesSettled: () => null,
+    ...profileSettings,
+    syncedProfileSettings: profileSettings.syncedProfileSettingsOf,
+    withSharedSettings: operation => operation(),
     isPlaylistSortOrder: () => false,
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })

@@ -1941,6 +1941,7 @@ Settings:
     Title: "구독 탭"
     Hint: "구독 페이지의 탭 순서를 변경합니다. 숨긴 탭은 다시 표시할 때를 위해 위치가 유지됩니다."
     Hidden: "(숨김)"
+  Profile Setting: "{profile}에서만 사용됩니다. 공유 값을 사용하려면 선택하세요."
 Tutorial:
   Skip: 건너뛰기
   Next: 다음
@@ -2027,6 +2028,12 @@ Profile:
   Close Profile Dropdown: 프로필 드롭다운 닫기
   Open Profile Dropdown: 프로필 드롭다운 열기
   Go To Profile Manager: 프로필 관리자로 이동
+  Keep Settings Separate: "설정 분리"
+  Keep Settings Separate Tooltip: "이 프로필에 자체 설정을 제공합니다. 처음에는 공유 설정과 동일합니다. 이 프로필이 활성화된 동안 설정의 변경 사항은 이 프로필에만 적용됩니다. 동기화, 프록시, 백업, 다운로드 폴더 등 이 기기의 설정은 계속 공유됩니다."
+  Own Settings: "자체 설정"
+  Own Settings Notice: "{profile}은(는) 설정을 분리해 두므로 여기서의 변경 사항은 이 프로필에만 적용됩니다. 동기화, 프록시, 백업 등 기기 설정은 계속 공유됩니다."
+  Use Shared Settings: "공유 설정 사용"
+  Use Shared Settings Warning: "{profile}은(는) 다시 공유 설정을 사용하며, 이 프로필에 대해 변경한 설정은 삭제됩니다."
 Channel:
   Hide Watched: 시청한 동영상 숨기기
   All Videos Watched: "이 동영상을 모두 시청했습니다. 표시하려면 \"시청한 동영상 숨기기\"를 끄세요."

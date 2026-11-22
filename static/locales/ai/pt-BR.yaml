@@ -1637,6 +1637,7 @@ Settings:
     Title: "Guias de inscrições"
     Hint: "Altere a ordem das guias na página Inscrições. As guias ocultas mantêm seu lugar para quando você mostrá-las novamente."
     Hidden: "(oculta)"
+  Profile Setting: "Usado apenas por {profile}. Selecione para usar o valor compartilhado."
 Tutorial:
   Skip: Ignorar
   Next: Seguinte
@@ -1711,6 +1712,12 @@ Profile:
   Use Initial: Usar inicial
   The selected image could not be loaded: Não foi possível carregar a imagem selecionada
   Theme Color: Cor do tema
+  Keep Settings Separate: "Manter as configurações separadas"
+  Keep Settings Separate Tooltip: "Dá a este perfil as próprias configurações, que no início são iguais às suas configurações compartilhadas. Enquanto este perfil estiver ativo, as alterações em Configurações só se aplicam a ele. As configurações deste dispositivo, como sincronização, proxy, backups e pastas de download, continuam compartilhadas."
+  Own Settings: "Configurações próprias"
+  Own Settings Notice: "{profile} mantém as configurações separadas, então as alterações aqui só se aplicam a ele. As configurações do dispositivo, como sincronização, proxy e backups, continuam compartilhadas."
+  Use Shared Settings: "Usar as configurações compartilhadas"
+  Use Shared Settings Warning: "{profile} voltará a usar as suas configurações compartilhadas, e as configurações que você alterou para ele serão excluídas."
 Channel:
   Hide Watched: Ocultar assistidos
   All Videos Watched: "Você já assistiu a todos esses vídeos. Desative \"Ocultar assistidos\" para mostrá-los."

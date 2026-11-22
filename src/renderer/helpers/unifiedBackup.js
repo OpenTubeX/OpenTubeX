@@ -243,6 +243,11 @@ export function validateBackupWatchStats(backup) {
 export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
+  // The own settings of profiles, by profile ID
+  const profileSettings = data.settings?.profileSettings
+  if (profileSettings !== undefined && (!object(profileSettings) || Object.entries(profileSettings).some(([id, settings]) => (
+    id === '__proto__' || !object(settings) || Object.keys(settings).includes('__proto__')
+  )))) throw new Error('Invalid backup settings')
   const sections = {
     // A separate profile whose ID can't name its datastores would silently share the others' data.
     profiles: record => object(record) && typeof record._id === 'string' && record._id !== '' &&

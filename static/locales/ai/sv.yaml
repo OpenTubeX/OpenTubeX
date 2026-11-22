@@ -1684,6 +1684,7 @@ Settings:
     Title: "Prenumerationsflikar"
     Hint: "Ändra ordningen på flikarna på sidan Prenumerationer. Dolda flikar behåller sin plats tills du visar dem igen."
     Hidden: "(dold)"
+  Profile Setting: "Används bara av {profile}. Välj för att använda det delade värdet i stället."
 Tutorial:
   Skip: Hoppa över
   Next: Nästa
@@ -1758,6 +1759,12 @@ Profile:
   Use Initial: Använd initial
   The selected image could not be loaded: Den valda bilden kunde inte läsas in
   Theme Color: Temafärg
+  Keep Settings Separate: "Håll inställningar separata"
+  Keep Settings Separate Tooltip: "Ger den här profilen egna inställningar, som från början är samma som dina delade inställningar. Medan den här profilen är aktiv gäller ändringar i Inställningar bara för den. Inställningar för den här enheten, som synkronisering, proxy, säkerhetskopior och nedladdningsmappar, förblir delade."
+  Own Settings: "Egna inställningar"
+  Own Settings Notice: "{profile} håller sina inställningar separata, så ändringar här gäller bara för den. Enhetsinställningar, som synkronisering, proxy och säkerhetskopior, förblir delade."
+  Use Shared Settings: "Använd delade inställningar"
+  Use Shared Settings Warning: "{profile} kommer att använda dina delade inställningar igen, och inställningarna du ändrade för den tas bort."
 Channel:
   Hide Watched: Dölj sedda
   All Videos Watched: "Du har sett alla dessa videor. Stäng av ”Dölj sedda” för att visa dem."

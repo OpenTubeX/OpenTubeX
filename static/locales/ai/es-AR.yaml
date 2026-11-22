@@ -1819,6 +1819,7 @@ Settings:
     Title: "Pestañas de suscripciones"
     Hint: "Cambiá el orden de las pestañas de la página Suscripciones. Las pestañas ocultas conservan su lugar para cuando vuelvas a mostrarlas."
     Hidden: "(oculta)"
+  Profile Setting: "Solo la usa {profile}. Seleccioná para usar el valor compartido."
 Tutorial:
   Skip: Omitir
   Next: Siguiente
@@ -1954,6 +1955,12 @@ Profile:
   Close Profile Dropdown: Cerrar el desplegable del Perfil
   Open Profile Dropdown: Abrir el desplegable del Perfil
   Go To Profile Manager: Ir al administrador de perfiles
+  Keep Settings Separate: "Mantener la configuración separada"
+  Keep Settings Separate Tooltip: "Le da a este perfil su propia configuración, que al principio es igual a tu configuración compartida. Mientras este perfil esté activo, los cambios en Configuración solo se aplican a él. La configuración de este dispositivo, como la sincronización, el proxy, las copias de seguridad y las carpetas de descarga, sigue compartida."
+  Own Settings: "Configuración propia"
+  Own Settings Notice: "{profile} mantiene su configuración separada, así que los cambios acá solo se aplican a él. La configuración del dispositivo, como la sincronización, el proxy y las copias de seguridad, sigue compartida."
+  Use Shared Settings: "Usar la configuración compartida"
+  Use Shared Settings Warning: "{profile} va a volver a usar tu configuración compartida, y se va a borrar la configuración que cambiaste para él."
 Channel:
   Hide Watched: Ocultar vistos
   All Videos Watched: "Ya viste todos estos videos. Desactivá «Ocultar vistos» para mostrarlos."

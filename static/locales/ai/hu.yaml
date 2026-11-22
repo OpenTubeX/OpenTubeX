@@ -1684,6 +1684,7 @@ Settings:
     Title: "Feliratkozások lapjai"
     Hint: "Módosítsd a lapok sorrendjét a Feliratkozások oldalon. A rejtett lapok megtartják a helyüket arra az esetre, ha újra megjeleníted őket."
     Hidden: "(rejtett)"
+  Profile Setting: "Csak {profile} használja. Válaszd ki a közös érték használatához."
 Tutorial:
   Skip: Kihagyás
   Next: Tovább
@@ -1758,6 +1759,12 @@ Profile:
   Use Initial: Monogram használata
   The selected image could not be loaded: A kiválasztott kép nem tölthető be
   Theme Color: Téma színe
+  Keep Settings Separate: "Beállítások külön tartása"
+  Keep Settings Separate Tooltip: "Saját beállításokat ad ennek a profilnak, amelyek kezdetben megegyeznek a közös beállításaiddal. Amíg ez a profil aktív, a Beállításokban végzett módosítások csak rá vonatkoznak. Az eszköz beállításai, például a szinkronizálás, a proxy, a biztonsági mentések és a letöltési mappák, közösek maradnak."
+  Own Settings: "Saját beállítások"
+  Own Settings Notice: "{profile} külön tartja a beállításait, így az itteni módosítások csak rá vonatkoznak. Az eszközbeállítások, például a szinkronizálás, a proxy és a biztonsági mentések, közösek maradnak."
+  Use Shared Settings: "Közös beállítások használata"
+  Use Shared Settings Warning: "{profile} ismét a közös beállításaidat fogja használni, és a számára módosított beállítások törlődnek."
 Channel:
   Hide Watched: Megtekintettek elrejtése
   All Videos Watched: "Az összes videót megnézted. A megjelenítésükhöz kapcsold ki a „Megtekintettek elrejtése” lehetőséget."

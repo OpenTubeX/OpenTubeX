@@ -13,6 +13,7 @@ import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from '../../src/renderer/helpers/unifiedBackup.js'
 import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
 import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
+import { canHaveOwnSettings, profileSettingsId } from '../../src/profileSettings.js'
 import * as seenPosts from '../../src/subscriptionSeenPosts.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import * as secretSettings from '../../src/datastores/secretSettings.js'
@@ -70,6 +71,8 @@ function fixture() {
     DEFAULT_PROFILE_ICON: {},
     MAIN_PROFILE_ID,
     isValidSeparateProfileId,
+    canHaveOwnSettings,
+    profileSettingsId,
     ...seenMarkSettings,
     ...seenPosts,
     ...secretSettings,

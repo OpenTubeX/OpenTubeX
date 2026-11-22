@@ -13,6 +13,9 @@ export const SECRET_SETTINGS = new Set([
 
 export const NON_TRANSFERABLE_SETTINGS = new Set([
   ...SECRET_SETTINGS,
+  // Which profile's own settings show and the shared values they replace,
+  // see `profileSettingsState` in the settings store.
+  'profileSettingsState',
   // Local migration bookkeeping is not a user preference.
   'historyWatchedStatusMigrated',
   'channelSettingsSyncMigration',
@@ -136,8 +139,10 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
  */
 export function getTransferableSettings(settings) {
   // Separate profiles' seen marks stay on this device like the shared ones.
+  // Profiles' own settings are saved under their profile, see `profileSettingsId`.
   const transferable = Object.fromEntries(Object.entries(settings)
-    .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key) && !isSeparateProfileSeenMarksSetting(key)))
+    .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key) && !isSeparateProfileSeenMarksSetting(key) &&
+      !key.startsWith('profileSettings.')))
   // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
   if (typeof transferable.defaultInvidiousInstance === 'string') {
     transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim()

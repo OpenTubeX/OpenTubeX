@@ -1144,6 +1144,7 @@ Settings:
     Title: "Karty subskrypcji"
     Hint: "Zmień kolejność kart na stronie Subskrypcje. Ukryte karty zachowują swoje miejsce na wypadek ponownego ich wyświetlenia."
     Hidden: "(ukryta)"
+  Profile Setting: "Używane tylko przez {profile}. Wybierz, aby użyć wspólnej wartości."
 Tutorial:
   Skip: Pomiń
   Next: Dalej
@@ -1217,6 +1218,12 @@ Profile:
   Use Initial: Użyj inicjału
   The selected image could not be loaded: Nie udało się wczytać wybranego obrazu
   Theme Color: Kolor motywu
+  Keep Settings Separate: "Oddzielne ustawienia"
+  Keep Settings Separate Tooltip: "Daje temu profilowi własne ustawienia, które na początku są takie same jak ustawienia wspólne. Gdy ten profil jest aktywny, zmiany w Ustawieniach dotyczą tylko jego. Ustawienia tego urządzenia, takie jak synchronizacja, proxy, kopie zapasowe i foldery pobierania, pozostają wspólne."
+  Own Settings: "Własne ustawienia"
+  Own Settings Notice: "{profile} ma oddzielne ustawienia, więc zmiany tutaj dotyczą tylko jego. Ustawienia urządzenia, takie jak synchronizacja, proxy i kopie zapasowe, pozostają wspólne."
+  Use Shared Settings: "Użyj wspólnych ustawień"
+  Use Shared Settings Warning: "{profile} będzie znowu używać wspólnych ustawień, a ustawienia zmienione dla niego zostaną usunięte."
 Channel:
   Hide Watched: Ukryj obejrzane
   All Videos Watched: "Obejrzano wszystkie te filmy. Wyłącz „Ukryj obejrzane”, aby je wyświetlić."

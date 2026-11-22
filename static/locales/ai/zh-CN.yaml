@@ -1684,6 +1684,7 @@ Settings:
     Title: "订阅标签页"
     Hint: "更改“订阅”页面上标签页的顺序。隐藏的标签页会保留其位置，以便再次显示。"
     Hidden: "（已隐藏）"
+  Profile Setting: "仅 {profile} 使用。选择以改用共享值。"
 Tutorial:
   Skip: 跳过
   Next: 下一步
@@ -1758,6 +1759,12 @@ Profile:
   Use Initial: 使用首字母
   The selected image could not be loaded: 无法加载所选图片
   Theme Color: 主题颜色
+  Keep Settings Separate: "单独保留设置"
+  Keep Settings Separate Tooltip: "为此个人资料提供它自己的设置，初始时与你的共享设置相同。此个人资料处于活动状态时，在“设置”中所做的更改仅适用于它。此设备的设置（如同步、代理、备份和下载文件夹）保持共享。"
+  Own Settings: "独立设置"
+  Own Settings Notice: "{profile} 单独保留其设置，因此此处的更改仅适用于它。设备设置（如同步、代理和备份）保持共享。"
+  Use Shared Settings: "使用共享设置"
+  Use Shared Settings Warning: "{profile} 将重新使用你的共享设置，你为其更改的设置将被删除。"
 Channel:
   Hide Watched: 隐藏已观看
   All Videos Watched: "这些视频你都看过了。关闭“隐藏已观看”即可显示。"

@@ -17,6 +17,7 @@
           :key="profile._id"
           :is-main-profile="profile._id === MAIN_PROFILE_ID"
           :is-separate="profile.separate === true"
+          :has-own-settings="store.getters.getProfileOwnSettings(profile._id) !== null"
           :profile-name="profile.name"
           :background-color="profile.bgColor"
           :text-color="profile.textColor"

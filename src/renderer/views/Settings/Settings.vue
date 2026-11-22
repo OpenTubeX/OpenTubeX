@@ -355,6 +355,10 @@
               tabindex="-1"
               @scroll.passive="clampSettingsContentScroll"
             >
+              <FtDataScopeNotice
+                settings
+                class="profileSettingsNotice"
+              />
               <component
                 :is="activeSettingsSection.component"
                 v-if="activeSettingsSection"
@@ -448,6 +452,7 @@
 <script setup>
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
+import FtDataScopeNotice from '../../components/FtDataScopeNotice/FtDataScopeNotice.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { supportsYouTubeAccount } from '../../helpers/youtube-account-state'
 import { useRootClass } from '../../helpers/rootClasses'

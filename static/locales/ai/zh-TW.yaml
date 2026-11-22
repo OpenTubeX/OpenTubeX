@@ -1684,6 +1684,7 @@ Settings:
     Title: "訂閱分頁"
     Hint: "變更「訂閱」頁面上分頁的順序。隱藏的分頁會保留其位置，以便再次顯示。"
     Hidden: "（已隱藏）"
+  Profile Setting: "僅 {profile} 使用。選取以改用共用值。"
 Tutorial:
   Skip: 略過
   Next: 下一步
@@ -1758,6 +1759,12 @@ Profile:
   Use Initial: 使用首字母
   The selected image could not be loaded: 無法載入選取的圖片
   Theme Color: 佈景主題色彩
+  Keep Settings Separate: "分開保留設定"
+  Keep Settings Separate Tooltip: "為此設定檔提供自己的設定，初始時與你的共用設定相同。此設定檔啟用期間，在「設定」中所做的變更僅套用於它。此裝置的設定（如同步、代理、備份和下載資料夾）會維持共用。"
+  Own Settings: "獨立設定"
+  Own Settings Notice: "{profile} 分開保留其設定，因此此處的變更僅套用於它。裝置設定（如同步、代理和備份）會維持共用。"
+  Use Shared Settings: "使用共用設定"
+  Use Shared Settings Warning: "{profile} 將重新使用你的共用設定，你為其變更的設定將被刪除。"
 Channel:
   Hide Watched: 隱藏已觀看
   All Videos Watched: "這些影片你都看過了。關閉「隱藏已觀看」即可顯示。"

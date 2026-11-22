@@ -337,6 +337,10 @@
   max-inline-size: 100%;
 }
 
+.profileSettingsNotice {
+  margin-block-start: 0;
+}
+
 .settingsContent .section,
 .settingsContent :deep(.settingsSection),
 .settingsContent :deep(.sectionBody) {

@@ -303,6 +303,13 @@ export default {
   /** Whether this is the Windows portable build */
   portableBuild: process.argv.includes('--portable=true'),
   /**
+   * Lets native controls follow the base theme of a profile with its own settings.
+   * @param {string} baseTheme
+   */
+  applyProfileBaseTheme: (baseTheme) => {
+    ipcRenderer.send(IpcChannels.APPLY_PROFILE_BASE_THEME, baseTheme)
+  },
+  /**
    * @param {{ color: string, symbolColor: string, height: number }} overlay height in CSS pixels
    */
   setTitleBarOverlay: ({ color, symbolColor, height }) => {

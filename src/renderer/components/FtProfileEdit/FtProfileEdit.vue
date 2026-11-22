@@ -95,6 +95,15 @@
               />
               {{ $t('Profile.Separate Profile Note') }}
             </p>
+            <FtToggleSwitch
+              v-if="!isMainProfile && (isNew || canHaveOwnSettings(profileId))"
+              class="separateDataToggle"
+              :label="$t('Profile.Keep Settings Separate')"
+              :tooltip="$t('Profile.Keep Settings Separate Tooltip')"
+              compact
+              :default-value="keepSettingsSeparate"
+              @change="keepSettingsSeparate = $event"
+            />
             <h3 class="profileIconHeading">
               {{ $t("Profile.Profile Icon") }}
             </h3>
@@ -286,6 +295,16 @@
       </div>
     </FtPrompt>
     <FtPrompt
+      v-if="showSharedSettingsPrompt"
+      autosize
+      :label="$t('Profile.Use Shared Settings Warning', { profile: translatedProfileName })"
+      :option-names="[$t('Profile.Use Shared Settings'), $t('Cancel')]"
+      :option-values="['shared', 'cancel']"
+      :option-icons="[['fas', 'users'], ['fas', 'xmark']]"
+      :is-first-option-destructive="true"
+      @click="handleSharedSettingsPrompt"
+    />
+    <FtPrompt
       v-if="showDeletePrompt"
       autosize
       :label="$t('Profile.Delete Profile')"
@@ -321,6 +340,7 @@ import { calculateColorLuminance, colors, resolveThemeColor } from '../../helper
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
+import { canHaveOwnSettings } from '../../../profileSettings'
 
 /**
  * @typedef {object} Profile
@@ -520,9 +540,33 @@ const editOrCreateProfileNameLabel = computed(() => {
 /** Whether a new profile gets its own data, which can't change later */
 const keepDataSeparate = ref(false)
 
-function saveProfile() {
+/** @type {import('vue').ComputedRef<Record<string, unknown> | null>} */
+const ownSettings = computed(() => props.isNew ? null : store.getters.getProfileOwnSettings(props.profile._id))
+
+/** Whether the profile uses its own settings instead of the shared ones */
+const keepSettingsSeparate = ref(ownSettings.value !== null)
+
+const showSharedSettingsPrompt = ref(false)
+
+/** @param {'shared' | 'cancel' | null} response */
+function handleSharedSettingsPrompt(response) {
+  showSharedSettingsPrompt.value = false
+  if (response === 'shared') saveProfile(true)
+}
+
+/**
+ * @param {boolean} [confirmedSharedSettings] whether the user agreed to delete
+ *   the profile's own settings
+ */
+function saveProfile(confirmedSharedSettings = false) {
   if (profileName.value === '') {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  const ownSettingsChanged = !props.isNew && !props.isMainProfile && keepSettingsSeparate.value !== (ownSettings.value !== null)
+  if (ownSettingsChanged && !keepSettingsSeparate.value && Object.keys(ownSettings.value).length > 0 && confirmedSharedSettings !== true) {
+    showSharedSettingsPrompt.value = true
     return
   }
 
@@ -534,14 +578,18 @@ function saveProfile() {
   }
 
   if (props.isNew) {
+    const ownSettings = keepSettingsSeparate.value
     store.dispatch('createProfile', keepDataSeparate.value
-      ? { ...details, separate: true, subscriptions: [] }
-      : { ...details, subscriptions: deepCopy(props.profile.subscriptions) })
+      ? { ...details, separate: true, subscriptions: [], ownSettings }
+      : { ...details, subscriptions: deepCopy(props.profile.subscriptions), ownSettings })
     showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
   } else {
     // Leave subscriptions out so channels added elsewhere since this page loaded stay
     store.dispatch('updateProfileDetails', { profileId: profileId.value, details })
+    if (ownSettingsChanged) {
+      store.dispatch('setProfileOwnSettingsEnabled', { profileId: profileId.value, enabled: keepSettingsSeparate.value })
+    }
     showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
   }
 }

@@ -1684,6 +1684,7 @@ Settings:
     Title: "Onglets des abonnements"
     Hint: "Modifiez l’ordre des onglets de la page Abonnements. Les onglets masqués conservent leur place pour quand vous les afficherez à nouveau."
     Hidden: "(masqué)"
+  Profile Setting: "Utilisé uniquement par {profile}. Sélectionnez pour utiliser plutôt la valeur partagée."
 Tutorial:
   Skip: Ignorer
   Next: Suivant
@@ -1757,6 +1758,12 @@ Profile:
   Use Initial: Utiliser l’initiale
   The selected image could not be loaded: L’image sélectionnée n’a pas pu être chargée
   Theme Color: Couleur du thème
+  Keep Settings Separate: "Garder les paramètres séparés"
+  Keep Settings Separate Tooltip: "Donne à ce profil ses propres paramètres, qui sont au départ identiques à vos paramètres partagés. Tant que ce profil est actif, les modifications dans Paramètres ne s’appliquent qu’à lui. Les paramètres de cet appareil, comme la synchronisation, le proxy, les sauvegardes et les dossiers de téléchargement, restent partagés."
+  Own Settings: "Paramètres propres"
+  Own Settings Notice: "{profile} garde ses paramètres séparés, donc les modifications ici ne s’appliquent qu’à lui. Les paramètres de l’appareil, comme la synchronisation, le proxy et les sauvegardes, restent partagés."
+  Use Shared Settings: "Utiliser les paramètres partagés"
+  Use Shared Settings Warning: "{profile} utilisera de nouveau vos paramètres partagés, et les paramètres que vous avez modifiés pour lui seront supprimés."
 Channel:
   Hide Watched: Masquer les vidéos visionnées
   All Videos Watched: "Vous avez regardé toutes ces vidéos. Désactivez « Masquer les vidéos visionnées » pour les afficher."

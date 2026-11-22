@@ -1666,6 +1666,7 @@ Settings:
     Title: "Separadores de subscrições"
     Hint: "Altere a ordem dos separadores na página Subscrições. Os separadores ocultos mantêm o seu lugar para quando os voltar a mostrar."
     Hidden: "(oculto)"
+  Profile Setting: "Usado apenas por {profile}. Selecione para usar o valor partilhado."
 Tutorial:
   Skip: Ignorar
   Next: Seguinte
@@ -1740,6 +1741,12 @@ Profile:
   The selected image could not be loaded: Não foi possível carregar a imagem selecionada
   Theme Color: Cor do tema
   Go To Profile Manager: Ir para o gestor de perfis
+  Keep Settings Separate: "Manter as definições separadas"
+  Keep Settings Separate Tooltip: "Dá a este perfil as suas próprias definições, que no início são iguais às suas definições partilhadas. Enquanto este perfil estiver ativo, as alterações nas Definições só se aplicam a ele. As definições deste dispositivo, como a sincronização, o proxy, as cópias de segurança e as pastas de transferência, continuam partilhadas."
+  Own Settings: "Definições próprias"
+  Own Settings Notice: "{profile} mantém as definições separadas, por isso as alterações aqui só se aplicam a ele. As definições do dispositivo, como a sincronização, o proxy e as cópias de segurança, continuam partilhadas."
+  Use Shared Settings: "Usar as definições partilhadas"
+  Use Shared Settings Warning: "{profile} voltará a usar as suas definições partilhadas, e as definições que alterou para ele serão eliminadas."
 Channel:
   Hide Watched: Ocultar vistos
   All Videos Watched: "Já viu todos estes vídeos. Desative «Ocultar vistos» para os mostrar."

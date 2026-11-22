@@ -22,7 +22,8 @@ export function previewBackupImport(data, current) {
     if (category === 'profileData') continue
     if (category === 'settings') {
       const settings = migrateLegacySettings(data.settings)
-      const accepted = Object.keys(settings).filter(key => Object.hasOwn(current.settings, key))
+      // Backups hold the own settings of profiles under `profileSettings`.
+      const accepted = Object.keys(settings).filter(key => Object.hasOwn(current.settings, key) || key === 'profileSettings')
       rows.push({ category, added: 0, existing: accepted.length, skipped: Object.keys(settings).length - accepted.length, effect: 'Settings effect' })
     } else {
       rows.push({

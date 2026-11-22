@@ -71,7 +71,8 @@ async function loadLocalChangePlugin() {
       isRemoteSyncDispatch,
       ...profileSync,
       isSettingSyncable: key => key === 'autoplayVideos',
-      isSettingSyncEnabled: () => true
+      isSettingSyncEnabled: () => true,
+      sharedSettingValue: (settings, key) => settings[key],
     }
   )
 }

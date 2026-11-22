@@ -1740,6 +1740,7 @@ Settings:
     Title: "Abonnementsfaner"
     Hint: "Skift rækkefølgen af fanerne på siden Abonnementer. Skjulte faner beholder deres plads, til du viser dem igen."
     Hidden: "(skjult)"
+  Profile Setting: "Bruges kun af {profile}. Vælg for at bruge den delte værdi i stedet."
 Tutorial:
   Skip: Spring over
   Next: Næste
@@ -1818,6 +1819,12 @@ Profile:
   The selected image could not be loaded: Det valgte billede kunne ikke indlæses
   Theme Color: Temafarve
   Go To Profile Manager: Gå til profilhåndtering
+  Keep Settings Separate: "Hold indstillinger adskilt"
+  Keep Settings Separate Tooltip: "Giver denne profil sine egne indstillinger, som til at begynde med er de samme som dine delte indstillinger. Mens denne profil er aktiv, gælder ændringer i Indstillinger kun for den. Indstillinger for denne enhed, såsom synkronisering, proxy, sikkerhedskopier og downloadmapper, forbliver delte."
+  Own Settings: "Egne indstillinger"
+  Own Settings Notice: "{profile} holder sine indstillinger adskilt, så ændringer her gælder kun for den. Enhedsindstillinger, såsom synkronisering, proxy og sikkerhedskopier, forbliver delte."
+  Use Shared Settings: "Brug delte indstillinger"
+  Use Shared Settings Warning: "{profile} bruger dine delte indstillinger igen, og de indstillinger, du har ændret for den, slettes."
 Channel:
   Hide Watched: Skjul sete
   All Videos Watched: "Du har set alle disse videoer. Slå „Skjul sete“ fra for at vise dem."
