@@ -199,12 +199,14 @@ function moveSwipe(event) {
 /** @param {PointerEvent} event */
 function finishSwipe(event) {
   if (swipe?.id !== event.pointerId) return
-  const { entry, locked, offset, velocity } = swipe
+  const { entry, locked, offset, velocity, time } = swipe
   swipe = null
   if (!locked) return
   const row = /** @type {HTMLElement} */ (event.currentTarget)
   suppressClick()
-  const flicked = Math.abs(offset) > 24 && Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(offset)
+  // A finger held still before release is no longer flicking.
+  const flicked = event.timeStamp - time < 100 && Math.abs(offset) > 24 &&
+    Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(offset)
   if (Math.abs(offset) > row.offsetWidth * 0.35 || flicked) {
     // The row leaves from where the finger released it, in the swiped direction.
     row.style.setProperty('--dismiss-direction', String(Math.sign(offset)))
