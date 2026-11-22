@@ -230,6 +230,40 @@ test.describe('YouTube playlists', () => {
     await expect(items.getByText('Members playlist video')).toBeVisible()
   })
 
+  test('download selection keeps the playlist positions of entries the parser drops', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateEnableDownloads', true))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.selectionDownloadPayloads = []
+      ipcMain.removeHandler('yt-dlp-download')
+      ipcMain.handle('yt-dlp-download', (_event, payload) => {
+        globalThis.selectionDownloadPayloads.push(payload)
+        return null
+      })
+    })
+    const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
+    // Entries without a video ID are left out of the playlist
+    const droppedEntry = structuredClone(lockup)
+    droppedEntry.contentId = ''
+    const secondVideo = structuredClone(lockup)
+    secondVideo.contentId = 'sampleVid02'
+    secondVideo.metadata.lockupMetadataViewModel.title.content = 'Second playlist video'
+    await routePlaylist(page, [droppedEntry, lockup, secondVideo])
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=PL-mixed-playlist')
+    await page.locator(sel.searchInput).press('Enter')
+
+    await page.locator('.playlistInfo').getByTitle('Download Playlist').click()
+    const selection = page.locator('.downloadPromptCard .videoSelection')
+    await selection.locator('summary').click()
+    await selection.getByText('2. Sample recommendation', { exact: true }).click()
+    await expect(selection.getByText('3. Second playlist video', { exact: true })).toBeVisible()
+    await page.locator('.downloadPromptCard').getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(1)
+    const payload = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[0])
+    expect(payload.videoIds).toEqual(['sampleVid02'])
+    expect(payload.playlistIndexes).toEqual([3])
+  })
+
   test('plays and queues YouTube playlists without hidden members-only videos', async ({ app, page }) => {
     const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
     const membersVideo = structuredClone(lockup)

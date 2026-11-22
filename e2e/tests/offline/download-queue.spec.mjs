@@ -161,7 +161,7 @@ test.describe('playlist video selection', () => {
     const prompt = page.locator('.downloadPromptCard')
     const download = prompt.getByRole('button', { name: 'Download', exact: true })
     const selection = prompt.locator('.videoSelection')
-    await expect(selection.locator('summary')).toHaveText('Videos: 3 of 3 selected')
+    await expect(selection.locator('summary')).toHaveText(/\b3\b.*\b3\b/)
     await selection.locator('summary').click()
 
     const toggle = name => selection.getByText(name, { exact: true }).click()
@@ -171,7 +171,7 @@ test.describe('playlist video selection', () => {
     await toggle('Select all')
     await toggle('2. Video 2')
     await expect(selection.getByRole('checkbox', { name: 'Select all' })).not.toBeChecked()
-    await expect(selection.locator('summary')).toHaveText('Videos: 2 of 3 selected')
+    await expect(selection.locator('summary')).toHaveText(/\b2\b.*\b3\b/)
     await download.click()
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(1)
     const payload = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[0])

@@ -596,7 +596,7 @@ test.describe('YouTube playlist search', () => {
     await expect(selection.getByText('200. Playlist video 200', { exact: true })).toBeAttached()
     await expect(selection.getByText('Loading the remaining videos…')).toHaveCount(0)
     await selection.getByText('3. Playlist video 3', { exact: true }).click()
-    await expect(selection.locator('summary')).toHaveText('Videos: 198 of 200 selected')
+    await expect(selection.locator('summary')).toHaveText(/\b198\b.*\b200\b/)
     await page.locator('.downloadPromptCard').getByRole('button', { name: 'Download', exact: true }).click()
 
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(1)

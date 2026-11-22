@@ -931,6 +931,8 @@ function openMoreOptionsMenu() {
 
 onBeforeUnmount(() => {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreMenuItems }))
+  // Loading another playlist removes the prompt without closing it
+  if (showDownloadPrompt.value) emit('download-video-selection', false)
 })
 
 const inputPlaylistNameBlank = computed(() => newTitle.value.trim() === '')

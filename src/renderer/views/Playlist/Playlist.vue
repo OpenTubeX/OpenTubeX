@@ -267,7 +267,7 @@ import {
   getLocalPlaylist,
   getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
-  parseLocalPlaylistVideos,
+  parseLocalPlaylistVideo,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -889,6 +889,14 @@ function getPlaylistInfo() {
 
 const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
+// Keeps each video's playlist position, which the entries the parser drops would otherwise shift
+function parseLocalPlaylistPage(items, offset) {
+  return items.flatMap((item, index) => {
+    const video = parseLocalPlaylistVideo(item)
+    return video == null ? [] : [{ ...video, index: offset + index }]
+  })
+}
+
 function resetState() {
   playlistRequestGeneration++
   releasePlaylistPreloadUi()
@@ -915,6 +923,7 @@ function resetState() {
   playlistError.value = ''
   playlistErrorRetryable.value = false
   fetchedLocalPlaylistItemCount = 0
+  downloadVideoSelectionOpen.value = false
 }
 
 async function getPlaylistLocal() {
@@ -928,7 +937,7 @@ async function getPlaylistLocal() {
 
     const channelName_ = getLocalPlaylistChannelName(result.info)
 
-    const playlistItems_ = parseLocalPlaylistVideos(result.items)
+    const playlistItems_ = parseLocalPlaylistPage(result.items, 0)
     fetchedLocalPlaylistItemCount = result.items.length
 
     playlistTitle.value = result.info.title
@@ -1204,7 +1213,7 @@ async function getNextPageLocal() {
         if (!requestIsCurrent()) return
 
         if (result) {
-          const parsedVideos = parseLocalPlaylistVideos(result.items)
+          const parsedVideos = parseLocalPlaylistPage(result.items, fetchedLocalPlaylistItemCount)
           fetchedLocalPlaylistItemCount += result.items.length
           playlistItems.value = playlistItems.value.concat(parsedVideos)
 
