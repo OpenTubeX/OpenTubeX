@@ -132,8 +132,7 @@
       />
       <FtToggleSwitch
         :label="t('Channel.Show refresh errors')"
-        :default-value="showRefreshErrors === true"
-        :indeterminate="showRefreshErrors === 'mixed'"
+        :default-value="showRefreshErrors"
         compact
         trailing
         controlled
@@ -185,7 +184,7 @@ const props = defineProps({
   },
   /** `null` hides the refresh errors switch. */
   showRefreshErrors: {
-    type: [Boolean, String],
+    type: Boolean,
     default: null
   }
 })

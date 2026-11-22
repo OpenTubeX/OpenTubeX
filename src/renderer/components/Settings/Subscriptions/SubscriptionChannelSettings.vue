@@ -73,11 +73,9 @@
             :notification-feed-type-states="uploadNotificationsAvailable ? selectedNotificationFeedTypeStates : null"
             :daily-video-limit="selectedDailyVideoLimit"
             :show-members-only="restrictedPlaybackConfigured ? selectedMembersOnlyState : null"
-            :show-refresh-errors="selectedRefreshErrorsState"
             @toggle-feed-type="updateSelectedFeedType"
             @update-daily-video-limit="updateSelectedChannelLimit"
             @update-show-members-only="updateSelectedShowMembersOnly"
-            @update-show-refresh-errors="updateSelectedShowRefreshErrors"
           />
         </div>
       </div>
@@ -306,9 +304,6 @@ const allVisibleChannelsSelected = computed(() => (
 const selectedMembersOnlyState = computed(() => selectedState(channel => (
   channelSettings(channel).showMembersOnly
 )))
-const selectedRefreshErrorsState = computed(() => selectedState(channel => (
-  channelSettings(channel).showRefreshErrors
-)))
 const selectedDailyVideoLimit = computed(() => {
   const [first, ...others] = selectedChannels.value.map(channel => channelSettings(channel).dailyVideoLimit)
   return others.every(limit => limit === first) ? first : 'mixed'
@@ -466,15 +461,6 @@ function updateSelectedShowMembersOnly(enabled) {
   persistChannelSettingsUpdates(selectedChannels.value
     .filter(channel => channelSettings(channel).showMembersOnly !== enabled)
     .map(channel => ({ channel, patch: { showMembersOnly: enabled } })))
-}
-
-/**
- * @param {boolean} enabled
- */
-function updateSelectedShowRefreshErrors(enabled) {
-  persistChannelSettingsUpdates(selectedChannels.value
-    .filter(channel => channelSettings(channel).showRefreshErrors !== enabled)
-    .map(channel => ({ channel, patch: { showRefreshErrors: enabled } })))
 }
 
 /**
