@@ -2013,6 +2013,60 @@ export default defineComponent({
       }
       await metadataPreload
     },
+    /**
+     * Shows when an upcoming premiere or live stream starts.
+     * @param {Date | null | undefined} startDate
+     * @param {number} loadGeneration
+     * @param {string} videoId
+     */
+    setUpcomingStart: function (startDate, loadGeneration, videoId) {
+      if (!startDate) {
+        this.upcomingTimestamp = null
+        this.upcomingTimeLeft = null
+        this.premiereDate = undefined
+        this.scheduleLiveReminderStartInvalidation()
+        return
+      }
+
+      const now = new Date()
+      this.premiereDate = startDate
+      this.updateUpcomingTimestamp()
+
+      let upcomingTimeLeft = startDate - now
+
+      // Convert from ms to second to minute
+      upcomingTimeLeft = (upcomingTimeLeft / 1000) / 60
+      let timeUnit = 'minute'
+
+      // Youtube switches to showing time left in minutes at 120 minutes remaining
+      if (upcomingTimeLeft > 120) {
+        upcomingTimeLeft /= 60
+        timeUnit = 'hour'
+      }
+
+      if (timeUnit === 'hour' && upcomingTimeLeft > 24) {
+        upcomingTimeLeft /= 24
+        timeUnit = 'day'
+      }
+
+      // Value after decimal not to be displayed
+      // e.g. > 2 days = display as `2 days`
+      upcomingTimeLeft = Math.floor(upcomingTimeLeft)
+
+      // Displays when less than a minute remains
+      // Looks better than `Premieres in x seconds`
+      if (upcomingTimeLeft < 1) {
+        this.upcomingTimeLeft = this.t('Video.Published.In less than a minute').toLowerCase()
+      } else {
+        // TODO a I18n entry for time format might be needed here
+        this.upcomingTimeLeft = new Intl.RelativeTimeFormat(this.currentLocale).format(upcomingTimeLeft, timeUnit)
+      }
+
+      this.scheduleLiveReminderStartInvalidation()
+      this.syncLiveReminder(loadGeneration, videoId).catch(error => {
+        console.error('Failed to load live stream reminder', error)
+      })
+    },
     updateUpcomingTimestamp: function () {
       if (!(this.premiereDate instanceof Date)) return
 
@@ -4108,53 +4162,7 @@ export default defineComponent({
             this.activeFormat = 'dash'
           }
         } else if (this.isUpcoming) {
-          const upcomingTimestamp = result.basic_info.start_timestamp
-
-          if (upcomingTimestamp) {
-            const now = new Date()
-            this.premiereDate = upcomingTimestamp
-            this.updateUpcomingTimestamp()
-
-            let upcomingTimeLeft = upcomingTimestamp - now
-
-            // Convert from ms to second to minute
-            upcomingTimeLeft = (upcomingTimeLeft / 1000) / 60
-            let timeUnit = 'minute'
-
-            // Youtube switches to showing time left in minutes at 120 minutes remaining
-            if (upcomingTimeLeft > 120) {
-              upcomingTimeLeft /= 60
-              timeUnit = 'hour'
-            }
-
-            if (timeUnit === 'hour' && upcomingTimeLeft > 24) {
-              upcomingTimeLeft /= 24
-              timeUnit = 'day'
-            }
-
-            // Value after decimal not to be displayed
-            // e.g. > 2 days = display as `2 days`
-            upcomingTimeLeft = Math.floor(upcomingTimeLeft)
-
-            // Displays when less than a minute remains
-            // Looks better than `Premieres in x seconds`
-            if (upcomingTimeLeft < 1) {
-              this.upcomingTimeLeft = this.t('Video.Published.In less than a minute').toLowerCase()
-            } else {
-              // TODO a I18n entry for time format might be needed here
-              this.upcomingTimeLeft = new Intl.RelativeTimeFormat(this.currentLocale).format(upcomingTimeLeft, timeUnit)
-            }
-
-            this.scheduleLiveReminderStartInvalidation()
-            this.syncLiveReminder(loadGeneration, videoId).catch(error => {
-              console.error('Failed to load live stream reminder', error)
-            })
-          } else {
-            this.upcomingTimestamp = null
-            this.upcomingTimeLeft = null
-            this.premiereDate = undefined
-            this.scheduleLiveReminderStartInvalidation()
-          }
+          this.setUpcomingStart(result.basic_info.start_timestamp, loadGeneration, videoId)
         }
 
         if (this.isPostLiveDvr) {
@@ -4589,6 +4597,7 @@ export default defineComponent({
           this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
 
           this.isLive = result.liveNow
+          this.isUpcoming = result.isUpcoming === true
           this.isLiveDvrEnabled = null
           this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
@@ -4614,7 +4623,7 @@ export default defineComponent({
             this.videoStoryboardSrc = storyboard
               ? `data:text/vtt;charset=utf-8,${encodeURIComponent(buildVTTFileLocally(storyboard, result.lengthSeconds))}`
               : null
-          } else if (!this.isLive && !this.isPostLiveDvr) {
+          } else if (!this.isLive && !this.isPostLiveDvr && !this.isUpcoming) {
             this.videoStoryboardSrc = `${this.currentInvidiousInstanceUrl}/api/v1/storyboards/${this.videoId}?height=90`
           }
 
@@ -4663,7 +4672,10 @@ export default defineComponent({
             this.videoLengthSeconds = result.lengthSeconds
           }
 
-          if (!metadataOnly && (this.isLive || this.isPostLiveDvr)) {
+          if (this.isUpcoming) {
+            // Invidious has no trailers, so an upcoming video has nothing to play yet
+            this.setUpcomingStart(result.premiereTimestamp > 0 ? new Date(result.premiereTimestamp * 1000) : null, loadGeneration, videoId)
+          } else if (!metadataOnly && (this.isLive || this.isPostLiveDvr)) {
             // The live DASH manifest is currently unusable as it returns 403s after 1 minute of playback
             // so we have to use the HLS one for now.
             // Leaving the code here commented out in case we can use it again in the future
