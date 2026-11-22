@@ -62,6 +62,56 @@
         class="downloadOptions"
       >
         <div ref="optionsContent">
+          <details
+            v-if="selectableVideos.length > 1"
+            class="videoSelection"
+            @toggle="handleVideoSelectionToggle"
+          >
+            <summary>{{ t('Downloads.Videos Selected', { selected: selectedVideoCount, total: videoSelectionTotal }) }}</summary>
+            <section class="optionSection">
+              <FtCheckboxList
+                v-model="selectAllVideos"
+                :labels="[t('Select all')]"
+                :values="['all']"
+                :indeterminate-values="partialVideoSelection && selectedVideos.length > 0 ? ['all'] : []"
+              />
+              <div
+                ref="videoSelectionScroller"
+                v-overlay-scrollbars
+                class="videoSelectionScroller"
+              >
+                <div
+                  ref="videoSelectionContent"
+                  class="videoSelectionContent"
+                >
+                  <FtCheckboxList
+                    v-model="selectedVideoPositions"
+                    class="videoSelectionList"
+                    :labels="selectableVideos.map(video => `${video.position}. ${video.title || video.videoId}`)"
+                    :values="selectableVideos.map(video => video.position)"
+                  />
+                </div>
+              </div>
+              <p
+                v-if="videosLoading"
+                class="videoSelectionNote"
+              >
+                {{ t('Downloads.Loading Remaining Videos') }}
+              </p>
+              <p
+                v-else-if="moreVideosAvailable"
+                class="videoSelectionNote"
+              >
+                {{ t('Downloads.Unloaded Videos Excluded') }}
+              </p>
+              <p
+                v-if="tooManyVideosSelected"
+                class="videoSelectionNote invalidSelection"
+              >
+                {{ t('Downloads.Too Many Videos Selected', { max: MAX_LOCAL_PLAYLIST_VIDEOS }) }}
+              </p>
+            </section>
+          </details>
           <section class="optionSection optionGrid">
             <FtSelect
               :placeholder="t('Downloads.Media Type')"
@@ -271,6 +321,10 @@
               {{ statusLine }}
             </p>
           </div>
+          <DownloadActiveVideos
+            class="downloadActiveVideos"
+            :download="activeDownload"
+          />
           <p
             v-if="activeDownload.status === 'completed' && activeDownload.errorMessage"
             class="downloadWarning"
@@ -326,7 +380,7 @@
             v-if="activeDownload === null"
             :label="t('Downloads.Download')"
             :icon="['fas', 'download']"
-            :disabled="downloadFolderRequired || filenameTemplateInvalid"
+            :disabled="downloadFolderRequired || filenameTemplateInvalid || !videoSelectionValid"
             @click="startDownload"
           />
           <FtButton
@@ -408,6 +462,7 @@ import { useI18n } from 'vue-i18n'
 
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { useScrollClamp } from '../../composables/useScrollClamp'
+import DownloadActiveVideos from '../DownloadActiveVideos/DownloadActiveVideos.vue'
 import DownloadFailureHint from '../DownloadFailureHint/DownloadFailureHint.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
@@ -422,7 +477,7 @@ import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDo
 import { showToast } from '../../helpers/utils'
 import { canStopRecording, recordingStatusText } from '../../helpers/downloadRecording'
 import { downloadErrorMessage, suggestsYtDlpUpdate } from '../../helpers/downloadErrors'
-import { isSafeDownloadFilenameTemplate } from '../../../ytDlpArguments'
+import { isSafeDownloadFilenameTemplate, MAX_LOCAL_PLAYLIST_VIDEOS } from '../../../ytDlpArguments'
 
 const props = defineProps({
   videoId: { type: String, default: '' },
@@ -434,15 +489,22 @@ const props = defineProps({
   // limits how many processes download a remote playlist at the same time
   videoCount: { type: Number, default: 0 },
   title: { type: String, required: true },
-  thumbnail: { type: String, default: '' }
+  thumbnail: { type: String, default: '' },
+  // the loaded videos of a playlist, which can be deselected
+  videos: { type: Array, default: () => [] },
+  // a YouTube playlist has videos that aren't loaded yet
+  moreVideosAvailable: { type: Boolean, default: false },
+  videosLoading: { type: Boolean, default: false }
 })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'select-videos'])
 const { t, locale } = useI18n()
 const phoneLayout = usePhoneLayout()
 const optionsScroller = useTemplateRef('optionsScroller')
 const optionsContent = useTemplateRef('optionsContent')
 useScrollClamp(optionsScroller, optionsContent)
 useScrollClamp(useTemplateRef('progressScroller'), useTemplateRef('progressContent'))
+// Titles unwrap when the dialog widens, which shortens the video list
+useScrollClamp(useTemplateRef('videoSelectionScroller'), useTemplateRef('videoSelectionContent'))
 const downloadLabel = computed(() => props.isPlaylist
   ? t('Downloads.Download Playlist')
   : t('Downloads.Download Video'))
@@ -647,6 +709,46 @@ function deleteTemplate() {
   loadTemplate('video:best')
 }
 
+// Positions start at 1, like the file names' playlist index. Videos of YouTube playlists keep
+// their index, which counts the entries the playlist page leaves out.
+const selectableVideos = computed(() => props.isPlaylist
+  ? props.videos.map((video, index) => ({
+      videoId: video.videoId,
+      title: video.title,
+      position: props.playlistId !== '' && Number.isSafeInteger(video.index) && video.index >= 0 ? video.index + 1 : index + 1
+    }))
+      .filter(video => typeof video.videoId === 'string' && video.videoId !== '')
+  : [])
+// New pages of a YouTube playlist load as selected, so remember the deselected videos
+const deselectedVideoPositions = ref(new Set())
+const selectedVideos = computed(() => selectableVideos.value.filter(video => !deselectedVideoPositions.value.has(video.position)))
+const partialVideoSelection = computed(() => selectedVideos.value.length < selectableVideos.value.length)
+const selectedVideoPositions = computed({
+  get: () => selectedVideos.value.map(video => video.position),
+  set: (positions) => {
+    const selected = new Set(positions)
+    deselectedVideoPositions.value = new Set(selectableVideos.value
+      .filter(video => !selected.has(video.position)).map(video => video.position))
+  }
+})
+const selectAllVideos = computed({
+  get: () => partialVideoSelection.value ? [] : ['all'],
+  set: (value) => {
+    deselectedVideoPositions.value = value.includes('all')
+      ? new Set()
+      : new Set(selectableVideos.value.map(video => video.position))
+  }
+})
+// Selecting every video downloads the whole playlist, including videos that aren't loaded yet
+const videoSelectionTotal = computed(() => Math.max(selectableVideos.value.length, props.videoCount))
+const selectedVideoCount = computed(() => partialVideoSelection.value ? selectedVideos.value.length : videoSelectionTotal.value)
+const tooManyVideosSelected = computed(() => partialVideoSelection.value && selectedVideos.value.length > MAX_LOCAL_PLAYLIST_VIDEOS)
+const videoSelectionValid = computed(() => !partialVideoSelection.value ||
+  (selectedVideos.value.length > 0 && !tooManyVideosSelected.value && !props.videosLoading))
+function handleVideoSelectionToggle(event) {
+  if (event.target.open) emit('select-videos')
+}
+
 function matchesDownload(download) {
   if (props.externalUrl) return download.retryPayload?.externalUrl === props.externalUrl
   if (!props.isPlaylist) return download.videoId === props.videoId
@@ -676,15 +778,19 @@ async function chooseDownloadFolder() {
   }
 }
 async function startDownload() {
+  if (!videoSelectionValid.value) return
+  const selection = partialVideoSelection.value ? selectedVideos.value : null
   const result = await ytDlp.ytDlpDownload({
     ...normalizeOptions(options),
     videoId: props.videoId,
     ...(props.externalUrl ? { externalUrl: props.externalUrl } : {}),
-    videoIds: [...props.videoIds],
+    // A selection keeps the playlist ID, which plays the downloaded videos in the playlist
+    videoIds: selection ? selection.map(video => video.videoId) : [...props.videoIds],
+    ...(selection ? { playlistIndexes: selection.map(video => video.position) } : {}),
     playlistId: props.playlistId,
     playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,
-    ...(props.isPlaylist && props.videoCount > 0 ? { videoCount: props.videoCount } : {}),
+    ...(props.isPlaylist && props.videoCount > 0 && !selection ? { videoCount: props.videoCount } : {}),
     title: props.title,
     thumbnail: props.thumbnail,
     // edited options no longer describe the template they started from

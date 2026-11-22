@@ -3970,6 +3970,11 @@ Downloads:
   File Name Shortened: The file name was shortened because the video title was too long.
   Some Videos Not Downloaded: Some videos in this playlist could not be downloaded.
   Playlist Video Position: Video {index} of {count}
+  Videos Selected: 'Videos: {selected} of {total} selected'
+  Loading Remaining Videos: Loading the remaining videos…
+  Unloaded Videos Excluded: Some videos could not be loaded. They are only downloaded when all videos are selected.
+  Too Many Videos Selected: Select up to {max} videos, or all of them.
+  Videos in Progress: Videos in progress
   Insufficient Disk Space: Not enough disk space. About {required} is needed and {available} is available.
   Unknown Download Size: Download size is unknown. {available} is available on the destination filesystem.
   Disk Space Check Unavailable: Available disk space could not be checked before starting this download.

@@ -3084,6 +3084,11 @@ Downloads:
   File Name Shortened: Filnamnet vart korta ned fordi videotittelen var for lang.
   Some Videos Not Downloaded: Nokre videoar i denne spelelista kunne ikkje lastast ned.
   Playlist Video Position: Video {index} av {count}
+  Videos Selected: 'Videoar: {selected} av {total} valde'
+  Loading Remaining Videos: Lastar inn dei attverande videoane…
+  Unloaded Videos Excluded: Nokre videoar kunne ikkje lastast inn. Dei vert berre lasta ned når alle videoane er valde.
+  Too Many Videos Selected: Vel opptil {max} videoar, eller alle.
+  Videos in Progress: Videoar som pågår
   Insufficient Disk Space: Ikkje nok diskplass. Det trengst om lag {required}, og {available} er tilgjengeleg.
   Unknown Download Size: Storleiken på nedlastinga er ukjend. {available} er tilgjengeleg i målfilsystemet.
   Disk Space Check Unavailable: Klarte ikkje å kontrollere tilgjengeleg diskplass før nedlastinga starta.

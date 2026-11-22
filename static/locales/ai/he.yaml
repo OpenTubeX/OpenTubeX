@@ -2750,6 +2750,11 @@ Downloads:
   File Name Shortened: שם הקובץ קוצר כי כותרת הסרטון הייתה ארוכה מדי.
   Some Videos Not Downloaded: לא ניתן היה להוריד חלק מהסרטונים ברשימת ההשמעה הזו.
   Playlist Video Position: סרטון {index} מתוך {count}
+  Videos Selected: 'סרטונים: {selected} מתוך {total} נבחרו'
+  Loading Remaining Videos: הסרטונים הנותרים נטענים…
+  Unloaded Videos Excluded: לא ניתן היה לטעון חלק מהסרטונים. הם יורדו רק כאשר כל הסרטונים נבחרים.
+  Too Many Videos Selected: יש לבחור עד {max} סרטונים, או את כולם.
+  Videos in Progress: סרטונים בתהליך
   Insufficient Disk Space: אין מספיק מקום בכונן. נדרשים כ-{required} וזמינים {available}.
   Unknown Download Size: גודל ההורדה אינו ידוע. במערכת הקבצים של היעד זמינים {available}.
   Disk Space Check Unavailable: לא ניתן היה לבדוק את המקום הפנוי בכונן לפני תחילת ההורדה.

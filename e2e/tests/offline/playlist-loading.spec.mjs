@@ -571,6 +571,42 @@ test.describe('YouTube playlist search', () => {
     await expect(items).toHaveCount(300)
   })
 
+  test('download selection loads every page and keeps the positions of unavailable videos', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateEnableDownloads', true))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.selectionDownloadPayloads = []
+      ipcMain.removeHandler('yt-dlp-download')
+      ipcMain.handle('yt-dlp-download', (_event, payload) => {
+        globalThis.selectionDownloadPayloads.push(payload)
+        return null
+      })
+    })
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      const videos = Array.from({ length: 100 }, (_, index) => playlistVideo((pageNumber - 1) * 100 + index))
+      // Invidious sends unavailable videos without their details, which the playlist leaves out
+      if (pageNumber === 1) Object.assign(videos[1], { title: '', author: '', authorId: null })
+      await route.fulfill({ json: playlistResponse(videos, 200) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    await page.locator('.playlistInfo').getByTitle('Download Playlist').click()
+    const selection = page.locator('.downloadPromptCard .videoSelection')
+    await selection.locator('summary').click()
+    await expect(selection.getByText('200. Playlist video 200', { exact: true })).toBeAttached()
+    await expect(selection.getByText('Loading the remaining videos…')).toHaveCount(0)
+    await selection.getByText('3. Playlist video 3', { exact: true }).click()
+    await expect(selection.locator('summary')).toHaveText(/\b198\b.*\b200\b/)
+    await page.locator('.downloadPromptCard').getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(1)
+    const payload = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[0])
+    expect(payload.playlistId).toBe('search-test')
+    expect(payload.videoIds.slice(0, 2)).toEqual(['video-00000', 'video-00003'])
+    expect(payload.playlistIndexes.slice(0, 2)).toEqual([1, 4])
+    expect(payload.playlistIndexes.at(-1)).toBe(200)
+  })
+
   test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
     await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
       const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)

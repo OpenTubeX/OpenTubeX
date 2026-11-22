@@ -2698,6 +2698,11 @@ Downloads:
   File Name Shortened: "Berreet eo bet anv ar restr rak re hir e oa titl ar video."
   Some Videos Not Downloaded: Ul lodenn eus ar videoioù er roll-lenn-mañ n'int ket bet pellgarget.
   Playlist Video Position: Video {index} diwar {count}
+  Videos Selected: 'Videoioù: {selected} diwar {total} dibabet'
+  Loading Remaining Videos: O kargañ ar videoioù all…
+  Unloaded Videos Excluded: N'eus ket bet gallet kargañ videoioù zo. Ne vezont pellgarget nemet pa vez dibabet an holl videoioù.
+  Too Many Videos Selected: Dibabit betek {max} video, pe an holl anezho.
+  Videos in Progress: Videoioù war ober
   Insufficient Disk Space: "N'eus ket trawalc'h a blas war ar bladenn. War-dro {required} zo rekis ha {available} zo hegerz."
   Unknown Download Size: "Dianav eo ment ar pellgargadenn. {available} zo hegerz war ar reizhiad restroù pal."
   Disk Space Check Unavailable: "N'eus ket bet gallet gwiriañ ar plas dieub war ar bladenn a-raok loc'hañ ar pellgargadenn-mañ."

@@ -285,6 +285,14 @@ def _download(request):
                     'speed': None if speed is None else FileDownloader.format_speed(speed).strip(),
                     'eta': None if shown['eta'] is None else FileDownloader.format_eta(shown['eta']).strip(),
                     'activeParts': len(active)}
+            if len(parts) > 1:
+                # Like desktop and Android, list the video of every part in playlist order.
+                data['activeVideos'] = [{'videoId': part['current']['currentVideoId'],
+                                         'title': part['current'].get('currentTitle', ''),
+                                         'playlistIndex': part['current'].get('playlistIndex'),
+                                         'status': part['status'], 'percent': part['percent'], 'live': False}
+                                        for part in sorted(active, key=position)
+                                        if 'currentVideoId' in part['current']]
             progress_file.write_text(json.dumps(data), encoding='utf-8')
 
     _validate_arguments(request['args'])

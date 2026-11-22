@@ -277,7 +277,13 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   const videoIds = payload.videoIds ?? []
   if (!Array.isArray(videoIds) || videoIds.some(id => typeof id !== 'string' || !ID_REGEX.test(id))) throw new Error('invalid-video-ids')
   if (videoIds.length > MAX_LOCAL_PLAYLIST_VIDEOS) throw new Error('too-many-videos')
-  const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' && PLAYLIST_ID_REGEX.test(payload.playlistId)
+  // A selection of a playlist's videos keeps their playlist positions in file names.
+  const playlistIndexes = payload.playlistIndexes ?? videoIds.map((_, index) => index + 1)
+  if (!Array.isArray(playlistIndexes) || playlistIndexes.length !== videoIds.length ||
+    playlistIndexes.some(index => !Number.isSafeInteger(index) || index < 1)) throw new Error('invalid-playlist-indexes')
+  // A selection of a remote playlist's videos downloads them like a local playlist.
+  const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' &&
+    PLAYLIST_ID_REGEX.test(payload.playlistId) && videoIds.length === 0
   const externalUrl = payload.externalUrl
   if (externalUrl !== undefined && (!isYtDlpMediaUrl(externalUrl) || payload.isPlaylist === true || ID_REGEX.test(payload.videoId ?? '') || videoIds.length > 0 || payload.automatic === true)) {
     throw new Error('invalid-media-url')
@@ -451,7 +457,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   } else if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)
   } else if (videoIds.length > 0) {
-    args.push(...videoIds.map((videoId, index) => `https://www.youtube.com/watch?v=${videoId}&index=${index + 1}`))
+    args.push(...videoIds.map((videoId, index) => `https://www.youtube.com/watch?v=${videoId}&index=${playlistIndexes[index]}`))
   } else {
     args.push(`https://www.youtube.com/watch?v=${payload.videoId}`)
   }

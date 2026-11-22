@@ -2687,6 +2687,11 @@ Downloads:
   File Name Shortened: 视频标题过长，因此已缩短文件名。
   Some Videos Not Downloaded: 此播放列表中的部分视频无法下载。
   Playlist Video Position: 第 {index} 个视频，共 {count} 个
+  Videos Selected: 视频：已选择 {selected}/{total}
+  Loading Remaining Videos: 正在加载剩余的视频…
+  Unloaded Videos Excluded: 部分视频无法加载。只有在选中所有视频时才会下载它们。
+  Too Many Videos Selected: 最多选择 {max} 个视频，或全部选择。
+  Videos in Progress: 进行中的视频
   Insufficient Disk Space: 磁盘空间不足。需要约 {required}，当前可用空间为 {available}。
   Unknown Download Size: 下载大小未知。目标文件系统有 {available} 可用空间。
   Disk Space Check Unavailable: 开始此下载前无法检查可用磁盘空间。

@@ -2696,6 +2696,11 @@ Downloads:
   File Name Shortened: Tiedostonimeä lyhennettiin, koska videon nimi oli liian pitkä.
   Some Videos Not Downloaded: Joitakin tämän soittolistan videoita ei voitu ladata.
   Playlist Video Position: Video {index}/{count}
+  Videos Selected: 'Videot: {selected}/{total} valittu'
+  Loading Remaining Videos: Ladataan jäljellä olevia videoita…
+  Unloaded Videos Excluded: Joitakin videoita ei voitu ladata. Ne ladataan vain, kun kaikki videot on valittu.
+  Too Many Videos Selected: Valitse enintään {max} videota tai kaikki.
+  Videos in Progress: Käynnissä olevat videot
   Insufficient Disk Space: Levytilaa ei ole tarpeeksi. Tilaa tarvitaan noin {required}, ja {available} on vapaana.
   Unknown Download Size: Latauksen kokoa ei tiedetä. Kohdetiedostojärjestelmässä on vapaana {available}.
   Disk Space Check Unavailable: Vapaan levytilan määrää ei voitu tarkistaa ennen tämän latauksen aloittamista.

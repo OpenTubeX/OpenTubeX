@@ -108,10 +108,13 @@ test('downloads a playlist in parallel processes that share the queue limit', as
   const row = page.locator('.downloadRow').filter({ hasText: 'Parallel playlist' })
   await expect(row).toContainText('Video 1 of 2')
   await expect(row).toContainText('2.00MiB/s')
+  // Each video that downloads at the same time shows its own progress
+  await expect(row.locator('.activeVideo')).toHaveText([/^1 • Video 1\s*10\.0%$/, /^2 • Video 2\s*10\.0%$/])
 
   await writeFile(path.join(app.userDataDir, 'release-1'), '')
   await expect(row).toContainText('Video 2 of 2')
   await expect(row).toContainText('1.00MiB/s')
+  await expect(row.locator('.activeVideo')).toHaveCount(0)
   // The finished part frees its slot for the next queued download.
   await expect.poll(async () => (await readFile(startsFile, 'utf8')).split('\n').filter(part => part === 'single').length).toBe(2)
   expect(await page.evaluate(async id => (
@@ -123,6 +126,66 @@ test('downloads a playlist in parallel processes that share the queue limit', as
     (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
   ), playlist.id)).toBe('completed')
   await writeFile(path.join(app.userDataDir, 'release-single'), '')
+})
+
+test.describe('playlist video selection', () => {
+  test.use({
+    seed: {
+      playlists: [{
+        _id: 'selection-playlist',
+        playlistName: 'Selection playlist',
+        description: '',
+        protected: false,
+        createdAt: 1700000000000,
+        lastUpdatedAt: 1700000000000,
+        videos: ['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc'].map((videoId, index) => ({
+          videoId, playlistItemId: `selection-${index}`, title: `Video ${index + 1}`, author: 'Channel', lengthSeconds: 60, type: 'video'
+        }))
+      }]
+    }
+  })
+
+  test('downloads only the selected videos and keeps their playlist positions', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateEnableDownloads', true))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.selectionDownloadPayloads = []
+      ipcMain.removeHandler('yt-dlp-download')
+      ipcMain.handle('yt-dlp-download', (_event, payload) => {
+        globalThis.selectionDownloadPayloads.push(payload)
+        return null
+      })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Selection playlist', exact: true }).click()
+    await page.getByTitle('Download Playlist').click()
+    const prompt = page.locator('.downloadPromptCard')
+    const download = prompt.getByRole('button', { name: 'Download', exact: true })
+    const selection = prompt.locator('.videoSelection')
+    await expect(selection.locator('summary')).toHaveText(/\b3\b.*\b3\b/)
+    await selection.locator('summary').click()
+
+    const toggle = name => selection.getByText(name, { exact: true }).click()
+    await toggle('Select all')
+    await expect(selection.getByRole('checkbox', { checked: true })).toHaveCount(0)
+    await expect(download).toBeDisabled()
+    await toggle('Select all')
+    await toggle('2. Video 2')
+    await expect(selection.getByRole('checkbox', { name: 'Select all' })).not.toBeChecked()
+    await expect(selection.locator('summary')).toHaveText(/\b2\b.*\b3\b/)
+    await download.click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(1)
+    const payload = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[0])
+    expect(payload).toMatchObject({ isPlaylist: true, videoIds: ['aaaaaaaaaaa', 'ccccccccccc'], playlistIndexes: [1, 3] })
+    expect(payload.videoCount).toBeUndefined()
+
+    // Selecting every video again downloads the whole playlist
+    await toggle('2. Video 2')
+    await download.click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(2)
+    const whole = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[1])
+    expect(whole.videoIds).toEqual(['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc'])
+    expect(whole.playlistIndexes).toBeUndefined()
+  })
 })
 
 test('controls queue order, running jobs, bandwidth, and retry-all', async ({ app, page }) => {

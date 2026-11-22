@@ -2825,6 +2825,11 @@ Downloads:
   File Name Shortened: فائل کا نام مختصر کر دیا گیا کیونکہ ویڈیو کا عنوان بہت طویل تھا۔
   Some Videos Not Downloaded: اس پلے لسٹ کی کچھ ویڈیوز ڈاؤن لوڈ نہیں ہو سکیں۔
   Playlist Video Position: ویڈیو {index} از {count}
+  Videos Selected: 'ویڈیوز: {total} میں سے {selected} منتخب'
+  Loading Remaining Videos: باقی ویڈیوز لوڈ ہو رہی ہیں…
+  Unloaded Videos Excluded: کچھ ویڈیوز لوڈ نہیں ہو سکیں۔ یہ صرف تب ڈاؤن لوڈ ہوتی ہیں جب تمام ویڈیوز منتخب ہوں۔
+  Too Many Videos Selected: زیادہ سے زیادہ {max} ویڈیوز یا سب منتخب کریں۔
+  Videos in Progress: جاری ویڈیوز
   Insufficient Disk Space: ڈسک میں کافی جگہ نہیں ہے۔ تقریباً {required} درکار ہے اور {available} دستیاب ہے۔
   Unknown Download Size: ڈاؤن لوڈ کا سائز نامعلوم ہے۔ منزل کے فائل سسٹم پر {available} دستیاب ہے۔
   Disk Space Check Unavailable: یہ ڈاؤن لوڈ شروع کرنے سے پہلے دستیاب ڈسک کی جگہ چیک نہیں ہو سکی۔

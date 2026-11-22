@@ -2690,6 +2690,11 @@ Downloads:
   File Name Shortened: Failinime lühendati, sest video pealkiri oli liiga pikk.
   Some Videos Not Downloaded: Mõnda selle esitusloendi videot ei õnnestunud alla laadida.
   Playlist Video Position: Video {index}/{count}
+  Videos Selected: 'Videod: valitud {selected}/{total}'
+  Loading Remaining Videos: Ülejäänud videote laadimine…
+  Unloaded Videos Excluded: Mõnda videot ei õnnestunud laadida. Need laaditakse alla ainult siis, kui kõik videod on valitud.
+  Too Many Videos Selected: Vali kuni {max} videot või kõik.
+  Videos in Progress: Pooleli olevad videod
   Insufficient Disk Space: Kettaruumi pole piisavalt. Vaja on umbes {required}, saadaval on {available}.
   Unknown Download Size: Allalaadimise maht pole teada. Sihtfailisüsteemis on saadaval {available}.
   Disk Space Check Unavailable: Enne selle allalaadimise alustamist ei saanud saadaolevat kettaruumi kontrollida.

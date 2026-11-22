@@ -505,7 +505,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 (queuePosition($0) == queuePosition($1) && $0 < $1) }
     }
 
-    private static let currentVideoKeys = ["currentVideoId", "currentTitle", "playlistIndex", "playlistCount"]
+    private static let currentVideoKeys = ["currentVideoId", "currentTitle", "playlistIndex", "playlistCount", "activeVideos"]
 
     private func refreshProgress() {
         for id in running {
@@ -519,6 +519,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 && progress["status"] as? String == "downloading"
                 && records[id]?["currentVideoId"] as? String == progress["currentVideoId"] as? String
                 && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int
+                // The other parts of a split playlist show their own progress.
+                && records[id]?["activeVideos"] as? NSArray == progress["activeVideos"] as? NSArray
                 // A finished part lowers the combined speed of a split playlist.
                 && max(1, progress["activeParts"] as? Int ?? 1) >= (slots[id] ?? 1) { continue }
             records[id]?["status"] = progress["status"] ?? "downloading"
@@ -608,6 +610,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 if self.records[id]?["status"] as? String == "pausing" {
                     self.records[id]?["status"] = "paused"
                 }
+                self.records[id]?["activeVideos"] = nil
                 self.running.remove(id)
                 self.slots[id] = nil
                 self.publish(id)

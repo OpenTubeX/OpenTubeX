@@ -63,6 +63,7 @@
         :preload-pending="playlistPreloadPending"
         :preload-requires-confirmation="playlistPreloadRequiresConfirmation"
         :preload-complete="playlistPreloadComplete"
+        :download-videos-loading="loadingPagesForDownload"
         :search-video-mode-allowed="shownVideoCount > 1 || playlistInVideoSearchMode"
         :search-query-text="searchQueryTextRequested"
         :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
@@ -75,6 +76,7 @@
         @prompt-close="promptOpen = false"
         @toggle-playlist-bookmark="togglePlaylistBookmark"
         @preload-playlist="preloadPlaylist"
+        @download-video-selection="downloadVideoSelectionOpen = $event"
       />
     </div>
 
@@ -265,7 +267,7 @@ import {
   getLocalPlaylist,
   getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
-  parseLocalPlaylistVideos,
+  parseLocalPlaylistVideo,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -760,8 +762,14 @@ const loadingPagesForSearch = computed(() =>
   playlistInVideoSearchMode.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
 )
 
-watch([loadingPagesForSearch, isLoadingMore, isLoading], () => {
-  if (loadingPagesForSearch.value && !isLoadingMore.value && !isLoading.value) getNextPage()
+// The download prompt's video selection lists every video, so it loads the remaining pages too
+const downloadVideoSelectionOpen = ref(false)
+const loadingPagesForDownload = computed(() =>
+  downloadVideoSelectionOpen.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
+)
+
+watch([loadingPagesForSearch, loadingPagesForDownload, isLoadingMore, isLoading], () => {
+  if ((loadingPagesForSearch.value || loadingPagesForDownload.value) && !isLoadingMore.value && !isLoading.value) getNextPage()
 })
 
 const sortOrderIcon = computed(() => getIconForSortPreference(sortOrder.value))
@@ -881,6 +889,14 @@ function getPlaylistInfo() {
 
 const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
+// Keeps each video's playlist position, which the entries the parser drops would otherwise shift
+function parseLocalPlaylistPage(items, offset) {
+  return items.flatMap((item, index) => {
+    const video = parseLocalPlaylistVideo(item)
+    return video == null ? [] : [{ ...video, index: offset + index }]
+  })
+}
+
 function resetState() {
   playlistRequestGeneration++
   releasePlaylistPreloadUi()
@@ -907,6 +923,7 @@ function resetState() {
   playlistError.value = ''
   playlistErrorRetryable.value = false
   fetchedLocalPlaylistItemCount = 0
+  downloadVideoSelectionOpen.value = false
 }
 
 async function getPlaylistLocal() {
@@ -920,7 +937,7 @@ async function getPlaylistLocal() {
 
     const channelName_ = getLocalPlaylistChannelName(result.info)
 
-    const playlistItems_ = parseLocalPlaylistVideos(result.items)
+    const playlistItems_ = parseLocalPlaylistPage(result.items, 0)
     fetchedLocalPlaylistItemCount = result.items.length
 
     playlistTitle.value = result.info.title
@@ -1196,7 +1213,7 @@ async function getNextPageLocal() {
         if (!requestIsCurrent()) return
 
         if (result) {
-          const parsedVideos = parseLocalPlaylistVideos(result.items)
+          const parsedVideos = parseLocalPlaylistPage(result.items, fetchedLocalPlaylistItemCount)
           fetchedLocalPlaylistItemCount += result.items.length
           playlistItems.value = playlistItems.value.concat(parsedVideos)
 

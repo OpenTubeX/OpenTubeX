@@ -2698,6 +2698,11 @@ Downloads:
   File Name Shortened: Fitxategi-izena laburtu da, bideoaren izenburua luzeegia zelako.
   Some Videos Not Downloaded: Erreprodukzio-zerrenda honetako bideo batzuk ezin izan dira deskargatu.
   Playlist Video Position: '{index}. bideoa {count}(e)tik'
+  Videos Selected: 'Bideoak: {total} bideotik {selected} hautatuta'
+  Loading Remaining Videos: Gainerako bideoak kargatzen…
+  Unloaded Videos Excluded: Bideo batzuk ezin izan dira kargatu. Bideo guztiak hautatuta daudenean soilik deskargatzen dira.
+  Too Many Videos Selected: Hautatu gehienez {max} bideo, edo guztiak.
+  Videos in Progress: Abian dauden bideoak
   Insufficient Disk Space: Ez dago behar adina leku diskoan. {required} inguru behar dira eta {available} daude erabilgarri.
   Unknown Download Size: Deskargaren tamaina ezezaguna da. {available} daude erabilgarri helburuko fitxategi-sisteman.
   Disk Space Check Unavailable: Ezin izan da egiaztatu diskoan zenbat leku dagoen erabilgarri deskarga hasi aurretik.

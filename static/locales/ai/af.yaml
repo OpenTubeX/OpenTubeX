@@ -2966,6 +2966,11 @@ Downloads:
   File Name Shortened: Die lêernaam is verkort omdat die videotitel te lank was.
   Some Videos Not Downloaded: Sommige video's in hierdie snitlys kon nie afgelaai word nie.
   Playlist Video Position: Video {index} van {count}
+  Videos Selected: 'Video''s: {selected} van {total} gekies'
+  Loading Remaining Videos: Laai die oorblywende video's…
+  Unloaded Videos Excluded: Sommige video's kon nie gelaai word nie. Hulle word slegs afgelaai wanneer alle video's gekies is.
+  Too Many Videos Selected: Kies tot {max} video's, of almal.
+  Videos in Progress: Video's aan die gang
   Insufficient Disk Space: Nie genoeg skyfspasie nie. Ongeveer {required} word benodig en {available} is beskikbaar.
   Unknown Download Size: Aflaaigrootte is onbekend. {available} is beskikbaar op die bestemmingslêerstelsel.
   Disk Space Check Unavailable: Beskikbare skyfspasie kon nie nagegaan word voordat hierdie aflaai begin het nie.

@@ -3299,6 +3299,11 @@ Downloads:
   File Name Shortened: Ime datoteke je bilo skrajšano, ker je bil naslov videoposnetka predolg.
   Some Videos Not Downloaded: Nekaterih videoposnetkov s tega seznama predvajanja ni bilo mogoče prenesti.
   Playlist Video Position: Videoposnetek {index} od {count}
+  Videos Selected: 'Videoposnetki: izbranih {selected} od {total}'
+  Loading Remaining Videos: Nalaganje preostalih videoposnetkov…
+  Unloaded Videos Excluded: Nekaterih videoposnetkov ni bilo mogoče naložiti. Prenesejo se le, ko so izbrani vsi videoposnetki.
+  Too Many Videos Selected: Izberite do {max} videoposnetkov ali vse.
+  Videos in Progress: Videoposnetki v teku
   Insufficient Disk Space: Na disku ni dovolj prostora. Potrebnih je približno {required}, na voljo pa je {available}.
   Unknown Download Size: Velikost prenosa ni znana. V ciljnem datotečnem sistemu je na voljo {available}.
   Disk Space Check Unavailable: Pred začetkom prenosa ni bilo mogoče preveriti razpoložljivega prostora na disku.

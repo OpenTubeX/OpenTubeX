@@ -46,6 +46,7 @@ const execFileAsync = promisify(execFile)
  * @property {string} videoId
  * @property {string} [externalUrl] web media URL to download instead of a YouTube video ID
  * @property {string[]} [videoIds]
+ * @property {number[]} [playlistIndexes] position of each of videoIds in its playlist, defaults to their order
  * @property {string} [playlistId]
  * @property {string} [playlistKey] stable playlist identity used only by the renderer
  * @property {boolean} [isPlaylist]
@@ -108,6 +109,8 @@ const execFileAsync = promisify(execFile)
  * @property {string} [currentTitle]
  * @property {number | null} [playlistIndex] position of the current video in a remote playlist download
  * @property {number | null} [playlistCount]
+ * @property {{ videoId: string, title: string, playlistIndex: number | null, status: 'preparing' | 'downloading' | 'processing', percent: number, live: boolean }[]} [activeVideos]
+ *   videos the parts of a split playlist are working on, in playlist order
  * @property {string | null} speed
  * @property {string | null} eta
  * @property {string | null} destination
@@ -570,7 +573,7 @@ async function startYtDlpDownload(
     return { error: 'too-many-videos' }
   }
   const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' &&
-    PLAYLIST_ID_REGEX.test(payload.playlistId)
+    PLAYLIST_ID_REGEX.test(payload.playlistId) && videoIds.length === 0
   const isSingleVideo = typeof payload.videoId === 'string' && ID_REGEX.test(payload.videoId)
 
   const isExternalMedia = payload.externalUrl !== undefined
@@ -891,6 +894,18 @@ async function startYtDlpDownload(
       status.playlistIndex = shown.playlistIndex
       status.playlistCount = shown.playlistCount
     }
+    if (parts.length > 1) {
+      status.activeVideos = unfinished.filter(part => part.currentVideoId !== undefined)
+        .sort((first, second) => partPosition(first) - partPosition(second))
+        .map(part => ({
+          videoId: part.currentVideoId ?? '',
+          title: part.currentTitle ?? '',
+          playlistIndex: part.playlistIndex ?? null,
+          status: part.phase,
+          percent: part.percent,
+          live: part.live === true
+        }))
+    }
   }
 
   const metadataByVideoId = new Map()
@@ -1102,6 +1117,7 @@ async function startYtDlpDownload(
 
   function finishDownload() {
     activeDownloads.delete(id)
+    delete status.activeVideos
     rm(temporaryDownloadFolder, { recursive: true, force: true })
       .catch(error => console.warn('Could not remove temporary download folder', error))
 

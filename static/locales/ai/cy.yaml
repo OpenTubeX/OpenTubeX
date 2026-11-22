@@ -2727,6 +2727,11 @@ Downloads:
   File Name Shortened: Byrhawyd enw'r ffeil oherwydd bod teitl y fideo'n rhy hir.
   Some Videos Not Downloaded: Doedd dim modd llwytho rhai fideos yn y rhestr chwarae hon i lawr.
   Playlist Video Position: Fideo {index} o {count}
+  Videos Selected: 'Fideos: {selected} o {total} wedi''u dewis'
+  Loading Remaining Videos: Wrthi'n llwytho'r fideos sy'n weddill…
+  Unloaded Videos Excluded: Nid oedd modd llwytho rhai fideos. Dim ond pan fydd pob fideo wedi'i ddewis y cânt eu llwytho i lawr.
+  Too Many Videos Selected: Dewiswch hyd at {max} fideo, neu bob un.
+  Videos in Progress: Fideos ar y gweill
   Insufficient Disk Space: Dim digon o le ar y ddisg. Mae angen tua {required} ac mae {available} ar gael.
   Unknown Download Size: Nid yw maint y lawrlwythiad yn hysbys. Mae {available} ar gael ar y system ffeiliau darged.
   Disk Space Check Unavailable: Nid oedd modd gwirio'r lle oedd ar gael ar y ddisg cyn dechrau'r lawrlwythiad hwn.

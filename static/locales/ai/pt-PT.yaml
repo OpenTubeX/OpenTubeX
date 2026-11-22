@@ -2690,6 +2690,11 @@ Downloads:
   File Name Shortened: O nome do ficheiro foi abreviado porque o título do vídeo era demasiado longo.
   Some Videos Not Downloaded: Não foi possível transferir alguns vídeos desta lista de reprodução.
   Playlist Video Position: Vídeo {index} de {count}
+  Videos Selected: 'Vídeos: {selected} de {total} selecionados'
+  Loading Remaining Videos: A carregar os vídeos restantes…
+  Unloaded Videos Excluded: Não foi possível carregar alguns vídeos. Só são transferidos quando todos os vídeos estão selecionados.
+  Too Many Videos Selected: Selecione até {max} vídeos, ou todos.
+  Videos in Progress: Vídeos em curso
   Insufficient Disk Space: Não há espaço suficiente no disco. São necessários cerca de {required} e estão disponíveis {available}.
   Unknown Download Size: O tamanho da descarga é desconhecido. Estão disponíveis {available} no sistema de ficheiros de destino.
   Disk Space Check Unavailable: Não foi possível verificar o espaço disponível no disco antes de iniciar esta descarga.

@@ -136,6 +136,13 @@ public class YtDlpDownloadProgressTest {
         assertEquals(20, record.getDouble("percent"), 0);
         assertEquals("00:30", record.getString("eta"));
         assertEquals("2.00MiB/s", record.getString("speed"));
+        // Every part's video is listed in playlist order with its own progress
+        JSONArray activeVideos = record.getJSONArray("activeVideos");
+        assertEquals(2, activeVideos.length());
+        assertEquals("Second", activeVideos.getJSONObject(0).getString("title"));
+        assertEquals(20, activeVideos.getJSONObject(0).getDouble("percent"), 0);
+        assertEquals("ccccccccccc", activeVideos.getJSONObject(1).getString("videoId"));
+        assertEquals(40, activeVideos.getJSONObject(1).getDouble("percent"), 0);
         second.put("done", true);
         YtDlpDownloads.showProgress(record, Arrays.asList(first, second), videoIds);
         assertEquals("Third", record.getString("currentTitle"));

@@ -2714,6 +2714,11 @@ Downloads:
   File Name Shortened: Nama berkas dipersingkat karena judul video terlalu panjang.
   Some Videos Not Downloaded: Beberapa video dalam playlist ini tidak dapat diunduh.
   Playlist Video Position: Video {index} dari {count}
+  Videos Selected: 'Video: {selected} dari {total} dipilih'
+  Loading Remaining Videos: Memuat video yang tersisa…
+  Unloaded Videos Excluded: Beberapa video tidak dapat dimuat. Video tersebut hanya diunduh jika semua video dipilih.
+  Too Many Videos Selected: Pilih hingga {max} video, atau semuanya.
+  Videos in Progress: Video yang sedang diproses
   Insufficient Disk Space: Ruang disk tidak cukup. Diperlukan sekitar {required} dan tersedia {available}.
   Unknown Download Size: Ukuran unduhan tidak diketahui. Tersedia {available} pada sistem berkas tujuan.
   Disk Space Check Unavailable: Ruang disk yang tersedia tidak dapat diperiksa sebelum unduhan dimulai.

@@ -390,6 +390,10 @@
         :video-count="videoCount"
         :title="title"
         :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
+        :videos="videos"
+        :more-videos-available="!isUserPlaylist && moreVideoDataAvailable"
+        :videos-loading="downloadVideosLoading"
+        @select-videos="emit('download-video-selection', true)"
         @close="showDownloadPrompt = false"
       />
     </div>
@@ -566,9 +570,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // the remaining pages are loading for the download prompt's video selection
+  downloadVideosLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist'])
+const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist', 'download-video-selection'])
 
 const { t } = useI18n()
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -923,6 +932,8 @@ function openMoreOptionsMenu() {
 
 onBeforeUnmount(() => {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreMenuItems }))
+  // Loading another playlist removes the prompt without closing it
+  if (showDownloadPrompt.value) emit('download-video-selection', false)
 })
 
 const inputPlaylistNameBlank = computed(() => newTitle.value.trim() === '')
@@ -956,7 +967,10 @@ watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
 watch(showRemoveDuplicateVideosPrompt, handlePromptToggle)
 watch(showPreloadPlaylistPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
-watch(showDownloadPrompt, handlePromptToggle)
+watch(showDownloadPrompt, (shown) => {
+  handlePromptToggle(shown)
+  if (!shown) emit('download-video-selection', false)
+})
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
 })
