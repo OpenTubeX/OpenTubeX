@@ -739,12 +739,12 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
         case DBActions.FEED_CACHE.WRITE:
           if (!isFeedCacheChange(data)) throw new TypeError('invalid feed cache change')
           await baseHandlers.feedCache.write(data)
-          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, { event: SyncEvents.GENERAL.UPSERT, data })
+          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, null, { event: SyncEvents.GENERAL.UPSERT, data })
           return null
 
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.feedCache.deleteAll()
-          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, { event: SyncEvents.GENERAL.DELETE_ALL })
+          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, null, { event: SyncEvents.GENERAL.DELETE_ALL })
           return null
 
         default:

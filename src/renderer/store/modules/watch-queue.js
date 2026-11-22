@@ -71,7 +71,8 @@ export function persistWatchQueue(store, storage, sharedQueue) {
         if (index !== -1) pending.splice(index, 1)
         return true
       }
-      result.then(snapshot => {
+      // Resolves once the queue shows the result.
+      return result.then(snapshot => {
         if (settle()) applySharedQueue(snapshot, true)
       }).catch(error => {
         if (settle()) applySharedQueue({ ...latest, scope }, true)
@@ -82,7 +83,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
   const restore = () => {
     if (sharedQueue) {
       try {
-        updateSharedQueue({})
+        return updateSharedQueue({})
       } catch (error) {
         console.warn('Could not restore the watch queue', error)
       }
@@ -102,7 +103,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
     // Requests made before the switch keep their own scope.
     pending.length = 0
     store.commit('setWatchQueue', [])
-    restore()
+    await restore()
   }
   forgetScope = async (forgottenScope) => {
     // Electron deletes the queue file with the profile's other data.

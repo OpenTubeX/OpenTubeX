@@ -193,6 +193,6 @@ export async function persistUploadedWatchStatsReset(devices, store, dataScope =
   if (!saved?.pending) return
   const uploaded = devices.map(device => findWatchStatsDevice(device, syncServerDeviceId)).find(Boolean)?.reset
   if (uploaded?.id === saved.id && !uploaded.pending) {
-    await store.dispatch('updateWatchStatsReset', { scope: dataScope, reset: uploaded })
+    await store.dispatch('updateWatchStatsReset', { scope: dataScope, reset: uploaded, pendingId: saved.id })
   }
 }

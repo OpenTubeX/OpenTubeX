@@ -14,6 +14,7 @@ import {
   withRemoteSyncDeletions,
 } from '../../src/renderer/helpers/sync-deletions.js'
 import * as dataScopes from '../../src/renderer/helpers/sync-data-scope.js'
+import { isValidSeparateProfileId } from '../../src/datastores/profileDatastoreNames.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
@@ -181,6 +182,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     process: { env: { IS_ELECTRON: !capacitor && Boolean(reminderService || desktopTabs), IS_CAPACITOR: capacitor } },
     packageDetails: { version: 'test' },
     MAIN_PROFILE_ID: 'main',
+    isValidSeparateProfileId,
     // Without recorded mutations, every sync merges the whole history.
     historyChanges: createHistoryChangeTracker(),
     syncDeletions: deletions,
@@ -776,6 +778,58 @@ test('a separate profile syncs its library only in its own collections and never
   assert.deepEqual(snapshot.scopes[scope].subscriptions, ['separate-channel'])
   assert.deepEqual(Object.keys(snapshot.scopes[scope].history), ['separate-video'])
   assert.deepEqual(Object.keys(snapshot.separateProfiles), ['separate-1'])
+})
+
+test('a failed deletion of a removed separate profile\'s data is retried by the next sync', async () => {
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
+  const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
+  // This device deleted `gone-1`, which the server still lists.
+  let listed = { revision: 1, payload: await privacy.encryptSyncDocument([entry('kept-1'), entry('gone-1')], key, salt) }
+  let deletesFail = true
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
+    if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: listed.revision }], legacy_data: false }
+    if (path !== '/v1/encrypted_sync/separateProfiles') {
+      if (options.method === 'DELETE' && deletesFail) return new Response('{}', { status: 503 })
+      return
+    }
+    if (options.method !== 'PUT') return listed
+    listed = { revision: listed.revision + 1, payload: JSON.parse(options.body).payload }
+    return { revision: listed.revision }
+  }
+  const settings = {
+    syncServerSyncProfiles: true,
+    syncServerSnapshot: JSON.stringify({ separateProfiles: { 'kept-1': metadata('kept-1'), 'gone-1': metadata('gone-1') } }),
+  }
+  const f = fixture(settings, { encrypted: true, respond })
+  f.context.rootState.profiles.profileList.push({ _id: 'kept-1', name: 'kept-1', bgColor: '#123456', textColor: '#FFFFFF', separate: true, subscriptions: [] })
+  const deletes = () => f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname)
+
+  await assert.rejects(f.actions.syncWithSyncServer(f.context))
+  // The upload no longer lists the profile, but the baseline keeps it until its data is gone.
+  assert.deepEqual((await privacy.decryptSyncDocument(listed.payload, key)).map(profile => profile.id), ['kept-1'])
+  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles).sort(), ['gone-1', 'kept-1'])
+
+  deletesFail = false
+  const failed = deletes().length
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+  assert.deepEqual(deletes().slice(failed).sort(),
+    ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles), ['kept-1'])
+})
+
+test('a sync that leaves out a list keeps the deletions made in it for a sync that merges it', async () => {
+  const deletions = createSyncDeletionDecisions()
+  deletions.confirm('subscriptions', ['removed-channel'])
+  deletions.confirm('playlistBookmarks', ['removed-playlist'])
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true }, { encrypted: true, deletions })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+  assert.deepEqual(Object.keys(deletions.snapshot()), ['subscriptions'])
 })
 
 test('a separate profile does not sync its library without server support', async () => {

@@ -90,6 +90,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import store from '../../store'
 import { combineWatchStatsDays, containsWatchStatsDevice, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { showToast } from '../../helpers/utils'
+import { getDataScope } from '../../../datastores/handlers/index'
 
 const props = defineProps({
   source: { type: Object, required: true },
@@ -111,6 +112,8 @@ const preview = computed(() => ({
   localReset: store.getters.getActiveWatchStatsReset,
 }))
 const { currentDeviceId, currentDeviceName, localDays, devices, localReset } = JSON.parse(JSON.stringify(preview.value))
+// Applying it after a switch to another profile would replace that profile's statistics.
+const previewScope = getDataScope()
 const target = devices.find(device => containsWatchStatsDevice(device, currentDeviceId))
 const replacedDevices = target?.replacedDevices ?? []
 const currentDays = target
@@ -126,7 +129,7 @@ async function apply() {
   busy.value = true
   error.value = ''
   try {
-    await store.dispatch('replaceSyncWatchStatsDevice', { source, overlap: overlap.value, localDays, currentDays, replacedDevices, localReset })
+    await store.dispatch('replaceSyncWatchStatsDevice', { source, overlap: overlap.value, localDays, currentDays, replacedDevices, localReset, previewScope })
     showToast({ message: t('Stats.Replacement success'), icon: ['fas', 'check'] })
     emit('replaced')
   } catch (failure) {

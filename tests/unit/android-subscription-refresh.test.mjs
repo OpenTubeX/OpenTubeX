@@ -185,10 +185,13 @@ test('closed-app refresh includes subscribed automatic-download channels filtere
   const configuration = createAndroidSubscriptionRefreshConfiguration({
     profiles: [
       { _id: 'all', subscriptions: [{ id: 'UC-auto', feedTypes: ['posts'] }] },
-      { _id: 'filtered', subscriptions: [] }
+      { _id: 'filtered', subscriptions: [] },
+      // A separate profile's channels aren't in the all channels profile.
+      { _id: 'separate', separate: true, subscriptions: [{ id: 'UC-separate', feedTypes: [] }] }
     ],
     automaticDownloadRules: {
       'UC-auto': { includeVideos: true, includeShorts: true, includeLivestreams: false },
+      'UC-separate': { includeVideos: true },
       'UC-unsubscribed': { includeVideos: true }
     },
     closedAppRefreshEnabled: true,
@@ -201,5 +204,8 @@ test('closed-app refresh includes subscribed automatic-download channels filtere
   })
   assert.deepEqual(configuration.profiles[1].channels, {
     videos: ['UC-auto'], shorts: ['UC-auto'], live: [], posts: []
+  })
+  assert.deepEqual(configuration.profiles[2].channels, {
+    videos: ['UC-separate'], shorts: [], live: [], posts: []
   })
 })

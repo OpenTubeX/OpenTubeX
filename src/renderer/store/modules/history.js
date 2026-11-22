@@ -251,9 +251,11 @@ const actions = {
 
   async removeAllHistory({ commit }) {
     try {
+      const scope = getDataScope()
       await DBHistoryHandlers.deleteAll()
-      // Positions a failed migration kept would otherwise return on the next start.
-      removeLegacyExternalMediaPositions(readLegacyExternalMediaPositions({}, null).keys)
+      // Positions a failed migration kept would otherwise return on the next
+      // start. They belong to the shared history.
+      if (scope === null) removeLegacyExternalMediaPositions(readLegacyExternalMediaPositions({}, null).keys)
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
       return true

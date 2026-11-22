@@ -211,6 +211,9 @@ export const SYNC_DELETION_ACTIONS = new Map([
   ['removeProfile', 'profiles'],
 ])
 
+/** The lists of the data of the active data scope, unlike those of profiles and bookmarks */
+const SCOPED_FAMILIES = new Set(['history', 'playlists'])
+
 /**
  * The synced ID lists that a local action can shrink, for comparing state
  * before and after it.
@@ -310,7 +313,8 @@ export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, dataS
         // Comparing the lists costs a scan of them, which only sync needs.
         const settings = store.state.settings
         if (family && settings?.syncServerEnabled && settings.syncServerToken && !isRemoteDispatch()) {
-          const scope = dataScope()
+          // Profiles and bookmarks are the same whichever profile's data the store shows.
+          const scope = SCOPED_FAMILIES.has(family) ? dataScope() : null
           // While a profile switch loads, the store may hold either profile's data.
           if (scope === undefined) return
           before.set(action, { family, scope, lists: syncedIdLists(store.state, family, mainProfileId, scope) })
@@ -322,7 +326,7 @@ export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, dataS
         // After a profile switch, the store holds another profile's data. Its
         // lists would look like the removal of everything the action started
         // with, so sync asks about this action's deletions instead.
-        if (dataScope() !== pending.scope) return
+        if (SCOPED_FAMILIES.has(pending.family) && dataScope() !== pending.scope) return
         confirmRemovedSyncIds(pending.lists, syncedIdLists(store.state, pending.family, mainProfileId, pending.scope), decisions)
       },
     })

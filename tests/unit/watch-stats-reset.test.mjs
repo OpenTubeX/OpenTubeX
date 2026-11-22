@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { compileFunction } from 'node:vm'
+import { compileFunction, runInNewContext } from 'node:vm'
+import { babelParse } from 'vue/compiler-sfc'
 import { createWatchStatsHelpers } from '../helpers/sync-watch-stats.mjs'
 
 const source = readFileSync(new URL('../../src/renderer/store/modules/watch-stats.js', import.meta.url), 'utf8')
@@ -104,4 +105,39 @@ test('a separate profile resets its own statistics, replaced devices included, a
   assert.deepEqual(watchSecondsForDevice({ [day]: 100 }, devices, 'pixel', 'all'), { [day]: 120 })
   const reset = createWatchStatsReset(devices, 'pixel', 2)
   assert.equal(watchSecondsForDevice({}, devices, 'pixel', 'all', reset)[day] ?? 0, 0)
+})
+
+test('sync acknowledges an uploaded reset only while it is still the saved one', async () => {
+  const settingsSource = readFileSync(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const program = babelParse(settingsSource, { sourceType: 'module' }).program.body
+  const helpers = program.filter(node => /^(runLocked|runLockedSettingUpdate|pendingLocks)$/.test(node.type === 'VariableDeclaration' ? node.declarations[0].id.name : node.id?.name))
+  const action = program
+    .find(node => node.type === 'VariableDeclaration' && node.declarations[0].id.name === 'customActions')
+    .declarations[0].init.properties.find(node => node.key?.name === 'updateWatchStatsReset')
+  // Another window saved a newer reset after this one uploaded the older one.
+  const newer = { id: 'newer', at: 2, pending: true }
+  const saved = { syncServerWatchStatsReset: newer, syncServerScopedWatchStatsResets: { kids: newer } }
+  const actions = runInNewContext(`${helpers.map(node => settingsSource.slice(node.start, node.end)).join('\n')}
+    ({ ${settingsSource.slice(action.start, action.end)} })`, {
+    console,
+    DBSettingHandlers: {
+      findValue: async id => structuredClone(saved[id]),
+      upsert: async (id, value) => { saved[id] = value },
+    },
+  })
+  const store = {
+    commit: () => {},
+    dispatch: async (name, value) => {
+      assert.equal(name, 'updateSyncServerWatchStatsReset')
+      saved.syncServerWatchStatsReset = value
+    },
+  }
+  for (const scope of [null, 'kids']) {
+    await actions.updateWatchStatsReset(store, { scope, reset: { id: 'older', at: 1 }, pendingId: 'older' })
+  }
+  assert.deepEqual(saved, { syncServerWatchStatsReset: newer, syncServerScopedWatchStatsResets: { kids: newer } })
+  for (const scope of [null, 'kids']) {
+    await actions.updateWatchStatsReset(store, { scope, reset: { id: 'newer', at: 2 }, pendingId: 'newer' })
+  }
+  assert.deepEqual(structuredClone(saved), { syncServerWatchStatsReset: { id: 'newer', at: 2 }, syncServerScopedWatchStatsResets: { kids: { id: 'newer', at: 2 } } })
 })

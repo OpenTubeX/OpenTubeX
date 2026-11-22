@@ -372,7 +372,9 @@ export class EncryptedSyncAdapter {
   }
 
   async getSeparateProfiles() {
-    return Array.isArray(this.document.separateProfiles) ? structuredClone(this.document.separateProfiles) : []
+    // Merging another form would replace it on the server, and every profile in it.
+    if (!Array.isArray(this.document.separateProfiles)) throw new Error('Invalid separate profiles')
+    return structuredClone(this.document.separateProfiles)
   }
 
   async putSeparateProfiles(value) { this.#set('separateProfiles', structuredClone(value)) }

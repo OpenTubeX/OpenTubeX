@@ -59,7 +59,18 @@ function open(name) {
 // Each database needs a file for itself and one for its journal.
 const FILES_PER_DATABASE = 2
 
-async function openDatabase(name) {
+/** @type {Promise<unknown>} */
+let openings = Promise.resolve()
+
+// Each opening makes room for its files from the pool's current count, so
+// openings of different databases run one at a time.
+function openDatabase(name) {
+  const opening = openings.then(() => openDatabaseFile(name))
+  openings = opening.catch(() => {})
+  return opening
+}
+
+async function openDatabaseFile(name) {
   const poolUtil = await getPool()
   // Separate profiles add databases, so the pool grows to fit every opened
   // one. It never grows on its own, and opening a file in a full pool fails.
