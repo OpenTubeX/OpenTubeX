@@ -79,6 +79,11 @@
   z-index: 1;
 }
 
+/* While the scrollbar is in use, its grown thumb draws above the tabs. */
+.tabBar:not(.vertical) .tabsContainer > :deep(.os-scrollbar-horizontal:is(:hover, :has(:active))) {
+  z-index: 2;
+}
+
 /* Keep the track's full hit area while making the idle thumb less prominent. */
 .tabBar:not(.vertical) :deep(.os-scrollbar-horizontal:not(:hover) .os-scrollbar-handle) {
   block-size: 50%;
@@ -359,19 +364,43 @@
   scroll-padding-block-end: var(--strip-new-tab-button-space);
 }
 
+/* Spans the row's full height and covers the tabs scrolling beneath it, with
+   a gap like between tabs. The cover stays square so no tab shows through its
+   corners, and the rounded hover shape is drawn on top of it. */
 .stripNewTabButton {
   box-sizing: border-box;
   position: sticky;
   inset-inline-end: 0;
+  align-self: stretch;
   inline-size: var(--strip-new-tab-button-size);
-
-  /* Covers the tabs scrolling beneath it, with a gap like between tabs. */
-  background-color: var(--side-nav-color);
-  box-shadow: 0 0 0 2px var(--side-nav-color);
+  box-shadow: 2px 0 var(--side-nav-color), -2px 0 var(--side-nav-color);
 }
 
-.stripNewTabButton:hover {
+.stripNewTabButton,
+.stripNewTabButton:is(:hover, :active) {
+  border-radius: 0;
+  background-color: var(--side-nav-color);
+}
+
+/* Sticky positioning makes the button a stacking context, so this draws
+   between its cover and its icon. */
+.stripNewTabButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: calc(12px * var(--ui-roundness));
+  transition:
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.stripNewTabButton:hover::after {
   background-color: var(--side-nav-hover-color);
+}
+
+.stripNewTabButton:active::after {
+  border-radius: var(--shape-corner-small);
 }
 
 .tabBar.vertical .stripNewTabButton {
@@ -379,6 +408,7 @@
   inset-block-end: 0;
   inline-size: auto;
   block-size: var(--strip-new-tab-button-size);
+  box-shadow: 0 2px var(--side-nav-color), 0 -2px var(--side-nav-color);
 }
 
 /* Keep the divider outside the tab bar's stacking context so it can straddle
