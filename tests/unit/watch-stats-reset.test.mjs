@@ -136,6 +136,11 @@ test('sync acknowledges an uploaded reset only while it is still the saved one',
     await actions.updateWatchStatsReset(store, { scope, reset: { id: 'older', at: 1 }, pendingId: 'older' })
   }
   assert.deepEqual(saved, { syncServerWatchStatsReset: newer, syncServerScopedWatchStatsResets: { kids: newer } })
+  // A clear whose deletion failed restores its previous reset only while its own is saved.
+  for (const scope of [null, 'kids']) {
+    await actions.updateWatchStatsReset(store, { scope, reset: { id: 'previous', at: 0 }, replacingId: 'older' })
+  }
+  assert.deepEqual(saved, { syncServerWatchStatsReset: newer, syncServerScopedWatchStatsResets: { kids: newer } })
   for (const scope of [null, 'kids']) {
     await actions.updateWatchStatsReset(store, { scope, reset: { id: 'newer', at: 2 }, pendingId: 'newer' })
   }

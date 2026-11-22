@@ -244,7 +244,9 @@ export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
   const sections = {
-    profiles: record => object(record) && typeof record._id === 'string' && record._id !== '' && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
+    // A separate profile whose ID can't name its datastores would silently share the others' data.
+    profiles: record => object(record) && typeof record._id === 'string' && record._id !== '' &&
+      (record.separate !== true || record._id === MAIN_PROFILE_ID || isValidSeparateProfileId(record._id)) && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
     history: record => object(record) && typeof record.videoId === 'string' && (record.timeWatched === undefined || (Number.isFinite(record.timeWatched) && record.timeWatched >= 0)) && (record.watchProgress === undefined || (Number.isFinite(record.watchProgress) && record.watchProgress >= 0)),
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',

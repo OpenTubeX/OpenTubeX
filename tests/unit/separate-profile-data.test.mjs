@@ -123,6 +123,17 @@ test('deleting a separate profile deletes its data, and deleting another profile
   assert.deepEqual((await scopedHandlers('separate').searchHistory.find()).map(entry => entry.query), ['query'])
   assert.deepEqual(await db.profiles.findAsync({}), [])
 
+  // A watch-time write that already started finishes before the datastores go.
+  await Profiles.create({ _id: 'writing', name: 'Writing', separate: true, subscriptions: [] })
+  let finishWrite
+  const writing = scopedHandlers('writing').watchStats.runWrite(() => new Promise(resolve => { finishWrite = resolve }))
+  const deleting = Profiles.delete('writing')
+  await new Promise(resolve => setImmediate(resolve))
+  assert.ok(!dropped.includes('writing'), 'the drop waits for the write')
+  finishWrite()
+  await Promise.all([writing, deleting])
+  assert.ok(dropped.includes('writing'))
+
   // The app keeps a profile whose data failed to delete, so deleting it again finishes the job.
   await Profiles.create({ _id: 'retry', name: 'Retry', separate: true, subscriptions: [] })
   const drop = db.dropProfileDatastores
@@ -130,7 +141,7 @@ test('deleting a separate profile deletes its data, and deleting another profile
   await assert.rejects(Profiles.delete('retry'), /busy/)
   db.dropProfileDatastores = drop
   await Profiles.delete('retry')
-  assert.deepEqual(dropped, ['separate', 'retry'])
+  assert.deepEqual(dropped, ['separate', 'writing', 'retry'])
 })
 
 test('a profile keeps whether its data is separate, and the main profile never is', async () => {
@@ -156,7 +167,7 @@ test('separate profiles get valid, distinct datastore names on every platform', 
   assert.equal(new Set(names).size, names.length)
   // The Android and iOS database plugins only accept these characters.
   for (const name of names) assert.match(`${name}-search-history`, /^[a-z0-9-]+$/)
-  for (const invalid of ['', 'x'.repeat(65), 'é'.repeat(33), null]) assert.throws(() => profileDatastorePrefix(invalid), TypeError)
+  for (const invalid of ['', 'x'.repeat(65), 'é'.repeat(33), '\ud800', null]) assert.throws(() => profileDatastorePrefix(invalid), TypeError)
 })
 
 test('a write that finishes after a switch to another profile leaves that profile’s shown data alone', async () => {

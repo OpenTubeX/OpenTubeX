@@ -89,7 +89,8 @@ const actions = {
       try {
         await DBWatchStatsHandlers.deleteAll(reset.at)
       } catch (error) {
-        await dispatch('updateWatchStatsReset', { scope, reset: previous })
+        // Another window may have saved a newer reset meanwhile.
+        await dispatch('updateWatchStatsReset', { scope, reset: previous, replacingId: reset.id })
         throw error
       }
       commit('resetWatchStats', reset.at)

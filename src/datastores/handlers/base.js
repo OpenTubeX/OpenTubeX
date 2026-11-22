@@ -1866,10 +1866,21 @@ function onScopeDataDeleted(listener) {
  * @param {string} scope
  */
 async function deleteScopeData(scope) {
+  const handlers = profileScopes.get(scope)
   profileScopes.delete(scope)
   await Promise.all([
-    // Seen-state updates queue history writes, which would reopen the datastore.
-    Settings.runSeenStateUpdate(() => db.dropProfileDatastores(scope)),
+    // Queued writes would reopen the datastores they write to: seen-state
+    // updates write history, and the handlers queue their own writes.
+    Settings.runSeenStateUpdate(async () => {
+      if (handlers) {
+        await Promise.allSettled([
+          handlers.watchStats.pendingWrite,
+          handlers.searchHistory.writes,
+          ...handlers.playlists.pendingVideoInsertions.values(),
+        ])
+      }
+      await db.dropProfileDatastores(scope)
+    }),
     ...[...scopeDeletionListeners].map(listener => listener(scope)),
   ])
 }

@@ -1007,13 +1007,15 @@ const customActions = {
 
   /**
    * Saves the reset of a data scope's watch statistics: the shared reset, or a
-   * separate profile's. A null reset deletes a separate profile's. With
-   * `pendingId`, it only acknowledges that pending reset, because another
-   * window can save a newer one meanwhile.
-   * @param {{ scope: string | null, reset: object | null, pendingId?: string }} payload
+   * separate profile's. A null reset deletes a separate profile's. Another
+   * window can save a newer one meanwhile, so with `pendingId` it only
+   * acknowledges that pending reset, and with `replacingId` it only replaces
+   * that reset.
+   * @param {{ scope: string | null, reset: object | null, pendingId?: string, replacingId?: string }} payload
    */
-  updateWatchStatsReset: ({ commit, dispatch }, { scope, reset, pendingId }) => {
-    const replaces = saved => pendingId === undefined || (saved?.pending === true && saved.id === pendingId)
+  updateWatchStatsReset: ({ commit, dispatch }, { scope, reset, pendingId, replacingId }) => {
+    const replaces = saved => (pendingId === undefined || (saved?.pending === true && saved.id === pendingId)) &&
+      (replacingId === undefined || saved?.id === replacingId)
     if (scope === null) {
       return runLockedSettingUpdate('syncServerWatchStatsResetUpdate', async () => {
         if (replaces(await DBSettingHandlers.findValue('syncServerWatchStatsReset'))) {

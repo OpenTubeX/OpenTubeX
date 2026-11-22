@@ -69,6 +69,11 @@ test('rejects malformed records before restoring data', async () => {
     ...data,
     profiles: [{ _id: 'broken', name: 'Broken', subscriptions: [null] }],
   })), /Invalid backup profiles/)
+  // A separate profile whose ID can't name its datastores would share the others' data.
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    profiles: [{ _id: 'é'.repeat(33), name: 'Separate', separate: true, subscriptions: [] }],
+  })), /Invalid backup profiles/)
   // Only the main profile may lack a name; sorting reads every other name.
   await assert.rejects(readUnifiedBackup(createUnifiedBackup({
     ...data,
