@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Parser, YTNodes } from 'youtubei.js'
+import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 import { FLAT_REPLY_RENDERING_PRIORITY, getTimedCommentPayloads, normalizeCommentFetchResponse, normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
+
+const { parseLocalTextRuns } = createLocalFeedParsers(() => false)
 
 const comment = id => ({ commentViewModel: { commentId: id, commentKey: id } })
 const continuation = token => ({
@@ -152,7 +155,8 @@ test('pairs Timed comments with their video time and skips the welcome and end m
         content: {
           content: `Comment ${id} 0:42 @mention`,
           commandRuns: [
-            { startIndex: id.length + 9, length: 4, onTap: { innertubeCommand: { watchEndpoint: { videoId: 'video', startTimeSeconds: 42 } } } },
+            // YouTube's timestamp links span the spaces around the time.
+            { startIndex: id.length + 8, length: 6, onTap: { innertubeCommand: { watchEndpoint: { videoId: 'video', startTimeSeconds: 42 } } } },
             { startIndex: id.length + 14, length: 8, onTap: { innertubeCommand: { browseEndpoint: { browseId: 'UCmention', canonicalBaseUrl: '/@mention' } } } }
           ]
         },
@@ -198,12 +202,14 @@ test('pairs Timed comments with their video time and skips the welcome and end m
   view.applyMutations(payloads[0].comment, payloads[0].toolbarState)
   assert.equal(view.content.toString(), 'Comment first 0:42 @mention')
   // Android links come without web metadata, which link parsing needs.
-  const [, timestamp, , mention] = view.content.runs
-  assert.equal(timestamp.text, '0:42')
+  const [, timestamp, mention] = view.content.runs
+  assert.equal(timestamp.text, ' 0:42 ')
   assert.equal(timestamp.endpoint.metadata.page_type, 'WEB_PAGE_TYPE_WATCH')
   assert.equal(timestamp.endpoint.metadata.url, '/watch?v=video&t=42s')
   assert.equal(mention.text, '@mention')
   assert.equal(mention.endpoint.metadata.page_type, 'WEB_PAGE_TYPE_CHANNEL')
+  // The timestamp stays plain text for the comment section to link, not a video link.
+  assert.match(parseLocalTextRuns(view.content.runs), /^Comment first 0:42 <a /)
   assert.equal(view.author.id, 'UCtest')
   assert.equal(view.like_count, '1K')
   assert.equal(view.reply_count, '2')

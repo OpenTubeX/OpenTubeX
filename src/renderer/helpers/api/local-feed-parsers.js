@@ -1089,7 +1089,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         if (endpoint) {
           switch (endpoint.metadata.page_type) {
             case 'WEB_PAGE_TYPE_WATCH':
-              if (timestampRegex.test(text)) {
+              // Android comments' timestamp links span the spaces around the time.
+              if (timestampRegex.test(text.trim())) {
                 parsedRuns.push(text)
               } else {
                 parsedRuns.push(parseLocalYouTubeLink(run, text))
