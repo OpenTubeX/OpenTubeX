@@ -1,7 +1,7 @@
 import { execFile, spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
-import { cp, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { freemem, loadavg, tmpdir, totalmem } from 'node:os'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -946,7 +946,13 @@ async function attachStallReport(testInfo, step, elapsed, output) {
       resolve(stdout || String(error))
     })
   })
-  const read = file => readFile(file, 'utf8').catch(error => String(error))
+  const read = file => {
+    try {
+      return readFileSync(file, 'utf8')
+    } catch (error) {
+      return String(error)
+    }
+  }
   const megabytes = bytes => `${Math.round(bytes / 1024 / 1024)} MB`
   const sections = [
     // A timer that fires much later than it should means the test worker
@@ -957,16 +963,26 @@ async function attachStallReport(testInfo, step, elapsed, output) {
   ]
   if (process.platform === 'linux') {
     for (const resource of ['cpu', 'memory', 'io']) {
-      sections.push(`Pressure stall (${resource}):\n${await read(`/proc/pressure/${resource}`)}`)
+      sections.push(`Pressure stall (${resource}):\n${read(`/proc/pressure/${resource}`)}`)
     }
-    // The state and kernel wait channel tell a process blocked on disk or a
-    // lock apart from one that is busy or stopped. Kernel threads are left out.
-    sections.push(`Processes:\n${await run('ps', ['--ppid', '2', '-p', '2', '-N', '-o', 'pid,ppid,stat,etimes,pcpu,rss,wchan:32,args', '--forest'])}`)
-  } else if (process.platform !== 'win32') {
-    sections.push(`Processes:\n${await run('ps', ['-axo', 'pid,ppid,stat,etime,pcpu,rss,command'])}`)
   }
   sections.push(`Main process output:\n${output || '(none yet)'}`)
+  // Attach these before listing processes: during a disk stall, `ps` blocks
+  // reading the command line of a process stuck on I/O, past its own timeout
+  // and the test's, which once left no report at all.
   await testInfo.attach(`stall report (${step})`, { body: sections.join('\n\n'), contentType: 'text/plain' })
+
+  let processes = ''
+  if (process.platform === 'linux') {
+    // The state and kernel wait channel tell a process blocked on disk or a
+    // lock apart from one that is busy or stopped. Kernel threads are left out.
+    processes = await run('ps', ['--ppid', '2', '-p', '2', '-N', '-o', 'pid,ppid,stat,etimes,pcpu,rss,wchan:32,args', '--forest'])
+  } else if (process.platform !== 'win32') {
+    processes = await run('ps', ['-axo', 'pid,ppid,stat,etime,pcpu,rss,command'])
+  }
+  if (processes) {
+    await testInfo.attach(`stall report processes (${step})`, { body: processes, contentType: 'text/plain' })
+  }
 }
 
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
