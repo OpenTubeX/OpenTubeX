@@ -72,11 +72,13 @@ public class LibraryDatabasePlugin extends Plugin {
     @Override
     public void load() {
         File resultsDir = results();
+        File[] stale = resultsDir.listFiles();
         File dbDir = LibraryDatabase.directory(getContext());
-        executor("_cleanup").execute(() -> {
-            File[] stale = resultsDir.listFiles();
-            if (stale != null) for (File file : stale) file.delete();
-        });
+        if (stale != null && stale.length > 0) {
+            executor("_cleanup").execute(() -> {
+                for (File file : stale) file.delete();
+            });
+        }
         synchronized (this) {
             if (destroyed) return;
             for (String name : PREWARM_DATABASES) {
