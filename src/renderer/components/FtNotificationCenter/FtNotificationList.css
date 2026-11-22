@@ -21,6 +21,15 @@
   display: flex;
   align-items: flex-start;
   border-radius: var(--shape-corner-medium);
+
+  /* Horizontal touch movement swipes the row away. */
+  touch-action: pan-y pinch-zoom;
+}
+
+.notificationRow[data-swipe='settling'] {
+  transition:
+    translate var(--motion-default-effects),
+    opacity var(--motion-default-effects);
 }
 
 /* A dismissed row slides out, then closes its gap so the rows below move up.

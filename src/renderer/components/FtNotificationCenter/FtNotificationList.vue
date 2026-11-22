@@ -19,6 +19,10 @@
         :key="entry.id"
         class="notificationRow"
         :class="{ unread: !entry.read }"
+        @pointerdown="startSwipe(entry, $event)"
+        @pointermove="moveSwipe"
+        @pointerup="finishSwipe"
+        @pointercancel="cancelSwipe"
       >
         <component
           :is="opensTab(entry) ? RouterLink : 'button'"
@@ -149,6 +153,93 @@ function opensTab(entry) {
  */
 function makeInert(element) {
   element.inert = true
+}
+
+/**
+ * Touch swipes dismiss a notification sideways, like the system's do. Vertical
+ * movement keeps scrolling the list.
+ * @type {{ entry: import('../../../notificationHistory').NotificationHistoryEntry, id: number, x: number, y: number, time: number, offset: number, velocity: number, locked: boolean } | null}
+ */
+let swipe = null
+
+/**
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {PointerEvent} event
+ */
+function startSwipe(entry, event) {
+  if (swipe || event.pointerType !== 'touch' || !event.isPrimary) return
+  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, time: 0, offset: 0, velocity: 0, locked: false }
+}
+
+/** @param {PointerEvent} event */
+function moveSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const row = /** @type {HTMLElement} */ (event.currentTarget)
+  const offset = event.clientX - swipe.x
+  if (!swipe.locked) {
+    const vertical = Math.abs(event.clientY - swipe.y)
+    if (vertical > 10 && vertical >= Math.abs(offset)) {
+      swipe = null
+      return
+    }
+    if (Math.abs(offset) < 10) return
+    swipe.locked = true
+    swipe.time = event.timeStamp
+    row.setPointerCapture(event.pointerId)
+    row.dataset.swipe = 'dragging'
+  }
+  // Flicks dismiss by the speed of the last movement.
+  swipe.velocity = (offset - swipe.offset) / Math.max(1, event.timeStamp - swipe.time)
+  swipe.time = event.timeStamp
+  swipe.offset = offset
+  row.style.translate = `${offset}px 0`
+  row.style.opacity = String(Math.max(0.2, 1 - Math.abs(offset) / row.offsetWidth))
+}
+
+/** @param {PointerEvent} event */
+function finishSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const { entry, locked, offset, velocity } = swipe
+  swipe = null
+  if (!locked) return
+  const row = /** @type {HTMLElement} */ (event.currentTarget)
+  suppressClick()
+  const flicked = Math.abs(offset) > 24 && Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(offset)
+  if (Math.abs(offset) > row.offsetWidth * 0.35 || flicked) {
+    // The row leaves from where the finger released it, in the swiped direction.
+    row.style.setProperty('--dismiss-direction', String(Math.sign(offset)))
+    delete row.dataset.swipe
+    emit('remove', entry, event)
+  } else {
+    settle(row)
+  }
+}
+
+/** @param {PointerEvent} event */
+function cancelSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const { locked } = swipe
+  swipe = null
+  if (locked) settle(/** @type {HTMLElement} */ (event.currentTarget))
+}
+
+/** @param {HTMLElement} row */
+function settle(row) {
+  row.dataset.swipe = 'settling'
+  row.style.translate = ''
+  row.style.opacity = ''
+  row.addEventListener('transitionend', () => { if (row.dataset.swipe === 'settling') delete row.dataset.swipe }, { once: true })
+}
+
+/** The released finger still clicks the entry or button under it. */
+function suppressClick() {
+  const suppress = (/** @type {MouseEvent} */ event) => {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  window.addEventListener('click', suppress, { capture: true, once: true })
+  // Taps after this one open entries again.
+  setTimeout(() => window.removeEventListener('click', suppress, true), 300)
 }
 
 /**
