@@ -323,7 +323,7 @@ test('a collaboration check is stored with its time, survives uploads writes fro
   await actions.grabAllSubscriptions({
     state,
     rootState: { profiles: { profilesLoaded: true } },
-    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    rootGetters: { getAllRootSubscriptions: [{ id: 'channel' }] },
     commit: (type, payload) => mutations[type](state, payload),
   })
   assert.equal(state.videoCache.channel.collaborationsCheckedAt, checkedAt)
