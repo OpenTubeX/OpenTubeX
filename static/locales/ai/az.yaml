@@ -1324,6 +1324,7 @@ Settings:
       Notify When Live: İzlənilən Twitch kanalları canlı yayına başlayanda bildiriş göndər
       Auto Refresh Interval: Digər platformaların avtomatik yenilənmə aralığı
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Baxılmış videoları axtarışda və tövsiyələrdə gizlət"
     Hide Full Screen Video Title: Tam pəncərədə / tam ekranda video başlığını gizlət
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
@@ -2460,6 +2461,7 @@ Tooltips:
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
     Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Baxılmış videoları axtarış nəticələrindən, baxış səhifəsindəki Növbəti bölməsindən və Ana səhifədəki YouTube tövsiyələrindən gizlədir. Avtomatik oxutma da onları ötürür."
     Hide Playlist Stats: Pleylist səhifələrində video sayını, baxış sayını, son yenilənmə tarixini və ümumi müddəti gizlədir.
     Count Watch Time From: "\"Bütün cihazlar\" baxış statistikasını sinxronlaşdıran hər cihazı sayır. \"Bu cihaz\" yalnız burada baxdıqlarınızı sayır."
     When a Limit Is Reached: "\"Oxutmaya Fasilə Ver\" 15 dəqiqə əlavə etməyə və ya bu gün üçün limiti nəzərə almamağa imkan verir. Tənzimləmələr parolu ilə limiti yalnız Tənzimləmələrdə artıra bilərsiniz."

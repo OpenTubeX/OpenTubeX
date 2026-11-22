@@ -1559,6 +1559,7 @@ Settings:
       Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
       Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Skrij gledane videoposnetke v iskanju in priporočilih"
     Hide Full Screen Video Title: Skrij naslov videoposnetka v celotnem oknu/celozaslonskem načinu
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
@@ -2969,6 +2970,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Skrije gledane videoposnetke iz rezultatov iskanja, razdelka Naslednje na sporedu na strani za ogled in priporočil YouTube na domači strani. Samodejno predvajanje jih prav tako preskoči."
     Hide Playlist Stats: Na straneh seznamov predvajanja skrije število videoposnetkov, število ogledov, datum zadnje posodobitve in skupno trajanje.
     Count Watch Time From: "Možnost »Vse naprave« šteje vse naprave, ki sinhronizirajo statistiko gledanja. »Ta naprava« šteje samo to, kar gledate tukaj."
     When a Limit Is Reached: "Možnost »Začasno ustavi predvajanje« omogoča, da dodate 15 minut ali omejitev za danes prezrete. Z geslom za nastavitve lahko omejitev povečate samo v nastavitvah."

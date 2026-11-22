@@ -57,7 +57,7 @@ import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpe
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched, withoutWatchedDiscoveryVideos } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
@@ -775,8 +775,11 @@ export default defineComponent({
           })
         })
     },
+    shownRecommendedVideos() {
+      return withoutWatchedDiscoveryVideos(this.recommendedVideos, this.$store.getters)
+    },
     displayedRecommendations() {
-      return this.isOffline ? this.offlineDownloadSuggestions : this.recommendedVideos
+      return this.isOffline ? this.offlineDownloadSuggestions : this.shownRecommendedVideos
     },
     hasScheduledPremiereStarted: function () {
       return this.premiereDate instanceof Date &&
@@ -1252,7 +1255,7 @@ export default defineComponent({
 
       const recommendedVideos = this.hideRecommendedVideos
         ? []
-        : this.recommendedVideos.filter(video =>
+        : this.shownRecommendedVideos.filter(video =>
             !this.isHiddenVideo(video)
           )
 
@@ -1283,7 +1286,7 @@ export default defineComponent({
     fullscreenRecommendationsAvailable() {
       if (this.isLoading || this.hideRecommendedVideos || (this.isFamilyFriendly === false && this.showFamilyFriendlyOnly)) return false
       if (this.isOffline) return this.offlineDownloadSuggestions.length > 0
-      return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
+      return this.shownRecommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
         hiddenChannelNames: this.$store.getters.getChannelsHiddenNamesToRemove,
         aiSlopChannels: this.$store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: this.$store.getters.getForbiddenTitlesToRemove,
@@ -1425,14 +1428,14 @@ export default defineComponent({
     },
     endScreenRecommendations: function () {
       if (this.hideRecommendedVideos || this.hideEndScreenRecommendations) return []
-      return this.recommendedVideos.filter(video =>
+      return this.shownRecommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(video)
       ).slice(0, 6)
     },
     nextRecommendedVideo: function () {
       if (this.isOffline) return undefined
-      return this.recommendedVideos.find((video) =>
+      return this.shownRecommendedVideos.find((video) =>
         !this.isHiddenVideo(video)
       )
     },

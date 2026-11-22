@@ -1520,6 +1520,7 @@ Settings:
       Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
       Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "검색 및 추천에서 시청한 동영상 숨기기"
     Hide Full Screen Video Title: 전체 창 / 전체 화면에서 동영상 제목 숨기기
     Digital Wellbeing:
       Count Watch Time From: "시청 시간 계산 기준"
@@ -2838,6 +2839,7 @@ Tooltips:
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "검색 결과, 시청 페이지의 다음 동영상, 홈의 YouTube 추천에서 시청한 동영상을 숨깁니다. 자동 재생도 이 동영상을 건너뜁니다."
     Hide Playlist Stats: 재생목록 페이지에서 동영상 수, 조회수, 마지막 업데이트 날짜, 총 재생 시간을 숨깁니다.
     Count Watch Time From: "“모든 기기”는 시청 통계를 동기화하는 모든 기기를 계산합니다. “이 기기”는 여기에서 시청한 시간만 계산합니다."
     When a Limit Is Reached: "“재생 일시 정지”를 사용하면 15분을 추가하거나 오늘은 한도를 무시할 수 있습니다. 설정 비밀번호가 있으면 한도는 설정에서만 늘릴 수 있습니다."

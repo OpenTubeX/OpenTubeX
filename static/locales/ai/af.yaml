@@ -1511,6 +1511,7 @@ Settings:
       Notify When Live: Stel in kennis wanneer gevolgde Twitch-kanale regstreeks gaan
       Auto Refresh Interval: Interval vir outomatiese verfrissing van ander platforms
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Versteek gekykte video’s in soektogte en aanbevelings"
     Hide Full Screen Video Title: Versteek videotitel in volle venster / volskerm
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
@@ -2709,6 +2710,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg word benodig om afsonderlike video- en oudiostrome saam te voeg en vir oudio-omskakeling. By verstek sal OpenTubeX aanvaar dat FFmpeg via die PATH-omgewingsveranderlike gevind kan word. Indien nodig, kan ’n pasgemaakte pad hier gestel word.
     Use cookies for subtitles: Gebruik die opgestelde koekies vir onderskrifte en outomatiese vertalings. Ook geaktiveer deur "Gebruik altyd koekies".
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Versteek gekykte video’s uit soekresultate, Volgende op die kykblad en YouTube-aanbevelings op die tuisblad. Outospeel slaan hulle ook oor."
     Hide Playlist Stats: Versteek die aantal video’s, die aantal kyke, die datum van die laaste opdatering en die totale duur op snitlysbladsye.
     Count Watch Time From: Alle toestelle tel elke toestel wat kykstatistieke sinkroniseer. Hierdie toestel tel slegs wat u hier kyk.
     When a Limit Is Reached: Pouseer afspeel laat u toe om 15 minute by te voeg of die limiet vir vandag te ignoreer. Met ’n instellingswagwoord kan u ’n limiet slegs in Instellings verhoog.

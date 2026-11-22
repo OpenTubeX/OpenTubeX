@@ -194,6 +194,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['hideLiveChat', 'Settings.Distraction Free Settings.Hide Live Chat', 'content', ['fas', 'comment']],
   ['hideLiveChatReplay', 'Settings.Distraction Free Settings.Hide Live Chat Replay', 'content', ['fas', 'comment']],
   ['hideWatchedSubs', 'Settings.Distraction Free Settings.Hide Videos on Watch', 'content', ['fas', 'eye-slash']],
+  ['hideWatchedInSearchAndRecommendations', 'Settings.Distraction Free Settings.Hide Watched in Search and Recommendations', 'content', ['fas', 'eye-slash']],
   ['hideVideoViews', 'Settings.Distraction Free Settings.Hide Video Views', 'content', ['fas', 'eye']],
   ['hideVideoLikesAndDislikes', 'Settings.Distraction Free Settings.Hide Video Likes And Dislikes', 'content', ['fas', 'thumbs-up']],
   ['hideChannelAvatars', 'Settings.Distraction Free Settings.Hide Channel Avatars', 'content', ['fas', 'circle-user']],

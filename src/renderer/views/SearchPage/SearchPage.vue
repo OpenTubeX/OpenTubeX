@@ -56,7 +56,7 @@
         <div
           v-if="searchCorrection"
           class="searchCorrection"
-          :class="{ centered: shownResults.length === 0 }"
+          :class="{ centered: visibleResults.length === 0 }"
           role="status"
         >
           <I18nT
@@ -129,7 +129,7 @@
         </p>
         <FtElementList
           appear
-          :data="shownResults"
+          :data="visibleResults"
         />
         <!-- Recheck visibility when results are appended or replaced. -->
         <FtAutoLoadNextPageWrapper
@@ -210,6 +210,7 @@ import {
   getLocalSearchResults
 } from '../../helpers/api/local'
 import { applyPublicationDates } from '../../helpers/api/missing-publication'
+import { withoutWatchedDiscoveryVideos } from '../../helpers/history'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { getSearchSettingsFromRouteQuery } from '../../../search-history'
@@ -294,7 +295,8 @@ onBeforeUnmount(() => {
 
 const query = ref('')
 const processedQuery = computed(() => query.value.trim())
-const exhaustedSearchMessage = computed(() => shownResults.value.length === 0
+const visibleResults = computed(() => withoutWatchedDiscoveryVideos(shownResults.value, store.getters))
+const exhaustedSearchMessage = computed(() => visibleResults.value.length === 0
   ? t('Channel.Your search results have returned 0 results')
   : t('Search Filters.There are no more results for this search'))
 

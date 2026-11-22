@@ -1322,6 +1322,7 @@ Settings:
       Notify When Live: 追隨的 Twitch 頻道開始直播時通知
       Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "在搜尋和推薦中隱藏已觀看的影片"
     Hide Full Screen Video Title: 在全視窗／全螢幕模式隱藏影片標題
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
@@ -2450,6 +2451,7 @@ Tooltips:
     FFmpeg Executable Path: 合併分開的影片與音訊串流及轉換音訊時需要 FFmpeg。OpenTubeX 預設會假設可透過 PATH 環境變數找到 FFmpeg。如有需要，可在此設定自訂路徑。
     Use cookies for subtitles: "使用已設定的 Cookie 取得字幕和自動翻譯。啟用「一律使用 Cookie」也會開啟此功能。"
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "在搜尋結果、播放頁面的「觀看其他類似影片」和首頁的 YouTube 推薦中隱藏已觀看的影片。自動播放也會略過這些影片。"
     Hide Playlist Stats: 在播放清單頁面上隱藏影片數量、觀看次數、最後更新日期和總長度。
     Count Watch Time From: "「所有裝置」會計算每台同步觀看統計資料的裝置。「此裝置」只計算你在這裡觀看的內容。"
     When a Limit Is Reached: "「暫停播放」可讓你再看 15 分鐘或今天忽略上限。若設有設定密碼，只能在設定中提高上限。"

@@ -1325,6 +1325,7 @@ Settings:
       Notify When Live: Hysbysu Pan Fydd Sianeli Twitch a Ddilynir yn Mynd yn Fyw
       Auto Refresh Interval: Cyfwng adnewyddu llwyfannau eraill yn awtomatig
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Cuddio fideos a wyliwyd mewn chwiliadau ac argymhellion"
     Hide Full Screen Video Title: Cuddio teitl y fideo mewn ffenestr lawn / sgrin lawn
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
@@ -2485,6 +2486,7 @@ Tooltips:
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Yn cuddio fideos rydych wedi’u gwylio o ganlyniadau chwilio, Nesaf ar y dudalen wylio, ac argymhellion YouTube ar y Cartref. Mae chwarae awtomatig yn eu hepgor hefyd."
     Hide Playlist Stats: Yn cuddio nifer y fideos, nifer y gwyliadau, dyddiad y diweddariad diwethaf a’r hyd cyfan ar dudalennau rhestrau chwarae.
     Count Watch Time From: "Mae \"Pob dyfais\" yn cyfrif pob dyfais sy'n cysoni ystadegau gwylio. Mae \"Y ddyfais hon\" yn cyfrif dim ond yr hyn rydych yn ei wylio yma."
     When a Limit Is Reached: "Mae \"Seibio Chwarae\" yn gadael i chi ychwanegu 15 munud neu anwybyddu'r terfyn am heddiw. Gyda chyfrinair gosodiadau, dim ond yn y Gosodiadau y gallwch godi terfyn."

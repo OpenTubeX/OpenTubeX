@@ -845,6 +845,7 @@ Settings:
       Notify When Live: Powiadamiaj, gdy obserwowane kanały Twitch rozpoczną transmisję
       Auto Refresh Interval: Interwał odświeżania innych platform
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ukrywaj obejrzane filmy w wyszukiwaniu i rekomendacjach"
     Hide Full Screen Video Title: Ukryj tytuł filmu w trybie pełnego okna lub pełnego ekranu
     Digital Wellbeing:
       Count Watch Time From: "Licz czas oglądania"
@@ -1674,6 +1675,7 @@ Tooltips:
     Always Use Cookies: "Używaj skonfigurowanych plików cookie do pobierania, napisów i za każdym razem, gdy yt-dlp pobiera informacje o strumieniach. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp."
     Use cookies for subtitles: "Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych. Włącza się także przez „Zawsze używaj ciasteczek”."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ukrywa obejrzane filmy w wynikach wyszukiwania, w sekcji Następne na stronie odtwarzania i w rekomendacjach YouTube na stronie głównej. Autoodtwarzanie również je pomija."
     Hide Playlist Stats: Ukrywa liczbę filmów, liczbę wyświetleń, datę ostatniej aktualizacji i łączny czas trwania na stronach playlist.
     Count Watch Time From: "„Wszystkie urządzenia” liczy każde urządzenie, które synchronizuje statystyki oglądania. „To urządzenie” liczy tylko to, co oglądasz tutaj."
     When a Limit Is Reached: "„Wstrzymaj odtwarzanie” pozwala dodać 15 minut lub zignorować limit na dzisiaj. Przy ustawionym haśle do ustawień limit można zwiększyć tylko w ustawieniach."

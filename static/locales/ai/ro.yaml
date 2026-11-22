@@ -1324,6 +1324,7 @@ Settings:
       Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
       Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ascunde videoclipurile vizionate în căutare și recomandări"
     Hide Full Screen Video Title: Ascunde titlul videoclipului în fereastră completă / pe ecran complet
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
@@ -2502,6 +2503,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
     Use cookies for subtitles: "Folosește cookie-urile configurate pentru subtitrări și traduceri automate. Se activează și prin „Folosește întotdeauna cookie-uri”."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ascunde videoclipurile vizionate din rezultatele căutării, din În continuare pe pagina de redare și din recomandările YouTube de pe pagina principală. Redarea automată le omite și ea."
     Hide Playlist Stats: Ascunde numărul de videoclipuri, numărul de vizionări, data ultimei actualizări și durata totală pe paginile listelor de redare.
     Count Watch Time From: "„Toate dispozitivele” numără fiecare dispozitiv care sincronizează statisticile de vizionare. „Acest dispozitiv” numără doar ce vizionați aici."
     When a Limit Is Reached: "„Întrerupe redarea” vă permite să adăugați 15 minute sau să ignorați limita pentru azi. Cu o parolă pentru setări, puteți mări o limită doar în setări."

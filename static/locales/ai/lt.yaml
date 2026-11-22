@@ -1540,6 +1540,7 @@ Settings:
       Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
       Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Slėpti peržiūrėtus vaizdo įrašus paieškoje ir rekomendacijose"
     Hide Full Screen Video Title: Slėpti vaizdo įrašo pavadinimą viso lango arba viso ekrano režimu
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
@@ -2875,6 +2876,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
     Use cookies for subtitles: "Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Taip pat įjungiama pasirinkus „Visada naudoti slapukus“."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Slepia peržiūrėtus vaizdo įrašus paieškos rezultatuose, peržiūros puslapio skiltyje „Sekantis“ ir YouTube rekomendacijose pagrindiniame puslapyje. Automatinis paleidimas juos taip pat praleidžia."
     Hide Playlist Stats: Grojaraščių puslapiuose paslepia vaizdo įrašų skaičių, peržiūrų skaičių, paskutinio atnaujinimo datą ir bendrą trukmę.
     Count Watch Time From: "„Visi įrenginiai“ skaičiuoja kiekvieną įrenginį, kuris sinchronizuoja žiūrėjimo statistiką. „Šis įrenginys“ skaičiuoja tik tai, ką žiūrite čia."
     When a Limit Is Reached: "„Pristabdyti atkūrimą“ leidžia pridėti 15 minučių arba šiandien ignoruoti limitą. Nustačius nustatymų slaptažodį, limitą padidinti galima tik nustatymuose."

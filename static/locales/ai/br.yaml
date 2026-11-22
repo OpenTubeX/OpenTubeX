@@ -1322,6 +1322,7 @@ Settings:
       Notify When Live: Kemenn pa grog ar chadennoù Twitch heuliet da skignañ war-eeun
       Auto Refresh Interval: Etrevez adkargañ emgefreek ar savennoù all
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Kuzhat ar videoioù sellet outo er c’hlask hag en erbedadennoù"
     Hide Full Screen Video Title: Kuzhat titl ar video er prenestr leun pe er skramm leun
     Digital Wellbeing:
       Count Watch Time From: "Kontañ an amzer sellet diwar"
@@ -2458,6 +2459,7 @@ Tooltips:
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
     Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Kuzhat a ra ar videoioù sellet outo diouzh disoc’hoù ar c’hlask, Da-heul war ar bajenn sellet hag erbedadennoù YouTube war an Degemer. Ar lenn emgefre a lamm dreist dezho ivez."
     Hide Playlist Stats: Kuzhat a ra niver ar videoioù, niver ar sellerezhioù, deiziad an hizivadur diwezhañ hag an amzer hollek war pajennoù ar rolloù-lenn.
     Count Watch Time From: "\"An holl drevnadoù\" a gont kement trevnad a goubred ar stadegoù sellout. \"An trevnad-mañ\" a gont ar pezh a sellit amañ hepken."
     When a Limit Is Reached: "\"Ehanañ al lenn\" a laosk ac'hanoc'h da ouzhpennañ 15 munutenn pe da lezel ar vevenn a-gostez evit hiziv. Gant ur ger-tremen evit an arventennoù, ne c'hallit kreskiñ ur vevenn nemet en Arventennoù."

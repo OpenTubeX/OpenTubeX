@@ -1322,6 +1322,7 @@ Settings:
       Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
       Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Peida vaadatud videod otsingus ja soovitustes"
     Hide Full Screen Video Title: Peida video pealkiri täisaknas või täisekraanil
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
@@ -2450,6 +2451,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Peidab vaadatud videod otsingutulemustest, vaatamislehe jaotisest Järgmisena ja avalehe YouTube’i soovitustest. Automaatesitus jätab need samuti vahele."
     Hide Playlist Stats: Peidab esitusloendite lehtedel videote arvu, vaatamiste arvu, viimase uuendamise kuupäeva ja kogukestuse.
     Count Watch Time From: "„Kõik seadmed“ arvestab iga seadet, mis sünkroonib vaatamisstatistikat. „See seade“ arvestab ainult seda, mida sa siin vaatad."
     When a Limit Is Reached: "„Peata esitus“ võimaldab lisada 15 minutit või jätta limiidi tänaseks tähelepanuta. Seadistuste salasõna korral saad limiiti tõsta ainult seadistustes."

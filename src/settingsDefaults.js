@@ -270,6 +270,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideVideoViews: false,
     shortenViewCounts: true,
     hideWatchedSubs: false,
+    hideWatchedInSearchAndRecommendations: false,
     hideUploader: false,
     unsubscriptionPopupStatus: false,
     hideLabelsSideBar: false,

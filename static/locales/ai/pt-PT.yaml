@@ -1285,6 +1285,7 @@ Settings:
       Notify When Live: Notificar quando os canais da Twitch seguidos entrarem em direto
       Auto Refresh Interval: Intervalo de atualização automática de outras plataformas
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ocultar vídeos visualizados na pesquisa e nas recomendações"
     Hide Full Screen Video Title: Ocultar título do vídeo em janela inteira ou ecrã inteiro
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualização de"
@@ -2448,6 +2449,7 @@ Tooltips:
     FFmpeg Executable Path: O FFmpeg é necessário para combinar transmissões separadas de vídeo e áudio e para converter áudio. Por predefinição, o OpenTubeX assume que o FFmpeg pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
     Use cookies for subtitles: "Usar os cookies configurados para legendas e traduções automáticas. Também é ativado por «Usar sempre cookies»."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Oculta os vídeos visualizados dos resultados da pesquisa, de Próximo na página de reprodução e das recomendações do YouTube no Início. A reprodução automática também os ignora."
     Hide Playlist Stats: Oculta o número de vídeos, o número de visualizações, a data da última atualização e a duração total nas páginas das listas de reprodução.
     Count Watch Time From: "«Todos os dispositivos» conta todos os dispositivos que sincronizam as estatísticas de visualização. «Este dispositivo» conta apenas o que vê aqui."
     When a Limit Is Reached: "«Pausar a reprodução» permite adicionar 15 minutos ou ignorar o limite por hoje. Com uma palavra-passe das definições, só pode aumentar um limite nas definições."

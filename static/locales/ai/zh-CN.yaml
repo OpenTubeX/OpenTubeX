@@ -1322,6 +1322,7 @@ Settings:
       Notify When Live: 关注的 Twitch 频道开播时通知
       Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "在搜索和推荐中隐藏已观看的视频"
     Hide Full Screen Video Title: 在全窗口或全屏时隐藏视频标题
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
@@ -2447,6 +2448,7 @@ Tooltips:
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "在搜索结果、播放页面的“接下来播放”和首页的 YouTube 推荐中隐藏已观看的视频。自动播放也会跳过这些视频。"
     Hide Playlist Stats: 在播放列表页面上隐藏视频数量、观看次数、最后更新日期和总时长。
     Count Watch Time From: "“所有设备”统计每台同步观看统计的设备。“此设备”只统计你在这里观看的内容。"
     When a Limit Is Reached: "“暂停播放”可让你再看 15 分钟或今天忽略限额。如果设有设置密码，只能在设置中提高限额。"
