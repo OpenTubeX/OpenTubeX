@@ -444,7 +444,7 @@ const { channelThumbnail } = useResultChannelAvatar(
 )
 
 /** @type {import('vue').ComputedRef<string | null>} */
-const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkPlaylistId = computed(() => store.getters.getActiveQuickBookmarkTargetPlaylistId)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
@@ -457,7 +457,7 @@ const markedAsQuickBookmarkTarget = computed(() => {
 async function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = store.getters.getQuickBookmarkPlaylist
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistMetadata.value.playlistId)
+  store.dispatch('updateActiveQuickBookmarkTarget', playlistMetadata.value.playlistId)
 
   if (currentQuickBookmarkTargetPlaylist != null) {
     showToast({
@@ -466,7 +466,7 @@ async function enableQuickBookmarkForThisPlaylist() {
       }),
       time: 5000,
       action: () => {
-        store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
+        store.dispatch('updateActiveQuickBookmarkTarget', currentQuickBookmarkTargetPlaylist._id)
         showToast({
           message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,

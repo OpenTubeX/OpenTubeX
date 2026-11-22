@@ -262,7 +262,7 @@ function stopObservingContent() {
 }
 
 const channels = computed(() => {
-  const subscriptions = store.getters.getProfileList[0]?.subscriptions ?? []
+  const subscriptions = store.getters.getSubscriptionRootProfile?.subscriptions ?? []
   const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
 
   return [...subscriptions].sort((a, b) => (
