@@ -1671,6 +1671,10 @@ Settings:
     Failed to Download: Không thể tải xuống danh sách
     Loaded Status: "Kênh bị chặn: {blocked} · Kênh bị gắn cờ: {warned} · Cập nhật: {date}"
   Highlight Changed Settings Label: Đã thay đổi
+  Subscription Tabs:
+    Title: "Thẻ đăng ký"
+    Hint: "Thay đổi thứ tự các thẻ trên trang Đăng ký. Các thẻ bị ẩn vẫn giữ vị trí cho đến khi bạn hiển thị lại."
+    Hidden: "(đã ẩn)"
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp

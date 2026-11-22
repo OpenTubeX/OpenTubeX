@@ -549,6 +549,10 @@ Settings:
     Quick Bookmark: "Schnell-Lesezeichen"
     Availability Hint: "Aktionen werden nur bei Videos angezeigt, für die sie verfügbar sind."
     Disabled: "(deaktiviert)"
+  Subscription Tabs:
+    Title: Abo-Registerkarten
+    Hint: Ändere die Reihenfolge der Registerkarten auf der Abos-Seite. Ausgeblendete Registerkarten behalten ihren Platz, falls du sie wieder einblendest.
+    Hidden: (ausgeblendet)
   # On Settings Page
   Settings: Einstellungen
   Categories:

@@ -1627,6 +1627,10 @@ Settings:
     Failed to Download: Не удалось загрузить списки
     Loaded Status: "Заблокированные каналы: {blocked} · Помеченные каналы: {warned} · Обновлено: {date}"
   Highlight Changed Settings Label: Изменённые
+  Subscription Tabs:
+    Title: "Вкладки подписок"
+    Hint: "Измените порядок вкладок на странице «Подписки». Скрытые вкладки сохраняют своё место на случай, если вы снова их покажете."
+    Hidden: "(скрыта)"
 Tutorial:
   Skip: Пропустить
   Next: Далее

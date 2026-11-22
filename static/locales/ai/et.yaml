@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Loendeid ei õnnestunud alla laadida
     Loaded Status: "Blokeeritud kanalid: {blocked} · Märgistatud kanalid: {warned} · Uuendatud: {date}"
   Highlight Changed Settings Label: Muudetud
+  Subscription Tabs:
+    Title: "Tellimuste vahekaardid"
+    Hint: "Muuda vahekaartide järjekorda lehel Tellimused. Peidetud vahekaardid säilitavad oma koha, kui need uuesti kuvad."
+    Hidden: "(peidetud)"
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi

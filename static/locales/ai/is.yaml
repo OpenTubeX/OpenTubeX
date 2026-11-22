@@ -1671,6 +1671,10 @@ Settings:
     Failed to Download: Ekki tókst að sækja listana
     Loaded Status: "Útilokaðar rásir: {blocked} · Merktar rásir: {warned} · Uppfært: {date}"
   Highlight Changed Settings Label: Breytt
+  Subscription Tabs:
+    Title: "Áskriftaflipar"
+    Hint: "Breyttu röð flipanna á síðunni Áskriftir. Faldir flipar halda sæti sínu þar til þú birtir þá aftur."
+    Hidden: "(falið)"
 Tutorial:
   Skip: Sleppa
   Next: Næsta

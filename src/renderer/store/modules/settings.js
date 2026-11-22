@@ -34,6 +34,7 @@ import { PLAYLIST_PREFERENCES_SYNC_KEYS } from '../../helpers/playlist-preferenc
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
+import { normalizeSubscriptionTabs } from '../../helpers/subscriptionTabs.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
@@ -557,6 +558,7 @@ const customGetters = {
     (state.thumbnailDataSaverMode === 'metered' && networkMetered.value),
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
+  getSubscriptionTabs: (state) => normalizeSubscriptionTabs(state.subscriptionTabs),
   getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),
   getPlayerMenuControls: (state) => normalizePlayerMenuControls(state.playerMenuControls),
   getHiddenPlayerMenuControls: (state) => withoutControlBarButtons(
@@ -849,6 +851,12 @@ const customActions = {
     state,
     'fullscreenActions',
     normalizeFullscreenActions(value)
+  ),
+  updateSubscriptionTabs: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'subscriptionTabs',
+    normalizeSubscriptionTabs(value)
   ),
   updateControlBarButtons: ({ commit, state }, value) => updateOrderedSetting(
     commit,

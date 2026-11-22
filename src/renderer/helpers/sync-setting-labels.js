@@ -244,6 +244,7 @@ export const SYNC_SETTING_LABELS = {
   quickBookmarkTargetPlaylistId: 'User Playlists.Quick Bookmark Icon',
   quickPlaybackSpeedBarOptions: 'Settings.Player Settings.Quick Playback Speed Bar Manager',
   fullscreenActions: 'Settings.Fullscreen Actions.Title',
+  subscriptionTabs: 'Settings.Subscription Tabs.Title',
   controlBarButtons: 'Settings.Control Bar.Title',
   playerMenuControls: 'Settings.Interface Customizer.Player Menu',
   hiddenPlayerMenuControls: 'Settings.Control Bar.Hidden',

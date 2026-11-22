@@ -1376,6 +1376,7 @@ export async function chooseTheme(page, { mode, light, dark }) {
 const INTERFACE_CUSTOMIZER_TABS = {
   navigation: 'navigation',
   'quick settings': 'quickSettings',
+  'subscription tabs': 'subscriptionTabs',
   player: 'player',
   'control bar': 'controlBar',
   'fullscreen actions': 'fullscreenActions'
@@ -1384,7 +1385,7 @@ const INTERFACE_CUSTOMIZER_TABS = {
 /**
  * Opens Customize interface from the Appearance settings and selects one of its tabs.
  * @param {import('@playwright/test').Page} page
- * @param {'navigation' | 'quick settings' | 'player' | 'control bar' | 'fullscreen actions'} tab
+ * @param {'navigation' | 'quick settings' | 'subscription tabs' | 'player' | 'control bar' | 'fullscreen actions'} tab
  */
 export async function openInterfaceCustomizer(page, tab) {
   const appearance = await goToSettingsSection(page, 'appearance')

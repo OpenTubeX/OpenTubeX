@@ -1882,6 +1882,10 @@ Settings:
     Failed to Download: No se pudieron descargar las listas
     Loaded Status: "Canales bloqueados: {blocked} · Canales marcados: {warned} · Actualizado: {date}"
   Highlight Changed Settings Label: Modificados
+  Subscription Tabs:
+    Title: "Pestañas de suscripciones"
+    Hint: "Cambia el orden de las pestañas de la página Suscripciones. Las pestañas ocultas conservan su lugar para cuando vuelvas a mostrarlas."
+    Hidden: "(oculta)"
 Tutorial:
   Skip: Omitir
   Next: Siguiente

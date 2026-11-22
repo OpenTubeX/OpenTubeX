@@ -1841,6 +1841,10 @@ Settings:
     Failed to Download: Klarte ikkje å laste ned listene
     Loaded Status: "Blokkerte kanalar: {blocked} · Flagga kanalar: {warned} · Oppdatert: {date}"
   Highlight Changed Settings Label: Endra
+  Subscription Tabs:
+    Title: "Abonnementsfaner"
+    Hint: "Endra rekkjefølgja på fanene på Abonnement-sida. Gøymde faner held på plassen sin til du viser dei att."
+    Hidden: "(gøymd)"
 Tutorial:
   Skip: Hopp over
   Next: Neste

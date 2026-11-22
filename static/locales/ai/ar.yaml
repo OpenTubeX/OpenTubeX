@@ -1697,6 +1697,10 @@ Settings:
     Failed to Download: تعذّر تنزيل القوائم
     Loaded Status: "القنوات المحظورة: {blocked} · القنوات المُعلَّمة: {warned} · آخر تحديث: {date}"
   Highlight Changed Settings Label: المُغيَّرة
+  Subscription Tabs:
+    Title: "تبويبات الاشتراكات"
+    Hint: "غيّر ترتيب التبويبات في صفحة الاشتراكات. تحتفظ التبويبات المخفية بمكانها لحين إظهارها مجددًا."
+    Hidden: "(مخفي)"
 Tutorial:
   Skip: تخطي
   Next: التالي

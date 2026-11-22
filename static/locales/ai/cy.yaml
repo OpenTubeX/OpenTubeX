@@ -1675,6 +1675,10 @@ Settings:
     Failed to Download: Methu llwytho'r rhestrau i lawr
     Loaded Status: "Sianeli wedi'u rhwystro: {blocked} · Sianeli wedi'u nodi: {warned} · Diweddarwyd: {date}"
   Highlight Changed Settings Label: Wedi newid
+  Subscription Tabs:
+    Title: "Tabiau tanysgrifio"
+    Hint: "Newidiwch drefn y tabiau ar y dudalen Tanysgrifiadau. Mae tabiau cudd yn cadw eu lle ar gyfer pan fyddwch yn eu dangos eto."
+    Hidden: "(cudd)"
 Tutorial:
   Skip: Hepgor
   Next: Nesaf

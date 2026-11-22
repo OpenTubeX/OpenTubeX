@@ -1753,6 +1753,10 @@ Settings:
     Confirm Password: پاس ورڈ کی تصدیق کریں
     Passwords Do Not Match: پاس ورڈ مماثل نہیں ہیں۔
   Highlight Changed Settings Label: تبدیل شدہ
+  Subscription Tabs:
+    Title: "سبسکرپشن ٹیبز"
+    Hint: "سبسکرپشنز صفحے پر ٹیبز کی ترتیب تبدیل کریں۔ چھپے ہوئے ٹیبز دوبارہ دکھانے کے لیے اپنی جگہ برقرار رکھتے ہیں۔"
+    Hidden: "(چھپا ہوا)"
 Tutorial:
   Skip: چھوڑیں
   Next: اگلا

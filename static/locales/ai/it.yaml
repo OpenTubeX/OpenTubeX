@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Impossibile scaricare le liste
     Loaded Status: "Canali bloccati: {blocked} · Canali segnalati: {warned} · Aggiornato: {date}"
   Highlight Changed Settings Label: Modificate
+  Subscription Tabs:
+    Title: "Schede iscrizioni"
+    Hint: "Cambia l'ordine delle schede nella pagina Iscrizioni. Le schede nascoste mantengono la loro posizione per quando le mostrerai di nuovo."
+    Hidden: "(nascosta)"
 Tutorial:
   Skip: Salta
   Next: Avanti

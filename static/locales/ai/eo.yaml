@@ -1710,6 +1710,10 @@ Settings:
     Confirm Password: Konfirmi pasvorton
     Passwords Do Not Match: La pasvortoj ne kongruas.
   Highlight Changed Settings Label: Ŝanĝitaj
+  Subscription Tabs:
+    Title: "Abonaj langetoj"
+    Hint: "Ŝanĝu la ordon de la langetoj en la paĝo Abonoj. Kaŝitaj langetoj konservas sian lokon por kiam vi denove montros ilin."
+    Hidden: "(kaŝita)"
 Tutorial:
   Skip: Preterlasi
   Next: Sekva

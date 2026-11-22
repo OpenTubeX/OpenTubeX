@@ -1697,6 +1697,10 @@ Settings:
     Failed to Download: Non se puideron descargar as listas
     Loaded Status: "Canles bloqueadas: {blocked} · Canles marcadas: {warned} · Actualizado: {date}"
   Highlight Changed Settings Label: Modificados
+  Subscription Tabs:
+    Title: "Lapelas de subscricións"
+    Hint: "Cambia a orde das lapelas da páxina Subscricións. As lapelas ocultas conservan o seu lugar para cando as volvas mostrar."
+    Hidden: "(oculta)"
 Tutorial:
   Skip: Omitir
   Next: Seguinte

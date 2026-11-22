@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Kunne ikke laste ned listene
     Loaded Status: "Blokkerte kanaler: {blocked} · Flaggede kanaler: {warned} · Oppdatert: {date}"
   Highlight Changed Settings Label: Endret
+  Subscription Tabs:
+    Title: "Abonnementsfaner"
+    Hint: "Endre rekkefølgen på fanene på Abonnementer-siden. Skjulte faner beholder plassen sin til du viser dem igjen."
+    Hidden: "(skjult)"
 Tutorial:
   Skip: Hopp over
   Next: Neste

@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Nem sikerült letölteni a listákat
     Loaded Status: "Letiltott csatornák: {blocked} · Megjelölt csatornák: {warned} · Frissítve: {date}"
   Highlight Changed Settings Label: Módosított
+  Subscription Tabs:
+    Title: "Feliratkozások lapjai"
+    Hint: "Módosítsd a lapok sorrendjét a Feliratkozások oldalon. A rejtett lapok megtartják a helyüket arra az esetre, ha újra megjeleníted őket."
+    Hidden: "(rejtett)"
 Tutorial:
   Skip: Kihagyás
   Next: Tovább

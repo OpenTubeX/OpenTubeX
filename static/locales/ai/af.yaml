@@ -1888,6 +1888,10 @@ Settings:
     Confirm Password: Bevestig wagwoord
     Passwords Do Not Match: Wagwoorde stem nie ooreen nie.
   Highlight Changed Settings Label: Verander
+  Subscription Tabs:
+    Title: "Intekeningoortjies"
+    Hint: "Verander die volgorde van die oortjies op die Intekeninge-bladsy. Versteekte oortjies behou hul plek vir wanneer jy hulle weer wys."
+    Hidden: "(versteek)"
 Tutorial:
   Skip: Slaan oor
   Next: Volgende

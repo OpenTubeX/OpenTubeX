@@ -4,6 +4,7 @@
     class="actionListControls"
   >
     <div
+      v-if="!reorderOnly"
       ref="itemPickerAnchorRef"
       class="itemPickerAnchor"
     >
@@ -125,6 +126,7 @@
           @click="moveItem(item.id, 1)"
         />
         <FtIconButton
+          v-if="!reorderOnly"
           class="itemAction"
           :title="`${t('Search Bar.Remove')} ${item.label}`"
           :disabled="item.required"
@@ -192,7 +194,12 @@ const props = defineProps({
   },
   addLabel: {
     type: String,
-    required: true
+    default: ''
+  },
+  /** Only lets the items be reordered, for lists that always hold every item. */
+  reorderOnly: {
+    type: Boolean,
+    default: false
   },
   emptyLabel: {
     type: String,

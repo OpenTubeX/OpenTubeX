@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Det gick inte att ladda ned listorna
     Loaded Status: "Blockerade kanaler: {blocked} · Flaggade kanaler: {warned} · Uppdaterad: {date}"
   Highlight Changed Settings Label: Ändrade
+  Subscription Tabs:
+    Title: "Prenumerationsflikar"
+    Hint: "Ändra ordningen på flikarna på sidan Prenumerationer. Dolda flikar behåller sin plats tills du visar dem igen."
+    Hidden: "(dold)"
 Tutorial:
   Skip: Hoppa över
   Next: Nästa

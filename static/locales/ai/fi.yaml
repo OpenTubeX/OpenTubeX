@@ -1668,6 +1668,10 @@ Settings:
     Failed to Download: Listojen lataaminen epäonnistui
     Loaded Status: "Estetyt kanavat: {blocked} · Merkityt kanavat: {warned} · Päivitetty: {date}"
   Highlight Changed Settings Label: Muutetut
+  Subscription Tabs:
+    Title: "Tilausten välilehdet"
+    Hint: "Muuta Tilaukset-sivun välilehtien järjestystä. Piilotetut välilehdet säilyttävät paikkansa, kun näytät ne uudelleen."
+    Hidden: "(piilotettu)"
 Tutorial:
   Skip: Ohita
   Next: Seuraava

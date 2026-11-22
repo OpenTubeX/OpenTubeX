@@ -1647,6 +1647,10 @@ Settings:
     Failed to Download: Não foi possível transferir as listas
     Loaded Status: "Canais bloqueados: {blocked} · Canais assinalados: {warned} · Atualizado: {date}"
   Highlight Changed Settings Label: Alteradas
+  Subscription Tabs:
+    Title: "Separadores de subscrições"
+    Hint: "Altere a ordem dos separadores na página Subscrições. Os separadores ocultos mantêm o seu lugar para quando os voltar a mostrar."
+    Hidden: "(oculto)"
 Tutorial:
   Skip: Ignorar
   Next: Seguinte

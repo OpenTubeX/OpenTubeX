@@ -1666,6 +1666,10 @@ Settings:
     Failed to Download: Ezin izan dira zerrendak deskargatu
     Loaded Status: "Blokeatutako kanalak: {blocked} · Markatutako kanalak: {warned} · Eguneratua: {date}"
   Highlight Changed Settings Label: Aldatuak
+  Subscription Tabs:
+    Title: "Harpidetzen fitxak"
+    Hint: "Aldatu Harpidetzak orriko fitxen ordena. Ezkutatutako fitxek beren lekua gordetzen dute berriro erakusten dituzunerako."
+    Hidden: "(ezkutatuta)"
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa

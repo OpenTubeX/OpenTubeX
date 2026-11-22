@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Listeler indirilemedi
     Loaded Status: "Engellenen kanallar: {blocked} · İşaretlenen kanallar: {warned} · Güncellendi: {date}"
   Highlight Changed Settings Label: Değiştirilenler
+  Subscription Tabs:
+    Title: "Abonelik sekmeleri"
+    Hint: "Abonelikler sayfasındaki sekmelerin sırasını değiştirin. Gizlenen sekmeler, yeniden gösterdiğinizde yerlerini korur."
+    Hidden: "(gizli)"
 Tutorial:
   Skip: Atla
   Next: İleri

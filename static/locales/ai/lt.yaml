@@ -1943,6 +1943,10 @@ Settings:
     Failed to Download: Nepavyko atsisiųsti sąrašų
     Loaded Status: "Užblokuoti kanalai: {blocked} · Pažymėti kanalai: {warned} · Atnaujinta: {date}"
   Highlight Changed Settings Label: Pakeisti
+  Subscription Tabs:
+    Title: "Prenumeratų kortelės"
+    Hint: "Pakeiskite kortelių tvarką Prenumeratų puslapyje. Paslėptos kortelės išlaiko savo vietą, kai vėl jas parodysite."
+    Hidden: "(paslėpta)"
 Tutorial:
   Skip: Praleisti
   Next: Toliau

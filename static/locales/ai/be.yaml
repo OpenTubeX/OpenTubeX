@@ -1730,6 +1730,10 @@ Settings:
     Failed to Download: Не ўдалося спампаваць спісы
     Loaded Status: "Заблакаваныя каналы: {blocked} · Пазначаныя каналы: {warned} · Абноўлена: {date}"
   Highlight Changed Settings Label: Змененыя
+  Subscription Tabs:
+    Title: "Укладкі падпісак"
+    Hint: "Змяніце парадак укладак на старонцы «Падпіскі». Схаваныя ўкладкі захоўваюць сваё месца, калі вы зноў іх пакажаце."
+    Hidden: "(схавана)"
 Tutorial:
   Skip: Прапусціць
   Next: Далей
