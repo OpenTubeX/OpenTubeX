@@ -1546,7 +1546,7 @@ Settings:
     Import backup: Sicherung importieren
     Export backup: Sicherung exportieren
     Backup description: Profile, Playlists, Verlauf, Statistiken und übertragbare Einstellungen in einer ZIP-Datei sichern. Beim Import werden sie mit den vorhandenen Daten zusammengeführt.
-    Backup separate profile data: Diese Sicherung enthält auch die Daten von {count} getrennten Profil, die in dieses Profil wiederhergestellt werden. | Diese Sicherung enthält auch die Daten von {count} getrennten Profilen, die in diese Profile wiederhergestellt werden.
+    Backup separate profile data: Diese Sicherung enthält auch die Daten eines getrennten Profils, die in dieses Profil wiederhergestellt werden. | Diese Sicherung enthält auch die Daten von {count} getrennten Profilen, die in diese Profile wiederhergestellt werden.
     Select backup data: Zu importierende Daten auswählen
     Profiles and subscriptions: Profile und Abonnements
     Backup exported: Sicherung erfolgreich exportiert
