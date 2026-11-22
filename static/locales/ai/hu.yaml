@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Ez a profil a feliratkozásait, az előzményeit és a lejátszási listáit elkülönítve tartja a többi profiltól."
   Separate Profile Deletion Warning: "A feliratkozásai, megtekintési előzményei, lejátszási listái, keresési előzményei, megtekintési statisztikái és lejátszási sora is törlődik."
   Separate Data Notice: "A(z) {profile} profil különválasztva tartja az adatait, ezért az alábbi importálások és exportálások csak a feliratkozásait, előzményeit, lejátszási listáit és keresési előzményeit használják."
-  Separate Data Storage Notice: "A(z) {profile} profil különválasztva tartja az adatait. Az alábbi gombok csak az ő adatait törlik, a méretek viszont minden profil adatait tartalmazzák."
+  Separate Data Storage Notice: "A(z) {profile} profil különválasztva tartja az adatait. Az előzmények, a statisztikák, a keresési előzmények, a feliratkozások vagy a lejátszási listák törlése itt csak az ő adatait törli, a méretek viszont minden profil adatait tartalmazzák."
   Customization: Testreszabás
   Manage Profile Subscriptions: Profil feliratkozásainak kezelése
   Icon Names:

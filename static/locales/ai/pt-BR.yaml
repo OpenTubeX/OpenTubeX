@@ -1663,7 +1663,7 @@ Profile:
   Separate Profile Note: "Este perfil mantém suas inscrições, histórico e playlists separados dos seus outros perfis."
   Separate Profile Deletion Warning: "Suas inscrições, histórico de reprodução, playlists, histórico de pesquisas, estatísticas de visualização e fila também serão excluídos."
   Separate Data Notice: "{profile} mantém seus dados separados, então as importações e exportações abaixo usam apenas suas inscrições, histórico, playlists e histórico de pesquisas."
-  Separate Data Storage Notice: "{profile} mantém seus dados separados. Os botões abaixo excluem apenas os dados dele, enquanto os tamanhos incluem os dados de todos os perfis."
+  Separate Data Storage Notice: "{profile} mantém seus dados separados. Excluir aqui o histórico, as estatísticas, o histórico de pesquisa, as inscrições ou as playlists exclui apenas os dados dele, enquanto os tamanhos incluem os dados de todos os perfis."
   Customization: Personalização
   Manage Profile Subscriptions: Gerenciar inscrições do perfil
   Icon Names:

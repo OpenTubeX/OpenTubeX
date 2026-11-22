@@ -1713,7 +1713,7 @@ Profile:
   Separate Profile Note: "Bu profil abunəliklərini, tarixçəsini və pleylistlərini digər profillərinizdən ayrı saxlayır."
   Separate Profile Deletion Warning: "Onun abunəlikləri, baxış tarixçəsi, pleylistləri, axtarış tarixçəsi, baxış statistikası və növbəsi də silinəcək."
   Separate Data Notice: "{profile} məlumatlarını ayrı saxlayır, buna görə aşağıdakı idxal və ixraclar yalnız onun abunəliklərindən, tarixçəsindən, pleylistlərindən və axtarış tarixçəsindən istifadə edir."
-  Separate Data Storage Notice: "{profile} məlumatlarını ayrı saxlayır. Aşağıdakı düymələr yalnız onun məlumatlarını silir, ölçülərə isə bütün profillərin məlumatları daxildir."
+  Separate Data Storage Notice: "{profile} məlumatlarını ayrı saxlayır. Burada tarixçəni, statistikanı, axtarış tarixçəsini, abunəlikləri və ya pleylistləri silmək yalnız onun məlumatlarını silir, ölçülərə isə bütün profillərin məlumatları daxildir."
   Customization: Fərdiləşdirmə
   Manage Profile Subscriptions: Profil abunəliklərini idarə et
   Icon Names:

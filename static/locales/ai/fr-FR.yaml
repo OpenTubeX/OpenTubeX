@@ -1709,7 +1709,7 @@ Profile:
   Separate Profile Note: "Ce profil garde ses abonnements, son historique et ses playlists séparés de vos autres profils."
   Separate Profile Deletion Warning: "Ses abonnements, son historique de visionnage, ses playlists, son historique de recherche, ses statistiques de visionnage et sa file d’attente seront également supprimés."
   Separate Data Notice: "{profile} garde ses données séparées : les imports et exports ci-dessous n’utilisent donc que ses abonnements, son historique, ses playlists et son historique de recherche."
-  Separate Data Storage Notice: "{profile} garde ses données séparées. Les boutons ci-dessous ne suppriment que ses données, tandis que les tailles incluent les données de tous les profils."
+  Separate Data Storage Notice: "{profile} garde ses données séparées. Supprimer ici l'historique, les statistiques, l'historique de recherche, les abonnements ou les playlists ne supprime que ses données, tandis que les tailles incluent les données de tous les profils."
   Customization: Personnalisation
   Manage Profile Subscriptions: Gérer les abonnements du profil
   Icon Names:

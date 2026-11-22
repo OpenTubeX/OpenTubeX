@@ -1932,7 +1932,7 @@ Profile:
   Separate Profile Note: "Este perfil mantiene sus suscripciones, historial y listas de reproducción separados de tus otros perfiles."
   Separate Profile Deletion Warning: "También se eliminarán sus suscripciones, historial de reproducción, listas de reproducción, historial de búsquedas, estadísticas de reproducción y cola."
   Separate Data Notice: "{profile} mantiene sus datos separados, por lo que las importaciones y exportaciones de abajo solo usan sus suscripciones, historial, listas de reproducción e historial de búsquedas."
-  Separate Data Storage Notice: "{profile} mantiene sus datos separados. Los botones de abajo solo eliminan sus datos, mientras que los tamaños incluyen los datos de todos los perfiles."
+  Separate Data Storage Notice: "{profile} mantiene sus datos separados. Eliminar aquí el historial, las estadísticas, el historial de búsqueda, las suscripciones o las listas de reproducción solo elimina sus datos, mientras que los tamaños incluyen los datos de todos los perfiles."
   Customization: Personalización
   Manage Profile Subscriptions: Gestionar suscripciones del perfil
   Icon Names:

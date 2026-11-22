@@ -1891,7 +1891,7 @@ Profile:
   Separate Profile Note: "Denne profilen held abonnementa, historikken og spelelistene sine åtskilde frå dei andre profilane dine."
   Separate Profile Deletion Warning: "Abonnementa, sjåhistorikken, spelelistene, søkjehistorikken, sjåstatistikken og køen til profilen blir også sletta."
   Separate Data Notice: "{profile} held dataa sine åtskilde, så importane og eksportane nedanfor brukar berre abonnementa, historikken, spelelistene og søkjehistorikken til profilen."
-  Separate Data Storage Notice: "{profile} held dataa sine åtskilde. Knappane nedanfor slettar berre dataa til profilen, medan storleikane omfattar dataa til alle profilar."
+  Separate Data Storage Notice: "{profile} held dataa sine åtskilde. Å slette historikk, statistikk, søkjehistorikk, abonnement eller spelelister her slettar berre dataa til profilen, medan storleikane omfattar dataa til alle profilar."
   Customization: Tilpassing
   Manage Profile Subscriptions: Administrer abonnementa til profilen
   Icon Names:

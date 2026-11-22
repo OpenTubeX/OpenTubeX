@@ -1725,7 +1725,7 @@ Profile:
   Separate Profile Note: "Ovaj profil čuva svoje pretplate, povijest i zbirke odvojeno od tvojih ostalih profila."
   Separate Profile Deletion Warning: "Izbrisat će se i njegove pretplate, povijest gledanja, zbirke, povijest pretraživanja, statistika gledanja i red čekanja."
   Separate Data Notice: "Profil {profile} čuva svoje podatke odvojeno, pa uvozi i izvozi u nastavku koriste samo njegove pretplate, povijest, zbirke i povijest pretraživanja."
-  Separate Data Storage Notice: "Profil {profile} čuva svoje podatke odvojeno. Gumbi u nastavku brišu samo njegove podatke, a veličine uključuju podatke svih profila."
+  Separate Data Storage Notice: "Profil {profile} čuva svoje podatke odvojeno. Brisanje povijesti, statistike, povijesti pretraživanja, pretplata ili popisa za reprodukciju ovdje briše samo njegove podatke, a veličine uključuju podatke svih profila."
   Customization: Prilagodba
   Manage Profile Subscriptions: Upravljaj pretplatama profila
   Icon Names:

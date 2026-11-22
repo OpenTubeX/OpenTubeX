@@ -1713,7 +1713,7 @@ Profile:
   Separate Profile Note: "Tämä profiili pitää tilauksensa, historiansa ja soittolistansa erillään muista profiileistasi."
   Separate Profile Deletion Warning: "Myös sen tilaukset, katseluhistoria, soittolistat, hakuhistoria, katselutilastot ja jono poistetaan."
   Separate Data Notice: "Profiili {profile} pitää tietonsa erillään, joten alla olevat tuonnit ja viennit käyttävät vain sen tilauksia, historiaa, soittolistoja ja hakuhistoriaa."
-  Separate Data Storage Notice: "Profiili {profile} pitää tietonsa erillään. Alla olevat painikkeet poistavat vain sen tiedot, mutta koot sisältävät kaikkien profiilien tiedot."
+  Separate Data Storage Notice: "Profiili {profile} pitää tietonsa erillään. Historian, tilastojen, hakuhistorian, tilausten tai soittolistojen poistaminen täällä poistaa vain sen tiedot, mutta koot sisältävät kaikkien profiilien tiedot."
   Customization: Mukauttaminen
   Manage Profile Subscriptions: Hallitse profiilin tilauksia
   Icon Names:

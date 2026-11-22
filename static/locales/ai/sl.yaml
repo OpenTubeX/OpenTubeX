@@ -2048,7 +2048,7 @@ Profile:
   Separate Profile Note: "Ta profil ohranja svoje naročnine, zgodovino in sezname predvajanja ločeno od vaših drugih profilov."
   Separate Profile Deletion Warning: "Izbrisani bodo tudi njegove naročnine, zgodovina ogledov, seznami predvajanja, zgodovina iskanja, statistika ogledov in čakalna vrsta."
   Separate Data Notice: "Profil {profile} ohranja svoje podatke ločeno, zato spodnji uvozi in izvozi uporabljajo samo njegove naročnine, zgodovino, sezname predvajanja in zgodovino iskanja."
-  Separate Data Storage Notice: "Profil {profile} ohranja svoje podatke ločeno. Spodnji gumbi izbrišejo samo njegove podatke, velikosti pa vključujejo podatke vseh profilov."
+  Separate Data Storage Notice: "Profil {profile} ohranja svoje podatke ločeno. Brisanje zgodovine, statistike, zgodovine iskanja, naročnin ali seznamov predvajanja tukaj izbriše samo njegove podatke, velikosti pa vključujejo podatke vseh profilov."
   Customization: Prilagoditev
   Manage Profile Subscriptions: Upravljaj naročnine profila
   Icon Names:

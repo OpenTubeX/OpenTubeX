@@ -1716,7 +1716,7 @@ Profile:
   Separate Profile Note: "Þetta notandasnið heldur áskriftum sínum, ferli og spilunarlistum aðskildum frá öðrum notandasniðum þínum."
   Separate Profile Deletion Warning: "Áskriftum þess, áhorfsferli, spilunarlistum, leitarferli, áhorfstölfræði og biðröð verður einnig eytt."
   Separate Data Notice: "{profile} heldur gögnum sínum aðskildum, þannig að innflutningur og útflutningur hér að neðan notar aðeins áskriftir þess, feril, spilunarlista og leitarferil."
-  Separate Data Storage Notice: "{profile} heldur gögnum sínum aðskildum. Hnapparnir hér að neðan eyða aðeins gögnum þess, en stærðirnar innihalda gögn allra notandasniða."
+  Separate Data Storage Notice: "{profile} heldur gögnum sínum aðskildum. Að eyða ferli, tölfræði, leitarferli, áskriftum eða spilunarlistum hér eyðir aðeins gögnum þess, en stærðirnar innihalda gögn allra notandasniða."
   Customization: Sérsnið
   Manage Profile Subscriptions: Stjórna áskriftum prófíls
   Icon Names:

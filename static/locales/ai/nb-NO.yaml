@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Denne profilen holder abonnementene, historikken og spillelistene sine adskilt fra de andre profilene dine."
   Separate Profile Deletion Warning: "Abonnementene, visningshistorikken, spillelistene, søkehistorikken, seerstatistikken og køen til profilen slettes også."
   Separate Data Notice: "{profile} holder dataene sine adskilt, så importene og eksportene nedenfor bruker bare abonnementene, historikken, spillelistene og søkehistorikken til profilen."
-  Separate Data Storage Notice: "{profile} holder dataene sine adskilt. Knappene nedenfor sletter bare dataene til profilen, mens størrelsene omfatter dataene til alle profiler."
+  Separate Data Storage Notice: "{profile} holder dataene sine adskilt. Å slette historikk, statistikk, søkehistorikk, abonnementer eller spillelister her sletter bare dataene til profilen, mens størrelsene omfatter dataene til alle profiler."
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer
   Icon Names:

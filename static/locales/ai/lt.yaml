@@ -1993,7 +1993,7 @@ Profile:
   Separate Profile Note: "Šis profilis savo prenumeratas, istoriją ir grojaraščius laiko atskirai nuo kitų jūsų profilių."
   Separate Profile Deletion Warning: "Bus ištrintos ir jo prenumeratos, žiūrėjimo istorija, grojaraščiai, paieškos istorija, žiūrėjimo statistika bei eilė."
   Separate Data Notice: "Profilis {profile} savo duomenis laiko atskirai, todėl toliau esantys importai ir eksportai naudoja tik jo prenumeratas, istoriją, grojaraščius ir paieškos istoriją."
-  Separate Data Storage Notice: "Profilis {profile} savo duomenis laiko atskirai. Toliau esantys mygtukai ištrina tik jo duomenis, o dydžiai apima visų profilių duomenis."
+  Separate Data Storage Notice: "Profilis {profile} savo duomenis laiko atskirai. Čia ištrynus istoriją, statistiką, paieškos istoriją, prenumeratas ar grojaraščius ištrinami tik jo duomenys, o dydžiai apima visų profilių duomenis."
   Customization: Tinkinimas
   Manage Profile Subscriptions: Tvarkyti profilio prenumeratas
   Icon Names:

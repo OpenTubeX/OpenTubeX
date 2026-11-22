@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "此設定檔的訂閱、記錄和播放清單與你的其他設定檔相互獨立。"
   Separate Profile Deletion Warning: "它的訂閱、觀看記錄、播放清單、搜尋記錄、觀看統計資料和佇列也會一併刪除。"
   Separate Data Notice: "{profile} 的資料是分開保存的，因此下方的匯入和匯出只會使用它的訂閱、記錄、播放清單和搜尋記錄。"
-  Separate Data Storage Notice: "{profile} 的資料是分開保存的。下方的按鈕只會刪除它的資料，而大小則包含所有設定檔的資料。"
+  Separate Data Storage Notice: "{profile} 的資料是分開保存的。在此刪除觀看記錄、統計、搜尋記錄、訂閱或播放清單只會刪除它的資料，而大小則包含所有設定檔的資料。"
   Customization: 自訂
   Manage Profile Subscriptions: 管理個人資料的訂閱
   Icon Names:

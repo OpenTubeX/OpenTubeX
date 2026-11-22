@@ -2454,7 +2454,7 @@ Profile:
   Separate Profile Note: This profile keeps its subscriptions, history, and playlists separate from your other profiles.
   Separate Profile Deletion Warning: Its subscriptions, watch history, playlists, search history, watch statistics, and queue will also be deleted.
   Separate Data Notice: '{profile} keeps its data separate, so the imports and exports below only use its subscriptions, history, playlists, and search history.'
-  Separate Data Storage Notice: '{profile} keeps its data separate. The buttons below only delete its data, while the sizes include the data of every profile.'
+  Separate Data Storage Notice: '{profile} keeps its data separate. Deleting history, statistics, search history, subscriptions, or playlists here only deletes its data, while the sizes include the data of every profile.'
   Customization: Customization
   Manage Profile Subscriptions: Manage profile subscriptions
   Icon Names:

@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Questo profilo tiene le sue iscrizioni, la sua cronologia e le sue playlist separate dagli altri tuoi profili."
   Separate Profile Deletion Warning: "Verranno eliminate anche le sue iscrizioni, la cronologia delle visualizzazioni, le playlist, la cronologia delle ricerche, le statistiche di visione e la coda."
   Separate Data Notice: "{profile} tiene i suoi dati separati, quindi le importazioni e le esportazioni qui sotto usano solo le sue iscrizioni, la cronologia, le playlist e la cronologia delle ricerche."
-  Separate Data Storage Notice: "{profile} tiene i suoi dati separati. I pulsanti qui sotto eliminano solo i suoi dati, mentre le dimensioni includono i dati di tutti i profili."
+  Separate Data Storage Notice: "{profile} tiene i suoi dati separati. Eliminare qui la cronologia, le statistiche, la cronologia delle ricerche, le iscrizioni o le playlist elimina solo i suoi dati, mentre le dimensioni includono i dati di tutti i profili."
   Customization: Personalizzazione
   Manage Profile Subscriptions: Gestisci le iscrizioni del profilo
   Icon Names:

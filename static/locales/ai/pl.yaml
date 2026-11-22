@@ -1169,7 +1169,7 @@ Profile:
   Separate Profile Note: "Ten profil przechowuje swoje subskrypcje, historię i playlisty osobno od pozostałych profili."
   Separate Profile Deletion Warning: "Zostaną też usunięte jego subskrypcje, historia oglądania, playlisty, historia wyszukiwania, statystyki oglądania i kolejka."
   Separate Data Notice: "Profil {profile} przechowuje swoje dane osobno, więc poniższe importy i eksporty używają tylko jego subskrypcji, historii, playlist i historii wyszukiwania."
-  Separate Data Storage Notice: "Profil {profile} przechowuje swoje dane osobno. Poniższe przyciski usuwają tylko jego dane, a rozmiary obejmują dane wszystkich profili."
+  Separate Data Storage Notice: "Profil {profile} przechowuje swoje dane osobno. Usunięcie tutaj historii, statystyk, historii wyszukiwania, subskrypcji lub playlist usuwa tylko jego dane, a rozmiary obejmują dane wszystkich profili."
   Customization: Dostosowanie
   Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu
   Icon Names:

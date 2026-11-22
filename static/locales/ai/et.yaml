@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "See profiil hoiab oma tellimusi, ajalugu ja esitusloendeid sinu teistest profiilidest eraldi."
   Separate Profile Deletion Warning: "Kustutatakse ka selle tellimused, vaatamisajalugu, esitusloendid, otsinguajalugu, vaatamisstatistika ja järjekord."
   Separate Data Notice: "Profiil {profile} hoiab oma andmed eraldi, seega kasutavad allolevad impordid ja ekspordid ainult selle tellimusi, ajalugu, esitusloendeid ja otsinguajalugu."
-  Separate Data Storage Notice: "Profiil {profile} hoiab oma andmed eraldi. Allolevad nupud kustutavad ainult selle andmed, samas kui suurused hõlmavad kõigi profiilide andmeid."
+  Separate Data Storage Notice: "Profiil {profile} hoiab oma andmed eraldi. Ajaloo, statistika, otsinguajaloo, tellimuste või esitusloendite kustutamine siin kustutab ainult selle andmed, samas kui suurused hõlmavad kõigi profiilide andmeid."
   Customization: Kohandamine
   Manage Profile Subscriptions: Halda profiili tellimusi
   Icon Names:

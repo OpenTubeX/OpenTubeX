@@ -421,18 +421,19 @@ const backupImportLabels = computed(() => backupImportSections.value.map(section
 const backupProfileDataCount = computed(() => Object.keys(backupData.value?.profileData ?? {}).length)
 
 /**
- * The saved data of `sections`, which a backup's sections merge with. Like a
- * backup, it holds the shared data, whichever profile is active.
+ * The saved data of `sections`, which imported sections merge with. Like a
+ * backup, it holds the shared data by default, whichever profile is active.
  * @param {string[]} sections
+ * @param {string | null} [scope] the data scope the import writes to
  */
-async function readImportState(sections) {
+async function readImportState(sections, scope = null) {
   const readers = {
     settings: () => deepCopy(transferableSettings.value),
     profiles: () => DBProfileHandlers.find(),
-    playlists: () => withDataScope(null, () => DBPlaylistHandlers.find()),
-    history: () => withDataScope(null, () => DBHistoryHandlers.find()),
-    searchHistory: () => withDataScope(null, () => DBSearchHistoryHandlers.find()),
-    watchStats: () => withDataScope(null, () => DBWatchStatsHandlers.find()),
+    playlists: () => withDataScope(scope, () => DBPlaylistHandlers.find()),
+    history: () => withDataScope(scope, () => DBHistoryHandlers.find()),
+    searchHistory: () => withDataScope(scope, () => DBSearchHistoryHandlers.find()),
+    watchStats: () => withDataScope(scope, () => DBWatchStatsHandlers.find()),
   }
   return Object.fromEntries(await Promise.all(sections.filter(section => Object.hasOwn(readers, section))
     .map(async section => [section, await readers[section]()])))
@@ -669,7 +670,8 @@ async function previewSelectedTakeoutData() {
   const selected = new Set(selectedTakeoutTypes.value)
   const entries = takeoutEntries.value.filter(entry => selected.has(entry.type))
   try {
-    const current = await readImportState([...selected].filter(type => type !== 'subscriptions'))
+    // Takeout imports go to the active profile's data.
+    const current = await readImportState([...selected].filter(type => type !== 'subscriptions'), store.getters.getActiveDataScope)
     const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
     if (takeoutFile.value === file) takeoutPreview.value = preview
   } catch (error) {

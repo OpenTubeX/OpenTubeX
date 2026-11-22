@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Den här profilen håller sina prenumerationer, sin historik och sina spellistor separata från dina andra profiler."
   Separate Profile Deletion Warning: "Dess prenumerationer, visningshistorik, spellistor, sökhistorik, visningsstatistik och kö raderas också."
   Separate Data Notice: "{profile} håller sina data separat, så importerna och exporterna nedan använder bara dess prenumerationer, historik, spellistor och sökhistorik."
-  Separate Data Storage Notice: "{profile} håller sina data separat. Knapparna nedan raderar bara dess data, medan storlekarna omfattar alla profilers data."
+  Separate Data Storage Notice: "{profile} håller sina data separat. Att radera historik, statistik, sökhistorik, prenumerationer eller spellistor här raderar bara dess data, medan storlekarna omfattar alla profilers data."
   Customization: Anpassning
   Manage Profile Subscriptions: Hantera profilens prenumerationer
   Icon Names:

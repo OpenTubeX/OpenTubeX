@@ -3032,7 +3032,7 @@ Profile:
   Separate Profile Note: Dieses Profil hält seine Abos, seinen Verlauf und seine Playlists von deinen anderen Profilen getrennt.
   Separate Profile Deletion Warning: Seine Abos, sein Wiedergabe- und Suchverlauf, seine Playlists, Wiedergabestatistiken und Warteschlange werden ebenfalls gelöscht.
   Separate Data Notice: '{profile} hält seine Daten getrennt. Die Importe und Exporte unten verwenden daher nur seine Abos, seinen Verlauf, seine Playlists und seinen Suchverlauf.'
-  Separate Data Storage Notice: '{profile} hält seine Daten getrennt. Die Schaltflächen unten löschen nur seine Daten, die Größen umfassen aber die Daten aller Profile.'
+  Separate Data Storage Notice: '{profile} hält seine Daten getrennt. Das Löschen von Verlauf, Statistiken, Suchverlauf, Abos oder Playlists betrifft hier nur seine Daten, die Größen umfassen aber die Daten aller Profile.'
   Customization: Anpassung
   Manage Profile Subscriptions: Profil-Abos verwalten
   Icon Names:

@@ -108,7 +108,9 @@ test('Takeout selection opens before decoding and previews only selected categor
     computed: getter => ({ get value() { return getter() } }),
     pickFileWithPicker: async () => file,
     listYouTubeTakeoutZipEntries: async () => entries,
-    readImportState: async categories => { reads.push(categories); return {} },
+    readImportState: async (categories, scope) => { reads.push({ categories, scope }); return {} },
+    // Takeout imports into a separate profile compare with its data.
+    store: { getters: { getActiveDataScope: 'separate' } },
     primaryProfile: { value: { subscriptions: [] } },
     IMPORT_DIRECTORY_ID: '',
     START_IN_DIRECTORY: '',
@@ -127,7 +129,8 @@ test('Takeout selection opens before decoding and previews only selected categor
   vm.runInContext('selectedTakeoutTypes.value = ["subscriptions"]', context)
   await context.previewSelectedTakeoutData()
   assert.deepEqual(previewCalls, [[entries[1]]])
-  assert.deepEqual(Array.from(reads[0]), [])
+  assert.deepEqual(Array.from(reads[0].categories), [])
+  assert.equal(reads[0].scope, 'separate')
   assert.equal(vm.runInContext('takeoutPreviewReady.value', context), true)
   vm.runInContext('selectedTakeoutTypes.value.push("history")', context)
   assert.equal(vm.runInContext('takeoutPreviewReady.value', context), false, 'Newly selected categories need a preview before importing')

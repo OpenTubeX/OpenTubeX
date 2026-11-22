@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Bu profil, aboneliklerini, geçmişini ve oynatma listelerini diğer profillerinizden ayrı tutar."
   Separate Profile Deletion Warning: "Abonelikleri, izleme geçmişi, oynatma listeleri, arama geçmişi, izleme istatistikleri ve kuyruğu da silinecek."
   Separate Data Notice: "{profile} verilerini ayrı tuttuğu için aşağıdaki içe ve dışa aktarmalar yalnızca onun aboneliklerini, geçmişini, oynatma listelerini ve arama geçmişini kullanır."
-  Separate Data Storage Notice: "{profile} verilerini ayrı tutar. Aşağıdaki düğmeler yalnızca onun verilerini siler, boyutlar ise tüm profillerin verilerini içerir."
+  Separate Data Storage Notice: "{profile} verilerini ayrı tutar. Burada geçmişi, istatistikleri, arama geçmişini, abonelikleri veya oynatma listelerini silmek yalnızca onun verilerini siler, boyutlar ise tüm profillerin verilerini içerir."
   Customization: Özelleştirme
   Manage Profile Subscriptions: Profil aboneliklerini yönet
   Icon Names:

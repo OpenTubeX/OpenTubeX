@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "このプロフィールは、登録チャンネル、履歴、再生リストを他のプロフィールとは別に保持します。"
   Separate Profile Deletion Warning: "このプロフィールの登録チャンネル、視聴履歴、再生リスト、検索履歴、視聴統計、キューも削除されます。"
   Separate Data Notice: "{profile} はデータを分けて保持しているため、以下のインポートとエクスポートでは、このプロフィールの登録チャンネル、履歴、再生リスト、検索履歴のみが対象になります。"
-  Separate Data Storage Notice: "{profile} はデータを分けて保持しています。以下のボタンで削除されるのはこのプロフィールのデータのみですが、サイズにはすべてのプロフィールのデータが含まれます。"
+  Separate Data Storage Notice: "{profile} はデータを分けて保持しています。ここで履歴、統計、検索履歴、登録チャンネル、再生リストを削除すると、このプロフィールのデータのみが削除されますが、サイズにはすべてのプロフィールのデータが含まれます。"
   Customization: カスタマイズ
   Manage Profile Subscriptions: プロフィールの登録チャンネルを管理
   Icon Names:

@@ -1711,7 +1711,7 @@ Profile:
   Separate Profile Note: "Profil honek bere harpidetzak, historia eta erreprodukzio-zerrendak zure beste profiletatik bereizita mantentzen ditu."
   Separate Profile Deletion Warning: "Bere harpidetzak, ikustaldi-historia, erreprodukzio-zerrendak, bilaketa-historia, ikustaldien estatistikak eta ilara ere ezabatuko dira."
   Separate Data Notice: "{profile} profilak bere datuak bereizita mantentzen ditu, beraz beheko inportazio eta esportazioek haren harpidetzak, historia, erreprodukzio-zerrendak eta bilaketa-historia soilik erabiltzen dituzte."
-  Separate Data Storage Notice: "{profile} profilak bere datuak bereizita mantentzen ditu. Beheko botoiek haren datuak soilik ezabatzen dituzte, baina tamainek profil guztien datuak barne hartzen dituzte."
+  Separate Data Storage Notice: "{profile} profilak bere datuak bereizita mantentzen ditu. Hemen historia, estatistikak, bilaketa-historia, harpidetzak edo erreprodukzio-zerrendak ezabatzeak haren datuak soilik ezabatzen ditu, baina tamainek profil guztien datuak barne hartzen dituzte."
   Customization: Pertsonalizazioa
   Manage Profile Subscriptions: Kudeatu profileko harpidetzak
   Icon Names:

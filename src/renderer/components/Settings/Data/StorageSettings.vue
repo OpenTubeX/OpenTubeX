@@ -819,20 +819,34 @@ async function handleCleanupPrompt(option) {
   }
 }
 
+/**
+ * Clears the cached feeds of the channels of `roots` that no other profile
+ * follows. It runs before their subscriptions go, so a failure leaves both
+ * for the retry.
+ * @param {object[]} roots profiles that hold every channel of their data
+ */
+async function clearCachedFeedsOf(roots) {
+  const cleared = new Set(roots.map(profile => profile._id))
+  const followedElsewhere = new Set(profileList.value
+    .filter((profile, index) => (index === 0 || profile.separate === true) && !cleared.has(profile._id))
+    .flatMap(profile => profile.subscriptions.map(channel => channel.id)))
+  const channelIds = roots.flatMap(profile => profile.subscriptions.map(channel => channel.id))
+  await requireCleanupSuccess(store.dispatch('clearSubscriptionsCacheForManyChannels', channelIds.filter(id => !followedElsewhere.has(id))))
+}
+
 // Like the other deletions, this only affects the active profile's data:
 // a separate profile's own subscriptions, or the profiles that share theirs.
 async function removeSubscriptionsAndProfiles() {
   if (store.getters.getActiveDataScope !== null) {
     const profile = store.getters.getActiveProfile
-    const channelIds = profile.subscriptions.map(channel => channel.id)
+    await clearCachedFeedsOf([profile])
     await requireCleanupSuccess(store.dispatch('updateProfile', { ...profile, subscriptions: [] }))
-    // The other profiles keep the cached feeds of channels they follow too.
-    const followedElsewhere = new Set(store.getters.getAllRootSubscriptions.map(channel => channel.id))
-    await store.dispatch('clearSubscriptionsCacheForManyChannels', channelIds.filter(id => !followedElsewhere.has(id)))
     return
   }
+  // Separate profiles keep the cached feeds of channels they follow too.
+  const hasSeparateProfiles = profileList.value.some(profile => profile.separate === true)
+  if (hasSeparateProfiles) await clearCachedFeedsOf([profileList.value[0]])
   await store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
-  const sharedChannelIds = profileList.value[0].subscriptions.map(channel => channel.id)
   const cleanupResults = await Promise.all(profileList.value.filter(profile => profile.separate !== true).map(profile => {
     if (profile._id === MAIN_PROFILE_ID) {
       return store.dispatch('updateProfile', { ...profile, subscriptions: [] })
@@ -840,13 +854,7 @@ async function removeSubscriptionsAndProfiles() {
     return store.dispatch('removeProfile', profile._id)
   }))
   await requireCleanupSuccess(cleanupResults.every(Boolean))
-  if (!profileList.value.some(profile => profile.separate === true)) {
-    await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
-    return
-  }
-  // Separate profiles keep the cached feeds of channels they follow too.
-  const followedElsewhere = new Set(store.getters.getAllRootSubscriptions.map(channel => channel.id))
-  await store.dispatch('clearSubscriptionsCacheForManyChannels', sharedChannelIds.filter(id => !followedElsewhere.has(id)))
+  if (!hasSeparateProfiles) await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
 }
 
 function updateEnableVideoMetadataCache(value) {

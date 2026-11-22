@@ -1755,7 +1755,7 @@ Profile:
   Separate Profile Note: "Ĉi tiu profilo konservas siajn abonojn, historion kaj ludlistojn aparte de viaj aliaj profiloj."
   Separate Profile Deletion Warning: "Ĝiaj abonoj, spekthistorio, ludlistoj, serĉa historio, spektaj statistikoj kaj vico ankaŭ estos forigitaj."
   Separate Data Notice: "{profile} konservas siajn datumojn aparte, do la enportoj kaj elportoj sube uzas nur ĝiajn abonojn, historion, ludlistojn kaj serĉan historion."
-  Separate Data Storage Notice: "{profile} konservas siajn datumojn aparte. La butonoj sube forigas nur ĝiajn datumojn, dum la grandoj inkluzivas la datumojn de ĉiuj profiloj."
+  Separate Data Storage Notice: "{profile} konservas siajn datumojn aparte. Forigi ĉi tie historion, statistikojn, serĉhistorion, abonojn aŭ ludlistojn forigas nur ĝiajn datumojn, dum la grandoj inkluzivas la datumojn de ĉiuj profiloj."
   Customization: Personecigo
   Manage Profile Subscriptions: Administri profilajn abonojn
   Icon Names:

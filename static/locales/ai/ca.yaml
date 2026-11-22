@@ -2080,7 +2080,7 @@ Profile:
   Separate Profile Note: "Aquest perfil manté les seves subscripcions, historial i llistes de reproducció separats dels altres perfils."
   Separate Profile Deletion Warning: "També se n'eliminaran les subscripcions, l'historial de reproducció, les llistes de reproducció, l'historial de cerques, les estadístiques de visualització i la cua."
   Separate Data Notice: "{profile} manté les dades separades, de manera que les importacions i exportacions següents només utilitzen les seves subscripcions, historial, llistes de reproducció i historial de cerques."
-  Separate Data Storage Notice: "{profile} manté les dades separades. Els botons següents només n'eliminen les dades, mentre que les mides inclouen les dades de tots els perfils."
+  Separate Data Storage Notice: "{profile} manté les dades separades. Eliminar aquí l'historial, les estadístiques, l'historial de cerca, les subscripcions o les llistes de reproducció només n'elimina les dades, mentre que les mides inclouen les dades de tots els perfils."
   Customization: Personalització
   Manage Profile Subscriptions: Gestiona les subscripcions del perfil
   Icon Names:

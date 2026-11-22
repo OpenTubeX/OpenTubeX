@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "Tento profil uchováva svoje odbery, históriu a playlisty oddelene od vašich ostatných profilov."
   Separate Profile Deletion Warning: "Odstránia sa aj jeho odbery, história pozerania, playlisty, história hľadania, štatistiky sledovania a poradie prehrávania."
   Separate Data Notice: "Profil {profile} uchováva svoje údaje oddelene, preto importy a exporty nižšie používajú iba jeho odbery, históriu, playlisty a históriu hľadania."
-  Separate Data Storage Notice: "Profil {profile} uchováva svoje údaje oddelene. Tlačidlá nižšie odstránia iba jeho údaje, no veľkosti zahŕňajú údaje všetkých profilov."
+  Separate Data Storage Notice: "Profil {profile} uchováva svoje údaje oddelene. Odstránenie histórie, štatistík, histórie vyhľadávania, odberov alebo playlistov tu odstráni iba jeho údaje, no veľkosti zahŕňajú údaje všetkých profilov."
   Customization: Prispôsobenie
   Manage Profile Subscriptions: Spravovať odbery profilu
   Icon Names:

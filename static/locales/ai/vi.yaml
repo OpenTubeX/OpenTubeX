@@ -1716,7 +1716,7 @@ Profile:
   Separate Profile Note: "Hồ sơ này giữ các mục đăng ký, lịch sử và danh sách phát tách biệt với các hồ sơ khác của bạn."
   Separate Profile Deletion Warning: "Các mục đăng ký, lịch sử xem, danh sách phát, lịch sử tìm kiếm, thống kê xem và hàng đợi của hồ sơ này cũng sẽ bị xóa."
   Separate Data Notice: "{profile} giữ dữ liệu riêng biệt, nên các mục nhập và xuất bên dưới chỉ dùng các mục đăng ký, lịch sử, danh sách phát và lịch sử tìm kiếm của hồ sơ này."
-  Separate Data Storage Notice: "{profile} giữ dữ liệu riêng biệt. Các nút bên dưới chỉ xóa dữ liệu của hồ sơ này, còn các kích thước bao gồm dữ liệu của mọi hồ sơ."
+  Separate Data Storage Notice: "{profile} giữ dữ liệu riêng biệt. Xóa lịch sử, thống kê, lịch sử tìm kiếm, kênh đăng ký hoặc danh sách phát tại đây chỉ xóa dữ liệu của hồ sơ này, còn các kích thước bao gồm dữ liệu của mọi hồ sơ."
   Customization: Tùy chỉnh
   Manage Profile Subscriptions: Quản lý đăng ký của hồ sơ
   Icon Names:

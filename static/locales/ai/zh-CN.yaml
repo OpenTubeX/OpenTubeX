@@ -1710,7 +1710,7 @@ Profile:
   Separate Profile Note: "此个人资料的订阅、历史记录和播放列表与你的其他个人资料相互独立。"
   Separate Profile Deletion Warning: "它的订阅、观看历史记录、播放列表、搜索历史记录、观看统计和队列也将被删除。"
   Separate Data Notice: "{profile} 的数据是单独保存的，因此下方的导入和导出只会使用它的订阅、历史记录、播放列表和搜索历史记录。"
-  Separate Data Storage Notice: "{profile} 的数据是单独保存的。下方的按钮只会删除它的数据，而大小则包含所有个人资料的数据。"
+  Separate Data Storage Notice: "{profile} 的数据是单独保存的。在此删除历史记录、统计、搜索记录、订阅或播放列表只会删除它的数据，而大小则包含所有个人资料的数据。"
   Customization: 自定义
   Manage Profile Subscriptions: 管理个人资料的订阅
   Icon Names:

@@ -1972,7 +1972,7 @@ Profile:
   Separate Profile Note: "이 프로필은 구독, 기록, 재생 목록을 다른 프로필과 별도로 보관합니다."
   Separate Profile Deletion Warning: "이 프로필의 구독, 시청 기록, 재생 목록, 검색 기록, 시청 통계, 대기열도 함께 삭제됩니다."
   Separate Data Notice: "{profile} 프로필은 데이터를 별도로 보관하므로, 아래의 가져오기와 내보내기에는 이 프로필의 구독, 기록, 재생 목록, 검색 기록만 사용됩니다."
-  Separate Data Storage Notice: "{profile} 프로필은 데이터를 별도로 보관합니다. 아래 버튼은 이 프로필의 데이터만 삭제하지만, 크기에는 모든 프로필의 데이터가 포함됩니다."
+  Separate Data Storage Notice: "{profile} 프로필은 데이터를 별도로 보관합니다. 여기서 기록, 통계, 검색 기록, 구독 또는 재생목록을 삭제하면 이 프로필의 데이터만 삭제되지만, 크기에는 모든 프로필의 데이터가 포함됩니다."
   Customization: 맞춤 설정
   Manage Profile Subscriptions: 프로필 구독 관리
   Icon Names:

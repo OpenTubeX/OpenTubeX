@@ -1769,7 +1769,7 @@ Profile:
   Separate Profile Note: "Denne profil holder sine abonnementer, sin historik og sine playlister adskilt fra dine andre profiler."
   Separate Profile Deletion Warning: "Dens abonnementer, visningshistorik, playlister, søgehistorik, seerstatistik og kø slettes også."
   Separate Data Notice: "{profile} holder sine data adskilt, så importerne og eksporterne nedenfor bruger kun dens abonnementer, historik, playlister og søgehistorik."
-  Separate Data Storage Notice: "{profile} holder sine data adskilt. Knapperne nedenfor sletter kun dens data, mens størrelserne omfatter alle profilers data."
+  Separate Data Storage Notice: "{profile} holder sine data adskilt. Sletning af historik, statistik, søgehistorik, abonnementer eller playlister her sletter kun dens data, mens størrelserne omfatter alle profilers data."
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer
   Icon Names:
