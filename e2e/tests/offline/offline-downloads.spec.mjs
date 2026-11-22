@@ -237,11 +237,27 @@ for (const mobile of [false, true]) {
         await goTo(page, 'downloads')
         const row = title => page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
         await row(sameDownload ? 'Downloaded audio' : 'Second audio download').getByRole('button', { name: 'Add to Queue', exact: true }).click()
+        // A queued copy of a video that starts playing from elsewhere is dropped,
+        // so it is queued again once the current video has started.
+        const queuedCopy = await page.evaluate(() => {
+          const { queueItemId: _queueItemId, ...video } = window.$store.getters.getWatchQueue[0]
+          window.$store.commit('clearWatchQueue')
+          return video
+        })
         await row('Downloaded audio').getByRole('button', { name: 'Play download', exact: true }).click()
         const video = page.locator('video').first()
         await expect(video).toHaveAttribute('src', downloadSource(2, 'offline0002', audioPath))
         await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
         const originalVideo = await video.elementHandle()
+        await video.evaluate(async element => {
+          const playing = new Promise(resolve => element.addEventListener('playing', resolve, { once: true }))
+          await element.play()
+          await playing
+          element.pause()
+          element.currentTime = 0
+        })
+        await page.evaluate(video => window.$store.commit('addVideoToWatchQueue', { video }), queuedCopy)
+        await expect(page.locator('.watchQueue .queueItem')).toHaveCount(1)
         const ended = originalVideo.evaluate(element => new Promise(resolve => element.addEventListener('ended', resolve, { once: true })))
         await video.evaluate(element => element.play())
         await ended
