@@ -2859,6 +2859,9 @@ Storage Startup Error:
   Web Message: "Ako je OpenTubeX otvoren u drugoj kartici, zatvori je i pokušaj ponovno."
   Insecure Web Message: "OpenTubeX može spremati tvoje podatke samo kad je otvoren putem HTTPS-a ili na localhostu. Umjesto toga otvori ovu adresu s https://."
   Retry: "Pokušaj ponovno"
+  In Use Title: "OpenTubeX je otvoren u drugoj kartici"
+  In Use Message: "OpenTubeX se može koristiti samo u jednoj kartici istovremeno. Ako ga koristiš ovdje, zatvorit će se u drugoj kartici."
+  Use Here: "Koristi ovdje"
 Native Permissions:
   Local Network Denied: "Dopuštenje za uređaje u blizini je odbijeno."
   Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."

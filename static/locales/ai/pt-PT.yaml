@@ -2820,6 +2820,9 @@ Storage Startup Error:
   Web Message: "Se o OpenTubeX estiver aberto noutro separador, feche-o e tente novamente."
   Insecure Web Message: "O OpenTubeX só pode guardar os seus dados quando é aberto através de HTTPS ou em localhost. Abra este endereço com https://."
   Retry: "Tentar novamente"
+  In Use Title: "O OpenTubeX está aberto noutro separador"
+  In Use Message: "O OpenTubeX só pode ser utilizado num separador de cada vez. Utilizá-lo aqui fecha-o no outro separador."
+  Use Here: "Utilizar aqui"
 Native Permissions:
   Local Network Denied: "A permissão para dispositivos próximos foi negada."
   Local Network: "Descobrir dispositivos na rede local e transmitir vídeos para eles, e sincronizar definições e dados entre dispositivos."

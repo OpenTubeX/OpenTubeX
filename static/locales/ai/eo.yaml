@@ -2862,6 +2862,9 @@ Storage Startup Error:
   Web Message: "Se OpenTubeX estas malfermita en alia langeto, fermu ĝin kaj reprovu."
   Insecure Web Message: "OpenTubeX povas konservi viajn datumojn nur kiam ĝi estas malfermita per HTTPS aŭ ĉe localhost. Anstataŭe malfermu ĉi tiun adreson per https://."
   Retry: Reprovi
+  In Use Title: "OpenTubeX estas malfermita en alia langeto"
+  In Use Message: "OpenTubeX uzeblas nur en unu langeto samtempe. Se vi uzas ĝin ĉi tie, ĝi fermiĝos en la alia langeto."
+  Use Here: "Uzi ĉi tie"
 Native Permissions:
   Local Network Denied: La permeso por proksimaj aparatoj estis rifuzita.
   Local Network: Malkovri kaj elsendi videaĵojn al aparatoj en via loka reto, kaj sinkronigi agordojn kaj datumojn inter aparatoj.

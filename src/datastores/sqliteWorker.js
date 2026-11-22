@@ -12,12 +12,14 @@ const databases = new Map()
 
 /**
  * Holds an exclusive lock for this worker's lifetime. The pool opens every
- * file exclusively, so only one tab can use it; a reload waits briefly for the
- * previous worker to end instead of failing.
+ * file exclusively, so only one tab can use it. A reload waits briefly for the
+ * previous worker to end, and a new tab for the tab that has the library to
+ * hand it over (libraryHandover.js), instead of failing.
  */
 function acquireLibraryLock() {
   return /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
-    navigator.locks.request('opentubex-library', { signal: AbortSignal.timeout(5000) }, () => {
+    // A background tab's timers run at most once a second.
+    navigator.locks.request('opentubex-library', { signal: AbortSignal.timeout(10_000) }, () => {
       resolve()
       return new Promise(() => {})
     }).catch(reject)

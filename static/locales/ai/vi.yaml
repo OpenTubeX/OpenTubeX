@@ -2836,6 +2836,9 @@ Storage Startup Error:
   Web Message: "Nếu OpenTubeX đang mở trong một thẻ khác, hãy đóng thẻ đó rồi thử lại."
   Insecure Web Message: "OpenTubeX chỉ có thể lưu dữ liệu của bạn khi được mở qua HTTPS hoặc trên localhost. Thay vào đó, hãy mở địa chỉ này bằng https://."
   Retry: "Thử lại"
+  In Use Title: "OpenTubeX đang mở trong một thẻ khác"
+  In Use Message: "OpenTubeX chỉ có thể dùng trong một thẻ tại một thời điểm. Dùng ở đây sẽ đóng nó trong thẻ kia."
+  Use Here: "Dùng ở đây"
 Native Permissions:
   Local Network Denied: "Quyền truy cập thiết bị ở gần đã bị từ chối."
   Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."

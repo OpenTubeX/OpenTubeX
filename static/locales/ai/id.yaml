@@ -2840,6 +2840,9 @@ Storage Startup Error:
   Web Message: "Jika OpenTubeX terbuka di tab lain, tutup tab tersebut dan coba lagi."
   Insecure Web Message: "OpenTubeX hanya dapat menyimpan data Anda jika dibuka melalui HTTPS atau di localhost. Buka alamat ini dengan https://."
   Retry: "Coba lagi"
+  In Use Title: "OpenTubeX terbuka di tab lain"
+  In Use Message: "OpenTubeX hanya dapat digunakan di satu tab dalam satu waktu. Menggunakannya di sini akan menutupnya di tab lain."
+  Use Here: "Gunakan di sini"
 Search Bar:
   Use Suggestion: Gunakan saran
   Video Link: "Video: {title}"

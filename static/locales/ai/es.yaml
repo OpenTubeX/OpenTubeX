@@ -2774,6 +2774,9 @@ Storage Startup Error:
   Web Message: "Si OpenTubeX está abierto en otra pestaña, ciérrala y vuelve a intentarlo."
   Insecure Web Message: "OpenTubeX solo puede guardar tus datos cuando se abre mediante HTTPS o en localhost. Abre esta dirección con https:// en su lugar."
   Retry: "Reintentar"
+  In Use Title: "OpenTubeX está abierto en otra pestaña"
+  In Use Message: "OpenTubeX solo se puede usar en una pestaña a la vez. Si lo usas aquí, se cerrará en la otra pestaña."
+  Use Here: "Usar aquí"
 Search Bar:
   Use Suggestion: Usar sugerencia
   Video Link: "Vídeo: {title}"

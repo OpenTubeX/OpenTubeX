@@ -2814,6 +2814,9 @@ Storage Startup Error:
   Web Message: "OpenTubeX başka bir sekmede açıksa sekmeyi kapatıp yeniden deneyin."
   Insecure Web Message: "OpenTubeX verilerinizi yalnızca HTTPS üzerinden veya localhost'ta açıldığında saklayabilir. Bunun yerine bu adresi https:// ile açın."
   Retry: "Tekrar dene"
+  In Use Title: "OpenTubeX başka bir sekmede açık"
+  In Use Message: "OpenTubeX aynı anda yalnızca bir sekmede kullanılabilir. Burada kullanırsanız diğer sekmede kapanır."
+  Use Here: "Burada kullan"
 Search Bar:
   Use Suggestion: Öneriyi kullan
   Video Link: "Video: {title}"

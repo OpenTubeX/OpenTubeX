@@ -1,4 +1,5 @@
 import { parseLegacyDatafile, SqliteDatastore } from './sqlite.js'
+import { claimLibrary, whenLibraryAvailable } from './libraryHandover.js'
 
 /**
  * @param {() => Worker} startWorker
@@ -6,32 +7,85 @@ import { parseLegacyDatafile, SqliteDatastore } from './sqlite.js'
  */
 function workerDrivers(startWorker) {
   let worker = null
+  /** @type {object[] | null} Requests waiting for this tab to start the worker */
+  let queued = null
   let nextId = 0
   const pending = new Map()
-  function call(method, args) {
-    if (!worker) {
-      worker = startWorker()
-      worker.onmessage = ({ data: { id, result, error } }) => {
-        const request = pending.get(id)
-        pending.delete(id)
-        if (error === undefined) request.resolve(result)
-        else request.reject(new Error(error))
-      }
-      // A worker that fails to load or crashes never answers. Fail its
-      // requests, and start a new worker for the next one.
-      worker.onerror = worker.onmessageerror = event => {
-        event.preventDefault?.()
-        worker.terminate()
-        worker = null
-        const error = new Error(`Library worker failed: ${event.message ?? event.type}`)
-        for (const request of pending.values()) request.reject(error)
-        pending.clear()
-      }
+  /** @type {(() => void)[]} */
+  const idleWaiters = []
+
+  function settle(id, settleRequest) {
+    const request = pending.get(id)
+    pending.delete(id)
+    settleRequest(request)
+    if (!pending.size) idleWaiters.splice(0).forEach(resolve => resolve())
+  }
+
+  // Lets the datastore operations this tab started finish, then ends the worker,
+  // which closes the library and releases its lock for the tab that takes it over.
+  async function release() {
+    const timedOut = new Promise(resolve => setTimeout(() => resolve(true), 3000))
+    // The writes that saving starts can take a few steps to arrive here.
+    await new Promise(resolve => setTimeout(resolve, 100))
+    // An operation sends its next request after the reply to the previous one.
+    // Message tasks aren't throttled in background tabs like timers.
+    while (pending.size) {
+      if (await Promise.race([new Promise(resolve => idleWaiters.push(() => resolve(false))), timedOut])) break
+      await new Promise(resolve => {
+        const { port1, port2 } = new MessageChannel()
+        port1.onmessage = resolve
+        port2.postMessage(null)
+      })
     }
+    worker?.terminate()
+    worker = null
+  }
+
+  function start() {
+    worker = startWorker()
+    claimLibrary(release)
+    worker.onmessage = ({ data: { id, result, error } }) => {
+      settle(id, request => error === undefined ? request.resolve(result) : request.reject(new Error(error)))
+    }
+    // A worker that fails to load or crashes never answers. Fail its
+    // requests, and start a new worker for the next one.
+    worker.onerror = worker.onmessageerror = event => {
+      event.preventDefault?.()
+      worker.terminate()
+      worker = null
+      const error = new Error(`Library worker failed: ${event.message ?? event.type}`)
+      for (const id of [...pending.keys()]) settle(id, request => request.reject(error))
+    }
+  }
+
+  // Requests wait while another tab has the library, in the order they were made.
+  function post(message) {
+    if (worker) {
+      worker.postMessage(message)
+    } else if (queued) {
+      queued.push(message)
+    } else {
+      queued = [message]
+      whenLibraryAvailable().then(() => {
+        const requests = queued
+        queued = null
+        try {
+          start()
+          for (const request of requests) worker.postMessage(request)
+        } catch (error) {
+          worker?.terminate()
+          worker = null
+          for (const { id } of requests) settle(id, request => request.reject(error))
+        }
+      })
+    }
+  }
+
+  function call(method, args) {
     return new Promise((resolve, reject) => {
       const id = nextId++
       pending.set(id, { resolve, reject })
-      worker.postMessage({ id, method, args })
+      post({ id, method, args })
     })
   }
   return name => ({

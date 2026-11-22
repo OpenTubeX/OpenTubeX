@@ -2883,6 +2883,9 @@ Storage Startup Error:
   Web Message: "Se OpenTubeX está aberto noutra lapela, péchaa e téntao de novo."
   Insecure Web Message: "OpenTubeX só pode gardar os teus datos cando se abre mediante HTTPS ou en localhost. Abre este enderezo con https:// no seu lugar."
   Retry: "Tentar de novo"
+  In Use Title: "OpenTubeX está aberto noutra lapela"
+  In Use Message: "OpenTubeX só se pode usar nunha lapela á vez. Se o usas aquí, pecharase na outra lapela."
+  Use Here: "Usar aquí"
 Native Permissions:
   Local Network Denied: "Denegouse o permiso para dispositivos próximos."
   Local Network: "Descubrir dispositivos na túa rede local e enviarlles vídeos, e sincronizar a configuración e os datos entre dispositivos."

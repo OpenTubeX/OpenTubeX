@@ -2814,6 +2814,9 @@ Storage Startup Error:
   Web Message: "Ha az OpenTubeX egy másik lapon is meg van nyitva, zárd be, és próbáld újra."
   Insecure Web Message: "Az OpenTubeX csak akkor tudja tárolni az adataidat, ha HTTPS-en keresztül vagy localhoston nyitod meg. Nyisd meg inkább ezt a címet https:// előtaggal."
   Retry: "Újrapróbálkozás"
+  In Use Title: "Az OpenTubeX egy másik lapon is meg van nyitva"
+  In Use Message: "Az OpenTubeX egyszerre csak egy lapon használható. Ha itt használod, a másik lapon bezárul."
+  Use Here: "Használat itt"
 Search Bar:
   Use Suggestion: Javaslat használata
   Video Link: "Videó: {title}"

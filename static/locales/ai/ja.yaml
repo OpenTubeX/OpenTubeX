@@ -2813,6 +2813,9 @@ Storage Startup Error:
   Web Message: "OpenTubeX が別のタブで開いている場合は、そのタブを閉じてからもう一度お試しください。"
   Insecure Web Message: "OpenTubeX がデータを保存できるのは、HTTPS 経由または localhost で開いた場合のみです。代わりに https:// でこのアドレスを開いてください。"
   Retry: "再試行"
+  In Use Title: "OpenTubeX は別のタブで開いています"
+  In Use Message: "OpenTubeX は一度に 1 つのタブでのみ使用できます。ここで使用すると、もう一方のタブでは閉じられます。"
+  Use Here: "ここで使用"
 Search Bar:
   Use Suggestion: 候補を入力
   Video Link: "動画：{title}"

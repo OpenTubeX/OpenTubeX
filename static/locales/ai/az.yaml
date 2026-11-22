@@ -2823,6 +2823,9 @@ Storage Startup Error:
   Web Message: "OpenTubeX başqa vərəqdə açıqdırsa, onu bağlayın və yenidən cəhd edin."
   Insecure Web Message: "OpenTubeX məlumatlarınızı yalnız HTTPS üzərindən və ya localhost-da açıldıqda saxlaya bilər. Bu ünvanı əvəzinə https:// ilə açın."
   Retry: "Yenidən cəhd et"
+  In Use Title: "OpenTubeX başqa vərəqdə açıqdır"
+  In Use Message: "OpenTubeX eyni anda yalnız bir vərəqdə istifadə oluna bilər. Onu burada istifadə etsəniz, digər vərəqdə bağlanacaq."
+  Use Here: "Burada istifadə et"
 Search Bar:
   Use Suggestion: Təklifi istifadə et
   Video Link: "Video: {title}"

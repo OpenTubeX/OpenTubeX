@@ -3210,6 +3210,9 @@ Storage Startup Error:
   Web Message: "Viss OpenTubeX er open i ei anna fane, lukk henne og prøv igjen."
   Insecure Web Message: "OpenTubeX kan berre lagra dataa dine når han er opna over HTTPS eller på localhost. Opna denne adressa med https:// i staden."
   Retry: "Prøv igjen"
+  In Use Title: "OpenTubeX er open i ei anna fane"
+  In Use Message: "OpenTubeX kan berre brukast i éi fane om gongen. Viss du brukar det her, vert det lukka i den andre fana."
+  Use Here: "Bruk her"
 Search Bar:
   Use Suggestion: Bruk framlegg
   Video Link: "Video: {title}"

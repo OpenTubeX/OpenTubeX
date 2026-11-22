@@ -2891,6 +2891,9 @@ Storage Startup Error:
   Web Message: "Als OpenTubeX in een ander tabblad open is, sluit dat dan en probeer het opnieuw."
   Insecure Web Message: "OpenTubeX kan je gegevens alleen opslaan als het via HTTPS of op localhost wordt geopend. Open dit adres in plaats daarvan met https://."
   Retry: "Opnieuw proberen"
+  In Use Title: "OpenTubeX is geopend in een ander tabblad"
+  In Use Message: "OpenTubeX kan maar in één tabblad tegelijk worden gebruikt. Als je het hier gebruikt, wordt het in het andere tabblad gesloten."
+  Use Here: "Hier gebruiken"
 Native Permissions:
   Local Network Denied: "Toestemming voor apparaten in de buurt is geweigerd."
   Local Network: "Apparaten op je lokale netwerk vinden en er video's naartoe casten, en instellingen en gegevens tussen apparaten synchroniseren."

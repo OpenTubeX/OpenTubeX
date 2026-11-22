@@ -2824,6 +2824,9 @@ Storage Startup Error:
   Web Message: "Ma'z eo digor OpenTubeX en ivinell all, serrit anezhi hag klaskit en-dro."
   Insecure Web Message: "Ne c'hall OpenTubeX enrollañ ho roadennoù nemet pa vez digoret dre HTTPS pe war localhost. Digorit ar chomlec'h-mañ gant https:// e-lec'h."
   Retry: "Klask en-dro"
+  In Use Title: "Digor eo OpenTubeX en ivinell all"
+  In Use Message: "N'haller implijout OpenTubeX nemet en un ivinell war un dro. Ma implijit anezhañ amañ e vo serret en ivinell all."
+  Use Here: "Implijout amañ"
 Search Bar:
   Use Suggestion: Implij ar c’hinnig
   Video Link: "Video: {title}"
