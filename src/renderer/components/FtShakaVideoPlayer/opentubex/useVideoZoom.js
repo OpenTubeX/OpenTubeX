@@ -114,8 +114,25 @@ export function useVideoZoom({
       transforms.push(`scale(${videoZoom.value}) translate(${offset.x * limit}%, ${offset.y * limit}%)`)
     }
 
-    return transforms.length > 0 ? { transform: transforms.join(' ') } : undefined
+    if (transforms.length === 0) return undefined
+
+    // For the layouts that replace this transform but keep the rotation.
+    return { transform: transforms.join(' '), '--video-rotation': `${rotation.value}deg` }
   })
+
+  // The transform animates in fullscreen. Turning the video, or a resize that changes how a
+  // turned video fits, jumps instead, so that a pinch can always divide the fit out of the
+  // rendered scale to get the zoom.
+  watch([rotation, rotationFit], () => {
+    if (video.value) video.value.style.transition = 'none'
+  })
+  watch([rotation, rotationFit], () => {
+    const videoElement = video.value
+    if (!videoElement) return
+    // Applies the new transform before the transition comes back.
+    videoElement.getBoundingClientRect()
+    videoElement.style.transition = ''
+  }, { flush: 'post' })
 
   watch(videoZoomPannable, (pannable) => {
     if (!pannable) {

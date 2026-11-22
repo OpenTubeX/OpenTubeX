@@ -165,7 +165,7 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack, mirrored: mirrorVideo }"
+        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack, mirrored: mirrorVideo, quarterTurned: videoRotation % 180 !== 0 }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -4856,12 +4856,25 @@ const useVrMode = computed(() => {
   return props.format === 'dash' && (props.vrProjection === 'EQUIRECTANGULAR' || props.vrProjection === 'VR180')
 })
 
+const videoElementWidth = ref(0)
+const videoElementHeight = ref(0)
+/** Height of the video element in CSS pixels, used to scale the captions with the player. */
+const videoElementLayoutHeight = ref(0)
+const videoElementLayoutWidth = ref(0)
+const videoIntrinsicSize = ref({ width: 0, height: 0 })
+
+// Mirroring and rotation only apply to the media they were chosen for. External media has no video ID.
+const mediaKey = computed(() => props.videoId || props.externalUrl)
+
 // VR renders the video to its own canvas, so there is no image to mirror.
 const mirrorVideoPossible = computed(() => store.getters.getShowMirrorVideoToggle && !audioOnlyMedia.value && !useVrMode.value)
-const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId, props.videoId))
+const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId, mediaKey.value))
 
-const rotateVideoPossible = computed(() => store.getters.getShowRotateVideoMenu && !audioOnlyMedia.value && !useVrMode.value)
-const videoRotation = computed(() => rotateVideoPossible.value ? store.getters.getTabVideoRotation(mediaTabId, props.videoId) : 0)
+// Like zoom, rotation leaves out the shorts player, whose inline layout covers its box with the video.
+const rotateVideoPossible = computed(() => {
+  return store.getters.getShowRotateVideoMenu && !audioOnlyMedia.value && !useVrMode.value && !props.shortsPlayer
+})
+const videoRotation = computed(() => rotateVideoPossible.value ? store.getters.getTabVideoRotation(mediaTabId, mediaKey.value) : 0)
 const videoRotationFit = computed(() => getVideoRotationFit(
   videoRotation.value,
   { width: videoElementLayoutWidth.value, height: videoElementLayoutHeight.value },
@@ -7866,13 +7879,6 @@ function updateHiddenShortsSeekBar(currentTime) {
   updateSponsorBlockSeekBarState(seekBarContainer)
 }
 
-const videoElementWidth = ref(0)
-const videoElementHeight = ref(0)
-/** Height of the video element in CSS pixels, used to scale the captions with the player. */
-const videoElementLayoutHeight = ref(0)
-const videoElementLayoutWidth = ref(0)
-const videoIntrinsicSize = ref({ width: 0, height: 0 })
-
 function updateVideoIntrinsicSize() {
   const width = video.value?.videoWidth ?? 0
   const height = video.value?.videoHeight ?? 0
@@ -8284,7 +8290,9 @@ const { musicVisualizerCanvas } = useMusicVisualizer({
 })
 
 const fullscreenAmbientBarsVisible = computed(() => {
-  const contentAspectRatio = annotationVideoAspectRatio.value
+  const aspectRatio = annotationVideoAspectRatio.value
+  // A quarter turn fits the turned frame into the element.
+  const contentAspectRatio = aspectRatio !== null && videoRotation.value % 180 !== 0 ? 1 / aspectRatio : aspectRatio
   const elementWidth = videoElementWidth.value
   const elementHeight = videoElementHeight.value
 
@@ -10555,7 +10563,7 @@ function registerMirrorVideoButton() {
     create(rootElement, controls) {
       return new BooleanSettingButton({
         value: mirrorVideo,
-        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, videoId: props.videoId, value }),
+        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, videoId: mediaKey.value, value }),
         events,
         className: 'mirror-video-button',
         mappedIcon: 'flip-horizontal',
@@ -10570,7 +10578,7 @@ function registerRotateVideoSelection() {
     create(rootElement, controls) {
       return new VideoRotationSelection({
         value: videoRotation,
-        updateValue: value => store.commit('setTabVideoRotation', { tabId: mediaTabId, videoId: props.videoId, value }),
+        updateValue: value => store.commit('setTabVideoRotation', { tabId: mediaTabId, videoId: mediaKey.value, value }),
         events,
       }, rootElement, controls)
     }
