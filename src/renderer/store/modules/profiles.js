@@ -481,6 +481,8 @@ const actions = {
         commit('setPlaylistsReady', false)
         commit('setSearchHistoryEntries', [])
         commit('clearWatchStats')
+        // Sync shows the other devices' statistics of this profile once it loaded.
+        commit('setSyncedWatchStats', [])
         return scope
       })
       if (!load) return scope
