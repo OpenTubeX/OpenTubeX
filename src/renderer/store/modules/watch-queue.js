@@ -144,7 +144,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
 export default {
   state: () => ({
     ...createWatchQueueState(),
-    // The video this window last played from the queue, until it starts playing.
+    // The video this window last played from the queue, until its Watch page starts playing it.
     // Not shared with other windows.
     playedVideoId: null
   }),

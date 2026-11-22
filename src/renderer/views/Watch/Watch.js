@@ -6286,9 +6286,10 @@ export default defineComponent({
     dropQueuedCopyOfCurrentVideo: function () {
       if (this.queueCheckedVideoId === this.videoId) return
       this.queueCheckedVideoId = this.videoId
-      // Played from the queue, so a following copy was queued to play it again
+      // Played from the queue, so a following copy was queued to play it again.
+      // Only that video consumes the marker, as it may still be loading in another tab.
       const playedFromQueue = this.$store.state.watchQueue.playedVideoId === this.videoId
-      this.$store.commit('setPlayedQueueVideoId', null)
+      if (playedFromQueue) this.$store.commit('setPlayedQueueVideoId', null)
       const nextVideo = this.nextQueuedVideo
       if (!playedFromQueue && nextVideo?.videoId === this.videoId) {
         this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
