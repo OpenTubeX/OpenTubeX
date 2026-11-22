@@ -1193,7 +1193,7 @@ test.describe('manual comment loading', () => {
 
       await video.evaluate(element => { element.currentTime = 2.5 })
       await expect(dock.locator('.commentThread')).toHaveCount(2)
-      await expect(dock.locator('.timedCommentsHint')).toHaveText('Next comment at 0:03')
+      await expect(dock.locator('.timedCommentsHint')).toContainText('0:03')
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
       await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
     })

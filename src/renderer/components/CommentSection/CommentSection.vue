@@ -2089,7 +2089,7 @@ const canSortByTime = computed(() => {
 })
 
 watch(canSortByTime, (canSort) => {
-  if (!canSort && isTimedSort.value) sortOrder.value = 'top'
+  if (!canSort && isTimedSort.value) handleSortChange('top')
 })
 
 const sortValues = computed(() => canSortByTime.value ? ['top', 'newest', 'timed'] : ['top', 'newest'])
@@ -2744,6 +2744,8 @@ async function getCommentRepliesLocal(index, commentId = null) {
   const rootComment = commentData.value[index]
   const comment = rootComment ? findComment(rootComment, commentId) : null
   let continuation = comment && replyTokens.get(comment.id)
+  /** @type {import('youtubei.js').YTNodes.CommentThread[] | null} */
+  let prefetchedReplies = null
 
   if (continuation === TIMED_COMMENT_REPLIES) {
     try {
@@ -2770,6 +2772,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
       return
     }
     replyTokens.set(comment.id, continuation)
+    // A linked-comment response can already carry the first reply batch.
+    if (continuation.replies?.length) {
+      prefetchedReplies = continuation.replies
+    }
   }
 
   const invidiousReplyToken = continuation && typeof continuation !== 'string'
@@ -2795,7 +2801,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
         hasLoadedReplyBatch && continuation.has_continuation
       )
 
-    if (loadInitialReplies) {
+    if (prefetchedReplies) {
+      replyThreads = prefetchedReplies
+      nextContinuation = continuation.has_continuation ? continuation : null
+    } else if (loadInitialReplies) {
       await continuation.getReplies()
       replyThreads = continuation.replies ?? []
       nextContinuation = continuation.has_continuation ? continuation : null
