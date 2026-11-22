@@ -26,14 +26,16 @@ h3 {
   justify-content: center;
 }
 
+/* Start-aligned text keeps the icon beside every wrapped line; the narrower
+   block keeps the icon and text centered as a group. */
 .separateDataNote {
   display: flex;
+  max-inline-size: 30em;
   margin-block: 12px 0;
+  margin-inline: auto;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   color: var(--tertiary-text-color);
-  text-align: center;
 }
 
 .profileActions {
