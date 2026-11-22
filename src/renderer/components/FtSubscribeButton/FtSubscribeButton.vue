@@ -906,13 +906,16 @@ function persistChannelSettings(patch) {
   const updateSequence = ++channelSettingsUpdateSequence
   optimisticChannelSettings.value = settings
   if (!isSubscribed.value) return Promise.resolve(false)
+  // A profile switch before the queued save runs doesn't move it.
+  const profileId = rootProfileId.value
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
     try {
       saved = await store.dispatch('updateChannelSettings', {
         channelId: props.channelId,
-        settings: patch
+        settings: patch,
+        profileId
       })
     } catch (error) {
       console.error(error)

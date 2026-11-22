@@ -235,6 +235,21 @@ for (const action of ['batchUpdateChannelSettings', 'updateChannelSettings']) {
     assert.ok(errors.mock.calls.every(call => /Invalid subscription settings timestamp/.test(call.arguments[0].message)))
   })
 
+  test(`${action} saves an edit queued before a switch to a separate profile in the profiles it was made in`, async () => {
+    const { db, store } = await profileStore()
+    const separate = { _id: 'separate', name: 'separate', separate: true, subscriptions: [{ id: 'channel', showMembersOnly: true }] }
+    await db.profiles.insertAsync(structuredClone(separate))
+    store.state.profileList.push(structuredClone(separate))
+    const profileId = store.getters.getSubscriptionRootProfile._id
+    store.commit('setActiveProfile', 'separate')
+    const update = { channelId: 'channel', settings: { showMembersOnly: false } }
+    assert.equal(await store.dispatch(action, action === 'batchUpdateChannelSettings' ? { updates: [update], profileId } : { ...update, profileId }), true)
+    for (const profiles of [store.state.profileList, await db.profiles.findAsync({})]) {
+      assert.deepEqual(Object.fromEntries(profiles.map(profile => [profile._id, profile.subscriptions[0].showMembersOnly])),
+        { allChannels: false, custom: false, separate: true })
+    }
+  })
+
   test(`${action} applies repeated explicit edits despite future saved timestamps`, async () => {
     const future = Date.now() + 86400000
     const subscriptions = ['first', 'second'].map(id => ({
