@@ -2787,6 +2787,9 @@ Storage Startup Error:
   Web Message: "如果 OpenTubeX 已在其他分頁中開啟，請關閉該分頁後再試一次。"
   Insecure Web Message: "只有透過 HTTPS 或在 localhost 上開啟時，OpenTubeX 才能儲存你的資料。請改用 https:// 開啟此網址。"
   Retry: "重試"
+  In Use Title: "OpenTubeX 已在其他分頁中開啟"
+  In Use Message: "OpenTubeX 一次只能在一個分頁中使用。在此使用會在另一個分頁中將其關閉。"
+  Use Here: "在此使用"
 Search Bar:
   Use Suggestion: 使用建議
   Video Link: "影片：{title}"

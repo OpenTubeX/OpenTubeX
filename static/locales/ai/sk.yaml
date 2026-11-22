@@ -2784,6 +2784,9 @@ Storage Startup Error:
   Web Message: "Ak je OpenTubeX otvorený na inej karte, zatvorte ju a skúste to znova."
   Insecure Web Message: "OpenTubeX môže ukladať vaše údaje, len keď je otvorený cez HTTPS alebo na localhost. Otvorte radšej túto adresu cez https://."
   Retry: "Skúsiť znova"
+  In Use Title: "OpenTubeX je otvorený na inej karte"
+  In Use Message: "OpenTubeX možno používať naraz len na jednej karte. Ak ho použijete tu, na druhej karte sa zatvorí."
+  Use Here: "Použiť tu"
 Search Bar:
   Use Suggestion: Použiť návrh
   Video Link: "Video: {title}"

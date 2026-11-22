@@ -2828,6 +2828,9 @@ Storage Startup Error:
   Web Message: "Os yw OpenTubeX ar agor mewn tab arall, caewch ef a rhowch gynnig arall arni."
   Insecure Web Message: "Dim ond pan gaiff ei agor dros HTTPS neu ar localhost y gall OpenTubeX gadw eich data. Agorwch y cyfeiriad hwn gyda https:// yn lle hynny."
   Retry: "Ceisio eto"
+  In Use Title: "Mae OpenTubeX ar agor mewn tab arall"
+  In Use Message: "Dim ond mewn un tab ar y tro y gellir defnyddio OpenTubeX. Bydd ei ddefnyddio yma yn ei gau yn y tab arall."
+  Use Here: "Defnyddio yma"
 Native Permissions:
   Local Network Denied: "Gwrthodwyd caniatâd dyfeisiau cyfagos."
   Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."

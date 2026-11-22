@@ -2783,6 +2783,9 @@ Storage Startup Error:
   Web Message: "If OpenTubeX is open in another tab, close it and try again."
   Insecure Web Message: "OpenTubeX can only store your data when it is opened over HTTPS or on localhost. Open this address with https:// instead."
   Retry: "Retry"
+  In Use Title: "OpenTubeX is open in another tab"
+  In Use Message: "OpenTubeX can only be used in one tab at a time. Using it here closes it in the other tab."
+  Use Here: "Use here"
 Native Permissions:
   Local Network Denied: "Nearby devices permission was denied."
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."

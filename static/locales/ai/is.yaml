@@ -2800,6 +2800,9 @@ Storage Startup Error:
   Web Message: "Ef OpenTubeX er opið í öðrum flipa skaltu loka honum og reyna aftur."
   Insecure Web Message: "OpenTubeX getur aðeins vistað gögnin þín þegar það er opnað yfir HTTPS eða á localhost. Opnaðu þetta vistfang frekar með https://."
   Retry: "Reyna aftur"
+  In Use Title: "OpenTubeX er opið í öðrum flipa"
+  In Use Message: "Aðeins er hægt að nota OpenTubeX í einum flipa í einu. Ef þú notar það hér lokast það í hinum flipanum."
+  Use Here: "Nota hér"
 Search Bar:
   Use Suggestion: Nota tillögu
   Video Link: "Myndskeið: {title}"

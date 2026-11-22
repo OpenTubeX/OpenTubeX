@@ -5,33 +5,73 @@ import { parseLegacyDatafile, SqliteDatastore } from './sqlite.js'
  * @returns {(name: string) => import('./sqlite.js').SqliteDriver}
  */
 function workerDrivers(startWorker) {
+  const { claimLibrary, whenLibraryAvailable } = require('./libraryHandover.js')
   let worker = null
+  /** @type {object[] | null} Requests waiting for this tab to start the worker */
+  let queued = null
   let nextId = 0
   const pending = new Map()
-  function call(method, args) {
-    if (!worker) {
-      worker = startWorker()
-      worker.onmessage = ({ data: { id, result, error } }) => {
-        const request = pending.get(id)
-        pending.delete(id)
-        if (error === undefined) request.resolve(result)
-        else request.reject(new Error(error))
-      }
-      // A worker that fails to load or crashes never answers. Fail its
-      // requests, and start a new worker for the next one.
-      worker.onerror = worker.onmessageerror = event => {
-        event.preventDefault?.()
-        worker.terminate()
-        worker = null
-        const error = new Error(`Library worker failed: ${event.message ?? event.type}`)
-        for (const request of pending.values()) request.reject(error)
-        pending.clear()
-      }
+  /** @type {(() => void)[]} */
+  const idleWaiters = []
+
+  function settle(id, settleRequest) {
+    const request = pending.get(id)
+    pending.delete(id)
+    settleRequest(request)
+    if (!pending.size) idleWaiters.splice(0).forEach(resolve => resolve())
+  }
+
+  // Lets the requests this tab already sent finish, then ends the worker, which
+  // closes the library and releases its lock for the tab that takes it over.
+  async function release() {
+    // The writes that saving starts can take a few steps to arrive here.
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await Promise.race([
+      pending.size ? new Promise(resolve => idleWaiters.push(resolve)) : null,
+      new Promise(resolve => setTimeout(resolve, 3000)),
+    ])
+    worker?.terminate()
+    worker = null
+  }
+
+  function start() {
+    worker = startWorker()
+    claimLibrary(release)
+    worker.onmessage = ({ data: { id, result, error } }) => {
+      settle(id, request => error === undefined ? request.resolve(result) : request.reject(new Error(error)))
     }
+    // A worker that fails to load or crashes never answers. Fail its
+    // requests, and start a new worker for the next one.
+    worker.onerror = worker.onmessageerror = event => {
+      event.preventDefault?.()
+      worker.terminate()
+      worker = null
+      const error = new Error(`Library worker failed: ${event.message ?? event.type}`)
+      for (const id of [...pending.keys()]) settle(id, request => request.reject(error))
+    }
+  }
+
+  // Requests wait while another tab has the library, in the order they were made.
+  function post(message) {
+    if (worker) {
+      worker.postMessage(message)
+    } else if (queued) {
+      queued.push(message)
+    } else {
+      queued = [message]
+      whenLibraryAvailable().then(() => {
+        start()
+        for (const request of queued) worker.postMessage(request)
+        queued = null
+      })
+    }
+  }
+
+  function call(method, args) {
     return new Promise((resolve, reject) => {
       const id = nextId++
       pending.set(id, { resolve, reject })
-      worker.postMessage({ id, method, args })
+      post({ id, method, args })
     })
   }
   return name => ({

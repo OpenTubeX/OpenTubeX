@@ -2784,6 +2784,9 @@ Storage Startup Error:
   Web Message: "如果 OpenTubeX 已在其他标签页中打开，请关闭该标签页后重试。"
   Insecure Web Message: "只有通过 HTTPS 或在 localhost 上打开时，OpenTubeX 才能保存你的数据。请改用 https:// 打开此地址。"
   Retry: "重试"
+  In Use Title: "OpenTubeX 已在其他标签页中打开"
+  In Use Message: "OpenTubeX 一次只能在一个标签页中使用。在此处使用会将其在另一个标签页中关闭。"
+  Use Here: "在此使用"
 Search Bar:
   Use Suggestion: 使用建议
   Video Link: "视频：{title}"

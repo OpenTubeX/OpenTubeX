@@ -3356,6 +3356,9 @@ Storage Startup Error:
   Web Message: "Si OpenTubeX está abierto en otra pestaña, cerrala y volvé a intentarlo."
   Insecure Web Message: "OpenTubeX solo puede guardar tus datos cuando se abre mediante HTTPS o en localhost. Abrí esta dirección con https:// en su lugar."
   Retry: "Reintentar"
+  In Use Title: "OpenTubeX está abierto en otra pestaña"
+  In Use Message: "OpenTubeX solo se puede usar en una pestaña a la vez. Si lo usás acá, se va a cerrar en la otra pestaña."
+  Use Here: "Usar acá"
 Native Permissions:
   Local Network Denied: "Se denegó el permiso para dispositivos cercanos."
   Local Network: "Detectar dispositivos en tu red local y transmitirles videos, y sincronizar la configuración y los datos entre dispositivos."

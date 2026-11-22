@@ -3293,6 +3293,9 @@ Storage Startup Error:
   Web Message: "Jei OpenTubeX atidaryta kitame skirtuke, uždarykite jį ir bandykite dar kartą."
   Insecure Web Message: "OpenTubeX gali saugoti jūsų duomenis tik atidaryta per HTTPS arba per localhost. Verčiau atidarykite šį adresą su https://."
   Retry: "Bandyti dar kartą"
+  In Use Title: "OpenTubeX atidaryta kitame skirtuke"
+  In Use Message: "OpenTubeX vienu metu galima naudoti tik viename skirtuke. Jei naudosite jį čia, kitame skirtuke jis bus uždarytas."
+  Use Here: "Naudoti čia"
 Native Permissions:
   Local Network Denied: "Leidimas pasiekti netoliese esančius įrenginius atmestas."
   Local Network: "Aptikti įrenginius vietiniame tinkle ir perduoti į juos vaizdo įrašus bei sinchronizuoti nustatymus ir duomenis tarp įrenginių."

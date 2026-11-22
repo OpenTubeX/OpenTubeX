@@ -2847,6 +2847,9 @@ Storage Startup Error:
   Web Message: "Dacă OpenTubeX este deschis în altă filă, închide-o și încearcă din nou."
   Insecure Web Message: "OpenTubeX îți poate salva datele doar când este deschis prin HTTPS sau pe localhost. Deschide această adresă cu https://."
   Retry: "Încearcă din nou"
+  In Use Title: "OpenTubeX este deschis în altă filă"
+  In Use Message: "OpenTubeX poate fi folosit doar într-o singură filă odată. Dacă îl folosești aici, se va închide în cealaltă filă."
+  Use Here: "Folosește aici"
 Native Permissions:
   Local Network Denied: "Permisiunea pentru dispozitivele din apropiere a fost refuzată."
   Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."

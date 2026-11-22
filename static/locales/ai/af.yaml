@@ -3044,6 +3044,9 @@ Storage Startup Error:
   Web Message: "As OpenTubeX in 'n ander oortjie oop is, maak dit toe en probeer weer."
   Insecure Web Message: "OpenTubeX kan jou data slegs stoor wanneer dit oor HTTPS of op localhost oopgemaak word. Maak hierdie adres eerder met https:// oop."
   Retry: Probeer weer
+  In Use Title: "OpenTubeX is in 'n ander oortjie oop"
+  In Use Message: "OpenTubeX kan net in een oortjie op 'n slag gebruik word. As jy dit hier gebruik, word dit in die ander oortjie toegemaak."
+  Use Here: "Gebruik hier"
 Native Permissions:
   Local Network Denied: Toestemming vir nabygeleë toestelle is geweier.
   Local Network: Ontdek en saai video’s uit na toestelle op u plaaslike netwerk, en sinkroniseer instellings en data oor toestelle heen.

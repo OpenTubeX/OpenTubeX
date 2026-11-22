@@ -2798,6 +2798,9 @@ Storage Startup Error:
   Web Message: "Jos OpenTubeX on auki toisessa välilehdessä, sulje se ja yritä uudelleen."
   Insecure Web Message: "OpenTubeX voi tallentaa tietosi vain, kun se avataan HTTPS-yhteydellä tai localhostissa. Avaa tämä osoite sen sijaan https://-alkuisena."
   Retry: "Yritä uudelleen"
+  In Use Title: "OpenTubeX on auki toisessa välilehdessä"
+  In Use Message: "OpenTubeXia voi käyttää vain yhdessä välilehdessä kerrallaan. Jos käytät sitä tässä, se suljetaan toisessa välilehdessä."
+  Use Here: "Käytä tässä"
 Native Permissions:
   Local Network Denied: "Lähellä olevien laitteiden käyttöoikeus evättiin."
   Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."

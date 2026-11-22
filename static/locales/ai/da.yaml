@@ -2887,6 +2887,9 @@ Storage Startup Error:
   Web Message: "Hvis OpenTubeX er åben i en anden fane, så luk den og prøv igen."
   Insecure Web Message: "OpenTubeX kan kun gemme dine data, når den åbnes via HTTPS eller på localhost. Åbn i stedet denne adresse med https://."
   Retry: "Prøv igen"
+  In Use Title: "OpenTubeX er åben i en anden fane"
+  In Use Message: "OpenTubeX kan kun bruges i én fane ad gangen. Hvis du bruger det her, lukkes det i den anden fane."
+  Use Here: "Brug her"
 Native Permissions:
   Local Network Denied: "Tilladelse til enheder i nærheden blev afvist."
   Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."

@@ -2795,6 +2795,9 @@ Storage Startup Error:
   Web Message: "OpenTubeX beste fitxa batean irekita badago, itxi eta saiatu berriro."
   Insecure Web Message: "OpenTubeX-ek zure datuak HTTPS bidez edo localhost-en irekitzen denean bakarrik gorde ditzake. Ireki helbide hau https:// erabiliz."
   Retry: "Saiatu berriro"
+  In Use Title: "OpenTubeX beste fitxa batean irekita dago"
+  In Use Message: "OpenTubeX fitxa bakarrean erabil daiteke aldi berean. Hemen erabiltzen baduzu, beste fitxan itxiko da."
+  Use Here: "Erabili hemen"
 Search Bar:
   Use Suggestion: Erabili iradokizuna
   Video Link: "Bideoa: {title}"

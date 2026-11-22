@@ -3387,6 +3387,9 @@ Storage Startup Error:
   Web Message: "Če je OpenTubeX odprt v drugem zavihku, ga zaprite in poskusite znova."
   Insecure Web Message: "OpenTubeX lahko shrani vaše podatke le, ko je odprt prek HTTPS ali na localhost. Namesto tega odprite ta naslov s https://."
   Retry: "Poskusi znova"
+  In Use Title: "OpenTubeX je odprt v drugem zavihku"
+  In Use Message: "OpenTubeX je mogoče hkrati uporabljati le v enem zavihku. Če ga uporabite tukaj, se bo v drugem zavihku zaprl."
+  Use Here: "Uporabi tukaj"
 Native Permissions:
   Local Network Denied: "Dovoljenje za naprave v bližini je bilo zavrnjeno."
   Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."

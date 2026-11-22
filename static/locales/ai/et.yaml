@@ -2787,6 +2787,9 @@ Storage Startup Error:
   Web Message: "Kui OpenTubeX on avatud teisel vahekaardil, sulge see ja proovi uuesti."
   Insecure Web Message: "OpenTubeX saab sinu andmeid salvestada ainult siis, kui see on avatud HTTPS-i kaudu või localhostis. Ava see aadress hoopis https:// abil."
   Retry: "Proovi uuesti"
+  In Use Title: "OpenTubeX on avatud teisel vahekaardil"
+  In Use Message: "OpenTubeXi saab korraga kasutada ainult ühel vahekaardil. Kui kasutad seda siin, suletakse see teisel vahekaardil."
+  Use Here: "Kasuta siin"
 Search Bar:
   Use Suggestion: Kasuta soovitust
   Video Link: "Video: {title}"

@@ -2830,6 +2830,9 @@ Storage Startup Error:
   Web Message: "إذا كان OpenTubeX مفتوحًا في علامة تبويب أخرى، فأغلقها وحاول مرة أخرى."
   Insecure Web Message: "لا يمكن لـ OpenTubeX حفظ بياناتك إلا عند فتحه عبر HTTPS أو على localhost. افتح هذا العنوان باستخدام https:// بدلًا من ذلك."
   Retry: "إعادة المحاولة"
+  In Use Title: "OpenTubeX مفتوح في علامة تبويب أخرى"
+  In Use Message: "لا يمكن استخدام OpenTubeX إلا في علامة تبويب واحدة في كل مرة. استخدامه هنا يغلقه في علامة التبويب الأخرى."
+  Use Here: "استخدامه هنا"
 Native Permissions:
   Local Network Denied: "تم رفض إذن الوصول إلى الأجهزة القريبة."
   Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."

@@ -1,6 +1,27 @@
 <template>
   <main class="storageError">
-    <section role="alert">
+    <section
+      v-if="inUseElsewhere"
+      role="status"
+    >
+      <h1>{{ t('Storage Startup Error.In Use Title') }}</h1>
+      <p>{{ t('Storage Startup Error.In Use Message') }}</p>
+      <button
+        type="button"
+        class="retry"
+        @click="useLibraryHere"
+      >
+        <FtIcon
+          :icon="['fas', 'right-to-bracket']"
+          aria-hidden="true"
+        />
+        {{ t('Storage Startup Error.Use Here') }}
+      </button>
+    </section>
+    <section
+      v-else
+      role="alert"
+    >
       <h1>{{ t('Storage Startup Error.Title') }}</h1>
       <p v-if="isCapacitor">
         {{ t('Storage Startup Error.Message') }}
@@ -30,6 +51,12 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
+import { useLibraryHere } from '../../../datastores/libraryHandover'
+
+defineProps({
+  // The web build's library is open in another tab, which this one handed it over to.
+  inUseElsewhere: { type: Boolean, default: false },
+})
 
 const { t } = useI18n()
 

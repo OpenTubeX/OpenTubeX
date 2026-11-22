@@ -2789,6 +2789,9 @@ Storage Startup Error:
   Web Message: "Om OpenTubeX är öppen i en annan flik stänger du den och försöker igen."
   Insecure Web Message: "OpenTubeX kan bara spara dina data när den öppnas via HTTPS eller på localhost. Öppna den här adressen med https:// i stället."
   Retry: "Försök igen"
+  In Use Title: "OpenTubeX är öppen i en annan flik"
+  In Use Message: "OpenTubeX kan bara användas i en flik åt gången. Om du använder det här stängs det i den andra fliken."
+  Use Here: "Använd här"
 Native Permissions:
   Local Network Denied: "Behörighet för enheter i närheten nekades."
   Local Network: "Hitta enheter i ditt lokala nätverk och casta videor till dem, och synkronisera inställningar och data mellan enheter."

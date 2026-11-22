@@ -2738,6 +2738,9 @@ Storage Startup Error:
   Web Message: "Se o OpenTubeX estiver aberto em outra aba, feche-a e tente novamente."
   Insecure Web Message: "O OpenTubeX só pode salvar seus dados quando é aberto via HTTPS ou em localhost. Abra este endereço com https://."
   Retry: "Tentar novamente"
+  In Use Title: "O OpenTubeX está aberto em outra aba"
+  In Use Message: "O OpenTubeX só pode ser usado em uma aba por vez. Usá-lo aqui fecha-o na outra aba."
+  Use Here: "Usar aqui"
 Search Bar:
   Use Suggestion: Usar sugestão
   Video Link: "Vídeo: {title}"

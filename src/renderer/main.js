@@ -64,6 +64,23 @@ if (isAndroidBackgroundRenderer) {
   startApp()
 }
 
+let mounted = false
+
+/**
+ * Shows why the library cannot be used, without reading or writing app storage.
+ * @param {{ inUseElsewhere?: boolean }} [props]
+ */
+async function showStorageScreen(props) {
+  // Use the system locale. A failed locale or region request must not keep the screen hidden.
+  await store.dispatch('triggerCurrentLocaleSideEffects', 'system').catch(console.error)
+  const { setIconPack } = await import('./icons/iconPackState')
+  await setIconPack('material')
+  const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
+  createApp(StorageStartupError, props).use(i18n).mount('#app')
+  document.getElementById('startup-splash')?.remove()
+  document.getElementById('app')?.removeAttribute('inert')
+}
+
 function startApp() {
   // Read the initial state before a restored Watch page picks its starting quality,
   // but don't let a missing answer prevent the application from mounting.
@@ -87,22 +104,25 @@ function startApp() {
     // (plain http:// addresses) or held by another tab.
     if (process.env.IS_CAPACITOR ? !process.env.IS_IOS : !process.env.IS_ELECTRON) {
       try {
+        if (!process.env.IS_CAPACITOR) {
+          // A new tab takes the library over from the tab that has it.
+          const { libraryInUseElsewhere, onLibraryTakenOver } = await import('../datastores/libraryHandover')
+          if (await libraryInUseElsewhere()) {
+            await showStorageScreen({ inUseElsewhere: true })
+            return
+          }
+          // Unmounting saves the open pages' progress before the library closes.
+          onLibraryTakenOver(() => { if (mounted) app.unmount() })
+        }
         const { waitForDatastores } = await import('../datastores/index')
         await waitForDatastores()
       } catch (error) {
         console.error('App storage is unavailable:', error)
-        // Use the system locale without reading or writing failed app storage.
-        // A failed locale or region request must not keep the error hidden.
-        await store.dispatch('triggerCurrentLocaleSideEffects', 'system').catch(console.error)
-        const { setIconPack } = await import('./icons/iconPackState')
-        await setIconPack('material')
-        const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
-        createApp(StorageStartupError).use(i18n).mount('#app')
-        document.getElementById('startup-splash')?.remove()
-        document.getElementById('app')?.removeAttribute('inert')
+        await showStorageScreen()
         return
       }
     }
+    mounted = true
     app.mount('#app')
     initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
   })
