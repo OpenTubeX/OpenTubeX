@@ -197,6 +197,7 @@ function cacheFixture(applied = true, logger = console) {
     toRaw,
     ...seenVideos,
     ...feedState,
+    withDataScope: (_scope, operation) => operation(),
     DBSubscriptionCacheHandlers: {
       markEntriesAsSeenMany: async () => {},
       updateVideosByChannelId: async () => applied,

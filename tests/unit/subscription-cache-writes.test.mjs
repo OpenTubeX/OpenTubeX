@@ -61,6 +61,7 @@ for (const [tab, field, cacheKey, update, mark] of [
         ...feedState,
         applySubscriptionSeenVideosToCache,
         applySubscriptionSeenPostsToCache,
+        withDataScope: (_scope, operation) => operation(),
         DBSubscriptionCacheHandlers: Cache,
       })
       vm.runInContext(moduleSource, context)

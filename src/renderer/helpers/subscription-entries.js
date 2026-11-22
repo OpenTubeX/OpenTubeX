@@ -233,6 +233,11 @@ export function reconcileFetchedSubscriptionEntries(
     ? Number.NaN
     : new Date(previousFetchTimestamp).getTime()
   const publicationDateKey = idKey === 'postId' ? 'publishedTime' : 'published'
+  // The entries a separate profile's feeds show, whose state is that profile's.
+  // The history tells only whether that profile watched an entry.
+  const scope = Array.isArray(previousEntries)
+    ? previousEntries.find(entry => typeof entry?.subscriptionFeedScope === 'string')?.subscriptionFeedScope
+    : undefined
 
   return entries.map((entry, index) => {
     const publishedTime = Number(entry.published ?? entry.publishedTime)
@@ -249,9 +254,23 @@ export function reconcileFetchedSubscriptionEntries(
       index < firstPreviouslyFetchedIndex &&
       isPlausiblyRecent
 
+    const arrivedNew = becamePublic || isNewlyFetched
     const reconciledEntry = {
       ...entry,
-      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || becamePublic || isNewlyFetched)
+      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || arrivedNew)
+    }
+    // Every profile sees what arrived as new, until it sees it. Entries that
+    // never were new leave it out, like those cached by earlier versions.
+    const wasShared = scope === undefined ? wasPreviouslyNew : previousEntry?.sharedNewInSubscriptionFeed === true
+    if ((previousEntry?.arrivedNewInSubscriptionFeed ?? wasShared) === true || arrivedNew) {
+      reconciledEntry.arrivedNewInSubscriptionFeed = true
+    }
+    if (previousEntry?.separateProfileFeedStates && !becamePublic) {
+      reconciledEntry.separateProfileFeedStates = previousEntry.separateProfileFeedStates
+    }
+    if (scope !== undefined) {
+      reconciledEntry.sharedNewInSubscriptionFeed = wasShared || arrivedNew
+      reconciledEntry.subscriptionFeedScope = scope
     }
 
     if (entry.isUpcoming === true || entry.premiere === true) {

@@ -87,5 +87,7 @@ export function mergeSubscriptionCollaborations(cacheEntry, collaborations, hist
     'videoId',
     checkedAt ?? cacheEntry.timestamp,
     historyById
-  ).map(video => !video.isNewInSubscriptionFeed && isPublishedSinceCheck(video) ? { ...video, isNewInSubscriptionFeed: true } : video))
+  ).map(video => !video.isNewInSubscriptionFeed && isPublishedSinceCheck(video)
+    ? { ...video, isNewInSubscriptionFeed: true, arrivedNewInSubscriptionFeed: true }
+    : video))
 }
