@@ -2265,7 +2265,7 @@ async function handleWatchPageLinkClick(event) {
 
   if (externalPlayerIsDefaultViewingMode.value) {
     event?.preventDefault()
-    if (await openInExternalPlayer() && plainLeftClick) emit('open-video')
+    if (await openInExternalPlayer() && plainLeftClick) emit('open-video', { opensWatchPage: false })
     return
   }
 
@@ -2283,7 +2283,7 @@ async function handleWatchPageLinkClick(event) {
       }
     })
     // A file that could not play stays wherever it was listed, such as the queue.
-    if (played && plainLeftClick) emit('open-video')
+    if (played && plainLeftClick) emit('open-video', { opensWatchPage: false })
     return
   }
 
@@ -2335,7 +2335,7 @@ async function handleWatchPageLinkClick(event) {
 
   // Plain left click navigates in this tab: morph the thumbnail into the player
   if (plainLeftClick) {
-    emit('open-video')
+    emit('open-video', { opensWatchPage: true })
     requestWatchPageViewTransition(event.currentTarget, {
       isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
       allowVisiblePlayer: props.appearance === 'recommendation'

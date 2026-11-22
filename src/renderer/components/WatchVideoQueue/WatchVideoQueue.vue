@@ -127,7 +127,7 @@
             :data="listVideoData(item)"
             appearance="watchPlaylistItem"
             force-list-type="list"
-            @open-video="playQueuedVideo(item.queueItemId)"
+            @open-video="({ opensWatchPage }) => playQueuedVideo(item.queueItemId, opensWatchPage)"
             @pause-player="emit('pause-player')"
           />
           <!-- Downloads and media from other sites have no YouTube metadata or actions -->
@@ -279,11 +279,12 @@ function listVideoData(item) {
   return item.route && item.lengthSeconds === undefined ? { ...item, lengthSeconds: '' } : item
 }
 
-function playQueuedVideo(queueItemId) {
+function playQueuedVideo(queueItemId, opensWatchPage = true) {
   emit('pause-player')
   const videoId = items.value.find(item => item.queueItemId === queueItemId)?.videoId
   remove(queueItemId)
-  if (videoId) store.commit('setPlayedQueueVideoId', videoId)
+  // External players and native download playback open no Watch page to take it.
+  if (videoId && opensWatchPage) store.commit('setPlayedQueueVideoId', videoId)
 }
 
 function playExternalQueuedVideo(queueItemId, event) {
