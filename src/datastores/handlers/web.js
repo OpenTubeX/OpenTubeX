@@ -49,6 +49,14 @@ class Settings {
   }
 }
 
+// The app has one window, so no other window changes the feed cache
+export const feedCache = {
+  find: () => baseHandlers.feedCache.find(),
+  write: change => baseHandlers.feedCache.write(change),
+  deleteAll: () => baseHandlers.feedCache.deleteAll(),
+  onChange: () => {},
+}
+
 // For the settings we use the wrapper class to hide some methods only needed in the Electron main process
 export { Settings as settings }
 

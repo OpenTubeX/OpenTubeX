@@ -4,14 +4,17 @@ import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 test.describe('search', () => {
   test('search returns video results', async ({ page }) => {
-    let blockPreviewRequest = true
+    let blockPreviewRequests = true
     let returnPreviewPlaceholder = false
-    let releasePreviewRequest
+    /** @type {Map<string, () => void>} */
+    const blockedPreviewRequests = new Map()
+    const finishedPreviewRequests = new Set()
     let placeholderPreviewRequested = false
-    let previewRequestFinished = false
+    const previewVideoId = url => /\/an_webp\/([^/]+)\//.exec(url)?.[1]
     page.on('requestfinished', request => {
-      if (/\/an_webp\//.test(request.url())) {
-        previewRequestFinished = true
+      const id = previewVideoId(request.url())
+      if (id) {
+        finishedPreviewRequests.add(id)
       }
     })
     await page.route(/\/an_webp\//, async route => {
@@ -25,12 +28,12 @@ test.describe('search', () => {
         return
       }
 
-      if (blockPreviewRequest) {
+      // Hold every preview until the test releases them. The pointer of the
+      // test display can rest over another result while the list renders, so
+      // keep track of each video's request instead of only the latest one.
+      if (blockPreviewRequests) {
         await new Promise(resolve => {
-          releasePreviewRequest = () => {
-            blockPreviewRequest = false
-            resolve()
-          }
+          blockedPreviewRequests.set(previewVideoId(route.request().url()), resolve)
         })
       }
       await route.fulfill({
@@ -44,8 +47,10 @@ test.describe('search', () => {
     const preview = video.locator('.thumbnailPreview')
     let videoId
     let hasThumbnailPreview = false
+    /** @type {{ index: number, videoId: string }[]} */
+    let otherPreviews = []
     // Some YouTube search responses leave out every moving thumbnail, so
-    // search again until the first result has one to hover.
+    // search again until the first result and another one have one to hover.
     for (let attempt = 0; attempt < 5 && !hasThumbnailPreview; attempt++) {
       if (attempt > 0) {
         await page.evaluate(() => window.$store.dispatch('clearSessionSearchHistory'))
@@ -61,13 +66,20 @@ test.describe('search', () => {
       const href = await thumbnail.getAttribute('href')
       videoId = /\/watch\/([^?]+)/.exec(href)?.[1]
       expect(videoId).toBeTruthy()
-      hasThumbnailPreview = await page.evaluate((videoId) => {
+      // Results such as movies have no moving thumbnail, so look for other
+      // results that have one instead of assuming it is the second.
+      otherPreviews = await page.evaluate(() => {
         const search = window.$store.getters.getSessionSearchHistory.find(entry => entry.query === 'big buck bunny')
-        const result = search?.data.find(item => item.videoId === videoId)
-        return typeof result?.thumbnailPreviewUrl === 'string'
-      }, videoId)
+        return [...document.querySelectorAll('.ft-list-video')].flatMap((card, index) => {
+          const href = card.querySelector('.thumbnailLink')?.getAttribute('href')
+          const videoId = /\/watch\/([^?]+)/.exec(href ?? '')?.[1]
+          const result = search?.data.find(item => item.videoId === videoId)
+          return typeof result?.thumbnailPreviewUrl === 'string' ? [{ index, videoId }] : []
+        })
+      })
+      hasThumbnailPreview = otherPreviews[0]?.index === 0 && otherPreviews.length > 1
     }
-    expect(hasThumbnailPreview, 'YouTube must return a moving thumbnail for the first search result').toBe(true)
+    expect(hasThumbnailPreview, 'YouTube must return moving thumbnails for the first and another search result').toBe(true)
 
     await page.evaluate(async () => {
       const store = window.$store
@@ -80,14 +92,15 @@ test.describe('search', () => {
     await expect(video).toHaveClass(/watched/)
 
     await thumbnail.hover()
-    await expect.poll(() => typeof releasePreviewRequest).toBe('function')
+    await expect.poll(() => blockedPreviewRequests.has(videoId)).toBe(true)
     await expect(preview).toHaveCount(0)
 
     await page.mouse.move(0, 0)
     await expect(preview).toHaveCount(0)
 
-    releasePreviewRequest()
-    await expect.poll(() => previewRequestFinished).toBe(true)
+    blockPreviewRequests = false
+    blockedPreviewRequests.forEach(release => release())
+    await expect.poll(() => finishedPreviewRequests.has(videoId)).toBe(true)
     await expect(preview).toHaveCount(0)
 
     await thumbnail.hover()
@@ -122,7 +135,11 @@ test.describe('search', () => {
     })
 
     returnPreviewPlaceholder = true
-    const secondVideo = page.locator('.ft-list-video').nth(1)
+    // Skip previews that already loaded under the resting pointer, since the
+    // image cache would answer them without a request.
+    const otherPreview = otherPreviews.find(({ index, videoId }) => index > 0 && !finishedPreviewRequests.has(videoId))
+    expect(otherPreview, 'Another search result must have a moving thumbnail that has not loaded yet').toBeTruthy()
+    const secondVideo = page.locator('.ft-list-video').nth(otherPreview.index)
     await secondVideo.locator('.thumbnailLink').hover()
     await expect.poll(() => placeholderPreviewRequested).toBe(true)
     await page.waitForTimeout(600)

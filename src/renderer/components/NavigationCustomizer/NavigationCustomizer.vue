@@ -203,6 +203,8 @@ const settingsOverlayActive = useSettingsOverlay(closeItemPicker)
 
 const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
   .filter(item => (!item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API) && (!item.requiresYtDlp || supportsYtDlp))
+  // Turned off, the Twitch page can't be added either
+  .filter(item => item.id !== 'twitch' || store.getters.getEnableTwitchPage)
   .map(item => ({
     ...item,
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys

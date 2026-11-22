@@ -376,7 +376,7 @@ for (const mode of ['yt-dlp', 'built-in', 'proxy', 'failed-child']) {
     const hlsRequests = []
     let childRequests = 0
     const manifestBody = mode === 'failed-child'
-      ? '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x360,CODECS="avc1.42E01E,mp4a.40.2"\nhttps://invidious.test/api/manifest/hls/child.m3u8\n'
+      ? '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x320,CODECS="avc1.42E01E,mp4a.40.2"\nhttps://invidious.test/api/manifest/hls/child.m3u8\n'
       : '#EXTM3U\n'
     await page.route('https://invidious.test/api/manifest/hls/**', route => {
       if (route.request().url().endsWith('/child.m3u8')) {

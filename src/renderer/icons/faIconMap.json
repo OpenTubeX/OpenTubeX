@@ -299,6 +299,10 @@
     "ri": "fire-line",
     "material": "local-fire-department-outline"
   },
+  "flip-horizontal": {
+    "ri": "flip-horizontal-line",
+    "material": "flip-rounded"
+  },
   "flag-checkered": {
     "ri": "flag-2-line",
     "material": "sports-score-rounded"
@@ -654,6 +658,10 @@
   "step-forward": {
     "ri": "skip-forward-mini-line",
     "material": "skip-next-rounded"
+  },
+  "stop": {
+    "ri": "stop-line",
+    "material": "stop-rounded"
   },
   "sun": {
     "ri": "sun-line",

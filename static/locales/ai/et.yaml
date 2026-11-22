@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Uuemad ees
   Oldest First: Vanemad ees
   RSS Feeds:
+    Load More Items: Laadi rohkem kirjeid
     Refreshing: RSS-voogude värskendamine
     Tab: RSS
     Followed Feeds: Jälgitavad RSS-vood
@@ -497,6 +498,7 @@ Settings:
       Memory: mälu
       Network: võrgu
       Disk: ketta
+    Label: Jõudlus
   General Settings:
     Invidious Instance Username: 'Instantsi kasutajanimi'
     Invidious Instance Password: 'Instantsi parool'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automaatne
     Preferred API Backend:
       Yattee Server: Yattee server
+      Local API Extension Required: Veebirakendus saab kohalikku API-t kasutada ainult brauserilaiendiga OpenTubeX Local API.
+      Install Local API Extension: Paigalda laiendus
     Yattee Server:
       Server URL: Yattee serveri URL
       Username: Kasutajanimi
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Toggle Playback With Tab Icon: Esita ja peata vahekaardi ikooniga
     Theme and Colors: "Kujundus ja värvid"
     Font Size: Fondi suurus
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Monoheli'
     Normalize Loudness: 'Normaliseeri helitugevus'
     Show Mono Audio Toggle: 'Näita monoheli lülitit'
+    Show Mirror Video Toggle: "Näita video peegeldamise lülitit"
     Pause on Stream Recovery: "Peata voo taastamisel"
     Buffering:
       Buffering: Puhverdamine
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Luba DLNA edastamine"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja
+    Mirror Video: "Peegelda videot"
     Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
     Show Volume Boost Toggle: "Kuva helitugevuse võimenduse lüliti"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Taasesituse juhtelementide kohandamine ebaõnnestus.
     yt-dlp Streaming: "yt-dlp voogedastus"
     Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'
+    Switch to Audio in Background: 'Lülitu taustal helivormingutele'
     Ignore Headphone Controls: 'Eira kõrvaklappide juhtnuppe'
     Music Visualizer: Muusika visualiseerija
     Automatically Open Chapters: Ava peatükid automaatselt
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Luba ajatempliga märkmed"
       Obsidian Vault: Obsidiani hoidla
+    Double-Tap With Two Fingers to Skip Chapters: "Peatükkide vahetamiseks topeltpuuduta kahe sõrmega"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Salvestusruumi puhastamine on lõpetatud
     Cleanup Failed: Salvestusruumi puhastamine nurjus
   Subscription Settings:
+    Refresh These Feeds Together: "Värskenda neid vooge koos"
     Fetch Feed on Startup: Hangi voog käivitamisel
     Show New Content Feed: Kuva uue sisu voog
     RSS Feeds: RSS-vood
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Teised platvormid
       Manage Channels: Halda jälgitavaid kanaleid
+      Enable Twitch Page: Luba Twitchi leht
       Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
       Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
     Hide Playlist Stats: Peida esitusloendi statistika
+    Hide Recommendation Details: Peida soovituste põhjused ja tagasiside
     Sections:
       Digital Wellbeing: "Digitaalne heaolu"
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: Loendite allalaadimine…
     Failed to Download: Loendeid ei õnnestunud alla laadida
     Loaded Status: "Blokeeritud kanalid: {blocked} · Märgistatud kanalid: {warned} · Uuendatud: {date}"
+  Highlight Changed Settings Label: Muudetud
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi
@@ -1924,6 +1937,9 @@ Video:
     Zoom:
       Zoom: Suurendus
       'Off': 'Väljas'
+    Lock Controls:
+      Lock Controls: "Lukusta juhtnupud"
+      Hold to Unlock: "Avamiseks hoidke all"
     Volume Boost:
       Volume Boost: "Helitugevuse võimendus"
       'Off': "Väljas"
@@ -2391,6 +2407,7 @@ Tooltips:
     Normalize Loudness: 'Vaigistab videoid, mis on valjemad kui enamik, et helitugevus videote vahel ei hüppaks. Vaiksed videod säilitavad oma helitugevuse. Töötab ainult kohaliku API kaudu laaditud videotega.'
     Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
+    Switch to Audio in Background: 'Esitab helivorminguid, kui rakendus töötab taustal või ekraan on välja lülitatud, mis säästab andmesidet ja akut. Pilt pildis režiim säilitab video. Video naaseb, kui rakenduse uuesti avad. Eeldab, et esitus jätkub lukustatud ekraaniga.'
     Ignore Headphone Controls: 'Eirab Bluetooth-seadmetest, juhtmega kõrvaklappidest ja klaviatuuride meediaklahvidest tulevaid esitamise, pausi ja vahelejätmise käske, et kogemata kõrvaklappide puudutamine taasesitust ei katkestaks. Rakenduse ja meediateavituse juhtnupud töötavad edasi.'
     Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
     Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.
@@ -2399,6 +2416,7 @@ Tooltips:
     Use YouTube-style Shorts: Kuvab Shortsid tellimuste ja kanalite lehtedel püstpaigutusega ruudustikus ning kasutab YouTube'i laadis Shortsi pleierit.
     Loop Shorts: Kui see on lubatud, käivituvad Shortsid automaatselt uuesti. Kui see on välja lülitatud, peatuvad Shortsid lõpus ja kuvatakse uuesti esitamise nupp.
     Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
+    Show Mirror Video Toggle: "Kuvab pleieri seadete menüüs lüliti, mis peegeldab videot horisontaalselt, et tantsu-, treening- ja pillimänguõpetustega oleks lihtsam kaasa teha."
     Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
@@ -2420,6 +2438,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
     Enable Timestamp Notes: "Lisab mängijasse nupu ja otsetee N, mis peatavad video ja avavad märkme, mis viitab praegusele hetkele. Märkmeid saab kopeerida Markdownina või arvutis lisada Obsidiani."
     Obsidian Vault: Ajatempliga märkmete jaoks kasutatava Obsidiani hoidla nimi. Kui see on määratud, saab märkmeid Obsidiani lisada. Iga video märkmed kogutakse video järgi nimetatud märkmesse hoidla uute märkmete kaustas.
+    Double-Tap With Two Fingers to Skip Chapters: "Järgmisele peatükile liikumiseks topeltpuuduta kahe sõrmega video paremat poolt või praeguse peatüki algusesse naasmiseks vasakut poolt. Peatüki esimese 3 sekundi jooksul viib vasak pool hoopis eelmisele peatükile, nii et kordamisel liigud peatükkide kaupa tagasi."
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.
@@ -2450,6 +2469,7 @@ Tooltips:
     Bedtime Reminder: "Peatab video ja tuletab sulle algus- ja lõpuaja vahel meelde, et vaatamine lõpetada."
     Shorten View Counts: Kuvab YouTube'i juba ümardatud vaatamiste arvu, kommentaaride arvu ja kommentaaride meeldimiste arvu lühendatud kujul, näiteks 14 000 asemel 14 tuh. Täpsed arvud kuvatakse alati täielikult.
   Subscription Settings:
+    Refresh These Feeds Together: "Kui värskendad üht märgitud voogu, värskendatakse teisi märgitud vooge kohe pärast seda. Automaatsed värskendused järgivad endiselt iga voo enda intervalli."
     Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
     Show New Content Feed: Kuvab vahelehe Uus, mis sisaldab tellimuste voo üksusi, mida eelmise hankimise ajal polnud.
     Enable RSS Feeds: Kuvab tellimuste lehel RSS-vahekaardi RSS- või Atom-voogude üksustega, et saaksid jälgida teiste platvormide sisuloojaid. Selle üksused avatakse yt-dlp abil.
@@ -2460,10 +2480,12 @@ Tooltips:
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
-    Show Collaborations From Other Channels: "Näitab ka videoid, mille tellitud kanalid tegid koos teise kanaliga, kes need üles laadis. YouTube näitab neid ainult kanali avalehe vahekaardil, seega laadib iga videote värskendus iga kanali kohta ühe lehe rohkem. Leitakse ainult seal näidatud uusimad koostööd, mõned kanalid ei näita ühtegi ja nende avaldamiskuupäevad on ligikaudsed. Pole Invidiouse API-ga saadaval."
+    Show Collaborations From Other Channels: "Näitab ka videoid, mille tellitud kanalid tegid koos teise kanaliga, kes need üles laadis. YouTube näitab neid ainult kanali avalehe vahekaardil, seega kontrollib videote värskendus kõige rohkem mõnda kanalit ja uute ilmumine võib võtta päeva või kauem. Leitakse ainult seal näidatud uusimad koostööd, mõned kanalid ei näita ühtegi ja nende avaldamiskuupäevad on ligikaudsed. Pole Invidiouse API-ga saadaval."
     Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
+    Enable Twitch Page: Võimaldab avada Twitchi lehe navigeerimisest ja käsupaletist. Seal saad sirvida populaarseid kategooriaid ja otsekanaleid ning otsida Twitchist.
     Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:
+    Toggle Playback With Tab Icon: Klõps esitatava või peatatud videoga vahekaardi ikoonil peatab või jätkab video, ilma et vahekaardile lülitutaks.
     Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust, sealhulgas need, mis pakuvad valikut Võta tagasi. Vead, hoiatused, teie seadistatud meeldetuletused ja otsust nõudvad teavitused, nagu värskendusviibad, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
@@ -2522,6 +2544,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Võta viimane kerimine tagasi
   Redo Seek: Tee tagasi võetud kerimine uuesti
   New Incognito Tab: Loo uus inkognito vahekaart
+  Shortcuts Label: Otseteed
 CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett
@@ -2556,6 +2579,8 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  Stop Recording: "Peata salvestamine"
+  Recording: "Salvestamine"
   File Name Template Invalid: 'Kasuta allalaadimiskaustas suhtelist teed ilma "..", "~", "$", "%" või eesliiteta nagu "thumbnail:".'
   Search Completed: "Otsi lõpetatud allalaadimisi pealkirja või kanali järgi"
   Format: "Vorming"
@@ -2699,6 +2724,22 @@ App Icon:
   Saved Message: "Ikoon on salvestatud. Käivitaja värskendamine võib võtta hetke."
   Title: "Rakenduse ikoon"
   Error: "Rakenduse ikooni ei saanud laadida ega muuta"
+
+App Lock:
+  Title: "Rakenduse lukk"
+  Enable: "Nõua ekraanilukku"
+  Enable Tooltip: "Küsib OpenTubeX-i naasmisel sõrmejälge, nägu, PIN-koodi, mustrit või parooli. Androidi versioonis 13 ja uuemas ei näita hiljutiste rakenduste vaade ka rakenduse eelvaadet."
+  Lock After: "Lukusta pärast"
+  Immediately: "Kohe"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minutit"
+  15 Minutes: "15 minutit"
+  1 Hour: "1 tund"
+  Unavailable: "Rakenduse luku kasutamiseks seadke Androidi seadetes ekraanilukk."
+  Error: "Rakenduse lukku ei saanud muuta"
+  Locked: "OpenTubeX on lukus"
+  Unlock: "Ava lukk"
+  Prompt Title: "OpenTubeX-i avamine"
 
 Tray:
   Hide All Windows: "Peida kõik aknad"
@@ -2878,6 +2919,33 @@ Platforms:
   Verify: "Kinnita"
   Categories: "Kategooriad"
   Category Not Found: "Seda kategooriat ei leitud."
+  Category Tags: "Kategooria sildid"
+  Stream Tags: "Voo sildid"
+  Language: "Keel"
+  All Languages: "Kõik keeled"
+  Other Language: "Muu"
+  American Sign Language: "Ameerika viipekeel"
+  Search Tags: "Otsi silte"
+  Add Tag: "Lisa silt"
+  Remove Tag: "Eemalda {tag}"
+  Sort:
+    Viewers: "Vaatajad (suurimast väikseimani)"
+    Viewers Ascending: "Vaatajad (väikseimast suurimani)"
+    Started: "Hiljuti alustatud"
+    Relevance: "Soovitatud"
+    Published: "Hiljuti avaldatud"
+    Views: "Vaatamised (suurimast väikseimani)"
+    Top Day: "Top 24 tundi"
+    Top Week: "Top 7 päeva"
+    Top Month: "Top 30 päeva"
+    Top All: "Top kõigi aegade"
+  Video Type:
+    Video Type: "Video tüüp"
+    All: "Kõik videod"
+    Archive: "Varasemad ülekanded"
+    Highlight: "Esiletõstetud hetked"
+    Upload: "Üleslaaditud"
+  Anonymous: "Anonüümne"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"
@@ -2912,5 +2980,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Otsi Twitchist"
+  Search Placeholder: "Kategooriad ja kanalid"
 New Incognito Tab: Uus inkognito vahekaart
 Incognito Tab: Inkognito vahekaart

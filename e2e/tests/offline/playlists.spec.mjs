@@ -1175,7 +1175,7 @@ test.describe('custom playlists overview order', () => {
     await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
   })
 
-  test('pins playlists to the side navigation in the overview order', async ({ app, page }) => {
+  test('pins playlists to the side navigation in pin order', async ({ app, page }) => {
     const pinned = page.locator('.sideNav .pinnedPlaylists .navChannel')
     const pinnedTitles = () => pinned.evaluateAll(links => links.map(link => link.title))
     async function togglePin(name, action) {
@@ -1189,16 +1189,14 @@ test.describe('custom playlists overview order', () => {
     await expect(pinned).toHaveCount(0)
     await togglePin('A', 'Pin to Navigation')
     await togglePin('B', 'Pin to Navigation')
-    // Playlists without a saved position start newest first.
-    await expect.poll(pinnedTitles).toEqual(['Overview B', 'Overview A'])
-
-    await goTo(page, 'userplaylists')
-    await page.locator('.playlistList [data-playlist-drag-item]')
-      .filter({ hasText: 'Overview A' })
-      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
-      .focus()
-    await page.keyboard.press('Home')
     await expect.poll(pinnedTitles).toEqual(['Overview A', 'Overview B'])
+
+    // Pins move in the navigation, independent of the Playlists page order.
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]').focus()
+    await page.keyboard.press('Alt+ArrowUp')
+    await expect.poll(pinnedTitles).toEqual(['Overview B', 'Overview A'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-b', 'custom-overview-a'])
 
     await goTo(page, 'history')
     await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]').click()

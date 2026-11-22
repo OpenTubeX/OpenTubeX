@@ -406,6 +406,22 @@ class SearchHistory {
   }
 }
 
+// Writes reach the main process in call order, see `createFeedCacheMirror`.
+const dbFeedCache = (action, data) => window.ftElectron.dbFeedCache(action, toPlain(data))
+
+const feedCache = {
+  // The main process sends each document's stored JSON text, see History.find.
+  find: async () => (await dbFeedCache(DBActions.GENERAL.FIND)).map(parseStoredDocument),
+  write: change => dbFeedCache(DBActions.FEED_CACHE.WRITE, change),
+  deleteAll: () => dbFeedCache(DBActions.GENERAL.DELETE_ALL),
+  /**
+   * Changes of other windows. Call after the first `find`, which contains the
+   * changes before it.
+   * @param {(event: number, change?: { docs: object[], removed: string[] }) => void} listener
+   */
+  onChange: listener => window.ftElectron.handleSyncFeedCache(listener),
+}
+
 // Subscription cache requests reach the main process in the order they were
 // made, so a deletion cannot be undone by a write made before it.
 let subscriptionCacheRequests = Promise.resolve()
@@ -476,8 +492,8 @@ class SubscriptionCache {
     return (await subscriptionCacheRequest(DBActions.GENERAL.FIND)).map(parseStoredDocument)
   }
 
-  static updateVideosByChannelId(channelId, entries, timestamp) {
-    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp })
+  static updateVideosByChannelId(channelId, entries, timestamp, collaborationsCheckedAt) {
+    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp, collaborationsCheckedAt })
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
@@ -520,5 +536,6 @@ export {
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  feedCache,
   compactAllDatastores,
 }

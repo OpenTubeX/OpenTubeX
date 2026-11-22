@@ -18,6 +18,7 @@ reviews:
   path_filters:
     # Native string files generated from static/locales by _scripts/prepareAndroid.mjs and _scripts/prepareIos.mjs
     - "!android/app/src/main/res/values*/widget_strings.xml"
+    - "!android/app/src/main/res/values*/app_lock_strings.xml"
     - "!ios/App/App/*.lproj/InfoPlist.strings"
     - "!ios/App/OpenTubeXWidgets/*.lproj/Localizable.strings"
   auto_review:

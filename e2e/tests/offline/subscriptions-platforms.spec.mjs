@@ -8,12 +8,23 @@ import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { externalHistoryEntry } from '../../helpers/external-media-history.mjs'
-import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
+import { DBActions } from '../../../src/constants.js'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 const AVATAR = 'https://twitch.example.test/avatar.jpg'
 const CHANNEL = { id: '1001', login: 'streamer', name: 'Streamer', avatar: AVATAR }
 const OTHER_CHANNEL = { id: '1002', login: 'other', name: 'Other', avatar: AVATAR }
+
+/**
+ * The documents of the followed channels in the feed cache
+ * @param {import('@playwright/test').Page} page
+ */
+function cachedChannels(page) {
+  return page.evaluate(async findAction => (await window.ftElectron.dbFeedCache(findAction))
+    .map(text => JSON.parse(text))
+    .filter(doc => doc._id.startsWith('platform:')), DBActions.GENERAL.FIND)
+}
+
 /**
  * @param {typeof CHANNEL} channel
  */
@@ -265,11 +276,7 @@ test.describe('Channels on other platforms', () => {
       expect(await page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(OTHER_CHANNEL)])
       // Its items and history are forgotten as soon as the setting changes, as for
       // channels unfollowed through sync, so following it again starts over
-      await expect.poll(() => page.evaluate((key) => {
-        const feed = JSON.parse(localStorage.getItem('platformFeed'))
-        const items = [...feed.live, ...feed.videos, ...feed.clips].filter(item => `${item.platform}:${item.channelId}` === key)
-        return { items: items.length, cached: feed.channelKeys.includes(key), history: key in JSON.parse(localStorage.getItem('platformFeedHistory') ?? '{}') }
-      }, `twitch:${CHANNEL.id}`)).toEqual({ items: 0, cached: false, history: false })
+      await expect.poll(async () => (await cachedChannels(page)).map(doc => doc._id)).not.toContain(`platform:twitch:${CHANNEL.id}`)
 
       await page.locator(sel.backButton).click()
       await expect(titles).toHaveText(['Other newest VOD', 'Other older VOD'])
@@ -291,6 +298,33 @@ test.describe('Channels on other platforms', () => {
         return { path, query }
       })).toEqual({ path: '/external-channel', query: { platform: 'twitch', id: OTHER_CHANNEL.id } })
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Renamed')
+    })
+
+    test('takes over the items and history that earlier versions cached', async ({ page }) => {
+      const requests = await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
+      const key = `twitch:${CHANNEL.id}`
+      // Earlier versions kept them in the local storage
+      await page.evaluate(({ key, channelId, published }) => {
+        localStorage.setItem('platformFeed', JSON.stringify({
+          live: [],
+          videos: [{ platform: 'twitch', id: '99', url: 'https://www.twitch.tv/videos/99', title: 'Cached VOD', author: 'Streamer', channelId, thumbnail: '', published }],
+          clips: [],
+          channelKeys: [key]
+        }))
+        localStorage.setItem('platformFeedHistory', JSON.stringify({ [key]: ['99'] }))
+        localStorage.setItem('platformFeedLastRefresh', String(published))
+      }, { key, channelId: CHANNEL.id, published: now })
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-platforms-tab]').click()
+
+      // The cached items cover the followed channel, so it doesn't load
+      await expect(page.locator('#subscriptionsPanel [data-platform-section="videos"] .h3Title')).toHaveText(['Cached VOD'])
+      expect(requests).toEqual([])
+      await expect.poll(async () => (await cachedChannels(page)).map(({ _id, loaded, history }) => ({ _id, loaded, history })))
+        .toEqual([{ _id: `platform:${key}`, loaded: true, history: ['99'] }])
+      expect(await page.evaluate(() => [localStorage.getItem('platformFeed'), localStorage.getItem('platformFeedHistory')]))
+        .toEqual([null, null])
     })
 
     test('lists new videos and live streams in the New feed until they are seen', async ({ page }) => {
@@ -324,7 +358,7 @@ test.describe('Channels on other platforms', () => {
       await page.locator('[data-platforms-tab]').click()
       await page.getByRole('button', { name: /Refresh Platforms/ }).click()
       await expect(videos.first()).toHaveText('Recording of Back live')
-      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('platformFeed')).videos.filter(item => item.isNew).length)).toBe(0)
+      await expect.poll(async () => (await cachedChannels(page)).flatMap(doc => doc.videos).filter(item => item.isNew)).toEqual([])
 
       // Refreshing all feeds covers other platforms too, from any tab of the tabbed New feed
       await page.evaluate(() => window.$store.dispatch('updateNewSubscriptionFeedView', 'tabbed'))
@@ -454,7 +488,7 @@ test.describe('Channels on other platforms', () => {
       const liveEntries = () => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
         .filter(entry => entry.kind === 'live')
         .map(({ title, body, path, query }) => ({ title, body, path, query })))
-      const cachedLiveStreams = () => page.evaluate(() => JSON.parse(localStorage.getItem('platformFeed') ?? 'null')?.live.map(item => item.id) ?? [])
+      const cachedLiveStreams = async () => (await cachedChannels(page)).flatMap(doc => doc.live).map(item => item.id)
       const shown = () => app.electronApp.evaluate(() => globalThis.shownNotifications)
 
       await page.evaluate(() => window.$store.dispatch('updateTwitchLiveNotifications', true))
@@ -528,59 +562,82 @@ test.describe('Channels on other platforms', () => {
     await expect(page.locator('.channelHeader .channelName')).toHaveText('Other')
   })
 
-  test.describe('with the Twitch page in the navigation', () => {
-    test.use({ seed: { settings: { ...SETTINGS, navigationItems: [...DEFAULT_NAVIGATION_ITEMS, 'twitch'] } } })
-
-    test('browses Twitch, searches it for categories and opens a category with its live streams', async ({ page }) => {
-      const chess = { slug: 'chess', displayName: 'Chess', viewersCount: 1200, boxArtURL: 'https://twitch.example.test/chess.jpg' }
-      const streamOf = ({ id, login, name }) => ({
-        node: {
-          id: `${id}9`,
-          title: `${name} live`,
-          createdAt: new Date(now - 600000).toISOString(),
-          viewersCount: 42,
-          previewImageURL: 'https://twitch.example.test/live.jpg',
-          broadcaster: { id, login, displayName: name, profileImageURL: AVATAR }
-        }
-      })
-      await page.route('https://twitch.example.test/**', route => route.fulfill({ path: THUMBNAIL_PATH }))
-      await page.route('https://gql.twitch.tv/gql', route => {
-        const { query, variables } = route.request().postDataJSON()
-        if (query.includes('index: GAME')) {
-          return route.fulfill({ json: { data: { searchFor: { games: { cursor: null, items: variables.query === 'chess' ? [chess] : [] } } } } })
-        }
-        if (query.includes('game(slug')) {
-          return route.fulfill({ json: { data: { game: variables.slug === 'chess' ? { ...chess, streams: { edges: [streamOf(OTHER_CHANNEL)] } } : null } } })
-        }
-        return route.fulfill({ json: { data: { games: { edges: [{ node: chess }] }, streams: { edges: [streamOf(CHANNEL)] } } } })
-      })
-
-      await goTo(page, 'twitch')
-      const results = page.locator(`${activeTab} [role="tabpanel"] .ft-list-item .h3Title`)
-      await expect(results).toHaveText(['Chess'])
-      await page.getByRole('tab', { name: 'Channels' }).click()
-      await expect(results).toHaveText(['Streamer live'])
-
-      // A search lists matching categories on their tab, and back returns to the search
-      const search = page.getByRole('searchbox', { name: 'Search Twitch' })
-      await search.fill('chess')
-      await search.press('Enter')
-      await page.getByRole('tab', { name: 'Categories' }).click()
-      await expect(page.locator(`${activeTab} .platformSearch .ft-list-item .h3Title`)).toHaveText(['Chess'])
-      await page.locator(`${activeTab} .platformSearch .ft-list-item .title`).click()
-      await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
-        .toBe('/external-category?platform=twitch&id=chess')
-      await expect(page.locator(`${activeTab} .channelHeader .channelName`)).toHaveText('Chess')
-      await expect(page.locator(`${activeTab} .ft-list-item .h3Title`)).toHaveText(['Other live'])
-      await page.locator(sel.backButton).click()
-      await expect(search).toHaveValue('chess')
-      await expect(page.locator(`${activeTab} .platformSearch .ft-list-item .h3Title`)).toHaveText(['Chess'])
-
-      // Emptying the search shows the most watched categories again
-      await search.fill('')
-      await expect(page.locator(`${activeTab} .platformSearch`)).toHaveCount(0)
-      await expect(results).toHaveText(['Chess'])
+  test('browses Twitch, searches it for categories and opens a category with its live streams', async ({ page }) => {
+    const chess = { slug: 'chess', displayName: 'Chess', viewersCount: 1200, boxArtURL: 'https://twitch.example.test/chess.jpg' }
+    const streamOf = ({ id, login, name }) => ({
+      node: {
+        id: `${id}9`,
+        title: `${name} live`,
+        createdAt: new Date(now - 600000).toISOString(),
+        viewersCount: 42,
+        previewImageURL: 'https://twitch.example.test/live.jpg',
+        broadcaster: { id, login, displayName: name, profileImageURL: AVATAR }
+      }
     })
+    const streamOptions = []
+    await page.route('https://twitch.example.test/**', route => route.fulfill({ path: THUMBNAIL_PATH }))
+    await page.route('https://gql.twitch.tv/gql', route => {
+      const { query, variables } = route.request().postDataJSON()
+      if (query.includes('index: GAME')) {
+        return route.fulfill({ json: { data: { searchFor: { games: { cursor: null, items: variables.query === 'chess' ? [chess] : [] } } } } })
+      }
+      if (query.includes('game(slug') && query.includes('clips(')) {
+        const clip = { slug: 'chess-clip', title: 'Chess clip', createdAt: new Date(now - 600000).toISOString(), durationSeconds: 30, thumbnailURL: 'https://twitch.example.test/clip.jpg', broadcaster: { id: OTHER_CHANNEL.id, login: OTHER_CHANNEL.login, displayName: OTHER_CHANNEL.name } }
+        return route.fulfill({ json: { data: { game: { ...chess, clips: { edges: [{ node: clip }] } } } } })
+      }
+      if (query.includes('game(slug')) {
+        streamOptions.push(variables.options)
+        return route.fulfill({ json: { data: { game: variables.slug === 'chess' ? { ...chess, streams: { edges: [streamOf(OTHER_CHANNEL)] } } : null } } })
+      }
+      return route.fulfill({ json: { data: { games: { edges: [{ node: chess }] }, streams: { edges: [streamOf(CHANNEL)] } } } })
+    })
+
+    await goTo(page, 'twitch')
+    const results = page.locator(`${activeTab} [role="tabpanel"] .ft-list-item .h3Title`)
+    await expect(results).toHaveText(['Chess'])
+    await page.getByRole('tab', { name: 'Channels' }).click()
+    await expect(results).toHaveText(['Streamer live'])
+
+    // A search lists matching categories on their tab, and back returns to the search
+    const search = page.getByRole('searchbox', { name: 'Search Twitch' })
+    await search.fill('chess')
+    await search.press('Enter')
+    await page.getByRole('tab', { name: 'Categories' }).click()
+    await expect(page.locator(`${activeTab} .platformSearch .ft-list-item .h3Title`)).toHaveText(['Chess'])
+    await page.locator(`${activeTab} .platformSearch .ft-list-item .title`).click()
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+      .toBe('/external-category?platform=twitch&id=chess')
+    await expect(page.locator(`${activeTab} .channelHeader .channelName`)).toHaveText('Chess')
+    await expect(page.locator(`${activeTab} .ft-list-item .h3Title`)).toHaveText(['Other live'])
+
+    // Several languages filter the streams together, and stay in the address
+    const languages = page.locator(activeTab).getByRole('combobox', { name: 'Language' })
+    await languages.click()
+    await page.getByRole('option', { name: 'German' }).click()
+    await page.getByRole('option', { name: 'French' }).click()
+    await expect(page.getByRole('listbox')).toBeVisible()
+    await expect.poll(() => streamOptions.at(-1)).toEqual({ sort: 'VIEWER_COUNT', broadcasterLanguages: ['FR', 'DE'] })
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+      .toBe('/external-category?platform=twitch&id=chess&language=fr&language=de')
+    await expect(page.locator(`${activeTab} .ft-list-item .h3Title`)).toHaveText(['Other live'])
+    // All languages clears the others
+    await page.getByRole('option', { name: 'All languages' }).click()
+    await expect.poll(() => streamOptions.at(-1)).toEqual({ sort: 'VIEWER_COUNT' })
+    await page.keyboard.press('Escape')
+
+    // The other tabs list the category's videos and clips
+    await page.locator(activeTab).getByRole('tab', { name: 'Clips' }).click()
+    await expect(page.locator(`${activeTab} .ft-list-item .h3Title`)).toHaveText(['Chess clip'])
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+      .toBe('/external-category?platform=twitch&id=chess&tab=clips')
+    await page.locator(sel.backButton).click()
+    await expect(search).toHaveValue('chess')
+    await expect(page.locator(`${activeTab} .platformSearch .ft-list-item .h3Title`)).toHaveText(['Chess'])
+
+    // Emptying the search shows the most watched categories again
+    await search.fill('')
+    await expect(page.locator(`${activeTab} .platformSearch`)).toHaveCount(0)
+    await expect(results).toHaveText(['Chess'])
   })
 
   test.describe('with a followed channel and every YouTube feed hidden', () => {

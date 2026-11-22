@@ -154,6 +154,7 @@ const IpcChannels = {
   DB_PLAYLISTS: 'db-playlists',
   DB_SEARCH_HISTORY: 'db-search-history',
   DB_SUBSCRIPTION_CACHE: 'db-subscription-cache',
+  DB_FEED_CACHE: 'db-feed-cache',
 
   SYNC_SETTINGS: 'sync-settings',
   SET_TRAY_ICON: 'set-tray-icon',
@@ -163,6 +164,7 @@ const IpcChannels = {
   SYNC_PROFILES: 'sync-profiles',
   SYNC_PLAYLISTS: 'sync-playlists',
   SYNC_SUBSCRIPTION_CACHE: 'sync-subscription-cache',
+  SYNC_FEED_CACHE: 'sync-feed-cache',
 
   DIAGNOSTIC_LOG_ADD: 'diagnostic-log-add',
   DIAGNOSTIC_LOG_GET: 'diagnostic-log-get',
@@ -347,6 +349,10 @@ const DBActions = {
     MARK_ENTRIES_AS_SEEN: 25,
     UPDATE_FEEDS: 26,
     MARK_ENTRIES_AS_SEEN_MANY: 27,
+  },
+
+  FEED_CACHE: {
+    WRITE: 20,
   },
 }
 

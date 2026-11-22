@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Prima i più recenti
   Oldest First: Prima i meno recenti
   RSS Feeds:
+    Load More Items: Carica altri elementi
     Refreshing: Aggiornamento dei feed RSS
     Tab: RSS
     Followed Feeds: Feed RSS seguiti
@@ -497,6 +498,7 @@ Settings:
       Memory: memoria
       Network: rete
       Disk: disco
+    Label: Prestazioni
   General Settings:
     Invidious Instance Username: 'Nome utente dell''istanza'
     Invidious Instance Password: 'Password dell''istanza'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automatico
     Preferred API Backend:
       Yattee Server: Server Yattee
+      Local API Extension Required: L’app web può usare l’API locale solo con l’estensione per browser OpenTubeX Local API.
+      Install Local API Extension: Installa l’estensione
     Yattee Server:
       Server URL: URL del server Yattee
       Username: Nome utente
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Toggle Playback With Tab Icon: Riproduci e metti in pausa con l’icona della scheda
     Theme and Colors: "Tema e colori"
     Font Size: Dimensione del carattere
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizza il volume'
     Show Mono Audio Toggle: 'Mostra l''interruttore dell''audio mono'
+    Show Mirror Video Toggle: "Mostra l'interruttore per specchiare il video"
     Pause on Stream Recovery: "Metti in pausa al ripristino dello stream"
     Buffering:
       Buffering: Buffering
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Abilita la trasmissione DLNA"
     Skip Unavailable Playlist Videos: "Salta i video non disponibili nelle playlist"
     Lights Off: Spegni le luci
+    Mirror Video: "Specchia video"
     Show Lights Off Toggle: Mostra l'interruttore per spegnere le luci
     Show Volume Boost Toggle: "Mostra l'interruttore di amplificazione del volume"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Impossibile regolare i controlli di riproduzione.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continua la riproduzione quando lo schermo è bloccato'
+    Switch to Audio in Background: 'Passa ai formati audio in background'
     Ignore Headphone Controls: 'Ignora i controlli delle cuffie'
     Music Visualizer: Visualizzatore musicale
     Automatically Open Chapters: Apri automaticamente i capitoli
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Attiva le note con indicazione temporale"
       Obsidian Vault: Vault di Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Tocca due volte con due dita per saltare i capitoli"
   Channel Settings:
     Channel Settings: Impostazioni dei canali
     Channel Settings Description: Ricorda separatamente per ogni canale le impostazioni scelte durante la visione e le riapplica quando guardi un altro video dello stesso canale.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Pulizia dello spazio di archiviazione completata
     Cleanup Failed: Pulizia dello spazio di archiviazione non riuscita
   Subscription Settings:
+    Refresh These Feeds Together: "Aggiorna questi feed insieme"
     Fetch Feed on Startup: Recupera feed all'avvio
     Show New Content Feed: Mostra feed dei nuovi contenuti
     RSS Feeds: Feed RSS
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Altre piattaforme
       Manage Channels: Gestisci i canali seguiti
+      Enable Twitch Page: Abilita la pagina Twitch
       Notify When Live: Avvisa quando i canali Twitch seguiti vanno in diretta
       Auto Refresh Interval: Intervallo di aggiornamento automatico delle altre piattaforme
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: "Nascondi l'indicatore di sincronizzazione nell'intestazione dell'app"
     Hide Repeat Stats: Nascondi statistiche di ripetizione
     Hide Playlist Stats: Nascondi statistiche della playlist
+    Hide Recommendation Details: Nascondi motivi dei consigli e feedback
     Sections:
       Digital Wellbeing: "Benessere digitale"
       Visible While Paused: Visibile durante la pausa in finestra intera o a schermo intero
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: Download delle liste in corso…
     Failed to Download: Impossibile scaricare le liste
     Loaded Status: "Canali bloccati: {blocked} · Canali segnalati: {warned} · Aggiornato: {date}"
+  Highlight Changed Settings Label: Modificate
 Tutorial:
   Skip: Salta
   Next: Avanti
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Disattivato'
+    Lock Controls:
+      Lock Controls: "Blocca controlli"
+      Hold to Unlock: "Tieni premuto per sbloccare"
     Volume Boost:
       Volume Boost: "Amplificazione del volume"
       'Off': "Disattivata"
@@ -2388,6 +2404,7 @@ Tooltips:
     Normalize Loudness: 'Abbassa il volume dei video più forti della maggior parte, così il volume non cambia bruscamente tra un video e l''altro. I video più bassi mantengono il loro volume. Funziona solo con i video caricati tramite le API locali.'
     Pause on Stream Recovery: "Quando lo stream video non riesce e il lettore lo ricarica o passa a un altro formato o motore, la riproduzione viene messa in pausa e l'errore rimane nella parte superiore del lettore finché non lo chiudi. Se disattivato, la riproduzione continua e l'errore appare brevemente come notifica."
     Continue Playback When Screen Is Locked: 'Mantiene l’audio in riproduzione in background e fornisce i controlli multimediali di Android. Disattiva questa opzione per mettere in pausa quando l’app non è più visibile.'
+    Switch to Audio in Background: 'Riproduce i formati audio mentre l’app è in background o lo schermo è spento, risparmiando dati e batteria. Il Picture-in-Picture mantiene il video. Il video torna quando riapri l’app. Richiede di continuare la riproduzione con lo schermo bloccato.'
     Ignore Headphone Controls: 'Ignora i comandi di riproduzione, pausa e salto provenienti da dispositivi Bluetooth, cuffie con filo e tasti multimediali delle tastiere, così i tocchi accidentali sugli auricolari non interrompono la riproduzione. I controlli nell''app e nella notifica multimediale continuano a funzionare.'
     Enable Caption Translations: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente.
     Use Quick Playback Speed Bar: Mostra una barra rapida della velocità di riproduzione tra i controlli a destra del lettore. Se è abilitato il salvataggio manuale della velocità per canale, la barra include anche il pulsante per salvare la velocità del canale corrente.
@@ -2396,6 +2413,7 @@ Tooltips:
     Use YouTube-style Shorts: Mostra gli Shorts in una griglia verticale nelle pagine delle iscrizioni e dei canali e usa il lettore di Shorts in stile YouTube.
     Loop Shorts: Se abilitato, gli Shorts ricominciano automaticamente. Se disabilitato, si fermano alla fine e mostrano un pulsante per riprodurli di nuovo.
     Show Skip Silence Toggle: Mostra nel menu delle impostazioni del lettore un interruttore per attivare o disattivare il salto dei silenzi.
+    Show Mirror Video Toggle: "Mostra nel menu delle impostazioni del lettore un interruttore che capovolge il video in orizzontale, per seguire più facilmente tutorial di danza, allenamento e strumenti musicali."
     Enable Skip Silence by Default: Abilita il salto dei silenzi nelle nuove schede. La modifica in una scheda non influisce sulle altre.
     Enable Video Zoom: Mostra il controllo Zoom nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera e i controlli di panoramica.
     Enable Seek History: Ricorda da dove sei saltato in ogni video fino alla chiusura dell'app. Mostra l'elenco della cronologia dei salti nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera.
@@ -2417,6 +2435,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Chiede una conferma prima di precaricare tutti i video di una playlist con più di {count} video."
     Enable Timestamp Notes: "Aggiunge un pulsante al lettore e la scorciatoia N, che mettono in pausa il video e aprono una nota con un collegamento al momento attuale. Le note si possono copiare come Markdown o, su desktop, aggiungere a Obsidian."
     Obsidian Vault: Nome del vault di Obsidian per le note con indicazione temporale. Se impostato, le note possono essere aggiunte a Obsidian. Le note di ogni video vengono raccolte in una nota con il nome del video, nella cartella del vault per le nuove note.
+    Double-Tap With Two Fingers to Skip Chapters: "Tocca due volte con due dita il lato destro del video per passare al capitolo successivo, o il lato sinistro per tornare all'inizio del capitolo corrente. Nei primi 3 secondi di un capitolo, il lato sinistro porta invece al capitolo precedente, quindi ripetendo il gesto torni indietro un capitolo alla volta."
   Download Settings:
     Download Folder: I video vengono salvati in questa cartella. Lascia vuoto per usare la cartella Download del sistema.
     Global Additional yt-dlp Arguments: Argomenti aggiuntivi della riga di comando passati a yt-dlp per ogni download, ad esempio --cookies-from-browser firefox.
@@ -2447,6 +2466,7 @@ Tooltips:
     Bedtime Reminder: "Mette in pausa il video e ti ricorda di smettere di guardare tra l'orario di inizio e quello di fine."
     Shorten View Counts: Mostra in forma abbreviata i conteggi delle visualizzazioni, dei commenti e dei Mi piace ai commenti già arrotondati da YouTube, ad esempio 14 mila invece di 14.000. I conteggi esatti vengono sempre mostrati per intero.
   Subscription Settings:
+    Refresh These Feeds Together: "Quando aggiorni uno dei feed selezionati, gli altri feed selezionati vengono aggiornati subito dopo. Gli aggiornamenti automatici seguono comunque l'intervallo di ciascun feed."
     Fetch Feed on Startup: Se abilitato, OpenTubeX recupera automaticamente il feed delle iscrizioni all'avvio e all'apertura di una nuova finestra.
     Show New Content Feed: Mostra una scheda Nuovi con gli elementi del feed delle iscrizioni assenti durante il recupero precedente.
     Enable RSS Feeds: Mostra una scheda RSS nella pagina Iscrizioni con gli elementi di feed RSS o Atom, così puoi seguire creatori di altre piattaforme. I suoi elementi si aprono con yt-dlp.
@@ -2457,10 +2477,12 @@ Tooltips:
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
     RSS Feeds Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i tuoi feed RSS mentre l'app è aperta.
     Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
-    Show Collaborations From Other Channels: "Mostra anche i video che i canali a cui sei iscritto hanno realizzato insieme a un altro canale che li ha caricati. YouTube li elenca solo nella scheda Home di un canale, quindi ogni aggiornamento dei video carica una pagina in più per canale. Vengono trovate solo le collaborazioni più recenti mostrate lì, alcuni canali non ne mostrano nessuna e le loro date di pubblicazione sono approssimative. Non disponibile con l'API di Invidious."
+    Show Collaborations From Other Channels: "Mostra anche i video che i canali a cui sei iscritto hanno realizzato insieme a un altro canale che li ha caricati. YouTube li elenca solo nella scheda Home di un canale, quindi un aggiornamento dei video controlla al massimo alcuni canali e le nuove possono impiegare un giorno o più a comparire. Vengono trovate solo le collaborazioni più recenti mostrate lì, alcuni canali non ne mostrano nessuna e le loro date di pubblicazione sono approssimative. Non disponibile con l'API di Invidious."
     Platforms Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i canali che segui su altre piattaforme mentre l'app è aperta.
+    Enable Twitch Page: Ti permette di aprire la pagina Twitch dalla navigazione e dalla tavolozza dei comandi. Lì puoi sfogliare le categorie popolari e i canali in diretta e cercare su Twitch.
     Twitch Notify When Live: Ti avvisa quando uno dei canali Twitch che segui inizia a trasmettere. OpenTubeX controlla ogni pochi minuti mentre è aperto, e anche mentre è chiuso se in quel momento aggiorna le iscrizioni.
   Theme Settings:
+    Toggle Playback With Tab Icon: Facendo clic sull’icona di una scheda con un video in riproduzione o in pausa, lo si mette in pausa o lo si riprende senza passare a quella scheda.
     Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato, comprese quelle che offrono Annulla. Errori, avvisi, promemoria che hai impostato e notifiche che richiedono una decisione, come le richieste di aggiornamento, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
     Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."
     Thumbnail Size: "Ridimensiona le miniature dei video in griglie ed elenchi. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
@@ -2519,6 +2541,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Annulla l'ultimo salto
   Redo Seek: Ripeti un salto annullato
   New Incognito Tab: Crea una nuova scheda in incognito
+  Shortcuts Label: Scorciatoie
 CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi
@@ -2553,6 +2576,8 @@ CommandPalette:
     Download Finished: Questo download non è più in corso
     Video: Apri prima un video
 Downloads:
+  Stop Recording: "Interrompi registrazione"
+  Recording: "Registrazione in corso"
   File Name Template Invalid: 'Usa un percorso relativo nella cartella dei download senza "..", "~", "$", "%" o un prefisso come "thumbnail:".'
   Search Completed: "Cerca i download completati per titolo o canale"
   Format: "Formato"
@@ -2696,6 +2721,22 @@ App Icon:
   Saved Message: "Icona salvata. L'aggiornamento del launcher potrebbe richiedere un momento."
   Title: "Icona dell'app"
   Error: "Impossibile caricare o cambiare l'icona dell'app"
+
+App Lock:
+  Title: "Blocco dell'app"
+  Enable: "Richiedi il blocco schermo"
+  Enable Tooltip: "Richiede impronta, volto, PIN, sequenza o password quando torni su OpenTubeX. Su Android 13 e versioni successive, le app recenti non mostrano più nemmeno un'anteprima dell'app."
+  Lock After: "Blocca dopo"
+  Immediately: "Subito"
+  1 Minute: "1 minuto"
+  5 Minutes: "5 minuti"
+  15 Minutes: "15 minuti"
+  1 Hour: "1 ora"
+  Unavailable: "Imposta un blocco schermo nelle impostazioni di Android per usare il blocco dell'app."
+  Error: "Impossibile modificare il blocco dell'app"
+  Locked: "OpenTubeX è bloccato"
+  Unlock: "Sblocca"
+  Prompt Title: "Sblocca OpenTubeX"
 
 Tray:
   Hide All Windows: "Nascondi tutte le finestre"
@@ -2875,6 +2916,33 @@ Platforms:
   Verify: "Verifica"
   Categories: "Categorie"
   Category Not Found: "Impossibile trovare questa categoria."
+  Category Tags: "Tag della categoria"
+  Stream Tags: "Tag dello stream"
+  Language: "Lingua"
+  All Languages: "Tutte le lingue"
+  Other Language: "Altra"
+  American Sign Language: "lingua dei segni americana"
+  Search Tags: "Cerca tag"
+  Add Tag: "Aggiungi tag"
+  Remove Tag: "Rimuovi {tag}"
+  Sort:
+    Viewers: "Spettatori (dal più al meno)"
+    Viewers Ascending: "Spettatori (dal meno al più)"
+    Started: "Iniziati di recente"
+    Relevance: "Consigliati"
+    Published: "Pubblicati di recente"
+    Views: "Visualizzazioni (dal più al meno)"
+    Top Day: "Top 24 ore"
+    Top Week: "Top 7 giorni"
+    Top Month: "Top 30 giorni"
+    Top All: "Top di sempre"
+  Video Type:
+    Video Type: "Tipo di video"
+    All: "Tutti i video"
+    Archive: "Trasmissioni passate"
+    Highlight: "Momenti salienti"
+    Upload: "Caricamenti"
+  Anonymous: "Anonimo"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha risposto a {commentAuthor}"
   Like: "Mi piace"
@@ -2909,5 +2977,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca su Twitch"
+  Search Placeholder: "Categorie e canali"
 New Incognito Tab: Nuova scheda in incognito
 Incognito Tab: Scheda in incognito

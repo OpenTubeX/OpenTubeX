@@ -10,6 +10,9 @@ import {
 import { isLiteBuild } from './ytDlpCapabilities.js'
 import { isSignedInToYouTube } from './youtube-account-state.js'
 
+// The Android app lock settings in the Privacy category; the rest of the group is the lock screen.
+const APP_LOCK_SEARCH_KEYS = new Set(['Title', 'Enable', 'Lock After'])
+
 export const settingsSearchNavigationKey = Symbol('settingsSearchNavigation')
 
 const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Loading\b|^Loaded\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Copied|Already Exists)$)/i
@@ -35,7 +38,9 @@ export function createSettingsSearchIndex(options) {
       {},
       [],
       (path, value) => isSearchableSettingsMessage('password', path, value, options)
-    )
+    ).concat(options.isCapacitor && !options.isIos
+      ? flattenSettingsSearchMessageValues(tm('App Lock'), {}, [], path => APP_LOCK_SEARCH_KEYS.has(path[0]))
+      : [])
   }
 
   return new Map(sections.map((section) => {
@@ -72,6 +77,7 @@ function getSettingsSearchSettingKeys(source, tm) {
 
 function getSettingsSearchSourceValues(source, options) {
   if (options.isIos && ['external-software', 'proxy', 'tab-unloading'].includes(source.type)) return []
+  if (options.isCapacitor && source.type === 'context-menu-search') return []
   if (isLiteBuild && ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)) return []
   if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
   if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []
@@ -390,6 +396,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if ([
       'Disable Smooth Scrolling',
       'Show Tab Previews',
+      'Toggle Playback With Tab Icon',
       'Tab Layout',
       'Tab Loading Indicator',
       'Vertical Tab Height',

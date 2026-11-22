@@ -291,6 +291,7 @@ dependencies {
     testImplementation "org.json:json:20260814"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:${rootProject.ext.androidxAppCompatVersion}"
+    implementation "androidx.biometric:biometric:1.1.0"
     implementation "androidx.coordinatorlayout:coordinatorlayout:${rootProject.ext.androidxCoordinatorLayoutVersion}"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0"
     implementation "androidx.core:core-splashscreen:${rootProject.ext.coreSplashScreenVersion}"

@@ -56,7 +56,7 @@ test.describe('landscape sidebar', { tag: '@scale' }, () => {
       store.commit('setOutlinesHidden', !store.getters.getOutlinesHidden)
     })
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(932 * scale), Math.round(600 * scale))
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(932 * scale), Math.round(680 * scale))
     }, uiScale / 100)
     await expect(page.locator('.app')).toHaveClass(/capacitorPhoneLayout/)
     await expect.poll(() => inner.evaluate(element => element.scrollTop)).toBe(0)

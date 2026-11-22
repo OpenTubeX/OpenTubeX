@@ -33,8 +33,9 @@ async function expectQuickSettingScrollRange(scroller) {
       const thumb = handle.getBoundingClientRect()
       const expectedRatio = Math.max(element.clientHeight / element.scrollHeight,
         Number.parseFloat(getComputedStyle(handle).minHeight) / track.height)
-      const validRange = element.scrollTop <= maximum + 1 &&
-        element.scrollHeight - element.clientHeight <= maximum + 1
+      const tolerance = 2 / devicePixelRatio
+      const validRange = element.scrollTop <= maximum + tolerance &&
+        element.scrollHeight - element.clientHeight <= maximum + tolerance
       const validScrollbar = maximum <= 1
         ? scrollbar.classList.contains('os-scrollbar-unusable')
         : !scrollbar.classList.contains('os-scrollbar-unusable') &&

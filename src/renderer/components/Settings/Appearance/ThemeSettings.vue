@@ -3,41 +3,43 @@
     :title="$t('Settings.Theme Settings.Theme Settings')"
     :icon="['fas', 'palette']"
   >
-    <div class="themeGalleryEntry">
-      <ThemeGallery />
+    <div class="themeControls">
+      <div class="themeGalleryEntry">
+        <ThemeGallery />
+      </div>
+      <FtFlexBox class="themeSelectRow">
+        <IconPackSelect
+          size-to-content
+          @change="updateIconPack"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="t('Settings.Theme Settings.Font.App Font')"
+          :value="appFont"
+          setting-key="appFont"
+          :select-names="fontNames"
+          :select-values="fontValues"
+          :option-groups="fontGroups"
+          :option-group-labels="{
+            bundled: t('Settings.Theme Settings.Font.Bundled Fonts'),
+            system: t('Settings.Theme Settings.Font.System Fonts')
+          }"
+          :icon="['fas', 'font']"
+          searchable
+          lazy-options
+          :loading="loadingSystemFonts"
+          @change="updateAppFont"
+          @open="loadSystemFonts"
+        >
+          <template #option="{ label, value }">
+            <span
+              class="fontPreview"
+              :style="{ fontFamily: getAppFontFamily(value) }"
+            >{{ label }}</span>
+          </template>
+        </FtSelect>
+      </FtFlexBox>
     </div>
-    <FtFlexBox class="themeSelectRow">
-      <IconPackSelect
-        size-to-content
-        @change="updateIconPack"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Theme Settings.Font.App Font')"
-        :value="appFont"
-        setting-key="appFont"
-        :select-names="fontNames"
-        :select-values="fontValues"
-        :option-groups="fontGroups"
-        :option-group-labels="{
-          bundled: t('Settings.Theme Settings.Font.Bundled Fonts'),
-          system: t('Settings.Theme Settings.Font.System Fonts')
-        }"
-        :icon="['fas', 'font']"
-        searchable
-        lazy-options
-        :loading="loadingSystemFonts"
-        @change="updateAppFont"
-        @open="loadSystemFonts"
-      >
-        <template #option="{ label, value }">
-          <span
-            class="fontPreview"
-            :style="{ fontFamily: getAppFontFamily(value) }"
-          >{{ label }}</span>
-        </template>
-      </FtSelect>
-    </FtFlexBox>
     <FtFlexBox
       v-if="IS_CAPACITOR || usingElectron"
       class="appIconActions"
@@ -159,8 +161,47 @@ function updateIconPack(value) {
   font-family: inherit !important;
 }
 
+/* The theme picker is as wide as the selects below it, which set the
+   width of the column, and its button spans from the start of the first
+   field to the end of the last, with its icons after it like theirs. The
+   row keeps as much room before its fields as its icons take after them,
+   counting the changed-setting marker gutter, so the fields are centered. */
+.themeControls {
+  display: grid;
+  grid-template-columns: minmax(0, max-content);
+  justify-content: center;
+  row-gap: calc(16px + 16px * var(--ui-density));
+
+  --theme-select-indicator-space: calc(8px + 22px + 22px);
+  --theme-row-inset: calc(var(--theme-select-indicator-space) - var(--settings-marker-gutter, 0px));
+}
+
 .themeGalleryEntry {
-  margin-block-end: 16px;
+  margin-inline: var(--theme-select-indicator-space);
+}
+
+.themeControls > .themeSelectRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, calc(200px + var(--theme-select-indicator-space) + var(--settings-marker-gutter, 0px))));
+  margin-inline-start: var(--theme-row-inset);
+}
+
+/* Stacked, the selects and the picker share a wider column. */
+@container settings-content (width < 580px) {
+  .themeControls > .themeSelectRow {
+    grid-template-columns: minmax(0, 20rem);
+  }
+}
+
+/* Every select fills its column and keeps the same room for its icons,
+   whichever it shows, so the fields line up with the picker. Outweighs the
+   select's own room and content sizing. */
+.themeControls > .themeSelectRow :deep(.select.contentSized) {
+  --select-indicator-space: var(--theme-select-indicator-space);
+
+  box-sizing: border-box;
+  inline-size: auto;
+  grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
 }
 
 .appIconActions {

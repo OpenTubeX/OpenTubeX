@@ -105,14 +105,18 @@ public class AppIconPlugin extends Plugin {
     }
 
     @SuppressWarnings("deprecation")
+    static Drawable loadCurrentIcon(Context context) throws PackageManager.NameNotFoundException {
+        return context.getPackageManager().getActivityInfo(
+            new ComponentName(context.getPackageName(), PREFIX + current(context)), 0
+        ).loadIcon(context.getPackageManager());
+    }
+
     static void updateTaskIcon(Activity activity) throws PackageManager.NameNotFoundException {
-        ActivityInfo alias = activity.getPackageManager().getActivityInfo(
-            new ComponentName(activity.getPackageName(), PREFIX + current(activity)), 0);
         String label = activity.getString(R.string.app_name);
         // Launcher3 reads only bitmap task icons; resource IDs fall back to MainActivity's icon.
         int size = activity.getSystemService(ActivityManager.class).getLauncherLargeIconSize();
         Bitmap icon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Drawable drawable = alias.loadIcon(activity.getPackageManager());
+        Drawable drawable = loadCurrentIcon(activity);
         drawable.setBounds(0, 0, size, size);
         drawable.draw(new Canvas(icon));
         activity.setTaskDescription(new ActivityManager.TaskDescription(label, icon));

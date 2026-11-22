@@ -41,21 +41,28 @@
         v-if="showMobileMore"
         :items="mobileOverflowItems"
         :pinned-items="mobilePinnedItems"
+        :reorder-status="reorderStatus"
         :class="{ compactLabels: compactNavigationLabels }"
+        @move-pinned="movePinned"
       />
       <hr>
       <div
         v-if="pinnedPlaylists.length > 0"
         class="mobileHidden pinnedPlaylists"
+        @pointerdown.capture="startPlaylistDrag"
+        @touchmove="holdPlaylistDrag"
       >
         <router-link
           v-for="playlist in pinnedPlaylists"
           :key="playlist._id"
           :to="{ path: `/playlist/${playlist._id}`, query: { playlistType: 'user' } }"
           :data-tab-title="playlist.playlistName"
+          :data-pinned-id="playlist._id"
           class="navChannel channelLink"
           :title="playlist.playlistName"
           role="button"
+          aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+          @keydown="movePinnedWithKeyboard($event, pinnedPlaylistReorder)"
         >
           <div class="thumbnailContainer">
             <FtRetryImage
@@ -89,6 +96,8 @@
       <div
         v-if="pinnedChannels.length > 0"
         class="mobileHidden pinnedChannels"
+        @pointerdown.capture="startChannelDrag"
+        @touchmove="holdChannelDrag"
       >
         <component
           :is="enableChannelLinks ? 'router-link' : 'span'"
@@ -96,11 +105,14 @@
           :key="channel.id"
           :to="`/channel/${channel.id}`"
           :data-tab-title="channel.name"
+          :data-pinned-id="channel.id"
           :class="enableChannelLinks ? '' : 'disabledIcon'"
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
           :aria-label="channel.name"
           :role="enableChannelLinks ? 'button' : undefined"
+          :aria-keyshortcuts="enableChannelLinks ? 'Alt+ArrowUp Alt+ArrowDown' : undefined"
+          @keydown="movePinnedWithKeyboard($event, pinnedChannelReorder)"
         >
           <div
             class="thumbnailContainer"
@@ -184,6 +196,14 @@
         />
       </div>
     </div>
+    <!-- A plain live region, as pages own the status role. -->
+    <p
+      class="pinReorderStatus"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ reorderStatus }}
+    </p>
   </FtFlexBox>
 </template>
 
@@ -191,7 +211,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -211,8 +231,9 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
-import { sortUserPlaylists } from '../../helpers/playlists'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'
+import { useGridReorder } from '../../composables/useGridReorder'
+import { moveItemToRenderedOrder } from '../../../orderedItems'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -320,17 +341,12 @@ function onActiveSubscriptionsVisibilityChanged(isVisible) {
   }
 }
 
+// Pins keep their own order, which the navigation arranges like pinned channels.
 const pinnedPlaylists = computed(() => {
-  const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
-  if (pinnedIds.size === 0) return []
-  // Follow the order of the Playlists page, so it can be arranged there.
-  return sortUserPlaylists(
-    store.getters.getAllPlaylists.filter(playlist => pinnedIds.has(playlist._id)),
-    store.getters.getUserPlaylistsSortBy,
-    store.getters.getUserPlaylistsCustomOrder,
-    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }),
-    store.getters.getUserPlaylistsPinnedIds
-  )
+  const pinnedIds = store.getters.getPinnedPlaylistIds
+  if (pinnedIds.length === 0) return []
+  const playlists = new Map(store.getters.getAllPlaylists.map(playlist => [playlist._id, playlist]))
+  return pinnedIds.map(id => playlists.get(id)).filter(playlist => playlist != null)
 })
 
 function pinnedPlaylistThumbnail(playlist) {
@@ -343,6 +359,103 @@ function pinnedPlaylistThumbnail(playlist) {
 }
 
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
+
+// ===== Reordering pins =====
+const reorderStatus = ref('')
+
+/**
+ * @template T
+ * @param {object} options
+ * @param {import('vue').ComputedRef<{ id: string, label: string }[]>} options.rendered
+ * @param {(item: T) => string} options.getId
+ * @param {(update: (items: T[]) => T[]) => Promise<boolean>} options.update
+ */
+function createPinReorder({ rendered, getId, update }) {
+  /**
+   * Moves the pin next to its new rendered neighbors in the saved list, which
+   * can hold pins that this window does not show, such as deleted playlists.
+   * @param {string} id
+   * @param {string[]} order
+   */
+  async function move(id, order) {
+    // The edit runs again on the saved value, where another window's edit can reject the move.
+    let moved = false
+    const saved = await update(items => {
+      const result = moveItemToRenderedOrder(items, getId, id, order)
+      moved = result !== items
+      return result
+    })
+    const items = rendered.value
+    const position = items.findIndex(item => item.id === id)
+    if (!saved || !moved || position === -1) return
+    reorderStatus.value = t('Home Page.Section moved', {
+      section: items[position].label,
+      position: position + 1,
+      total: items.length,
+    })
+  }
+  return { rendered, move }
+}
+
+const pinnedPlaylistReorder = createPinReorder({
+  rendered: computed(() => pinnedPlaylists.value.map(playlist => ({ id: playlist._id, label: playlist.playlistName }))),
+  getId: id => id,
+  update: update => store.dispatch('updatePinnedPlaylistIds', update),
+})
+
+const pinnedChannelReorder = createPinReorder({
+  rendered: computed(() => pinnedChannels.value.map(channel => ({ id: channel.id, label: channel.name }))),
+  getId: channel => channel.id,
+  update: update => store.dispatch('updatePinnedChannels', update),
+})
+
+const { onPointerDown: startPlaylistDrag, onTouchMove: holdPlaylistDrag } = useGridReorder({
+  itemSelector: '.navChannel',
+  handleSelector: '.navChannel',
+  getId: item => item.dataset.pinnedId,
+  commit: pinnedPlaylistReorder.move,
+  clickableHandles: true,
+})
+
+const { onPointerDown: startChannelDrag, onTouchMove: holdChannelDrag } = useGridReorder({
+  itemSelector: '.navChannel',
+  handleSelector: '.navChannel',
+  getId: item => item.dataset.pinnedId,
+  commit: pinnedChannelReorder.move,
+  clickableHandles: true,
+})
+
+/**
+ * Moves from the phone's More sheet.
+ * @param {'playlist' | 'channel'} group
+ * @param {string} id
+ * @param {string[]} order
+ */
+function movePinned(group, id, order) {
+  (group === 'playlist' ? pinnedPlaylistReorder : pinnedChannelReorder).move(id, order)
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @param {ReturnType<typeof createPinReorder>} reorder
+ */
+async function movePinnedWithKeyboard(event, reorder) {
+  const offset = { ArrowUp: -1, ArrowDown: 1 }[event.key]
+  if (!offset || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+  event.preventDefault()
+  const link = /** @type {HTMLElement} */ (event.currentTarget)
+  const id = link.dataset.pinnedId
+  const order = reorder.rendered.value.map(item => item.id)
+  const index = order.indexOf(id)
+  const target = index + offset
+  if (index === -1 || target < 0 || target >= order.length) return
+  order.splice(index, 1)
+  order.splice(target, 0, id)
+  reorder.move(id, order)
+  // Moving the row in the document drops its focus.
+  await nextTick()
+  if (link.isConnected && document.activeElement !== link) link.focus()
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {
@@ -373,6 +486,7 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
     backendFallback: backendFallback.value,
     showWatchStats: showWatchStats.value,
     supportsYtDlp,
+    enableTwitchPage: store.getters.getEnableTwitchPage,
   }
 )
   .map(id => navigationCatalog.value.get(id))
@@ -382,6 +496,8 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
 const mobilePinnedItems = computed(() => [
   ...pinnedPlaylists.value.map(playlist => ({
     key: `playlist-${playlist._id}`,
+    id: playlist._id,
+    group: 'playlist',
     path: `/playlist/${playlist._id}`,
     query: { playlistType: 'user' },
     label: playlist.playlistName,
@@ -392,6 +508,8 @@ const mobilePinnedItems = computed(() => [
   })),
   ...pinnedChannels.value.map(channel => ({
     key: `channel-${channel.id}`,
+    id: channel.id,
+    group: 'channel',
     path: enableChannelLinks.value ? `/channel/${channel.id}` : null,
     label: channel.name,
     thumbnail: channel.thumbnail,

@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
   RSS Feeds:
+    Load More Items: Meer items laden
     Refreshing: RSS-feeds vernieuwen
     Tab: RSS
     Followed Feeds: Gevolgde RSS-feeds
@@ -502,6 +503,7 @@ Settings:
       Memory: geheugen
       Network: netwerk
       Disk: schijf
+    Label: Prestaties
   General Settings:
     Invidious Instance Username: 'Gebruikersnaam van instantie'
     Invidious Instance Password: 'Wachtwoord van instantie'
@@ -625,6 +627,8 @@ Settings:
       Auto: Automatisch
     Preferred API Backend:
       Yattee Server: Yattee-server
+      Local API Extension Required: De webapp kan de lokale API alleen gebruiken met de browserextensie OpenTubeX Local API.
+      Install Local API Extension: Extensie installeren
     Yattee Server:
       Server URL: URL van Yattee-server
       Username: Gebruikersnaam
@@ -667,6 +671,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Toggle Playback With Tab Icon: Afspelen en pauzeren met het tabbladpictogram
     Theme and Colors: "Thema en kleuren"
     Font Size: Lettergrootte
     Sections:
@@ -882,6 +887,7 @@ Settings:
     Mono Audio: 'Mono-audio'
     Normalize Loudness: 'Volume normaliseren'
     Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
+    Show Mirror Video Toggle: "Schakelaar voor 'Video spiegelen' tonen"
     Default Media Format:
       Default Media Format: 'Standaardmediaformaat'
     Pause on Stream Recovery: "Pauzeren bij streamherstel"
@@ -911,6 +917,7 @@ Settings:
     Enable DLNA Casting: "DLNA-casting inschakelen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
     Lights Off: Lichten uit
+    Mirror Video: "Video spiegelen"
     Show Lights Off Toggle: Schakelaar voor 'Lichten uit' tonen
     Show Volume Boost Toggle: "Schakelaar voor volumeversterking tonen"
     Swipe Gestures:
@@ -924,6 +931,7 @@ Settings:
       Unavailable: De afspeelbediening kon niet worden aangepast.
     yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Doorgaan met afspelen wanneer het scherm is vergrendeld'
+    Switch to Audio in Background: 'Op de achtergrond overschakelen naar audioformaten'
     Ignore Headphone Controls: 'Hoofdtelefoonbediening negeren'
     Music Visualizer: Muziekvisualisatie
     Automatically Open Chapters: Hoofdstukken automatisch openen
@@ -1065,6 +1073,7 @@ Settings:
     Timestamp Notes:
       Enable: "Notities met tijdstempel inschakelen"
       Obsidian Vault: Obsidian-kluis
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers om hoofdstukken over te slaan"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1303,6 +1312,7 @@ Settings:
     Cleanup Complete: Opslag opgeschoond
     Cleanup Failed: Opschonen van opslag mislukt
   Subscription Settings:
+    Refresh These Feeds Together: "Deze feeds samen vernieuwen"
     Fetch Feed on Startup: Feed ophalen bij opstarten
     Show New Content Feed: Feed met nieuwe content tonen
     RSS Feeds: RSS-feeds
@@ -1323,6 +1333,7 @@ Settings:
     Platforms:
       Other Platforms: Andere platforms
       Manage Channels: Gevolgde kanalen beheren
+      Enable Twitch Page: Twitch-pagina inschakelen
       Notify When Live: Melden wanneer gevolgde Twitch-kanalen live gaan
       Auto Refresh Interval: Interval voor automatisch vernieuwen van andere platforms
   Distraction Free Settings:
@@ -1368,6 +1379,7 @@ Settings:
     Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
     Hide Playlist Stats: Afspeellijststatistieken verbergen
+    Hide Recommendation Details: Redenen voor aanbevelingen en feedback verbergen
     Sections:
       Digital Wellbeing: "Digitaal welzijn"
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
@@ -1686,6 +1698,7 @@ Settings:
     Downloading: Lijsten downloaden…
     Failed to Download: Kan de lijsten niet downloaden
     Loaded Status: "Geblokkeerde kanalen: {blocked} · Gemarkeerde kanalen: {warned} · Bijgewerkt: {date}"
+  Highlight Changed Settings Label: Gewijzigd
 Tutorial:
   Skip: Overslaan
   Next: Volgende
@@ -1981,6 +1994,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Uit
+    Lock Controls:
+      Lock Controls: "Bediening vergrendelen"
+      Hold to Unlock: "Ingedrukt houden om te ontgrendelen"
     Volume Boost:
       Volume Boost: "Volumeversterking"
       'Off': "Uit"
@@ -2456,6 +2472,7 @@ Tooltips:
     Normalize Loudness: 'Zet video''s die luider zijn dan de meeste zachter, zodat het volume niet verspringt tussen video''s. Zachte video''s behouden hun volume. Werkt alleen voor video''s die met de lokale API zijn geladen.'
     Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
+    Switch to Audio in Background: 'Speelt audioformaten af terwijl de app op de achtergrond draait of het scherm uit is, wat data en batterij bespaart. Beeld-in-beeld behoudt de video. De video komt terug als je de app weer opent. Vereist dat het afspelen doorgaat als het scherm vergrendeld is.'
     Ignore Headphone Controls: 'Negeert afspeel-, pauzeer- en overslaanopdrachten van Bluetooth-apparaten, bedrade koptelefoons en mediatoetsen op toetsenborden, zodat per ongeluk tikken op oordopjes het afspelen niet onderbreekt. Bediening in de app en in de mediamelding blijft werken.'
     Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.
     Use Quick Playback Speed Bar: Toont rechts in de spelerbediening een balk om snel de afspeelsnelheid te kiezen. Als het handmatig opslaan van afspeelsnelheid per kanaal is ingeschakeld, bevat de balk ook een knop om de snelheid voor het huidige kanaal op te slaan.
@@ -2464,6 +2481,7 @@ Tooltips:
     Use YouTube-style Shorts: Toont Shorts in een staand raster op abonnements- en kanaalpagina's en gebruikt de Shorts-speler in YouTube-stijl.
     Loop Shorts: Als dit is ingeschakeld, beginnen Shorts automatisch opnieuw. Als dit is uitgeschakeld, stoppen Shorts aan het einde en verschijnt een knop om ze opnieuw af te spelen.
     Show Skip Silence Toggle: Toont in het instellingenmenu van de speler een aan-uitschakelaar om stiltes over te slaan.
+    Show Mirror Video Toggle: "Toont in het instellingenmenu van de speler een aan-uitschakelaar die de video horizontaal spiegelt, zodat je dans-, workout- en instrumentlessen makkelijker kunt volgen."
     Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
     Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
     Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
@@ -2485,6 +2503,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
     Enable Timestamp Notes: "Voegt een spelerknop en de sneltoets N toe die de video pauzeren en een notitie openen die naar het huidige moment linkt. Notities kunnen als Markdown worden gekopieerd of op de computer aan Obsidian worden toegevoegd."
     Obsidian Vault: Naam van de Obsidian-kluis voor notities met tijdstempel. Als deze is ingesteld, kunnen notities aan Obsidian worden toegevoegd. De notities van elke video worden verzameld in een notitie met de naam van de video, in de map van de kluis voor nieuwe notities.
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers op de rechterkant van de video om naar het volgende hoofdstuk te gaan, of op de linkerkant om terug te gaan naar het begin van het huidige hoofdstuk. In de eerste 3 seconden van een hoofdstuk gaat de linkerkant in plaats daarvan naar het vorige hoofdstuk, dus door het te herhalen ga je stap voor stap terug door de hoofdstukken."
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.
@@ -2515,6 +2534,7 @@ Tooltips:
     Bedtime Reminder: "Pauzeert de video en herinnert je eraan om tussen de begin- en eindtijd te stoppen met kijken."
     Shorten View Counts: Toont aantallen weergaven, reacties en vind-ik-leuks bij reacties die YouTube al verkort heeft afgerond, bijvoorbeeld 14K in plaats van 14.000. Exacte aantallen worden altijd volledig weergegeven.
   Subscription Settings:
+    Refresh These Feeds Together: "Wanneer je een van de aangevinkte feeds vernieuwt, worden de andere aangevinkte feeds direct daarna vernieuwd. Automatische vernieuwingen volgen nog steeds het eigen interval van elke feed."
     Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
     Show New Content Feed: Toont een tabblad Nieuw met items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
     Enable RSS Feeds: Toont een RSS-tabblad op de pagina Abonnementen met de items van RSS- of Atom-feeds, zodat je makers op andere platforms kunt volgen. De items worden geopend met yt-dlp.
@@ -2525,10 +2545,12 @@ Tooltips:
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
     RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
     Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
-    Show Collaborations From Other Channels: "Toont ook video's die kanalen waarop je bent geabonneerd hebben gemaakt samen met een ander kanaal dat ze heeft geüpload. YouTube toont deze alleen op het tabblad Home van een kanaal, dus elke vernieuwing van video's laadt één pagina meer per kanaal. Alleen de nieuwste samenwerkingen die daar worden getoond, worden gevonden, sommige kanalen tonen er geen en hun publicatiedatums zijn bij benadering. Niet beschikbaar met de Invidious-API."
+    Show Collaborations From Other Channels: "Toont ook video's die kanalen waarop je bent geabonneerd hebben gemaakt samen met een ander kanaal dat ze heeft geüpload. YouTube toont deze alleen op het tabblad Home van een kanaal, dus een vernieuwing van video's controleert hooguit een paar kanalen, en nieuwe kunnen een dag of langer nodig hebben om te verschijnen. Alleen de nieuwste samenwerkingen die daar worden getoond, worden gevonden, sommige kanalen tonen er geen en hun publicatiedatums zijn bij benadering. Niet beschikbaar met de Invidious-API."
     Platforms Auto Refresh Interval: Hoe vaak OpenTubeX de kanalen die je op andere platforms volgt automatisch vernieuwt terwijl de app geopend is.
+    Enable Twitch Page: Laat je de Twitch-pagina openen vanuit de navigatie en het opdrachtpalet. Daar kun je populaire categorieën en live kanalen bekijken en op Twitch zoeken.
     Twitch Notify When Live: Geeft een melding wanneer een van je gevolgde Twitch-kanalen begint met streamen. OpenTubeX controleert om de paar minuten zolang het geopend is, en ook wanneer het gesloten is als het dan abonnementen vernieuwt.
   Theme Settings:
+    Toggle Playback With Tab Icon: Klikken op het pictogram van een tabblad met een afspelende of gepauzeerde video pauzeert of hervat deze zonder naar dat tabblad te wisselen.
     Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden, ook als ze Ongedaan maken aanbieden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen die om een beslissing vragen, zoals updateverzoeken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
     Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
     Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
@@ -2591,6 +2613,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Laatste sprong ongedaan maken
   Redo Seek: Ongedaan gemaakte sprong opnieuw uitvoeren
   New Incognito Tab: Nieuw incognitotabblad maken
+  Shortcuts Label: Sneltoetsen
 CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen
@@ -2625,6 +2648,8 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  Stop Recording: "Opname stoppen"
+  Recording: "Opnemen"
   File Name Template Invalid: 'Gebruik een relatief pad binnen de downloadmap zonder "..", "~", "$", "%" of een voorvoegsel zoals "thumbnail:".'
   Search Completed: "Voltooide downloads zoeken op titel of kanaal"
   Format: "Formaat"
@@ -2774,6 +2799,22 @@ App Icon:
   Saved Message: "Pictogram opgeslagen. Het kan even duren voordat je launcher is bijgewerkt."
   Title: "App-pictogram"
   Error: "Kan het app-pictogram niet laden of wijzigen"
+
+App Lock:
+  Title: "App-vergrendeling"
+  Enable: "Schermvergrendeling vereisen"
+  Enable Tooltip: "Vraagt om je vingerafdruk, gezicht, pincode, patroon of wachtwoord wanneer je terugkeert naar OpenTubeX. Op Android 13 en hoger tonen recente apps ook geen voorbeeld van de app meer."
+  Lock After: "Vergrendelen na"
+  Immediately: "Onmiddellijk"
+  1 Minute: "1 minuut"
+  5 Minutes: "5 minuten"
+  15 Minutes: "15 minuten"
+  1 Hour: "1 uur"
+  Unavailable: "Stel een schermvergrendeling in via de Android-instellingen om app-vergrendeling te gebruiken."
+  Error: "App-vergrendeling kan niet worden gewijzigd"
+  Locked: "OpenTubeX is vergrendeld"
+  Unlock: "Ontgrendelen"
+  Prompt Title: "OpenTubeX ontgrendelen"
 
 Tray:
   Hide All Windows: "Alle vensters verbergen"
@@ -2948,6 +2989,33 @@ Platforms:
   Verify: "Verifiëren"
   Categories: "Categorieën"
   Category Not Found: "Deze categorie kan niet worden gevonden."
+  Category Tags: "Categorietags"
+  Stream Tags: "Streamtags"
+  Language: "Taal"
+  All Languages: "Alle talen"
+  Other Language: "Overig"
+  American Sign Language: "Amerikaanse Gebarentaal"
+  Search Tags: "Tags zoeken"
+  Add Tag: "Tag toevoegen"
+  Remove Tag: "{tag} verwijderen"
+  Sort:
+    Viewers: "Kijkers (hoog naar laag)"
+    Viewers Ascending: "Kijkers (laag naar hoog)"
+    Started: "Onlangs gestart"
+    Relevance: "Aanbevolen"
+    Published: "Onlangs gepubliceerd"
+    Views: "Weergaven (hoog naar laag)"
+    Top Day: "Top 24 uur"
+    Top Week: "Top 7 dagen"
+    Top Month: "Top 30 dagen"
+    Top All: "Top aller tijden"
+  Video Type:
+    Video Type: "Videotype"
+    All: "Alle video's"
+    Archive: "Eerdere uitzendingen"
+    Highlight: "Hoogtepunten"
+    Upload: "Uploads"
+  Anonymous: "Anoniem"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} heeft {commentAuthor} geantwoord"
   Like: "Vind ik leuk"
@@ -2982,5 +3050,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Zoeken op Twitch"
+  Search Placeholder: "Categorieën en kanalen"
 New Incognito Tab: Nieuw incognitotabblad
 Incognito Tab: Incognitotabblad

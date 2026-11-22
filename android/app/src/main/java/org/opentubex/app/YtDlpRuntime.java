@@ -47,6 +47,13 @@ final class YtDlpRuntime {
             }
             process.destroy();
         }
+        /** Sends SIGINT to Python alone, which then asks FFmpeg to finish its file. */
+        boolean interrupt() {
+            int pid = group.get();
+            if (stopped || pid <= 0) return false;
+            try { android.system.Os.kill(pid, android.system.OsConstants.SIGINT); return true; }
+            catch (android.system.ErrnoException ignored) { return false; }
+        }
     }
 
     static final class ErrorOutput {
@@ -142,12 +149,16 @@ final class YtDlpRuntime {
         INSTALL_LOCK.readLock().lockInterruptibly();
         RunningProcess running = null;
         boolean completed = false;
+        YtDlpCookies.Checkout cookies = null;
         try {
+            cookies = YtDlpCookies.checkOut(context.getCacheDir(), args);
             File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
             File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
             String marker = "__OPENTUBEX_PROCESS_" + UUID.randomUUID() + "__:";
-            String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
+            // Python only turns SIGINT into KeyboardInterrupt, which stops a live recording
+            // and keeps it, when the app did not start it with SIGINT ignored.
+            String bootstrap = "import os,sys,runpy,signal\nsignal.signal(signal.SIGINT,signal.default_int_handler)\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
                 + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\n"
                 + rumbleHttpBootstrap + "\ninstall_rumble_http()\n"
                 + outputPathsBootstrap + "\ninstall_output_containment()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
@@ -155,7 +166,7 @@ final class YtDlpRuntime {
                 entryPoint.getAbsolutePath(),
                 "--ignore-config", "--no-plugin-dirs", "--no-cache-dir", "--js-runtimes", "quickjs:" + nativeDir + "/libqjs.so",
                 "--ffmpeg-location", nativeDir + "/libffmpeg.so"));
-            command.addAll(args);
+            command.addAll(cookies.args);
             // Last option wins over custom arguments; --geo-verification-proxy must
             // follow the same policy instead of escaping through a second proxy.
             command.addAll(asList("--proxy", AndroidProxy.authenticatedUrl(), "--geo-verification-proxy", AndroidProxy.authenticatedUrl()));
@@ -210,6 +221,7 @@ final class YtDlpRuntime {
                 if (!completed) running.stop();
                 if (id != null) PROCESSES.remove(id, running);
             }
+            if (cookies != null) cookies.release();
             INSTALL_LOCK.readLock().unlock();
         }
     }
@@ -305,9 +317,18 @@ final class YtDlpRuntime {
         } finally { process.destroy(); }
     }
 
+    /** Interrupts the process of one part of a download, as Ctrl+C would, and returns whether it got the signal. */
+    static boolean interrupt(long id, int part) {
+        RunningProcess process = PROCESSES.get(part == 0 ? "download-" + id : "download-" + id + "-" + part);
+        return process != null && process.interrupt();
+    }
+
+    /** Stops every process of a download, including the other parts of a split playlist. */
     static void cancel(long id) {
-        RunningProcess process = PROCESSES.get("download-" + id);
-        if (process != null) process.stop();
+        String key = "download-" + id;
+        PROCESSES.forEach((name, process) -> {
+            if (name.equals(key) || name.startsWith(key + "-")) process.stop();
+        });
     }
 
 }

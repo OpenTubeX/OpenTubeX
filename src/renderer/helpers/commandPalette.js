@@ -143,16 +143,22 @@ function compareMatches(first, second) {
 
 function normalizedCharacterMap(value, locale) {
   const characters = Array.from(value)
-  const normalizedCharacters = characters.flatMap((character, index) => (
-    Array.from(character.toLocaleLowerCase(locale).normalize('NFKD'))
-      .filter(normalizedCharacter => !/\p{Mark}/u.test(normalizedCharacter))
-      .map(normalizedCharacter => ({ value: normalizedCharacter, originalIndex: index }))
-  ))
-  return { characters, normalizedCharacters }
+  let candidate = ''
+  const originalIndexes = []
+  for (let index = 0; index < characters.length; index++) {
+    const normalized = characters[index]
+      .toLocaleLowerCase(locale)
+      .normalize('NFKD')
+      .replaceAll(/\p{Mark}/gu, '')
+    candidate += normalized
+    for (let offset = 0; offset < normalized.length; offset++) {
+      originalIndexes.push(index)
+    }
+  }
+  return { characters, candidate, originalIndexes }
 }
 
-function tokenHighlightIndexes(token, normalizedCharacters) {
-  const candidate = normalizedCharacters.map(character => character.value).join('')
+function tokenHighlightIndexes(token, candidate) {
   const exactIndex = candidate.indexOf(token)
   if (exactIndex !== -1) {
     return Array.from({ length: token.length }, (_, index) => exactIndex + index)
@@ -174,10 +180,15 @@ function tokenHighlightIndexes(token, normalizedCharacters) {
   }
   if (bestMatch) return bestMatch.indexes
 
-  const compactCharacters = normalizedCharacters.filter(character => !/\s/u.test(character.value))
-  const compactCandidate = compactCharacters.map(character => character.value).join('')
+  let compactCandidate = ''
+  const compactCandidateIndexes = []
+  for (let index = 0; index < candidate.length; index++) {
+    if (/\s/u.test(candidate[index])) continue
+    compactCandidate += candidate[index]
+    compactCandidateIndexes.push(index)
+  }
   return findSubsequenceIndexes(token, compactCandidate)
-    ?.map(index => normalizedCharacters.indexOf(compactCharacters[index])) ?? []
+    ?.map(index => compactCandidateIndexes[index]) ?? []
 }
 
 /**
@@ -190,12 +201,12 @@ function tokenHighlightIndexes(token, normalizedCharacters) {
 export function highlightCommandText(value, query, locale) {
   const normalizedQuery = normalizeCommandText(query, locale)
   if (normalizedQuery === '') return [{ text: value, highlighted: false }]
-  const { characters, normalizedCharacters } = normalizedCharacterMap(value, locale)
+  const { characters, candidate, originalIndexes } = normalizedCharacterMap(value, locale)
 
   const highlightedIndexes = new Set()
   for (const token of normalizedQuery.split(' ')) {
-    for (const index of tokenHighlightIndexes(token, normalizedCharacters)) {
-      highlightedIndexes.add(normalizedCharacters[index].originalIndex)
+    for (const index of tokenHighlightIndexes(token, candidate)) {
+      highlightedIndexes.add(originalIndexes[index])
     }
   }
 

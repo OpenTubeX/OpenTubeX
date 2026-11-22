@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron'
 
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
+import { isFeedCacheChange } from '../feedCache'
 import { handleTrusted, sendToOtherAppWindows } from './ipc'
 import { numberSyncMessage, readSynced, settingSyncMessage, writeSynced } from './datastoreSync'
 import { canRendererWriteSetting } from './settingWriteGuard'
@@ -720,6 +721,35 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
         default:
           // eslint-disable-next-line no-throw-literal
           throw 'invalid subscriptionCache db action'
+      }
+    } catch (err) {
+      if (typeof err === 'string') throw err
+      else throw err.toString()
+    }
+  })
+
+  // RSS and other platforms' feed cache
+  handleSyncedDatastoreRequests(IpcChannels.DB_FEED_CACHE, IpcChannels.SYNC_FEED_CACHE, async (event, { action, data }) => {
+    try {
+      switch (action) {
+        case DBActions.GENERAL.FIND:
+          // Strings cross IPC and the context bridge far faster than records.
+          return await baseHandlers.feedCache._findSerialized()
+
+        case DBActions.FEED_CACHE.WRITE:
+          if (!isFeedCacheChange(data)) throw new TypeError('invalid feed cache change')
+          await baseHandlers.feedCache.write(data)
+          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, { event: SyncEvents.GENERAL.UPSERT, data })
+          return null
+
+        case DBActions.GENERAL.DELETE_ALL:
+          await baseHandlers.feedCache.deleteAll()
+          syncOtherWindows(IpcChannels.SYNC_FEED_CACHE, event, { event: SyncEvents.GENERAL.DELETE_ALL })
+          return null
+
+        default:
+          // eslint-disable-next-line no-throw-literal
+          throw 'invalid feed cache db action'
       }
     } catch (err) {
       if (typeof err === 'string') throw err

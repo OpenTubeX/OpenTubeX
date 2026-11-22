@@ -225,6 +225,7 @@ Subscriptions:
     Description: Füge einen RSS- oder Atom-Feed hinzu, um Kanälen auf anderen Plattformen zu folgen. {rssHub}-Instanzen stellen Feeds für viele Websites bereit, zum Beispiel Twitch.
     Empty Items: Deine Feeds enthalten derzeit keine Einträge.
     No Feeds: Du hast noch keine RSS-Feeds abonniert.
+    Load More Items: Weitere Einträge laden
     RSSHub:
       Browse: RSSHub durchsuchen
       Title: Feed von RSSHub hinzufügen
@@ -644,6 +645,8 @@ Settings:
       Local API: Lokale API
       Invidious API: Invidious-API
       Yattee Server: "Yattee-Server"
+      Local API Extension Required: Die Web-App kann die lokale API nur mit der Browsererweiterung „OpenTubeX Lokale API“ nutzen.
+      Install Local API Extension: Erweiterung installieren
     Video View Type:
       Video View Type: Videoübersicht
       Grid: Raster
@@ -968,6 +971,7 @@ Settings:
     Loaded Tab Icons: 'Fehlendes Tab-Symbol geladen: {count} | Fehlende Tab-Symbole geladen: {count}'
     Loaded Tab Icons With Failures: '{loaded} Tab-Symbole geladen; {failed} konnten nicht geladen werden'
     Show Tab Previews: Tab-Vorschauen anzeigen
+    Toggle Playback With Tab Icon: Mit dem Tab-Symbol abspielen und pausieren
     Use Fixed Tab Width: Im horizontalen Modus feste Tab-Breite verwenden
     Use Custom Title Bar: Eigene Titelleiste verwenden
     Tab Width: Tab-Breite
@@ -1103,9 +1107,11 @@ Settings:
       Screenshots: Screenshots
       Timestamp Notes: Zeitstempel-Notizen
     Lights Off: Licht aus
+    Mirror Video: Video spiegeln
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
     Show Mono Audio Toggle: Schalter für Mono-Audio anzeigen
+    Show Mirror Video Toggle: Schalter für „Video spiegeln“ anzeigen
     Show Music Mode Toggle: Schalter für den Musikmodus anzeigen
     Swipe Gestures:
       Fullscreen Brightness: Volle Helligkeit im Vollbild
@@ -1264,6 +1270,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: Breite Videos im Vollbild ins Querformat drehen
     Swipe Up or Down to Enter or Exit Fullscreen: Zum Öffnen oder Schließen des Vollbilds nach oben oder unten wischen
     Continue Playback When Screen Is Locked: Wiedergabe bei gesperrtem Bildschirm fortsetzen
+    Switch to Audio in Background: Im Hintergrund zu Audioformaten wechseln
     Ignore Headphone Controls: Kopfhörersteuerung ignorieren
     Skip by Scrolling Over Video Player: Überspringen durch Scrollen
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
@@ -1342,6 +1349,7 @@ Settings:
     Keep Status Bar Hidden in Fullscreen: Statusleiste im Vollbild ausgeblendet lassen
     Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
     Show Swipe to Seek Preview: Vorschau beim Wischen zum Spulen anzeigen
+    Double-Tap With Two Fingers to Skip Chapters: Mit zwei Fingern doppelt tippen, um Kapitel zu überspringen
     Enable Google Cast: "Google Cast aktivieren"
     Enable FCast: "FCast aktivieren"
   Subscription Settings:
@@ -1355,6 +1363,7 @@ Settings:
     Platforms:
       Other Platforms: Andere Plattformen
       Manage Channels: Gefolgte Kanäle verwalten
+      Enable Twitch Page: Twitch-Seite aktivieren
       Notify When Live: Benachrichtigen, wenn gefolgte Twitch-Kanäle live gehen
       Auto Refresh Interval: Automatisches Aktualisierungsintervall für andere Plattformen
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
@@ -1371,6 +1380,7 @@ Settings:
     RSS Feeds Auto Refresh Interval: Automatisches Aktualisierungsintervall für RSS-Feeds
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
     Notify About New Uploads: Über neue Uploads benachrichtigen
+    Refresh These Feeds Together: Diese Feeds gemeinsam aktualisieren
     Faster Subscription Refresh: Schnellere Abo-Aktualisierung
     Show Collaborations From Other Channels: Collabs anderer Kanäle anzeigen
   Privacy Settings:
@@ -1667,6 +1677,7 @@ Settings:
     Hide Active Subscriptions: Aktive Abos ausblenden
     Hide Playlists: Playlists ausblenden
     Hide Playlist Stats: Playlist-Statistiken ausblenden
+    Hide Recommendation Details: Empfehlungsgründe und Feedback ausblenden
     Hide Comments: Kommentare ausblenden
     Hide Live Streams: Livestreams ausblenden
     Hide Sharing Actions: Aktionen zum Teilen ausblenden
@@ -1973,10 +1984,12 @@ Settings:
     Profile Selector Hint: Du kannst auch mit der rechten Maustaste auf das Profilsymbol klicken, um das Profil zu wechseln
     Profile Selector Touch Hint: Du kannst auch lange auf das Profilsymbol tippen, um das Profil zu wechseln
   Highlight Changed Settings: Von den Standardwerten abweichende Einstellungen hervorheben
+  Highlight Changed Settings Label: Geändert
   Reset Setting to Default: Diese Einstellung auf den Standardwert zurücksetzen
   Experimental Badge: Experimentell
   Performance Impact:
     Show Performance Impact: Hinweise zu Leistungsauswirkungen anzeigen
+    Label: Leistung
     Moderate: Mittlere Auswirkung
     High: Hohe Auswirkung
     Description: Diese Einstellung kann die Nutzung von {resources} erhöhen
@@ -2693,6 +2706,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Aus
+    Lock Controls:
+      Lock Controls: Steuerung sperren
+      Hold to Unlock: Zum Entsperren halten
     Volume Boost:
       Volume Boost: Lautstärkeverstärkung
       'Off': Aus
@@ -3164,11 +3180,13 @@ Tooltips:
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."
     RSS Feeds Auto Refresh Interval: Wie oft OpenTubeX deine RSS-Feeds automatisch aktualisiert, während die App geöffnet ist.
     Platforms Auto Refresh Interval: Wie oft OpenTubeX die Kanäle, denen du auf anderen Plattformen folgst, automatisch aktualisiert, während die App geöffnet ist.
+    Enable Twitch Page: Lässt dich die Twitch-Seite über die Navigation und die Befehlspalette öffnen. Dort siehst du beliebte Kategorien und Live-Kanäle an und durchsuchst Twitch.
     Twitch Notify When Live: Benachrichtigt dich, wenn einer deiner gefolgten Twitch-Kanäle einen Stream startet. OpenTubeX prüft alle paar Minuten, während es geöffnet ist, und auch, während es geschlossen ist, sofern es dann Abos aktualisiert.
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
+    Refresh These Feeds Together: Wenn du einen der ausgewählten Feeds aktualisierst, werden die anderen ausgewählten Feeds direkt danach aktualisiert. Automatische Aktualisierungen folgen weiterhin dem Intervall des jeweiligen Feeds.
     Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
-    Show Collaborations From Other Channels: Zeigt auch Videos, die abonnierte Kanäle zusammen mit einem anderen Kanal gemacht haben, der sie hochgeladen hat. YouTube listet diese nur auf der Startseite eines Kanals, daher lädt jede Video-Aktualisierung pro Kanal eine Seite mehr. Nur die neuesten dort gezeigten Collabs werden gefunden, manche Kanäle zeigen keine, und ihre Veröffentlichungsdaten sind ungefähr. Mit der Invidious-API nicht verfügbar.
+    Show Collaborations From Other Channels: Zeigt auch Videos, die abonnierte Kanäle zusammen mit einem anderen Kanal gemacht haben, der sie hochgeladen hat. YouTube listet diese nur auf der Startseite eines Kanals, daher prüft eine Video-Aktualisierung höchstens einige Kanäle, und neue Collabs können einen Tag oder länger brauchen, bis sie erscheinen. Nur die neuesten dort gezeigten Collabs werden gefunden, manche Kanäle zeigen keine, und ihre Veröffentlichungsdaten sind ungefähr. Mit der Invidious-API nicht verfügbar.
   Player Settings:
     Enable Timestamp Notes: Fügt dem Player eine Schaltfläche und das Tastenkürzel N hinzu, die das Video pausieren und eine Notiz öffnen, die auf die aktuelle Stelle verlinkt. Notizen können als Markdown kopiert oder auf dem Desktop zu Obsidian hinzugefügt werden.
     Obsidian Vault: Name des Obsidian-Vaults für Zeitstempel-Notizen. Ist er gesetzt, können Notizen zu Obsidian hinzugefügt werden. Die Notizen eines Videos werden in einer nach dem Video benannten Notiz im Ordner für neue Notizen des Vaults gesammelt.
@@ -3181,6 +3199,7 @@ Tooltips:
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
     Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
+    Show Mirror Video Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter an, der das Video horizontal spiegelt. So kannst du Tanz-, Fitness- und Instrumenten-Tutorials leichter folgen.
     Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Speed Up: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend mit dem gewählten Wert zu multiplizieren.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
@@ -3194,6 +3213,7 @@ Tooltips:
     Enable Video Zoom: >-
       Zeigt die Zoomsteuerung im Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel und
       Schwenksteuerungen.
+    Double-Tap With Two Fingers to Skip Chapters: Tippe mit zwei Fingern doppelt auf die rechte Seite des Videos, um zum nächsten Kapitel zu springen, oder auf die linke Seite, um zum Anfang des aktuellen Kapitels zurückzukehren. In den ersten 3 Sekunden eines Kapitels springt die linke Seite stattdessen zum vorherigen Kapitel, sodass du durch Wiederholen kapitelweise zurückgehst.
     Show Seek Bar Filmstrip: >-
       Beim Ziehen des Reglers der Zeitleiste erscheint ein Streifen mit Bildern rund um die Zielstelle. Ziehst du nach oben auf
       den Streifen, spulst du genauer. Wenn deaktiviert, zeigt das Ziehen ein einzelnes Vorschaubild wie beim Darüberfahren.
@@ -3206,6 +3226,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: >-
       Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
       Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.
+    Switch to Audio in Background: Spielt Audioformate ab, solange die App im Hintergrund läuft oder der Bildschirm aus ist, und spart so Daten und Akku. Im Bild-in-Bild-Modus bleibt das Video erhalten. Das Video kehrt zurück, sobald du die App wieder öffnest. Erfordert, dass die Wiedergabe bei gesperrtem Bildschirm fortgesetzt wird.
     Ignore Headphone Controls: Ignoriert Befehle zum Abspielen, Pausieren und Überspringen von Bluetooth-Geräten, kabelgebundenen Kopfhörern und Medientasten von Tastaturen, sodass versehentliches Tippen auf Earbuds die Wiedergabe nicht unterbricht. Die Steuerung in der App und in der Medienbenachrichtigung funktioniert weiterhin.
     Voice-over Translation: >-
       Sendet Video-ID, Dauer und ausgewählte Sprache an den inoffiziellen Yandex-Dienst für Voice-over-Übersetzungen, wenn
@@ -3296,6 +3317,7 @@ Tooltips:
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
+    Toggle Playback With Tab Icon: Ein Klick auf das Symbol eines Tabs mit laufendem oder pausiertem Video pausiert es oder setzt es fort, ohne zu diesem Tab zu wechseln.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
     UI Density: Ändert die Abstände in Listen, Menüs, der Seitenleiste und den Einstellungen.
@@ -3476,6 +3498,7 @@ KeyboardShortcutPrompt:
   Next Chapter: Nächstes Kapitel
   Last Chapter: Letztes Kapitel
   Show Keyboard Shortcuts: Tastaturkürzel anzeigen
+  Shortcuts Label: Tastaturkürzel
   History Forward: Eine Seite nach vorne gehen
   Increase Video Speed: Erhöhen der Videogeschwindigkeit basierend auf dem Intervall der Videowiedergaberate
   Large Rewind: 10 Sekunden zurückspulen / Zurückspulen basierend auf der aktuellen Wiedergabegeschwindigkeit
@@ -3818,6 +3841,8 @@ Downloads:
   Play Download: Download wiedergeben
   Retry Download: Download erneut versuchen
   Pause Download: Download pausieren
+  Stop Recording: Aufnahme beenden
+  Recording: Aufnahme läuft
   Resume Download: Download fortsetzen
   Move Earlier: Nach vorne verschieben
   Move Later: Nach hinten verschieben
@@ -3965,6 +3990,22 @@ App Icon:
   Title: "App-Symbol"
   Error: "Das App-Symbol konnte nicht geladen oder geändert werden"
 
+App Lock:
+  Title: "App-Sperre"
+  Enable: "Displaysperre verlangen"
+  Enable Tooltip: "Fragt nach Fingerabdruck, Gesicht, PIN, Muster oder Passwort, wenn du zu OpenTubeX zurückkehrst. Ab Android 13 zeigen die letzten Apps außerdem keine Vorschau der App mehr."
+  Lock After: "Sperren nach"
+  Immediately: "Sofort"
+  1 Minute: "1 Minute"
+  5 Minutes: "5 Minuten"
+  15 Minutes: "15 Minuten"
+  1 Hour: "1 Stunde"
+  Unavailable: "Richte in den Android-Einstellungen eine Displaysperre ein, um die App-Sperre zu verwenden."
+  Error: "Die App-Sperre konnte nicht geändert werden"
+  Locked: "OpenTubeX ist gesperrt"
+  Unlock: "Entsperren"
+  Prompt Title: "OpenTubeX entsperren"
+
 Tray:
   Hide All Windows: "Alle Fenster ausblenden"
   Show All Windows: "Alle Fenster anzeigen"
@@ -4083,6 +4124,33 @@ Platforms:
   Verify: "Bestätigen"
   Categories: "Kategorien"
   Category Not Found: "Diese Kategorie wurde nicht gefunden."
+  Category Tags: "Kategorie-Tags"
+  Stream Tags: "Stream-Tags"
+  Language: "Sprache"
+  All Languages: "Alle Sprachen"
+  Other Language: "Andere"
+  American Sign Language: "Amerikanische Gebärdensprache"
+  Search Tags: "Tags suchen"
+  Add Tag: "Tag hinzufügen"
+  Remove Tag: "{tag} entfernen"
+  Sort:
+    Viewers: "Zuschauende (meiste zuerst)"
+    Viewers Ascending: "Zuschauende (wenigste zuerst)"
+    Started: "Kürzlich gestartet"
+    Relevance: "Empfohlen"
+    Published: "Kürzlich veröffentlicht"
+    Views: "Aufrufe (meiste zuerst)"
+    Top Day: "Top 24 Stunden"
+    Top Week: "Top 7 Tage"
+    Top Month: "Top 30 Tage"
+    Top All: "Top aller Zeiten"
+  Video Type:
+    Video Type: "Videotyp"
+    All: "Alle Videos"
+    Archive: "Vergangene Übertragungen"
+    Highlight: "Highlights"
+    Upload: "Uploads"
+  Anonymous: "Anonym"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"
@@ -4117,3 +4185,4 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch durchsuchen"
+  Search Placeholder: "Kategorien und Kanäle"

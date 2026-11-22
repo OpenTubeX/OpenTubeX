@@ -7,6 +7,7 @@ export const RELEASE_NOTE_PLATFORMS = new Map([
   ['linux', 'Linux'],
   ['macos', 'macOS'],
   ['windows', 'Windows'],
+  ['web', 'Web'],
 ])
 
 const DESKTOP_PLATFORMS = ['linux', 'macos', 'windows']

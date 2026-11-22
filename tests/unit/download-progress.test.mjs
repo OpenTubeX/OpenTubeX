@@ -7,15 +7,23 @@ import { downloadErrorMessage } from '../../src/renderer/helpers/downloadErrors.
 
 const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const DOWNLOAD_STOPPED_ERROR = /^const DOWNLOAD_STOPPED_ERROR = '([^']+)'$/m.exec(source)[1]
-const handler = source.slice(source.indexOf('  function setDownloadPhase(phase) {'), source.indexOf('\n  let stdoutBuffer', source.indexOf('  function handleStdoutLine(line) {')))
+const stderrHandlerStart = source.indexOf('  /**\n   * @param {DownloadPart} part\n   * @param {string} line\n   */\n  function handleStderrLine(part, line) {')
+const stderrHandler = source.slice(stderrHandlerStart, source.indexOf('  function finishDownload() {', stderrHandlerStart))
+const handler = source.slice(source.indexOf('  /** @param {DownloadPart} part */\n  function partPosition(part) {'), stderrHandlerStart)
+const liveConstants = ['LIVE_PREFIX', 'FFMPEG_PROGRESS_REGEX', 'STOP_UNANSWERED_MS']
+  .map(name => new RegExp(`^const ${name} = .+$`, 'm').exec(source)[0]).join('\n')
 
 function replay(lines, initialStatus = 'downloading', overrides = {}) {
   const status = { status: initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00' }
+  const part = { phase: ['paused', 'pausing'].includes(initialStatus) ? 'downloading' : initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00', done: false }
   const entry = {}
   const updates = []
   const context = vm.createContext({
     status,
     entry,
+    parts: [part],
+    videoIds: [],
+    combineDownloadSpeeds: () => null,
     sendStatus: force => updates.push({ ...status, force }),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
@@ -29,9 +37,10 @@ function replay(lines, initialStatus = 'downloading', overrides = {}) {
     isPathInsideFolders: () => true,
     ...overrides,
   })
-  vm.runInContext(`${handler}\nglobalThis.handleLine = handleStdoutLine`, context)
-  for (const line of lines) context.handleLine(line)
-  return { status, updates, entry }
+  vm.runInContext(`${liveConstants}\n${handler}\nglobalThis.handleLine = (index, line) => handleStdoutLine(parts[index], line)`, context)
+  // A line for another part of a split playlist is given with that part's index
+  for (const line of lines) context.handleLine(...(Array.isArray(line) ? line : [0, line]))
+  return { status: context.status, updates, entry, parts: context.parts }
 }
 
 test('preparation clears the previous playlist item progress and publishes immediately', () => {
@@ -99,6 +108,84 @@ test('unknown transfer measurements do not leak yt-dlp placeholders', () => {
   assert.equal(status.eta, null)
 })
 
+test('live recordings show the recorded length and size that FFmpeg reports', () => {
+  const { status, updates, parts: [part] } = replay([
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t\t\t"Live stream"',
+    '__OPENTUBEX_LIVE__:True',
+    'total_size=N/A',
+    'out_time_us=N/A',
+    'progress=continue',
+    'total_size=10485760',
+    'out_time_us=9648333',
+    'out_time=00:00:09.648333',
+    'speed=1.01x',
+    'progress=continue',
+  ], 'preparing')
+  assert.equal(status.status, 'downloading')
+  assert.equal(status.live, true)
+  assert.equal(status.recordedSeconds, 9.648333)
+  assert.equal(status.recordedBytes, 10485760)
+  assert.equal(status.percent, 0)
+  assert.equal(updates.find(update => update.status === 'downloading').force, true)
+
+  // FFmpeg reports once more while it finishes the recording
+  status.status = 'processing'
+  part.phase = 'processing'
+  part.stopRequestedAt = Date.now()
+  replay(['progress=continue'], 'processing', { status, parts: [part] })
+  assert.equal(status.status, 'processing')
+
+  // A recording that ignored the stop request shows that it is still recording
+  part.stopRequestedAt = Date.now() - 60_000
+  replay(['progress=continue'], 'processing', { status, parts: [part] })
+  assert.equal(status.status, 'downloading')
+  assert.equal(part.stopRequestedAt, undefined)
+})
+
+test('FFmpeg progress of a video that is not live leaves its status alone', () => {
+  // A live video earlier in a playlist must not mark the next one as live
+  const { status } = replay([
+    '__OPENTUBEX_LIVE__:True',
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t2\t2\t"Video"',
+    '__OPENTUBEX_LIVE__:False',
+    'out_time_us=1000000',
+    'progress=continue',
+  ], 'preparing')
+  assert.equal(status.status, 'preparing')
+  assert.notEqual(status.live, true)
+  assert.equal(status.recordedSeconds, undefined)
+})
+
+test('parts of a split playlist keep their own live state', () => {
+  const parts = [0, 1, 2].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
+  const { status, updates } = replay([
+    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t3\t"Video"'],
+    [0, '__OPENTUBEX_LIVE__:False'],
+    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t3\t"Live stream"'],
+    [1, '__OPENTUBEX_LIVE__:True'],
+    [2, '__OPENTUBEX_PREPARING__:ccccccccccc\t3\t3\t"Another live stream"'],
+    [2, '__OPENTUBEX_LIVE__:True'],
+    [1, 'out_time_us=5000000'],
+    [1, 'progress=continue'],
+    [2, 'out_time_us=7000000'],
+    [2, 'progress=continue'],
+    [1, '__OPENTUBEX_PROCESSING__'],
+    [0, '__OPENTUBEX_DOWNLOAD__:downloading\t40.0%\t1.00MiB/s\t00:10'],
+  ], 'preparing', { parts })
+  // Pausing is refused as soon as a live video is known, before FFmpeg reports progress
+  const firstLive = updates.find(update => update.live === true)
+  assert.equal(firstLive.status, 'preparing')
+  assert.equal(firstLive.playlistIndex, 2)
+  // The row shows the stream still recording over an earlier video and an ended stream,
+  // so it offers to stop it instead of pausing
+  assert.equal(status.status, 'downloading')
+  assert.equal(status.live, true)
+  assert.equal(status.playlistIndex, 3)
+  assert.equal(status.recordedSeconds, 7)
+  assert.equal(parts[0].live, false)
+  assert.equal(parts[0].percent, 40)
+})
+
 test('stderr progress is decoded across chunks and keeps diagnostic history bounded', () => {
   const listeners = {}
   const lines = []
@@ -107,10 +194,11 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
     setEncoding() {},
     on(event, callback) { listeners[`${name}:${event}`] = callback },
   })
-  const wiring = source.slice(source.indexOf("  let stdoutBuffer = ''"), source.indexOf("  child.on('error',", source.indexOf("  let stdoutBuffer = ''")))
-  vm.runInNewContext(wiring, {
+  const wiring = source.slice(source.indexOf("    let stdoutBuffer = ''"), source.indexOf("    child.on('error'", source.indexOf("    let stdoutBuffer = ''")))
+  vm.runInNewContext(`${stderrHandler}${wiring}`, {
     child: { stdout: stream('stdout'), stderr: stream('stderr') },
-    handleStdoutLine: line => lines.push(line),
+    part: {},
+    handleStdoutLine: (_, line) => lines.push(line),
     stderrLines,
     errorLines: [],
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
@@ -156,14 +244,13 @@ test('storage history includes only terminal downloads that the backend can clea
 })
 
 function finishDownload({ code, payload, destinations, stderr, subtitleFormat = '', existingFiles = [] }) {
-  const start = source.indexOf('  /** @param {string} line */\n  function handleStderrLine(line) {')
-  const closeStart = source.indexOf("  child.on('close', (code) => {", start)
-  const closeEnd = source.indexOf('\n  })\n', closeStart) + 5
+  const finishStart = source.indexOf('  function finishDownload() {')
+  const finish = source.slice(finishStart, source.indexOf('\n  }\n', finishStart) + 4)
   const status = { status: 'downloading', percent: 40, destinations, destination: destinations.at(-1) ?? null, errorMessage: null }
   const notifications = []
-  let close
-  vm.runInNewContext(`${source.slice(start, source.indexOf("  child.on('error',", start))}${source.slice(closeStart, closeEnd)}
-    for (const line of stderr) handleStderrLine(line)`, {
+  vm.runInNewContext(`${stderrHandler}${finish}
+    for (const line of stderr) handleStderrLine(parts[0], line)
+    finishDownload()`, {
     id: 1,
     stderr,
     stderrLines: [],
@@ -171,24 +258,22 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     status,
     payload,
     subtitleFormat,
-    finished: false,
+    parts: [{ done: true, code, error: null }],
     subtitleDestinations: new Set(destinations),
     existsSync: file => existingFiles.includes(file),
     entry: { cancelled: false, restarting: false },
     activeDownloads: new Map(),
     handleStdoutLine() {},
-    releaseDownloadSlot() {},
-    removeTemporaryDownloadFolder() {},
+    rm: async () => {},
+    temporaryDownloadFolder: '/downloads/.opentubex-download-1',
     sendStatus() {},
     saveDownloadRecords: async () => {},
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
     DOWNLOAD_STOPPED_ERROR,
-    child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })
-  close(code)
   return { status, notifications }
 }
 

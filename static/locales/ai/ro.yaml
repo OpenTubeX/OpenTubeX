@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
   RSS Feeds:
+    Load More Items: Încarcă mai multe elemente
     Refreshing: Se reîmprospătează fluxurile RSS
     Tab: RSS
     Followed Feeds: Fluxuri RSS urmărite
@@ -497,6 +498,7 @@ Settings:
       Memory: memorie
       Network: rețea
       Disk: disc
+    Label: Performanță
   General Settings:
     Invidious Instance Username: 'Numele de utilizator al instanței'
     Invidious Instance Password: 'Parola instanței'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automat
     Preferred API Backend:
       Yattee Server: Server Yattee
+      Local API Extension Required: Aplicația web poate folosi API-ul local doar cu extensia de browser OpenTubeX Local API.
+      Install Local API Extension: Instalează extensia
     Yattee Server:
       Server URL: URL-ul serverului Yattee
       Username: Nume de utilizator
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Toggle Playback With Tab Icon: Redare și pauză cu pictograma filei
     Theme and Colors: "Temă și culori"
     Font Size: Dimensiunea fontului
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizează volumul'
     Show Mono Audio Toggle: 'Afișează comutatorul audio mono'
+    Show Mirror Video Toggle: "Afișează comutatorul pentru oglindirea videoclipului"
     Pause on Stream Recovery: "Pauză la recuperarea fluxului"
     Buffering:
       Buffering: Memorie tampon
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Activează transmiterea DLNA"
     Skip Unavailable Playlist Videos: "Omite videoclipurile indisponibile din listele de redare"
     Lights Off: Stinge luminile
+    Mirror Video: "Oglindește videoclipul"
     Show Lights Off Toggle: Afișează comutatorul pentru stingerea luminilor
     Show Volume Boost Toggle: "Afișează comutatorul de amplificare a volumului"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Nu s-au putut ajusta comenzile de redare.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuă redarea când ecranul este blocat'
+    Switch to Audio in Background: 'Comută la formate audio în fundal'
     Ignore Headphone Controls: 'Ignoră comenzile căștilor'
     Music Visualizer: Vizualizator muzical
     Automatically Open Chapters: Deschide automat capitolele
@@ -1052,6 +1060,7 @@ Settings:
     Timestamp Notes:
       Enable: "Activează notele cu marcaj temporal"
       Obsidian Vault: Seif Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Atingeți de două ori cu două degete pentru a sări între capitole"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1290,6 +1299,7 @@ Settings:
     Cleanup Complete: Curățarea spațiului de stocare s-a încheiat
     Cleanup Failed: Curățarea spațiului de stocare a eșuat
   Subscription Settings:
+    Refresh These Feeds Together: "Reîmprospătează aceste fluxuri împreună"
     Fetch Feed on Startup: Preia fluxul la pornire
     Show New Content Feed: Afișează fluxul de conținut nou
     RSS Feeds: Fluxuri RSS
@@ -1310,6 +1320,7 @@ Settings:
     Platforms:
       Other Platforms: Alte platforme
       Manage Channels: Gestionează canalele urmărite
+      Enable Twitch Page: Activează pagina Twitch
       Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
       Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
@@ -1355,6 +1366,7 @@ Settings:
     Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
     Hide Playlist Stats: Ascunde statisticile listei de redare
+    Hide Recommendation Details: Ascunde motivele recomandărilor și feedbackul
     Sections:
       Digital Wellbeing: "Bunăstare digitală"
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
@@ -1673,6 +1685,7 @@ Settings:
     Downloading: Se descarcă listele…
     Failed to Download: Listele nu au putut fi descărcate
     Loaded Status: "Canale blocate: {blocked} · Canale semnalate: {warned} · Actualizat: {date}"
+  Highlight Changed Settings Label: Modificate
 Tutorial:
   Skip: Omite
   Next: Înainte
@@ -1964,6 +1977,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Dezactivat'
+    Lock Controls:
+      Lock Controls: "Blochează comenzile"
+      Hold to Unlock: "Țineți apăsat pentru deblocare"
     Volume Boost:
       Volume Boost: "Amplificare volum"
       'Off': "Dezactivată"
@@ -2443,6 +2459,7 @@ Tooltips:
     Normalize Loudness: 'Reduce volumul videoclipurilor mai puternice decât majoritatea, astfel încât volumul să nu sară între videoclipuri. Videoclipurile cu volum redus își păstrează volumul. Funcționează doar pentru videoclipurile încărcate prin API-ul local.'
     Pause on Stream Recovery: "Când fluxul video eșuează și playerul îl reîncarcă sau trece la alt format sau motor, redarea este pusă pe pauză, iar eroarea rămâne în partea de sus a playerului până când o închizi. Când este dezactivat, redarea continuă, iar eroarea apare pentru scurt timp ca notificare."
     Continue Playback When Screen Is Locked: 'Menține redarea audio în fundal și oferă comenzi media Android. Dezactivează pentru a întrerupe redarea când aplicația nu mai este vizibilă.'
+    Switch to Audio in Background: 'Redă formate audio cât timp aplicația rulează în fundal sau ecranul este oprit, economisind date și baterie. Picture-in-Picture păstrează videoclipul. Videoclipul revine când redeschizi aplicația. Necesită continuarea redării când ecranul este blocat.'
     Ignore Headphone Controls: 'Ignoră comenzile de redare, pauză și salt de la dispozitivele Bluetooth, căștile cu fir și tastele media ale tastaturilor, astfel încât atingerile accidentale ale căștilor să nu întrerupă redarea. Comenzile din aplicație și din notificarea media funcționează în continuare.'
     Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
     Use Quick Playback Speed Bar: Afișează o bară rapidă pentru viteza de redare în partea dreaptă a comenzilor playerului. Dacă este activată salvarea manuală a vitezei de redare pentru fiecare canal, bara include și butonul pentru salvarea vitezei canalului curent.
@@ -2451,6 +2468,7 @@ Tooltips:
     Use YouTube-style Shorts: Afișează videoclipurile Shorts într-o grilă portret pe paginile de abonamente și canale și folosește playerul Shorts în stil YouTube.
     Loop Shorts: Când opțiunea este activată, videoclipurile Shorts repornesc automat. Când este dezactivată, acestea se opresc la sfârșit și afișează un buton de reluare.
     Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
+    Show Mirror Video Toggle: "Afișează în meniul de setări al playerului un comutator care oglindește videoclipul pe orizontală, ca să urmărești mai ușor tutorialele de dans, antrenament și instrumente muzicale."
     Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
     Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
     Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.
@@ -2472,6 +2490,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
     Enable Timestamp Notes: "Adaugă un buton în player și scurtătura N, care pun videoclipul pe pauză și deschid o notă cu link către momentul curent. Notele pot fi copiate ca Markdown sau, pe desktop, adăugate în Obsidian."
     Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.
+    Double-Tap With Two Fingers to Skip Chapters: "Atingeți de două ori cu două degete partea dreaptă a videoclipului pentru a trece la capitolul următor sau partea stângă pentru a reveni la începutul capitolului curent. În primele 3 secunde ale unui capitol, partea stângă duce în schimb la capitolul anterior, astfel încât, repetând gestul, vă deplasați înapoi prin capitole."
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.
@@ -2502,6 +2521,7 @@ Tooltips:
     Bedtime Reminder: "Întrerupe videoclipul și vă reamintește să nu mai vizionați între ora de început și cea de sfârșit."
     Shorten View Counts: Afișează în formă abreviată numărul de vizionări, de comentarii și de aprecieri ale comentariilor pe care YouTube le-a rotunjit deja, de exemplu 14 K în loc de 14.000. Valorile exacte sunt afișate întotdeauna integral.
   Subscription Settings:
+    Refresh These Feeds Together: "Când reîmprospătezi unul dintre fluxurile bifate, celelalte fluxuri bifate se reîmprospătează imediat după el. Reîmprospătările automate respectă în continuare intervalul fiecărui flux."
     Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
     Show New Content Feed: Afișează o filă Nou cu elementele din fluxul de abonamente care nu existau la preluarea anterioară.
     Enable RSS Feeds: Afișează o filă RSS pe pagina Abonamente cu elementele fluxurilor RSS sau Atom, ca să poți urmări creatori de pe alte platforme. Elementele sale se deschid cu yt-dlp.
@@ -2512,10 +2532,12 @@ Tooltips:
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
     RSS Feeds Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat fluxurile RSS cât timp aplicația este deschisă.
     Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
-    Show Collaborations From Other Channels: "Afișează și videoclipurile pe care canalele la care ești abonat le-au făcut împreună cu un alt canal care le-a încărcat. YouTube le afișează doar în fila Pagina principală a unui canal, așa că fiecare reîmprospătare a videoclipurilor încarcă încă o pagină pentru fiecare canal. Sunt găsite doar cele mai noi colaborări afișate acolo, unele canale nu afișează niciuna, iar datele lor de publicare sunt aproximative. Indisponibil cu API-ul Invidious."
+    Show Collaborations From Other Channels: "Afișează și videoclipurile pe care canalele la care ești abonat le-au făcut împreună cu un alt canal care le-a încărcat. YouTube le afișează doar în fila Pagina principală a unui canal, așa că o reîmprospătare a videoclipurilor verifică cel mult câteva canale, iar cele noi pot apărea abia după o zi sau mai mult. Sunt găsite doar cele mai noi colaborări afișate acolo, unele canale nu afișează niciuna, iar datele lor de publicare sunt aproximative. Indisponibil cu API-ul Invidious."
     Platforms Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat canalele pe care le urmărești pe alte platforme cât timp aplicația este deschisă.
+    Enable Twitch Page: Îți permite să deschizi pagina Twitch din navigare și din paleta de comenzi. Acolo poți răsfoi categoriile populare și canalele live și poți căuta pe Twitch.
     Twitch Notify When Live: Te anunță când unul dintre canalele Twitch pe care le urmărești începe o transmisiune. OpenTubeX verifică la fiecare câteva minute cât timp este deschis, și de asemenea cât timp este închis, dacă atunci actualizează abonamentele.
   Theme Settings:
+    Toggle Playback With Tab Icon: Un clic pe pictograma unei file cu un videoclip redat sau pus pe pauză îl pune pe pauză sau îl reia fără a comuta la acea filă.
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare, inclusiv cele care oferă Anulare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care cer o decizie, precum solicitările de actualizare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
@@ -2578,6 +2600,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Anulați ultimul salt
   Redo Seek: Refaceți un salt anulat
   New Incognito Tab: Creează o filă incognito nouă
+  Shortcuts Label: Comenzi rapide
 CommandPalette:
   Title: Paletă de comenzi
   Open: Deschide paleta de comenzi
@@ -2612,6 +2635,8 @@ CommandPalette:
     Download Finished: Această descărcare nu mai rulează
     Video: Deschideți mai întâi un videoclip
 Downloads:
+  Stop Recording: "Oprește înregistrarea"
+  Recording: "Se înregistrează"
   File Name Template Invalid: 'Folosește o cale relativă în dosarul de descărcări, fără "..", "~", "$", "%" sau un prefix precum "thumbnail:".'
   Search Completed: "Caută descărcările finalizate după titlu sau canal"
   Format: "Format"
@@ -2759,6 +2784,22 @@ App Icon:
   Saved Message: "Pictograma a fost salvată. Actualizarea lansatorului poate dura puțin."
   Title: "Pictograma aplicației"
   Error: "Nu s-a putut încărca sau schimba pictograma aplicației"
+
+App Lock:
+  Title: "Blocarea aplicației"
+  Enable: "Cere blocarea ecranului"
+  Enable Tooltip: "Cere amprenta, fața, PIN-ul, modelul sau parola când revii în OpenTubeX. Pe Android 13 și versiunile ulterioare, nici aplicațiile recente nu mai afișează o previzualizare a aplicației."
+  Lock After: "Blochează după"
+  Immediately: "Imediat"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minute"
+  15 Minutes: "15 minute"
+  1 Hour: "1 oră"
+  Unavailable: "Setează o blocare a ecranului în setările Android pentru a folosi blocarea aplicației."
+  Error: "Blocarea aplicației nu a putut fi modificată"
+  Locked: "OpenTubeX este blocat"
+  Unlock: "Deblochează"
+  Prompt Title: "Deblochează OpenTubeX"
 
 Tray:
   Hide All Windows: "Ascunde toate ferestrele"
@@ -2933,6 +2974,33 @@ Platforms:
   Verify: "Verifică"
   Categories: "Categorii"
   Category Not Found: "Această categorie nu a putut fi găsită."
+  Category Tags: "Etichete categorie"
+  Stream Tags: "Etichete stream"
+  Language: "Limbă"
+  All Languages: "Toate limbile"
+  Other Language: "Altele"
+  American Sign Language: "limbajul semnelor american"
+  Search Tags: "Caută etichete"
+  Add Tag: "Adaugă etichetă"
+  Remove Tag: "Elimină {tag}"
+  Sort:
+    Viewers: "Spectatori (de la mulți la puțini)"
+    Viewers Ascending: "Spectatori (de la puțini la mulți)"
+    Started: "Începute recent"
+    Relevance: "Recomandate"
+    Published: "Publicate recent"
+    Views: "Vizionări (de la mulți la puțini)"
+    Top Day: "Top 24 de ore"
+    Top Week: "Top 7 zile"
+    Top Month: "Top 30 de zile"
+    Top All: "Top din toate timpurile"
+  Video Type:
+    Video Type: "Tip de videoclip"
+    All: "Toate videoclipurile"
+    Archive: "Transmisiuni anterioare"
+    Highlight: "Momente importante"
+    Upload: "Încărcări"
+  Anonymous: "Anonim"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} i-a răspuns lui {commentAuthor}"
   Like: "Îmi place"
@@ -2967,5 +3035,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Caută pe Twitch"
+  Search Placeholder: "Categorii și canale"
 New Incognito Tab: Filă incognito nouă
 Incognito Tab: Filă incognito

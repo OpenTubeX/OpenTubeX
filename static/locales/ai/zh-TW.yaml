@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: 最新優先
   Oldest First: 最舊優先
   RSS Feeds:
+    Load More Items: 載入更多項目
     Refreshing: 正在重新整理 RSS 訂閱源
     Tab: RSS
     Followed Feeds: 已追蹤的 RSS 摘要
@@ -497,6 +498,7 @@ Settings:
       Memory: 記憶體
       Network: 網路
       Disk: 磁碟
+    Label: 效能
   General Settings:
     Invidious Instance Username: '執行個體使用者名稱'
     Invidious Instance Password: '執行個體密碼'
@@ -620,6 +622,8 @@ Settings:
       Auto: 自動
     Preferred API Backend:
       Yattee Server: Yattee 伺服器
+      Local API Extension Required: 網頁應用程式必須搭配 OpenTubeX Local API 瀏覽器擴充功能才能使用本機 API。
+      Install Local API Extension: 安裝擴充功能
     Yattee Server:
       Server URL: Yattee 伺服器 URL
       Username: 使用者名稱
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Toggle Playback With Tab Icon: 使用分頁圖示播放與暫停
     Theme and Colors: "主題和顏色"
     Font Size: 字型大小
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: '單聲道音訊'
     Normalize Loudness: '響度正規化'
     Show Mono Audio Toggle: '顯示單聲道音訊開關'
+    Show Mirror Video Toggle: "顯示鏡像影片開關"
     Pause on Stream Recovery: "串流復原時暫停"
     Buffering:
       Buffering: 緩衝
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "啟用 DLNA 投放"
     Skip Unavailable Playlist Videos: "略過播放清單中無法播放的影片"
     Lights Off: 關燈
+    Mirror Video: "鏡像影片"
     Show Lights Off Toggle: 顯示關燈開關
     Show Volume Boost Toggle: "顯示音量增強切換"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: 無法調整播放控制項。
     yt-dlp Streaming: "yt-dlp 串流"
     Continue Playback When Screen Is Locked: '螢幕鎖定時繼續播放'
+    Switch to Audio in Background: '在背景時切換為音訊格式'
     Ignore Headphone Controls: '忽略耳機控制'
     Music Visualizer: 音樂視覺化工具
     Automatically Open Chapters: 自動開啟章節
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "啟用時間戳記筆記"
       Obsidian Vault: Obsidian 儲存庫
+    Double-Tap With Two Fingers to Skip Chapters: "雙指輕觸兩下以跳轉章節"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: 儲存空間清理完成
     Cleanup Failed: 儲存空間清理失敗
   Subscription Settings:
+    Refresh These Feeds Together: "同時重新整理這些動態消息"
     Fetch Feed on Startup: 啟動時擷取動態
     Show New Content Feed: 顯示新內容動態
     RSS Feeds: RSS 摘要
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: 其他平台
       Manage Channels: 管理追隨的頻道
+      Enable Twitch Page: 啟用 Twitch 頁面
       Notify When Live: 追隨的 Twitch 頻道開始直播時通知
       Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: 隱藏應用程式標題列中的同步指示器
     Hide Repeat Stats: 隱藏循環統計
     Hide Playlist Stats: 隱藏播放清單統計資料
+    Hide Recommendation Details: 隱藏推薦原因與意見回饋
     Sections:
       Digital Wellbeing: "數位健康"
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: 正在下載清單…
     Failed to Download: 無法下載清單
     Loaded Status: 已封鎖頻道：{blocked} · 已標記頻道：{warned} · 更新時間：{date}
+  Highlight Changed Settings Label: 已變更
 Tutorial:
   Skip: 略過
   Next: 下一步
@@ -1925,6 +1938,9 @@ Video:
     Zoom:
       Zoom: 縮放
       'Off': '關閉'
+    Lock Controls:
+      Lock Controls: "鎖定控制項"
+      Hold to Unlock: "長按以解除鎖定"
     Volume Boost:
       Volume Boost: "音量增強"
       'Off': "關閉"
@@ -2391,6 +2407,7 @@ Tooltips:
     Normalize Loudness: '降低比多數影片更大聲的影片音量，避免切換影片時音量忽大忽小。較安靜的影片會維持原本的音量。僅適用於透過本機 API 載入的影片。'
     Pause on Stream Recovery: "當影片串流失敗且播放器重新載入或切換至其他格式或引擎時，暫停播放，並在播放器頂端保留錯誤訊息，直到你將其關閉。停用後，播放會繼續，錯誤會以通知短暫顯示。"
     Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
+    Switch to Audio in Background: '在應用程式於背景執行或螢幕關閉時播放音訊格式，以節省數據用量與電量。子母畫面會保留影片。重新開啟應用程式後會恢復影片。需要開啟「螢幕鎖定時繼續播放」。'
     Ignore Headphone Controls: '忽略來自藍牙裝置、有線耳機和鍵盤媒體鍵的播放、暫停和跳過指令，避免誤觸耳機中斷播放。應用程式內和媒體通知中的控制項仍可正常使用。'
     Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
     Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。
@@ -2399,6 +2416,7 @@ Tooltips:
     Use YouTube-style Shorts: 在訂閱與頻道頁面上以直向格狀排列顯示 Shorts，並使用 YouTube 風格的 Shorts 播放器。
     Loop Shorts: 啟用後，Shorts 會自動重新播放。停用後，Shorts 會在結束時停止並顯示重播按鈕。
     Show Skip Silence Toggle: 在播放器的設定選單中顯示略過靜音的開關。
+    Show Mirror Video Toggle: "在播放器的設定選單中顯示一個開關，可將影片水平翻轉，方便跟著舞蹈、健身和樂器教學練習。"
     Enable Skip Silence by Default: 新分頁預設啟用略過靜音。在一個分頁中變更此設定不會影響其他分頁。
     Enable Video Zoom: 在播放器的設定選單中顯示縮放控制項，並啟用其鍵盤快捷鍵與平移控制項。
     Enable Seek History: 在應用程式關閉前記住你在每部影片中從哪裡跳轉。在播放器設定選單中顯示跳轉紀錄清單，並啟用其鍵盤快速鍵。
@@ -2420,6 +2438,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "預先載入超過 {count} 部影片的播放清單中的所有影片前要求確認。"
     Enable Timestamp Notes: "新增播放器按鈕與 N 快速鍵，可暫停影片並開啟一則連結至目前時間點的筆記。筆記可複製為 Markdown，或在桌面版中新增至 Obsidian。"
     Obsidian Vault: 用於時間戳記筆記的 Obsidian 儲存庫名稱。設定後即可將筆記新增至 Obsidian。每部影片的筆記會彙整在以該影片命名的筆記中，位於儲存庫的新筆記資料夾內。
+    Double-Tap With Two Fingers to Skip Chapters: "用雙指輕觸影片右側兩下可跳到下一個章節，輕觸左側兩下可回到目前章節的開頭。在章節開始後的3秒內，左側會改為跳到上一個章節，因此重複操作即可逐章倒退。"
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。
@@ -2450,6 +2469,7 @@ Tooltips:
     Bedtime Reminder: "在開始時間與結束時間之間暫停影片，並提醒你停止觀看。"
     Shorten View Counts: 將 YouTube 已四捨五入的觀看次數、留言數與留言按讚數以縮寫顯示，例如以 14K 取代 14,000。精確數字一律完整顯示。
   Subscription Settings:
+    Refresh These Feeds Together: "重新整理任一已勾選的動態消息時，其他已勾選的動態消息會緊接著重新整理。自動重新整理仍依各動態消息自己的間隔進行。"
     Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
     Show New Content Feed: 顯示「新增」分頁，其中包含上次擷取時尚未出現的訂閱動態消息項目。
     Enable RSS Feeds: 在訂閱頁面顯示 RSS 分頁，列出 RSS 或 Atom 摘要中的項目，讓您追蹤其他平台的創作者。其中的項目會使用 yt-dlp 開啟。
@@ -2460,10 +2480,12 @@ Tooltips:
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
-    Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片都會為每個頻道多載入一個頁面。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
+    Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片最多只檢查少數幾個頻道，新的合作影片可能需要一天或更久才會出現。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
     Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
+    Enable Twitch Page: 讓你從導覽和命令選擇區開啟 Twitch 頁面。你可以在該頁面瀏覽熱門分類和直播頻道，並搜尋 Twitch。
     Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
+    Toggle Playback With Tab Icon: 點選正在播放或已暫停影片的分頁圖示，即可暫停或繼續播放，無需切換至該分頁。
     Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知，包括提供復原的通知。錯誤、警告、你設定的提醒，以及需要你做出決定的通知（例如更新提示）仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
@@ -2522,6 +2544,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 復原上一次跳轉
   Redo Seek: 重做已復原的跳轉
   New Incognito Tab: 建立新的無痕分頁
+  Shortcuts Label: 快捷鍵
 CommandPalette:
   Title: 命令選擇區
   Open: 開啟命令選擇區
@@ -2556,6 +2579,8 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  Stop Recording: "停止錄製"
+  Recording: "正在錄製"
   File Name Template Invalid: '請使用下載資料夾內的相對路徑，不得包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前綴。'
   Search Completed: "依標題或頻道搜尋已完成的下載"
   Format: "格式"
@@ -2699,6 +2724,22 @@ App Icon:
   Saved Message: "圖示已儲存。啟動器可能需要一點時間更新。"
   Title: "應用程式圖示"
   Error: "無法載入或變更應用程式圖示"
+
+App Lock:
+  Title: "應用程式鎖定"
+  Enable: "要求螢幕鎖定"
+  Enable Tooltip: "返回 OpenTubeX 時，會要求驗證指紋、臉部、PIN 碼、圖案或密碼。在 Android 13 及更新版本中，最近使用的應用程式清單也不再顯示應用程式預覽。"
+  Lock After: "鎖定時間"
+  Immediately: "立即"
+  1 Minute: "1 分鐘"
+  5 Minutes: "5 分鐘"
+  15 Minutes: "15 分鐘"
+  1 Hour: "1 小時"
+  Unavailable: "請在 Android 設定中設定螢幕鎖定，以使用應用程式鎖定。"
+  Error: "無法變更應用程式鎖定"
+  Locked: "OpenTubeX 已鎖定"
+  Unlock: "解鎖"
+  Prompt Title: "解鎖 OpenTubeX"
 
 Tray:
   Hide All Windows: "隱藏所有視窗"
@@ -2878,6 +2919,33 @@ Platforms:
   Verify: "驗證"
   Categories: "分類"
   Category Not Found: "找不到此分類。"
+  Category Tags: "分類標籤"
+  Stream Tags: "直播標籤"
+  Language: "語言"
+  All Languages: "所有語言"
+  Other Language: "其他"
+  American Sign Language: "美國手語"
+  Search Tags: "搜尋標籤"
+  Add Tag: "新增標籤"
+  Remove Tag: "移除 {tag}"
+  Sort:
+    Viewers: "觀眾人數（由高到低）"
+    Viewers Ascending: "觀眾人數（由低到高）"
+    Started: "最近開播"
+    Relevance: "推薦"
+    Published: "最近發布"
+    Views: "觀看次數（由高到低）"
+    Top Day: "24 小時熱門"
+    Top Week: "7 天熱門"
+    Top Month: "30 天熱門"
+    Top All: "歷來熱門"
+  Video Type:
+    Video Type: "影片類型"
+    All: "所有影片"
+    Archive: "過往直播"
+    Highlight: "精彩片段"
+    Upload: "上傳"
+  Anonymous: "匿名"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回覆了 {commentAuthor}"
   Like: "喜歡"
@@ -2912,5 +2980,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜尋 Twitch"
+  Search Placeholder: "分類和頻道"
 New Incognito Tab: 新增無痕分頁
 Incognito Tab: 無痕分頁

@@ -1,5 +1,57 @@
+diff --git a/LANCommander.Interposer/dll/src/config.cpp b/LANCommander.Interposer/dll/src/config.cpp
+index b968cfd..3070514 100644
+--- a/LANCommander.Interposer/dll/src/config.cpp
++++ b/LANCommander.Interposer/dll/src/config.cpp
+@@ -21,7 +21,7 @@ std::wstring g_username;
+ std::wstring g_computername;
+ 
+ bool                      g_fastdlEnabled             = false;
+-bool                      g_logFastDL                 = true;
++bool                      g_logFastDL                 = false;
+ std::wstring              g_fastdlBaseUrl;
+ std::vector<std::wstring> g_fastdlAllowedExtensions;
+ std::vector<FastDLPath>   g_fastdlPaths;
+@@ -37,7 +37,7 @@ std::vector<PortRange>    g_fastdlFilteredPorts       = {{ 23000, 23009 }};
+ bool         g_logPlugins       = false;
+ bool         g_logIdentity     = false;
+ bool         g_logRichPresence  = false;
+-bool         g_logDnsRedirects = true;
++bool         g_logDnsRedirects = false;
+ bool         g_logNetwork      = false;
+ bool         g_logDirectInput  = false;
+ 
+@@ -1022,7 +1022,7 @@ void LoadConfig()
+         if (logging["Registry"])
+             g_logRegistry = logging["Registry"].as<bool>(false);
+         if (logging["Downloads"])
+-            g_logFastDL = logging["Downloads"].as<bool>(true);
++            g_logFastDL = logging["Downloads"].as<bool>(false);
+         if (logging["Plugins"])
+             g_logPlugins = logging["Plugins"].as<bool>(false);
+         if (logging["Identity"])
+@@ -1030,7 +1030,7 @@ void LoadConfig()
+         if (logging["RichPresence"])
+             g_logRichPresence = logging["RichPresence"].as<bool>(false);
+         if (logging["DnsRedirects"])
+-            g_logDnsRedirects = logging["DnsRedirects"].as<bool>(true);
++            g_logDnsRedirects = logging["DnsRedirects"].as<bool>(false);
+         if (logging["Network"])
+             g_logNetwork = logging["Network"].as<bool>(false);
+         if (logging["DirectInput"])
+@@ -1365,6 +1365,11 @@ void LoadConfig()
+     }
+ 
+     // ── Open log at .interposer\Logs\<timestamp>.log ──────────────────────────
++    if (!g_logFiles && !g_logRegistry && !g_logFastDL && !g_logPlugins &&
++        !g_logIdentity && !g_logRichPresence && !g_logDnsRedirects &&
++        !g_logNetwork && !g_logDirectInput)
++        return;
++
+     CreateDirectoryW(interposerDir.c_str(), nullptr);
+ 
+     std::wstring logsDir = interposerDir + L"Logs\\";
 diff --git a/LANCommander.Interposer/dll/src/dllmain.cpp b/LANCommander.Interposer/dll/src/dllmain.cpp
-index 7989945..9f33edb 100644
+index 7989945..b05107e 100644
 --- a/LANCommander.Interposer/dll/src/dllmain.cpp
 +++ b/LANCommander.Interposer/dll/src/dllmain.cpp
 @@ -1,55 +1,23 @@

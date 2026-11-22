@@ -73,6 +73,58 @@ test('shares one yt-dlp version probe across concurrent downloads and keeps cust
   }).toEqual([true, true, true])
 })
 
+test('downloads a playlist in parallel processes that share the queue limit', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'parallel-yt-dlp.sh')
+  const startsFile = path.join(app.userDataDir, 'parallel-starts.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
+    'part=single',
+    'previous=',
+    'for argument do [ "$previous" = --playlist-items ] && part="$argument"; previous="$argument"; done',
+    `printf '%s\\n' "$part" >> '${startsFile}'`,
+    'index="$' + '{part%%::*}"',
+    'printf \'__OPENTUBEX_PREPARING__:vvvvvvvvvv%s\\t%s\\t2\\t"Video %s"\\n\' "$index" "$index" "$index"',
+    'printf \'__OPENTUBEX_DOWNLOAD__:downloading\\t10.0%%\\t1.00MiB/s\\t00:10\\n\'',
+    `while [ ! -f "${app.userDataDir}/release-$index" ]; do sleep 0.05; done`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(app, page, {
+    ytDlpPath: executable,
+    ytDlpDownloadFolderPath: app.userDataDir,
+    ytDlpMaxConcurrentDownloads: 3,
+  })
+
+  const [playlist] = await submitDownloads(page, [
+    { playlistId: 'PL1234567890', isPlaylist: true, videoCount: 2, title: 'Parallel playlist', mode: 'video' },
+    { videoId: 'aaaaaaaaaaa', title: 'Download beside the playlist', mode: 'video' },
+    { videoId: 'bbbbbbbbbbb', title: 'Download after the playlist', mode: 'video' },
+  ])
+  // The playlist takes only the slots its two videos can use, which leaves one for the next download.
+  await expect.poll(async () => (await readFile(startsFile, 'utf8').catch(() => '')).split('\n').sort())
+    .toEqual(['', '1::2', '2::2', 'single'])
+
+  await goTo(page, 'downloads')
+  const row = page.locator('.downloadRow').filter({ hasText: 'Parallel playlist' })
+  await expect(row).toContainText('Video 1 of 2')
+  await expect(row).toContainText('2.00MiB/s')
+
+  await writeFile(path.join(app.userDataDir, 'release-1'), '')
+  await expect(row).toContainText('Video 2 of 2')
+  await expect(row).toContainText('1.00MiB/s')
+  // The finished part frees its slot for the next queued download.
+  await expect.poll(async () => (await readFile(startsFile, 'utf8')).split('\n').filter(part => part === 'single').length).toBe(2)
+  expect(await page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), playlist.id)).toBe('downloading')
+
+  await writeFile(path.join(app.userDataDir, 'release-2'), '')
+  await expect.poll(() => page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), playlist.id)).toBe('completed')
+  await writeFile(path.join(app.userDataDir, 'release-single'), '')
+})
+
 test('controls queue order, running jobs, bandwidth, and retry-all', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'queued-yt-dlp.sh')
   const startsFile = path.join(app.userDataDir, 'queue-starts.txt')
@@ -428,8 +480,16 @@ test('honors the download cookie preference and Always override', async ({ app, 
   const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
   const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
   const cookies = path.join(app.userDataDir, 'session.txt')
-  await writeFile(cookies, '# Netscape HTTP Cookie File\n')
-  await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > '${argumentsFile}'\n`)
+  const passedCookies = path.join(app.userDataDir, 'passed-cookies.txt')
+  const session = '# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t4102444800\tSID\tsession\n'
+  await writeFile(cookies, session)
+  // The cookie file is a copy that is removed after yt-dlp exits.
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'previous=',
+    `for argument do [ "$previous" = --cookies ] && cp "$argument" '${passedCookies}'; previous="$argument"; done`,
+    `printf '%s\\n' "$@" > '${argumentsFile}'`
+  ].join('\n'))
   await chmod(executable, 0o755)
   await configureQueue(app, page, {
     enableDownloads: true,
@@ -446,7 +506,10 @@ test('honors the download cookie preference and Always override', async ({ app, 
     await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
     expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
-    if ((enabled || always) && mode === 'file') expect(args[args.indexOf('--cookies') + 1]).toBe(cookies)
+    if ((enabled || always) && mode === 'file') {
+      expect(args[args.indexOf('--cookies') + 1]).not.toBe(cookies)
+      expect(await readFile(passedCookies, 'utf8')).toBe(session)
+    }
   }
   await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: true })
   await writeFile(argumentsFile, '')

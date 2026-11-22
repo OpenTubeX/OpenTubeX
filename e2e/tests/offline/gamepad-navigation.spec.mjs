@@ -63,13 +63,20 @@ async function connectMockGamepad(page) {
     Object.defineProperty(navigator, 'getGamepads', {
       configurable: true,
       value: () => {
+        const snapshot = structuredClone(gamepad)
         // The app ignores gamepads while the window lacks focus
-        if (document.hasFocus()) window.__e2eGamepadPolls++
-        return [null, gamepad]
+        if (document.hasFocus()) {
+          window.__e2eGamepadPolls++
+          const releaseInput = window.__e2eReleaseGamepadInput
+          window.__e2eReleaseGamepadInput = null
+          releaseInput?.()
+        }
+        return [null, snapshot]
       }
     })
     window.__e2eGamepad = gamepad
     window.__e2eGamepadPolls = 0
+    window.__e2eReleaseGamepadInput = null
     const event = new Event('gamepadconnected')
     Object.defineProperty(event, 'gamepad', { value: gamepad })
     window.dispatchEvent(event)
@@ -86,33 +93,45 @@ async function waitForGamepadPoll(page, polls) {
   await page.waitForFunction(previous => window.__e2eGamepadPolls > previous, polls)
 }
 
+/**
+ * Reports a button press or stick movement for exactly one focused poll and
+ * releases it in the next. Releasing it from the test instead can take longer
+ * than the app's repeat delay on a busy runner, so the app would repeat it.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ kind: 'button' | 'axis', index: number, value: number }} input
+ */
+async function pulseGamepadInput(page, input) {
+  const polls = await page.evaluate(({ kind, index, value }) => {
+    const gamepad = window.__e2eGamepad
+    const setInput = (inputValue) => {
+      if (kind === 'button') {
+        gamepad.buttons[index].pressed = inputValue !== 0
+        gamepad.buttons[index].value = inputValue
+      } else {
+        gamepad.axes[index] = inputValue
+      }
+      gamepad.timestamp++
+    }
+    setInput(value)
+    window.__e2eReleaseGamepadInput = () => setInput(0)
+    return window.__e2eGamepadPolls
+  }, input)
+  // One poll reads the input and the next its release, so repeating the same
+  // input counts as a new press.
+  await waitForGamepadPoll(page, polls + 1)
+}
+
 async function pressGamepadButton(page, action) {
   const buttonIndex = GAMEPAD_BUTTON_INDEX[action]
   if (buttonIndex === undefined) {
     throw new Error(`Unknown gamepad action: ${action}`)
   }
 
-  for (const pressed of [true, false]) {
-    const polls = await page.evaluate(({ index, pressed }) => {
-      const button = window.__e2eGamepad.buttons[index]
-      button.pressed = pressed
-      button.value = pressed ? 1 : 0
-      window.__e2eGamepad.timestamp++
-      return window.__e2eGamepadPolls
-    }, { index: buttonIndex, pressed })
-    await waitForGamepadPoll(page, polls)
-  }
+  await pulseGamepadInput(page, { kind: 'button', index: buttonIndex, value: 1 })
 }
 
 async function moveGamepadAxis(page, axisIndex, value) {
-  for (const axisValue of [value, 0]) {
-    const polls = await page.evaluate(({ index, axisValue }) => {
-      window.__e2eGamepad.axes[index] = axisValue
-      window.__e2eGamepad.timestamp++
-      return window.__e2eGamepadPolls
-    }, { index: axisIndex, axisValue })
-    await waitForGamepadPoll(page, polls)
-  }
+  await pulseGamepadInput(page, { kind: 'axis', index: axisIndex, value })
 }
 
 test('navigates and activates the interface with a standard gamepad', async ({ attachScreenshot, page }) => {

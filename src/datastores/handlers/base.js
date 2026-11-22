@@ -11,7 +11,7 @@ import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistory
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
 import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
-import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
+import { isOlderCollaborationCheck, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
 import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats, withProfileSeparation } from '../../renderer/helpers/unifiedBackup'
@@ -1524,8 +1524,9 @@ class SubscriptionCache {
 
   /**
    * Stores fetched feeds for many channels in one SQLite transaction. A feed whose
-   * stored timestamp is newer than the fetched one stays as it is.
-   * @param {{ channelId: string, field: string, entries: object[], timestamp: Date | string }[]} updates
+   * stored timestamp is newer than the fetched one stays as it is. Video feeds
+   * can also store when their collaborations were last checked.
+   * @param {{ channelId: string, field: string, entries: object[], timestamp: Date | string, collaborationsCheckedAt?: number | null }[]} updates
    * @returns {Promise<boolean[]>} whether each update was applied
    */
   static updateFeeds(updates) {
@@ -1537,18 +1538,26 @@ class SubscriptionCache {
       const documents = await this._loadDocuments(channelIds)
       const changed = new Set()
       const applied = []
-      for (const { channelId, field, entries, timestamp } of updates) {
+      for (const update of updates) {
+        const { channelId, field, timestamp, collaborationsCheckedAt } = update
         const current = documents.get(channelId)
         const timestampField = `${field}Timestamp`
-        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) {
+        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime() ||
+          isOlderCollaborationCheck(collaborationsCheckedAt, current?.collaborationsCheckedAt)) {
           applied.push(false)
           continue
+        }
+        // Without a check time, the write keeps the stored collaborations.
+        // The update is changed too, so other windows receive them.
+        if (field === 'videos' && collaborationsCheckedAt === undefined) {
+          update.entries = keepStoredSubscriptionCollaborations(update.entries, current?.videos)
         }
         documents.set(channelId, {
           ...current,
           _id: channelId,
-          [field]: preserveSubscriptionSeenEntries(entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
+          [field]: preserveSubscriptionSeenEntries(update.entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
           [timestampField]: timestamp,
+          ...(collaborationsCheckedAt !== undefined ? { collaborationsCheckedAt } : {}),
         })
         changed.add(channelId)
         applied.push(true)
@@ -1622,8 +1631,8 @@ class SubscriptionCache {
     return this.markEntriesAsSeenMany([{ channelId, tab, entries }])
   }
 
-  static updateVideosByChannelId(channelId, entries, timestamp) {
-    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'videos')
+  static async updateVideosByChannelId(channelId, entries, timestamp, collaborationsCheckedAt) {
+    return (await SubscriptionCache.updateFeeds([{ channelId, field: 'videos', entries, timestamp, collaborationsCheckedAt }]))[0]
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
@@ -1686,6 +1695,42 @@ class SubscriptionCache {
     this.clearing = Promise.allSettled([this.clearing, ...this.pendingUpdates.values()])
       .then(() => db.subscriptionCache.removeAsync({}, { multi: true }))
     return this.clearing
+  }
+}
+
+/**
+ * The items of the followed RSS feeds and channels on other platforms, one
+ * document per feed or channel, with the IDs that tell which items are new.
+ * Windows keep them in memory and write the documents that changed.
+ */
+class FeedCache {
+  static find() {
+    return db.feedCache.findAsync({})
+  }
+
+  // ******************** //
+  // Unique Electron main process handlers
+  /** Every document as its stored JSON text, see `SubscriptionCache._findSerialized` */
+  static _findSerialized() {
+    return db.feedCache.findSerializedAsync()
+  }
+  // ******************** //
+
+  /**
+   * @param {{ docs: object[], removed: string[] }} change documents to replace
+   * or insert, and the IDs of documents to remove
+   */
+  static async write({ docs, removed }) {
+    if (docs.length > 0) {
+      // NeDB, used by unit tests, has no bulk replace
+      if (typeof db.feedCache.replaceManyAsync === 'function') await db.feedCache.replaceManyAsync(docs)
+      else await Promise.all(docs.map(doc => db.feedCache.updateAsync({ _id: doc._id }, doc, { upsert: true })))
+    }
+    if (removed.length > 0) await db.feedCache.removeAsync({ _id: { $in: removed } }, { multi: true })
+  }
+
+  static deleteAll() {
+    return db.feedCache.removeAsync({}, { multi: true })
   }
 }
 
@@ -1839,6 +1884,7 @@ function loadDeferredDatastores() {
     db.subscriptionCache.loadDatabaseAsync(),
     db.liveReminders.loadDatabaseAsync(),
     db.videoMetadataCache.loadDatabaseAsync(),
+    db.feedCache.loadDatabaseAsync(),
   ])
 }
 
@@ -1856,6 +1902,7 @@ function compactAllDatastores() {
     db.tabSession.compactDatafileAsync(),
     db.liveReminders.compactDatafileAsync(),
     db.videoMetadataCache.compactDatafileAsync(),
+    db.feedCache.compactDatafileAsync(),
   ])
 }
 
@@ -1868,6 +1915,7 @@ export {
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  FeedCache as feedCache,
   TabSession as tabSession,
 
   scopedHandlers,

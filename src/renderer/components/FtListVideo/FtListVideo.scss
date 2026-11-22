@@ -120,7 +120,7 @@
 // Give the thumbnail actions their own column, so a long label truncates beside
 // them instead of covering them on small thumbnails. `:where()` keeps these
 // below the Playlist page's own thumbnail columns.
-.ft-list-item .videoThumbnail:has(> .sponsorBlockVideoLabel) {
+.ft-list-item .videoThumbnail.hasSponsorBlockLabel {
   grid-template-columns: minmax(0, 1fr) auto;
 
   > * {

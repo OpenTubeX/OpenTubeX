@@ -2,6 +2,7 @@ import {
   ANDROID_MEDIA_SESSION_ACTIONS,
   updateAndroidMediaSession,
 } from '../helpers/androidMediaSession.js'
+import { shallowReactive } from 'vue'
 import { keepTabLoaded } from './TabResidency.js'
 
 const MEDIA_SESSION_ACTIONS = [
@@ -10,6 +11,9 @@ const MEDIA_SESSION_ACTIONS = [
 ]
 
 const mediaByTabId = new Map()
+// A reactive copy of each tab's playback state lets tab strips show it.
+/** @type {Map<string, string>} */
+const playbackStateByTabId = shallowReactive(new Map())
 let presentedTabId = null
 let ownerTabId = null
 let pictureInPictureTabId = null
@@ -98,6 +102,11 @@ function chooseOwner() {
   }
 
   return ownerTabId && mediaByTabId.has(ownerTabId) ? ownerTabId : null
+}
+
+function updatePlaybackState(tabId, entry, playbackState) {
+  entry.playbackState = playbackState
+  if (playbackStateByTabId.get(tabId) !== playbackState) playbackStateByTabId.set(tabId, playbackState)
 }
 
 function getActionHandlers(entry) {
@@ -287,7 +296,7 @@ export const tabMediaCoordinator = {
     if (playbackState === 'playing' && entry.playbackState !== 'playing') pauseOtherAndroidTabs(tabId)
     if (playbackState === 'playing') releaseEndedHandoff()
 
-    entry.playbackState = playbackState
+    updatePlaybackState(tabId, entry, playbackState)
     if (playbackState === 'playing') {
       entry.lastPlayedAt = ++playSequence
     }
@@ -326,7 +335,7 @@ export const tabMediaCoordinator = {
     if (playbackState !== null) {
       if (playbackStarted) pauseOtherAndroidTabs(tabId)
       if (playbackState === 'playing') releaseEndedHandoff()
-      entry.playbackState = playbackState
+      updatePlaybackState(tabId, entry, playbackState)
       if (playbackStarted) entry.lastPlayedAt = ++playSequence
     }
     entry.positionState = positionState
@@ -371,8 +380,32 @@ export const tabMediaCoordinator = {
     return mediaByTabId.get(tabId)?.playbackState === 'playing'
   },
 
+  /**
+   * Reactive playback state of a tab's media.
+   * @param {string} tabId
+   * @returns {string}
+   */
+  getPlaybackState(tabId) {
+    return playbackStateByTabId.get(tabId) ?? 'none'
+  },
+
+  /**
+   * Pauses a tab's playing media, or resumes its paused media.
+   * @param {string} tabId
+   */
+  togglePlayback(tabId) {
+    const playbackState = mediaByTabId.get(tabId)?.playbackState
+    if (playbackState === 'playing') {
+      this.dispatchAction('pause', {}, tabId)
+    } else if (playbackState === 'paused') {
+      // The viewer asked for this tab to play, even though it is hidden.
+      this.dispatchAction('play', { allowBackground: true }, tabId)
+    }
+  },
+
   unregister(tabId) {
     mediaByTabId.delete(tabId)
+    playbackStateByTabId.delete(tabId)
     if (endedHandoff?.tabId === tabId) releaseEndedHandoff()
     if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
@@ -393,8 +426,8 @@ export const tabMediaCoordinator = {
   }
 }
 
-globalThis.window?.ftElectron?.tabs?.onMediaSessionAction?.((action) => {
-  tabMediaCoordinator.dispatchAction(action)
+globalThis.window?.ftElectron?.tabs?.onMediaSessionAction?.((action, details) => {
+  tabMediaCoordinator.dispatchAction(action, details)
 })
 
 export default tabMediaCoordinator

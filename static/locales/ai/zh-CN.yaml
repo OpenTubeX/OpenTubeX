@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: 最新优先
   Oldest First: 最早优先
   RSS Feeds:
+    Load More Items: 加载更多条目
     Refreshing: 正在刷新 RSS 订阅源
     Tab: RSS
     Followed Feeds: 已关注的 RSS 订阅源
@@ -497,6 +498,7 @@ Settings:
       Memory: 内存
       Network: 网络
       Disk: 磁盘
+    Label: 性能
   General Settings:
     Invidious Instance Username: '实例用户名'
     Invidious Instance Password: '实例密码'
@@ -620,6 +622,8 @@ Settings:
       Auto: 自动
     Preferred API Backend:
       Yattee Server: Yattee 服务器
+      Local API Extension Required: 网页应用只有安装 OpenTubeX Local API 浏览器扩展后才能使用本地 API。
+      Install Local API Extension: 安装扩展
     Yattee Server:
       Server URL: Yattee 服务器 URL
       Username: 用户名
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Toggle Playback With Tab Icon: 使用标签页图标播放和暂停
     Theme and Colors: "主题和颜色"
     Font Size: 字体大小
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: '单声道音频'
     Normalize Loudness: '响度标准化'
     Show Mono Audio Toggle: '显示单声道音频开关'
+    Show Mirror Video Toggle: "显示镜像视频开关"
     Pause on Stream Recovery: "流恢复时暂停"
     Buffering:
       Buffering: 缓冲
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "启用 DLNA 投屏"
     Skip Unavailable Playlist Videos: "跳过播放列表中无法播放的视频"
     Lights Off: 关灯
+    Mirror Video: "镜像视频"
     Show Lights Off Toggle: 显示关灯开关
     Show Volume Boost Toggle: "显示音量增强开关"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: 无法调整播放控件。
     yt-dlp Streaming: "yt-dlp 流媒体"
     Continue Playback When Screen Is Locked: '屏幕锁定时继续播放'
+    Switch to Audio in Background: '在后台时切换到音频格式'
     Ignore Headphone Controls: '忽略耳机控制'
     Music Visualizer: 音乐可视化
     Automatically Open Chapters: 自动展开章节
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "启用时间戳笔记"
       Obsidian Vault: Obsidian 仓库
+    Double-Tap With Two Fingers to Skip Chapters: "双指双击以跳转章节"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: 存储空间清理完成
     Cleanup Failed: 存储空间清理失败
   Subscription Settings:
+    Refresh These Feeds Together: "同时刷新这些订阅源"
     Fetch Feed on Startup: 启动时获取动态
     Show New Content Feed: 显示新内容动态
     RSS Feeds: RSS 订阅源
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: 其他平台
       Manage Channels: 管理已关注的频道
+      Enable Twitch Page: 启用 Twitch 页面
       Notify When Live: 关注的 Twitch 频道开播时通知
       Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: 隐藏应用标题栏中的同步指示器
     Hide Repeat Stats: 隐藏循环统计
     Hide Playlist Stats: 隐藏播放列表统计信息
+    Hide Recommendation Details: 隐藏推荐原因和反馈
     Sections:
       Digital Wellbeing: "数字健康"
       Visible While Paused: 全窗口或全屏暂停时显示
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: 正在下载列表…
     Failed to Download: 无法下载列表
     Loaded Status: 已屏蔽频道：{blocked} · 已标记频道：{warned} · 更新时间：{date}
+  Highlight Changed Settings Label: 已更改
 Tutorial:
   Skip: 跳过
   Next: 下一步
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: 缩放
       'Off': '关闭'
+    Lock Controls:
+      Lock Controls: "锁定控件"
+      Hold to Unlock: "长按解锁"
     Volume Boost:
       Volume Boost: "音量增强"
       'Off': "关闭"
@@ -2388,6 +2404,7 @@ Tooltips:
     Normalize Loudness: '降低比大多数视频更响的视频的音量，避免切换视频时音量忽高忽低。较安静的视频保持原有音量。仅适用于通过本地API加载的视频。'
     Pause on Stream Recovery: "当视频流失败且播放器重新加载它或切换到其他格式或引擎时，暂停播放，并在播放器顶部保留错误信息，直到你将其关闭。关闭此选项后，播放会继续，错误会以通知形式短暂显示。"
     Continue Playback When Screen Is Locked: '在后台继续播放音频并提供 Android 媒体控件。关闭此选项后，应用不再可见时将暂停播放。'
+    Switch to Audio in Background: '在应用于后台运行或屏幕关闭时播放音频格式，以节省流量和电量。画中画会保留视频。重新打开应用后会恢复视频。需要开启“屏幕锁定时继续播放”。'
     Ignore Headphone Controls: '忽略来自蓝牙设备、有线耳机和键盘媒体键的播放、暂停和跳过命令，避免误触耳机打断播放。应用内和媒体通知中的控件仍可正常使用。'
     Enable Caption Translations: 启用后，如果视频没有与首选字幕语言匹配的原始字幕轨道，字幕按钮和 C 快捷键将优先使用自动翻译的字幕轨道。
     Use Quick Playback Speed Bar: 在播放器控件右侧显示快速播放速度栏。如果启用了手动保存每个频道的播放速度，该栏还会显示用于保存当前频道播放速度的按钮。
@@ -2396,6 +2413,7 @@ Tooltips:
     Use YouTube-style Shorts: 在订阅和频道页面上以纵向网格显示 Shorts，并使用 YouTube 风格的 Shorts 播放器。
     Loop Shorts: 启用后，Shorts 会自动重新播放。禁用后，Shorts 会在播放结束时停止，并显示重播按钮。
     Show Skip Silence Toggle: 在播放器的设置菜单中显示跳过静音的开关。
+    Show Mirror Video Toggle: "在播放器的设置菜单中显示一个开关，可将视频水平翻转，方便跟着舞蹈、健身和乐器教程练习。"
     Enable Skip Silence by Default: 为新标签页启用跳过静音。在一个标签页中更改此设置不会影响其他标签页。
     Enable Video Zoom: 在播放器的设置菜单中显示缩放控件，并启用其键盘快捷键和平移控件。
     Enable Seek History: 在应用关闭前记住你在每个视频中从哪里跳转。在播放器设置菜单中显示跳转历史列表，并启用其键盘快捷键。
@@ -2417,6 +2435,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
     Enable Timestamp Notes: "添加一个播放器按钮和 N 快捷键，用于暂停视频并打开一条链接到当前时刻的笔记。笔记可以复制为 Markdown，或在桌面版中添加到 Obsidian。"
     Obsidian Vault: 用于时间戳笔记的 Obsidian 仓库名称。设置后，可将笔记添加到 Obsidian。每个视频的笔记会汇总到一篇以该视频命名的笔记中，位于仓库的新笔记文件夹内。
+    Double-Tap With Two Fingers to Skip Chapters: "用双指双击视频右侧可跳到下一章，双击左侧可返回当前章节开头。在章节开始后的3秒内，左侧会改为跳到上一章，因此重复操作即可逐章后退。"
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。
@@ -2447,6 +2466,7 @@ Tooltips:
     Bedtime Reminder: "在开始时间与结束时间之间暂停视频，并提醒你停止观看。"
     Shorten View Counts: 以缩写形式显示 YouTube 已取整的观看次数、评论数和评论点赞数，例如显示 14K 而不是 14,000。精确计数始终完整显示。
   Subscription Settings:
+    Refresh These Feeds Together: "刷新任一已勾选的订阅源时，其他已勾选的订阅源会紧接着刷新。自动刷新仍按各订阅源自己的间隔进行。"
     Fetch Feed on Startup: 启用后，OpenTubeX 会在启动时和打开新窗口时自动获取订阅动态。
     Show New Content Feed: 显示“新内容”标签页，其中包含上次获取时尚未出现的订阅动态项目。
     Enable RSS Feeds: 在订阅页面显示一个包含 RSS 或 Atom 订阅源项目的 RSS 标签页，方便你关注其他平台的创作者。这些项目使用 yt-dlp 打开。
@@ -2457,10 +2477,12 @@ Tooltips:
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
     RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
-    Show Collaborations From Other Channels: "同时显示你订阅的频道与上传这些视频的其他频道合作制作的视频。YouTube 只在频道的首页标签中列出这些视频，因此每次刷新视频都会为每个频道多加载一个页面。只能找到那里显示的最新合作视频，有些频道不显示任何合作视频，且其发布日期为大致时间。使用 Invidious API 时不可用。"
+    Show Collaborations From Other Channels: "同时显示你订阅的频道与上传这些视频的其他频道合作制作的视频。YouTube 只在频道的首页标签中列出这些视频，因此每次刷新视频最多只检查少数几个频道，新的合作视频可能需要一天或更久才会出现。只能找到那里显示的最新合作视频，有些频道不显示任何合作视频，且其发布日期为大致时间。使用 Invidious API 时不可用。"
     Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
+    Enable Twitch Page: 允许你从导航和命令面板打开 Twitch 页面。你可以在该页面浏览热门分类和直播频道，并搜索 Twitch。
     Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:
+    Toggle Playback With Tab Icon: 点击正在播放或已暂停视频的标签页图标，即可暂停或继续播放，而无需切换到该标签页。
     Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知，包括提供撤销的通知。错误、警告、你设置的提醒以及需要你做出决定的通知（如更新提示）仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
@@ -2519,6 +2541,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 撤销上一次跳转
   Redo Seek: 重做已撤销的跳转
   New Incognito Tab: 新建无痕标签页
+  Shortcuts Label: 快捷键
 CommandPalette:
   Title: 命令面板
   Open: 打开命令面板
@@ -2553,6 +2576,8 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Stop Recording: "停止录制"
+  Recording: "正在录制"
   File Name Template Invalid: '请使用下载文件夹内的相对路径，不能包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前缀。'
   Search Completed: "按标题或频道搜索已完成的下载"
   Format: "格式"
@@ -2696,6 +2721,22 @@ App Icon:
   Saved Message: "图标已保存。启动器可能需要一些时间来更新。"
   Title: "应用图标"
   Error: "无法加载或更改应用图标"
+
+App Lock:
+  Title: "应用锁"
+  Enable: "要求屏幕锁定"
+  Enable Tooltip: "返回 OpenTubeX 时，要求验证指纹、面孔、PIN 码、图案或密码。在 Android 13 及更高版本中，最近使用的应用列表也不再显示应用预览。"
+  Lock After: "锁定时间"
+  Immediately: "立即"
+  1 Minute: "1 分钟"
+  5 Minutes: "5 分钟"
+  15 Minutes: "15 分钟"
+  1 Hour: "1 小时"
+  Unavailable: "请在 Android 设置中设置屏幕锁定，以使用应用锁。"
+  Error: "无法更改应用锁"
+  Locked: "OpenTubeX 已锁定"
+  Unlock: "解锁"
+  Prompt Title: "解锁 OpenTubeX"
 
 Tray:
   Hide All Windows: "隐藏所有窗口"
@@ -2875,6 +2916,33 @@ Platforms:
   Verify: "验证"
   Categories: "分类"
   Category Not Found: "找不到此分类。"
+  Category Tags: "分类标签"
+  Stream Tags: "直播标签"
+  Language: "语言"
+  All Languages: "所有语言"
+  Other Language: "其他"
+  American Sign Language: "美国手语"
+  Search Tags: "搜索标签"
+  Add Tag: "添加标签"
+  Remove Tag: "移除 {tag}"
+  Sort:
+    Viewers: "观众数（从高到低）"
+    Viewers Ascending: "观众数（从低到高）"
+    Started: "最近开播"
+    Relevance: "推荐"
+    Published: "最近发布"
+    Views: "观看次数（从高到低）"
+    Top Day: "24 小时热门"
+    Top Week: "7 天热门"
+    Top Month: "30 天热门"
+    Top All: "历史热门"
+  Video Type:
+    Video Type: "视频类型"
+    All: "所有视频"
+    Archive: "往期直播"
+    Highlight: "精彩片段"
+    Upload: "上传"
+  Anonymous: "匿名"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回复了 {commentAuthor}"
   Like: "喜欢"
@@ -2909,5 +2977,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜索 Twitch"
+  Search Placeholder: "分类和频道"
 New Incognito Tab: 新建无痕标签页
 Incognito Tab: 无痕标签页

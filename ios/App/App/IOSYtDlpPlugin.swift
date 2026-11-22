@@ -239,6 +239,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     private var records: [Int: [String: Any]] = [:]
     private var nextId = 0
     private var running: Set<Int> = []
+    // A playlist takes several slots for parallel parts and frees them as its parts finish.
+    private var slots: [Int: Int] = [:]
     private var configuration: [String: Any] = [:]
     private var timer: Timer?
     private let storageKey = "iosYtDlpDownloads"
@@ -433,7 +435,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             "thumbnail": payload["thumbnail"] ?? "", "videoId": payload["videoId"] ?? "",
             "playlistId": payload["playlistId"] ?? "", "playlistKey": payload["playlistKey"] ?? "",
             "template": payload["template"] ?? "", "folder": reference,
-            "destinations": [], "files": [], "queuePosition": id
+            "destinations": [], "files": [], "queuePosition": id,
+            // how many parts of a playlist can download at the same time
+            "partLimit": min(10, max(1, call.getInt("partLimit") ?? 1))
         ]
         record["errorMessage"] = NSNull()
         records[id] = record
@@ -444,11 +448,14 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func startNext() {
         let limit = min(10, max(1, configuration["concurrency"] as? Int ?? 1))
-        guard running.count < limit,
+        let usedSlots = slots.values.reduce(0, +)
+        guard usedSlots < limit,
               let id = queueIDs(with: ["queued"]).first(where: { !running.contains($0) && records[$0]?["args"] != nil }),
               let payload = records[id]?["retryPayload"] as? [String: Any],
               let args = records[id]?["args"] as? [String] else { return }
+        let parts = min(max(1, records[id]?["partLimit"] as? Int ?? 1), limit - usedSlots)
         running.insert(id)
+        slots[id] = parts
         let staging = folder(for: id)
         try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
         try? FileManager.default.removeItem(at: controlFile(for: id))
@@ -462,7 +469,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         IOSYtDlpRuntime.run(["operation": "download", "payload": payload, "args": args,
                              "cookies": configuration["useCookies"] as? Bool == true ? configuration["cookies"] ?? "" : "",
                              "bandwidth": configuration["bandwidth"] ?? "",
-                             "concurrency": limit,
+                             "concurrency": limit, "parts": parts,
                              "staging": staging.path, "progressFile": progressFile(for: id).path,
                              "controlFile": controlFile(for: id).path]) { [weak self] result in
             switch result {
@@ -511,7 +518,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             if abs(percent - previous) < 0.1 && records[id]?["status"] as? String == "downloading"
                 && progress["status"] as? String == "downloading"
                 && records[id]?["currentVideoId"] as? String == progress["currentVideoId"] as? String
-                && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int { continue }
+                && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int
+                // A finished part lowers the combined speed of a split playlist.
+                && max(1, progress["activeParts"] as? Int ?? 1) >= (slots[id] ?? 1) { continue }
             records[id]?["status"] = progress["status"] ?? "downloading"
             records[id]?["percent"] = percent
             records[id]?["speed"] = progress["speed"] ?? NSNull()
@@ -519,9 +528,27 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             for key in Self.currentVideoKeys { records[id]?[key] = progress[key] }
             publish(id)
         }
+        // Finished parts free their slots for other downloads. The last one stays
+        // claimed until the export finishes.
+        var released = false
+        for id in running {
+            guard let held = slots[id], held > 1,
+                  let data = try? Data(contentsOf: progressFile(for: id)),
+                  let progress = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let active = progress["activeParts"] as? Int, max(1, active) < held else { continue }
+            slots[id] = max(1, active)
+            released = true
+        }
+        if released { startNext() }
     }
 
     private func finish(_ id: Int, result: Result<[String: Any], Error>) {
+        // Every part has finished, but progress can miss that when they finish between
+        // two refreshes. Keep one slot until the export finishes.
+        if (slots[id] ?? 0) > 1 {
+            slots[id] = 1
+            startNext()
+        }
         let staging = folder(for: id)
         let reference = records[id]?["folder"] as? String ?? ""
         let videoId = records[id]?["videoId"] as? String ?? ""
@@ -537,10 +564,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                     let names = value["files"] as? [String] ?? []
                     if names.isEmpty { throw NSError(domain: "IOSYtDlp", code: 6, userInfo: [NSLocalizedDescriptionKey: "No file was downloaded"]) }
                     let target = try self.directory(reference)
-                    guard target.startAccessingSecurityScopedResource() else {
+                    let accessed = target.startAccessingSecurityScopedResource()
+                    defer { if accessed { target.stopAccessingSecurityScopedResource() } }
+                    guard accessed || FileManager.default.isWritableFile(atPath: target.path) else {
                         throw NSError(domain: "IOSYtDlp", code: 7, userInfo: [NSLocalizedDescriptionKey: "The download folder is unavailable"])
                     }
-                    defer { target.stopAccessingSecurityScopedResource() }
                     let exported = try IOSYtDlpExporter.copy(names, from: staging, to: target, videoId: videoId)
                     DispatchQueue.main.sync {
                         guard self.records[id]?["status"] as? String == "processing" else { return }
@@ -581,6 +609,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                     self.records[id]?["status"] = "paused"
                 }
                 self.running.remove(id)
+                self.slots[id] = nil
                 self.publish(id)
                 self.startNext()
             }
@@ -592,8 +621,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         for id in records.keys where records[id]?["status"] as? String == "completed" {
             guard var files = records[id]?["files"] as? [[String: Any]] else { continue }
             let target = try? directory(records[id]?["folder"] as? String ?? "")
-            let accessible = target?.startAccessingSecurityScopedResource() == true
-            defer { if accessible { target?.stopAccessingSecurityScopedResource() } }
+            let accessed = target?.startAccessingSecurityScopedResource() == true
+            defer { if accessed { target?.stopAccessingSecurityScopedResource() } }
+            let accessible = accessed || (target.map { FileManager.default.isReadableFile(atPath: $0.path) } ?? false)
             var available = 0
             for index in files.indices {
                 let path = files[index]["path"] as? String ?? ""
@@ -681,8 +711,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         guard let record = records[id], !running.contains(id) else { call.resolve(["ok": false]); return }
         do {
             let target = try directory(record["folder"] as? String ?? "")
-            guard target.startAccessingSecurityScopedResource() else { throw URLError(.noPermissionsToReadFile) }
-            defer { target.stopAccessingSecurityScopedResource() }
+            let accessed = target.startAccessingSecurityScopedResource()
+            defer { if accessed { target.stopAccessingSecurityScopedResource() } }
+            guard accessed || FileManager.default.isWritableFile(atPath: target.path) else {
+                throw URLError(.noPermissionsToReadFile)
+            }
             for path in record["destinations"] as? [String] ?? [] where FileManager.default.fileExists(atPath: path) {
                 try FileManager.default.removeItem(atPath: path)
             }
@@ -701,16 +734,19 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
               let controller = bridge?.viewController else {
             call.resolve(["ok": false]); return
         }
-        guard let target = try? directory(record["folder"] as? String ?? ""),
-              target.startAccessingSecurityScopedResource() else {
+        guard let target = try? directory(record["folder"] as? String ?? "") else {
+            call.resolve(["ok": false]); return
+        }
+        let accessed = target.startAccessingSecurityScopedResource()
+        guard accessed || FileManager.default.isReadableFile(atPath: target.path) else {
             call.resolve(["ok": false]); return
         }
         guard FileManager.default.fileExists(atPath: path) else {
-            target.stopAccessingSecurityScopedResource()
+            if accessed { target.stopAccessingSecurityScopedResource() }
             call.resolve(["ok": false]); return
         }
         let activity = UIActivityViewController(activityItems: [URL(fileURLWithPath: path)], applicationActivities: nil)
-        activity.completionWithItemsHandler = { _, _, _, _ in target.stopAccessingSecurityScopedResource() }
+        activity.completionWithItemsHandler = { _, _, _, _ in if accessed { target.stopAccessingSecurityScopedResource() } }
         activity.popoverPresentationController?.sourceView = controller.view
         controller.present(activity, animated: true)
         call.resolve(["ok": true])
@@ -730,16 +766,19 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
               }),
               let path = file["path"] as? String,
               let controller = bridge?.viewController, controller.presentedViewController == nil,
-              let target = try? directory(record["folder"] as? String ?? ""),
-              target.startAccessingSecurityScopedResource() else {
+              let target = try? directory(record["folder"] as? String ?? "") else {
+            call.resolve(["ok": false]); return
+        }
+        let accessed = target.startAccessingSecurityScopedResource()
+        guard accessed || FileManager.default.isReadableFile(atPath: target.path) else {
             call.resolve(["ok": false]); return
         }
         guard FileManager.default.fileExists(atPath: path) else {
-            target.stopAccessingSecurityScopedResource()
+            if accessed { target.stopAccessingSecurityScopedResource() }
             call.resolve(["ok": false]); return
         }
         let player = IOSScopedPlayerController()
-        player.releaseFile = { target.stopAccessingSecurityScopedResource() }
+        player.releaseFile = { if accessed { target.stopAccessingSecurityScopedResource() } }
         player.player = AVPlayer(url: URL(fileURLWithPath: path))
         controller.present(player, animated: true) { player.player?.play() }
         call.resolve(["ok": true])

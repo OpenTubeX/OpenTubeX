@@ -225,6 +225,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
   RSS Feeds:
+    Load More Items: 항목 더 불러오기
     Refreshing: RSS 피드 새로고침 중
     Tab: RSS
     Followed Feeds: 팔로우 중인 RSS 피드
@@ -590,6 +591,7 @@ Settings:
       Memory: 메모리
       Network: 네트워크
       Disk: 디스크
+    Label: 성능
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
     Invidious Instance Username: '인스턴스 사용자 이름'
@@ -722,6 +724,8 @@ Settings:
       Auto: 자동
     Preferred API Backend:
       Yattee Server: Yattee 서버
+      Local API Extension Required: 웹 앱은 OpenTubeX Local API 브라우저 확장 프로그램이 있어야 로컬 API를 사용할 수 있습니다.
+      Install Local API Extension: 확장 프로그램 설치
     Yattee Server:
       Server URL: Yattee 서버 URL
       Username: 사용자 이름
@@ -762,6 +766,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Toggle Playback With Tab Icon: 탭 아이콘으로 재생 및 일시정지
     Theme and Colors: "테마 및 색상"
     Font Size: 글꼴 크기
     Sections:
@@ -1040,6 +1045,7 @@ Settings:
     Mono Audio: '모노 오디오'
     Normalize Loudness: '음량 평준화'
     Show Mono Audio Toggle: '모노 오디오 토글 표시'
+    Show Mirror Video Toggle: "동영상 좌우 반전 토글 표시"
     Default Media Format:
       Default Media Format: '기본 미디어 포맷'
     Pause on Stream Recovery: "스트림 복구 시 일시 정지"
@@ -1069,6 +1075,7 @@ Settings:
     Enable DLNA Casting: "DLNA 전송 활성화"
     Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"
     Lights Off: 조명 끄기
+    Mirror Video: "동영상 좌우 반전"
     Show Lights Off Toggle: 조명 끄기 토글 표시
     Show Volume Boost Toggle: "볼륨 증폭 토글 표시"
     Swipe Gestures:
@@ -1082,6 +1089,7 @@ Settings:
       Unavailable: 재생 컨트롤을 조정할 수 없습니다.
     yt-dlp Streaming: "yt-dlp 스트리밍"
     Continue Playback When Screen Is Locked: '화면이 잠겨 있을 때도 재생 계속'
+    Switch to Audio in Background: '백그라운드에서 오디오 형식으로 전환'
     Ignore Headphone Controls: '헤드폰 컨트롤 무시'
     Music Visualizer: 음악 시각화
     Automatically Open Chapters: 챕터 자동 열기
@@ -1229,6 +1237,7 @@ Settings:
     Timestamp Notes:
       Enable: "타임스탬프 메모 사용"
       Obsidian Vault: Obsidian 보관함
+    Double-Tap With Two Fingers to Skip Chapters: "두 손가락으로 두 번 탭하여 챕터 건너뛰기"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1483,6 +1492,7 @@ Settings:
     Cleanup Complete: 저장 공간 정리를 마쳤습니다
     Cleanup Failed: 저장 공간 정리에 실패했습니다
   Subscription Settings:
+    Refresh These Feeds Together: "이 피드를 함께 새로고침"
     Fetch Feed on Startup: 시작할 때 피드 가져오기
     Show New Content Feed: 새 콘텐츠 피드 표시
     RSS Feeds: RSS 피드
@@ -1506,6 +1516,7 @@ Settings:
     Platforms:
       Other Platforms: 다른 플랫폼
       Manage Channels: 팔로우한 채널 관리
+      Enable Twitch Page: Twitch 페이지 사용
       Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
       Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
   Distraction Free Settings:
@@ -1551,6 +1562,7 @@ Settings:
     Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
     Hide Playlist Stats: 재생목록 통계 숨기기
+    Hide Recommendation Details: 추천 이유 및 피드백 숨기기
     Sections:
       Digital Wellbeing: "디지털 웰빙"
       Side Bar: 사이드바
@@ -1907,6 +1919,7 @@ Settings:
     Downloading: 목록 다운로드 중…
     Failed to Download: 목록을 다운로드할 수 없습니다
     Loaded Status: "차단된 채널: {blocked} · 표시된 채널: {warned} · 업데이트: {date}"
+  Highlight Changed Settings Label: 변경됨
 Tutorial:
   Skip: 건너뛰기
   Next: 다음
@@ -2251,6 +2264,9 @@ Video:
     Zoom:
       Zoom: 확대/축소
       'Off': 끄기
+    Lock Controls:
+      Lock Controls: "컨트롤 잠금"
+      Hold to Unlock: "길게 눌러 잠금 해제"
     Volume Boost:
       Volume Boost: "볼륨 증폭"
       'Off': "끄기"
@@ -2777,6 +2793,7 @@ Tooltips:
     Normalize Loudness: '대부분의 동영상보다 소리가 큰 동영상의 음량을 낮춰 동영상 간에 음량이 갑자기 바뀌지 않도록 합니다. 소리가 작은 동영상은 음량이 그대로 유지됩니다. 로컬 API로 불러온 동영상에서만 작동합니다.'
     Pause on Stream Recovery: "동영상 스트림이 실패하여 플레이어가 다시 불러오거나 다른 형식 또는 엔진으로 전환하면 재생을 일시 정지하고, 닫을 때까지 플레이어 상단에 오류를 표시합니다. 끄면 재생이 계속되고 오류는 알림으로 잠시 표시됩니다."
     Continue Playback When Screen Is Locked: '백그라운드에서 오디오를 계속 재생하고 Android 미디어 컨트롤을 제공합니다. 앱이 더 이상 보이지 않을 때 일시중지하려면 이 옵션을 끄세요.'
+    Switch to Audio in Background: '앱이 백그라운드에 있거나 화면이 꺼져 있는 동안 오디오 형식으로 재생하여 데이터와 배터리를 절약합니다. PIP에서는 동영상이 유지됩니다. 앱을 다시 열면 동영상으로 돌아갑니다. 화면이 잠겨 있을 때도 재생 계속 설정이 필요합니다.'
     Ignore Headphone Controls: '블루투스 기기, 유선 헤드폰, 키보드 미디어 키의 재생, 일시정지, 건너뛰기 명령을 무시하여 이어폰을 실수로 탭해도 재생이 중단되지 않습니다. 앱과 미디어 알림의 컨트롤은 계속 작동합니다.'
     Enable Caption Translations: 활성화하면 동영상에 선호 자막 언어와 일치하는 원본 트랙이 없을 때 자막 버튼과 C 단축키가 자동 번역된 트랙을 우선 사용합니다.
     Use Quick Playback Speed Bar: 오른쪽 플레이어 컨트롤에 빠른 재생 속도 표시줄을 표시합니다. 채널별 재생 속도 수동 저장이 활성화된 경우 현재 채널의 속도를 저장하는 버튼도 표시됩니다.
@@ -2785,6 +2802,7 @@ Tooltips:
     Use YouTube-style Shorts: 구독 및 채널 페이지에서 Shorts를 세로형 격자로 표시하고 YouTube 스타일 Shorts 플레이어를 사용합니다.
     Loop Shorts: 활성화하면 Shorts를 자동으로 다시 시작합니다. 비활성화하면 끝에서 멈추고 다시 재생 버튼을 표시합니다.
     Show Skip Silence Toggle: 플레이어 설정 메뉴에 무음 구간 건너뛰기 켜기/끄기 전환 버튼을 표시합니다.
+    Show Mirror Video Toggle: "플레이어 설정 메뉴에 동영상을 좌우로 반전하는 켜기/끄기 전환 버튼을 표시하여 댄스, 운동, 악기 튜토리얼을 더 쉽게 따라 할 수 있습니다."
     Enable Skip Silence by Default: 새 탭에서 무음 구간 건너뛰기를 활성화합니다. 한 탭에서 변경해도 다른 탭에는 영향을 주지 않습니다.
     Enable Video Zoom: 플레이어 설정 메뉴에 확대/축소 컨트롤을 표시하고 키보드 단축키와 화면 이동 컨트롤을 활성화합니다.
     Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.
@@ -2806,6 +2824,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
     Enable Timestamp Notes: "동영상을 일시 정지하고 현재 시점으로 연결되는 메모를 여는 플레이어 버튼과 N 단축키를 추가합니다. 메모는 Markdown으로 복사하거나 데스크톱에서 Obsidian에 추가할 수 있습니다."
     Obsidian Vault: 타임스탬프 메모에 사용할 Obsidian 보관함 이름입니다. 설정하면 메모를 Obsidian에 추가할 수 있습니다. 각 동영상의 메모는 보관함의 새 노트 폴더에 있는, 동영상 이름으로 된 노트에 모입니다.
+    Double-Tap With Two Fingers to Skip Chapters: "동영상 오른쪽을 두 손가락으로 두 번 탭하면 다음 챕터로, 왼쪽을 두 번 탭하면 현재 챕터의 처음으로 이동합니다. 챕터 시작 후 3초 이내에는 왼쪽이 대신 이전 챕터로 이동하므로, 반복하면 챕터를 하나씩 거슬러 올라갈 수 있습니다."
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:
@@ -2841,6 +2860,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: 단어, 단어 일부 또는 구문을 입력하면 원본 제목에 해당 텍스트가 포함된 모든 동영상, 재생목록 및 채널을 OpenTubeX 전체에서 숨깁니다. 대소문자를 구분하지 않습니다. 시청 기록, 내 재생목록 및 재생목록 안의 동영상은 제외됩니다.
     Hide Videos on Watch: 구독 및 채널 페이지의 동영상, Shorts 및 실시간 탭에서 시청한 동영상을 숨깁니다. 채널 페이지의 홈 탭에는 영향을 주지 않습니다
   Subscription Settings:
+    Refresh These Feeds Together: "선택한 피드 중 하나를 새로고침하면 선택한 다른 피드도 바로 이어서 새로고침됩니다. 자동 새로고침은 계속 각 피드의 간격을 따릅니다."
     Fetch Feed on Startup: 활성화하면 OpenTubeX를 시작하거나 새 창을 열 때 구독 피드를 자동으로 가져옵니다.
     Show New Content Feed: 이전에 가져올 때 없었던 구독 피드 항목이 포함된 신규 탭을 표시합니다.
     Enable RSS Feeds: 구독 페이지에 RSS 또는 Atom 피드의 항목을 보여 주는 RSS 탭을 표시하여 다른 플랫폼의 크리에이터를 팔로우할 수 있게 합니다. 항목은 yt-dlp로 열립니다.
@@ -2851,10 +2871,12 @@ Tooltips:
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
     RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
-    Show Collaborations From Other Channels: "구독한 채널이 해당 동영상을 업로드한 다른 채널과 함께 만든 동영상도 표시합니다. YouTube는 이러한 동영상을 채널의 홈 탭에만 표시하므로 동영상을 새로고침할 때마다 채널당 한 페이지를 더 불러옵니다. 그곳에 표시되는 최신 콜라보만 찾을 수 있고, 일부 채널은 아무것도 표시하지 않으며, 게시 날짜는 대략적입니다. Invidious API에서는 사용할 수 없습니다."
+    Show Collaborations From Other Channels: "구독한 채널이 해당 동영상을 업로드한 다른 채널과 함께 만든 동영상도 표시합니다. YouTube는 이러한 동영상을 채널의 홈 탭에만 표시하므로 동영상을 새로고침할 때 최대 몇 개 채널만 확인하며, 새 콜라보가 표시되기까지 하루 이상 걸릴 수 있습니다. 그곳에 표시되는 최신 콜라보만 찾을 수 있고, 일부 채널은 아무것도 표시하지 않으며, 게시 날짜는 대략적입니다. Invidious API에서는 사용할 수 없습니다."
     Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
+    Enable Twitch Page: 탐색 메뉴와 명령 팔레트에서 Twitch 페이지를 열 수 있게 합니다. 이 페이지에서 인기 카테고리와 라이브 채널을 둘러보고 Twitch를 검색할 수 있습니다.
     Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
   Theme Settings:
+    Toggle Playback With Tab Icon: 재생 중이거나 일시정지된 동영상이 있는 탭의 아이콘을 클릭하면 해당 탭으로 전환하지 않고 일시정지하거나 다시 재생합니다.
     Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨기며, 실행취소를 제공하는 알림도 여기에 포함됩니다. 오류, 경고, 직접 설정한 알림, 그리고 업데이트 안내처럼 결정을 요청하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
@@ -2985,6 +3007,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 마지막 탐색 실행 취소
   Redo Seek: 실행 취소한 탐색 다시 실행
   New Incognito Tab: 새 시크릿 탭 만들기
+  Shortcuts Label: 단축키
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기
@@ -3019,6 +3042,8 @@ CommandPalette:
     Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
     Video: 먼저 동영상을 여세요
 Downloads:
+  Stop Recording: "녹화 중지"
+  Recording: "녹화 중"
   File Name Template Invalid: '다운로드 폴더 안의 상대 경로를 사용하세요. "..", "~", "$", "%" 또는 "thumbnail:" 같은 접두사는 사용할 수 없습니다.'
   Search Completed: "제목 또는 채널로 완료된 다운로드 검색"
   Format: "형식"
@@ -3168,6 +3193,22 @@ App Icon:
   Saved Message: "아이콘이 저장되었습니다. 런처가 업데이트되는 데 잠시 걸릴 수 있습니다."
   Title: "앱 아이콘"
   Error: "앱 아이콘을 불러오거나 변경할 수 없습니다"
+
+App Lock:
+  Title: "앱 잠금"
+  Enable: "화면 잠금 필요"
+  Enable Tooltip: "OpenTubeX로 돌아올 때 지문, 얼굴, PIN, 패턴 또는 비밀번호를 요청합니다. Android 13 이상에서는 최근 앱 목록에서도 앱 미리보기가 표시되지 않습니다."
+  Lock After: "잠금 시간"
+  Immediately: "즉시"
+  1 Minute: "1분"
+  5 Minutes: "5분"
+  15 Minutes: "15분"
+  1 Hour: "1시간"
+  Unavailable: "앱 잠금을 사용하려면 Android 설정에서 화면 잠금을 설정하세요."
+  Error: "앱 잠금을 변경할 수 없습니다"
+  Locked: "OpenTubeX가 잠겨 있습니다"
+  Unlock: "잠금 해제"
+  Prompt Title: "OpenTubeX 잠금 해제"
 
 Tray:
   Hide All Windows: "모든 창 숨기기"
@@ -3333,6 +3374,33 @@ Platforms:
   Verify: "확인"
   Categories: "카테고리"
   Category Not Found: "이 카테고리를 찾을 수 없습니다."
+  Category Tags: "카테고리 태그"
+  Stream Tags: "스트림 태그"
+  Language: "언어"
+  All Languages: "모든 언어"
+  Other Language: "기타"
+  American Sign Language: "미국 수어"
+  Search Tags: "태그 검색"
+  Add Tag: "태그 추가"
+  Remove Tag: "{tag} 제거"
+  Sort:
+    Viewers: "시청자 수 (많은 순)"
+    Viewers Ascending: "시청자 수 (적은 순)"
+    Started: "최근 시작순"
+    Relevance: "추천"
+    Published: "최근 게시순"
+    Views: "조회수 (많은 순)"
+    Top Day: "24시간 인기"
+    Top Week: "7일 인기"
+    Top Month: "30일 인기"
+    Top All: "전체 기간 인기"
+  Video Type:
+    Video Type: "동영상 유형"
+    All: "모든 동영상"
+    Archive: "지난 방송"
+    Highlight: "하이라이트"
+    Upload: "업로드"
+  Anonymous: "익명"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}님이 {commentAuthor}님에게 답글을 남겼습니다"
   Like: "좋아요"
@@ -3367,5 +3435,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch 검색"
+  Search Placeholder: "카테고리 및 채널"
 New Incognito Tab: 새 시크릿 탭
 Incognito Tab: 시크릿 탭

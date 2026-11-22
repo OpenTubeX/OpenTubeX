@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Parser, YTNodes } from 'youtubei.js'
-import { normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
+import { FLAT_REPLY_RENDERING_PRIORITY, normalizeCommentFetchResponse, normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
 
 const comment = id => ({ commentViewModel: { commentId: id, commentKey: id } })
 const continuation = token => ({
@@ -51,10 +51,21 @@ test('loads flat YouTube replies and their next page through the real parser', a
   assert.deepEqual(thread.replies.map(reply => reply.comment.comment_id), ['reply-1'])
   assert.equal(thread.has_continuation, true)
   assert.equal(thread.replies[0].comment.content.toString(), 'Reply text')
+  // Flat replies come without their parents, so the comment section nests them by mention.
+  assert.equal(thread.replies[0].rendering_priority, FLAT_REPLY_RENDERING_PRIORITY)
   const next = await thread.getContinuation()
   assert.deepEqual(next.replies.map(reply => reply.comment.comment_id), ['reply-2'])
+  assert.equal(next.replies[0].rendering_priority, FLAT_REPLY_RENDERING_PRIORITY)
   assert.equal(next.has_continuation, false)
   assert.deepEqual(tokens, ['first', 'second'])
+})
+
+test('passes the prefixed session data through, so the session is not generated locally', async () => {
+  const body = ")]}'\n[[\"session\"]]"
+  const response = new Response(body, { headers: { 'content-type': 'application/json; charset=utf-8' } })
+  const passed = await normalizeCommentFetchResponse(response, () => assert.fail('only JSON responses are reported'))
+  assert.equal(passed.status, 200)
+  assert.equal(await passed.text(), body)
 })
 
 test('preserves modern nested reply threads and unrelated response fields', () => {

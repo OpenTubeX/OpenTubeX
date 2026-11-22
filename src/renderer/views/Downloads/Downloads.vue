@@ -72,6 +72,7 @@
         :download="download"
         @pause="controlDownload(download.id, 'pause')"
         @resume="controlDownload(download.id, 'resume')"
+        @stop="controlDownload(download.id, 'stop')"
       />
     </section>
 
@@ -324,7 +325,10 @@ watch(() => completedDownloads.value.length, count => {
     sortOrder.value = 'date-desc'
   }
 })
-const pausableDownloads = computed(() => downloads.value.filter(download => ['queued', 'preparing', 'downloading', 'processing'].includes(download.status)))
+// Pausing all leaves live recordings running
+const pausableDownloads = computed(() => downloads.value.filter(download => (
+  ['queued', 'preparing', 'downloading', 'processing'].includes(download.status) && download.live !== true
+)))
 const resumableDownloads = computed(() => downloads.value.filter(download => ['paused', 'pausing'].includes(download.status)))
 const failedDownloads = computed(() => finishedDownloads.value.filter(download => download.status === 'failed'))
 const clearableDownloads = computed(() => downloads.value.filter(download => (

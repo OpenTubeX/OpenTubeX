@@ -409,11 +409,14 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   // Window coordinates are only valid for the display they were saved on.
   'scrollMiniPlayerSavedRect',
   'crossTabMiniPlayerSavedRect',
+  // Custom download templates stay on this device, so a selected one may not exist on peers.
+  'ytDlpSelectedTemplate',
   // These choices describe one physical device, not the user's account.
   'mobileAutoPictureInPicture',
   'capacitorLayoutMode',
   'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
+  'switchToAudioInBackground',
   'ignoreHeadphoneControls',
   'hapticFeedback',
   'hapticFeedbackIgnoresSystemSetting',
@@ -572,6 +575,7 @@ const customGetters = {
       backendFallback: state.backendFallback,
       showWatchStats: state.rememberHistory && state.enableWatchStats,
       supportsYtDlp,
+      enableTwitchPage: state.enableTwitchPage,
     })
   ),
 

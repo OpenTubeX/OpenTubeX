@@ -181,7 +181,7 @@ for (const currentSettings of [false, true]) {
           hideLiveChatReplay: true,
           moveDownloadsToAppHeader: true,
           aiVideoSummaryMode: 'hide',
-          navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats'],
+          navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats', 'twitch'],
           autoPictureInPictureTriggers: ['tab', 'minimize'],
           scrollPlayerMode: 'off',
           playlistThumbnailSize: 240,

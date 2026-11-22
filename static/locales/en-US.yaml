@@ -379,6 +379,7 @@ Subscriptions:
     Description: Add an RSS or Atom feed to follow creators from other platforms. {rssHub} instances provide feeds for many sites, such as Twitch.
     Empty Items: Your feeds currently do not have any items.
     No Feeds: You don't follow any RSS feeds yet.
+    Load More Items: Load more items
     RSSHub:
       Browse: Browse RSSHub
       Title: Add a feed from RSSHub
@@ -783,10 +784,12 @@ Settings:
     Advanced Description: Backends, buffering, external tools, proxy, and diagnostics
     Alternative providers: Video and metadata providers
   Highlight Changed Settings: Highlight settings changed from defaults
+  Highlight Changed Settings Label: Changed
   Reset Setting to Default: Reset this setting to its default
   Experimental Badge: Experimental
   Performance Impact:
     Show Performance Impact: Show performance impact indicators
+    Label: Performance
     Moderate: Moderate impact
     High: High impact
     Description: This setting can increase {resources} usage
@@ -926,6 +929,8 @@ Settings:
       Local API: Local API
       Invidious API: Invidious API
       Yattee Server: "Yattee Server"
+      Local API Extension Required: The web app can only use the local API with the OpenTubeX Local API browser extension.
+      Install Local API Extension: Install the extension
     Video View Type:
       Video View Type: Video View Type
       Grid: Grid
@@ -1043,6 +1048,7 @@ Settings:
     Loaded Tab Icons: 'Missing tab icon loaded: {count} | Missing tab icons loaded: {count}'
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
+    Toggle Playback With Tab Icon: Play and Pause With the Tab Icon
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width
@@ -1340,9 +1346,11 @@ Settings:
       Screenshots: Screenshots
       Timestamp Notes: Timestamp Notes
     Lights Off: Lights Off
+    Mirror Video: Mirror Video
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: Show Volume Boost Toggle
     Show Mono Audio Toggle: Show Mono Audio Toggle
+    Show Mirror Video Toggle: Show Mirror Video Toggle
     Show Music Mode Toggle: Show Music Mode Toggle
     Swipe Gestures:
       Fullscreen Brightness: Full brightness in fullscreen
@@ -1469,6 +1477,7 @@ Settings:
     Rewind on Resume: Rewind on Resume
     Minimum Pause Before Rewinding: Minimum Pause Before Rewinding
     Continue Playback When Screen Is Locked: Continue playback when the screen is locked
+    Switch to Audio in Background: Switch to audio formats in the background
     Ignore Headphone Controls: Ignore headphone controls
     Voice-over Translation:
       Title: Voice-over translation
@@ -1566,6 +1575,7 @@ Settings:
     Keep Status Bar Hidden in Fullscreen: Keep status bar hidden in fullscreen
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Swipe to Seek Preview: Show swipe-to-seek preview
+    Double-Tap With Two Fingers to Skip Chapters: Double-tap with two fingers to skip chapters
     Enable Google Cast: "Enable Google Cast"
     Enable FCast: "Enable FCast"
   Channel Settings:
@@ -1853,6 +1863,7 @@ Settings:
     Platforms:
       Other Platforms: Other Platforms
       Manage Channels: Manage Followed Channels
+      Enable Twitch Page: Enable Twitch Page
       Notify When Live: Notify When Followed Twitch Channels Go Live
       Auto Refresh Interval: Other Platforms Auto Refresh Interval
     Show New Content Indicators: Show New Content Indicators
@@ -1865,6 +1876,7 @@ Settings:
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: Refresh Subscriptions While App Is Closed
     Notify About New Uploads: Notify About New Uploads
+    Refresh These Feeds Together: Refresh These Feeds Together
     Faster Subscription Refresh: Faster Subscription Refresh
     Show Collaborations From Other Channels: Show Collaborations From Other Channels
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
@@ -1930,6 +1942,7 @@ Settings:
     Hide Popular Videos: Hide Popular Videos
     Hide Playlists: Hide Playlists
     Hide Playlist Stats: Hide Playlist Stats
+    Hide Recommendation Details: Hide Recommendation Reasons and Feedback
     Hide Live Chat: Hide Live Chat
     Hide Live Chat Replay: Hide Live Chat Replay
     Hide Active Subscriptions: Hide Active Subscriptions
@@ -2923,6 +2936,9 @@ Video:
     Zoom:
       Zoom: Zoom
       Off: 'Off'
+    Lock Controls:
+      Lock Controls: Lock Controls
+      Hold to Unlock: Hold to unlock
     Volume Boost:
       Volume Boost: Volume Boost
       Off: 'Off'
@@ -3507,14 +3523,17 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Show Mirror Video Toggle: Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials.
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
+    Double-Tap With Two Fingers to Skip Chapters: Double-tap the right side of the video with two fingers to skip to the next chapter, or the left side to return to the start of the current chapter. In the first 3 seconds of a chapter, the left side goes to the previous chapter instead, so repeating it steps back through the chapters.
     Show Seek Bar Filmstrip: Dragging the seek bar knob shows a strip of frames around where you'll land, and pulling up onto it seeks precisely. When disabled, dragging shows a single thumbnail, as when hovering.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.
     Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
     Rewind on Resume: Jumps back this many seconds when you resume a paused video, so you can catch the last moments again. Set to 0 to turn it off.
     Minimum Pause Before Rewinding: Only rewinds when the video was paused for at least this long. Set to 0 to rewind after every pause.
     Continue Playback When Screen Is Locked: Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.
+    Switch to Audio in Background: Plays audio formats while the app is in the background or the screen is off, which saves data and battery. Picture-in-Picture keeps the video. The video returns when you open the app again. Requires continuing playback when the screen is locked.
     Ignore Headphone Controls: Ignores play, pause, and skip commands from Bluetooth devices, wired headphones, and keyboard media keys, so accidental earbud taps don't interrupt playback. Controls in the app and in the media notification keep working.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Speed Up: Hold the Spacebar or left mouse button over the player to temporarily multiply the current playback speed by the selected amount.
@@ -3599,11 +3618,13 @@ Tooltips:
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Enable Twitch Page: Lets you open the Twitch page from the navigation and the command palette. There you can browse popular categories and live channels and search Twitch.
     Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
+    Refresh These Feeds Together: When you refresh one of the checked feeds, the other checked feeds refresh right after it. Automatic refreshes still follow each feed's own interval.
     Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
-    Show Collaborations From Other Channels: Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so each video refresh loads one more page per channel. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API.
+    Show Collaborations From Other Channels: Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so a video refresh checks at most a few channels, and new ones can take a day or more to appear. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API.
   Theme Settings:
     Thumbnail Size: Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
     Playlist Thumbnail Size: Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
@@ -3614,6 +3635,7 @@ Tooltips:
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Visible Search Suggestions: Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Toggle Playback With Tab Icon: Clicking the icon of a tab with a playing or paused video pauses or resumes it without switching to that tab.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     UI Density: Changes the spacing in lists, menus, the side bar, and Settings.
@@ -3735,6 +3757,7 @@ KeyboardShortcutPrompt:
       Search and Page: App: Search & Page
       Window and View: App: Window & View
   Show Keyboard Shortcuts: Show keyboard shortcuts
+  Shortcuts Label: Shortcuts
   History Backward: Go back one page
   History Forward: Go forward one page
   New Window: Create a new window
@@ -3862,6 +3885,8 @@ Downloads:
   Play Download: Play download
   Retry Download: Retry download
   Pause Download: Pause download
+  Stop Recording: Stop recording
+  Recording: Recording
   Resume Download: Resume download
   Move Earlier: Move earlier
   Move Later: Move later
@@ -3974,6 +3999,22 @@ App Icon:
   Saved Message: "Icon saved. Your launcher may take a moment to update."
   Title: "App icon"
   Error: "Unable to load or change the app icon"
+
+App Lock:
+  Title: "App lock"
+  Enable: "Require screen lock"
+  Enable Tooltip: "Asks for your fingerprint, face, PIN, pattern, or password when you return to OpenTubeX. On Android 13 and later, recent apps also stop showing a preview of the app."
+  Lock After: "Lock after"
+  Immediately: "Immediately"
+  1 Minute: "1 minute"
+  5 Minutes: "5 minutes"
+  15 Minutes: "15 minutes"
+  1 Hour: "1 hour"
+  Unavailable: "Set a screen lock in Android settings to use app lock."
+  Error: "Unable to change app lock"
+  Locked: "OpenTubeX is locked"
+  Unlock: "Unlock"
+  Prompt Title: "Unlock OpenTubeX"
 
 Tray:
   Hide All Windows: "Hide All Windows"
@@ -4092,6 +4133,33 @@ Platforms:
   Verify: "Verify"
   Categories: "Categories"
   Category Not Found: "This category could not be found."
+  Category Tags: "Category tags"
+  Stream Tags: "Stream tags"
+  Language: "Language"
+  All Languages: "All languages"
+  Other Language: "Other"
+  American Sign Language: "American Sign Language"
+  Search Tags: "Search tags"
+  Add Tag: "Add tag"
+  Remove Tag: "Remove {tag}"
+  Sort:
+    Viewers: "Viewers (high to low)"
+    Viewers Ascending: "Viewers (low to high)"
+    Started: "Recently started"
+    Relevance: "Recommended"
+    Published: "Recently published"
+    Views: "Views (high to low)"
+    Top Day: "Top 24 hours"
+    Top Week: "Top 7 days"
+    Top Month: "Top 30 days"
+    Top All: "Top all time"
+  Video Type:
+    Video Type: "Video type"
+    All: "All videos"
+    Archive: "Past broadcasts"
+    Highlight: "Highlights"
+    Upload: "Uploads"
+  Anonymous: "Anonymous"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
@@ -4126,3 +4194,4 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Search Twitch"
+  Search Placeholder: "Categories and channels"

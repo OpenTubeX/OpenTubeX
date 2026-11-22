@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
   RSS Feeds:
+    Load More Items: טעינת פריטים נוספים
     Refreshing: מרענן הזנות RSS
     Tab: RSS
     Followed Feeds: פידי RSS במעקב
@@ -502,6 +503,7 @@ Settings:
       Memory: זיכרון
       Network: רשת
       Disk: כונן
+    Label: ביצועים
   General Settings:
     Invidious Instance Username: 'שם המשתמש במופע'
     Invidious Instance Password: 'הסיסמה למופע'
@@ -625,6 +627,8 @@ Settings:
       Auto: אוטומטי
     Preferred API Backend:
       Yattee Server: שרת Yattee
+      Local API Extension Required: אפליקציית הרשת יכולה להשתמש ב־API המקומי רק עם תוסף הדפדפן OpenTubeX Local API.
+      Install Local API Extension: התקנת התוסף
     Yattee Server:
       Server URL: כתובת שרת Yattee
       Username: שם משתמש
@@ -667,6 +671,7 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Toggle Playback With Tab Icon: הפעלה והשהיה באמצעות סמל הכרטיסייה
     Theme and Colors: "ערכת עיצוב וצבעים"
     Font Size: גודל הגופן
     Sections:
@@ -882,6 +887,7 @@ Settings:
     Mono Audio: 'שמע מונו'
     Normalize Loudness: 'נרמול עוצמת קול'
     Show Mono Audio Toggle: 'הצגת מתג שמע מונו'
+    Show Mirror Video Toggle: "הצגת מתג להיפוך הסרטון"
     Default Media Format:
       Default Media Format: 'תצורת המדיה כברירת המחדל'
     Pause on Stream Recovery: "השהה בעת שחזור הזרם"
@@ -911,6 +917,7 @@ Settings:
     Enable DLNA Casting: "הפעלת שידור DLNA"
     Skip Unavailable Playlist Videos: "דילוג על סרטונים לא זמינים ברשימות השמעה"
     Lights Off: כיבוי אורות
+    Mirror Video: "היפוך הסרטון"
     Show Lights Off Toggle: הצגת מתג לכיבוי האורות
     Show Volume Boost Toggle: "הצגת מתג הגברת עוצמת קול"
     Swipe Gestures:
@@ -924,6 +931,7 @@ Settings:
       Unavailable: לא ניתן לכוונן את פקדי הניגון.
     yt-dlp Streaming: "הזרמת yt-dlp"
     Continue Playback When Screen Is Locked: 'המשך הפעלה כשהמסך נעול'
+    Switch to Audio in Background: 'מעבר לפורמטי שמע ברקע'
     Ignore Headphone Controls: 'התעלמות מפקדי האוזניות'
     Music Visualizer: מציג מוזיקה
     Automatically Open Chapters: פתיחת פרקים אוטומטית
@@ -1065,6 +1073,7 @@ Settings:
     Timestamp Notes:
       Enable: "הפעלת הערות עם חותמת זמן"
       Obsidian Vault: כספת Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "הקשה כפולה בשתי אצבעות לדילוג בין פרקים"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1303,6 +1312,7 @@ Settings:
     Cleanup Complete: ניקוי האחסון הושלם
     Cleanup Failed: ניקוי האחסון נכשל
   Subscription Settings:
+    Refresh These Feeds Together: "רענון הפידים האלה יחד"
     Fetch Feed on Startup: טעינת העדכונים בעת ההפעלה
     Show New Content Feed: הצגת עדכוני תוכן חדש
     RSS Feeds: פידי RSS
@@ -1323,6 +1333,7 @@ Settings:
     Platforms:
       Other Platforms: פלטפורמות אחרות
       Manage Channels: ניהול ערוצים במעקב
+      Enable Twitch Page: הפעלת דף Twitch
       Notify When Live: להודיע כשערוצי Twitch במעקב מתחילים שידור חי
       Auto Refresh Interval: מרווח ריענון אוטומטי של פלטפורמות אחרות
   Distraction Free Settings:
@@ -1368,6 +1379,7 @@ Settings:
     Hide Header Sync Indicator: הסתרת מחוון הסנכרון בכותרת היישום
     Hide Repeat Stats: הסתרת נתוני חזרה
     Hide Playlist Stats: הסתרת הנתונים הסטטיסטיים של הפלייליסט
+    Hide Recommendation Details: הסתרת סיבות ההמלצות והמשוב
     Sections:
       Digital Wellbeing: "רווחה דיגיטלית"
       Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא
@@ -1686,6 +1698,7 @@ Settings:
     Downloading: הרשימות בהורדה…
     Failed to Download: לא ניתן היה להוריד את הרשימות
     Loaded Status: "ערוצים חסומים: {blocked} · ערוצים מסומנים: {warned} · עודכן: {date}"
+  Highlight Changed Settings Label: שהשתנו
 Tutorial:
   Skip: דילוג
   Next: הבא
@@ -1975,6 +1988,9 @@ Video:
     Zoom:
       Zoom: תקריב
       'Off': 'כבוי'
+    Lock Controls:
+      Lock Controls: "נעילת פקדים"
+      Hold to Unlock: "יש ללחוץ לחיצה ארוכה לביטול הנעילה"
     Volume Boost:
       Volume Boost: "הגברת עוצמת קול"
       'Off': "כבוי"
@@ -2447,6 +2463,7 @@ Tooltips:
     Normalize Loudness: 'מנמיך סרטונים שרועשים יותר מרוב הסרטונים, כדי שעוצמת הקול לא תקפוץ בין סרטונים. סרטונים שקטים שומרים על עוצמת הקול שלהם. פועל רק בסרטונים שנטענו עם ה־API המקומי.'
     Pause on Stream Recovery: "כאשר זרם הווידאו נכשל והנגן טוען אותו מחדש או עובר לתבנית או למנוע אחרים, הניגון מושהה והשגיאה נשארת בראש הנגן עד שתסגור אותה. כשהאפשרות כבויה, הניגון ממשיך והשגיאה מוצגת לזמן קצר כהתראה."
     Continue Playback When Screen Is Locked: 'משאיר את השמע מתנגן ברקע ומספק פקדי מדיה של Android. יש לכבות אפשרות זו כדי להשהות כשהיישום אינו גלוי עוד.'
+    Switch to Audio in Background: 'מנגן פורמטי שמע כל עוד האפליקציה פועלת ברקע או שהמסך כבוי, וכך חוסך בנתונים ובסוללה. תמונה בתוך תמונה שומרת על הווידאו. הווידאו חוזר כשפותחים שוב את האפליקציה. נדרש שההפעלה תימשך כשהמסך נעול.'
     Ignore Headphone Controls: 'מתעלם מפקודות הפעלה, השהיה ודילוג ממכשירי Bluetooth, מאוזניות חוטיות וממקשי מדיה במקלדות, כדי שנגיעות מקריות באוזניות לא יפריעו להפעלה. הפקדים באפליקציה ובהתראת המדיה ממשיכים לפעול.'
     Enable Caption Translations: כשהאפשרות מופעלת והסרטון אינו מספק רצועה מקורית בשפת הכתוביות המועדפת, כפתור הכתוביות והקיצור C יעדיפו רצועת כתוביות שתורגמה אליה אוטומטית.
     Use Quick Playback Speed Bar: הצגת סרגל מהיר לשליטה במהירות ההפעלה בצד הימני של פקדי הנגן. אם שמירה ידנית של מהירות ההפעלה לכל ערוץ מופעלת, הסרגל כולל גם כפתור לשמירת המהירות לערוץ הנוכחי.
@@ -2455,6 +2472,7 @@ Tooltips:
     Use YouTube-style Shorts: הצגת Shorts ברשת אנכית בדפי המינויים והערוצים ושימוש בנגן Shorts בסגנון YouTube.
     Loop Shorts: כשהאפשרות מופעלת, סרטוני Shorts מתחילים מחדש אוטומטית. כשהיא מושבתת, הם נעצרים בסוף ומציגים כפתור להפעלה חוזרת.
     Show Skip Silence Toggle: הצגת מתג להפעלה ולכיבוי של דילוג על שקט בתפריט ההגדרות של הנגן.
+    Show Mirror Video Toggle: "הצגת מתג בתפריט ההגדרות של הנגן שהופך את הסרטון אופקית, כדי שיהיה קל יותר לעקוב אחר מדריכי ריקוד, אימון וכלי נגינה."
     Enable Skip Silence by Default: הפעלת דילוג על שקט בכרטיסיות חדשות. שינוי האפשרות בכרטיסייה אחת אינו משפיע על האחרות.
     Enable Video Zoom: הצגת פקד התקריב בתפריט ההגדרות של הנגן והפעלת קיצורי המקלדת ופקדי ההזזה שלו.
     Enable Seek History: זוכר מאיפה קפצת בכל סרטון עד לסגירת האפליקציה. מציג את רשימת היסטוריית הקפיצות בתפריט ההגדרות של הנגן ומפעיל את קיצורי המקלדת שלה.
@@ -2476,6 +2494,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
     Enable Timestamp Notes: "מוסיף לנגן כפתור ואת קיצור הדרך N, שמשהים את הסרטון ופותחים הערה עם קישור לרגע הנוכחי. ניתן להעתיק הערות כ־Markdown או, במחשב, להוסיף אותן ל־Obsidian."
     Obsidian Vault: שם כספת Obsidian עבור הערות עם חותמת זמן. כשהוא מוגדר, ניתן להוסיף הערות ל־Obsidian. ההערות של כל סרטון נאספות בהערה הנקראת על שם הסרטון, בתיקיית ההערות החדשות של הכספת.
+    Double-Tap With Two Fingers to Skip Chapters: "הקישו פעמיים בשתי אצבעות על הצד הימני של הסרטון כדי לדלג לפרק הבא, או על הצד השמאלי כדי לחזור לתחילת הפרק הנוכחי. ב-3 השניות הראשונות של פרק, הצד השמאלי מעביר במקום זאת לפרק הקודם, כך שחזרה על הפעולה מחזירה אתכם אחורה פרק אחר פרק."
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.
@@ -2506,6 +2525,7 @@ Tooltips:
     Bedtime Reminder: "משהה את הסרטון ומזכיר להפסיק לצפות בין שעת ההתחלה לשעת הסיום."
     Shorten View Counts: מציג ספירות צפיות, תגובות ולייקים לתגובות ש-YouTube כבר עיגלה בצורה מקוצרת, למשל 14K במקום 14,000. ספירות מדויקות תמיד מוצגות במלואן.
   Subscription Settings:
+    Refresh These Feeds Together: "כשמרעננים אחד מהפידים המסומנים, שאר הפידים המסומנים מתרעננים מיד אחריו. רענונים אוטומטיים עדיין פועלים לפי המרווח של כל פיד."
     Fetch Feed on Startup: כשהאפשרות מופעלת, OpenTubeX תטען אוטומטית את פיד המינויים עם ההפעלה ובפתיחת חלון חדש.
     Show New Content Feed: מציג לשונית בשם חדש ובה פריטים מפיד המינויים שלא היו בטעינה הקודמת.
     Enable RSS Feeds: מציג לשונית RSS בעמוד המינויים עם הפריטים של פידי RSS או Atom, כדי לאפשר מעקב אחרי יוצרים בפלטפורמות אחרות. הפריטים שלה נפתחים באמצעות yt-dlp.
@@ -2516,10 +2536,12 @@ Tooltips:
     Notify About New Uploads: מציג התראות מערכת במכשיר זה עבור ערוצים שהפעלת את ההתראות שלהם בהגדרות המינוי שלהם. OpenTubeX בודק אם יש תוכן חדש בעת רענון המינויים, לכן יש לבחור מרווח ריענון אוטומטי. כדי לקבל התראות כשהיישום סגור, יש להפעיל גם ריענון כשהיישום סגור.
     RSS Feeds Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את פידי ה-RSS שלך כשהיישום פתוח.
     Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
-    Show Collaborations From Other Channels: "מציג גם סרטונים שערוצים שאתם רשומים אליהם יצרו יחד עם ערוץ אחר שהעלה אותם. YouTube מציג אותם רק בכרטיסיית דף הבית של הערוץ, ולכן כל רענון סרטונים טוען עמוד נוסף לכל ערוץ. נמצאים רק שיתופי הפעולה האחרונים שמוצגים שם, חלק מהערוצים לא מציגים אף אחד, ותאריכי הפרסום שלהם משוערים. לא זמין עם ה־API של Invidious."
+    Show Collaborations From Other Channels: "מציג גם סרטונים שערוצים שאתם רשומים אליהם יצרו יחד עם ערוץ אחר שהעלה אותם. YouTube מציג אותם רק בכרטיסיית דף הבית של הערוץ, ולכן רענון סרטונים בודק לכל היותר כמה ערוצים, וייתכן שחדשים יופיעו רק אחרי יום או יותר. נמצאים רק שיתופי הפעולה האחרונים שמוצגים שם, חלק מהערוצים לא מציגים אף אחד, ותאריכי הפרסום שלהם משוערים. לא זמין עם ה־API של Invidious."
     Platforms Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את הערוצים שבמעקב בפלטפורמות אחרות כשהיישום פתוח.
+    Enable Twitch Page: מאפשר לפתוח את דף Twitch מהניווט ומלוח הפקודות. שם אפשר לעיין בקטגוריות פופולריות ובערוצים בשידור חי ולחפש ב-Twitch.
     Twitch Notify When Live: מודיע כשאחד מערוצי ה־Twitch שבמעקב מתחיל לשדר. OpenTubeX בודק כל כמה דקות כל עוד הוא פתוח, וגם כשהוא סגור אם הוא מרענן אז את המינויים.
   Theme Settings:
+    Toggle Playback With Tab Icon: לחיצה על הסמל של כרטיסייה עם סרטון שמתנגן או מושהה משהה אותו או ממשיכה אותו בלי לעבור לכרטיסייה זו.
     Only Show Important Notifications: מסתיר התראות בתוך היישום שרק מאשרות פעולה או מדווחות על מצב, כולל כאלה שמציעות הסגה. שגיאות, אזהרות, תזכורות שהגדרת והתראות שמבקשות ממך להחליט, כמו הצעות לעדכון, ממשיכות להופיע. התקדמות פעולות ברקע, כמו רענון המינויים, מוצגת בסרגל ההתקדמות הכללי במקום כהתראה. התראות המערכת אינן מושפעות.
     Visible Search Suggestions: "קובע כמה רשומות מהיסטוריית החיפוש והצעות סרגל החיפוש מציג לפני שיש לגלול את הרשימה שלו. הרשימה לעולם אינה חורגת מתחתית החלון."
     Thumbnail Size: "משנה את גודל התמונות הממוזערות של סרטונים ברשתות וברשימות. רשתות עם מספר עמודות קבוע או סוג התצוגה „רוחב מלא” ממלאות במקום זאת כל שורה, ולכן שם הוא משנה רק תמונות ממוזערות ברשימות ו־Shorts. בחלונות בגודל טלפון התמונות הממוזערות ברשת מוגבלות ל־100%."
@@ -2582,6 +2604,7 @@ KeyboardShortcutPrompt:
   Undo Seek: ביטול הקפיצה האחרונה
   Redo Seek: ביצוע מחדש של קפיצה שבוטלה
   New Incognito Tab: יצירת כרטיסיית גלישה בסתר חדשה
+  Shortcuts Label: קיצורים
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות
@@ -2616,6 +2639,8 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  Stop Recording: "עצירת ההקלטה"
+  Recording: "מקליט"
   File Name Template Invalid: 'יש להשתמש בנתיב יחסי בתוך תיקיית ההורדות ללא "..", "~", "$", "%" או קידומת כמו "thumbnail:".'
   Search Completed: "חיפוש הורדות שהושלמו לפי כותרת או ערוץ"
   Format: "פורמט"
@@ -2765,6 +2790,22 @@ App Icon:
   Saved Message: "הסמל נשמר. ייתכן שיידרש רגע לעדכון מסך הבית."
   Title: "סמל היישום"
   Error: "לא ניתן לטעון או לשנות את סמל היישום"
+
+App Lock:
+  Title: "נעילת אפליקציה"
+  Enable: "דרישת נעילת מסך"
+  Enable Tooltip: "מבקש טביעת אצבע, זיהוי פנים, קוד PIN, קו ביטול נעילה או סיסמה כשחוזרים אל OpenTubeX. ב-Android 13 ואילך, גם רשימת האפליקציות האחרונות מפסיקה להציג תצוגה מקדימה של האפליקציה."
+  Lock After: "נעילה לאחר"
+  Immediately: "מיד"
+  1 Minute: "דקה אחת"
+  5 Minutes: "5 דקות"
+  15 Minutes: "15 דקות"
+  1 Hour: "שעה אחת"
+  Unavailable: "הגדירו נעילת מסך בהגדרות Android כדי להשתמש בנעילת אפליקציה."
+  Error: "לא ניתן לשנות את נעילת האפליקציה"
+  Locked: "OpenTubeX נעול"
+  Unlock: "ביטול נעילה"
+  Prompt Title: "ביטול הנעילה של OpenTubeX"
 
 Tray:
   Hide All Windows: "הסתרת כל החלונות"
@@ -2939,6 +2980,33 @@ Platforms:
   Verify: "אימות"
   Categories: "קטגוריות"
   Category Not Found: "לא ניתן היה למצוא את הקטגוריה הזו."
+  Category Tags: "תגיות קטגוריה"
+  Stream Tags: "תגיות שידור"
+  Language: "שפה"
+  All Languages: "כל השפות"
+  Other Language: "אחר"
+  American Sign Language: "שפת הסימנים האמריקאית"
+  Search Tags: "חיפוש תגיות"
+  Add Tag: "הוספת תגית"
+  Remove Tag: "הסרת {tag}"
+  Sort:
+    Viewers: "צופים (מהגבוה לנמוך)"
+    Viewers Ascending: "צופים (מהנמוך לגבוה)"
+    Started: "התחילו לאחרונה"
+    Relevance: "מומלצים"
+    Published: "פורסמו לאחרונה"
+    Views: "צפיות (מהגבוה לנמוך)"
+    Top Day: "הטובים ב-24 השעות האחרונות"
+    Top Week: "הטובים ב-7 הימים האחרונים"
+    Top Month: "הטובים ב-30 הימים האחרונים"
+    Top All: "הטובים בכל הזמנים"
+  Video Type:
+    Video Type: "סוג סרטון"
+    All: "כל הסרטונים"
+    Archive: "שידורים קודמים"
+    Highlight: "קטעים נבחרים"
+    Upload: "העלאות"
+  Anonymous: "אנונימי"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} השיב/ה ל-{commentAuthor}"
   Like: "לייק"
@@ -2973,5 +3041,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "חיפוש ב-Twitch"
+  Search Placeholder: "קטגוריות וערוצים"
 New Incognito Tab: כרטיסיית גלישה בסתר חדשה
 Incognito Tab: כרטיסיית גלישה בסתר

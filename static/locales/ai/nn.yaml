@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Nyaste først
   Oldest First: Eldste først
   RSS Feeds:
+    Load More Items: Last inn fleire element
     Refreshing: Oppdaterer RSS-straumar
     Tab: RSS
     Followed Feeds: Fylgde RSS-straumar
@@ -509,6 +510,7 @@ Settings:
       Memory: minne
       Network: nettverk
       Disk: disk
+    Label: Yting
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
     Invidious Instance Username: 'Brukarnamn for instansen'
@@ -641,6 +643,8 @@ Settings:
       Auto: Automatisk
     Preferred API Backend:
       Yattee Server: Yattee-tenar
+      Local API Extension Required: Nettappen kan berre bruke det lokale API-et med nettlesarutvidinga OpenTubeX Local API.
+      Install Local API Extension: Installer utvidinga
     Yattee Server:
       Server URL: URL til Yattee-tenar
       Username: Brukarnamn
@@ -681,6 +685,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Toggle Playback With Tab Icon: Spel av og set på pause med faneikonet
     Theme and Colors: "Tema og fargar"
     Font Size: Skriftstorleik
     Sections:
@@ -959,6 +964,7 @@ Settings:
     Mono Audio: 'Monolyd'
     Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis brytar for monolyd'
+    Show Mirror Video Toggle: "Vis brytar for å spegelvende video"
     Default Media Format:
       Default Media Format: 'Medieformat'
     Pause on Stream Recovery: "Set på pause ved gjenoppretting av straum"
@@ -988,6 +994,7 @@ Settings:
     Enable DLNA Casting: "Aktiver DLNA-kasting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelege videoar i spelelister"
     Lights Off: Slå av lyset
+    Mirror Video: "Spegelvend video"
     Show Lights Off Toggle: Vis brytar for å slå av lyset
     Show Volume Boost Toggle: "Vis brytar for volumforsterking"
     Swipe Gestures:
@@ -1001,6 +1008,7 @@ Settings:
       Unavailable: Klarte ikkje å justera avspelingskontrollane.
     yt-dlp Streaming: "yt-dlp-strauming"
     Continue Playback When Screen Is Locked: 'Hald fram med avspeling når skjermen er låst'
+    Switch to Audio in Background: 'Byt til lydformat i bakgrunnen'
     Ignore Headphone Controls: 'Ignorer hovudtelefonkontrollar'
     Music Visualizer: Musikkvisualisering
     Automatically Open Chapters: Opne kapittel automatisk
@@ -1148,6 +1156,7 @@ Settings:
     Timestamp Notes:
       Enable: "Slå på tidsstempelnotat"
       Obsidian Vault: Obsidian-kvelv
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttrykk med to fingrar for å hoppe mellom kapittel"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1402,6 +1411,7 @@ Settings:
     Cleanup Complete: Lagringsoppryddinga er fullført
     Cleanup Failed: Lagringsoppryddinga mislykkast
   Subscription Settings:
+    Refresh These Feeds Together: "Oppdater desse straumane saman"
     Fetch Feed on Startup: Hent straumen ved oppstart
     Show New Content Feed: Vis straumen med nytt innhald
     RSS Feeds: RSS-straumar
@@ -1425,6 +1435,7 @@ Settings:
     Platforms:
       Other Platforms: Andre plattformer
       Manage Channels: Administrer følgde kanalar
+      Enable Twitch Page: Aktiver Twitch-sida
       Notify When Live: Varsle når følgde Twitch-kanalar startar direktesending
       Auto Refresh Interval: Intervall for automatisk oppdatering av andre plattformer
   Distraction Free Settings:
@@ -1470,6 +1481,7 @@ Settings:
     Hide Header Sync Indicator: Gøym synkroniseringsindikatoren i apphovudet
     Hide Repeat Stats: Skjul gjentakingsstatistikk
     Hide Playlist Stats: Skjul spelelistestatistikk
+    Hide Recommendation Details: Gøym årsaker til tilrådingar og tilbakemeldingar
     Sections:
       Digital Wellbeing: "Digital velvære"
       Side Bar: Sidestolpe
@@ -1826,6 +1838,7 @@ Settings:
     Downloading: Lastar ned listene…
     Failed to Download: Klarte ikkje å laste ned listene
     Loaded Status: "Blokkerte kanalar: {blocked} · Flagga kanalar: {warned} · Oppdatert: {date}"
+  Highlight Changed Settings Label: Endra
 Tutorial:
   Skip: Hopp over
   Next: Neste
@@ -2175,6 +2188,9 @@ Video:
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
+    Lock Controls:
+      Lock Controls: "Lås kontrollar"
+      Hold to Unlock: "Hald for å låse opp"
     Volume Boost:
       Volume Boost: "Volumforsterking"
       'Off': "Av"
@@ -2701,6 +2717,7 @@ Tooltips:
     Normalize Loudness: 'Skrur ned videoar som er høgare enn dei fleste, slik at lydstyrken ikkje hoppar mellom videoar. Stille videoar held på lydstyrken sin. Fungerer berre for videoar som er lasta inn med det lokale API-et.'
     Pause on Stream Recovery: "Når videostraumen feilar og spelaren lastar han inn på nytt eller byter til eit anna format eller ein annan motor, vert avspelinga sett på pause, og feilen vert ståande øvst i spelaren til du lukkar han. Når dette er slått av, held avspelinga fram, og feilen vert vist kort som eit varsel."
     Continue Playback When Screen Is Locked: 'Held fram med lydavspeling i bakgrunnen og viser Android-mediekontrollar. Slå av dette for å setje på pause når appen ikkje lenger er synleg.'
+    Switch to Audio in Background: 'Spelar av lydformat medan appen køyrer i bakgrunnen eller skjermen er av, noko som sparar data og batteri. Bilete-i-bilete held på videoen. Videoen kjem tilbake når du opnar appen att. Krev at avspelinga held fram når skjermen er låst.'
     Ignore Headphone Controls: 'Ignorerer avspelings-, pause- og hoppekommandoar frå Bluetooth-einingar, kabla hovudtelefonar og medietastar på tastatur, slik at utilsikta trykk på øyreplugger ikkje avbryt avspelinga. Kontrollane i appen og i medievarselet fungerer framleis.'
     Enable Caption Translations: Når dette er slått på, føretrekkjer teksteknappen og C-hurtigtasten eit automatisk omsett spor på det føretrekte tekstespråket dersom videoen ikkje har eit samsvarande originalspor.
     Use Quick Playback Speed Bar: Viser ei snøgglinje for avspelingsfart til høgre i spelarkontrollane. Dersom manuell lagring av avspelingsfart for kvar kanal er slått på, har linja òg ein knapp for å lagre farten for den gjeldande kanalen.
@@ -2709,6 +2726,7 @@ Tooltips:
     Use YouTube-style Shorts: Viser Shorts i eit ståande rutenett på abonnements- og kanalsider og brukar Shorts-spelaren i YouTube-stil.
     Loop Shorts: Når dette er slått på, startar Shorts automatisk på nytt. Når det er slått av, stoppar Shorts på slutten og viser ein knapp for ny avspeling.
     Show Skip Silence Toggle: Viser ein av/på-brytar for å hoppe over stille parti i innstillingsmenyen til spelaren.
+    Show Mirror Video Toggle: "Viser ein av/på-brytar i innstillingsmenyen til spelaren som spegelvender videoen vassrett, slik at det blir lettare å følgje danse-, trenings- og instrumentrettleiingar."
     Enable Skip Silence by Default: Hoppar som standard over stille parti i nye faner. Endringar i éi fane påverkar ikkje andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spelaren og slår på hurtigtastane og panoreringskontrollane.
     Enable Seek History: Hugsar kvar du hoppa frå i kvar video til appen vert lukka. Viser hopphistorikklista i innstillingsmenyen til avspelaren og slår på snøggtastane for ho.
@@ -2730,6 +2748,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Ber om stadfesting før alle videoane i ei speleliste med meir enn {count} videoar vert førehandslasta."
     Enable Timestamp Notes: "Legg til ein avspelarknapp og snarvegen N som set videoen på pause og opnar eit notat som lenkjer til det noverande augeblinken. Notat kan kopierast som Markdown eller, på datamaskina, leggjast til i Obsidian."
     Obsidian Vault: Namnet på Obsidian-kvelven for tidsstempelnotat. Når det er sett, kan notat leggjast til i Obsidian. Notata for kvar video vert samla i eit notat kalla opp etter videoen, i mappa til kvelven for nye notat.
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttrykk med to fingrar på høgre side av videoen for å hoppe til neste kapittel, eller på venstre side for å gå tilbake til starten av gjeldande kapittel. I dei første 3 sekunda av eit kapittel går venstre side i staden til førre kapittel, så når du gjentek det, går du bakover gjennom kapitla."
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:
@@ -2765,6 +2784,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Skriv inn eit ord, ein del av eit ord eller ei setning, utan skilnad på store og små bokstavar, for å gøyme alle videoar, spelelister og kanalar med ein originaltittel som inneheld teksten. Dette gjeld i heile OpenTubeX, bortsett frå Historikk, Dine spelelister og videoar i spelelister.
     Hide Videos on Watch: Gøymer videoar du har sett, frå fanene Videoar, Shorts og Direkte på abonnements- og kanalsidene. Dette påverkar ikkje Heim-fana på kanalsider
   Subscription Settings:
+    Refresh These Feeds Together: "Når du oppdaterer ein av dei avkryssa straumane, blir dei andre avkryssa straumane oppdaterte rett etterpå. Automatiske oppdateringar følgjer framleis intervallet til kvar straum."
     Fetch Feed on Startup: Når dette er slått på, hentar OpenTubeX automatisk abonnementsstraumen ved oppstart og når eit nytt vindauge vert opna.
     Show New Content Feed: Viser fana Ny med element frå abonnementsstraumen som ikkje fanst ved førre henting.
     Enable RSS Feeds: Viser ei RSS-fane på Abonnement-sida med elementa frå RSS- eller Atom-straumar, slik at du kan følgje skaparar på andre plattformer. Elementa vert opna med yt-dlp.
@@ -2775,10 +2795,12 @@ Tooltips:
     Notify About New Uploads: Viser systemvarsel på denne eininga for kanalar du har slått på varsel for i abonnementinnstillingane deira. OpenTubeX ser etter nytt innhald når abonnement vert oppdaterte, så vel eit intervall for automatisk oppdatering. For å bli varsla medan appen er lukka, må du også slå på oppdatering medan appen er lukka.
     RSS Feeds Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer RSS-straumane dine medan appen er open.
     Faster Subscription Refresh: "Sjekkar først RSS-straumen til kvar kanal og lastar berre inn videoar, Shorts og direktesendingar frå kanalar med nye opplastingar. Automatiske oppdateringar hoppar òg over kanalar som er lasta inn dei siste 10 minutta. For kanalar utan nye opplastingar vert visingstal, fjerna videoar og endra titlar berre oppdaterte med nokre timars mellomrom, og nye opplastingar kan dukke opp seinare når RSS-straumen heng etter. Ikkje tilgjengeleg med Invidious-API-et."
-    Show Collaborations From Other Channels: "Viser også videoar som kanalar du abonnerer på har laga saman med ein annan kanal som lasta dei opp. YouTube viser dei berre på Heim-fana til ein kanal, så kvar oppdatering av videoar lastar inn éi side til per kanal. Berre dei nyaste samarbeida som blir viste der, blir funne, nokre kanalar viser ingen, og publiseringsdatoane er omtrentlege. Ikkje tilgjengeleg med Invidious-API-et."
+    Show Collaborations From Other Channels: "Viser også videoar som kanalar du abonnerer på har laga saman med ein annan kanal som lasta dei opp. YouTube viser dei berre på Heim-fana til ein kanal, så ei oppdatering av videoar sjekkar høgst nokre få kanalar, og nye kan bruke ein dag eller meir på å dukke opp. Berre dei nyaste samarbeida som blir viste der, blir funne, nokre kanalar viser ingen, og publiseringsdatoane er omtrentlege. Ikkje tilgjengeleg med Invidious-API-et."
     Platforms Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer kanalane du følgjer på andre plattformer medan appen er open.
+    Enable Twitch Page: Lèt deg opne Twitch-sida frå navigasjonen og kommandopaletten. Der kan du bla gjennom populære kategoriar og kanalar som sender direkte, og søkje på Twitch.
     Twitch Notify When Live: Varslar deg når ein av Twitch-kanalane du følgjer, byrjar å strøyma. OpenTubeX sjekkar med nokre minutts mellomrom medan det er ope, og òg medan det er lukka dersom det då oppdaterer abonnement.
   Theme Settings:
+    Toggle Playback With Tab Icon: Eit klikk på ikonet til ei fane med ein video som vert spelt av eller er sett på pause, set han på pause eller held fram utan å byte til fana.
     Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status, inkludert dei som tilbyr Angre. Feil, åtvaringar, påminningar du har sett opp, og varsel som ber deg ta eit val, som oppdateringsførespurnader, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
     Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
@@ -2916,6 +2938,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Angre siste hopp
   Redo Seek: Gjer om eit angra hopp
   New Incognito Tab: Opprett ei ny inkognitofane
+  Shortcuts Label: Snarvegar
 CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten
@@ -2950,6 +2973,8 @@ CommandPalette:
     Download Finished: Denne nedlastinga er ikkje lenger aktiv
     Video: Opne ein video først
 Downloads:
+  Stop Recording: "Stopp opptak"
+  Recording: "Tek opp"
   File Name Template Invalid: 'Bruk ein relativ sti i nedlastingsmappa utan "..", "~", "$", "%" eller eit prefiks som "thumbnail:".'
   Search Completed: "Søk i fullførte nedlastingar etter tittel eller kanal"
   Format: "Format"
@@ -3093,6 +3118,22 @@ App Icon:
   Saved Message: "Ikonet er lagra. Det kan ta litt tid før startskjermen vert oppdatert."
   Title: "Appikon"
   Error: "Kunne ikkje laste inn eller endre appikonet"
+
+App Lock:
+  Title: "Applås"
+  Enable: "Krev skjermlås"
+  Enable Tooltip: "Ber om fingeravtrykk, ansikt, PIN-kode, mønster eller passord når du kjem tilbake til OpenTubeX. På Android 13 og nyare viser heller ikkje nylege appar eit førehandsvising av appen."
+  Lock After: "Lås etter"
+  Immediately: "Med ein gong"
+  1 Minute: "1 minutt"
+  5 Minutes: "5 minutt"
+  15 Minutes: "15 minutt"
+  1 Hour: "1 time"
+  Unavailable: "Set ein skjermlås i Android-innstillingane for å bruke applås."
+  Error: "Kunne ikkje endre applåsen"
+  Locked: "OpenTubeX er låst"
+  Unlock: "Lås opp"
+  Prompt Title: "Lås opp OpenTubeX"
 
 Tray:
   Hide All Windows: "Gøym alle vindauge"
@@ -3272,6 +3313,33 @@ Platforms:
   Verify: "Stadfest"
   Categories: "Kategoriar"
   Category Not Found: "Fann ikkje denne kategorien."
+  Category Tags: "Kategorimerkelappar"
+  Stream Tags: "Straummerkelappar"
+  Language: "Språk"
+  All Languages: "Alle språk"
+  Other Language: "Anna"
+  American Sign Language: "amerikansk teiknspråk"
+  Search Tags: "Søk etter merkelappar"
+  Add Tag: "Legg til merkelapp"
+  Remove Tag: "Fjern {tag}"
+  Sort:
+    Viewers: "Sjåarar (flest til færrast)"
+    Viewers Ascending: "Sjåarar (færrast til flest)"
+    Started: "Nyleg starta"
+    Relevance: "Tilrådd"
+    Published: "Nyleg publisert"
+    Views: "Visingar (flest til færrast)"
+    Top Day: "Topp 24 timar"
+    Top Week: "Topp 7 dagar"
+    Top Month: "Topp 30 dagar"
+    Top All: "Topp gjennom tidene"
+  Video Type:
+    Video Type: "Videotype"
+    All: "Alle videoar"
+    Archive: "Tidlegare sendingar"
+    Highlight: "Høgdepunkt"
+    Upload: "Opplastingar"
+  Anonymous: "Anonym"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"
@@ -3306,5 +3374,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Søk på Twitch"
+  Search Placeholder: "Kategoriar og kanalar"
 New Incognito Tab: Ny inkognitofane
 Incognito Tab: Inkognitofane

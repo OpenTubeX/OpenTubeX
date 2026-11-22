@@ -10,9 +10,11 @@ For the web app's development server, add `http://localhost` the same way, or `h
 
 ## Install
 
-The extension isn't in the browser add-on stores yet. Download or clone this repository, then:
+The extension isn't in the browser add-on stores yet. [Download the extension](https://github.com/OpenTubeX/OpenTubeX/releases/latest/download/opentubex-local-api-extension.zip), then:
 
-- **Chrome, Edge, and other Chromium browsers:** open `chrome://extensions`, turn on developer mode, choose **Load unpacked**, and select this folder.
-- **Firefox:** open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select `manifest.json` in this folder. Firefox removes temporary add-ons when it restarts.
+- **Chrome, Edge, and other Chromium browsers:** extract the ZIP file to a folder you keep, open `chrome://extensions`, turn on developer mode, choose **Load unpacked**, and select that folder.
+- **Firefox:** open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select the ZIP file. Firefox removes temporary add-ons when it restarts.
 
 Reload the web app afterward. It then uses the local API, unless you picked another backend in its settings.
+
+To update the extension in a Chromium browser, extract a newer download over the same folder and choose the reload button on the extension's card in `chrome://extensions`.

@@ -1,6 +1,7 @@
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -478,6 +479,43 @@ test('seekbar dragging preserves paused and playing states', { tag: '@scale' }, 
     const duration = await video.evaluate(element => element.duration)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(duration * 0.58)
     expect(await video.evaluate(element => element.currentTime)).toBeLessThan(duration * 0.7)
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
+  }
+})
+
+test('play and pause requests during a format switch decide playback after the switch', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const view = await watchViewHandle(page)
+  await view.evaluate((view, url) => {
+    view.manifestSrc = url
+    view.manifestMimeType = 'video/webm'
+  }, DEMO_MEDIA_URL)
+  await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+  await waitForPlayback(page)
+  await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
+    const player = element.ui.getControls().getPlayer()
+    const unload = player.unload.bind(player)
+    player.unload = async (...args) => {
+      await new Promise(resolve => { window.finishSwitchUnload = resolve })
+      return unload(...args)
+    }
+  })
+  // The media notification controls playback through the player while the switch loads.
+  for (const [format, requests] of [['audio', ['pause']], ['dash', ['pause', 'play']]]) {
+    await view.evaluate((view, format) => { view.activeFormat = format }, format)
+    await expect.poll(() => page.evaluate(() => typeof window.finishSwitchUnload)).toBe('function')
+    await view.evaluate((view, requests) => {
+      for (const request of requests) view.$refs.player[request]()
+    }, requests)
+    await page.evaluate(() => {
+      const finish = window.finishSwitchUnload
+      delete window.finishSwitchUnload
+      finish()
+    })
+    await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+    const paused = requests.at(-1) === 'pause'
+    if (!paused) await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
+    await page.waitForTimeout(500)
     expect(await video.evaluate(element => element.paused)).toBe(paused)
   }
 })
@@ -1134,6 +1172,8 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCSS('display', 'none')
   expect(await translations.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
 
+  // Measured once the menu has zoomed to the view, which scales each box differently until then.
+  await settleMenuZoom(player)
   const [headerBounds, translationsBounds, scrollbarBounds] = await Promise.all([
     header.boundingBox(),
     translations.boundingBox(),
@@ -1180,6 +1220,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(selectedTranslation).toHaveAttribute('aria-selected', 'true')
   await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(2)
 
+  await settleMenuZoom(player)
   const [listBounds, languageBounds] = await Promise.all([
     translations.boundingBox(),
     translations.getByRole('button', { name: 'Afrikaans' }).boundingBox(),
@@ -1514,7 +1555,10 @@ test.describe('scroll mini player', () => {
     await page.mouse.move(0, 0)
     const button = player.locator('.scrollMiniPlayPause')
     await expect(button).toHaveClass(/isHidden/, { timeout: 6000 })
-    await expect(button).toHaveCSS('opacity', '0')
+    const corners = player.locator('.scrollMiniScrollTop, .scrollMiniVolume')
+    for (const control of [button, corners.first(), corners.last()]) {
+      await expect(control).toHaveCSS('opacity', '0')
+    }
     const bounds = await player.boundingBox()
     const session = await page.context().newCDPSession(page)
     const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
@@ -1522,6 +1566,10 @@ test.describe('scroll mini player', () => {
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await session.detach()
     await expect(button).not.toHaveClass(/isHidden/)
+    await expect(corners).toHaveCount(2)
+    for (const control of [corners.first(), corners.last()]) {
+      await expect(control).not.toHaveClass(/isHidden/)
+    }
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
   })
 

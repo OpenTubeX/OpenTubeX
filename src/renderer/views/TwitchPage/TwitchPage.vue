@@ -15,7 +15,7 @@
         class="twitchSearch"
         input-type="search"
         :label="t('Twitch Page.Search')"
-        :placeholder="t('Twitch Page.Search')"
+        :placeholder="t('Twitch Page.Search Placeholder')"
         :action-button-label="t('Twitch Page.Search')"
         :icon="['fas', 'search']"
         :value="query"
@@ -65,42 +65,55 @@
         :query="query"
         :type="currentTab"
       />
-      <FtLoader v-else-if="browseLoading" />
-      <template v-else-if="browseError">
-        <p
-          class="message"
-          role="alert"
-        >
-          {{ t('Platforms.Load Error', { platform: twitch.name }) }}
-        </p>
-        <FtFlexBox>
-          <FtButton
-            :label="t('User Playlists.SinglePlaylistView.Retry')"
-            :icon="['fas', 'sync']"
-            @click="loadBrowse"
-          />
-        </FtFlexBox>
-      </template>
       <template v-else>
-        <p
-          v-if="browseResults.length === 0"
-          class="message"
-        >
-          {{ t('Platforms.Empty Tab') }}
-        </p>
-        <PlatformResultList
-          appear
-          :results="browseResults"
+        <PlatformFilters
+          v-if="currentTab === 'channels'"
+          class="liveFilters"
+          :platform="twitch"
+          :options="twitch.liveStreamFilters"
+          :filters="filters"
+          @change="updateRoute"
         />
+        <FtLoader v-if="browseLoading" />
+        <template v-else-if="browseError">
+          <p
+            class="message"
+            role="alert"
+          >
+            {{ t('Platforms.Load Error', { platform: twitch.name }) }}
+          </p>
+          <FtFlexBox>
+            <FtButton
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
+              @click="loadBrowse"
+            />
+          </FtFlexBox>
+        </template>
+        <template v-else>
+          <p
+            v-if="browseResults.length === 0"
+            class="message"
+          >
+            {{ t('Platforms.Empty Tab') }}
+          </p>
+          <!-- Each tab and set of filters mounts its own list, so it enters
+               like channel tabs do instead of reflowing the previous grid -->
+          <PlatformResultList
+            :key="`${currentTab}:${filtersKey}`"
+            appear
+            :results="browseResults"
+          />
+        </template>
       </template>
     </FtCard>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, shallowRef, useId } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../../components/FtButton/FtButton.vue'
@@ -109,14 +122,16 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
+import PlatformFilters from '../../components/PlatformFilters/PlatformFilters.vue'
 import PlatformResultList from '../../components/PlatformResultList/PlatformResultList.vue'
 import PlatformSearchResults from '../../components/PlatformSearchResults/PlatformSearchResults.vue'
 
+import { usePlatformFilters } from '../../composables/usePlatformFilters'
 import { getPlatformFetch } from '../../helpers/platformFetch'
 import twitch from '../../../platforms/twitch'
 import { PLATFORM_ICONS } from '../../../platforms/index'
 
-/** Without a search, these tabs list the most watched categories and live streams */
+/** Without a search, these tabs list the most watched categories and live streams of every category */
 const TABS = /** @type {const} */ (['categories', 'channels'])
 const TAB_ICONS = {
   categories: ['fas', 'gamepad'],
@@ -125,7 +140,6 @@ const TAB_ICONS = {
 
 const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 const headingId = useId()
 const panelId = useId()
 
@@ -138,16 +152,7 @@ const tabLabels = computed(() => ({
 const query = computed(() => typeof route.query.query === 'string' ? route.query.query.trim() : '')
 const currentTab = computed(() => TABS.includes(/** @type {any} */ (route.query.tab)) ? route.query.tab : TABS[0])
 
-/**
- * @param {Record<string, string | undefined>} changes
- */
-function updateRoute(changes) {
-  const next = { ...route.query, ...changes }
-  for (const key of Object.keys(changes)) {
-    if (!next[key]) delete next[key]
-  }
-  router.replace({ query: next })
-}
+const { filters, filtersKey, updateQuery: updateRoute } = usePlatformFilters(computed(() => twitch), computed(() => twitch.liveStreamFilters))
 
 /**
  * @param {string} text
@@ -184,19 +189,33 @@ function focusOtherTab(tab) {
   tabRefs.get(other)?.focus()
 }
 
-/** @type {import('vue').ShallowRef<{ categories: import('../../../platforms/types').PlatformCategory[], items: import('../../../platforms/types').PlatformItem[] } | null>} */
-const browse = shallowRef(null)
+/** @type {import('vue').ShallowRef<import('../../../platforms/types').PlatformResult[]>} */
+const browseResults = shallowRef([])
 const browseLoading = ref(false)
 const browseError = ref(false)
 let browseGeneration = 0
+/** @type {AbortController | null} */
+let browseController = null
 
+/** Loads the list of the tab, unless a search shows another */
 async function loadBrowse() {
   const generation = ++browseGeneration
-  browseLoading.value = true
+  browseController?.abort()
+  browseResults.value = []
   browseError.value = false
+  if (query.value) {
+    browseLoading.value = false
+    return
+  }
+  const controller = new AbortController()
+  browseController = controller
+  browseLoading.value = true
   try {
-    const result = await twitch.getBrowse(getPlatformFetch(twitch.id))
-    if (generation === browseGeneration) browse.value = result
+    const fetch = getPlatformFetch(twitch.id)
+    const results = currentTab.value === 'categories'
+      ? (await twitch.getTopCategories(fetch, controller.signal)).map(category => ({ kind: /** @type {const} */ ('category'), category }))
+      : (await twitch.getLiveStreams(fetch, filters.value, controller.signal)).map(item => ({ kind: /** @type {const} */ ('item'), item }))
+    if (generation === browseGeneration) browseResults.value = results
   } catch (error) {
     if (generation !== browseGeneration) return
     console.error('Failed to load Twitch', error)
@@ -206,15 +225,9 @@ async function loadBrowse() {
   }
 }
 
-/** @type {import('vue').ComputedRef<import('../../../platforms/types').PlatformResult[]>} */
-const browseResults = computed(() => {
-  if (!browse.value) return []
-  return currentTab.value === 'categories'
-    ? browse.value.categories.map(category => ({ kind: 'category', category }))
-    : browse.value.items.map(item => ({ kind: 'item', item }))
-})
+onBeforeUnmount(() => browseController?.abort())
 
-loadBrowse()
+watch([query, currentTab, () => currentTab.value === 'channels' ? filtersKey.value : ''], loadBrowse, { immediate: true })
 </script>
 
 <style scoped src="../ExternalChannel/ExternalChannel.css" />
@@ -232,5 +245,11 @@ loadBrowse()
 
 .twitchSearch {
   inline-size: 100%;
+}
+
+/* With the list items' own padding, their thumbnails sit as far below the
+   filters as the filters' labels below the card's edge */
+.liveFilters {
+  margin-block-end: calc(10px * var(--ui-density));
 }
 </style>

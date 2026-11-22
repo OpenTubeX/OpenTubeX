@@ -254,6 +254,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
   RSS Feeds:
+    Load More Items: Naloži več elementov
     Refreshing: Osveževanje virov RSS
     Tab: RSS
     Followed Feeds: Spremljani viri RSS
@@ -623,6 +624,7 @@ Settings:
       Memory: pomnilnik
       Network: omrežje
       Disk: disk
+    Label: Zmogljivost
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
     Invidious Instance Username: 'Uporabniško ime primerka'
@@ -755,6 +757,8 @@ Settings:
       Auto: Samodejno
     Preferred API Backend:
       Yattee Server: Strežnik Yattee
+      Local API Extension Required: Spletna aplikacija lahko lokalni API uporablja le z razširitvijo brskalnika OpenTubeX Local API.
+      Install Local API Extension: Namesti razširitev
     Yattee Server:
       Server URL: URL strežnika Yattee
       Username: Uporabniško ime
@@ -795,6 +799,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Toggle Playback With Tab Icon: Predvajaj in začasno ustavi z ikono zavihka
     Theme and Colors: "Tema in barve"
     Font Size: Velikost pisave
     Sections:
@@ -1073,6 +1078,7 @@ Settings:
     Mono Audio: 'Mono zvok'
     Normalize Loudness: 'Normaliziraj glasnost'
     Show Mono Audio Toggle: 'Prikaži stikalo za mono zvok'
+    Show Mirror Video Toggle: "Prikaži stikalo za zrcaljenje videoposnetka"
     Default Media Format:
       Default Media Format: 'Prevzeta oblika predstavnosti'
     Pause on Stream Recovery: "Začasno ustavi ob obnovitvi pretoka"
@@ -1102,6 +1108,7 @@ Settings:
     Enable DLNA Casting: "Omogoči predvajanje prek DLNA"
     Skip Unavailable Playlist Videos: "Preskoči nedostopne videoposnetke na seznamih predvajanja"
     Lights Off: Ugasni luči
+    Mirror Video: "Zrcali videoposnetek"
     Show Lights Off Toggle: Prikaži stikalo za ugašanje luči
     Show Volume Boost Toggle: "Prikaži preklop za ojačitev glasnosti"
     Swipe Gestures:
@@ -1115,6 +1122,7 @@ Settings:
       Unavailable: Kontrolnikov predvajanja ni bilo mogoče prilagoditi.
     yt-dlp Streaming: "Pretakanje z yt-dlp"
     Continue Playback When Screen Is Locked: 'Nadaljuj predvajanje, ko je zaslon zaklenjen'
+    Switch to Audio in Background: 'Preklopi na zvočne formate v ozadju'
     Ignore Headphone Controls: 'Prezri kontrolnike slušalk'
     Music Visualizer: Glasbeni vizualizator
     Automatically Open Chapters: Samodejno odpri poglavja
@@ -1267,6 +1275,7 @@ Settings:
     Timestamp Notes:
       Enable: "Omogoči opombe s časovnimi oznakami"
       Obsidian Vault: Trezor Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Dvojni dotik z dvema prstoma za preskakovanje poglavij"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1522,6 +1531,7 @@ Settings:
     Cleanup Complete: Čiščenje shrambe je končano
     Cleanup Failed: Čiščenje shrambe ni uspelo
   Subscription Settings:
+    Refresh These Feeds Together: "Osveži te vire skupaj"
     Fetch Feed on Startup: Pridobi vir ob zagonu
     Show New Content Feed: Prikaži vir novih vsebin
     RSS Feeds: Viri RSS
@@ -1545,6 +1555,7 @@ Settings:
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljaj spremljane kanale
+      Enable Twitch Page: Omogoči stran Twitch
       Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
       Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
@@ -1590,6 +1601,7 @@ Settings:
     Hide Header Sync Indicator: Skrij kazalnik sinhronizacije v glavi aplikacije
     Hide Repeat Stats: Skrij statistiko ponavljanja
     Hide Playlist Stats: Skrij statistiko seznama predvajanja
+    Hide Recommendation Details: Skrij razloge za priporočila in povratne informacije
     Sections:
       Digital Wellbeing: "Digitalno dobro počutje"
       Side Bar: Stranska vrstica
@@ -1983,6 +1995,7 @@ Settings:
     Downloading: Prenašanje seznamov…
     Failed to Download: Seznamov ni bilo mogoče prenesti
     Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Posodobljeno: {date}"
+  Highlight Changed Settings Label: Spremenjene
 Tutorial:
   Skip: Preskoči
   Next: Naprej
@@ -2368,6 +2381,9 @@ Video:
     Zoom:
       Zoom: Povečava
       'Off': 'Izklopljeno'
+    Lock Controls:
+      Lock Controls: "Zakleni kontrolnike"
+      Hold to Unlock: "Pridržite za odklepanje"
     Volume Boost:
       Volume Boost: "Ojačitev glasnosti"
       'Off': "Izklopljeno"
@@ -2900,6 +2916,7 @@ Tooltips:
     Normalize Loudness: 'Utiša videoposnetke, ki so glasnejši od večine, da glasnost med videoposnetki ne skače. Tihi videoposnetki ohranijo svojo glasnost. Deluje samo za videoposnetke, naložene prek lokalnega APV.'
     Pause on Stream Recovery: "Ko video pretok ne uspe in predvajalnik ga znova naloži ali preklopi na drug format ali pogon, se predvajanje začasno ustavi, napaka pa ostane na vrhu predvajalnika, dokler je ne opustite. Ko je izklopljeno, se predvajanje nadaljuje, napaka pa se na kratko prikaže kot obvestilo."
     Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
+    Switch to Audio in Background: 'Predvaja zvočne formate, ko aplikacija teče v ozadju ali je zaslon izklopljen, kar varčuje s podatki in baterijo. Slika v sliki ohrani videoposnetek. Videoposnetek se vrne, ko znova odprete aplikacijo. Zahteva nadaljevanje predvajanja pri zaklenjenem zaslonu.'
     Ignore Headphone Controls: 'Prezre ukaze za predvajanje, premor in preskok iz naprav Bluetooth, žičnih slušalk in predstavnostnih tipk na tipkovnicah, da nenamerni dotiki slušalk ne prekinejo predvajanja. Kontrolniki v aplikaciji in v obvestilu o predstavnosti še naprej delujejo.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.
     Proxy Videos Through Invidious: Za posredovanje videoposnetkov se poveže z Invidiousom namesto neposredno z YouTubom.
@@ -2911,6 +2928,7 @@ Tooltips:
     Use YouTube-style Shorts: Videoposnetke Shorts prikaže v pokončni mreži na straneh naročnin in kanalov ter uporabi predvajalnik Shorts v slogu YouTuba.
     Loop Shorts: Ko je možnost omogočena, se videoposnetki Shorts samodejno začnejo znova. Ko je onemogočena, se na koncu ustavijo in prikažejo gumb za ponovno predvajanje.
     Show Skip Silence Toggle: V meniju nastavitev predvajalnika prikaže stikalo za vklop ali izklop preskakovanja tišine.
+    Show Mirror Video Toggle: "V meniju nastavitev predvajalnika prikaže stikalo, ki videoposnetek vodoravno zrcali, da lažje sledite vadnicam za ples, vadbo in igranje inštrumentov."
     Enable Skip Silence by Default: Omogoči preskakovanje tišine za nove zavihke. Sprememba v enem zavihku ne vpliva na druge.
     Enable Video Zoom: V meniju nastavitev predvajalnika prikaže kontrolnik za povečavo ter omogoči njegove bližnjice na tipkovnici in kontrolnike za pomikanje.
     Enable Seek History: Do zaprtja aplikacije si zapomni, od kod ste skočili v vsakem videoposnetku. Prikaže seznam zgodovine skokov v meniju nastavitev predvajalnika in omogoči njene bližnjice na tipkovnici.
@@ -2932,6 +2950,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
     Enable Timestamp Notes: "V predvajalnik doda gumb in bližnjico N, ki zaustavita videoposnetek in odpreta opombo s povezavo do trenutnega trenutka. Opombe lahko kopirate kot Markdown ali jih na računalniku dodate v Obsidian."
     Obsidian Vault: Ime trezorja Obsidian za opombe s časovnimi oznakami. Ko je nastavljeno, lahko opombe dodajate v Obsidian. Opombe posameznega videoposnetka se zbirajo v opombi, poimenovani po videoposnetku, v mapi trezorja za nove opombe.
+    Double-Tap With Two Fingers to Skip Chapters: "Z dvema prstoma se dvakrat dotaknite desne strani videoposnetka, da skočite na naslednje poglavje, ali leve strani, da se vrnete na začetek trenutnega poglavja. V prvih 3 sekundah poglavja vas leva stran namesto tega premakne na prejšnje poglavje, zato se s ponavljanjem pomikate nazaj po poglavjih."
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
@@ -2973,6 +2992,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Vnesite besedo, del besede ali besedno zvezo ne glede na velikost črk, da po vsej aplikaciji OpenTubeX skrijete videoposnetke, sezname predvajanja in kanale, katerih izvirni naslovi jo vsebujejo. Izvzeti so le Zgodovina, Vaši seznami predvajanja in videoposnetki znotraj seznamov predvajanja.
     Hide Videos on Watch: Skrije ogledane videoposnetke z zavihkov Videoposnetki, Shorts in V živo na straneh naročnin in kanalov. To ne vpliva na zavihek Domov na straneh kanalov
   Subscription Settings:
+    Refresh These Feeds Together: "Ko osvežite enega od označenih virov, se drugi označeni viri osvežijo takoj za njim. Samodejne osvežitve še vedno sledijo intervalu posameznega vira."
     Fetch Feed on Startup: Ko je možnost omogočena, OpenTubeX samodejno pridobi vir naročnin ob zagonu in odprtju novega okna.
     Show New Content Feed: Prikaže zavihek Novo z elementi vira naročnin, ki ob prejšnjem pridobivanju še niso bili prisotni.
     Enable RSS Feeds: Prikaže zavihek RSS na strani Naročnine z elementi virov RSS ali Atom, da lahko spremljate ustvarjalce na drugih platformah. Njegovi elementi se odprejo z yt-dlp.
@@ -2983,10 +3003,12 @@ Tooltips:
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
-    Show Collaborations From Other Channels: "Prikaže tudi videoposnetke, ki so jih naročeni kanali ustvarili skupaj z drugim kanalom, ki jih je naložil. YouTube jih navaja samo na zavihku Domov kanala, zato vsaka osvežitev videoposnetkov naloži eno stran več na kanal. Najdena so samo najnovejša sodelovanja, prikazana tam, nekateri kanali ne prikazujejo nobenega, datumi objave pa so približni. Ni na voljo z API-jem Invidious."
+    Show Collaborations From Other Channels: "Prikaže tudi videoposnetke, ki so jih naročeni kanali ustvarili skupaj z drugim kanalom, ki jih je naložil. YouTube jih navaja samo na zavihku Domov kanala, zato osvežitev videoposnetkov preveri največ nekaj kanalov, nova sodelovanja pa se lahko pojavijo šele po dnevu ali več. Najdena so samo najnovejša sodelovanja, prikazana tam, nekateri kanali ne prikazujejo nobenega, datumi objave pa so približni. Ni na voljo z API-jem Invidious."
     Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
+    Enable Twitch Page: Omogoča odpiranje strani Twitch iz navigacije in palete ukazov. Tam lahko brskate po priljubljenih kategorijah in kanalih v živo ter iščete po Twitchu.
     Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
+    Toggle Playback With Tab Icon: Klik ikone zavihka s predvajanim ali začasno ustavljenim videoposnetkom ga začasno ustavi ali nadaljuje, ne da bi preklopili na ta zavihek.
     Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje, vključno s tistimi, ki ponujajo Razveljavi. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki zahtevajo odločitev, na primer pozivi k posodobitvi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
@@ -3131,6 +3153,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Razveljavi zadnji skok
   Redo Seek: Znova uveljavi razveljavljeni skok
   New Incognito Tab: Ustvari nov zavihek brez beleženja zgodovine
+  Shortcuts Label: Bližnjice
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov
@@ -3165,6 +3188,8 @@ CommandPalette:
     Download Finished: Ta prenos se ne izvaja več
     Video: Najprej odprite videoposnetek
 Downloads:
+  Stop Recording: "Ustavi snemanje"
+  Recording: "Snemanje"
   File Name Template Invalid: 'Uporabite relativno pot znotraj mape za prenose brez "..", "~", "$", "%" ali predpone, kot je "thumbnail:".'
   Search Completed: "Poišči dokončane prenose po naslovu ali kanalu"
   Format: "Oblika"
@@ -3308,6 +3333,22 @@ App Icon:
   Saved Message: "Ikona je shranjena. Posodobitev zaganjalnika lahko traja nekaj časa."
   Title: "Ikona aplikacije"
   Error: "Ikone aplikacije ni bilo mogoče naložiti ali spremeniti"
+
+App Lock:
+  Title: "Zaklep aplikacije"
+  Enable: "Zahtevaj zaklep zaslona"
+  Enable Tooltip: "Ob vrnitvi v OpenTubeX zahteva prstni odtis, obraz, PIN, vzorec ali geslo. V Androidu 13 in novejših najnovejše aplikacije prav tako ne prikazujejo predogleda aplikacije."
+  Lock After: "Zakleni po"
+  Immediately: "Takoj"
+  1 Minute: "1 minuti"
+  5 Minutes: "5 minutah"
+  15 Minutes: "15 minutah"
+  1 Hour: "1 uri"
+  Unavailable: "Če želite uporabljati zaklep aplikacije, nastavite zaklep zaslona v nastavitvah Androida."
+  Error: "Zaklepa aplikacije ni bilo mogoče spremeniti"
+  Locked: "OpenTubeX je zaklenjen"
+  Unlock: "Odkleni"
+  Prompt Title: "Odkleni OpenTubeX"
 
 Tray:
   Hide All Windows: "Skrij vsa okna"
@@ -3473,6 +3514,33 @@ Platforms:
   Verify: "Preveri"
   Categories: "Kategorije"
   Category Not Found: "Te kategorije ni bilo mogoče najti."
+  Category Tags: "Oznake kategorije"
+  Stream Tags: "Oznake pretoka"
+  Language: "Jezik"
+  All Languages: "Vsi jeziki"
+  Other Language: "Drugo"
+  American Sign Language: "ameriški znakovni jezik"
+  Search Tags: "Iskanje oznak"
+  Add Tag: "Dodaj oznako"
+  Remove Tag: "Odstrani {tag}"
+  Sort:
+    Viewers: "Gledalci (od največ do najmanj)"
+    Viewers Ascending: "Gledalci (od najmanj do največ)"
+    Started: "Nedavno začeto"
+    Relevance: "Priporočeno"
+    Published: "Nedavno objavljeno"
+    Views: "Ogledi (od največ do najmanj)"
+    Top Day: "Najboljše v 24 urah"
+    Top Week: "Najboljše v 7 dneh"
+    Top Month: "Najboljše v 30 dneh"
+    Top All: "Najboljše vseh časov"
+  Video Type:
+    Video Type: "Vrsta videoposnetka"
+    All: "Vsi videoposnetki"
+    Archive: "Pretekli prenosi"
+    Highlight: "Poudarki"
+    Upload: "Naloženi videoposnetki"
+  Anonymous: "Anonimno"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"
@@ -3507,5 +3575,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Iskanje po Twitchu"
+  Search Placeholder: "Kategorije in kanali"
 New Incognito Tab: Nov zavihek brez beleženja zgodovine
 Incognito Tab: Zavihek brez beleženja zgodovine

@@ -72,7 +72,7 @@ function fixture(platform = 'linux') {
     Menu: { buildFromTemplate: items => items },
     createWindow: () => new Window(),
     requestQuit: () => {},
-    getDockMediaSession: () => mediaSession,
+    getMediaControlSession: () => mediaSession,
     requestDockMediaAction: action => mediaActions.push(action),
     IpcChannels: { WINDOW_MINIMIZED_STATE: 'minimized' },
     monitorsKdeWaylandWindowState: true,

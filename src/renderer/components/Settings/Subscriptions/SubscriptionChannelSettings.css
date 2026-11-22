@@ -1,8 +1,10 @@
+/* The sync icon sits after the button, outside it, so the button itself
+   is centered. */
 .manageButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
   max-inline-size: 100%;
+  position: relative;
 }
 
 .manageButton :deep(.btn) {
@@ -11,6 +13,8 @@
 }
 
 .manageButton :deep(.syncedSettingIndicator) {
+  position: absolute;
+  inset-inline-start: calc(100% + 0.4em);
   font-size: 0.8em;
   margin-inline-start: 0;
 }

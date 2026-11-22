@@ -15,7 +15,8 @@ import {
   markThreadOpened,
   normalizeTrackedCommentThreads,
   trackComment,
-  untrackComment
+  untrackComment,
+  updateWatchedCommentText
 } from '../../src/commentReplyTracking.js'
 
 const own = { videoId: 'video1', channelId: 'UCme', handle: '@Me', text: 'First', videoTitle: 'Title' }
@@ -125,7 +126,7 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
     entityKey: `entity-${commentId}`,
     payload: {
       commentEntityPayload: {
-        properties: { commentId, toolbarStateKey: stateKey, content: { content: `\u200B \u2068Text of ${commentId}\u2069 ` } },
+        properties: { commentId, toolbarStateKey: stateKey, content: { content: `\u200B \u2068Text of ${commentId}\u2069 \u{1F469}\u200D\u{1F4BB} ` } },
         toolbar: { heartActiveTooltip: tooltip }
       }
     }
@@ -143,8 +144,8 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
       }
     }
   }
-  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name', text: 'Text of thread1' })
-  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name', text: 'Text of thread1.a' })
+  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name', text: 'Text of thread1 \u{1F469}\u200D\u{1F4BB}' })
+  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name', text: 'Text of thread1.a \u{1F469}\u200D\u{1F4BB}' })
   assert.equal(findCommentHeart(response, 'thread1.b'), null)
   assert.equal(findCommentHeart({}, 'thread1'), null)
 })
@@ -247,4 +248,15 @@ test('watches others\' comments from now on and apart from own ones', () => {
   const { accountId, ...legacy } = threads[0]
   assert.equal(accountId, 'UCme')
   assert.equal(isOwnWatchedComment(legacy), true)
+})
+
+test('an edit changes the text of the watched comment only', () => {
+  const threads = trackComment(trackComment([], { ...own, threadId: 'thread1', commentId: 'mine' }, 1000),
+    { ...own, threadId: 'thread2', commentId: 'thread2' }, 2000)
+
+  // Posted replies may lack the `threadId.` that edited ones have.
+  const edited = updateWatchedCommentText(threads, 'video1', 'thread1.mine', 'Edited')
+  assert.deepEqual(edited.map(thread => [thread.threadId, thread.text]), [['thread2', 'First'], ['thread1', 'Edited']])
+  assert.equal(updateWatchedCommentText(threads, 'video1', 'thread1.other', 'Edited'), null)
+  assert.equal(updateWatchedCommentText(threads, 'video2', 'thread2', 'Edited'), null)
 })

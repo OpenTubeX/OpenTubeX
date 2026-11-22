@@ -208,6 +208,16 @@
             :disabled="!store.getters.getTabsEnabled"
             @change="updateShowTabPreviews"
           />
+          <FtToggleSwitch
+            v-if="usingElectron"
+            :label="$t('Settings.Theme Settings.Toggle Playback With Tab Icon')"
+            :tooltip="$t('Tooltips.Theme Settings.Toggle Playback With Tab Icon')"
+            compact
+            :default-value="store.getters.getToggleTabPlaybackWithIcon"
+            setting-key="toggleTabPlaybackWithIcon"
+            :disabled="!store.getters.getTabsEnabled"
+            @change="store.dispatch('updateToggleTabPlaybackWithIcon', $event)"
+          />
         </div>
       </div>
       <FtFlexBox

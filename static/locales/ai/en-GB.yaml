@@ -208,6 +208,7 @@ Subscriptions:
   Newest First: Newest first
   Oldest First: Oldest first
   RSS Feeds:
+    Load More Items: Load more items
     Refreshing: Refreshing RSS feeds
     Tab: RSS
     Followed Feeds: Followed RSS feeds
@@ -494,6 +495,7 @@ Settings:
       Memory: memory
       Network: network
       Disk: disk
+    Label: Performance
   General Settings:
     Invidious Instance Username: 'Instance username'
     Invidious Instance Password: 'Instance password'
@@ -606,6 +608,8 @@ Settings:
       Auto: Auto
     Preferred API Backend:
       Yattee Server: Yattee Server
+      Local API Extension Required: The web app can only use the local API with the OpenTubeX Local API browser extension.
+      Install Local API Extension: Install the extension
     Yattee Server:
       Server URL: Yattee server URL
       Username: Username
@@ -648,6 +652,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Toggle Playback With Tab Icon: Play and Pause With the Tab Icon
     Theme and Colors: "Theme and colours"
     Font Size: Font Size
     Sections:
@@ -862,6 +867,7 @@ Settings:
     Mono Audio: 'Mono Audio'
     Normalize Loudness: 'Normalise Loudness'
     Show Mono Audio Toggle: 'Show Mono Audio Toggle'
+    Show Mirror Video Toggle: "Show Mirror Video Toggle"
     Pause on Stream Recovery: "Pause on Stream Recovery"
     Buffering:
       Buffering: Buffering
@@ -889,6 +895,7 @@ Settings:
     Enable DLNA Casting: "Enable DLNA casting"
     Skip Unavailable Playlist Videos: "Skip Unavailable Playlist Videos"
     Lights Off: Lights Off
+    Mirror Video: "Mirror Video"
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: "Show Volume Boost Toggle"
     Swipe Gestures:
@@ -902,6 +909,7 @@ Settings:
       Unavailable: Could not adjust playback controls.
     yt-dlp Streaming: "yt-dlp Streaming"
     Continue Playback When Screen Is Locked: 'Continue playback when the screen is locked'
+    Switch to Audio in Background: 'Switch to audio formats in the background'
     Ignore Headphone Controls: 'Ignore headphone controls'
     Music Visualizer: Music visualiser
     Automatically Open Chapters: Automatically Open Chapters
@@ -1035,6 +1043,7 @@ Settings:
     Timestamp Notes:
       Enable: "Enable Timestamp Notes"
       Obsidian Vault: Obsidian Vault
+    Double-Tap With Two Fingers to Skip Chapters: "Double-tap with two fingers to skip chapters"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1273,6 +1282,7 @@ Settings:
     Cleanup Complete: Storage cleanup finished
     Cleanup Failed: Storage cleanup failed
   Subscription Settings:
+    Refresh These Feeds Together: "Refresh These Feeds Together"
     Show New Content Feed: Show New Content Feed
     RSS Feeds: RSS feeds
     Enable RSS Feeds: Enable RSS feeds for other platforms
@@ -1292,6 +1302,7 @@ Settings:
     Platforms:
       Other Platforms: Other platforms
       Manage Channels: Manage followed channels
+      Enable Twitch Page: Enable Twitch page
       Notify When Live: Notify when followed Twitch channels go live
       Auto Refresh Interval: Other platforms auto refresh interval
   Distraction Free Settings:
@@ -1339,6 +1350,7 @@ Settings:
     Hide Header Sync Indicator: Hide Header Sync Indicator
     Hide Repeat Stats: Hide Repeat Stats
     Hide Playlist Stats: Hide Playlist Stats
+    Hide Recommendation Details: Hide Recommendation Reasons and Feedback
     Hide Channel Avatars: Hide Channel Avatars
     Shorten View Counts: Shorten View, Comment and Comment Like Counts
     Hide Home: Hide Home
@@ -1636,6 +1648,7 @@ Settings:
     Downloading: Downloading the lists…
     Failed to Download: Couldn't download the lists
     Loaded Status: "Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}"
+  Highlight Changed Settings Label: Changed
 Tutorial:
   Skip: Skip
   Next: Next
@@ -1912,6 +1925,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Off'
+    Lock Controls:
+      Lock Controls: "Lock Controls"
+      Hold to Unlock: "Hold to unlock"
     Volume Boost:
       Volume Boost: "Volume Boost"
       'Off': "Off"
@@ -2384,6 +2400,7 @@ Tooltips:
     Normalize Loudness: 'Turns down videos that are louder than most, so the volume doesn''t jump between videos. Quiet videos keep their volume. Only works for videos loaded with the Local API.'
     Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
     Continue Playback When Screen Is Locked: 'Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.'
+    Switch to Audio in Background: 'Plays audio formats while the app is in the background or the screen is off, which saves data and battery. Picture-in-Picture keeps the video. The video returns when you open the app again. Requires continuing playback when the screen is locked.'
     Ignore Headphone Controls: 'Ignores play, pause, and skip commands from Bluetooth devices, wired headphones, and keyboard media keys, so accidental earbud taps don''t interrupt playback. Controls in the app and in the media notification keep working.'
     Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
     Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.
@@ -2392,6 +2409,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Show Mirror Video Toggle: "Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials."
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.
@@ -2413,6 +2431,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
     Enable Timestamp Notes: "Adds a player button and the N shortcut that pause the video and open a note linking to the current moment. Notes can be copied as Markdown or, on desktop, added to Obsidian."
     Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
+    Double-Tap With Two Fingers to Skip Chapters: "Double-tap the right side of the video with two fingers to skip to the next chapter, or the left side to return to the start of the current chapter. In the first 3 seconds of a chapter, the left side goes to the previous chapter instead, so repeating it steps back through the chapters."
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
@@ -2443,6 +2462,7 @@ Tooltips:
     Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
   Subscription Settings:
+    Refresh These Feeds Together: "When you refresh one of the ticked feeds, the other ticked feeds refresh right after it. Automatic refreshes still follow each feed's own interval."
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Enable RSS Feeds: Shows an RSS tab on the Subscriptions page with the items of RSS or Atom feeds, so you can follow creators on other platforms. Its items open with yt-dlp.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
@@ -2452,10 +2472,12 @@ Tooltips:
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
-    Show Collaborations From Other Channels: "Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so each video refresh loads one more page per channel. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API."
+    Show Collaborations From Other Channels: "Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so a video refresh checks at most a few channels, and new ones can take a day or more to appear. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API."
     Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Enable Twitch Page: Lets you open the Twitch page from the navigation and the command palette. There you can browse popular categories and live channels and search Twitch.
     Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
   Theme Settings:
+    Toggle Playback With Tab Icon: Clicking the icon of a tab with a playing or paused video pauses or resumes it without switching to that tab.
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status, including ones that offer Undo. Errors, warnings, reminders you set up, and notifications that ask for a decision, such as update prompts, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
@@ -2516,6 +2538,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Undo the last seek
   Redo Seek: Redo an undone seek
   New Incognito Tab: Create a new incognito tab
+  Shortcuts Label: Shortcuts
 CommandPalette:
   Title: Command palette
   Open: Open command palette
@@ -2550,6 +2573,8 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  Stop Recording: "Stop recording"
+  Recording: "Recording"
   File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'
   Search Completed: "Search completed downloads by title or channel"
   Format: "Format"
@@ -2695,6 +2720,22 @@ App Icon:
   Saved Message: "Icon saved. Your launcher may take a moment to update."
   Title: "App icon"
   Error: "Unable to load or change the app icon"
+
+App Lock:
+  Title: "App lock"
+  Enable: "Require screen lock"
+  Enable Tooltip: "Asks for your fingerprint, face, PIN, pattern, or password when you return to OpenTubeX. On Android 13 and later, recent apps also stop showing a preview of the app."
+  Lock After: "Lock after"
+  Immediately: "Immediately"
+  1 Minute: "1 minute"
+  5 Minutes: "5 minutes"
+  15 Minutes: "15 minutes"
+  1 Hour: "1 hour"
+  Unavailable: "Set a screen lock in Android settings to use app lock."
+  Error: "Unable to change app lock"
+  Locked: "OpenTubeX is locked"
+  Unlock: "Unlock"
+  Prompt Title: "Unlock OpenTubeX"
 
 Tray:
   Hide All Windows: "Hide All Windows"
@@ -2869,6 +2910,33 @@ Platforms:
   Verify: "Verify"
   Categories: "Categories"
   Category Not Found: "This category could not be found."
+  Category Tags: "Category tags"
+  Stream Tags: "Stream tags"
+  Language: "Language"
+  All Languages: "All languages"
+  Other Language: "Other"
+  American Sign Language: "American Sign Language"
+  Search Tags: "Search tags"
+  Add Tag: "Add tag"
+  Remove Tag: "Remove {tag}"
+  Sort:
+    Viewers: "Viewers (high to low)"
+    Viewers Ascending: "Viewers (low to high)"
+    Started: "Recently started"
+    Relevance: "Recommended"
+    Published: "Recently published"
+    Views: "Views (high to low)"
+    Top Day: "Top 24 hours"
+    Top Week: "Top 7 days"
+    Top Month: "Top 30 days"
+    Top All: "Top all time"
+  Video Type:
+    Video Type: "Video type"
+    All: "All videos"
+    Archive: "Past broadcasts"
+    Highlight: "Highlights"
+    Upload: "Uploads"
+  Anonymous: "Anonymous"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
@@ -2903,5 +2971,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Search Twitch"
+  Search Placeholder: "Categories and channels"
 New Incognito Tab: New Incognito Tab
 Incognito Tab: Incognito tab

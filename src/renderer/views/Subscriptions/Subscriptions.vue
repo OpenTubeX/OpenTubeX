@@ -607,13 +607,8 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import { isSubscriptionRefreshReserved, takeSubscriptionFeedRefreshRequest } from '../../helpers/subscriptionFeedRefreshRequest'
 import { useSubscriptionPremiereUpdates } from '../../composables/useSubscriptionPremiereUpdates'
-import {
-  requestSubscriptionRefreshCancellation,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote
-} from '../../helpers/subscriptions'
+import { requestSubscriptionRefreshCancellation } from '../../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../../helpers/subscriptionFeedRefresh'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { getEnabledSubscriptionFeedSources } from '../../helpers/newSubscriptionFeed'
 import {
@@ -696,7 +691,8 @@ function suppressFeedTabHoldClick(event) {
 }
 
 function handleFeedContextMenu(event) {
-  if (!process.env.IS_CAPACITOR && event.pointerType !== 'touch') return
+  // Electron opens the feed tab menu in the main process, and Shift keeps the browser's menu
+  if ((isElectron || event.shiftKey) && event.pointerType !== 'touch') return
   const tab = event.target.closest(FEED_TAB_SELECTOR)
   if (!tab) return
 
@@ -745,6 +741,12 @@ function handleFeedContextMenu(event) {
       icon: ['fas', 'check'],
       run: () => handleFeedMarkSeenRequest({ tabId, feedTab })
     })
+  }
+  if (!process.env.IS_CAPACITOR && event.pointerType !== 'touch') {
+    window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+      detail: { x: event.clientX, y: event.clientY, items: ref(actions.map(action => ({ enabled: true, ...action }))) }
+    }))
+    return
   }
   openMobileContextActions({ title: tab.textContent.trim(), actions })
 }
@@ -1777,15 +1779,7 @@ async function handleFeedReloadRequest(payload) {
     return
   }
 
-  const options = { t }
-  const refreshers = {
-    videos: refreshSubscriptionVideosFromRemote,
-    shorts: refreshSubscriptionShortsFromRemote,
-    live: refreshSubscriptionLiveFromRemote,
-    posts: refreshSubscriptionPostsFromRemote
-  }
-
-  await refreshers[payload.feedTab]?.(options)
+  await refreshSubscriptionFeed(payload.feedTab, { t })
 }
 
 // ===== Single row header =====

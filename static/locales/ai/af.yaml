@@ -257,6 +257,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube verskaf nie RSS-voere vir plasings nie. Deaktiveer die instelling "{rssSetting}" om plasings te sien, of aktiveer die instelling "{hideSetting}" om hierdie oortjie te versteek.
   RSS Feeds:
+    Load More Items: Laai meer items
     Refreshing: RSS-feeds word herlaai
     Tab: RSS
     Followed Feeds: Gevolgde RSS-voere
@@ -662,6 +663,7 @@ Settings:
       Memory: geheue
       Network: netwerk
       Disk: skyf
+    Label: Werkverrigting
   Return to Settings Menu: Keer terug na instellingskieslys
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
@@ -775,6 +777,8 @@ Settings:
       Entire App: Hele toep
     Preferred API Backend:
       Yattee Server: Yattee-bediener
+      Local API Extension Required: Die webtoep kan die plaaslike API slegs met die OpenTubeX Local API-blaaieruitbreiding gebruik.
+      Install Local API Extension: Installeer die uitbreiding
     Video View Type:
       Full Width: Volle breedte
     Playlist View Type:
@@ -832,6 +836,7 @@ Settings:
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.
   Theme Settings:
+    Toggle Playback With Tab Icon: Speel en pouseer met die oortjie-ikoon
     Theme and Colors: "Tema en kleure"
     Font Size: Lettergrootte
     Sections:
@@ -1058,9 +1063,11 @@ Settings:
       Screenshots: Skermkiekies
       Timestamp Notes: Tydstempelnotas
     Lights Off: Ligte af
+    Mirror Video: "Spieël video"
     Show Lights Off Toggle: Wys Ligte af-wisselaar
     Show Volume Boost Toggle: Wys volumeversterking-wisselaar
     Show Mono Audio Toggle: Wys mono-oudio-wisselaar
+    Show Mirror Video Toggle: "Wys video-spieëlwisselaar"
     Show Music Mode Toggle: Wys musiekmodus-wisselaar
     Swipe Gestures:
       Fullscreen Brightness: Volle helderheid in volskerm
@@ -1164,6 +1171,7 @@ Settings:
     Show Seek Bar Filmstrip: "Wys soekbalk-filmstrook"
     Pause on Stream Recovery: Pouseer by stroomherstel
     Continue Playback When Screen Is Locked: Speel voort wanneer die skerm gesluit is
+    Switch to Audio in Background: 'Skakel in die agtergrond oor na klankformate'
     Ignore Headphone Controls: 'Ignoreer oorfoonkontroles'
     Voice-over Translation:
       Title: Stemoorvertaling
@@ -1233,6 +1241,7 @@ Settings:
     Timestamp Notes:
       Enable: "Aktiveer tydstempelnotas"
       Obsidian Vault: Obsidian-kluis
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers om hoofstukke oor te slaan"
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -1477,6 +1486,7 @@ Settings:
     Cleanup Complete: Bergingsopruiming voltooi
     Cleanup Failed: Bergingsopruiming het misluk
   Subscription Settings:
+    Refresh These Feeds Together: "Verfris hierdie voere saam"
     Fetch Feed on Startup: Haal voer by opstart op
     Show New Content Feed: Wys voer vir nuwe inhoud
     RSS Feeds: RSS-voere
@@ -1497,6 +1507,7 @@ Settings:
     Platforms:
       Other Platforms: Ander platforms
       Manage Channels: Bestuur gevolgde kanale
+      Enable Twitch Page: Aktiveer Twitch-bladsy
       Notify When Live: Stel in kennis wanneer gevolgde Twitch-kanale regstreeks gaan
       Auto Refresh Interval: Interval vir outomatiese verfrissing van ander platforms
   Distraction Free Settings:
@@ -1540,6 +1551,7 @@ Settings:
     Hide Header Sync Indicator: Versteek sinkroniseringsaanwyser in kopstuk
     Hide Repeat Stats: Versteek herhaalstatistieke
     Hide Playlist Stats: Versteek snitlysstatistieke
+    Hide Recommendation Details: Versteek aanbevelingsredes en terugvoer
     Sections:
       Digital Wellbeing: Digitale welstand
       Visible While Paused: Sigbaar terwyl gepouseer in volle venster / volskerm
@@ -1873,6 +1885,7 @@ Settings:
     Failed to Save Password: Kon nie wagwoord stoor nie.
     Confirm Password: Bevestig wagwoord
     Passwords Do Not Match: Wagwoorde stem nie ooreen nie.
+  Highlight Changed Settings Label: Verander
 Tutorial:
   Skip: Slaan oor
   Next: Volgende
@@ -2209,6 +2222,9 @@ Video:
     Zoom:
       Zoom: Zoem
       'Off': 'Af'
+    Lock Controls:
+      Lock Controls: "Sluit kontroles"
+      Hold to Unlock: "Hou in om te ontsluit"
     Volume Boost:
       Volume Boost: Volumeversterking
       'Off': 'Af'
@@ -2653,12 +2669,14 @@ Tooltips:
     Use YouTube-style Shorts: Vertoon kortvideo’s in ’n portretrooster op intekening- en kanaalblaaie en gebruik die kortvideospeler in YouTube-styl.
     Loop Shorts: Wanneer geaktiveer, begin kortvideo’s outomaties weer. Wanneer gedeaktiveer, stop kortvideo’s aan die einde en wys ’n herspeelknoppie.
     Show Skip Silence Toggle: Wys ’n aan/af-wisselaar vir die oorslaan van stilte in die speler se instellingskieslys.
+    Show Mirror Video Toggle: "Wys ’n aan/af-wisselaar in die speler se instellingskieslys wat die video horisontaal spieël, sodat dit makliker is om dans-, oefen- en instrumenttutoriale te volg."
     Enable Skip Silence by Default: Aktiveer die oorslaan van stilte vir nuwe oortjies. As u dit in een oortjie verander, raak dit nie ander oortjies nie.
     Enable Video Zoom: Wys die zoemkontrole in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie en panneerkontroles daarvan.
     Enable Seek History: Onthou waarvandaan u in elke video gespring het totdat die toep sluit. Wys die spoelgeskiedenislys in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie daarvan.
     Show Seek Bar Filmstrip: "As jy die soekbalk se knop sleep, wys dit 'n strook rame rondom waar jy gaan land, en as jy daarop optrek, spoel jy presies. Wanneer gedeaktiveer, wys sleep 'n enkele duimnael, soos wanneer jy daaroor beweeg."
     Pause on Stream Recovery: Wanneer die videostroom misluk en die speler dit herlaai of na ’n ander formaat of enjin oorskakel, pouseer afspeel en hou die fout bo-aan die speler totdat u dit toemaak. Wanneer gedeaktiveer, gaan afspeel voort en verskyn die fout kortliks as ’n kennisgewing.
     Continue Playback When Screen Is Locked: Hou oudio in die agtergrond aan die speel en verskaf Android-mediakontroles. Skakel dit af om te pouseer wanneer die toep nie meer sigbaar is nie.
+    Switch to Audio in Background: 'Speel klankformate terwyl die app in die agtergrond loop of die skerm af is, wat data en battery spaar. Prent-in-prent behou die video. Die video keer terug wanneer jy die app weer oopmaak. Vereis dat afspeel voortgaan wanneer die skerm gesluit is.'
     Ignore Headphone Controls: 'Ignoreer speel-, pouse- en oorslaanopdragte van Bluetooth-toestelle, bedrade oorfone en mediasleutels op sleutelborde, sodat onbedoelde tikke op oordopjies nie die afspeel onderbreek nie. Kontroles in die toepassing en in die mediakennisgewing werk steeds.'
     Voice-over Translation: Stuur die video-ID, duur en gekose taal na die nie-amptelike Yandex-stemoorvertaaldiens wanneer u ’n vertaling versoek. By verstek gedeaktiveer.
     Hold to Speed Up: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik met die gekose waarde te vermenigvuldig.
@@ -2679,6 +2697,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
     Enable Timestamp Notes: "Voeg 'n spelerknoppie en die N-kortpad by wat die video laat wag en 'n notas oopmaak wat na die huidige oomblik skakel. Notas kan as Markdown gekopieer word of, op die rekenaar, by Obsidian gevoeg word."
     Obsidian Vault: Naam van die Obsidian-kluis vir tydstempelnotas. Wanneer dit gestel is, kan notas by Obsidian gevoeg word. Die notas van elke video word versamel in 'n nota wat na die video vernoem is, in die kluis se vouer vir nuwe notas.
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers aan die regterkant van die video om na die volgende hoofstuk te spring, of aan die linkerkant om na die begin van die huidige hoofstuk terug te keer. In die eerste 3 sekondes van 'n hoofstuk gaan die linkerkant eerder na die vorige hoofstuk, sodat elke herhaling nog een hoofstuk verder terug gaan."
   Download Settings:
     Download Folder: Video’s word in hierdie vouer gestoor. Laat leeg om u stelsel se Aflaaie-vouer te gebruik.
     Global Additional yt-dlp Arguments: Bykomende opdragreëlargumente wat vir elke aflaai aan yt-dlp deurgegee word, byvoorbeeld --cookies-from-browser firefox.
@@ -2709,6 +2728,7 @@ Tooltips:
     Bedtime Reminder: Pouseer die video en herinner u om op te hou kyk tussen die begin- en eindtyd.
     Shorten View Counts: Wys getalle van kyke, kommentaar en kommentaar-hou-van’s wat YouTube reeds afgerond het in ’n verkorte vorm, bv. 14K in plaas van 14 000. Presiese getalle word altyd volledig gewys.
   Subscription Settings:
+    Refresh These Feeds Together: "Wanneer jy een van die gemerkte voere verfris, word die ander gemerkte voere direk daarna verfris. Outomatiese verfrissings volg steeds elke voer se eie interval."
     Fetch Feed on Startup: Wanneer geaktiveer, sal OpenTubeX u intekeningvoer outomaties by opstart ophaal en wanneer ’n nuwe venster oopgemaak word.
     Show New Content Feed: Wys ’n Nuut-oortjie met intekeningvoeritems wat nie tydens die vorige ophaal teenwoordig was nie.
     Enable RSS Feeds: Wys ’n RSS-oortjie op die Intekeninge-blad met die items van RSS- of Atom-voere, sodat u skeppers op ander platforms kan volg. Die items daarvan word met yt-dlp oopgemaak.
@@ -2719,10 +2739,12 @@ Tooltips:
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
     RSS Feeds Auto Refresh Interval: Hoe gereeld OpenTubeX jou RSS-voere outomaties verfris terwyl die toep oop is.
     Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
-    Show Collaborations From Other Channels: "Wys ook video's wat kanale waarop jy ingeteken is saam met 'n ander kanaal gemaak het wat dit opgelaai het. YouTube lys dit net op 'n kanaal se Tuis-oortjie, so elke video-verfrissing laai een bladsy meer per kanaal. Net die nuutste samewerkings wat daar gewys word, word gevind, sommige kanale wys geen nie, en hul publikasiedatums is benaderd. Nie beskikbaar met die Invidious-API nie."
+    Show Collaborations From Other Channels: "Wys ook video's wat kanale waarop jy ingeteken is saam met 'n ander kanaal gemaak het wat dit opgelaai het. YouTube lys dit net op 'n kanaal se Tuis-oortjie, so 'n video-verfrissing gaan hoogstens 'n paar kanale na, en nuwes kan 'n dag of langer neem om te verskyn. Net die nuutste samewerkings wat daar gewys word, word gevind, sommige kanale wys geen nie, en hul publikasiedatums is benaderd. Nie beskikbaar met die Invidious-API nie."
     Platforms Auto Refresh Interval: Hoe gereeld OpenTubeX die kanale wat u op ander platforms volg, outomaties verfris terwyl die toep oop is.
+    Enable Twitch Page: Laat jou die Twitch-bladsy vanaf die navigasie en die opdragpalet oopmaak. Daar kan jy gewilde kategorieë en regstreekse kanale deursoek en Twitch deursoek.
     Twitch Notify When Live: Stel jou in kennis wanneer een van jou gevolgde Twitch-kanale begin uitsaai. OpenTubeX kyk elke paar minute terwyl dit oop is, en ook terwyl dit toe is as dit dan intekeninge verfris.
   Theme Settings:
+    Toggle Playback With Tab Icon: Om op die ikoon van ’n oortjie met ’n video wat speel of gepouseer is te klik, pouseer of hervat dit sonder om na daardie oortjie oor te skakel.
     Only Show Important Notifications: Versteek kennisgewings in die app wat slegs 'n aksie bevestig of 'n status meld, insluitend dié wat Ontdoen bied. Foute, waarskuwings, herinneringe wat jy opgestel het en kennisgewings wat vir 'n besluit vra, soos bywerkingsversoeke, verskyn steeds. Agtergrondvordering, soos die verfris van intekeninge, word in die globale vorderingsbalk gewys in plaas van as 'n kennisgewing. Stelselkennisgewings word nie geraak nie.
     Thumbnail Size: Skaal videoduimnaels in roosters en lyste. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
     Playlist Thumbnail Size: Skaal videoduimnaels op afspeellysblaaie. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
@@ -2796,6 +2818,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Ontdoen die laaste spoel
   Redo Seek: Doen ’n ontdane spoel oor
   New Incognito Tab: Skep ’n nuwe incognito-oortjie
+  Shortcuts Label: Kortpaaie
 CommandPalette:
   Title: Opdragpalet
   Open: Maak opdragpalet oop
@@ -2830,6 +2853,8 @@ CommandPalette:
     Download Finished: Hierdie aflaai loop nie meer nie
     Video: Maak eers ’n video oop
 Downloads:
+  Stop Recording: "Stop opname"
+  Recording: "Besig om op te neem"
   File Name Template Invalid: 'Gebruik ’n relatiewe pad binne die aflaaigids sonder "..", "~", "$", "%" of ’n voorvoegsel soos "thumbnail:".'
   Add Download: Voeg aflaai by
   Search Completed: Soek voltooide aflaaie volgens titel of kanaal
@@ -2969,6 +2994,22 @@ App Icon:
   Saved Message: Ikoon gestoor. U lanseerder kan ’n oomblik neem om by te werk.
   Title: Toepikoon
   Error: Kan nie die toepikoon laai of verander nie
+App Lock:
+  Title: "Toepslot"
+  Enable: "Vereis skermslot"
+  Enable Tooltip: "Vra vir jou vingerafdruk, gesig, PIN, patroon of wagwoord wanneer jy na OpenTubeX terugkeer. Op Android 13 en later wys onlangse toepassings ook nie meer 'n voorskou van die toepassing nie."
+  Lock After: "Sluit na"
+  Immediately: "Onmiddellik"
+  1 Minute: "1 minuut"
+  5 Minutes: "5 minute"
+  15 Minutes: "15 minute"
+  1 Hour: "1 uur"
+  Unavailable: "Stel 'n skermslot in Android-instellings in om die toepslot te gebruik."
+  Error: "Kan nie toepslot verander nie"
+  Locked: "OpenTubeX is gesluit"
+  Unlock: "Ontsluit"
+  Prompt Title: "Ontsluit OpenTubeX"
+
 Tray:
   Hide All Windows: Versteek alle vensters
   Show All Windows: Wys alle vensters
@@ -3087,6 +3128,33 @@ Platforms:
   Verify: "Bevestig"
   Categories: "Kategorieë"
   Category Not Found: "Hierdie kategorie kon nie gevind word nie."
+  Category Tags: "Kategorie-etikette"
+  Stream Tags: "Stroom-etikette"
+  Language: "Taal"
+  All Languages: "Alle tale"
+  Other Language: "Ander"
+  American Sign Language: "Amerikaanse Gebaretaal"
+  Search Tags: "Soek etikette"
+  Add Tag: "Voeg etiket by"
+  Remove Tag: "Verwyder {tag}"
+  Sort:
+    Viewers: "Kykers (hoog na laag)"
+    Viewers Ascending: "Kykers (laag na hoog)"
+    Started: "Onlangs begin"
+    Relevance: "Aanbeveel"
+    Published: "Onlangs gepubliseer"
+    Views: "Kyke (hoog na laag)"
+    Top Day: "Top 24 uur"
+    Top Week: "Top 7 dae"
+    Top Month: "Top 30 dae"
+    Top All: "Top van alle tye"
+  Video Type:
+    Video Type: "Video-tipe"
+    All: "Alle video's"
+    Archive: "Vorige uitsendings"
+    Highlight: "Hoogtepunte"
+    Upload: "Oplaaie"
+  Anonymous: "Anoniem"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} het op {commentAuthor} geantwoord"
   Like: "Hou van"
@@ -3121,5 +3189,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Deursoek Twitch"
+  Search Placeholder: "Kategorieë en kanale"
 New Incognito Tab: Nuwe incognito-oortjie
 Incognito Tab: Incognito-oortjie

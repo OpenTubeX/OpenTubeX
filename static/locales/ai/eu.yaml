@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
   RSS Feeds:
+    Load More Items: Kargatu elementu gehiago
     Refreshing: RSS jarioak freskatzen
     Tab: RSS
     Followed Feeds: Jarraitutako RSS jarioak
@@ -497,6 +498,7 @@ Settings:
       Memory: memoria
       Network: sarea
       Disk: diskoa
+    Label: Errendimendua
   General Settings:
     Invidious Instance Username: 'Instantziaren erabiltzaile-izena'
     Invidious Instance Password: 'Instantziaren pasahitza'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automatikoa
     Preferred API Backend:
       Yattee Server: Yattee zerbitzaria
+      Local API Extension Required: Web-aplikazioak OpenTubeX Local API nabigatzailearen luzapenarekin soilik erabil dezake API lokala.
+      Install Local API Extension: Instalatu luzapena
     Yattee Server:
       Server URL: Yattee zerbitzariaren URLa
       Username: Erabiltzaile-izena
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Toggle Playback With Tab Icon: Erreproduzitu eta pausatu fitxaren ikonoarekin
     Theme and Colors: "Gaia eta koloreak"
     Font Size: Letra-tamaina
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Audio monoa'
     Normalize Loudness: 'Normalizatu bolumena'
     Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
+    Show Mirror Video Toggle: "Erakutsi bideoa ispilatzeko etengailua"
     Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
     Buffering:
       Buffering: Bufferra
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
     Lights Off: Argiak itzali
+    Mirror Video: "Bideoa ispilatu"
     Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua
     Show Volume Boost Toggle: "Erakutsi bolumen-igoeraren etengailua"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Ezin izan dira erreprodukzio-kontrolak doitu.
     yt-dlp Streaming: "yt-dlp transmisioa"
     Continue Playback When Screen Is Locked: 'Jarraitu erreproduzitzen pantaila blokeatuta dagoenean'
+    Switch to Audio in Background: 'Aldatu audio-formatuetara atzeko planoan'
     Ignore Headphone Controls: 'Ez ikusi egin entzungailuen kontrolei'
     Music Visualizer: Musika-bistaratzailea
     Automatically Open Chapters: Ireki kapituluak automatikoki
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Gaitu denbora-zigiludun oharrak"
       Obsidian Vault: Obsidian biltegia
+    Double-Tap With Two Fingers to Skip Chapters: "Sakatu birritan bi hatzekin kapituluak saltatzeko"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Biltegiratzea garbitu da
     Cleanup Failed: Ezin izan da biltegiratzea garbitu
   Subscription Settings:
+    Refresh These Feeds Together: "Freskatu jario hauek batera"
     Fetch Feed on Startup: Eskuratu jarioa abioan
     Show New Content Feed: Erakutsi eduki berriaren jarioa
     RSS Feeds: RSS jarioak
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Beste plataformak
       Manage Channels: Kudeatu jarraitutako kanalak
+      Enable Twitch Page: Gaitu Twitch orria
       Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
       Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea
     Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
     Hide Playlist Stats: Ezkutatu erreprodukzio-zerrendaren estatistikak
+    Hide Recommendation Details: Ezkutatu gomendioen arrazoiak eta iritziak
     Sections:
       Digital Wellbeing: "Ongizate digitala"
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
@@ -1651,6 +1663,7 @@ Settings:
     Downloading: Zerrendak deskargatzen…
     Failed to Download: Ezin izan dira zerrendak deskargatu
     Loaded Status: "Blokeatutako kanalak: {blocked} · Markatutako kanalak: {warned} · Eguneratua: {date}"
+  Highlight Changed Settings Label: Aldatuak
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
@@ -1933,6 +1946,9 @@ Video:
     Zoom:
       Zoom: Zooma
       'Off': 'Desaktibatuta'
+    Lock Controls:
+      Lock Controls: "Blokeatu kontrolak"
+      Hold to Unlock: "Eutsi sakatuta desblokeatzeko"
     Volume Boost:
       Volume Boost: "Bolumen-igoera"
       'Off': "Desaktibatuta"
@@ -2399,6 +2415,7 @@ Tooltips:
     Normalize Loudness: 'Gehienak baino ozenagoak diren bideoen bolumena jaisten du, bideoen artean bolumenak jauzirik egin ez dezan. Bideo isilek beren bolumena mantentzen dute. Tokiko APIarekin kargatutako bideoekin soilik dabil.'
     Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
+    Switch to Audio in Background: 'Audio-formatuak erreproduzitzen ditu aplikazioa atzeko planoan dagoen bitartean edo pantaila itzalita dagoenean, eta horrela datuak eta bateria aurrezten ditu. Irudia irudian moduak bideoa mantentzen du. Bideoa itzultzen da aplikazioa berriro irekitzean. Pantaila blokeatuta dagoenean erreprodukzioarekin jarraitzea eskatzen du.'
     Ignore Headphone Controls: 'Bluetooth gailuetatik, kabledun entzungailuetatik eta teklatuetako multimedia-tekletatik datozen erreprodukzio-, pausa- eta saltatze-aginduei ez die jaramonik egiten, entzungailuetan nahi gabe sakatzeak erreprodukzioa eten ez dezan. Aplikazioko eta multimedia-jakinarazpeneko kontrolek funtzionatzen jarraitzen dute.'
     Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
     Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
@@ -2407,6 +2424,7 @@ Tooltips:
     Use YouTube-style Shorts: Shorts bideoak sareta bertikalean erakusten ditu harpidetzen eta kanalen orrietan, eta YouTube estiloko Shorts erreproduzigailua erabiltzen du.
     Loop Shorts: Gaituta dagoenean, Shorts bideoak automatikoki hasten dira berriro. Desgaituta dagoenean, amaieran gelditzen dira eta berriro erreproduzitzeko botoia erakusten dute.
     Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
+    Show Mirror Video Toggle: "Bideoa horizontalki ispilatzen duen etengailua erakusten du erreproduzigailuaren ezarpen-menuan, dantza, ariketa fisiko eta musika-tresnen tutorialak errazago jarraitzeko."
     Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
@@ -2428,6 +2446,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
     Enable Timestamp Notes: "Erreproduzigailuari botoi bat eta N lasterbidea gehitzen dizkio, bideoa pausatu eta uneko momentura estekatzen duen ohar bat irekitzen dutenak. Oharrak Markdown gisa kopia daitezke edo, mahaigainean, Obsidian-era gehitu."
     Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.
+    Double-Tap With Two Fingers to Skip Chapters: "Sakatu birritan bi hatzekin bideoaren eskuineko aldea hurrengo kapitulura joateko, edo ezkerreko aldea uneko kapituluaren hasierara itzultzeko. Kapitulu baten lehen 3 segundoetan, ezkerreko aldeak aurreko kapitulura eramaten zaitu horren ordez; beraz, errepikatuz gero, kapituluetan atzera egingo duzu."
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.
@@ -2458,6 +2477,7 @@ Tooltips:
     Bedtime Reminder: "Bideoa pausatzen du eta ikusteari uzteko gogorarazten dizu hasiera- eta amaiera-orduen artean."
     Shorten View Counts: YouTube-k dagoeneko biribildu dituen ikustaldi-, iruzkin- eta iruzkinetako atsegite-kopuruak modu laburtuan erakusten ditu; adibidez, 14K, 14.000 ordez. Kopuru zehatzak osorik erakusten dira beti.
   Subscription Settings:
+    Refresh These Feeds Together: "Markatutako jarioetako bat freskatzean, markatutako beste jarioak berehala freskatzen dira haren ondoren. Freskatze automatikoek jario bakoitzaren tartea jarraitzen dute."
     Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
     Show New Content Feed: Berria fitxa erakusten du, aurreko eskuratzean ez zeuden harpidetza-jarioko elementuekin.
     Enable RSS Feeds: RSS fitxa bat erakusten du Harpidetzak orrian RSS edo Atom jarioen elementuekin, beste plataformetako sortzaileei jarraitu ahal izateko. Bere elementuak yt-dlp-rekin irekitzen dira.
@@ -2468,10 +2488,12 @@ Tooltips:
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
-    Show Collaborations From Other Channels: "Harpidetuta zauden kanalek igo dituen beste kanal batekin batera egindako bideoak ere erakusten ditu. YouTubek kanal baten Hasiera fitxan bakarrik zerrendatzen ditu, beraz, bideoen freskatze bakoitzak orri bat gehiago kargatzen du kanal bakoitzeko. Han erakutsitako lankidetza berrienak bakarrik aurkitzen dira, kanal batzuek ez dute bat ere erakusten, eta argitaratze-datak gutxi gorabeherakoak dira. Ez dago erabilgarri Invidious APIarekin."
+    Show Collaborations From Other Channels: "Harpidetuta zauden kanalek igo dituen beste kanal batekin batera egindako bideoak ere erakusten ditu. YouTubek kanal baten Hasiera fitxan bakarrik zerrendatzen ditu, beraz, bideoen freskatze batek gehienez kanal gutxi batzuk egiaztatzen ditu, eta berriak agertzeko egun bat edo gehiago behar izan daiteke. Han erakutsitako lankidetza berrienak bakarrik aurkitzen dira, kanal batzuek ez dute bat ere erakusten, eta argitaratze-datak gutxi gorabeherakoak dira. Ez dago erabilgarri Invidious APIarekin."
     Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
+    Enable Twitch Page: Twitch orria nabigaziotik eta komando-paletatik irekitzeko aukera ematen dizu. Han kategoria ezagunak eta zuzeneko kanalak arakatu eta Twitch-en bilatu ditzakezu.
     Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:
+    Toggle Playback With Tab Icon: Erreproduzitzen ari den edo pausatuta dagoen bideo bat duen fitxa baten ikonoan klik eginez gero, pausatu edo berrekin egiten da fitxa horretara aldatu gabe.
     Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu, Desegin eskaintzen dutenak barne. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta erabaki bat eskatzen duten jakinarazpenak, eguneratze-eskaerak adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
@@ -2530,6 +2552,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Desegin azken jauzia
   Redo Seek: Berregin desegindako jauzia
   New Incognito Tab: Sortu ezkutuko fitxa berria
+  Shortcuts Label: Lasterbideak
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta
@@ -2564,6 +2587,8 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Stop Recording: "Gelditu grabazioa"
+  Recording: "Grabatzen"
   File Name Template Invalid: 'Erabili deskargen karpetaren barruko bide erlatibo bat, "..", "~", "$", "%" edo "thumbnail:" bezalako aurrizkirik gabe.'
   Search Completed: "Bilatu amaitutako deskargak izenburuaren edo kanalaren arabera"
   Format: "Formatua"
@@ -2707,6 +2732,22 @@ App Icon:
   Saved Message: "Ikonoa gorde da. Abiarazleak une bat behar izan dezake eguneratzeko."
   Title: "Aplikazioaren ikonoa"
   Error: "Ezin izan da aplikazioaren ikonoa kargatu edo aldatu"
+
+App Lock:
+  Title: "Aplikazioaren blokeoa"
+  Enable: "Eskatu pantaila-blokeoa"
+  Enable Tooltip: "Hatz-marka, aurpegia, PINa, eredua edo pasahitza eskatzen du OpenTubeX-era itzultzean. Android 13 eta berriagoetan, azken aplikazioek ere ez dute aplikazioaren aurrebistarik erakusten."
+  Lock After: "Blokeatu hau igarotakoan"
+  Immediately: "Berehala"
+  1 Minute: "1 minutu"
+  5 Minutes: "5 minutu"
+  15 Minutes: "15 minutu"
+  1 Hour: "1 ordu"
+  Unavailable: "Aplikazioaren blokeoa erabiltzeko, ezarri pantaila-blokeoa Androiden ezarpenetan."
+  Error: "Ezin izan da aplikazioaren blokeoa aldatu"
+  Locked: "OpenTubeX blokeatuta dago"
+  Unlock: "Desblokeatu"
+  Prompt Title: "Desblokeatu OpenTubeX"
 
 Tray:
   Hide All Windows: "Ezkutatu leiho guztiak"
@@ -2886,6 +2927,33 @@ Platforms:
   Verify: "Egiaztatu"
   Categories: "Kategoriak"
   Category Not Found: "Ezin izan da kategoria hau aurkitu."
+  Category Tags: "Kategoriaren etiketak"
+  Stream Tags: "Streamaren etiketak"
+  Language: "Hizkuntza"
+  All Languages: "Hizkuntza guztiak"
+  Other Language: "Beste bat"
+  American Sign Language: "Amerikako zeinu-hizkuntza"
+  Search Tags: "Bilatu etiketak"
+  Add Tag: "Gehitu etiketa"
+  Remove Tag: "Kendu {tag}"
+  Sort:
+    Viewers: "Ikusleak (handienetik txikienera)"
+    Viewers Ascending: "Ikusleak (txikienetik handienera)"
+    Started: "Duela gutxi hasiak"
+    Relevance: "Gomendatua"
+    Published: "Duela gutxi argitaratuak"
+    Views: "Ikustaldiak (handienetik txikienera)"
+    Top Day: "Azken 24 orduetako onenak"
+    Top Week: "Azken 7 egunetako onenak"
+    Top Month: "Azken 30 egunetako onenak"
+    Top All: "Garai guztietako onenak"
+  Video Type:
+    Video Type: "Bideo mota"
+    All: "Bideo guztiak"
+    Archive: "Iraganeko emisioak"
+    Highlight: "Nabarmenak"
+    Upload: "Igoerak"
+  Anonymous: "Anonimoa"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}(e)k {commentAuthor}(r)i erantzun dio"
   Like: "Atsegin dut"
@@ -2920,5 +2988,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Bilatu Twitch-en"
+  Search Placeholder: "Kategoriak eta kanalak"
 New Incognito Tab: Ezkutuko fitxa berria
 Incognito Tab: Ezkutuko fitxa

@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Önce en yeniler
   Oldest First: Önce en eskiler
   RSS Feeds:
+    Load More Items: Daha fazla öğe yükle
     Refreshing: RSS beslemeleri yenileniyor
     Tab: RSS
     Followed Feeds: Takip edilen RSS akışları
@@ -497,6 +498,7 @@ Settings:
       Memory: bellek
       Network: ağ
       Disk: disk
+    Label: Performans
   General Settings:
     Invidious Instance Username: 'Örnek kullanıcı adı'
     Invidious Instance Password: 'Örnek parolası'
@@ -620,6 +622,8 @@ Settings:
       Auto: Otomatik
     Preferred API Backend:
       Yattee Server: Yattee Sunucusu
+      Local API Extension Required: Web uygulaması yerel API’yi yalnızca OpenTubeX Local API tarayıcı uzantısıyla kullanabilir.
+      Install Local API Extension: Uzantıyı yükle
     Yattee Server:
       Server URL: Yattee sunucusu URL'si
       Username: Kullanıcı adı
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Bir ad ve %s içeren geçerli bir HTTP veya HTTPS arama URL'si girin.
     Engine Limit: En fazla {count} özel arama motoru ekleyebilirsiniz.
   Theme Settings:
+    Toggle Playback With Tab Icon: Sekme simgesiyle oynat ve duraklat
     Theme and Colors: "Tema ve renkler"
     Font Size: Yazı Tipi Boyutu
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Mono ses'
     Normalize Loudness: 'Ses yüksekliğini normalleştir'
     Show Mono Audio Toggle: 'Mono ses düğmesini göster'
+    Show Mirror Video Toggle: "Video aynalama düğmesini göster"
     Pause on Stream Recovery: "Akış kurtarmada duraklat"
     Buffering:
       Buffering: Arabelleğe Alma
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "DLNA yayınını etkinleştir"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat
+    Mirror Video: "Videoyu aynala"
     Show Lights Off Toggle: Işıkları kapatma düğmesini göster
     Show Volume Boost Toggle: "Ses yükseltme düğmesini göster"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Oynatma kontrolleri ayarlanamadı.
     yt-dlp Streaming: "yt-dlp Akışı"
     Continue Playback When Screen Is Locked: 'Ekran kilitliyken oynatmaya devam et'
+    Switch to Audio in Background: 'Arka planda ses biçimlerine geç'
     Ignore Headphone Controls: 'Kulaklık kontrollerini yok say'
     Music Visualizer: Müzik görselleştirici
     Automatically Open Chapters: Bölümleri Otomatik Olarak Aç
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Zaman Damgalı Notları Etkinleştir"
       Obsidian Vault: Obsidian Kasası
+    Double-Tap With Two Fingers to Skip Chapters: "Bölümleri atlamak için iki parmakla çift dokunun"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Depolama temizliği tamamlandı
     Cleanup Failed: Depolama temizliği başarısız oldu
   Subscription Settings:
+    Refresh These Feeds Together: "Bu akışları birlikte yenile"
     Fetch Feed on Startup: Başlangıçta Akışı Getir
     Show New Content Feed: Yeni İçerik Akışını Göster
     RSS Feeds: RSS Akışları
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Diğer Platformlar
       Manage Channels: Takip Edilen Kanalları Yönet
+      Enable Twitch Page: Twitch Sayfasını Etkinleştir
       Notify When Live: Takip Edilen Twitch Kanalları Canlı Yayına Başladığında Bildir
       Auto Refresh Interval: Diğer Platformların Otomatik Yenileme Aralığı
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Uygulama başlığındaki eşitleme göstergesini gizle
     Hide Repeat Stats: Tekrar istatistiklerini gizle
     Hide Playlist Stats: Oynatma listesi istatistiklerini gizle
+    Hide Recommendation Details: Öneri nedenlerini ve geri bildirimi gizle
     Sections:
       Digital Wellbeing: "Dijital Denge"
       Visible While Paused: Tam Pencere / Tam Ekranda Duraklatıldığında Görünür
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: Listeler indiriliyor…
     Failed to Download: Listeler indirilemedi
     Loaded Status: "Engellenen kanallar: {blocked} · İşaretlenen kanallar: {warned} · Güncellendi: {date}"
+  Highlight Changed Settings Label: Değiştirilenler
 Tutorial:
   Skip: Atla
   Next: İleri
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: Yakınlaştırma
       'Off': Kapalı
+    Lock Controls:
+      Lock Controls: "Kontrolleri kilitle"
+      Hold to Unlock: "Kilidi açmak için basılı tutun"
     Volume Boost:
       Volume Boost: "Ses yükseltme"
       'Off': "Kapalı"
@@ -2389,6 +2405,7 @@ Tooltips:
     Normalize Loudness: 'Çoğundan daha yüksek sesli videoların sesini kısar, böylece ses düzeyi videolar arasında sıçramaz. Sessiz videolar ses düzeylerini korur. Yalnızca Yerel API ile yüklenen videolarda çalışır.'
     Pause on Stream Recovery: "Video akışı başarısız olduğunda ve oynatıcı onu yeniden yüklediğinde ya da başka bir biçime veya motora geçtiğinde oynatma duraklatılır ve hata siz kapatana kadar oynatıcının üstünde kalır. Devre dışı bırakıldığında oynatma devam eder ve hata kısa süreliğine bildirim olarak görünür."
     Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
+    Switch to Audio in Background: 'Uygulama arka plandayken veya ekran kapalıyken ses biçimlerini oynatır; bu da veri ve pilden tasarruf sağlar. Resim içinde Resim videoyu korur. Uygulamayı yeniden açtığınızda video geri gelir. Ekran kilitliyken oynatmanın devam etmesini gerektirir.'
     Ignore Headphone Controls: 'Bluetooth cihazlarından, kablolu kulaklıklardan ve klavyelerdeki medya tuşlarından gelen oynatma, duraklatma ve atlama komutlarını yok sayar; böylece kulaklığa yanlışlıkla dokunmak oynatmayı kesmez. Uygulamadaki ve medya bildirimindeki kontroller çalışmaya devam eder.'
     Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
     Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.
@@ -2397,6 +2414,7 @@ Tooltips:
     Use YouTube-style Shorts: Kısa Videoları abonelik ve kanal sayfalarında dikey bir ızgarada gösterir ve YouTube tarzı Kısa Video oynatıcısını kullanır.
     Loop Shorts: Etkinleştirildiğinde Kısa Videolar otomatik olarak yeniden başlar. Devre dışı bırakıldığında sonunda durur ve yeniden oynatma düğmesi gösterir.
     Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
+    Show Mirror Video Toggle: "Oynatıcının ayarlar menüsünde videoyu yatay olarak aynalayan bir açma ve kapatma düğmesi gösterir; böylece dans, egzersiz ve enstrüman derslerini takip etmek kolaylaşır."
     Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.
@@ -2418,6 +2436,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
     Enable Timestamp Notes: "Videoyu duraklatan ve geçerli ana bağlantı veren bir not açan bir oynatıcı düğmesi ve N kısayolu ekler. Notlar Markdown olarak kopyalanabilir veya masaüstünde Obsidian'a eklenebilir."
     Obsidian Vault: Zaman damgalı notlar için Obsidian kasasının adı. Ayarlandığında notlar Obsidian'a eklenebilir. Her videonun notları, kasanın yeni notlar klasöründe videonun adını taşıyan bir notta toplanır.
+    Double-Tap With Two Fingers to Skip Chapters: "Sonraki bölüme geçmek için videonun sağ tarafına, geçerli bölümün başına dönmek için sol tarafına iki parmakla çift dokunun. Bir bölümün ilk 3 saniyesinde sol taraf bunun yerine önceki bölüme gider, böylece tekrarladıkça bölümler arasında geriye doğru ilerlersiniz."
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.
@@ -2448,6 +2467,7 @@ Tooltips:
     Bedtime Reminder: "Başlangıç ve bitiş saatleri arasında videoyu duraklatır ve izlemeyi bırakmanızı hatırlatır."
     Shorten View Counts: YouTube'un zaten yuvarlayarak kısalttığı izlenme, yorum ve yorum beğeni sayılarını gösterir, örneğin 14.000 yerine 14 B. Kesin sayılar her zaman tam gösterilir.
   Subscription Settings:
+    Refresh These Feeds Together: "İşaretli akışlardan birini yenilediğinizde, diğer işaretli akışlar hemen ardından yenilenir. Otomatik yenilemeler her akışın kendi aralığını izlemeye devam eder."
     Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
     Show New Content Feed: Önceki getirme sırasında bulunmayan abonelik akışı öğelerini içeren Yeni sekmesini gösterir.
     Enable RSS Feeds: Abonelikler sayfasında RSS veya Atom akışlarının öğelerini içeren bir RSS sekmesi gösterir, böylece diğer platformlardaki içerik üreticilerini takip edebilirsiniz. Öğeleri yt-dlp ile açılır.
@@ -2458,10 +2478,12 @@ Tooltips:
     Notify About New Uploads: Abonelik ayarlarında bildirimlerini açtığınız kanallar için bu cihazda sistem bildirimleri gösterir. OpenTubeX yeni içeriği abonelikler yenilendiğinde denetler, bu nedenle bir otomatik yenileme aralığı seçin. Uygulama kapalıyken de bildirim almak için uygulama kapalıyken yenilemeyi de etkinleştirin.
     RSS Feeds Auto Refresh Interval: Uygulama açıkken OpenTubeX'in RSS akışlarınızı ne sıklıkla otomatik olarak yenilediği.
     Faster Subscription Refresh: "Önce her kanalın RSS akışını denetler ve yalnızca yeni yüklemesi olan kanalların videolarını, Shorts'larını ve canlı yayınlarını yükler. Otomatik yenilemeler son 10 dakikada yüklenen kanalları da atlar. Yeni yüklemesi olmayan kanallarda görüntüleme sayıları, kaldırılan videolar ve değişen başlıklar yalnızca birkaç saatte bir güncellenir ve RSS akışı geride kaldığında yeni yüklemeler daha geç görünebilir. Invidious API ile kullanılamaz."
-    Show Collaborations From Other Channels: "Abone olduğunuz kanalların, bunları yükleyen başka bir kanalla birlikte yaptığı videoları da gösterir. YouTube bunları yalnızca bir kanalın Ana Sayfa sekmesinde listeler, bu nedenle her video yenilemesi kanal başına bir sayfa daha yükler. Yalnızca orada gösterilen en son ortak çalışmalar bulunur, bazı kanallar hiç göstermez ve yayın tarihleri yaklaşıktır. Invidious API ile kullanılamaz."
+    Show Collaborations From Other Channels: "Abone olduğunuz kanalların, bunları yükleyen başka bir kanalla birlikte yaptığı videoları da gösterir. YouTube bunları yalnızca bir kanalın Ana Sayfa sekmesinde listeler, bu nedenle bir video yenilemesi en fazla birkaç kanalı kontrol eder ve yenilerinin görünmesi bir gün veya daha uzun sürebilir. Yalnızca orada gösterilen en son ortak çalışmalar bulunur, bazı kanallar hiç göstermez ve yayın tarihleri yaklaşıktır. Invidious API ile kullanılamaz."
     Platforms Auto Refresh Interval: Uygulama açıkken OpenTubeX'in diğer platformlarda takip ettiğiniz kanalları ne sıklıkla otomatik olarak yenilediği.
+    Enable Twitch Page: Twitch sayfasını gezinmeden ve komut paletinden açmanızı sağlar. Orada popüler kategorilere ve canlı kanallara göz atabilir, Twitch'te arama yapabilirsiniz.
     Twitch Notify When Live: Takip ettiğiniz Twitch kanallarından biri yayına başladığında size bildirir. OpenTubeX açıkken birkaç dakikada bir kontrol eder; kapalıyken de o sırada abonelikleri yeniliyorsa kontrol eder.
   Theme Settings:
+    Toggle Playback With Tab Icon: Oynatılan veya duraklatılmış bir video içeren sekmenin simgesine tıklamak, o sekmeye geçmeden videoyu duraklatır veya devam ettirir.
     Only Show Important Notifications: Yalnızca bir işlemi onaylayan veya bir durumu bildiren uygulama içi bildirimleri, Geri al sunanlar dahil, gizler. Hatalar, uyarılar, ayarladığınız hatırlatıcılar ve güncelleme istemleri gibi karar gerektiren bildirimler görünmeye devam eder. Abonelikleri yenileme gibi arka plan işlemlerinin ilerlemesi bildirim yerine genel ilerleme çubuğunda gösterilir. Sistem bildirimleri etkilenmez.
     Visible Search Suggestions: "Arama çubuğunun listesi kaydırılmadan önce kaç arama geçmişi girdisi ve öneri göstereceğini belirler. Liste hiçbir zaman pencerenin alt kenarını aşmaz."
     Thumbnail Size: "Izgaralarda ve listelerde video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
@@ -2520,6 +2542,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Son atlamayı geri al
   Redo Seek: Geri alınan atlamayı yinele
   New Incognito Tab: Yeni bir gizli sekme oluştur
+  Shortcuts Label: Kısayollar
 CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç
@@ -2554,6 +2577,8 @@ CommandPalette:
     Download Finished: Bu indirme artık çalışmıyor
     Video: Önce bir video açın
 Downloads:
+  Stop Recording: "Kaydı durdur"
+  Recording: "Kaydediliyor"
   File Name Template Invalid: 'İndirme klasörü içinde "..", "~", "$", "%" veya "thumbnail:" gibi bir önek içermeyen göreli bir yol kullanın.'
   Search Completed: "Tamamlanan indirmeleri başlığa veya kanala göre ara"
   Format: "Biçim"
@@ -2697,6 +2722,22 @@ App Icon:
   Saved Message: "Simge kaydedildi. Başlatıcınızın güncellenmesi biraz zaman alabilir."
   Title: "Uygulama simgesi"
   Error: "Uygulama simgesi yüklenemedi veya değiştirilemedi"
+
+App Lock:
+  Title: "Uygulama kilidi"
+  Enable: "Ekran kilidini zorunlu kıl"
+  Enable Tooltip: "OpenTubeX'e döndüğünüzde parmak izi, yüz, PIN, desen veya parola ister. Android 13 ve sonrasında son uygulamalar da uygulamanın önizlemesini göstermez."
+  Lock After: "Şu süre sonra kilitle"
+  Immediately: "Hemen"
+  1 Minute: "1 dakika"
+  5 Minutes: "5 dakika"
+  15 Minutes: "15 dakika"
+  1 Hour: "1 saat"
+  Unavailable: "Uygulama kilidini kullanmak için Android ayarlarında bir ekran kilidi belirleyin."
+  Error: "Uygulama kilidi değiştirilemedi"
+  Locked: "OpenTubeX kilitli"
+  Unlock: "Kilidi aç"
+  Prompt Title: "OpenTubeX kilidini aç"
 
 Tray:
   Hide All Windows: "Tüm pencereleri gizle"
@@ -2876,6 +2917,33 @@ Platforms:
   Verify: "Doğrula"
   Categories: "Kategoriler"
   Category Not Found: "Bu kategori bulunamadı."
+  Category Tags: "Kategori etiketleri"
+  Stream Tags: "Yayın etiketleri"
+  Language: "Dil"
+  All Languages: "Tüm diller"
+  Other Language: "Diğer"
+  American Sign Language: "Amerikan İşaret Dili"
+  Search Tags: "Etiket ara"
+  Add Tag: "Etiket ekle"
+  Remove Tag: "{tag} etiketini kaldır"
+  Sort:
+    Viewers: "İzleyiciler (çoktan aza)"
+    Viewers Ascending: "İzleyiciler (azdan çoğa)"
+    Started: "Yakın zamanda başlayanlar"
+    Relevance: "Önerilen"
+    Published: "Yakın zamanda yayınlananlar"
+    Views: "İzlenme (çoktan aza)"
+    Top Day: "En iyi 24 saat"
+    Top Week: "En iyi 7 gün"
+    Top Month: "En iyi 30 gün"
+    Top All: "Tüm zamanların en iyisi"
+  Video Type:
+    Video Type: "Video türü"
+    All: "Tüm videolar"
+    Archive: "Geçmiş yayınlar"
+    Highlight: "Öne çıkanlar"
+    Upload: "Yüklemeler"
+  Anonymous: "Anonim"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}, {commentAuthor} adlı kullanıcıyı yanıtladı"
   Like: "Beğen"
@@ -2910,5 +2978,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch'te ara"
+  Search Placeholder: "Kategoriler ve kanallar"
 New Incognito Tab: Yeni Gizli Sekme
 Incognito Tab: Gizli sekme

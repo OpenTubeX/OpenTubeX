@@ -11,7 +11,7 @@ import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWai
 import { getGoogleVideoProbeUrl } from '../../helpers/player/googleVideoFallback'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { probeHlsManifest } from '../../helpers/player/hlsManifest'
+import { probeHlsManifest, probeVrHlsManifest } from '../../helpers/player/hlsManifest'
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
@@ -55,6 +55,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
+import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
@@ -70,6 +71,7 @@ import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedP
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoDescriptionSections } from '../../helpers/video-description-sections'
 import { escapeHTML } from '../../helpers/feed-metadata'
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
@@ -651,6 +653,8 @@ export default defineComponent({
       // Holds the phone comment preview still, since redrawing it costs power
       // on top of the video frames.
       videoPlaying: false,
+      /** @type {'dash'|'legacy'|null} the format to restore once the app is visible again, while audio plays in its place */
+      formatBeforeBackground: null,
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
       recommendationWatchSession: null,
@@ -959,7 +963,8 @@ export default defineComponent({
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
-        this.vrProjection !== 'EQUIRECTANGULAR'
+        this.vrProjection !== 'EQUIRECTANGULAR' &&
+        this.vrProjection !== 'VR180'
     },
     customShortsPlayerActive: function () {
       return this.useCustomShortsPlayerForCurrentVideo &&
@@ -1791,6 +1796,7 @@ export default defineComponent({
     this.shortsNavigation.addListeners()
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
+    document.addEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -1834,6 +1840,7 @@ export default defineComponent({
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
+    document.removeEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
     this.theatreModeAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
@@ -2572,15 +2579,51 @@ export default defineComponent({
      */
     applyBackgroundStart() {
       const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
-      this.activeFormat = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
+      const format = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
         ? 'audio'
         : this.defaultVideoFormat
+      // A video that starts in the background also plays audio until the app is visible.
+      this.formatBeforeBackground = this.formatBeforeBackground !== null && format !== 'audio' && isAppHidden() ? format : null
+      this.activeFormat = this.formatBeforeBackground === null ? format : 'audio'
       if (backgroundStart) {
         this.queuedPlaybackVideoId = this.tabRoute.params.id
         // The user chose to play it in the mini player, unlike a background tab.
         this.hasBeenPresented = true
       }
       return backgroundStart
+    },
+
+    /**
+     * Plays audio formats while the app is in the background or the screen
+     * is off, where nobody can see the video, if the user enabled it.
+     * Android Picture-in-Picture keeps the app visible, so it keeps the video.
+     */
+    switchToAudioInBackground() {
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !isAppHidden() || this.formatBeforeBackground !== null ||
+        !this.$store.getters.getSwitchToAudioInBackground ||
+        // Playback pauses in the background without it.
+        !this.$store.getters.getContinuePlaybackWhenScreenIsLocked ||
+        this.activeFormat === 'audio' || !this.audioFormatAvailable || this.castingActive ||
+        !this.videoPlaying || !this.isPlaybackPresented()) return
+      this.formatBeforeBackground = this.activeFormat
+      this.activeFormat = 'audio'
+    },
+
+    handleBackgroundAudioVisibility() {
+      if (isAppHidden()) {
+        this.switchToAudioInBackground()
+        return
+      }
+      const format = this.formatBeforeBackground
+      if (format === null) return
+      this.formatBeforeBackground = null
+      // Keep audio that Play in Background chose, or a format chosen since.
+      if (this.activeFormat !== 'audio' || this.watchNavigation?.audioOnlySession?.value === true) return
+      if (format === 'legacy' && this.legacyFormatAvailable) {
+        this.enableLegacyFormat()
+      } else {
+        this.enableDashFormat()
+      }
     },
 
     /** Plays the current video with audio only, as Play in Background does. */
@@ -4238,6 +4281,11 @@ export default defineComponent({
                   format.projection_type !== 'RECTANGULAR'
               })
               ?.projection_type ?? null
+            // The panoramic HLS rendition of VR180 videos is a flat view, so their
+            // mesh streams, which pack both eyes' half spheres, are shown instead
+            if (this.vrProjection === 'MESH' && videoInfo.isVr180) {
+              this.vrProjection = 'VR180'
+            }
 
             if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {
               this.vrStreamsPending = true
@@ -4704,11 +4752,16 @@ export default defineComponent({
                   }
                   url = instanceUrl.toString()
                 }
-                const playable = await probeHlsManifest(url)
+                // Invidious doesn't say whether a mesh video is VR180, but its HLS rendition shows it
+                const hlsKind = await probeVrHlsManifest(url)
                 if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-                if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
-                  vrHlsManifestUrl = url
-                  this.vrProjection = 'EQUIRECTANGULAR'
+                if (hlsKind !== null && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                  if (hlsKind === 'flat') {
+                    this.vrProjection = 'VR180'
+                  } else {
+                    vrHlsManifestUrl = url
+                    this.vrProjection = 'EQUIRECTANGULAR'
+                  }
                 }
               }
               if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
@@ -5470,6 +5523,8 @@ export default defineComponent({
       // Resuming consumes the recovery pause, so later format switches or
       // reloads keep playing while the notice stays visible.
       if (!this.isLoading) this.streamRecoveryPausesPlayback = false
+      // Playback can start from the media notification in the background.
+      this.switchToAudioInBackground()
     },
     handlePlayerSeeking() {
       this.skipNextPlaybackTick = true
@@ -7074,9 +7129,10 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
-      const preferVrHls = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
-        .some(source => source?.vrProjection === 'MESH' ||
-          (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
+      const backendSources = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
+      const preferVrHls = backendSources.some(source => source?.vrProjection === 'MESH' ||
+        (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
+      const vr180 = backendSources.some(source => source?.vrProjection === 'VR180')
       try {
         source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
           if (
@@ -7090,7 +7146,7 @@ export default defineComponent({
               icon: ['fas', 'exchange-alt'],
             })
           }
-        }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls)
+        }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls, vr180)
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
@@ -7137,7 +7193,10 @@ export default defineComponent({
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
-      this.vrProjection = source.vrProjection ?? this.vrProjection
+      // yt-dlp only provides VR180 videos' flat view. A mesh video's HLS source
+      // without a projection is that flat view too.
+      const flatView = vr180 || (preferVrHls && source.manifestMimeType === MANIFEST_TYPE_HLS && !source.vrProjection)
+      this.vrProjection = source.vrProjection ?? (flatView ? null : this.vrProjection)
       if (source.vrProjection === 'EQUIRECTANGULAR') {
         this.activeFormat = 'dash'
       }
@@ -7536,6 +7595,7 @@ export default defineComponent({
     },
 
     updateTitle: function () {
+      if (this.hasResolvedVideoTitle) reportLoadedPageTitle(`video:${this.videoId}`, this.videoTitle)
       this.setTabTitle(
         this.videoTitle || this.getPendingVideoTitle(),
         { resolveHistoryEntry: this.hasResolvedVideoTitle }

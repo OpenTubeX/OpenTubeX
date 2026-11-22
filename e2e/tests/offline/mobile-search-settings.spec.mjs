@@ -20,7 +20,9 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     const actions = page.locator('.settingsHeaderActions')
     await expect.poll(() => actions.locator('button').evaluateAll(buttons => {
       const bounds = buttons.map(button => button.getBoundingClientRect()).filter(rect => rect.width > 0)
-      return bounds.every((rect, index) => index === 0 || rect.left - bounds[index - 1].right >= 7.99)
+      // The tools can wrap below the window controls, so compare every pair.
+      const gap = (a, b) => Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom)
+      return bounds.every((a, index) => bounds.slice(index + 1).every(b => gap(a, b) >= 7.99))
     })).toBe(true)
     const category = page.locator('.settingsMenu .title[data-section="appearance"]')
     await expect(category).toBeVisible()

@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Mới nhất trước
   Oldest First: Cũ nhất trước
   RSS Feeds:
+    Load More Items: Tải thêm mục
     Refreshing: Đang làm mới nguồn cấp RSS
     Tab: RSS
     Followed Feeds: Nguồn cấp RSS đang theo dõi
@@ -497,6 +498,7 @@ Settings:
       Memory: bộ nhớ
       Network: mạng
       Disk: ổ đĩa
+    Label: Hiệu năng
   General Settings:
     Invidious Instance Username: 'Tên người dùng của máy chủ'
     Invidious Instance Password: 'Mật khẩu của máy chủ'
@@ -620,6 +622,8 @@ Settings:
       Auto: Tự động
     Preferred API Backend:
       Yattee Server: Máy chủ Yattee
+      Local API Extension Required: Ứng dụng web chỉ có thể dùng API cục bộ khi có tiện ích trình duyệt OpenTubeX Local API.
+      Install Local API Extension: Cài đặt tiện ích
     Yattee Server:
       Server URL: URL máy chủ Yattee
       Username: Tên người dùng
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Toggle Playback With Tab Icon: Phát và tạm dừng bằng biểu tượng thẻ
     Theme and Colors: "Chủ đề và màu sắc"
     Font Size: Cỡ chữ
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Âm thanh đơn kênh'
     Normalize Loudness: 'Chuẩn hóa âm lượng'
     Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
+    Show Mirror Video Toggle: "Hiển thị nút bật/tắt lật video"
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
     Buffering:
       Buffering: Bộ đệm
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Bật truyền phát DLNA"
     Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"
     Lights Off: Tắt đèn
+    Mirror Video: "Lật video"
     Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
     Show Volume Boost Toggle: "Hiển thị nút bật tăng âm lượng"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Không thể điều chỉnh các điều khiển phát lại.
     yt-dlp Streaming: "Phát trực tuyến bằng yt-dlp"
     Continue Playback When Screen Is Locked: 'Tiếp tục phát khi màn hình bị khóa'
+    Switch to Audio in Background: 'Chuyển sang định dạng âm thanh khi chạy nền'
     Ignore Headphone Controls: 'Bỏ qua điều khiển từ tai nghe'
     Music Visualizer: Trình trực quan hóa nhạc
     Automatically Open Chapters: Tự động mở chương
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Bật ghi chú theo mốc thời gian"
       Obsidian Vault: Kho Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Nhấn đúp bằng hai ngón tay để chuyển chương"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Đã dọn dẹp bộ nhớ
     Cleanup Failed: Không thể dọn dẹp bộ nhớ
   Subscription Settings:
+    Refresh These Feeds Together: "Làm mới các bảng tin này cùng lúc"
     Fetch Feed on Startup: Tải bảng tin khi khởi động
     Show New Content Feed: Hiện bảng tin nội dung mới
     RSS Feeds: Nguồn cấp RSS
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Nền tảng khác
       Manage Channels: Quản lý kênh đang theo dõi
+      Enable Twitch Page: Bật trang Twitch
       Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
       Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
     Hide Repeat Stats: Ẩn thống kê lặp lại
     Hide Playlist Stats: Ẩn thống kê danh sách phát
+    Hide Recommendation Details: Ẩn lý do đề xuất và phản hồi
     Sections:
       Digital Wellbeing: "Sức khỏe kỹ thuật số"
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
@@ -1656,6 +1668,7 @@ Settings:
     Downloading: Đang tải xuống danh sách…
     Failed to Download: Không thể tải xuống danh sách
     Loaded Status: "Kênh bị chặn: {blocked} · Kênh bị gắn cờ: {warned} · Cập nhật: {date}"
+  Highlight Changed Settings Label: Đã thay đổi
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp
@@ -1934,6 +1947,9 @@ Video:
     Zoom:
       Zoom: Thu phóng
       'Off': 'Tắt'
+    Lock Controls:
+      Lock Controls: "Khóa điều khiển"
+      Hold to Unlock: "Nhấn giữ để mở khóa"
     Volume Boost:
       Volume Boost: "Tăng âm lượng"
       'Off': "Tắt"
@@ -2405,6 +2421,7 @@ Tooltips:
     Normalize Loudness: 'Giảm âm lượng của những video to hơn phần lớn video khác để âm lượng không thay đổi đột ngột giữa các video. Video nhỏ tiếng vẫn giữ nguyên âm lượng. Chỉ hoạt động với video được tải bằng API địa phương.'
     Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
+    Switch to Audio in Background: 'Phát định dạng âm thanh khi ứng dụng chạy nền hoặc màn hình tắt, giúp tiết kiệm dữ liệu và pin. Hình trong hình vẫn giữ video. Video sẽ trở lại khi bạn mở lại ứng dụng. Yêu cầu tiếp tục phát khi màn hình bị khóa.'
     Ignore Headphone Controls: 'Bỏ qua các lệnh phát, tạm dừng và bỏ qua từ thiết bị Bluetooth, tai nghe có dây và phím đa phương tiện trên bàn phím, để việc vô tình chạm vào tai nghe không làm gián đoạn phát lại. Các điều khiển trong ứng dụng và trong thông báo đa phương tiện vẫn hoạt động.'
     Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.
     Use Quick Playback Speed Bar: Hiện thanh tốc độ phát nhanh trong phần điều khiển bên phải của trình phát. Nếu bật lưu tốc độ phát thủ công theo kênh, thanh này cũng có nút lưu tốc độ cho kênh hiện tại.
@@ -2413,6 +2430,7 @@ Tooltips:
     Use YouTube-style Shorts: Hiện video ngắn trong lưới dọc trên trang đăng ký và trang kênh, đồng thời dùng trình phát video ngắn kiểu YouTube.
     Loop Shorts: Khi bật, video ngắn sẽ tự động phát lại. Khi tắt, video ngắn sẽ dừng ở cuối và hiện nút phát lại.
     Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
+    Show Mirror Video Toggle: "Hiện nút bật/tắt trong menu cài đặt của trình phát để lật ngang video, giúp bạn dễ tập theo các video hướng dẫn nhảy, tập luyện và chơi nhạc cụ hơn."
     Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
     Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
     Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.
@@ -2434,6 +2452,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
     Enable Timestamp Notes: "Thêm một nút trình phát và phím tắt N để tạm dừng video và mở một ghi chú liên kết đến thời điểm hiện tại. Có thể sao chép ghi chú dưới dạng Markdown hoặc, trên máy tính, thêm vào Obsidian."
     Obsidian Vault: Tên kho Obsidian dùng cho ghi chú theo mốc thời gian. Khi được đặt, ghi chú có thể được thêm vào Obsidian. Ghi chú của mỗi video được gom vào một ghi chú mang tên video, trong thư mục ghi chú mới của kho.
+    Double-Tap With Two Fingers to Skip Chapters: "Nhấn đúp bằng hai ngón tay vào bên phải video để chuyển sang chương tiếp theo, hoặc bên trái để quay lại đầu chương hiện tại. Trong 3 giây đầu của một chương, bên trái sẽ chuyển về chương trước thay vì đầu chương, vì vậy khi lặp lại bạn sẽ lùi dần qua từng chương."
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.
@@ -2464,6 +2483,7 @@ Tooltips:
     Bedtime Reminder: "Tạm dừng video và nhắc bạn ngừng xem trong khoảng giữa giờ bắt đầu và giờ kết thúc."
     Shorten View Counts: Hiện số lượt xem, bình luận và lượt thích bình luận theo dạng rút gọn mà YouTube đã làm tròn, ví dụ 14K thay vì 14.000. Số chính xác luôn được hiện đầy đủ.
   Subscription Settings:
+    Refresh These Feeds Together: "Khi bạn làm mới một trong các bảng tin đã chọn, các bảng tin đã chọn khác sẽ được làm mới ngay sau đó. Việc làm mới tự động vẫn theo khoảng thời gian riêng của từng bảng tin."
     Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
     Show New Content Feed: Hiện thẻ Mới chứa các mục trong bảng tin đăng ký chưa có ở lần tải trước.
     Enable RSS Feeds: Hiện thẻ RSS trên trang Đăng ký với các mục từ nguồn cấp RSS hoặc Atom, để bạn có thể theo dõi nhà sáng tạo trên các nền tảng khác. Các mục của thẻ này được mở bằng yt-dlp.
@@ -2474,10 +2494,12 @@ Tooltips:
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
     RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
     Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
-    Show Collaborations From Other Channels: "Cũng hiển thị các video mà kênh bạn đăng ký đã thực hiện cùng một kênh khác đã tải chúng lên. YouTube chỉ liệt kê chúng trên thẻ Trang chủ của kênh, nên mỗi lần làm mới video sẽ tải thêm một trang cho mỗi kênh. Chỉ tìm thấy các nội dung cộng tác mới nhất hiển thị ở đó, một số kênh không hiển thị nội dung nào và ngày đăng của chúng chỉ là ước tính. Không khả dụng với API Invidious."
+    Show Collaborations From Other Channels: "Cũng hiển thị các video mà kênh bạn đăng ký đã thực hiện cùng một kênh khác đã tải chúng lên. YouTube chỉ liệt kê chúng trên thẻ Trang chủ của kênh, nên mỗi lần làm mới video chỉ kiểm tra tối đa một vài kênh và nội dung cộng tác mới có thể mất một ngày hoặc lâu hơn mới xuất hiện. Chỉ tìm thấy các nội dung cộng tác mới nhất hiển thị ở đó, một số kênh không hiển thị nội dung nào và ngày đăng của chúng chỉ là ước tính. Không khả dụng với API Invidious."
     Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
+    Enable Twitch Page: Cho phép bạn mở trang Twitch từ thanh điều hướng và bảng lệnh. Tại đó bạn có thể duyệt các danh mục phổ biến và kênh đang phát trực tiếp, đồng thời tìm kiếm trên Twitch.
     Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
   Theme Settings:
+    Toggle Playback With Tab Icon: Nhấp vào biểu tượng của thẻ có video đang phát hoặc đã tạm dừng sẽ tạm dừng hoặc tiếp tục video mà không chuyển sang thẻ đó.
     Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái, kể cả những thông báo có Hoàn tác. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo yêu cầu bạn đưa ra quyết định, chẳng hạn như đề nghị cập nhật, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
@@ -2538,6 +2560,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Hoàn tác lần tua gần nhất
   Redo Seek: Làm lại lần tua đã hoàn tác
   New Incognito Tab: Tạo thẻ ẩn danh mới
+  Shortcuts Label: Phím tắt
 CommandPalette:
   Title: Bảng lệnh
   Open: Mở bảng lệnh
@@ -2572,6 +2595,8 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  Stop Recording: "Dừng ghi"
+  Recording: "Đang ghi"
   File Name Template Invalid: 'Hãy dùng đường dẫn tương đối bên trong thư mục tải xuống, không có "..", "~", "$", "%" hoặc tiền tố như "thumbnail:".'
   Search Completed: "Tìm tệp tải xuống đã hoàn tất theo tiêu đề hoặc kênh"
   Format: "Định dạng"
@@ -2719,6 +2744,22 @@ App Icon:
   Saved Message: "Đã lưu biểu tượng. Trình khởi chạy có thể mất một lúc để cập nhật."
   Title: "Biểu tượng ứng dụng"
   Error: "Không thể tải hoặc thay đổi biểu tượng ứng dụng"
+
+App Lock:
+  Title: "Khóa ứng dụng"
+  Enable: "Yêu cầu khóa màn hình"
+  Enable Tooltip: "Yêu cầu vân tay, khuôn mặt, mã PIN, hình mở khóa hoặc mật khẩu khi bạn quay lại OpenTubeX. Trên Android 13 trở lên, danh sách ứng dụng gần đây cũng không còn hiển thị bản xem trước của ứng dụng."
+  Lock After: "Khóa sau"
+  Immediately: "Ngay lập tức"
+  1 Minute: "1 phút"
+  5 Minutes: "5 phút"
+  15 Minutes: "15 phút"
+  1 Hour: "1 giờ"
+  Unavailable: "Hãy đặt khóa màn hình trong phần cài đặt Android để dùng khóa ứng dụng."
+  Error: "Không thể thay đổi khóa ứng dụng"
+  Locked: "OpenTubeX đã bị khóa"
+  Unlock: "Mở khóa"
+  Prompt Title: "Mở khóa OpenTubeX"
 
 Tray:
   Hide All Windows: "Ẩn tất cả cửa sổ"
@@ -2893,6 +2934,33 @@ Platforms:
   Verify: "Xác minh"
   Categories: "Danh mục"
   Category Not Found: "Không tìm thấy danh mục này."
+  Category Tags: "Thẻ danh mục"
+  Stream Tags: "Thẻ luồng phát"
+  Language: "Ngôn ngữ"
+  All Languages: "Tất cả ngôn ngữ"
+  Other Language: "Khác"
+  American Sign Language: "Ngôn ngữ Ký hiệu Mỹ"
+  Search Tags: "Tìm thẻ"
+  Add Tag: "Thêm thẻ"
+  Remove Tag: "Xóa {tag}"
+  Sort:
+    Viewers: "Người xem (cao đến thấp)"
+    Viewers Ascending: "Người xem (thấp đến cao)"
+    Started: "Mới bắt đầu"
+    Relevance: "Được đề xuất"
+    Published: "Mới đăng gần đây"
+    Views: "Lượt xem (cao đến thấp)"
+    Top Day: "Hàng đầu 24 giờ qua"
+    Top Week: "Hàng đầu 7 ngày qua"
+    Top Month: "Hàng đầu 30 ngày qua"
+    Top All: "Hàng đầu mọi thời đại"
+  Video Type:
+    Video Type: "Loại video"
+    All: "Tất cả video"
+    Archive: "Buổi phát sóng trước đây"
+    Highlight: "Nổi bật"
+    Upload: "Video tải lên"
+  Anonymous: "Ẩn danh"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} đã trả lời {commentAuthor}"
   Like: "Thích"
@@ -2927,5 +2995,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Tìm kiếm trên Twitch"
+  Search Placeholder: "Danh mục và kênh"
 New Incognito Tab: Thẻ ẩn danh mới
 Incognito Tab: Thẻ ẩn danh

@@ -35,7 +35,8 @@ export function isSubscriptionFeedRecentlyFetched(cacheEntry, now) {
 /**
  * Whether the cached feed may be kept when the channel has no new uploads.
  * Scheduled and live entries change state without a new upload, so their
- * feeds are always fetched.
+ * feeds are always fetched. Collaborations are not in the fetched feed, so
+ * theirs don't count.
  * @param {{ timestamp?: Date | number | string, videos?: Record<string, unknown>[] } | undefined} cacheEntry
  * @param {number} now
  */
@@ -45,13 +46,13 @@ export function canKeepSubscriptionFeedWithoutNewUploads(cacheEntry, now) {
     return false
   }
 
-  return !cacheEntry.videos.some(video =>
+  return !cacheEntry.videos.some(video => video.isCollaboration !== true && (
     video.isUpcoming === true ||
     video.premiere === true ||
     video.isPremiere === true ||
     video.liveNow === true ||
     video.isLive === true
-  )
+  ))
 }
 
 /**

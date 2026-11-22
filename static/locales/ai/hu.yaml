@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Legújabb elöl
   Oldest First: Legrégebbi elöl
   RSS Feeds:
+    Load More Items: További elemek betöltése
     Refreshing: RSS-hírcsatornák frissítése
     Tab: RSS
     Followed Feeds: Követett RSS-hírcsatornák
@@ -497,6 +498,7 @@ Settings:
       Memory: memória
       Network: hálózat
       Disk: lemez
+    Label: Teljesítmény
   General Settings:
     Invidious Instance Username: 'A példány felhasználóneve'
     Invidious Instance Password: 'A példány jelszava'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automatikus
     Preferred API Backend:
       Yattee Server: Yattee-kiszolgáló
+      Local API Extension Required: A webalkalmazás csak az OpenTubeX Local API böngészőbővítménnyel tudja használni a helyi API-t.
+      Install Local API Extension: Bővítmény telepítése
     Yattee Server:
       Server URL: Yattee-kiszolgáló URL-je
       Username: Felhasználónév
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Toggle Playback With Tab Icon: Lejátszás és szüneteltetés a lap ikonjával
     Theme and Colors: "Téma és színek"
     Font Size: Betűméret
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Monó hang'
     Normalize Loudness: 'Hangerő kiegyenlítése'
     Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
+    Show Mirror Video Toggle: "Videótükrözés kapcsolójának megjelenítése"
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
       Buffering: Pufferelés
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "DLNA-átküldés engedélyezése"
     Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
     Lights Off: Fények lekapcsolása
+    Mirror Video: "Videó tükrözése"
     Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
     Show Volume Boost Toggle: "Hangerő-erősítés kapcsoló megjelenítése"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Nem sikerült módosítani a lejátszás vezérlőit.
     yt-dlp Streaming: "yt-dlp streamelés"
     Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
+    Switch to Audio in Background: 'Váltás hangformátumokra a háttérben'
     Ignore Headphone Controls: 'Fejhallgató-vezérlők figyelmen kívül hagyása'
     Music Visualizer: Zenevizualizáció
     Automatically Open Chapters: Fejezetek automatikus megnyitása
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Időbélyeges jegyzetek engedélyezése"
       Obsidian Vault: Obsidian-széf
+    Double-Tap With Two Fingers to Skip Chapters: "Fejezetek léptetése két ujjal való dupla koppintással"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Tárhelytisztítás befejezve
     Cleanup Failed: A tárhelytisztítás sikertelen
   Subscription Settings:
+    Refresh These Feeds Together: "Ezek a hírfolyamok együtt frissüljenek"
     Fetch Feed on Startup: Hírfolyam lekérése indításkor
     Show New Content Feed: Új tartalmak hírfolyamának megjelenítése
     RSS Feeds: RSS-hírcsatornák
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Más platformok
       Manage Channels: Követett csatornák kezelése
+      Enable Twitch Page: Twitch-oldal engedélyezése
       Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
       Auto Refresh Interval: Más platformok automatikus frissítésének időköze
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
     Hide Playlist Stats: Lejátszási lista statisztikáinak elrejtése
+    Hide Recommendation Details: Ajánlási okok és visszajelzés elrejtése
     Sections:
       Digital Wellbeing: "Digitális jóllét"
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: Listák letöltése…
     Failed to Download: Nem sikerült letölteni a listákat
     Loaded Status: "Letiltott csatornák: {blocked} · Megjelölt csatornák: {warned} · Frissítve: {date}"
+  Highlight Changed Settings Label: Módosított
 Tutorial:
   Skip: Kihagyás
   Next: Tovább
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: Nagyítás
       'Off': 'Ki'
+    Lock Controls:
+      Lock Controls: "Vezérlők zárolása"
+      Hold to Unlock: "Tartsa lenyomva a feloldáshoz"
     Volume Boost:
       Volume Boost: "Hangerő-erősítés"
       'Off': "Ki"
@@ -2389,6 +2405,7 @@ Tooltips:
     Normalize Loudness: 'Lehalkítja a legtöbbnél hangosabb videókat, hogy a hangerő ne ugráljon a videók között. A halk videók megtartják a hangerejüket. Csak a helyi API-val betöltött videóknál működik.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
+    Switch to Audio in Background: 'Hangformátumokat játszik le, amíg az alkalmazás a háttérben fut, vagy a képernyő ki van kapcsolva, így adatot és akkumulátort takarít meg. A kép a képben mód megtartja a videót. A videó visszatér, amikor újra megnyitod az alkalmazást. A lejátszás folytatása szükséges zárolt képernyőnél.'
     Ignore Headphone Controls: 'Figyelmen kívül hagyja a Bluetooth-eszközök, a vezetékes fejhallgatók és a billentyűzetek médiabillentyűinek lejátszás, szünet és ugrás parancsait, hogy a fülhallgató véletlen megérintése ne szakítsa meg a lejátszást. Az alkalmazás és a médiaértesítés vezérlői továbbra is működnek.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.
@@ -2397,6 +2414,7 @@ Tooltips:
     Use YouTube-style Shorts: A Shorts-videók álló tájolású rácsban jelennek meg a feliratkozások és a csatornák oldalain, és a YouTube-stílusú Shorts-lejátszót használják.
     Loop Shorts: Bekapcsolva a Shorts-videók automatikusan újraindulnak. Kikapcsolva a végükön megállnak, és megjelenik az újrajátszás gomb.
     Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
+    Show Mirror Video Toggle: "Kapcsolót jelenít meg a lejátszó beállítási menüjében, amely vízszintesen tükrözi a videót, így könnyebb követni a tánc-, edzés- és hangszeres oktatóvideókat."
     Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
     Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
     Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.
@@ -2418,6 +2436,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
     Enable Timestamp Notes: "Hozzáad a lejátszóhoz egy gombot és az N billentyűparancsot, amelyek szüneteltetik a videót, és megnyitnak egy jegyzetet, amely az aktuális pillanatra hivatkozik. A jegyzetek Markdownként másolhatók, vagy asztali gépen hozzáadhatók az Obsidianhoz."
     Obsidian Vault: Az időbélyeges jegyzetekhez használt Obsidian-széf neve. Ha meg van adva, a jegyzetek hozzáadhatók az Obsidianhoz. Az egyes videók jegyzetei egy, a videóról elnevezett jegyzetben gyűlnek össze, a széf új jegyzeteknek szánt mappájában.
+    Double-Tap With Two Fingers to Skip Chapters: "Koppints duplán két ujjal a videó jobb oldalára a következő fejezetre ugráshoz, vagy a bal oldalára az aktuális fejezet elejére való visszatéréshez. Egy fejezet első 3 másodpercében a bal oldal ehelyett az előző fejezetre ugrik, így ismétléssel fejezetről fejezetre visszafelé haladhatsz."
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.
@@ -2448,6 +2467,7 @@ Tooltips:
     Bedtime Reminder: "Szünetelteti a videót, és a kezdési és befejezési idő között emlékezteti, hogy hagyja abba a nézést."
     Shorten View Counts: A YouTube által már kerekített megtekintés-, hozzászólás- és hozzászóláskedvelési számok rövidített megjelenítése, például 14 E a 14 000 helyett. A pontos számok mindig teljesen jelennek meg.
   Subscription Settings:
+    Refresh These Feeds Together: "Ha frissíted az egyik bejelölt hírfolyamot, a többi bejelölt hírfolyam közvetlenül utána frissül. Az automatikus frissítések továbbra is az egyes hírfolyamok saját időközét követik."
     Fetch Feed on Startup: Bekapcsolva az OpenTubeX automatikusan lekéri a feliratkozási hírfolyamot indításkor és új ablak megnyitásakor.
     Show New Content Feed: Egy Új lap megjelenítése azokkal a feliratkozási hírfolyamelemekkel, amelyek az előző lekéréskor még nem szerepeltek.
     Enable RSS Feeds: Egy RSS lapot jelenít meg a Feliratkozások oldalon RSS- vagy Atom-hírcsatornák elemeivel, így más platformok alkotóit is követheti. Elemei a yt-dlp segítségével nyílnak meg.
@@ -2458,10 +2478,12 @@ Tooltips:
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
     RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
-    Show Collaborations From Other Channels: "Azokat a videókat is megjeleníti, amelyeket a feliratkozott csatornák egy másik, azokat feltöltő csatornával közösen készítettek. A YouTube ezeket csak a csatorna Kezdőlap lapján listázza, ezért minden videófrissítés csatornánként eggyel több oldalt tölt be. Csak az ott megjelenő legújabb közös videók találhatók meg, egyes csatornák egyet sem mutatnak, és a közzétételi dátumuk hozzávetőleges. Az Invidious API-val nem érhető el."
+    Show Collaborations From Other Channels: "Azokat a videókat is megjeleníti, amelyeket a feliratkozott csatornák egy másik, azokat feltöltő csatornával közösen készítettek. A YouTube ezeket csak a csatorna Kezdőlap lapján listázza, ezért egy videófrissítés legfeljebb néhány csatornát ellenőriz, és az újak megjelenése egy napig vagy tovább is tarthat. Csak az ott megjelenő legújabb közös videók találhatók meg, egyes csatornák egyet sem mutatnak, és a közzétételi dátumuk hozzávetőleges. Az Invidious API-val nem érhető el."
     Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
+    Enable Twitch Page: Lehetővé teszi, hogy megnyisd a Twitch-oldalt a navigációból és a parancspalettáról. Ott népszerű kategóriákat és élő csatornákat böngészhetsz, valamint kereshetsz a Twitchen.
     Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:
+    Toggle Playback With Tab Icon: Egy lejátszott vagy szüneteltetett videót tartalmazó lap ikonjára kattintva a videó szünetel vagy folytatódik anélkül, hogy arra a lapra váltana.
     Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek, beleértve a Visszavonás lehetőséget kínálókat is. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a döntést kérő értesítések, például a frissítési felkérések, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
@@ -2520,6 +2542,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Az utolsó ugrás visszavonása
   Redo Seek: Egy visszavont ugrás újbóli végrehajtása
   New Incognito Tab: Új inkognitólap létrehozása
+  Shortcuts Label: Billentyűparancsok
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása
@@ -2554,6 +2577,8 @@ CommandPalette:
     Download Finished: Ez a letöltés már nem fut
     Video: Előbb nyisson meg egy videót
 Downloads:
+  Stop Recording: "Felvétel leállítása"
+  Recording: "Felvétel folyamatban"
   File Name Template Invalid: 'Használjon a letöltési mappán belüli relatív útvonalat "..", "~", "$", "%" vagy például "thumbnail:" előtag nélkül.'
   Search Completed: "Befejezett letöltések keresése cím vagy csatorna alapján"
   Format: "Formátum"
@@ -2697,6 +2722,22 @@ App Icon:
   Saved Message: "Ikon mentve. A kezdőképernyő frissítése eltarthat egy ideig."
   Title: "Alkalmazásikon"
   Error: "Nem sikerült betölteni vagy módosítani az alkalmazás ikonját"
+
+App Lock:
+  Title: "Alkalmazászár"
+  Enable: "Képernyőzár megkövetelése"
+  Enable Tooltip: "Ujjlenyomatot, arcot, PIN-kódot, mintát vagy jelszót kér, amikor visszatér az OpenTubeX-be. Android 13 és újabb rendszeren a legutóbbi alkalmazások nézete sem mutat előnézetet az alkalmazásról."
+  Lock After: "Zárolás ennyi idő után"
+  Immediately: "Azonnal"
+  1 Minute: "1 perc"
+  5 Minutes: "5 perc"
+  15 Minutes: "15 perc"
+  1 Hour: "1 óra"
+  Unavailable: "Az alkalmazászár használatához állítson be képernyőzárat az Android beállításaiban."
+  Error: "Nem sikerült módosítani az alkalmazászárat"
+  Locked: "Az OpenTubeX zárolva van"
+  Unlock: "Feloldás"
+  Prompt Title: "OpenTubeX feloldása"
 
 Tray:
   Hide All Windows: "Összes ablak elrejtése"
@@ -2876,6 +2917,33 @@ Platforms:
   Verify: "Ellenőrzés"
   Categories: "Kategóriák"
   Category Not Found: "Ez a kategória nem található."
+  Category Tags: "Kategóriacímkék"
+  Stream Tags: "Streamcímkék"
+  Language: "Nyelv"
+  All Languages: "Minden nyelv"
+  Other Language: "Egyéb"
+  American Sign Language: "amerikai jelnyelv"
+  Search Tags: "Címkék keresése"
+  Add Tag: "Címke hozzáadása"
+  Remove Tag: "{tag} eltávolítása"
+  Sort:
+    Viewers: "Nézők (csökkenő sorrend)"
+    Viewers Ascending: "Nézők (növekvő sorrend)"
+    Started: "Nemrég indult"
+    Relevance: "Ajánlott"
+    Published: "Nemrég közzétéve"
+    Views: "Megtekintések (csökkenő sorrend)"
+    Top Day: "Top 24 óra"
+    Top Week: "Top 7 nap"
+    Top Month: "Top 30 nap"
+    Top All: "Minden idők legjobbjai"
+  Video Type:
+    Video Type: "Videótípus"
+    All: "Összes videó"
+    Archive: "Korábbi adások"
+    Highlight: "Kiemelések"
+    Upload: "Feltöltések"
+  Anonymous: "Névtelen"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} válaszolt {commentAuthor} hozzászólására"
   Like: "Tetszik"
@@ -2910,5 +2978,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Keresés a Twitchen"
+  Search Placeholder: "Kategóriák és csatornák"
 New Incognito Tab: Új inkognitólap
 Incognito Tab: Inkognitólap

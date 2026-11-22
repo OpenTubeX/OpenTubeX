@@ -243,6 +243,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
   RSS Feeds:
+    Load More Items: Įkelti daugiau įrašų
     Refreshing: Atnaujinami RSS sklaidos kanalai
     Tab: RSS
     Followed Feeds: Stebimi RSS sklaidos kanalai
@@ -611,6 +612,7 @@ Settings:
       Memory: atminties
       Network: tinklo
       Disk: disko
+    Label: Našumas
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
     Invidious Instance Username: 'Egzemplioriaus naudotojo vardas'
@@ -743,6 +745,8 @@ Settings:
       Auto: Automatiškai
     Preferred API Backend:
       Yattee Server: Yattee serveris
+      Local API Extension Required: Žiniatinklio programa vietinę API gali naudoti tik su naršyklės plėtiniu „OpenTubeX Local API“.
+      Install Local API Extension: Įdiegti plėtinį
     Yattee Server:
       Server URL: Yattee serverio URL
       Username: Naudotojo vardas
@@ -783,6 +787,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Toggle Playback With Tab Icon: Leisti ir pristabdyti kortelės piktograma
     Theme and Colors: "Tema ir spalvos"
     Font Size: Šrifto dydis
     Sections:
@@ -1061,6 +1066,7 @@ Settings:
     Mono Audio: 'Mono garsas'
     Normalize Loudness: 'Normalizuoti garsumą'
     Show Mono Audio Toggle: 'Rodyti mono garso jungiklį'
+    Show Mirror Video Toggle: "Rodyti veidrodinio vaizdo jungiklį"
     Default Media Format:
       Default Media Format: 'Numatytasis medijos formatas'
     Pause on Stream Recovery: "Pristabdyti atkuriant srautą"
@@ -1090,6 +1096,7 @@ Settings:
     Enable DLNA Casting: "Įjungti DLNA transliavimą"
     Skip Unavailable Playlist Videos: "Praleisti nepasiekiamus vaizdo įrašus grojaraščiuose"
     Lights Off: Išjungti šviesas
+    Mirror Video: "Veidrodinis vaizdo įrašas"
     Show Lights Off Toggle: Rodyti šviesų išjungimo jungiklį
     Show Volume Boost Toggle: "Rodyti garsumo stiprinimo jungiklį"
     Swipe Gestures:
@@ -1103,6 +1110,7 @@ Settings:
       Unavailable: Nepavyko sureguliuoti atkūrimo valdiklių.
     yt-dlp Streaming: "yt-dlp srautinis perdavimas"
     Continue Playback When Screen Is Locked: 'Tęsti atkūrimą, kai ekranas užrakintas'
+    Switch to Audio in Background: 'Fone perjungti į garso formatus'
     Ignore Headphone Controls: 'Nepaisyti ausinių valdiklių'
     Music Visualizer: Muzikos vizualizacija
     Automatically Open Chapters: Automatiškai atverti skyrius
@@ -1250,6 +1258,7 @@ Settings:
     Timestamp Notes:
       Enable: "Įjungti laiko žymų pastabas"
       Obsidian Vault: Obsidian saugykla
+    Double-Tap With Two Fingers to Skip Chapters: "Dukart bakstelėkite dviem pirštais, kad praleistumėte skyrius"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1503,6 +1512,7 @@ Settings:
     Cleanup Complete: Saugyklos valymas baigtas
     Cleanup Failed: Saugyklos išvalyti nepavyko
   Subscription Settings:
+    Refresh These Feeds Together: "Atnaujinti šiuos kanalus kartu"
     Fetch Feed on Startup: Paleidžiant gauti sklaidos kanalo duomenis
     Show New Content Feed: Rodyti naujo turinio sklaidos kanalą
     RSS Feeds: RSS sklaidos kanalai
@@ -1526,6 +1536,7 @@ Settings:
     Platforms:
       Other Platforms: Kitos platformos
       Manage Channels: Tvarkyti sekamus kanalus
+      Enable Twitch Page: Įjungti Twitch puslapį
       Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
       Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
@@ -1571,6 +1582,7 @@ Settings:
     Hide Header Sync Indicator: Slėpti sinchronizavimo indikatorių programos antraštėje
     Hide Repeat Stats: Slėpti kartojimo statistiką
     Hide Playlist Stats: Slėpti grojaraščio statistiką
+    Hide Recommendation Details: Slėpti rekomendacijų priežastis ir atsiliepimus
     Sections:
       Digital Wellbeing: "Skaitmeninė gerovė"
       Subscriptions Page: Prenumeratų puslapis
@@ -1928,6 +1940,7 @@ Settings:
     Downloading: Atsisiunčiami sąrašai…
     Failed to Download: Nepavyko atsisiųsti sąrašų
     Loaded Status: "Užblokuoti kanalai: {blocked} · Pažymėti kanalai: {warned} · Atnaujinta: {date}"
+  Highlight Changed Settings Label: Pakeisti
 Tutorial:
   Skip: Praleisti
   Next: Toliau
@@ -2285,6 +2298,9 @@ Video:
     Zoom:
       Zoom: Mastelis
       'Off': 'Išjungta'
+    Lock Controls:
+      Lock Controls: "Užrakinti valdiklius"
+      Hold to Unlock: "Palaikykite, kad atrakintumėte"
     Volume Boost:
       Volume Boost: "Garsumo stiprinimas"
       'Off': "Išjungta"
@@ -2813,6 +2829,7 @@ Tooltips:
     Normalize Loudness: 'Pritildo vaizdo įrašus, kurie garsesni už daugumą, kad garsumas nešokinėtų tarp vaizdo įrašų. Tylūs vaizdo įrašai išlaiko savo garsumą. Veikia tik su vaizdo įrašais, įkeltais per vietinį API.'
     Pause on Stream Recovery: "Kai vaizdo srautas nepavyksta ir grotuvas jį įkelia iš naujo arba perjungia į kitą formatą ar variklį, atkūrimas pristabdomas, o klaida lieka grotuvo viršuje, kol ją uždarysite. Išjungus atkūrimas tęsiamas, o klaida trumpai parodoma kaip pranešimas."
     Continue Playback When Screen Is Locked: 'Toliau leidžia garsą fone ir pateikia „Android“ medijos valdiklius. Išjunkite, kad atkūrimas būtų pristabdytas, kai programa nebematoma.'
+    Switch to Audio in Background: 'Leidžia garso formatus, kol programa veikia fone arba ekranas išjungtas, taip taupydama duomenis ir bateriją. Vaizdo vaizde režimas išlaiko vaizdo įrašą. Vaizdo įrašas grįžta, kai vėl atidarote programą. Reikia, kad atkūrimas tęstųsi užrakinus ekraną.'
     Ignore Headphone Controls: 'Ignoruoja leidimo, pristabdymo ir praleidimo komandas iš Bluetooth įrenginių, laidinių ausinių ir klaviatūrų medijos klavišų, kad atsitiktiniai ausinių palietimai nenutrauktų atkūrimo. Valdikliai programoje ir medijos pranešime toliau veikia.'
     Enable Caption Translations: Įjungus subtitrų mygtukas ir spartusis klavišas C teikia pirmenybę automatiškai išverstam takeliui pageidaujama subtitrų kalba, jei vaizdo įraše nėra atitinkamo originalaus takelio.
     Use Quick Playback Speed Bar: Dešinėje leistuvo valdiklių pusėje rodo sparčiojo atkūrimo greičio juostą. Jei įjungtas rankinis atkūrimo greičio išsaugojimas kiekvienam kanalui, juostoje taip pat yra mygtukas dabartinio kanalo greičiui išsaugoti.
@@ -2822,6 +2839,7 @@ Tooltips:
     Use YouTube-style Shorts: Prenumeratų ir kanalų puslapiuose rodo Shorts vertikaliame tinklelyje ir naudoja YouTube stiliaus Shorts leistuvą.
     Loop Shorts: Įjungus Shorts automatiškai paleidžiami iš naujo. Išjungus Shorts pabaigoje sustoja ir rodomas pakartojimo mygtukas.
     Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
+    Show Mirror Video Toggle: "Leistuvo nustatymų meniu rodo jungiklį, kuris horizontaliai apverčia vaizdo įrašą, kad būtų lengviau sekti šokių, treniruočių ir muzikos instrumentų pamokas."
     Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
     Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
     Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.
@@ -2843,6 +2861,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
     Enable Timestamp Notes: "Prideda grotuvo mygtuką ir spartųjį klavišą N, kurie pristabdo vaizdo įrašą ir atveria pastabą su nuoroda į dabartinę akimirką. Pastabas galima nukopijuoti kaip Markdown arba kompiuteryje pridėti prie Obsidian."
     Obsidian Vault: Obsidian saugyklos, skirtos laiko žymų pastaboms, pavadinimas. Jį nustačius, pastabas galima pridėti į Obsidian. Kiekvieno vaizdo įrašo pastabos renkamos pagal vaizdo įrašą pavadintoje pastaboje, saugyklos naujų pastabų aplanke.
+    Double-Tap With Two Fingers to Skip Chapters: "Dukart bakstelėkite dviem pirštais dešinę vaizdo įrašo pusę, kad pereitumėte į kitą skyrių, arba kairę pusę, kad grįžtumėte į dabartinio skyriaus pradžią. Per pirmąsias 3 skyriaus sekundes kairė pusė vietoj to perkelia į ankstesnį skyrių, todėl kartodami grįžtate atgal per skyrius."
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:
@@ -2879,6 +2898,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Įveskite žodį, žodžio dalį arba frazę (didžiosios ir mažosios raidės neskiriamos), kad visoje OpenTubeX nebūtų rodomi vaizdo įrašai, grojaraščiai ir kanalai, kurių originaliuose pavadinimuose yra šis tekstas. Filtras netaikomas tik istorijai, jūsų grojaraščiams ir grojaraščiuose esantiems vaizdo įrašams.
     Hide Videos on Watch: Prenumeratų ir kanalų puslapių kortelėse Vaizdo įrašai, Shorts ir Tiesiogiai slepia peržiūrėtus vaizdo įrašus. Tai neturi įtakos kanalų puslapių kortelei Pradžia
   Subscription Settings:
+    Refresh These Feeds Together: "Kai atnaujinate vieną iš pažymėtų kanalų, kiti pažymėti kanalai atnaujinami iškart po jo. Automatiniai atnaujinimai ir toliau vyksta pagal kiekvieno kanalo intervalą."
     Fetch Feed on Startup: Įjungus OpenTubeX automatiškai gaus prenumeratų sklaidos kanalą paleidžiant programą ir atvėrus naują langą.
     Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
     Enable RSS Feeds: Prenumeratų puslapyje rodo RSS kortelę su RSS arba Atom sklaidos kanalų elementais, kad galėtumėte stebėti kūrėjus kitose platformose. Jos elementai atidaromi naudojant yt-dlp.
@@ -2889,10 +2909,12 @@ Tooltips:
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
-    Show Collaborations From Other Channels: "Taip pat rodo vaizdo įrašus, kuriuos prenumeruojami kanalai sukūrė kartu su kitu juos įkėlusiu kanalu. „YouTube“ juos rodo tik kanalo skirtuke „Pagrindinis“, todėl kiekvienas vaizdo įrašų atnaujinimas kiekvienam kanalui įkelia vienu puslapiu daugiau. Randami tik ten rodomi naujausi bendradarbiavimai, kai kurie kanalai jų visai nerodo, o jų paskelbimo datos yra apytikslės. Nepasiekiama su „Invidious“ API."
+    Show Collaborations From Other Channels: "Taip pat rodo vaizdo įrašus, kuriuos prenumeruojami kanalai sukūrė kartu su kitu juos įkėlusiu kanalu. „YouTube“ juos rodo tik kanalo skirtuke „Pagrindinis“, todėl vaizdo įrašų atnaujinimas patikrina daugiausia kelis kanalus, o nauji gali pasirodyti tik po dienos ar vėliau. Randami tik ten rodomi naujausi bendradarbiavimai, kai kurie kanalai jų visai nerodo, o jų paskelbimo datos yra apytikslės. Nepasiekiama su „Invidious“ API."
     Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
+    Enable Twitch Page: Leidžia atidaryti Twitch puslapį iš naršymo ir komandų paletės. Ten galite naršyti populiarias kategorijas ir tiesioginius kanalus bei ieškoti Twitch.
     Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
+    Toggle Playback With Tab Icon: Spustelėjus kortelės su leidžiamu ar pristabdytu vaizdo įrašu piktogramą, jis pristabdomas arba tęsiamas neperjungiant į tą kortelę.
     Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną, įskaitant tuos, kuriuose siūloma Anuliuoti. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, prašantys priimti sprendimą, pavyzdžiui, raginimai atnaujinti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
@@ -3031,6 +3053,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Atšaukti paskutinį peršokimą
   Redo Seek: Pakartoti atšauktą peršokimą
   New Incognito Tab: Sukurti naują inkognito kortelę
+  Shortcuts Label: Spartieji klavišai
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę
@@ -3065,6 +3088,8 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Stop Recording: "Stabdyti įrašymą"
+  Recording: "Įrašoma"
   File Name Template Invalid: 'Naudokite santykinį kelią atsisiuntimų aplanke be "..", "~", "$", "%" ar priešdėlio, pvz., "thumbnail:".'
   Search Completed: "Ieškoti baigtų atsisiuntimų pagal pavadinimą ar kanalą"
   Format: "Formatas"
@@ -3214,6 +3239,22 @@ App Icon:
   Saved Message: "Piktograma išsaugota. Paleidyklės atnaujinimas gali šiek tiek užtrukti."
   Title: "Programėlės piktograma"
   Error: "Nepavyko įkelti ar pakeisti programėlės piktogramos"
+
+App Lock:
+  Title: "Programėlės užraktas"
+  Enable: "Reikalauti ekrano užrakto"
+  Enable Tooltip: "Grįžus į „OpenTubeX“ paprašoma piršto antspaudo, veido, PIN kodo, atrakinimo piešinio arba slaptažodžio. „Android 13“ ir naujesnėje versijoje paskutinių programėlių rodinyje taip pat neberodoma programėlės peržiūra."
+  Lock After: "Užrakinti po"
+  Immediately: "Iš karto"
+  1 Minute: "1 minutės"
+  5 Minutes: "5 minučių"
+  15 Minutes: "15 minučių"
+  1 Hour: "1 valandos"
+  Unavailable: "Norėdami naudoti programėlės užraktą, nustatykite ekrano užraktą „Android“ nustatymuose."
+  Error: "Nepavyko pakeisti programėlės užrakto"
+  Locked: "„OpenTubeX“ užrakinta"
+  Unlock: "Atrakinti"
+  Prompt Title: "Atrakinti „OpenTubeX“"
 
 Tray:
   Hide All Windows: "Slėpti visus langus"
@@ -3379,6 +3420,33 @@ Platforms:
   Verify: "Patvirtinti"
   Categories: "Kategorijos"
   Category Not Found: "Šios kategorijos rasti nepavyko."
+  Category Tags: "Kategorijos žymos"
+  Stream Tags: "Transliacijos žymos"
+  Language: "Kalba"
+  All Languages: "Visos kalbos"
+  Other Language: "Kita"
+  American Sign Language: "Amerikos gestų kalba"
+  Search Tags: "Ieškoti žymų"
+  Add Tag: "Pridėti žymą"
+  Remove Tag: "Pašalinti {tag}"
+  Sort:
+    Viewers: "Žiūrovai (nuo daugiausia iki mažiausia)"
+    Viewers Ascending: "Žiūrovai (nuo mažiausia iki daugiausia)"
+    Started: "Neseniai pradėtos"
+    Relevance: "Rekomenduojama"
+    Published: "Neseniai paskelbta"
+    Views: "Peržiūros (nuo daugiausia iki mažiausia)"
+    Top Day: "Populiariausi per 24 val."
+    Top Week: "Populiariausi per 7 dienas"
+    Top Month: "Populiariausi per 30 dienų"
+    Top All: "Populiariausi per visą laiką"
+  Video Type:
+    Video Type: "Vaizdo įrašo tipas"
+    All: "Visi vaizdo įrašai"
+    Archive: "Praėjusios transliacijos"
+    Highlight: "Svarbiausi momentai"
+    Upload: "Įkėlimai"
+  Anonymous: "Anonimas"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} atsakė naudotojui {commentAuthor}"
   Like: "Patinka"
@@ -3413,5 +3481,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Ieškoti Twitch"
+  Search Placeholder: "Kategorijos ir kanalai"
 New Incognito Tab: Nauja inkognito kortelė
 Incognito Tab: Inkognito kortelė

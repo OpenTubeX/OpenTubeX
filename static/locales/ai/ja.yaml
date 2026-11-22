@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: 新しい順
   Oldest First: 古い順
   RSS Feeds:
+    Load More Items: さらに項目を読み込む
     Refreshing: RSS フィードを更新中
     Tab: RSS
     Followed Feeds: フォロー中の RSS フィード
@@ -497,6 +498,7 @@ Settings:
       Memory: メモリ
       Network: ネットワーク
       Disk: ディスク
+    Label: パフォーマンス
   General Settings:
     Invidious Instance Username: 'インスタンスのユーザー名'
     Invidious Instance Password: 'インスタンスのパスワード'
@@ -620,6 +622,8 @@ Settings:
       Auto: 自動
     Preferred API Backend:
       Yattee Server: Yattee Server
+      Local API Extension Required: Web アプリでローカル API を使うには、ブラウザー拡張機能「OpenTubeX Local API」が必要です。
+      Install Local API Extension: 拡張機能をインストール
     Yattee Server:
       Server URL: Yattee サーバーの URL
       Username: ユーザー名
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Toggle Playback With Tab Icon: タブのアイコンで再生・一時停止
     Theme and Colors: "テーマと色"
     Font Size: フォントサイズ
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'モノラル音声'
     Normalize Loudness: 'ラウドネスを正規化'
     Show Mono Audio Toggle: 'モノラル音声の切り替えを表示'
+    Show Mirror Video Toggle: "動画の左右反転の切り替えを表示"
     Pause on Stream Recovery: "ストリーム復旧時に一時停止"
     Buffering:
       Buffering: バッファリング
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "DLNAキャストを有効にする"
     Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"
     Lights Off: 照明を消す
+    Mirror Video: "動画を左右反転"
     Show Lights Off Toggle: 照明を消す切り替えを表示
     Show Volume Boost Toggle: "音量ブーストの切り替えを表示"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: 再生コントロールを調整できませんでした。
     yt-dlp Streaming: "yt-dlp ストリーミング"
     Continue Playback When Screen Is Locked: '画面ロック中も再生を続ける'
+    Switch to Audio in Background: 'バックグラウンドで音声形式に切り替える'
     Ignore Headphone Controls: 'ヘッドホンの操作を無視'
     Music Visualizer: 音楽ビジュアライザー
     Automatically Open Chapters: チャプターを自動的に開く
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "タイムスタンプメモを有効にする"
       Obsidian Vault: Obsidian の保管庫
+    Double-Tap With Two Fingers to Skip Chapters: "2本指でダブルタップしてチャプターを移動"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: ストレージのクリーンアップが完了しました
     Cleanup Failed: ストレージのクリーンアップに失敗しました
   Subscription Settings:
+    Refresh These Feeds Together: "これらのフィードをまとめて更新"
     Fetch Feed on Startup: 起動時にフィードを取得
     Show New Content Feed: 新着コンテンツのフィードを表示
     RSS Feeds: RSS フィード
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: 他のプラットフォーム
       Manage Channels: フォロー中のチャンネルを管理
+      Enable Twitch Page: Twitch ページを有効にする
       Notify When Live: フォロー中の Twitch チャンネルが配信を開始したら通知
       Auto Refresh Interval: 他のプラットフォームの自動更新間隔
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: アプリヘッダーの同期インジケーターを非表示
     Hide Repeat Stats: リピート統計を非表示
     Hide Playlist Stats: 再生リストの統計を非表示
+    Hide Recommendation Details: おすすめの理由とフィードバックを非表示
     Sections:
       Digital Wellbeing: "デジタル ウェルビーイング"
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: リストをダウンロードしています…
     Failed to Download: リストをダウンロードできませんでした
     Loaded Status: "ブロック済みチャンネル: {blocked} · 警告対象チャンネル: {warned} · 更新日時: {date}"
+  Highlight Changed Settings Label: 変更済み
 Tutorial:
   Skip: スキップ
   Next: 次へ
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: ズーム
       'Off': 'オフ'
+    Lock Controls:
+      Lock Controls: "操作をロック"
+      Hold to Unlock: "長押しでロック解除"
     Volume Boost:
       Volume Boost: "音量ブースト"
       'Off': "オフ"
@@ -2388,6 +2404,7 @@ Tooltips:
     Normalize Loudness: 'ほとんどの動画より音が大きい動画の音量を下げ、動画間で音量が急に変わらないようにします。音が小さい動画の音量はそのままです。内部 API で読み込んだ動画でのみ機能します。'
     Pause on Stream Recovery: "動画ストリームが失敗し、プレーヤーが再読み込みするか別の形式やエンジンに切り替えたとき、再生を一時停止し、閉じるまでエラーをプレーヤー上部に表示します。オフにすると再生は続行され、エラーは通知として短時間表示されます。"
     Continue Playback When Screen Is Locked: 'バックグラウンドで音声の再生を続け、Android のメディアコントロールを提供します。アプリが表示されなくなったときに一時停止するには無効にしてください。'
+    Switch to Audio in Background: 'アプリがバックグラウンドにあるときや画面がオフのときに音声形式で再生し、データ通信量とバッテリーを節約します。ピクチャー・イン・ピクチャーでは動画のままです。アプリを再び開くと動画に戻ります。画面ロック中も再生を続ける設定が必要です。'
     Ignore Headphone Controls: 'Bluetooth デバイス、有線ヘッドホン、キーボードのメディアキーからの再生、一時停止、スキップのコマンドを無視し、イヤホンへの誤タップで再生が中断されないようにします。アプリ内とメディア通知のコントロールは引き続き使用できます。'
     Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。
     Use Quick Playback Speed Bar: プレーヤー右側の操作欄にクイック再生速度バーを表示します。チャンネルごとの再生速度を手動保存する設定が有効な場合は、現在のチャンネルに速度を保存するボタンも表示されます。
@@ -2396,6 +2413,7 @@ Tooltips:
     Use YouTube-style Shorts: 登録チャンネルとチャンネルのページでショート動画を縦長のグリッドに表示し、YouTube形式のショート動画プレーヤーを使用します。
     Loop Shorts: 有効にするとショート動画を自動的に最初から再生します。無効にすると最後で停止し、再生ボタンを表示します。
     Show Skip Silence Toggle: プレーヤーの設定メニューに、無音スキップのオンとオフを切り替える項目を表示します。
+    Show Mirror Video Toggle: "プレーヤーの設定メニューに、動画を左右反転する切り替えを表示します。ダンス、トレーニング、楽器のチュートリアルをまねしやすくなります。"
     Enable Skip Silence by Default: 新しいタブで無音スキップを有効にします。あるタブで変更しても、ほかのタブには影響しません。
     Enable Video Zoom: プレーヤーの設定メニューにズーム操作を表示し、キーボードショートカットとパン操作を有効にします。
     Enable Seek History: アプリを閉じるまで、各動画でどこからジャンプしたかを記憶します。プレーヤーの設定メニューにシーク履歴の一覧を表示し、キーボードショートカットを有効にします。
@@ -2417,6 +2435,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
     Enable Timestamp Notes: "動画を一時停止し、現在の位置へのリンクを含むメモを開くプレーヤーボタンと N ショートカットを追加します。メモは Markdown としてコピーするか、デスクトップでは Obsidian に追加できます。"
     Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。
+    Double-Tap With Two Fingers to Skip Chapters: "動画の右側を2本指でダブルタップすると次のチャプターへ、左側をダブルタップすると現在のチャプターの先頭へ移動します。チャプター開始から3秒以内は、左側で代わりに前のチャプターへ移動するため、繰り返すとチャプターを順にさかのぼれます。"
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'
@@ -2447,6 +2466,7 @@ Tooltips:
     Bedtime Reminder: "開始時刻から終了時刻までの間、動画を一時停止して視聴をやめるようリマインドします。"
     Shorten View Counts: YouTubeですでに丸められた視聴回数、コメント数、コメントの高評価数を、14,000ではなく14Kのように省略表示します。正確な数値は常に省略せず表示します。
   Subscription Settings:
+    Refresh These Feeds Together: "チェックしたフィードのいずれかを更新すると、チェックした他のフィードもその直後に更新されます。自動更新は引き続き各フィードの間隔に従います。"
     Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
     Show New Content Feed: 前回の取得時にはなかった登録チャンネルのフィード項目を「新着」タブに表示します。
     Enable RSS Feeds: 登録チャンネルページに RSS または Atom フィードの項目を含む RSS タブを表示し、他のプラットフォームのクリエイターをフォローできるようにします。項目は yt-dlp で開きます。
@@ -2457,10 +2477,12 @@ Tooltips:
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
     RSS Feeds Auto Refresh Interval: アプリを開いている間に OpenTubeX が RSS フィードを自動更新する間隔です。
     Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
-    Show Collaborations From Other Channels: "登録チャンネルが、アップロードした別のチャンネルと一緒に制作した動画も表示します。YouTube はこれらをチャンネルのホームタブにしか表示しないため、動画を更新するたびにチャンネルごとに 1 ページ多く読み込みます。そこに表示される最新のコラボだけが見つかり、一部のチャンネルは何も表示せず、公開日はおおよそです。Invidious API では利用できません。"
+    Show Collaborations From Other Channels: "登録チャンネルが、アップロードした別のチャンネルと一緒に制作した動画も表示します。YouTube はこれらをチャンネルのホームタブにしか表示しないため、動画を更新しても確認するのは最大でいくつかのチャンネルだけです。新しいコラボが表示されるまで 1 日以上かかることがあります。そこに表示される最新のコラボだけが見つかり、一部のチャンネルは何も表示せず、公開日はおおよそです。Invidious API では利用できません。"
     Platforms Auto Refresh Interval: アプリを開いている間に OpenTubeX が他のプラットフォームでフォロー中のチャンネルを自動更新する間隔です。
+    Enable Twitch Page: ナビゲーションとコマンドパレットから Twitch ページを開けるようにします。このページでは、人気のカテゴリーやライブ中のチャンネルを見たり、Twitch を検索したりできます。
     Twitch Notify When Live: フォロー中の Twitch チャンネルが配信を開始すると通知します。OpenTubeX は開いている間は数分ごとに確認し、閉じている間も登録チャンネルを更新する設定であれば確認します。
   Theme Settings:
+    Toggle Playback With Tab Icon: 再生中または一時停止中の動画があるタブのアイコンをクリックすると、そのタブに切り替えずに一時停止または再開します。
     Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします（「元に戻す」が表示されるものも含みます）。エラー、警告、設定したリマインダー、およびアップデートの確認など判断を求める通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
@@ -2519,6 +2541,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 最後のシークを元に戻す
   Redo Seek: 元に戻したシークをやり直す
   New Incognito Tab: 新しいシークレット タブを作成
+  Shortcuts Label: ショートカット
 CommandPalette:
   Title: コマンドパレット
   Open: コマンドパレットを開く
@@ -2553,6 +2576,8 @@ CommandPalette:
     Download Finished: このダウンロードはすでに終了しています
     Video: 先に動画を開いてください
 Downloads:
+  Stop Recording: "録画を停止"
+  Recording: "録画中"
   File Name Template Invalid: 'ダウンロードフォルダー内の相対パスを使用してください。".."、"~"、"$"、"%"、"thumbnail:" のような接頭辞は使用できません。'
   Search Completed: "完了したダウンロードをタイトルまたはチャンネルで検索"
   Format: "形式"
@@ -2696,6 +2721,22 @@ App Icon:
   Saved Message: "アイコンを保存しました。ランチャーの更新には少し時間がかかる場合があります。"
   Title: "アプリアイコン"
   Error: "アプリアイコンを読み込むか変更することができませんでした"
+
+App Lock:
+  Title: "アプリロック"
+  Enable: "画面ロックを必須にする"
+  Enable Tooltip: "OpenTubeX に戻ったときに、指紋、顔、PIN、パターン、パスワードの入力を求めます。Android 13 以降では、最近使用したアプリにもアプリのプレビューが表示されなくなります。"
+  Lock After: "ロックするまでの時間"
+  Immediately: "すぐに"
+  1 Minute: "1 分"
+  5 Minutes: "5 分"
+  15 Minutes: "15 分"
+  1 Hour: "1 時間"
+  Unavailable: "アプリロックを使うには、Android の設定で画面ロックを設定してください。"
+  Error: "アプリロックを変更できません"
+  Locked: "OpenTubeX はロックされています"
+  Unlock: "ロック解除"
+  Prompt Title: "OpenTubeX のロックを解除"
 
 Tray:
   Hide All Windows: "すべてのウィンドウを非表示"
@@ -2875,6 +2916,33 @@ Platforms:
   Verify: "確認"
   Categories: "カテゴリー"
   Category Not Found: "このカテゴリーは見つかりませんでした。"
+  Category Tags: "カテゴリーのタグ"
+  Stream Tags: "配信のタグ"
+  Language: "言語"
+  All Languages: "すべての言語"
+  Other Language: "その他"
+  American Sign Language: "アメリカ手話"
+  Search Tags: "タグを検索"
+  Add Tag: "タグを追加"
+  Remove Tag: "{tag} を削除"
+  Sort:
+    Viewers: "視聴者数（多い順）"
+    Viewers Ascending: "視聴者数（少ない順）"
+    Started: "開始が新しい順"
+    Relevance: "おすすめ"
+    Published: "公開が新しい順"
+    Views: "再生回数（多い順）"
+    Top Day: "トップ 24時間"
+    Top Week: "トップ 7日間"
+    Top Month: "トップ 30日間"
+    Top All: "トップ（全期間）"
+  Video Type:
+    Video Type: "動画タイプ"
+    All: "すべての動画"
+    Archive: "過去の配信"
+    Highlight: "ハイライト"
+    Upload: "アップロード"
+  Anonymous: "匿名"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} さんが {commentAuthor} さんに返信しました"
   Like: "高く評価"
@@ -2909,5 +2977,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch を検索"
+  Search Placeholder: "カテゴリーとチャンネル"
 New Incognito Tab: 新しいシークレット タブ
 Incognito Tab: シークレット タブ

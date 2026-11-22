@@ -1,7 +1,7 @@
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, splitArguments, isYtDlpMediaUrl,
-  isSafeDownloadFilenameTemplate, DOT_FIELD_PATTERN,
+  isSafeDownloadFilenameTemplate, DOT_FIELD_PATTERN, playlistDownloadPartLimit, splitDownloadArguments,
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -16,8 +16,9 @@ import { createSerialQueue } from './serialQueue'
 import { readJsonState } from './readJsonState'
 import { writeFileAtomic } from './writeFileAtomic'
 import { shouldUseGioTrash } from './trashPlatform'
-import { killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
+import { interruptProcess, killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
 import {
+  combineDownloadSpeeds,
   compareQueuedDownloads,
   normalizeDownloadBandwidth,
   normalizeDownloadConcurrency,
@@ -35,6 +36,7 @@ import {
   ytDlpEnvironment,
 } from './ytDlpBinaries'
 import { pushYtDlpPlaybackAuthenticationArguments } from './ytDlpPlayback'
+import { checkOutYtDlpCookies } from './ytDlpCookieFile'
 import { authorizeAutomaticDownload, showAutomaticDownloadNotification } from './ytDlpAutomaticDownloads'
 
 const execFileAsync = promisify(execFile)
@@ -47,6 +49,7 @@ const execFileAsync = promisify(execFile)
  * @property {string} [playlistId]
  * @property {string} [playlistKey] stable playlist identity used only by the renderer
  * @property {boolean} [isPlaylist]
+ * @property {number} [videoCount] number of videos in a remote playlist, limits how many processes download it
  * @property {string} [title] only used for display purposes in the renderer
  * @property {string} [thumbnail] only used for display purposes in the renderer
  * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
@@ -98,6 +101,9 @@ const execFileAsync = promisify(execFile)
  * @property {'unmetered' | 'charging' | null} [waitingFor] unmet automatic download requirement
  * @property {boolean} [started]
  * @property {number} percent
+ * @property {boolean} [live] whether the current video is a live stream, which yt-dlp records until it ends or is stopped
+ * @property {number} [recordedSeconds] length of the live recording so far
+ * @property {number} [recordedBytes] size of the live recording so far
  * @property {string} [currentVideoId] video yt-dlp is working on
  * @property {string} [currentTitle]
  * @property {number | null} [playlistIndex] position of the current video in a remote playlist download
@@ -126,6 +132,10 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+const LIVE_PREFIX = '__OPENTUBEX_LIVE__:'
+// The keys of FFmpeg's `-progress` output that a live recording shows
+const FFMPEG_PROGRESS_REGEX = /^(out_time_us|total_size|progress)=(\S+)$/
+const STOP_UNANSWERED_MS = 10_000
 const DOWNLOAD_STOPPED_ERROR = 'DOWNLOAD_STOPPED_UNEXPECTEDLY'
 const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
 // Names the process whose download uses a temporary folder
@@ -215,19 +225,45 @@ let missingFfmpegInstall = null
 /** @type {NodeJS.Timeout | null} */
 let powerSourcePollTimer = null
 
-/** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused' }>} */
+/**
+ * A playlist download can run several yt-dlp processes, which `children` holds until they exit.
+ * @type {Map<number, { children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string }>}
+ */
 const activeDownloads = new Map()
 // Downloads run in their own process groups, so the terminal's SIGINT or
 // SIGHUP no longer reaches them. Stop any that `shutdownYtDlpDownloads` did not.
 process.on('exit', () => {
-  for (const { child } of activeDownloads.values()) killProcessTreeSync(child)
+  for (const { children } of activeDownloads.values()) {
+    for (const child of children) killProcessTreeSync(child)
+  }
 })
+
+/**
+ * @param {{ children: Set<import('node:child_process').ChildProcess> }} entry
+ * @param {NodeJS.Signals} [signal]
+ */
+function signalDownload(entry, signal) {
+  const signalled = []
+  let failed = false
+  for (const child of entry.children) {
+    if (signalProcessTree(child, signal)) signalled.push(child)
+    // A part that exited before its close event needs no signal.
+    else if (child.exitCode === null && child.signalCode === null) failed = true
+  }
+  // A pause stops every part or none, so continue the parts it stopped.
+  if (failed && signal === 'SIGSTOP') {
+    for (const child of signalled) signalProcessTree(child, 'SIGCONT')
+  }
+  return !failed
+}
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()
 const MAX_SAVED_FILELESS_DOWNLOAD_RECORDS = 200
 const FILELESS_DOWNLOAD_STATUSES = ['failed', 'cancelled', 'skipped']
-/** @type {Map<number, (permitted: boolean) => void>} */
+/** @type {Map<number, (slots: number) => void>} */
 const queuedDownloadWaiters = new Map()
+/** @type {Map<number, number>} how many slots a queued download can use */
+const queuedDownloadSlotDemands = new Map()
 const individuallyResumedDownloadIds = new Set()
 /** @type {Promise<void> | null} */
 let downloadRecordsLoadPromise = null
@@ -332,9 +368,12 @@ async function drainDownloadQueue() {
     if (!next) return
 
     const resolve = queuedDownloadWaiters.get(next.id)
+    // A playlist also takes the other free slots for parallel processes.
+    const slots = Math.min(queuedDownloadSlotDemands.get(next.id) ?? 1, queueSettings.concurrency - runningDownloadCount)
     queuedDownloadWaiters.delete(next.id)
-    runningDownloadCount++
-    resolve?.(true)
+    queuedDownloadSlotDemands.delete(next.id)
+    runningDownloadCount += slots
+    resolve?.(slots)
   }
 }
 
@@ -352,9 +391,15 @@ async function requestDownloadQueueDrain() {
   }
 }
 
-function waitForDownloadSlot(id) {
+/**
+ * @param {number} id
+ * @param {number} demand
+ * @returns {Promise<number>} the number of slots granted, or 0 if the download was cancelled
+ */
+function waitForDownloadSlot(id, demand) {
   return new Promise(resolve => {
     queuedDownloadWaiters.set(id, resolve)
+    queuedDownloadSlotDemands.set(id, demand)
     if (downloadQueuePaused && setPendingDownloadStatus('paused').length > 0) {
       saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
     }
@@ -366,13 +411,14 @@ function cancelQueuedDownload(id) {
   const resolve = queuedDownloadWaiters.get(id)
   if (!resolve) return false
   queuedDownloadWaiters.delete(id)
+  queuedDownloadSlotDemands.delete(id)
   individuallyResumedDownloadIds.delete(id)
-  resolve(false)
+  resolve(0)
   return true
 }
 
-function releaseDownloadSlot() {
-  runningDownloadCount = Math.max(0, runningDownloadCount - 1)
+function releaseDownloadSlot(count = 1) {
+  runningDownloadCount = Math.max(0, runningDownloadCount - count)
   requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
 }
 
@@ -436,8 +482,8 @@ export function flushYtDlpDownloadRecords() {
 
 export async function shutdownYtDlpDownloads() {
   shuttingDownDownloads = true
-  const downloads = [...activeDownloads.values()]
-  const settled = downloads.map(({ child }) => new Promise((resolve) => {
+  const children = [...activeDownloads.values()].flatMap(({ children }) => [...children])
+  const settled = children.map(child => new Promise((resolve) => {
     child.once('close', resolve)
     child.once('error', resolve)
   }))
@@ -446,8 +492,8 @@ export async function shutdownYtDlpDownloads() {
     entry.restarting = true
     const record = downloadRecords.get(id)
     entry.restartStatus = record && ['paused', 'pausing'].includes(record.status) ? 'paused' : 'queued'
-    if (entry.paused) signalProcessTree(entry.child, 'SIGCONT')
-    signalProcessTree(entry.child)
+    if (entry.paused) signalDownload(entry, 'SIGCONT')
+    signalDownload(entry)
   }
 
   await Promise.allSettled(settled)
@@ -550,7 +596,11 @@ async function startYtDlpDownload(
     '--print',
     `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
     '--print',
-    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`,
+    // yt-dlp records live streams with FFmpeg, which reports no progress to yt-dlp
+    // and runs silently because `--print` implies quiet mode.
+    '--downloader-args',
+    'ffmpeg:-progress pipe:1'
   ]
 
   await pushProxyArgument(args)
@@ -579,10 +629,12 @@ async function startYtDlpDownload(
 
   /** @type {string} */
   const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
-  const { args: downloadArgs, truncatesLongTitles, directoryFields } = buildYtDlpDownloadArguments(payload)
+  // The global custom arguments lead these, so they can keep a playlist in one process.
+  const { args: commandArgs, truncatesLongTitles, directoryFields } =
+    buildYtDlpDownloadArguments(payload, typeof globalCustomArgsSetting === 'string' ? globalCustomArgsSetting : '')
   // Custom arguments follow the destination, so an option missing its value
-  // cannot take `--paths` as its value.
-  args.push('--paths', downloadFolder, ...globalCustomArgs, ...downloadArgs)
+  // cannot take `--paths` as its value. Each process appends its own URLs.
+  args.push('--paths', downloadFolder, ...splitDownloadArguments(payload, commandArgs, 1).shared)
 
   if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
     (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
@@ -643,7 +695,6 @@ async function startYtDlpDownload(
   downloadRecords.set(id, status)
 
   let lastSent = 0
-  let finished = false
 
   /**
    * @param {boolean} [force]
@@ -664,7 +715,8 @@ async function startYtDlpDownload(
   // A cancel while saving found no waiter, so one registered now would never resolve
   if (status.status !== 'queued' && status.status !== 'paused') return { id }
 
-  if (!await waitForDownloadSlot(id)) {
+  const slots = await waitForDownloadSlot(id, playlistDownloadPartLimit(payload, commandArgs))
+  if (slots === 0) {
     return { id }
   }
 
@@ -684,7 +736,7 @@ async function startYtDlpDownload(
       status.status = 'failed'
       status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
       sendStatus(true)
-      releaseDownloadSlot()
+      releaseDownloadSlot(slots)
       await saveDownloadRecords()
       return { id }
     }
@@ -710,7 +762,7 @@ async function startYtDlpDownload(
       status.status = 'failed'
       status.errorMessage = 'INSUFFICIENT_SPACE'
       sendStatus(true)
-      releaseDownloadSlot()
+      releaseDownloadSlot(slots)
       await rm(temporaryDownloadFolder, { recursive: true, force: true })
       await saveDownloadRecords()
       return { id }
@@ -727,7 +779,7 @@ async function startYtDlpDownload(
       status.errorMessage = 'download-queue-failed'
       sendStatus(true)
     }
-    releaseDownloadSlot()
+    releaseDownloadSlot(slots)
     await rm(temporaryDownloadFolder, { recursive: true, force: true })
     await saveDownloadRecords()
     return { id }
@@ -762,8 +814,11 @@ async function startYtDlpDownload(
   individuallyResumedDownloadIds.delete(id)
   status.status = 'preparing'
   status.started = true
-  const child = spawn(executable, args, { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
-  const entry = { child, cancelled: false, paused: false, restarting: false, restartStatus: 'queued' }
+  const partArgs = splitDownloadArguments(payload, commandArgs, slots).parts
+  // The limit only counts videos, so it cannot change between the request and the split.
+  if (partArgs.length < slots) releaseDownloadSlot(slots - partArgs.length)
+  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[], showProgress: () => void }} */
+  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [], showProgress: () => {} }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')
   sendStatus(true)
@@ -778,48 +833,137 @@ async function startYtDlpDownload(
   const subtitleDestinations = new Set()
   const downloadFolders = [downloadFolder, temporaryDownloadFolder]
 
-  /** @param {'preparing' | 'downloading' | 'processing'} phase */
-  function setDownloadPhase(phase) {
+  /**
+   * @typedef DownloadPart
+   * @property {'preparing' | 'downloading' | 'processing'} phase
+   * @property {number} percent
+   * @property {string | null} speed
+   * @property {string | null} eta
+   * @property {string} [currentVideoId]
+   * @property {string} [currentTitle]
+   * @property {number | null} [playlistIndex]
+   * @property {number | null} [playlistCount]
+   * @property {boolean} [live] whether the current video is a live stream
+   * @property {number} [recordedSeconds]
+   * @property {number} [recordedBytes]
+   * @property {number} [stopRequestedAt] when the live recording was asked to stop
+   * @property {import('node:child_process').ChildProcess} [child]
+   * @property {boolean} done
+   * @property {number | null} code
+   * @property {Error | null} error
+   */
+  /** @type {DownloadPart[]} */
+  const parts = partArgs.map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false, code: null, error: null }))
+  entry.parts = parts
+  entry.showProgress = showProgress
+
+  /** @param {DownloadPart} part */
+  function partPosition(part) {
+    return part.playlistIndex || (videoIds.indexOf(part.currentVideoId ?? '') + 1) || Infinity
+  }
+
+  // The row shows the earliest video still in progress, with the speed of all processes.
+  // A live recording comes first, so the row offers to stop it instead of pausing it.
+  // 2: recording a live stream, 1: processing one, 0: a regular video
+  /** @param {DownloadPart} part */
+  const liveRank = part => part.live !== true ? 0 : part.phase === 'downloading' ? 2 : 1
+  function showProgress() {
+    const unfinished = parts.filter(part => !part.done)
+    const topRank = Math.max(...unfinished.map(liveRank))
+    const active = unfinished.filter(part => liveRank(part) === topRank)
+    const shown = active.reduce((earliest, part) => partPosition(part) < partPosition(earliest) ? part : earliest, active[0] ?? parts[0])
     if (status.status === 'paused' || status.status === 'pausing') {
-      entry.resumeStatus = phase
+      entry.resumeStatus = shown.phase
     } else {
-      status.status = phase
+      status.status = shown.phase
+    }
+    status.percent = shown.percent
+    status.speed = parts.length === 1 ? shown.speed : combineDownloadSpeeds(active.map(part => part.speed))
+    status.eta = shown.eta
+    status.live = shown.live === true
+    for (const key of /** @type {const} */ (['recordedSeconds', 'recordedBytes'])) {
+      if (shown[key] === undefined) delete status[key]
+      else status[key] = shown[key]
+    }
+    if (shown.currentVideoId !== undefined) {
+      status.currentVideoId = shown.currentVideoId
+      status.currentTitle = shown.currentTitle
+      status.playlistIndex = shown.playlistIndex
+      status.playlistCount = shown.playlistCount
     }
   }
 
   const metadataByVideoId = new Map()
 
   /**
+   * @param {DownloadPart} part
    * @param {string} line
    */
-  function handleStdoutLine(line) {
+  function handleStdoutLine(part, line) {
     if (line.startsWith('__OPENTUBEX_PREPARING__:')) {
       const [videoId, rawIndex, rawCount, rawTitle] = line.slice('__OPENTUBEX_PREPARING__:'.length).split('\t')
       let title = null
       try { title = JSON.parse(rawTitle) } catch {}
       const index = Number.parseInt(rawIndex, 10)
       const count = Number.parseInt(rawCount, 10)
-      status.currentVideoId = ID_REGEX.test(videoId) ? videoId : ''
-      status.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
-      status.playlistIndex = index > 0 ? index : null
-      status.playlistCount = count > 0 ? count : null
+      part.currentVideoId = ID_REGEX.test(videoId) ? videoId : ''
+      part.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
+      part.playlistIndex = index > 0 ? index : null
+      part.playlistCount = count > 0 ? count : null
+      // The next line reports whether this video is live
+      part.live = false
+      delete part.recordedSeconds
+      delete part.recordedBytes
+      delete part.stopRequestedAt
+    }
+    if (line.startsWith(LIVE_PREFIX)) {
+      part.live = line.slice(LIVE_PREFIX.length) === 'True'
+      // Pausing checks the row, which has to show a live video before it reports progress
+      showProgress()
+      sendStatus(true)
+      return
+    }
+    const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
+    if (ffmpegProgress) {
+      if (part.live !== true) return
+      if (part.stopRequestedAt !== undefined) {
+        // FFmpeg ends its report within moments of a stop request. A process that
+        // started with interrupts ignored keeps recording, so show that again.
+        if (Date.now() - part.stopRequestedAt < STOP_UNANSWERED_MS) return
+        delete part.stopRequestedAt
+      }
+      const [, key, value] = ffmpegProgress
+      if (key === 'out_time_us' && /^\d+$/.test(value)) part.recordedSeconds = Number(value) / 1_000_000
+      else if (key === 'total_size' && /^\d+$/.test(value)) part.recordedBytes = Number(value)
+      else if (key === 'progress' && value === 'continue') {
+        const previousStatus = status.status
+        part.phase = 'downloading'
+        part.percent = 0
+        part.speed = null
+        part.eta = null
+        showProgress()
+        sendStatus(previousStatus !== status.status)
+      }
+      return
     }
     if (line.startsWith('__OPENTUBEX_PREPARING__:') || line === '__OPENTUBEX_PROCESSING__' || line.startsWith('__OPENTUBEX_DOWNLOAD__:finished')) {
-      setDownloadPhase(line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing')
-      status.percent = 0
-      status.speed = null
-      status.eta = null
+      part.phase = line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing'
+      part.percent = 0
+      part.speed = null
+      part.eta = null
+      showProgress()
       sendStatus(true)
       return
     }
     if (line.startsWith('__OPENTUBEX_DOWNLOAD__:downloading\t')) {
       const [, percent, speed, eta] = line.split('\t')
-      const changed = status.status !== 'downloading'
-      setDownloadPhase('downloading')
-      status.percent = Number.parseFloat(percent) || 0
-      status.speed = !speed || /^(Unknown|NA)/.test(speed.trim()) ? null : speed.trim()
-      status.eta = !eta || /^(Unknown|NA)/.test(eta.trim()) ? null : eta.trim()
-      sendStatus(changed)
+      const previousStatus = status.status
+      part.phase = 'downloading'
+      part.percent = Number.parseFloat(percent) || 0
+      part.speed = !speed || /^(Unknown|NA)/.test(speed.trim()) ? null : speed.trim()
+      part.eta = !eta || /^(Unknown|NA)/.test(eta.trim()) ? null : eta.trim()
+      showProgress()
+      sendStatus(previousStatus !== status.status)
       return
     }
     if (line.startsWith(FINAL_METADATA_PREFIX)) {
@@ -858,10 +1002,10 @@ async function startYtDlpDownload(
     }
 
     if (line.startsWith(FINAL_PATH_PREFIX)) {
-      const parts = line.slice(FINAL_PATH_PREFIX.length).split('\t')
-      const hasMediaMetadata = parts.length >= 5
-      const [videoId, rawDuration, rawWidth, rawHeight] = parts
-      const pathParts = parts.slice(hasMediaMetadata ? 4 : parts.length > 1 ? 1 : 0)
+      const fields = line.slice(FINAL_PATH_PREFIX.length).split('\t')
+      const hasMediaMetadata = fields.length >= 5
+      const [videoId, rawDuration, rawWidth, rawHeight] = fields
+      const pathParts = fields.slice(hasMediaMetadata ? 4 : fields.length > 1 ? 1 : 0)
       const destination = pathParts.join('\t')
       if (!isPathInsideFolders(destination, downloadFolders)) return
       status.destination = destination
@@ -899,10 +1043,11 @@ async function startYtDlpDownload(
     const progressMatch = PROGRESS_REGEX.exec(line)
     if (progressMatch) {
       const previousStatus = status.status
-      setDownloadPhase(/\bin\s/.test(line) && Number(progressMatch[1]) === 100 ? 'processing' : 'downloading')
-      status.percent = parseFloat(progressMatch[1])
-      status.speed = progressMatch[2] ?? null
-      status.eta = progressMatch[3] ?? null
+      part.phase = /\bin\s/.test(line) && Number(progressMatch[1]) === 100 ? 'processing' : 'downloading'
+      part.percent = parseFloat(progressMatch[1])
+      part.speed = progressMatch[2] ?? null
+      part.eta = progressMatch[3] ?? null
+      showProgress()
       sendStatus(previousStatus !== status.status)
       return
     }
@@ -915,7 +1060,8 @@ async function startYtDlpDownload(
       if (isPathInsideFolders(destinationMatch[1], downloadFolders)) status.destination = destinationMatch[1]
 
       if (line.startsWith('[ExtractAudio]')) {
-        setDownloadPhase('processing')
+        part.phase = 'processing'
+        showProgress()
       }
 
       sendStatus(true)
@@ -924,43 +1070,22 @@ async function startYtDlpDownload(
 
     const mergerMatch = MERGER_REGEX.exec(line)
     if (mergerMatch) {
-      setDownloadPhase('processing')
+      part.phase = 'processing'
+      showProgress()
       if (isPathInsideFolders(mergerMatch[1], downloadFolders)) status.destination = mergerMatch[1]
       sendStatus(true)
     }
   }
 
-  let stdoutBuffer = ''
-  function removeTemporaryDownloadFolder() {
-    rm(temporaryDownloadFolder, { recursive: true, force: true })
-      .catch(error => console.warn('Could not remove temporary download folder', error))
-  }
-  child.stdout.setEncoding('utf-8')
-  child.stdout.on('data', (chunk) => {
-    stdoutBuffer += chunk
-    const lines = stdoutBuffer.split(/\r?\n/)
-    stdoutBuffer = lines.pop()
-    lines.forEach(handleStdoutLine)
-  })
-
-  let stderrBuffer = ''
-  child.stderr.setEncoding('utf-8')
-  child.stderr.on('data', (chunk) => {
-    stderrBuffer += chunk
-    const lines = stderrBuffer.split(/\r?\n/)
-    stderrBuffer = lines.pop()
-    lines.forEach(handleStderrLine)
-  })
-  child.stderr.on('end', () => {
-    if (stderrBuffer) handleStderrLine(stderrBuffer)
-  })
-
-  /** @param {string} line */
-  function handleStderrLine(line) {
+  /**
+   * @param {DownloadPart} part
+   * @param {string} line
+   */
+  function handleStderrLine(part, line) {
     // `--print` writes the file and metadata sentinels to stdout. Extractor and
     // server text can reach stderr, so sentinels found there are ignored.
     if (!line.startsWith(FINAL_PATH_PREFIX) && !line.startsWith(FINAL_METADATA_PREFIX)) {
-      handleStdoutLine(line)
+      handleStdoutLine(part, line)
     }
     // Progress sentinels would hide the actual error, and yt-dlp prints none
     // when it is killed.
@@ -975,31 +1100,10 @@ async function startYtDlpDownload(
     }
   }
 
-  child.on('error', (error) => {
-    if (finished) {
-      return
-    }
-    finished = true
-
+  function finishDownload() {
     activeDownloads.delete(id)
-    releaseDownloadSlot()
-    removeTemporaryDownloadFolder()
-    status.status = entry.restarting ? entry.restartStatus : 'failed'
-    status.errorMessage = entry.restarting ? null : error.code === 'ENOENT' ? 'ENOENT' : error.message
-    if (!entry.restarting) showAutomaticDownloadNotification(payload, 'failed')
-    sendStatus(true)
-    saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
-  })
-
-  child.on('close', (code) => {
-    if (finished) {
-      return
-    }
-    finished = true
-
-    activeDownloads.delete(id)
-    releaseDownloadSlot()
-    removeTemporaryDownloadFolder()
+    rm(temporaryDownloadFolder, { recursive: true, force: true })
+      .catch(error => console.warn('Could not remove temporary download folder', error))
 
     if (entry.restarting) {
       status.status = entry.restartStatus
@@ -1008,11 +1112,12 @@ async function startYtDlpDownload(
     } else if (entry.cancelled) {
       status.status = 'cancelled'
     } else {
+      const succeeded = parts.every(part => part.code === 0)
       if (subtitleFormat !== '') {
         const convertedSubtitleDestinations = new Map([...subtitleDestinations]
           .map((subtitlePath) => [subtitlePath, subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)])
           // A failed download may have stopped before converting some subtitles
-          .filter(([, convertedPath]) => code === 0 || existsSync(convertedPath)))
+          .filter(([, convertedPath]) => succeeded || existsSync(convertedPath)))
         status.destinations = status.destinations.map((destination) => (
           convertedSubtitleDestinations.get(destination) ?? destination
         ))
@@ -1020,9 +1125,10 @@ async function startYtDlpDownload(
       }
       // yt-dlp skips playlist entries it cannot download, such as members-only
       // videos, but still exits with an error after downloading the others.
-      const skippedPlaylistVideos = code !== 0 && payload.isPlaylist === true &&
+      const skippedPlaylistVideos = !succeeded && payload.isPlaylist === true &&
         status.destinations.some(destination => existsSync(destination))
-      if (code === 0 || skippedPlaylistVideos) {
+      const spawnError = parts.find(part => part.error !== null)?.error
+      if (succeeded || skippedPlaylistVideos) {
         if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n') || DOWNLOAD_STOPPED_ERROR
         status.status = payload.automatic === true && status.destinations.length === 0
           ? 'skipped'
@@ -1033,7 +1139,9 @@ async function startYtDlpDownload(
         }
       } else {
         status.status = 'failed'
-        status.errorMessage = stderrLines.join('\n') || DOWNLOAD_STOPPED_ERROR
+        status.errorMessage = stderrLines.join('\n') || (spawnError
+          ? (/** @type {NodeJS.ErrnoException} */ (spawnError).code === 'ENOENT' ? 'ENOENT' : spawnError.message)
+          : DOWNLOAD_STOPPED_ERROR)
       }
     }
 
@@ -1045,7 +1153,69 @@ async function startYtDlpDownload(
 
     sendStatus(true)
     saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
-  })
+  }
+
+  for (const [index, part] of parts.entries()) {
+    /** @type {import('node:child_process').ChildProcess | undefined} */
+    let child
+    // Parts run at the same time, so each needs its own copy of the cookie file.
+    const cookies = checkOutYtDlpCookies(args)
+    /**
+     * @param {number | null} code
+     * @param {Error | null} error
+     */
+    function finishPart(code, error) {
+      if (part.done) {
+        return
+      }
+      part.done = true
+      part.code = code
+      part.error = error
+      cookies.release()
+      if (child) entry.children.delete(child)
+      releaseDownloadSlot()
+      if (parts.every(other => other.done)) {
+        finishDownload()
+      } else {
+        showProgress()
+        sendStatus(true)
+      }
+    }
+
+    try {
+      child = spawn(executable, [...cookies.args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
+    } catch (error) {
+      // Some spawn errors are thrown instead of emitted, and the other parts keep running.
+      finishPart(null, error)
+      continue
+    }
+    entry.children.add(child)
+    part.child = child
+
+    let stdoutBuffer = ''
+    child.stdout.setEncoding('utf-8')
+    child.stdout.on('data', (chunk) => {
+      stdoutBuffer += chunk
+      const lines = stdoutBuffer.split(/\r?\n/)
+      stdoutBuffer = lines.pop()
+      lines.forEach(line => handleStdoutLine(part, line))
+    })
+
+    let stderrBuffer = ''
+    child.stderr.setEncoding('utf-8')
+    child.stderr.on('data', (chunk) => {
+      stderrBuffer += chunk
+      const lines = stderrBuffer.split(/\r?\n/)
+      stderrBuffer = lines.pop()
+      lines.forEach(line => handleStderrLine(part, line))
+    })
+    child.stderr.on('end', () => {
+      if (stderrBuffer) handleStderrLine(part, stderrBuffer)
+    })
+
+    child.on('error', error => finishPart(null, error))
+    child.on('close', code => finishPart(code, null))
+  }
 
   return { id }
 }
@@ -1208,8 +1378,8 @@ export function handleYtDlpCancelDownload(event, id) {
   const entry = activeDownloads.get(id)
   if (entry) {
     entry.cancelled = true
-    if (entry.paused) signalProcessTree(entry.child, 'SIGCONT')
-    signalProcessTree(entry.child)
+    if (entry.paused) signalDownload(entry, 'SIGCONT')
+    signalDownload(entry)
     return
   }
 
@@ -1237,7 +1407,7 @@ function clearQueuePauseAfterLastIndividualResume() {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {number} id
- * @param {'pause' | 'resume' | 'move'} action
+ * @param {'pause' | 'resume' | 'stop' | 'move'} action
  * @param {number} [value]
  */
 export async function handleYtDlpControlDownload(event, id, action, value) {
@@ -1251,9 +1421,9 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     if (record.status === 'queued') {
       individuallyResumedDownloadIds.delete(id)
       record.status = 'paused'
-    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status)) {
+    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status) && record.live !== true) {
       entry.resumeStatus = record.status
-      if (process.platform !== 'win32' && signalProcessTree(entry.child, 'SIGSTOP')) {
+      if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
       } else {
@@ -1266,7 +1436,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     }
   } else if (action === 'resume') {
     if (entry?.paused && record.status === 'paused') {
-      signalProcessTree(entry.child, 'SIGCONT')
+      signalDownload(entry, 'SIGCONT')
       entry.paused = false
       record.status = entry.resumeStatus ?? 'preparing'
     } else if (record.status === 'paused') {
@@ -1290,6 +1460,35 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       return false
     }
     clearQueuePauseAfterLastIndividualResume()
+  } else if (action === 'stop') {
+    // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
+    // Other parts of a playlist download or process its other videos, which an interrupt would stop.
+    const recordingParts = entry?.paused === false
+      ? entry.parts.filter(part => part.live === true && part.phase === 'downloading' && !part.done &&
+        part.stopRequestedAt === undefined && part.child)
+      : []
+    if (recordingParts.length === 0) return false
+    const requestedAt = Date.now()
+    for (const part of recordingParts) {
+      part.stopRequestedAt = requestedAt
+      part.phase = 'processing'
+    }
+    entry.showProgress()
+    broadcastDownloadStatus(record)
+    const interrupted = await Promise.all(recordingParts.map(part => interruptProcess(part.child)))
+    if (!interrupted.includes(true)) {
+      // A part that moved on to the next video while waiting is no longer this request's
+      for (const part of recordingParts) {
+        if (part.stopRequestedAt !== requestedAt || part.done) continue
+        delete part.stopRequestedAt
+        part.phase = 'downloading'
+      }
+      if (activeDownloads.get(id) === entry && !entry.cancelled) {
+        entry.showProgress()
+        broadcastDownloadStatus(record)
+      }
+      return false
+    }
   } else if (action === 'move' && ['queued', 'paused'].includes(record.status) && !entry && (value === -1 || value === 1)) {
     const peers = [...downloadRecords.values()]
       .filter(download => ['queued', 'paused'].includes(download.status) && !activeDownloads.has(download.id))
@@ -1329,9 +1528,11 @@ export async function handleYtDlpQueueAction(event, action) {
     setPendingDownloadStatus('paused')
     for (const [id, entry] of activeDownloads) {
       const record = downloadRecords.get(id)
-      if (!record || entry.paused) continue
+      // A paused live recording would miss the stream in the meantime, and one
+      // waiting to pause on Windows would keep recording until the stream ends.
+      if (!record || entry.paused || record.live === true) continue
       if (record.status !== 'pausing') entry.resumeStatus = record.status
-      if (process.platform !== 'win32' && signalProcessTree(entry.child, 'SIGSTOP')) {
+      if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
       } else {
@@ -1348,7 +1549,7 @@ export async function handleYtDlpQueueAction(event, action) {
     for (const record of downloadRecords.values()) {
       const entry = activeDownloads.get(record.id)
       if (entry?.paused) {
-        signalProcessTree(entry.child, 'SIGCONT')
+        signalDownload(entry, 'SIGCONT')
         entry.paused = false
         record.status = entry.resumeStatus ?? 'preparing'
         broadcastDownloadStatus(record)

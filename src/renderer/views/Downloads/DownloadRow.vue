@@ -82,14 +82,14 @@
             class="progressTrack"
             role="progressbar"
             :aria-label="download.title || t('Downloads.Downloading')"
-            :aria-valuenow="download.status === 'downloading' ? progressPercentage : undefined"
+            :aria-valuenow="download.status === 'downloading' && !download.live ? progressPercentage : undefined"
             :aria-valuetext="statusText"
             aria-valuemin="0"
             aria-valuemax="100"
           >
             <div
               class="progressFill"
-              :class="{ indeterminate: download.status !== 'downloading' }"
+              :class="{ indeterminate: download.status !== 'downloading' || download.live }"
               :style="{ transform: `scaleX(${progressPercentage / 100})` }"
               aria-hidden="true"
             />
@@ -163,7 +163,14 @@
         class="downloadActions"
       >
         <FtIconButton
-          v-if="controllable"
+          v-if="canStopRecording(download)"
+          :title="t('Downloads.Stop Recording')"
+          :icon="['fas', 'stop']"
+          theme="primary"
+          @click="emit('stop')"
+        />
+        <FtIconButton
+          v-else-if="controllable && (paused || !download.live)"
           :title="paused ? t('Downloads.Resume Download') : t('Downloads.Pause Download')"
           :icon="['fas', paused ? 'play' : 'pause']"
           theme="primary"
@@ -221,7 +228,14 @@
             @click="emit('resume')"
           />
           <FtIconButton
-            v-else
+            v-else-if="canStopRecording(download)"
+            :title="t('Downloads.Stop Recording')"
+            :icon="['fas', 'stop']"
+            theme="primary"
+            @click="emit('stop')"
+          />
+          <FtIconButton
+            v-else-if="!download.live"
             :title="t('Downloads.Pause Download')"
             :icon="['fas', 'pause']"
             theme="secondary"
@@ -387,6 +401,7 @@ import { formatBytes } from '../../helpers/fileSize'
 import { downloadErrorMessage, suggestsYtDlpUpdate } from '../../helpers/downloadErrors'
 import { isDownloadPlaybackSupported, isPlayableDownloadFile, downloadQueueVideos } from '../../helpers/downloadPlayback'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { canStopRecording, recordingStatusText } from '../../helpers/downloadRecording'
 
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
@@ -398,7 +413,7 @@ const props = defineProps({
   canMoveEarlier: { type: Boolean, default: false },
   canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry', 'stop'])
 const IS_IOS = !!process.env.IS_IOS
 // desktop keeps the full rows; phones get compact rows with an actions menu
 const COMPACT = !!process.env.IS_CAPACITOR
@@ -619,6 +634,7 @@ const spaceWarningText = computed(() => {
   return ''
 })
 const statusText = computed(() => {
+  if (props.download.status === 'downloading' && props.download.live) return recordingStatusText(props.download, t)
   if (props.download.status === 'downloading') {
     return [`${progressPercentage.value.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
   }

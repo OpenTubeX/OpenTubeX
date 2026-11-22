@@ -6,6 +6,15 @@
   >
     <FtFlexBox>
       <FtToggleSwitch
+        v-if="supportsYtDlp"
+        :label="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"
+        :default-value="enableTwitchPage"
+        setting-key="enableTwitchPage"
+        :tooltip="t('Tooltips.Subscription Settings.Enable Twitch Page')"
+        :compact="true"
+        @change="value => store.dispatch('updateEnableTwitchPage', value)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.Subscription Settings.Platforms.Notify When Live')"
         :default-value="liveNotifications"
         setting-key="twitchLiveNotifications"
@@ -44,12 +53,14 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../../store/index'
 import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
 import { getFollowedChannels, requestCapacitorNotificationPermission } from '../../../helpers/platformFeed'
+import { supportsYtDlp } from '../../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 
 // The refresh select repeats another section's label, so it names its section.
 const titleId = useId()
 
+const enableTwitchPage = computed(() => store.getters.getEnableTwitchPage)
 const liveNotifications = computed(() => store.getters.getTwitchLiveNotifications)
 
 /**

@@ -157,70 +157,87 @@
         @input="handleSettingsSearch"
       />
       <div class="settingsHeaderActions">
-        <button
-          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-          :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-          @click="showKeyboardShortcutPrompt"
-        >
-          <FtIcon :icon="['fas', 'keyboard']" />
-        </button>
-        <button
+        <div
           v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :class="{ active: highlightChangedSettings }"
-          :aria-label="t('Settings.Highlight Changed Settings')"
-          :title="t('Settings.Highlight Changed Settings')"
-          :aria-pressed="highlightChangedSettings"
-          @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+          class="settingsHeaderTools"
         >
-          <FtIcon :icon="['fas', 'pen']" />
-        </button>
-        <button
-          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :class="{ active: showPerformanceImpactIndicators }"
-          :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
-          :title="t('Settings.Performance Impact.Show Performance Impact')"
-          :aria-pressed="showPerformanceImpactIndicators"
-          @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
-        >
-          <FtIcon :icon="['fas', 'gauge-high']" />
-        </button>
-        <button
-          v-if="showMinimizeButton"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="t('Minimize')"
-          :title="t('Minimize')"
-          @click="minimizeSettings"
-        >
-          <FtIcon :icon="['fas', 'angle-down']" />
-        </button>
-        <button
-          v-if="!isMaximizationForced"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="maximizeButtonLabel"
-          :title="maximizeButtonLabel"
-          @click="toggleMaximized"
-        >
-          <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
-        </button>
-        <button
-          ref="settingsCloseButtonRef"
-          type="button"
-          class="settingsHeaderButton settingsCloseButton"
-          :aria-label="t('Close')"
-          :title="t('Close')"
-          @click="closeSettings"
-        >
-          <FtIcon :icon="['fas', 'xmark']" />
-        </button>
+          <button
+            v-if="unlocked && showKeyboardShortcutAction"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+            :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+            @click="showKeyboardShortcutPrompt"
+          >
+            <FtIcon :icon="['fas', 'keyboard']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('KeyboardShortcutPrompt.Shortcuts Label') }}</span>
+          </button>
+          <button
+            type="button"
+            class="settingsHeaderButton"
+            :class="{ active: highlightChangedSettings }"
+            :aria-label="t('Settings.Highlight Changed Settings')"
+            :title="t('Settings.Highlight Changed Settings')"
+            :aria-pressed="highlightChangedSettings"
+            @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+          >
+            <FtIcon :icon="['fas', 'pen']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('Settings.Highlight Changed Settings Label') }}</span>
+          </button>
+          <button
+            type="button"
+            class="settingsHeaderButton"
+            :class="{ active: showPerformanceImpactIndicators }"
+            :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
+            :title="t('Settings.Performance Impact.Show Performance Impact')"
+            :aria-pressed="showPerformanceImpactIndicators"
+            @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
+          >
+            <FtIcon :icon="['fas', 'gauge-high']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('Settings.Performance Impact.Label') }}</span>
+          </button>
+        </div>
+        <div class="settingsWindowControls">
+          <button
+            v-if="showMinimizeButton"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="t('Minimize')"
+            :title="t('Minimize')"
+            @click="minimizeSettings"
+          >
+            <FtIcon :icon="['fas', 'angle-down']" />
+          </button>
+          <button
+            v-if="!isMaximizationForced"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="maximizeButtonLabel"
+            :title="maximizeButtonLabel"
+            @click="toggleMaximized"
+          >
+            <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
+          </button>
+          <button
+            ref="settingsCloseButtonRef"
+            type="button"
+            class="settingsHeaderButton settingsCloseButton"
+            :aria-label="t('Close')"
+            :title="t('Close')"
+            @click="closeSettings"
+          >
+            <FtIcon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
       </div>
     </header>
 
@@ -504,7 +521,7 @@ const SETTINGS_BOUNDS_STORAGE_KEY = 'opentubex-settings-window-bounds'
 const WINDOW_MARGIN = 12
 const MINIMUM_WIDTH = 360
 const MINIMUM_HEIGHT = 360
-const DEFAULT_WIDTH = 1280
+const DEFAULT_WIDTH = 1440
 const DEFAULT_HEIGHT = 820
 const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 const props = defineProps({
@@ -641,6 +658,7 @@ let boundsSaveTimer = null
 let boundsAnimation = null
 let searchHighlightTimer = null
 let standaloneClampFrame = null
+let pendingContentScrollTop = null
 let downloadsReturnScrollTop = 0
 let draggingPointerId = null
 let resizeSession = null
@@ -650,6 +668,8 @@ let dragOffsetY = 0
 let liveBounds = null
 let maximizedDragSession = null
 let restoreBounds = null
+/** Whether the user moved or resized the window; until then it stays centered */
+let hasPlacedBounds = false
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
 let preservedScrollPositions = []
 
@@ -1004,6 +1024,8 @@ onMounted(() => {
 onActivated(() => {
   windowActive.value = true
   handleMounted()
+  // The viewport can change while the window is closed and not listening.
+  clampWindowToViewport()
   nextTick(() => {
     if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
   })
@@ -1064,6 +1086,7 @@ watch(() => store.getters.getSettingsWindowView, async (view, previousView) => {
   observeStandaloneContent()
 })
 watch(activeSection, (section) => {
+  clearPendingContentScrollTop()
   if (section !== null) {
     store.commit('rememberSettingsWindowSection', section)
   }
@@ -1162,6 +1185,7 @@ function stopObserving() {
   settingsResizeObserver?.disconnect()
   settingsResizeObserver = null
   cancelStandaloneScrollClamp()
+  clearPendingContentScrollTop()
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
@@ -1239,9 +1263,18 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
     if (!protectedSettingsVisible.value) return
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
-    const contentShrank = previousHeight !== null && height < previousHeight
+    const isFirstNotification = previousHeight === null
+    const contentGrew = !isFirstNotification && height > previousHeight
+    const contentShrank = !isFirstNotification && height < previousHeight
     previousHeight = height
     if (resizeSession !== null) return
+    if (pendingContentScrollTop !== null && (isFirstNotification || contentGrew)) {
+      restoreOverlayScrollTop(content, pendingContentScrollTop)
+      if (content.scrollTop >= pendingContentScrollTop - 1) {
+        clearPendingContentScrollTop()
+      }
+      return
+    }
     if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
       clampOverlayScrollTop(content, contentEnd)
     }
@@ -1279,6 +1312,14 @@ function cancelStandaloneScrollClamp() {
     cancelAnimationFrame(standaloneClampFrame)
     standaloneClampFrame = null
   }
+}
+
+let pendingScrollCancelCleanup = null
+
+function clearPendingContentScrollTop() {
+  pendingContentScrollTop = null
+  pendingScrollCancelCleanup?.()
+  pendingScrollCancelCleanup = null
 }
 
 function getSettingsContentEnd(content) {
@@ -1357,6 +1398,7 @@ async function activateSectionTab(tab, focus = false) {
   const section = activeSettingsSection.value
   if (!section?.tabs?.some(({ id }) => id === tab)) return
   const changed = activeSectionTab.value !== tab
+  if (changed) clearPendingContentScrollTop()
   activeSectionTabs.value[section.type] = tab
   await nextTick()
 
@@ -1411,6 +1453,8 @@ async function animateSettingsElement(elementRef, classRef, className) {
 }
 
 async function openSearchResult(sectionType, match) {
+  clearPendingContentScrollTop()
+  preservedScrollPositions = preservedScrollPositions.filter(({ element }) => element !== settingsContentRef.value)
   settingsSearchQuery.value = ''
   navigateToSection(sectionType)
   await nextTick()
@@ -1527,6 +1571,7 @@ function getSearchTargetText(element) {
 }
 
 function handleSettingsSearch(value) {
+  clearPendingContentScrollTop()
   // FtInput emits the current text even while the keyboard is composing.
   settingsSearchQuery.value = value
   closeAllSubpages()
@@ -1704,6 +1749,7 @@ function minimizeSettings() {
 }
 
 function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
+  clearPendingContentScrollTop()
   if (!unlocked.value && !standalone) return
   const viewports = getCurrentScrollViewports(standalone)
   preservedScrollPositions = [
@@ -1724,12 +1770,34 @@ function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
 }
 
 function restorePreservedScrollPositions() {
+  if (preservedScrollPositions.length === 0) return
+  clearPendingContentScrollTop()
   const viewports = getCurrentScrollViewports()
   const pending = []
   for (const { element, scrollTop } of preservedScrollPositions) {
     if (!element.isConnected) continue
-    if (viewports.has(element)) restoreOverlayScrollTop(element, scrollTop)
-    else pending.push({ element, scrollTop })
+    if (element === settingsContentRef.value && props.searchTarget) continue
+    if (viewports.has(element)) {
+      restoreOverlayScrollTop(element, scrollTop)
+      // Sections that expand over the opening frames (for example as labels
+      // wrap at a new width or scale) clamp the initial restore early; keep
+      // following their growth until the saved offset is reached or the user
+      // interacts with the pane.
+      if (element === settingsContentRef.value && element.scrollTop < scrollTop - 1) {
+        pendingContentScrollTop = scrollTop
+        const cancel = () => clearPendingContentScrollTop()
+        for (const event of ['wheel', 'pointerdown', 'keydown']) {
+          element.addEventListener(event, cancel, { once: true, passive: true })
+        }
+        pendingScrollCancelCleanup = () => {
+          for (const event of ['wheel', 'pointerdown', 'keydown']) {
+            element.removeEventListener(event, cancel)
+          }
+        }
+      }
+    } else {
+      pending.push({ element, scrollTop })
+    }
   }
   preservedScrollPositions = pending
 }
@@ -1797,7 +1865,7 @@ function cancelBoundsAnimation() {
 
 function restoreSettingsWindow() {
   if (!isMaximized.value) return
-  windowBounds.value = clampBounds(restoreBounds ?? windowBounds.value)
+  windowBounds.value = hasPlacedBounds ? clampBounds(restoreBounds ?? windowBounds.value) : getCenteredBounds()
   restoreBounds = null
   isMaximized.value = false
   scheduleBoundsSave()
@@ -1880,6 +1948,7 @@ function dragWindow(event) {
     maximizedDragSession = null
     restoreBounds = null
     isMaximized.value = false
+    hasPlacedBounds = true
     return
   }
   liveBounds = clampBounds({
@@ -1903,6 +1972,7 @@ function commitLiveBounds() {
   if (liveBounds === null) return
   windowBounds.value = liveBounds
   liveBounds = null
+  hasPlacedBounds = true
 }
 
 function stopDragging(event) {
@@ -1989,6 +2059,12 @@ function stopResizing(event) {
   window.removeEventListener('pointerup', stopResizing)
   window.removeEventListener('pointercancel', stopResizing)
   scheduleBoundsSave()
+  if (pendingContentScrollTop !== null && protectedSettingsVisible.value && settingsContentRef.value) {
+    restoreOverlayScrollTop(settingsContentRef.value, pendingContentScrollTop)
+    if (settingsContentRef.value.scrollTop >= pendingContentScrollTop - 1) {
+      clearPendingContentScrollTop()
+    }
+  }
   clampWindowContentScroll()
   clampProfileManagerScroll()
 }
@@ -2008,7 +2084,9 @@ function updateNarrowLayout() {
 
 function clampWindowToViewport() {
   if (isWindowMaximized.value) return
-  windowBounds.value = clampBounds(liveBounds ?? windowBounds.value)
+  windowBounds.value = hasPlacedBounds || liveBounds !== null
+    ? clampBounds(liveBounds ?? windowBounds.value)
+    : getCenteredBounds()
   if (liveBounds !== null) liveBounds = windowBounds.value
 }
 
@@ -2033,27 +2111,36 @@ function clampBounds(bounds) {
   }
 }
 
+function getCenteredBounds() {
+  // Prefer wider margins, but not at the cost of the desktop layout when the
+  // viewport has room for it. The layout measures inside the 1px borders.
+  const width = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48, SETTINGS_DESKTOP_WIDTH_THRESHOLD + 2))
+  const height = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
+  return clampBounds({
+    x: Math.round((window.innerWidth - width) / 2),
+    y: Math.round((window.innerHeight - height) / 2),
+    width,
+    height
+  })
+}
+
 function getInitialBounds() {
-  const fallbackWidth = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
-  const fallbackHeight = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
-  const fallback = {
-    x: Math.round((window.innerWidth - fallbackWidth) / 2),
-    y: Math.max(WINDOW_MARGIN, Math.round((window.innerHeight - fallbackHeight) / 2)),
-    width: fallbackWidth,
-    height: fallbackHeight
-  }
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_BOUNDS_STORAGE_KEY))
     if ([saved?.x, saved?.y, saved?.width, saved?.height].every(Number.isFinite)) {
+      hasPlacedBounds = true
       return clampBounds(saved)
     }
   } catch {
     // Ignore corrupt state and use the centered default.
   }
-  return clampBounds(fallback)
+  return getCenteredBounds()
 }
 
+// Only a placement the user chose is remembered. Saving the default would pin it
+// to the viewport it was first opened in.
 function scheduleBoundsSave() {
+  if (!hasPlacedBounds) return
   if (boundsSaveTimer !== null) clearTimeout(boundsSaveTimer)
   boundsSaveTimer = setTimeout(() => {
     try {

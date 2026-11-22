@@ -1486,6 +1486,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!scrollMiniPlayerActive.value) return
 
     showScrollMiniVolume()
+    handleScrollMiniPlayPauseMouseEnter()
   }
 
   function handleScrollMiniVolumeMouseLeave() {

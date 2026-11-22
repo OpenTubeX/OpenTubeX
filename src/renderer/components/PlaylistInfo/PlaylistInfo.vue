@@ -387,6 +387,7 @@
         :playlist-key="id"
         :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
         :is-playlist="true"
+        :video-count="videoCount"
         :title="title"
         :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
         @close="showDownloadPrompt = false"

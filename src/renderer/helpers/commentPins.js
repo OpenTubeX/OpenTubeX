@@ -19,6 +19,7 @@ const COMMENT_BOOLEAN_FIELDS = [
   'authorVerifiedArtist',
   'hasOwnerReplied',
   'isEdited',
+  'isFlatReply',
   'isHearted',
   'isMember',
   'isOwner',

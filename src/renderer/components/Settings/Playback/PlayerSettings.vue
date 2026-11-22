@@ -57,6 +57,16 @@
           :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
           @change="updateContinuePlaybackWhenScreenIsLocked"
         />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR && !IS_IOS"
+          :label="t('Settings.Player Settings.Switch to Audio in Background')"
+          :compact="true"
+          :default-value="store.getters.getSwitchToAudioInBackground"
+          :disabled="!continuePlaybackWhenScreenIsLocked"
+          setting-key="switchToAudioInBackground"
+          :tooltip="t('Tooltips.Player Settings.Switch to Audio in Background')"
+          @change="store.dispatch('updateSwitchToAudioInBackground', $event)"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -409,6 +419,14 @@
           @change="store.dispatch('updateShowLightsOffToggle', $event)"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Show Mirror Video Toggle')"
+          :compact="true"
+          :default-value="store.getters.getShowMirrorVideoToggle"
+          setting-key="showMirrorVideoToggle"
+          :tooltip="t('Tooltips.Player Settings.Show Mirror Video Toggle')"
+          @change="store.dispatch('updateShowMirrorVideoToggle', $event)"
+        />
+        <FtToggleSwitch
           v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"
@@ -509,6 +527,15 @@
           :disabled="!store.getters.getEnableMobileFullscreenSeek"
           setting-key="showMobileSeekPreview"
           @change="store.dispatch('updateShowMobileSeekPreview', $event)"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Double-Tap With Two Fingers to Skip Chapters')"
+          :compact="true"
+          :default-value="store.getters.getEnableMobileChapterTaps"
+          setting-key="enableMobileChapterTaps"
+          :tooltip="t('Tooltips.Player Settings.Double-Tap With Two Fingers to Skip Chapters')"
+          @change="store.dispatch('updateEnableMobileChapterTaps', $event)"
         />
       </div>
     </div>

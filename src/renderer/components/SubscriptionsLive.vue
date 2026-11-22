@@ -33,10 +33,8 @@ import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionCha
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
-import {
-  refreshSubscriptionLiveFromRemote,
-  updateVideoListAfterProcessing
-} from '../helpers/subscriptions'
+import { updateVideoListAfterProcessing } from '../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../helpers/subscriptionFeedRefresh'
 import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
@@ -332,7 +330,7 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
 
   let refreshedVideos = null
   try {
-    refreshedVideos = await refreshSubscriptionLiveFromRemote({
+    refreshedVideos = await refreshSubscriptionFeed('live', {
       t,
       automatic
     })

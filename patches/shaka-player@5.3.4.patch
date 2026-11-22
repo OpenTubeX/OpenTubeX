@@ -1,5 +1,18 @@
+diff --git a/dist/shaka-player.ui-es2021.d.ts b/dist/shaka-player.ui-es2021.d.ts
+index 6aff7bc5a52c14fd685158b75ec11a1c619ee367..a0c4ac6916cc2021a7a1edb56f6ee96ee0854f3a 100644
+--- a/dist/shaka-player.ui-es2021.d.ts
++++ b/dist/shaka-player.ui-es2021.d.ts
+@@ -7266,7 +7266,7 @@ nameSpan : HTMLElement ;
+ }
+ // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
+ declare namespace shaka.extern {
+-  type UIConfiguration = { adStatisticsList : string [] , addSeekBar : boolean , allowTogglePresentationTime : boolean , alwaysShowVolumeBar : boolean , bigButtons : string [] , captionsFontScaleFactors : number [] , captionsStyleElements : string [] , captionsStyles : boolean , castAndroidReceiverCompatible : boolean , castReceiverAppId : string , castSenderUrl : string , clearBufferOnQualityChange : boolean , closeMenusDelay : number , contextMenuElements : string [] , controlPanelElements : string [] , customContextMenu : boolean , customTrackLabel : shaka.extern.UITrackLabelCallback , defaultVrProjectionMode : string , displayInVrMode : boolean , documentPictureInPicture : shaka.extern.UIDocumentPictureInPicture , doubleClickForFullscreen : boolean , enableFullscreenOnRotation : boolean , enableKeyboardPlaybackControls : boolean , enableKeyboardPlaybackControlsInWindow : boolean , enableTooltips : boolean , enableVrDeviceMotion : boolean , enableVrWheelZoom : boolean , fadeDelay : number , fastForwardRates : number [] , forceLandscapeOnFullscreen : boolean , fullScreenElement : HTMLElement | null , keyboardLargeSeekDistance : number , keyboardSeekDistance : number , mediaSession : shaka.extern.UIMediaSession , menuOpenUntilUserClosesIt : boolean , overflowMenuButtons : string [] , playbackRateBarColors : shaka.extern.UIVolumeBarColors , playbackRateSliderMax : number , playbackRateSliderMin : number , playbackRateSliderStep : number , playbackRates : number [] , preferIntlDisplayNames : boolean , preferVideoFullScreenInVisionOS : boolean , qualityMarks : shaka.extern.UIQualityMarks , refreshTickInSeconds : number , rewindRates : number [] , seekBarColors : shaka.extern.UISeekBarColors , seekButtonDistance : number , seekOnTaps : boolean , shortcuts : shaka.extern.UIShortcuts , showAudioChannelCountVariants : boolean , showAudioCodec : boolean , showBufferingSpinner : boolean , showRemainingTimeInPresentationTime : boolean , showUIAlways : boolean , showUIAlwaysOnAudioOnly : boolean , showUIOnPaused : boolean , showUnbufferedStart : boolean , showVideoCodec : boolean , singleClickForPlayAndPause : boolean , statisticsList : string [] , tapSeekDistance : number , textTrackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , topControlPanelElements : string [] , trackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , volumeBarColors : shaka.extern.UIVolumeBarColors } ;
++  type UIConfiguration = { adStatisticsList : string [] , addSeekBar : boolean , allowTogglePresentationTime : boolean , alwaysShowVolumeBar : boolean , bigButtons : string [] , captionsFontScaleFactors : number [] , captionsStyleElements : string [] , captionsStyles : boolean , castAndroidReceiverCompatible : boolean , castReceiverAppId : string , castSenderUrl : string , clearBufferOnQualityChange : boolean , closeMenusDelay : number , contextMenuElements : string [] , controlPanelElements : string [] , customContextMenu : boolean , customTrackLabel : shaka.extern.UITrackLabelCallback , defaultVrProjectionMode : string , displayInVrMode : boolean , documentPictureInPicture : shaka.extern.UIDocumentPictureInPicture , doubleClickForFullscreen : boolean , enableFullscreenOnRotation : boolean , enableKeyboardPlaybackControls : boolean , enableKeyboardPlaybackControlsInWindow : boolean , enableTooltips : boolean , enableVrDeviceMotion : boolean , enableVrWheelZoom : boolean , fadeDelay : number , fastForwardRates : number [] , forceLandscapeOnFullscreen : boolean , fullScreenElement : HTMLElement | null , keyboardLargeSeekDistance : number , keyboardSeekDistance : number , mediaSession : shaka.extern.UIMediaSession , menuOpenUntilUserClosesIt : boolean , overflowMenuButtons : string [] , playbackRateBarColors : shaka.extern.UIVolumeBarColors , playbackRateSliderMax : number , playbackRateSliderMin : number , playbackRateSliderStep : number , playbackRates : number [] , preferIntlDisplayNames : boolean , preferVideoFullScreenInVisionOS : boolean , qualityMarks : shaka.extern.UIQualityMarks , refreshTickInSeconds : number , rewindRates : number [] , seekBarColors : shaka.extern.UISeekBarColors , seekButtonDistance : number , seekOnTaps : boolean , shortcuts : shaka.extern.UIShortcuts , showAudioChannelCountVariants : boolean , showAudioCodec : boolean , showBufferingSpinner : boolean , showRemainingTimeInPresentationTime : boolean , showUIAlways : boolean , showUIAlwaysOnAudioOnly : boolean , showUIOnPaused : boolean , showUnbufferedStart : boolean , showVideoCodec : boolean , singleClickForPlayAndPause : boolean , statisticsList : string [] , tapSeekDistance : number , textTrackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , topControlPanelElements : string [] , trackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , volumeBarColors : shaka.extern.UIVolumeBarColors , vrSideBySide : boolean } ;
+ }
+ // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
+ declare namespace shaka.extern {
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 8a9584de095894c76a889fc1a1151921ce08784c..b5e883fcf242adc9e8d750b6f6728f3e5176c156 100644
+index 8a9584de095894c76a889fc1a1151921ce08784c..5b75af8f0711ce27c3df41cfa0de7bb1b845dd19 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -517,7 +517,7 @@ function to(a,b=!1){var c=f=>{if(f.fullMimeTypes&&f.fullMimeTypes.size>1&&a.i.ha
@@ -65,6 +78,27 @@ index 8a9584de095894c76a889fc1a1151921ce08784c..b5e883fcf242adc9e8d750b6f6728f3e
  function NO(a,b){a=a.controls.I;for(let c=0;c<a.length;c++){let d=a[c],e=c===a.length-1;if(d.startTime<=b&&(d.endTime>b||e&&b>=d.endTime))return d}return null}function OO(a){if(!a||!a.images.length)return null;var b=a.images[0];return{segment:null,imageHeight:b.height||0,imageWidth:b.width||0,height:b.height||0,positionX:0,positionY:0,startTime:a.startTime,duration:a.endTime-a.startTime,uris:[b.url],startByte:0,endByte:null,width:b.width||0,sprite:!1,mimeType:"",codecs:""}}
  var PO=class extends DO{constructor(a,b){super(a,b,["shaka-seek-bar-container"],["shaka-seek-bar","shaka-no-propagation","shaka-show-controls-on-mouse-over"]);this.eventManager.B(this.container,"wheel",c=>{if(!c.ctrlKey&&!c.metaKey&&c.deltaY&&!this.bar.disabled&&this.controls.Fa()&&this.video.duration&&this.isShowing()){c.preventDefault();var d=this.player.ya();c=(this.controls.O?this.getValue():this.video.currentTime)+(c.deltaY>0?-1:1);zO(this.controls,Math.max(d.start,Math.min(d.end,c)),!1)}});
  this.M=U("div");this.M.classList.add("shaka-ad-markers");this.container.insertBefore(this.M,this.container.childNodes[0]);this.F=U("div");this.F.classList.add("shaka-chapter-markers");this.container.insertBefore(this.F,this.container.childNodes[0]);this.J=this.controls.h;this.O=new N(()=>{var c=this.getValue();this.player.va()||c==this.video.duration&&(c-=.001);this.video.currentTime=c;this.controls.ve();this.controls.lc();this.update()});this.L=new N(()=>{EO(this)});this.o=new N(()=>{GO(this)});
+@@ -1782,15 +1782,15 @@ function nP(a,b){switch(b){case a.h.VERTEX_SHADER:var c=a.m=="cubemap"?"attribut
+ break;case a.h.FRAGMENT_SHADER:switch(a.m){case "cubemap":c="varying highp vec2 vTextureCoord;\nuniform sampler2D uSampler;\nvoid main(void) {\n  highp vec4 texelColor = texture2D(uSampler, vTextureCoord);\n  gl_FragColor = vec4(texelColor.rgb , texelColor.a);\n}";break;case "fisheye":c="precision highp float;\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n if (distance(v_TexCoordinate, vec2(0.5, 0.5)) > 0.5001) {\n  // There is no content outside of the image circle.\n  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n } else {\n  highp vec4 texelColor = texture2D(uSampler, v_TexCoordinate);\n  gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n }\n}";
+ break;case "halfequirectangular":c="precision highp float;\n#define PI 3.141592653589793238462643383279\n#define HALF_PI 1.570796326794896619231321691639\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // The semi-sphere only spans 180 degrees of longitude, so the whole\n // texture width maps to half a turn of atan().\n highp float xValue =\n      (HALF_PI + atan(pass_position.z, pass_position.x)) / PI;\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}";
+ break;default:c="precision highp float;\n#define PI 3.141592653589793238462643383279\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // Compute the longitude per fragment, instead of using the interpolated\n // texture coordinate, to avoid needing texture wrapping at the seam.\n // (REPEAT is not available for non-power-of-two video textures in WebGL1.)\n highp float xValue =\n      (PI + atan(pass_position.z, pass_position.x)) / (2.0 * PI);\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}"}break;
+-default:return null}b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function oP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function pP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
+-function qP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,f/=2;var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],r=g[10],q=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-r*e;g[3]=m*b-q*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+r*b;g[11]=m*e+q*b}else a.H-=b;if(a.I<f&&a.I>
++default:return null}a.ftSbs&&(c=c.replace("vec2(xValue,","vec2(xValue * 0.5,"));b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function oP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function pP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
++function qP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,a.m=="fisheye"&&(f/=2);var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],r=g[10],q=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-r*e;g[3]=m*b-q*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+r*b;g[11]=m*e+q*b}else a.H-=b;if(a.I<f&&a.I>
+ -f){f=b=YO();e=YO();h=-1*c;c=Math.sin(h);h=Math.cos(h);k=e[4];l=e[5];m=e[6];n=e[7];p=e[8];r=e[9];q=e[10];let u=e[11];e!==f&&(f[0]=e[0],f[1]=e[1],f[2]=e[2],f[3]=e[3],f[12]=e[12],f[13]=e[13],f[14]=e[14],f[15]=e[15]);f[4]=k*h+p*c;f[5]=l*h+r*c;f[6]=m*h+q*c;f[7]=n*h+u*c;f[8]=p*h-k*c;f[9]=r*h-l*c;f[10]=q*h-m*c;f[11]=u*h-n*c;ZO(g,b,g)}else a.I-=c;c=YO();f=YO();e=Math.sin(d);d=Math.cos(d);b=f[0];h=f[1];k=f[2];l=f[3];m=f[4];n=f[5];p=f[6];r=f[7];f!==c&&(c[8]=f[8],c[9]=f[9],c[10]=f[10],c[11]=f[11],c[12]=f[12],
+ c[13]=f[13],c[14]=f[14],c[15]=f[15]);c[0]=b*d+m*e;c[1]=h*d+n*e;c[2]=k*d+p*e;c[3]=l*d+r*e;c[4]=m*d-b*e;c[5]=n*d-h*e;c[6]=p*d-k*e;c[7]=r*d-l*e;ZO(g,c,g);lP(a,!1)}function rP(a,b){b/=50;a.u>=20&&a.u<=100&&(a.u+=b);a.u<20?a.u=20:a.u>100&&(a.u=100);lP(a,!1)}
+ function sP(a,b=!0){b&&($O(a.j,a.G),a.T=0,a.A=bP(),a.A[0]=(a.j[0]-a.K[0])/20,a.A[1]=(a.j[1]-a.K[1])/20,a.A[2]=(a.j[2]-a.K[2])/20,a.A[3]=(a.j[3]-a.K[3])/20);a.j[0]-=a.A[0];a.j[1]-=a.A[1];a.j[2]-=a.A[2];a.j[3]-=a.A[3];b=YO();cP(a.j,a.j);aP(b,a.j);a.G=b;a.L&&(a.L.stop(),a.L=null);a.T<20?a.L=(new N(()=>{sP(a,!1);a.H=0;a.I=0;a.T++;lP(a,!1)})).aa(.025):(aP(b,a.K),a.G=b)}
+-var tP=class{constructor(a,b,c,d,e,f=180){this.i=a;this.oa=b;this.l=c;this.h=d;this.C=new bb;this.K=bP();this.j=bP();this.ka=this.P=this.ea=this.o=null;this.G=YO();this.$=YO();this.M=YO();this.U=YO();this.A=null;this.J=!1;this.L=this.D=null;this.V=this.W=0;this.ba=this.ra=this.sa=this.xa=this.wa=this.N=this.O=this.F=null;this.I=this.H=0;this.u=75;this.T=0;this.m=e;this.qa=f;this.R=new St(this.i);fP(this)}release(){this.R?.release();this.R=null;this.C?.release();this.C=null;this.D?.stop();this.D=null;
++var tP=class{constructor(a,b,c,d,e,f=180,g=!1){this.ftSbs=g;this.i=a;this.oa=b;this.l=c;this.h=d;this.C=new bb;this.K=bP();this.j=bP();this.ka=this.P=this.ea=this.o=null;this.G=YO();this.$=YO();this.M=YO();this.U=YO();this.A=null;this.J=!1;this.L=this.D=null;this.V=this.W=0;this.ba=this.ra=this.sa=this.xa=this.wa=this.N=this.O=this.F=null;this.I=this.H=0;this.u=75;this.T=0;this.m=e;this.qa=f;this.R=new St(this.i);fP(this)}release(){this.R?.release();this.R=null;this.C?.release();this.C=null;this.D?.stop();this.D=null;
+ this.L?.stop();this.L=null}ee(){(this.J=!this.J)||this.h.viewport(0,0,this.l.width,this.l.height);lP(this,!1)}};function uP(a){if(!a||!window.WebGLRenderingContext)return null;var b=["webgl2","webgl"];for(let c of b)if(b=a.getContext(c))return b;return null}
+-function vP(a){var b=a.J.F.Va();if(!a.C.displayInVrMode&&!a.m||b)a.j&&a.h&&(a.j.style.display="none",a.i.Pa(),a.h.release(),a.h=null,a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Ec()))));else{a.j||(a.j=document.createElement("canvas"),a.j.classList.add("shaka-vr-canvas-container"),a.H.parentElement.insertBefore(a.j,a.H.nextElementSibling),a.G=uP(a.j));b=a.m||a.C.defaultVrProjectionMode;let c=a.I||180;if(a.h){let d=b=="fisheye"&&a.h.qa!=c;if(a.h.m!=b||d)a.i.Pa(),a.h.release(),
+-wP(a,b,c)}else a.j.style.display="",wP(a,b,c),a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Ec())))}}function wP(a,b,c){a.G&&a.j&&(a.h=new tP(a.H,a.N,a.j,a.G,b,c),xP(a))}
++function vP(a){var b=a.J.F.Va();if(!a.C.displayInVrMode&&!a.m||b)a.j&&a.h&&(a.j.style.display="none",a.i.Pa(),a.h.release(),a.h=null,a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Ec()))));else{a.j||(a.j=document.createElement("canvas"),a.j.classList.add("shaka-vr-canvas-container"),a.H.parentElement.insertBefore(a.j,a.H.nextElementSibling),a.G=uP(a.j));b=a.m||a.C.defaultVrProjectionMode;let c=a.I||180;if(a.h){let d=b=="fisheye"&&a.h.qa!=c;if(a.h.m!=b||d||a.h.ftSbs!=a.C.vrSideBySide)a.i.Pa(),a.h.release(),
++wP(a,b,c)}else a.j.style.display="",wP(a,b,c),a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Ec())))}}function wP(a,b,c){a.G&&a.j&&(a.h=new tP(a.H,a.N,a.j,a.G,b,c,a.C.vrSideBySide),xP(a))}
+ function xP(a){a.i.B(a.o,"mousedown",b=>{if(!a.l&&b.button==0&&yP(b.target)){var c=b.clientX;b=b.clientY;a.l=!0;a.D=c;a.F=b}});navigator.maxTouchPoints>0&&a.i.B(a.o,"touchstart",b=>{if(b.touches.length==2)a.l=!1,a.A=zP(b);else if(!a.l&&yP(b.target)){var c=b.touches[0].clientX;b=b.touches[0].clientY;a.l=!0;a.D=c;a.F=b}});a.i.B(a.o,"wheel",b=>{!a.l&&a.C.enableVrWheelZoom&&yP(b.target)&&(rP(a.h,b.deltaY),b.preventDefault(),b.stopPropagation())});a.i.B(a.o,"mousemove",b=>{a.l&&AP(a,b.clientX,b.clientY)});
+ navigator.maxTouchPoints>0&&a.i.B(a.o,"touchmove",b=>{if(a.A!=null&&b.touches.length==2){let c=zP(b);rP(a.h,(a.A-c)*5);a.A=c;b.preventDefault()}else a.l&&(AP(a,b.touches[0].clientX,b.touches[0].clientY),b.preventDefault())});a.i.ia(a.o,["mouseleave","mouseup"],()=>{a.l=!1});navigator.maxTouchPoints>0&&a.i.B(a.o,"touchend",b=>{a.l=!1;b.touches.length==2?a.A=zP(b):a.A=null;if(b.touches.length==1){var c=b.touches[0].clientX;b=b.touches[0].clientY;a.l=!0;a.D=c;a.F=b}});if(a.C.enableVrDeviceMotion&&window.DeviceOrientationEvent){let b=
+ !1;if(typeof DeviceMotionEvent.requestPermission=="function"){let c=["click","mouseup"];navigator.maxTouchPoints>0&&c.push("touchend");let d=()=>{DeviceMotionEvent.requestPermission().then(f=>{f!=="granted"||b||(b=!0,BP(a))})},e=()=>{a.i.ti(a.o,c,d);a.i.kj(a.o,c,d)};DeviceMotionEvent.requestPermission().then(f=>{f!=="granted"?e():(a.i.ti(a.o,c,d),b=!0,BP(a))}).catch(e)}else b=!0,BP(a)}}function yP(a){return a instanceof Element?!a.closest(".shaka-no-propagation"):!0}
 @@ -1994,7 +1994,7 @@ function kO(a,b=!1){a.Da&&!a.Ec()&&(a.rg()?a.ve():a.wb()?a.V.Ja():b&&a.Fa()?(b=a
  function mO(a,b){if(a.C.duration)if(a.gb&&a.rg())a.gb=!1,b.cancelable&&b.preventDefault();else{var c=a.ra!=null;a.Fa()?kO(a,!0):(KP(a,b),lO(a));b.cancelable&&b.preventDefault();c&&a.ra==null||(a.W=Date.now(),a.ra=Date.now())}}function xO(a){if(a.Da){if(a.o&&(a.o&&a.o.isPaused()?a.o.play():a.o&&a.o.pause(),a.o.isLinear()))return;a.C.duration&&(a.A&&a.A.endMouseInteraction(),a.C.paused&&!a.O?(a.m.qd()&&(a.C.currentTime=a.m.ya().start),a.C.play()):a.C.pause())}}
  function yO(a,b){LP(a);zO(a,a.Dc()+b)}function MP(a){a.Fa()?a.dispatchEvent(new D("showingui")):a.dispatchEvent(new D("hidingui"))}function NP(a,b=!0){var c=[],d=a.j.getElementsByClassName("shaka-text-container")[0],e=a.j.getElementsByClassName("shaka-speech-to-text-container")[0];d&&c.push(d);e&&c.push(e);if(c.length){d="0px";a.Fa()&&(d=a.U.clientHeight+"px");for(let f of c)b?f.style.bottom=d:(f.style.transition="none",f.style.bottom=d,f.getBoundingClientRect(),f.style.transition="")}}
@@ -115,6 +149,15 @@ index 8a9584de095894c76a889fc1a1151921ce08784c..b5e883fcf242adc9e8d750b6f6728f3e
  document.fullscreenElement==this.h.fullScreenElement||!(!this.h.fullScreenElement||!this.h.fullScreenElement.contains(document.fullscreenElement)):!1;var a=this.u;return a.webkitSupportsFullscreen?a.webkitDisplayingFullscreen:!1}async Le(){this.ib()?await YP(this):await fQ(this)}Df(){return this.F.Va()?!1:document.pictureInPictureEnabled||eQ(this)?!this.u.disablePictureInPicture:!1}Qd(){return!!(window.documentPictureInPicture&&window.documentPictureInPicture.window||document.pictureInPictureElement)}async Lc(){try{eQ(this)?
  (this.ib()&&await YP(this),await gQ(this)):document.pictureInPictureElement?await document.exitPictureInPicture():(this.ib()&&YP(this),await this.u.requestPictureInPicture())}catch(a){this.dispatchEvent(new D("error",(new Map).set("detail",a)))}}Sj(){Y(this.ka,!0);this.G&&this.G.hasChildNodes()&&Y(this.G,!0);this.H&&this.H.hasChildNodes()&&Y(this.H,!0);this.o.hasCustomClick()?this.i.setAttribute("ad-active","true"):this.i.removeAttribute("ad-active")}fj(){Y(this.ka,!1);Y(this.G,!1);Y(this.H,!1);this.i.removeAttribute("ad-active")}Fa(){return this.Da?
  this.i.getAttribute("shown")!=null||this.i.getAttribute("casting")!=null:!1}ef(){var a=!0;this.Ec()&&(a=!1);a&&this.F.Va()&&(a=!1);a&&(this.m.drmInfo()||this.m.mc())&&(a=!1);a&&this.o&&(a=!1);a&&this.m.Ka()&&(a=!1);return a}li(a="png",b=1){if(this.ef()){var c=`image/${a==="jpg"?"jpeg":a}`,d=document.createElement("canvas"),e=d.getContext("2d"),f=this.u;d.width=f.videoWidth;d.height=f.videoHeight;e.drawImage(f,0,0,d.width,d.height);b=d.toDataURL(c,b);c=document.createElement("a");c.href=b;c.download=
+@@ -2079,7 +2079,7 @@ function WQ(a){var b="play_pause skip_previous skip_next mute_volume time_and_du
+ "spacer"],bigButtons:[],overflowMenuButtons:"captions-settings quality video_type language chapter picture_in_picture playback_rate recenter_vr toggle_stereoscopic".split(" "),statisticsList:"width height currentCodecs corruptedFrames decodedFrames droppedFrames drmTimeSeconds licenseTime liveLatency loadLatency timeToFirstFrame bufferingTime manifestTimeSeconds estimatedBandwidth streamBandwidth maxSegmentDuration pauseTime playTime completionPercent manifestSizeBytes bytesDownloaded nonFatalErrorCount manifestPeriodCount manifestGapCount gapsJumped stallsDetected".split(" "),
+ adStatisticsList:"loadTimes averageLoadTime started overlayAds playedCompletely skipped errors".split(" "),contextMenuElements:["loop","picture_in_picture","copy_video_frame","save_video_frame"],playbackRates:[1,1.25,1.5,2,3],playbackRateSliderMin:.5,playbackRateSliderMax:3,playbackRateSliderStep:.05,fastForwardRates:[2,4,8,1],rewindRates:[-1,-2,-4,-8],addSeekBar:!0,customContextMenu:!0,castReceiverAppId:"",castAndroidReceiverCompatible:!1,clearBufferOnQualityChange:!0,showUnbufferedStart:!1,seekBarColors:{base:"rgba(255, 255, 255, 0.3)",
+ buffered:"rgba(255, 255, 255, 0.54)",played:"rgb(255, 255, 255)",adBreaks:"rgb(255, 204, 0)",chapters:"rgba(255, 0, 0, 0.8)"},volumeBarColors:{base:"rgba(255, 255, 255, 0.54)",level:"rgb(255, 255, 255)"},playbackRateBarColors:{base:"rgba(255, 255, 255, 0.54)",level:"rgb(255, 255, 255)"},qualityMarks:{720:"",1080:"HD",1440:"2K",2160:"4K",4320:"8K"},trackLabelFormat:XQ,textTrackLabelFormat:XQ,fadeDelay:0,closeMenusDelay:2,doubleClickForFullscreen:!0,singleClickForPlayAndPause:!0,enableKeyboardPlaybackControls:!0,
+-enableFullscreenOnRotation:!1,forceLandscapeOnFullscreen:!1,enableTooltips:!0,keyboardSeekDistance:5,keyboardLargeSeekDistance:60,fullScreenElement:a.m,showAudioChannelCountVariants:!0,seekOnTaps:!1,tapSeekDistance:10,seekButtonDistance:10,refreshTickInSeconds:.125,displayInVrMode:!1,defaultVrProjectionMode:"equirectangular",preferVideoFullScreenInVisionOS:!0,showAudioCodec:!0,showVideoCodec:!0,castSenderUrl:"https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",enableKeyboardPlaybackControlsInWindow:!1,
++enableFullscreenOnRotation:!1,forceLandscapeOnFullscreen:!1,enableTooltips:!0,keyboardSeekDistance:5,keyboardLargeSeekDistance:60,fullScreenElement:a.m,showAudioChannelCountVariants:!0,seekOnTaps:!1,tapSeekDistance:10,seekButtonDistance:10,refreshTickInSeconds:.125,displayInVrMode:!1,defaultVrProjectionMode:"equirectangular",vrSideBySide:!1,preferVideoFullScreenInVisionOS:!0,showAudioCodec:!0,showVideoCodec:!0,castSenderUrl:"https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",enableKeyboardPlaybackControlsInWindow:!1,
+ alwaysShowVolumeBar:!1,shortcuts:{small_rewind:"ArrowLeft",small_fast_forward:"ArrowRight",large_rewind:"PageDown",large_fast_forward:"PageUp",home:"Home",end:"End",captions:"c",fullscreen:"f",mute:"m",picture_in_picture:"p",increase_video_speed:">",decrease_video_speed:"<",play:"k",take_screenshot:"u",last_frame:",",next_frame:"."},menuOpenUntilUserClosesIt:!0,allowTogglePresentationTime:!0,showRemainingTimeInPresentationTime:!1,enableVrDeviceMotion:!0,enableVrWheelZoom:!1,showUIAlways:!1,showUIAlwaysOnAudioOnly:!0,
+ preferIntlDisplayNames:!0,mediaSession:{enabled:!0,handleMetadata:!0,handleActions:!0,handlePosition:!0,supportedActions:c,allowAutoPiP:!0},captionsStyles:!0,captionsFontScaleFactors:[.5,.75,1,1.25,1.5,1.75,2],captionsStyleElements:"captions-font-family captions-font-color captions-size captions-background-color captions-background-opacity captions-character-edge-style captions-font-opacity captions-position captions-style-reset".split(" "),documentPictureInPicture:{enabled:!0,preferInitialWindowPlacement:!1,
+ disallowReturnToOpener:!1},showUIOnPaused:!0,customTrackLabel:()=>"",showBufferingSpinner:!0};if(a.ph()){b.bigButtons=["skip_previous_always","play_pause_buffering","skip_next_always"];b.customContextMenu=!1;b.singleClickForPlayAndPause=!1;b.seekOnTaps=!0;b.enableTooltips=!1;a=gb();b.enableFullscreenOnRotation=a.j()!=="WEBKIT";b.forceLandscapeOnFullscreen=!0;b.controlPanelElements=b.controlPanelElements.map(e=>e==="mute_volume"?"mute":e);let d=["play_pause","skip_previous","skip_next"];b.controlPanelElements=
 @@ -2175,7 +2175,7 @@ yQ("recenter_vr",new yS);GP("recenter_vr",new yS);async function zS(a,b=!1){if(a
  (await a.i.cancelWatchAvailability(a.j),a.j=-1);a.h.ariaPressed=a.i?.state=="connected"?"true":"false"}function AS(a){a.l||(a.i.state=="disconnected"?a.o.use(UN.CAST):a.o.use(UN.EXIT_CAST))}
  var BS=class extends TN{constructor(a,b){super(a,b);a=gb();this.l=a.P();this.h=El();this.h.classList.add("shaka-remote-button");this.h.classList.add("shaka-tooltip");this.h.classList.add("shaka-no-propagation");this.h.ariaPressed="false";this.o=new XN(this.h,this.l?UN.AIRPLAY:UN.CAST);b=U("label");b.classList.add("shaka-overflow-button-label");b.classList.add("shaka-overflow-menu-only");this.u=U("span");b.appendChild(this.u);this.m=U("span");this.m.classList.add("shaka-current-selection-span");b.appendChild(this.m);
@@ -441,6 +484,31 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
        }
      }
  
+diff --git a/ui/externs/ui.js b/ui/externs/ui.js
+index e3242df55e38d600ffb6e49939bcd2ddd488bef9..d5cd1ee1c0e59518bc7965902bf9634f48a9a1b9 100644
+--- a/ui/externs/ui.js
++++ b/ui/externs/ui.js
+@@ -339,6 +339,7 @@ shaka.extern.UITrackLabelCallback;
+  *   refreshTickInSeconds: number,
+  *   displayInVrMode: boolean,
+  *   defaultVrProjectionMode: string,
++ *   vrSideBySide: boolean,
+  *   preferVideoFullScreenInVisionOS: boolean,
+  *   showAudioCodec: boolean,
+  *   showVideoCodec: boolean,
+@@ -591,6 +592,12 @@ shaka.extern.UITrackLabelCallback;
+  *   <code>'cubemap'</code>.
+  *   <br>
+  *   Defaults to <code>'equirectangular'</code>.
++ * @property {boolean} vrSideBySide
++ *   If true, each frame of VR content packs the left and right eye side by
++ *   side, and only the left eye is shown. Applies to the equirectangular and
++ *   half equirectangular projections.
++ *   <br>
++ *   Defaults to <code>false</code>.
+  * @property {boolean} preferVideoFullScreenInVisionOS
+  *   If true, we will use the fullscreen API of the video element itself if it
+  *   is available in Vision OS. This is useful to be able to access 3D
 diff --git a/ui/range_element.js b/ui/range_element.js
 index d85839a80edc90dad46acdc2b74b412efa5ff838..fa472411ca8783db233e4caae57c160808691550 100644
 --- a/ui/range_element.js
@@ -546,6 +614,18 @@ index deb178dd47dead6ceecc52d062c0f54991e37bab..9a0b73e3652d8722f39189249c1b1985
        this.thumbnailImage_.width = thumbnail.imageWidth;
      } else if (!thumbnail.sprite) {
        this.thumbnailImage_.style.width = '100%';
+diff --git a/ui/ui.js b/ui/ui.js
+index 736e4a5405830038f935752ddf48684ca6f65f6d..dd9d088047934f43ead0e75eb5998258f527ddd9 100644
+--- a/ui/ui.js
++++ b/ui/ui.js
+@@ -425,6 +425,7 @@ shaka.ui.Overlay = class {
+       refreshTickInSeconds: 0.125,
+       displayInVrMode: false,
+       defaultVrProjectionMode: 'equirectangular',
++      vrSideBySide: false,
+       preferVideoFullScreenInVisionOS: true,
+       showAudioCodec: true,
+       showVideoCodec: true,
 diff --git a/ui/ui_utils.js b/ui/ui_utils.js
 index 2952b5ccfd5c05905df12b6a5edd489b24dbc2a4..3f77d96d9e4a9e18149ee7efedc12f57e53d0318 100644
 --- a/ui/ui_utils.js
@@ -561,3 +641,118 @@ index 2952b5ccfd5c05905df12b6a5edd489b24dbc2a4..3f77d96d9e4a9e18149ee7efedc12f57
        return;
      }
      // Skip the items of hidden nested submenus, e.g. those inside a
+diff --git a/ui/vr_manager.js b/ui/vr_manager.js
+index c4aabc0a984f6ea51be7923de1cbb1922e6abcd5..06be4c04c5acf58968f236fe9a5b98191ffed3f4 100644
+--- a/ui/vr_manager.js
++++ b/ui/vr_manager.js
+@@ -354,9 +354,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+       const newProjectionMode =
+           this.vrAsset_ || this.config_.defaultVrProjectionMode;
+       const newHfov = this.vrHfov_ || 180;
++      const newSideBySide = this.config_.vrSideBySide;
+       if (!this.vrWebgl_) {
+         this.canvas_.style.display = '';
+-        this.init_(newProjectionMode, newHfov);
++        this.init_(newProjectionMode, newHfov, newSideBySide);
+         this.dispatchEvent(new shaka.util.FakeEvent(
+             'vrstatuschanged',
+             (new Map()).set('newStatus', this.isPlayingVR())));
+@@ -364,10 +365,13 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+         const currentProjectionMode = this.vrWebgl_.getProjectionMode();
+         const hfovChanged = newProjectionMode == 'fisheye' &&
+             this.vrWebgl_.getHfov() != newHfov;
+-        if (currentProjectionMode != newProjectionMode || hfovChanged) {
++        const sideBySideChanged =
++            this.vrWebgl_.isSideBySide() != newSideBySide;
++        if (currentProjectionMode != newProjectionMode || hfovChanged ||
++            sideBySideChanged) {
+           this.eventManager_.removeAll();
+           this.vrWebgl_.release();
+-          this.init_(newProjectionMode, newHfov);
++          this.init_(newProjectionMode, newHfov, newSideBySide);
+           // Re-initialization the status does not change.
+         }
+       }
+@@ -385,13 +389,14 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+   /**
+    * @param {string} projectionMode
+    * @param {number} hfov
++   * @param {boolean} sideBySide
+    * @private
+    */
+-  init_(projectionMode, hfov) {
++  init_(projectionMode, hfov, sideBySide) {
+     if (this.gl_ && this.canvas_) {
+       this.vrWebgl_ = new shaka.ui.VRWebgl(
+           this.video_, this.player_, this.canvas_, this.gl_, projectionMode,
+-          hfov);
++          hfov, sideBySide);
+       this.setupVRListeners_();
+     }
+   }
+diff --git a/ui/vr_webgl.js b/ui/vr_webgl.js
+index 3568a1ea232d7e7c3536d3e8da8e558f016b9cd4..9ef03be6a61dcee5385c98a4142ccda6d6b792da 100644
+--- a/ui/vr_webgl.js
++++ b/ui/vr_webgl.js
+@@ -32,8 +32,12 @@ shaka.ui.VRWebgl = class {
+    * @param {string} projectionMode
+    * @param {number=} hfov Horizontal field of view of the content, in
+    *   degrees. Only used by the fisheye projection.
++   * @param {boolean=} sideBySide Whether each frame packs the left and right
++   *   eye side by side. Only the left eye is shown. Not used by the fisheye
++   *   and cubemap projections.
+    */
+-  constructor(video, player, canvas, gl, projectionMode, hfov = 180) {
++  constructor(video, player, canvas, gl, projectionMode, hfov = 180,
++      sideBySide = false) {
+     /** @private {!HTMLVideoElement} */
+     this.video_ = /** @type {!HTMLVideoElement} */ (video);
+ 
+@@ -142,6 +146,9 @@ shaka.ui.VRWebgl = class {
+     /** @private {number} */
+     this.hfov_ = hfov;
+ 
++    /** @private {boolean} */
++    this.sideBySide_ = sideBySide;
++
+     /** @private {?shaka.util.VideoFrameCallbackHandler} */
+     this.videoFrameCallbackHandler_ =
+         new shaka.util.VideoFrameCallbackHandler(this.video_);
+@@ -180,6 +187,13 @@ shaka.ui.VRWebgl = class {
+     return this.hfov_;
+   }
+ 
++  /**
++   * @return {boolean}
++   */
++  isSideBySide() {
++    return this.sideBySide_;
++  }
++
+   /**
+    * @param {!Float32Array} quat
+    * @return {{pitch: number, yaw: number, roll: number}} as radians
+@@ -416,6 +430,11 @@ shaka.ui.VRWebgl = class {
+         return null;
+     }
+ 
++    if (this.sideBySide_) {
++      // Sample the left eye, which fills the left half of the frame.
++      source = source.replace('vec2(xValue,', 'vec2(xValue * 0.5,');
++    }
++
+     const shader = this.gl_.createShader(glType);
+ 
+     this.gl_.shaderSource(shader, source);
+@@ -674,7 +693,10 @@ shaka.ui.VRWebgl = class {
+     if (this.projectionMode_ == 'halfequirectangular' ||
+         this.projectionMode_ == 'fisheye') {
+       yawBoundary = 90.0 * Math.PI / 180;
+-      pitchBoundary /= 2;
++      // A half sphere still spans the full 180 degrees of latitude.
++      if (this.projectionMode_ == 'fisheye') {
++        pitchBoundary /= 2;
++      }
+     }
+ 
+     let matrix;

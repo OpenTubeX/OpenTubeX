@@ -134,6 +134,7 @@ export async function getStoredLandingRoute() {
       backendFallbackSetting,
       rememberHistorySetting,
       enableWatchStatsSetting,
+      enableTwitchPageSetting,
     ] = await Promise.all([
       baseHandlers.settings._findOne('landingPage'),
       baseHandlers.settings._findOne('navigationItems'),
@@ -145,6 +146,7 @@ export async function getStoredLandingRoute() {
       baseHandlers.settings._findOne('backendFallback'),
       baseHandlers.settings._findOne('rememberHistory'),
       baseHandlers.settings._findOne('enableWatchStats'),
+      baseHandlers.settings._findOne('enableTwitchPage'),
     ])
 
     let landingPage = landingPageSetting?.value
@@ -175,6 +177,7 @@ export async function getStoredLandingRoute() {
         (enableWatchStatsSetting?.value ?? true),
       // Electron always has yt-dlp
       supportsYtDlp: true,
+      enableTwitchPage: enableTwitchPageSetting?.value ?? true,
     })
 
     return normalizeRoutePath(resolveLandingPage(landingPage, availablePages))

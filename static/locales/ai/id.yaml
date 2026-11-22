@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
   RSS Feeds:
+    Load More Items: Muat lebih banyak item
     Refreshing: Menyegarkan feed RSS
     Tab: RSS
     Followed Feeds: Umpan RSS yang diikuti
@@ -498,6 +499,7 @@ Settings:
       Memory: memori
       Network: jaringan
       Disk: disk
+    Label: Performa
   General Settings:
     Invidious Instance Username: 'Nama pengguna instans'
     Invidious Instance Password: 'Kata sandi instans'
@@ -621,6 +623,8 @@ Settings:
       Auto: Otomatis
     Preferred API Backend:
       Yattee Server: Server Yattee
+      Local API Extension Required: Aplikasi web hanya dapat menggunakan API lokal dengan ekstensi browser OpenTubeX Local API.
+      Install Local API Extension: Pasang ekstensi
     Yattee Server:
       Server URL: URL server Yattee
       Username: Nama pengguna
@@ -663,6 +667,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Toggle Playback With Tab Icon: Putar dan jeda dengan ikon tab
     Theme and Colors: "Tema dan warna"
     Font Size: Ukuran Font
     Sections:
@@ -878,6 +883,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalkan kenyaringan'
     Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
+    Show Mirror Video Toggle: "Tampilkan tombol cerminkan video"
     Default Media Format:
       Default Media Format: 'Format Media Bawaan'
     Pause on Stream Recovery: "Jeda saat pemulihan streaming"
@@ -907,6 +913,7 @@ Settings:
     Enable DLNA Casting: "Aktifkan transmisi DLNA"
     Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"
     Lights Off: Matikan lampu
+    Mirror Video: "Cerminkan video"
     Show Lights Off Toggle: Tampilkan tombol matikan lampu
     Show Volume Boost Toggle: "Tampilkan sakelar penguat volume"
     Swipe Gestures:
@@ -920,6 +927,7 @@ Settings:
       Unavailable: Tidak dapat menyesuaikan kontrol pemutaran.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Lanjutkan pemutaran saat layar terkunci'
+    Switch to Audio in Background: 'Beralih ke format audio di latar belakang'
     Ignore Headphone Controls: 'Abaikan kontrol headphone'
     Music Visualizer: Visualisator musik
     Automatically Open Chapters: Buka Bab Secara Otomatis
@@ -1053,6 +1061,7 @@ Settings:
     Timestamp Notes:
       Enable: "Aktifkan Catatan Stempel Waktu"
       Obsidian Vault: Brankas Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Ketuk dua kali dengan dua jari untuk melompati bab"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1291,6 +1300,7 @@ Settings:
     Cleanup Complete: Pembersihan penyimpanan selesai
     Cleanup Failed: Pembersihan penyimpanan gagal
   Subscription Settings:
+    Refresh These Feeds Together: "Segarkan umpan ini bersamaan"
     Fetch Feed on Startup: Ambil Umpan Saat Aplikasi Dimulai
     Show New Content Feed: Tampilkan Umpan Konten Baru
     RSS Feeds: Umpan RSS
@@ -1311,6 +1321,7 @@ Settings:
     Platforms:
       Other Platforms: Platform Lain
       Manage Channels: Kelola Kanal yang Diikuti
+      Enable Twitch Page: Aktifkan Halaman Twitch
       Notify When Live: Beri Tahu Saat Kanal Twitch yang Diikuti Mulai Siaran Langsung
       Auto Refresh Interval: Interval Pembaruan Otomatis Platform Lain
   Distraction Free Settings:
@@ -1356,6 +1367,7 @@ Settings:
     Hide Header Sync Indicator: Sembunyikan indikator sinkronisasi di header aplikasi
     Hide Repeat Stats: Sembunyikan statistik pengulangan
     Hide Playlist Stats: Sembunyikan statistik daftar putar
+    Hide Recommendation Details: Sembunyikan alasan rekomendasi dan masukan
     Sections:
       Digital Wellbeing: "Kesejahteraan Digital"
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
@@ -1659,6 +1671,7 @@ Settings:
     Downloading: Mengunduh daftar…
     Failed to Download: Tidak dapat mengunduh daftar
     Loaded Status: "Kanal diblokir: {blocked} · Kanal ditandai: {warned} · Diperbarui: {date}"
+  Highlight Changed Settings Label: Diubah
 Tutorial:
   Skip: Lewati
   Next: Berikutnya
@@ -1945,6 +1958,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Nonaktif'
+    Lock Controls:
+      Lock Controls: "Kunci Kontrol"
+      Hold to Unlock: "Tahan untuk membuka kunci"
     Volume Boost:
       Volume Boost: "Penguat volume"
       'Off': "Nonaktif"
@@ -2415,6 +2431,7 @@ Tooltips:
     Normalize Loudness: 'Mengecilkan volume video yang lebih keras daripada kebanyakan video agar volume tidak melonjak antarvideo. Video yang pelan tetap pada volumenya. Hanya berfungsi untuk video yang dimuat dengan API Lokal.'
     Pause on Stream Recovery: "Saat streaming video gagal dan pemutar memuatnya ulang atau beralih ke format atau mesin lain, pemutaran dijeda dan galat tetap ditampilkan di bagian atas pemutar sampai Anda menutupnya. Jika dinonaktifkan, pemutaran berlanjut dan galat muncul sebentar sebagai notifikasi."
     Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'
+    Switch to Audio in Background: 'Memutar format audio selama aplikasi berjalan di latar belakang atau layar mati, sehingga menghemat data dan baterai. Picture-in-Picture tetap menampilkan video. Video kembali saat Anda membuka aplikasi lagi. Memerlukan pemutaran yang berlanjut saat layar terkunci.'
     Ignore Headphone Controls: 'Mengabaikan perintah putar, jeda, dan lewati dari perangkat Bluetooth, headphone berkabel, dan tombol media pada keyboard, sehingga ketukan tidak sengaja pada earbud tidak mengganggu pemutaran. Kontrol di aplikasi dan di notifikasi media tetap berfungsi.'
     Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.
     Use Quick Playback Speed Bar: Menampilkan bilah kecepatan pemutaran cepat di sisi kanan kontrol pemutar. Jika penyimpanan kecepatan pemutaran manual per saluran diaktifkan, bilah juga memuat tombol untuk menyimpan kecepatan bagi saluran saat ini.
@@ -2423,6 +2440,7 @@ Tooltips:
     Use YouTube-style Shorts: Menampilkan Shorts dalam kisi potret pada halaman langganan dan saluran, serta menggunakan pemutar Shorts bergaya YouTube.
     Loop Shorts: Jika diaktifkan, Shorts dimulai ulang secara otomatis. Jika dinonaktifkan, Shorts berhenti di akhir dan menampilkan tombol putar ulang.
     Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
+    Show Mirror Video Toggle: "Menampilkan tombol aktif/nonaktif dalam menu pengaturan pemutar yang membalik video secara horizontal, sehingga lebih mudah mengikuti tutorial tari, olahraga, dan alat musik."
     Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.
@@ -2444,6 +2462,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
     Enable Timestamp Notes: "Menambahkan tombol pemutar dan pintasan N yang menjeda video serta membuka catatan yang menautkan ke momen saat ini. Catatan dapat disalin sebagai Markdown atau, di desktop, ditambahkan ke Obsidian."
     Obsidian Vault: Nama brankas Obsidian untuk catatan stempel waktu. Jika diatur, catatan dapat ditambahkan ke Obsidian. Catatan setiap video dikumpulkan dalam catatan yang dinamai sesuai video, di folder brankas untuk catatan baru.
+    Double-Tap With Two Fingers to Skip Chapters: "Ketuk dua kali dengan dua jari di sisi kanan video untuk melompat ke bab berikutnya, atau di sisi kiri untuk kembali ke awal bab saat ini. Dalam 3 detik pertama sebuah bab, sisi kiri justru menuju bab sebelumnya, sehingga mengulanginya akan mundur melalui bab-bab satu per satu."
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.
@@ -2474,6 +2493,7 @@ Tooltips:
     Bedtime Reminder: "Menjeda video dan mengingatkan Anda untuk berhenti menonton antara waktu mulai dan waktu akhir."
     Shorten View Counts: Menampilkan jumlah penayangan, komentar dan suka komentar yang telah dibulatkan YouTube dalam bentuk singkat, misalnya 14 rb, bukan 14.000. Jumlah persis selalu ditampilkan penuh.
   Subscription Settings:
+    Refresh These Feeds Together: "Saat Anda menyegarkan salah satu umpan yang dicentang, umpan lain yang dicentang langsung disegarkan setelahnya. Penyegaran otomatis tetap mengikuti interval masing-masing umpan."
     Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
     Show New Content Feed: Menampilkan tab Baru yang berisi item umpan langganan yang belum ada saat pengambilan sebelumnya.
     Enable RSS Feeds: Menampilkan tab RSS di halaman Langganan berisi item dari umpan RSS atau Atom, sehingga Anda dapat mengikuti kreator di platform lain. Itemnya dibuka dengan yt-dlp.
@@ -2484,10 +2504,12 @@ Tooltips:
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
     RSS Feeds Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui umpan RSS Anda secara otomatis saat aplikasi terbuka.
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
-    Show Collaborations From Other Channels: "Juga menampilkan video yang dibuat oleh saluran yang Anda langgani bersama saluran lain yang mengunggahnya. YouTube hanya mencantumkannya di tab Beranda saluran, jadi setiap penyegaran video memuat satu halaman lagi per saluran. Hanya kolaborasi terbaru yang ditampilkan di sana yang ditemukan, beberapa saluran tidak menampilkannya sama sekali, dan tanggal publikasinya merupakan perkiraan. Tidak tersedia dengan API Invidious."
+    Show Collaborations From Other Channels: "Juga menampilkan video yang dibuat oleh saluran yang Anda langgani bersama saluran lain yang mengunggahnya. YouTube hanya mencantumkannya di tab Beranda saluran, jadi penyegaran video memeriksa paling banyak beberapa saluran, dan yang baru bisa memerlukan waktu sehari atau lebih untuk muncul. Hanya kolaborasi terbaru yang ditampilkan di sana yang ditemukan, beberapa saluran tidak menampilkannya sama sekali, dan tanggal publikasinya merupakan perkiraan. Tidak tersedia dengan API Invidious."
     Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
+    Enable Twitch Page: Memungkinkan Anda membuka halaman Twitch dari navigasi dan palet perintah. Di sana Anda dapat menjelajahi kategori populer dan kanal langsung serta mencari di Twitch.
     Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:
+    Toggle Playback With Tab Icon: Mengklik ikon tab yang berisi video yang sedang diputar atau dijeda akan menjeda atau melanjutkannya tanpa beralih ke tab tersebut.
     Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status, termasuk yang menawarkan Urungkan. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang meminta keputusan, seperti permintaan pembaruan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
@@ -2546,6 +2568,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Urungkan lompatan terakhir
   Redo Seek: Ulangi lompatan yang diurungkan
   New Incognito Tab: Buat tab penyamaran baru
+  Shortcuts Label: Pintasan
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah
@@ -2580,6 +2603,8 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Stop Recording: "Hentikan perekaman"
+  Recording: "Merekam"
   File Name Template Invalid: 'Gunakan jalur relatif di dalam folder unduhan tanpa "..", "~", "$", "%", atau awalan seperti "thumbnail:".'
   Search Completed: "Cari unduhan selesai berdasarkan judul atau kanal"
   Format: "Format"
@@ -2723,6 +2748,22 @@ App Icon:
   Saved Message: "Ikon disimpan. Peluncur mungkin memerlukan waktu untuk memperbarui."
   Title: "Ikon aplikasi"
   Error: "Tidak dapat memuat atau mengubah ikon aplikasi"
+
+App Lock:
+  Title: "Kunci aplikasi"
+  Enable: "Wajibkan kunci layar"
+  Enable Tooltip: "Meminta sidik jari, wajah, PIN, pola, atau sandi Anda saat kembali ke OpenTubeX. Di Android 13 dan yang lebih baru, aplikasi terbaru juga tidak lagi menampilkan pratinjau aplikasi."
+  Lock After: "Kunci setelah"
+  Immediately: "Segera"
+  1 Minute: "1 menit"
+  5 Minutes: "5 menit"
+  15 Minutes: "15 menit"
+  1 Hour: "1 jam"
+  Unavailable: "Setel kunci layar di setelan Android untuk menggunakan kunci aplikasi."
+  Error: "Tidak dapat mengubah kunci aplikasi"
+  Locked: "OpenTubeX terkunci"
+  Unlock: "Buka kunci"
+  Prompt Title: "Buka kunci OpenTubeX"
 
 Tray:
   Hide All Windows: "Sembunyikan semua jendela"
@@ -2902,6 +2943,33 @@ Platforms:
   Verify: "Verifikasi"
   Categories: "Kategori"
   Category Not Found: "Kategori ini tidak dapat ditemukan."
+  Category Tags: "Tag kategori"
+  Stream Tags: "Tag siaran"
+  Language: "Bahasa"
+  All Languages: "Semua bahasa"
+  Other Language: "Lainnya"
+  American Sign Language: "Bahasa Isyarat Amerika"
+  Search Tags: "Cari tag"
+  Add Tag: "Tambah tag"
+  Remove Tag: "Hapus {tag}"
+  Sort:
+    Viewers: "Penonton (tinggi ke rendah)"
+    Viewers Ascending: "Penonton (rendah ke tinggi)"
+    Started: "Baru dimulai"
+    Relevance: "Direkomendasikan"
+    Published: "Baru dipublikasikan"
+    Views: "Ditonton (tinggi ke rendah)"
+    Top Day: "Teratas 24 jam"
+    Top Week: "Teratas 7 hari"
+    Top Month: "Teratas 30 hari"
+    Top All: "Teratas sepanjang masa"
+  Video Type:
+    Video Type: "Jenis video"
+    All: "Semua video"
+    Archive: "Siaran sebelumnya"
+    Highlight: "Sorotan"
+    Upload: "Unggahan"
+  Anonymous: "Anonim"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} membalas {commentAuthor}"
   Like: "Suka"
@@ -2936,5 +3004,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cari di Twitch"
+  Search Placeholder: "Kategori dan kanal"
 New Incognito Tab: Tab Penyamaran Baru
 Incognito Tab: Tab penyamaran

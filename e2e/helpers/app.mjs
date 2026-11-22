@@ -1,8 +1,8 @@
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
-import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { cp, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { freemem, loadavg, tmpdir, totalmem } from 'node:os'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { fileURLToPath } from 'node:url'
@@ -402,6 +402,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const env = {
     ...process.env,
     OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
+    ...(crashDumpsDir() ? { OPENTUBEX_E2E_CRASH_DUMPS_DIR: crashDumpsDir() } : {}),
     ELECTRON_OZONE_PLATFORM_HINT: 'x11',
     // Tests expect en-GB strings, which CI's bare "en" system locale resolves
     // to. Pin it so the default locale setting does not follow the host.
@@ -813,6 +814,10 @@ function recordAppDiagnostics(testInfo, recordTrace) {
         await app.context().tracing.start({ snapshots: true, screenshots: false, title: testInfo.title })
       }
     },
+    /** The main process output so far. */
+    output() {
+      return Buffer.concat(output).toString()
+    },
     /** Keeps the trace of an app that is about to be relaunched. */
     save() {
       return stopTracing(testInfo.outputPath(`app-trace-${tracePaths.length + 1}.zip`))
@@ -837,6 +842,102 @@ function recordAppDiagnostics(testInfo, recordTrace) {
       }
     }
   }
+}
+
+/**
+ * Where every app the current test launches keeps the minidumps of its crashed
+ * processes, including apps a test launches with a profile it deletes itself.
+ * The test's output directory is uploaded with the results, so the dumps of a
+ * test without the `app` fixture are kept too.
+ */
+export function crashDumpsDir() {
+  try {
+    return base.info().outputPath('crash-dumps')
+  } catch {
+    // Called outside a test, such as by the performance comparison scripts.
+    return undefined
+  }
+}
+
+/**
+ * Attaches the minidumps of processes that crashed during a failed test, such
+ * as a renderer that exited with code 133. The E2E app never uploads them.
+ * Symbolize one with the symbols of the Electron version in its name, for
+ * example with `minidump_stackwalk`.
+ * @param {import('@playwright/test').TestInfo} testInfo
+ */
+async function attachCrashDumps(testInfo) {
+  const directory = testInfo.outputPath('crash-dumps')
+  const dumps = (await readdir(directory, { recursive: true }).catch(() => [])).filter(entry => entry.endsWith('.dmp'))
+  if (dumps.length === 0) return
+  const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'node_modules', 'electron', 'package.json'), 'utf8'))
+  for (const dump of dumps) {
+    await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
+      path: path.join(directory, dump),
+      contentType: 'application/octet-stream'
+    })
+  }
+}
+
+const STALL_REPORT_DELAY = 20_000
+
+/**
+ * Runs a step that normally takes a few seconds, such as launching or closing
+ * the app, and attaches what the machine was doing if it takes much longer.
+ * On CI, both have stalled for longer than the test timeout, which then cut
+ * them off without leaving any trace of the cause.
+ * @template T
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {string} step
+ * @param {() => Promise<T>} action
+ * @param {() => string} [output] the main process output so far
+ * @returns {Promise<T>}
+ */
+async function reportStall(testInfo, step, action, output) {
+  const startedAt = performance.now()
+  const timer = setTimeout(() => {
+    attachStallReport(testInfo, step, performance.now() - startedAt, output?.() ?? '').catch(() => {})
+  }, STALL_REPORT_DELAY)
+  try {
+    return await action()
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/**
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {string} step
+ * @param {number} elapsed
+ * @param {string} output
+ */
+async function attachStallReport(testInfo, step, elapsed, output) {
+  const run = (command, args) => new Promise(resolve => {
+    execFile(command, args, { timeout: 10_000, maxBuffer: 8 * 1024 * 1024 }, (error, stdout) => {
+      resolve(stdout || String(error))
+    })
+  })
+  const read = file => readFile(file, 'utf8').catch(error => String(error))
+  const megabytes = bytes => `${Math.round(bytes / 1024 / 1024)} MB`
+  const sections = [
+    // A timer that fires much later than it should means the test worker
+    // itself was paused, so the whole machine stalled rather than the app.
+    `${step} was still running after ${Math.round(elapsed)} ms. This report was due after ${STALL_REPORT_DELAY} ms.`,
+    `Load average: ${loadavg().map(load => load.toFixed(2)).join(' ')}`,
+    `Free memory: ${megabytes(freemem())} of ${megabytes(totalmem())}`,
+  ]
+  if (process.platform === 'linux') {
+    for (const resource of ['cpu', 'memory', 'io']) {
+      sections.push(`Pressure stall (${resource}):\n${await read(`/proc/pressure/${resource}`)}`)
+    }
+    // The state and kernel wait channel tell a process blocked on disk or a
+    // lock apart from one that is busy or stopped. Kernel threads are left out.
+    sections.push(`Processes:\n${await run('ps', ['--ppid', '2', '-p', '2', '-N', '-o', 'pid,ppid,stat,etimes,pcpu,rss,wchan:32,args', '--forest'])}`)
+  } else if (process.platform !== 'win32') {
+    sections.push(`Processes:\n${await run('ps', ['-axo', 'pid,ppid,stat,etime,pcpu,rss,command'])}`)
+  }
+  sections.push(`Main process output:\n${output || '(none yet)'}`)
+  await testInfo.attach(`stall report (${step})`, { body: sections.join('\n\n'), contentType: 'text/plain' })
 }
 
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
@@ -955,7 +1056,7 @@ export const test = base.extend({
 
       // Drops requests from an earlier test's app that was still closing.
       takeBlockedRequests()
-      const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
+      const { electronApp, page } = await reportStall(testInfo, 'launching the app', () => launchApp(userDataDir, launchArgs, launchOptions), diagnostics.output)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
       const relaunch = async (beforeLaunch) => {
@@ -965,10 +1066,10 @@ export const test = base.extend({
         const oldProcess = appHandle.electronApp.process()
         const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
         await diagnostics.save()
-        await appHandle.electronApp.close()
+        await reportStall(testInfo, 'closing the app', () => appHandle.electronApp.close(), diagnostics.output)
         await exited
         await beforeLaunch?.(oldProcess)
-        const next = await launchApp(userDataDir, launchArgs, launchOptions)
+        const next = await reportStall(testInfo, 'launching the app', () => launchApp(userDataDir, launchArgs, launchOptions), diagnostics.output)
         appHandle.electronApp = next.electronApp
         appHandle.page = next.page
         return next
@@ -997,8 +1098,9 @@ export const test = base.extend({
       }
       await diagnostics.finish(failed)
       if (appHandle) {
-        await appHandle.electronApp.close().catch(() => {})
+        await reportStall(testInfo, 'closing the app', () => appHandle.electronApp.close().catch(() => {}), diagnostics.output)
       }
+      if (failed) await attachCrashDumps(testInfo)
       const blockedRequests = [...new Set(takeBlockedRequests())]
       // Requests from the main process and its child processes, which
       // Playwright cannot mock. They fail instead of reaching real hosts.

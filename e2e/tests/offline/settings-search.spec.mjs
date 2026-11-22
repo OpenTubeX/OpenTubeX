@@ -89,13 +89,15 @@ test.describe('settings search highlights', () => {
     const header = page.locator('.settingsWindowHeader')
     await expect.poll(() => header.evaluate(element => {
       const title = element.querySelector('.settingsHeaderNavigation').getBoundingClientRect()
-      const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
-      return Math.abs(title.y + title.height / 2 - actions.y - actions.height / 2)
+      return Math.max(...['.settingsHeaderTools', '.settingsWindowControls'].map(selector => {
+        const actions = element.querySelector(selector).getBoundingClientRect()
+        return Math.abs(title.y + title.height / 2 - actions.y - actions.height / 2)
+      }))
     })).toBeLessThanOrEqual(1)
     const bounds = await header.evaluate(element => {
       const header = element.getBoundingClientRect()
       const search = element.querySelector('.settingsSearch').getBoundingClientRect()
-      const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
+      const actions = element.querySelector('.settingsHeaderTools').getBoundingClientRect()
       return { left: search.left - header.left, right: header.right - search.right, searchTop: search.top, actionsBottom: actions.bottom }
     })
     expect(bounds.left).toBeCloseTo(10, 0)

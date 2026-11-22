@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
   RSS Feeds:
+    Load More Items: Hlaða fleiri atriðum
     Refreshing: Uppfæri RSS-strauma
     Tab: RSS
     Followed Feeds: RSS-straumar sem þú fylgist með
@@ -497,6 +498,7 @@ Settings:
       Memory: minnis
       Network: nets
       Disk: disks
+    Label: Afköst
   General Settings:
     Invidious Instance Username: 'Notandanafn tilviks'
     Invidious Instance Password: 'Lykilorð tilviks'
@@ -620,6 +622,8 @@ Settings:
       Auto: Sjálfvirkt
     Preferred API Backend:
       Yattee Server: Yattee-netþjónn
+      Local API Extension Required: Vefforritið getur aðeins notað staðbundna API-ið með vafraviðbótinni OpenTubeX Local API.
+      Install Local API Extension: Setja upp viðbótina
     Yattee Server:
       Server URL: Slóð Yattee-netþjóns
       Username: Notandanafn
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Toggle Playback With Tab Icon: Spila og gera hlé með flipatákninu
     Theme and Colors: "Þema og litir"
     Font Size: Leturstærð
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Einóma hljóð'
     Normalize Loudness: 'Jafna hljóðstyrk'
     Show Mono Audio Toggle: 'Sýna rofa fyrir einóma hljóð'
+    Show Mirror Video Toggle: "Sýna rofa til að spegla myndskeið"
     Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
       Buffering: Biðminni
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Virkja DLNA-streymi"
     Skip Unavailable Playlist Videos: "Sleppa óaðgengilegum myndskeiðum í spilunarlistum"
     Lights Off: Slökkva ljósin
+    Mirror Video: "Spegla myndskeið"
     Show Lights Off Toggle: Sýna rofa til að slökkva ljósin
     Show Volume Boost Toggle: "Sýna rofa fyrir hljóðstyrksaukningu"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Ekki tókst að stilla spilunarstýringar.
     yt-dlp Streaming: "yt-dlp-streymi"
     Continue Playback When Screen Is Locked: 'Halda spilun áfram þegar skjárinn er læstur'
+    Switch to Audio in Background: 'Skipta yfir í hljóðsnið í bakgrunni'
     Ignore Headphone Controls: 'Hunsa stýringar heyrnartóla'
     Music Visualizer: Tónlistarmyndgerð
     Automatically Open Chapters: Opna kafla sjálfkrafa
@@ -1052,6 +1060,7 @@ Settings:
     Timestamp Notes:
       Enable: "Virkja tímamerktar glósur"
       Obsidian Vault: Obsidian-hvelfing
+    Double-Tap With Two Fingers to Skip Chapters: "Tvísmella með tveimur fingrum til að hoppa á milli kafla"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1290,6 +1299,7 @@ Settings:
     Cleanup Complete: Hreinsun geymslu lokið
     Cleanup Failed: Hreinsun geymslu mistókst
   Subscription Settings:
+    Refresh These Feeds Together: "Uppfæra þessar veitur saman"
     Fetch Feed on Startup: Sækja efnisstraum við ræsingu
     Show New Content Feed: Sýna straum með nýju efni
     RSS Feeds: RSS-straumar
@@ -1310,6 +1320,7 @@ Settings:
     Platforms:
       Other Platforms: Aðrir vettvangar
       Manage Channels: Sýsla með rásir sem þú fylgir
+      Enable Twitch Page: Virkja Twitch-síðuna
       Notify When Live: Láta vita þegar Twitch-rásir sem þú fylgir fara í beina útsendingu
       Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna annarra vettvanga
   Distraction Free Settings:
@@ -1355,6 +1366,7 @@ Settings:
     Hide Header Sync Indicator: Fela samstillingarvísi í haus forritsins
     Hide Repeat Stats: Fela tölfræði endurtekninga
     Hide Playlist Stats: Fela tölfræði spilunarlista
+    Hide Recommendation Details: Fela ástæður tillagna og endurgjöf
     Sections:
       Digital Wellbeing: "Stafræn vellíðan"
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
@@ -1656,6 +1668,7 @@ Settings:
     Downloading: Sæki listana…
     Failed to Download: Ekki tókst að sækja listana
     Loaded Status: "Útilokaðar rásir: {blocked} · Merktar rásir: {warned} · Uppfært: {date}"
+  Highlight Changed Settings Label: Breytt
 Tutorial:
   Skip: Sleppa
   Next: Næsta
@@ -1938,6 +1951,9 @@ Video:
     Zoom:
       Zoom: Aðdráttur
       'Off': 'Slökkt'
+    Lock Controls:
+      Lock Controls: "Læsa stýringum"
+      Hold to Unlock: "Haltu inni til að aflæsa"
     Volume Boost:
       Volume Boost: "Hljóðstyrksaukning"
       'Off': "Slökkt"
@@ -2404,6 +2420,7 @@ Tooltips:
     Normalize Loudness: 'Lækkar í myndskeiðum sem eru háværari en flest, svo hljóðstyrkurinn hoppi ekki milli myndskeiða. Lágvær myndskeið halda sínum hljóðstyrk. Virkar aðeins fyrir myndskeið sem eru hlaðin með staðværa API-kerfisviðmótinu.'
     Pause on Stream Recovery: "Þegar myndstreymið bregst og spilarinn endurhleður það eða skiptir yfir í annað snið eða aðra vél er gert hlé á spilun og villan helst efst í spilaranum þar til þú lokar henni. Þegar slökkt er á þessu heldur spilun áfram og villan birtist stuttlega sem tilkynning."
     Continue Playback When Screen Is Locked: 'Heldur hljóði í spilun í bakgrunni og birtir miðlunarstýringar Android. Slökktu á þessu til að gera hlé þegar forritið er ekki lengur sýnilegt.'
+    Switch to Audio in Background: 'Spilar hljóðsnið á meðan forritið er í bakgrunni eða slökkt er á skjánum, sem sparar gögn og rafhlöðu. Mynd í mynd heldur myndskeiðinu. Myndskeiðið kemur aftur þegar þú opnar forritið á ný. Krefst þess að spilun haldi áfram þegar skjárinn er læstur.'
     Ignore Headphone Controls: 'Hunsar skipanir um spilun, hlé og að sleppa frá Bluetooth-tækjum, heyrnartólum með snúru og margmiðlunarlyklum á lyklaborðum, svo að óviljandi snerting á heyrnartólum trufli ekki spilun. Stýringar í forritinu og í margmiðlunartilkynningunni virka áfram.'
     Enable Caption Translations: Þegar þetta er virkt velja skjátextahnappurinn og flýtileiðin C sjálfkrafa þýddan texta á völdu tungumáli ef myndbandið býður ekki upp á samsvarandi frumtexta.
     Use Quick Playback Speed Bar: Sýnir stiku til að breyta spilunarhraða hratt hægra megin í stjórntækjum spilarans. Ef kveikt er á handvirkri vistun spilunarhraða fyrir hverja rás birtist þar einnig hnappur til að vista hraðann fyrir núverandi rás.
@@ -2412,6 +2429,7 @@ Tooltips:
     Use YouTube-style Shorts: Sýnir Shorts í reitaneti með lóðréttum smámyndum á áskriftar- og rásarsíðum og notar Shorts-spilara að hætti YouTube.
     Loop Shorts: Þegar þetta er virkt hefjast Shorts sjálfkrafa aftur. Ef slökkt er á þessu stöðvast þau í lokin og hnappur til að spila aftur birtist.
     Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
+    Show Mirror Video Toggle: "Sýnir rofa í stillingavalmynd spilarans sem speglar myndskeiðið lárétt, svo auðveldara sé að fylgja dans-, æfinga- og hljóðfærakennslu."
     Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.
@@ -2433,6 +2451,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
     Enable Timestamp Notes: "Bætir við hnappi í spilarann og flýtilyklinum N sem gera hlé á myndskeiðinu og opna glósu sem tengir á núverandi augnablik. Hægt er að afrita glósur sem Markdown eða, á tölvu, bæta þeim við Obsidian."
     Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.
+    Double-Tap With Two Fingers to Skip Chapters: "Tvísmelltu með tveimur fingrum hægra megin á myndskeiðinu til að hoppa í næsta kafla, eða vinstra megin til að fara aftur í upphaf núverandi kafla. Fyrstu 3 sekúndur kafla fer vinstri hliðin í staðinn í fyrri kafla, svo með því að endurtaka það ferðu aftur á bak í gegnum kaflana."
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.
@@ -2463,6 +2482,7 @@ Tooltips:
     Bedtime Reminder: "Gerir hlé á myndbandinu og minnir þig á að hætta að horfa milli upphafs- og lokatíma."
     Shorten View Counts: Sýnir fjölda áhorfa, athugasemda og fjölda þeirra sem líka við athugasemdir á styttu formi ef YouTube hefur þegar námundað tölurnar, t.d. 14 þ. í stað 14.000. Nákvæmur fjöldi er alltaf sýndur fullskrifaður.
   Subscription Settings:
+    Refresh These Feeds Together: "Þegar þú uppfærir eina af merktu veitunum eru hinar merktu veiturnar uppfærðar strax á eftir. Sjálfvirkar uppfærslur fylgja áfram tímabili hverrar veitu."
     Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
     Show New Content Feed: Sýnir flipann Nýtt með færslum í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Enable RSS Feeds: Sýnir RSS-flipa á áskriftasíðunni með atriðum úr RSS- eða Atom-straumum, svo þú getir fylgst með höfundum á öðrum kerfum. Atriði hans eru opnuð með yt-dlp.
@@ -2473,10 +2493,12 @@ Tooltips:
     Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
     RSS Feeds Auto Refresh Interval: Hversu oft OpenTubeX uppfærir RSS-straumana þína sjálfvirkt á meðan forritið er opið.
     Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
-    Show Collaborations From Other Channels: "Sýnir einnig myndskeið sem rásir sem þú ert áskrifandi að gerðu ásamt annarri rás sem hlóð þeim upp. YouTube sýnir þau aðeins á Heim-flipa rásar, svo hver uppfærsla myndskeiða hleður einni síðu meira fyrir hverja rás. Aðeins nýjasta samstarfið sem sýnt er þar finnst, sumar rásir sýna ekkert og útgáfudagsetningar eru áætlaðar. Ekki í boði með Invidious API."
+    Show Collaborations From Other Channels: "Sýnir einnig myndskeið sem rásir sem þú ert áskrifandi að gerðu ásamt annarri rás sem hlóð þeim upp. YouTube sýnir þau aðeins á Heim-flipa rásar, svo uppfærsla myndskeiða athugar í mesta lagi nokkrar rásir og nýtt samstarf getur tekið dag eða lengur að birtast. Aðeins nýjasta samstarfið sem sýnt er þar finnst, sumar rásir sýna ekkert og útgáfudagsetningar eru áætlaðar. Ekki í boði með Invidious API."
     Platforms Auto Refresh Interval: Hversu oft OpenTubeX uppfærir rásirnar sem þú fylgir á öðrum vettvöngum sjálfvirkt á meðan forritið er opið.
+    Enable Twitch Page: Gerir þér kleift að opna Twitch-síðuna úr leiðsögninni og skipanaspjaldinu. Þar geturðu skoðað vinsæla flokka og beinar útsendingar og leitað á Twitch.
     Twitch Notify When Live: Lætur þig vita þegar ein af Twitch-rásunum sem þú fylgir hefur útsendingu. OpenTubeX athugar á nokkurra mínútna fresti á meðan það er opið, og líka á meðan það er lokað ef það uppfærir áskriftir þá.
   Theme Settings:
+    Toggle Playback With Tab Icon: Ef smellt er á tákn flipa með myndskeiði í spilun eða í hléi er gert hlé á því eða það haldið áfram án þess að skipta yfir á þann flipa.
     Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu, þar á meðal þær sem bjóða upp á Afturkalla. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem biðja um ákvörðun, eins og uppfærslubeiðnir, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
@@ -2535,6 +2557,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Afturkalla síðasta stökk
   Redo Seek: Endurtaka afturkallað stökk
   New Incognito Tab: Stofna nýjan huliðsflipa
+  Shortcuts Label: Flýtileiðir
 CommandPalette:
   Title: Skipanaspjald
   Open: Opna skipanaspjald
@@ -2569,6 +2592,8 @@ CommandPalette:
     Download Finished: Þetta niðurhal er ekki lengur í gangi
     Video: Opnaðu myndband fyrst
 Downloads:
+  Stop Recording: "Stöðva upptöku"
+  Recording: "Tekur upp"
   File Name Template Invalid: 'Notaðu afstæða slóð innan niðurhalsmöppunnar án "..", "~", "$", "%" eða forskeytis eins og "thumbnail:".'
   Search Completed: "Leita að loknu niðurhali eftir titli eða rás"
   Format: "Snið"
@@ -2712,6 +2737,22 @@ App Icon:
   Saved Message: "Táknið hefur verið vistað. Uppfærsla heimaskjásins gæti tekið smástund."
   Title: "Tákn forrits"
   Error: "Ekki tókst að hlaða eða breyta tákni forritsins"
+
+App Lock:
+  Title: "Forritalás"
+  Enable: "Krefjast skjálássins"
+  Enable Tooltip: "Biður um fingrafar, andlit, PIN-númer, mynstur eða aðgangsorð þegar þú ferð aftur í OpenTubeX. Í Android 13 og nýrri sýna nýleg forrit heldur ekki forskoðun á forritinu."
+  Lock After: "Læsa eftir"
+  Immediately: "Strax"
+  1 Minute: "1 mínúta"
+  5 Minutes: "5 mínútur"
+  15 Minutes: "15 mínútur"
+  1 Hour: "1 klukkustund"
+  Unavailable: "Stilltu skjálás í stillingum Android til að nota forritalás."
+  Error: "Ekki tókst að breyta forritalásnum"
+  Locked: "OpenTubeX er læst"
+  Unlock: "Aflæsa"
+  Prompt Title: "Aflæsa OpenTubeX"
 
 Tray:
   Hide All Windows: "Fela alla glugga"
@@ -2891,6 +2932,33 @@ Platforms:
   Verify: "Staðfesta"
   Categories: "Flokkar"
   Category Not Found: "Þessi flokkur fannst ekki."
+  Category Tags: "Merki flokks"
+  Stream Tags: "Merki streymis"
+  Language: "Tungumál"
+  All Languages: "Öll tungumál"
+  Other Language: "Annað"
+  American Sign Language: "amerískt táknmál"
+  Search Tags: "Leita að merkjum"
+  Add Tag: "Bæta við merki"
+  Remove Tag: "Fjarlægja {tag}"
+  Sort:
+    Viewers: "Áhorfendur (flestir til fæstir)"
+    Viewers Ascending: "Áhorfendur (fæstir til flestir)"
+    Started: "Nýlega hafið"
+    Relevance: "Mælt með"
+    Published: "Nýlega birt"
+    Views: "Áhorf (flest til fæst)"
+    Top Day: "Vinsælast síðustu 24 klukkustundir"
+    Top Week: "Vinsælast síðustu 7 daga"
+    Top Month: "Vinsælast síðustu 30 daga"
+    Top All: "Vinsælast frá upphafi"
+  Video Type:
+    Video Type: "Tegund myndskeiðs"
+    All: "Öll myndskeið"
+    Archive: "Fyrri útsendingar"
+    Highlight: "Hápunktar"
+    Upload: "Innsendingar"
+  Anonymous: "Nafnlaust"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svaraði {commentAuthor}"
   Like: "Líkar við"
@@ -2925,5 +2993,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Leita á Twitch"
+  Search Placeholder: "Flokkar og rásir"
 New Incognito Tab: Nýr huliðsflipi
 Incognito Tab: Huliðsflipi

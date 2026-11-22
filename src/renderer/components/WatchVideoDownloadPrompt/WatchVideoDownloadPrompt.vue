@@ -263,7 +263,7 @@
             >
               <div
                 class="downloadProgressBarFill"
-                :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
+                :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) || activeDownload.live }"
                 :style="{ transform: `scaleX(${Math.min(100, Math.max(0, activeDownload.percent)) / 100})` }"
               />
             </div>
@@ -330,7 +330,13 @@
             @click="startDownload"
           />
           <FtButton
-            v-else-if="downloadInProgress"
+            v-if="activeDownload !== null && canStopRecording(activeDownload)"
+            :label="t('Downloads.Stop Recording')"
+            :icon="['fas', 'stop']"
+            @click="stopRecording"
+          />
+          <FtButton
+            v-if="downloadInProgress"
             :label="t('Downloads.Cancel Download')"
             :icon="['fas', 'times-circle']"
             theme="destructive"
@@ -414,6 +420,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
+import { canStopRecording, recordingStatusText } from '../../helpers/downloadRecording'
 import { downloadErrorMessage, suggestsYtDlpUpdate } from '../../helpers/downloadErrors'
 import { isSafeDownloadFilenameTemplate } from '../../../ytDlpArguments'
 
@@ -424,6 +431,8 @@ const props = defineProps({
   playlistId: { type: String, default: '' },
   playlistKey: { type: String, default: '' },
   isPlaylist: { type: Boolean, default: false },
+  // limits how many processes download a remote playlist at the same time
+  videoCount: { type: Number, default: 0 },
   title: { type: String, required: true },
   thumbnail: { type: String, default: '' }
 })
@@ -655,8 +664,16 @@ const downloadFolderDisplay = computed(() => displayAndroidPath(downloadFolderPa
   ? t('Downloads.Folder Required')
   : t('Downloads.System Downloads Folder')))
 
-function chooseDownloadFolder() {
-  return ytDlp.ytDlpChooseDownloadFolder()
+async function chooseDownloadFolder() {
+  try {
+    return await ytDlp.ytDlpChooseDownloadFolder()
+  } catch (error) {
+    showToast({
+      message: error?.message || t('Settings.Data Settings.Unable to write file'),
+      icon: ['fas', 'circle-exclamation']
+    })
+    return null
+  }
 }
 async function startDownload() {
   const result = await ytDlp.ytDlpDownload({
@@ -667,6 +684,7 @@ async function startDownload() {
     playlistId: props.playlistId,
     playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,
+    ...(props.isPlaylist && props.videoCount > 0 ? { videoCount: props.videoCount } : {}),
     title: props.title,
     thumbnail: props.thumbnail,
     // edited options no longer describe the template they started from
@@ -688,6 +706,7 @@ const statusLine = computed(() => {
   if (download.status === 'queued') return t('Downloads.Queued')
   if (download.status === 'paused') return t('Downloads.Paused')
   if (download.status === 'pausing') return t('Downloads.Pausing')
+  if (download.status === 'downloading' && download.live) return recordingStatusText(download, t)
   if (download.status === 'downloading') return [`${download.percent.toFixed(1)}%`, download.speed, download.eta ? `ETA ${download.eta}` : null].filter(Boolean).join(' • ')
   if (download.status === 'preparing') return t('Downloads.Preparing')
   if (download.status === 'processing') return t('Downloads.Processing')
@@ -697,6 +716,9 @@ const statusLine = computed(() => {
 })
 function cancelDownload() {
   if (downloadId.value !== null) ytDlp.ytDlpCancelDownload(downloadId.value)
+}
+function stopRecording() {
+  if (downloadId.value !== null) ytDlp.ytDlpControlDownload(downloadId.value, 'stop')
 }
 function openDownloads() {
   close()

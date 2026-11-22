@@ -32,7 +32,8 @@ import {
   markThreadOpened,
   normalizeTrackedCommentThreads,
   trackComment,
-  untrackComment
+  untrackComment,
+  updateWatchedCommentText
 } from '../../commentReplyTracking.js'
 
 const STORAGE_KEY = 'commentReplyThreads'
@@ -152,6 +153,22 @@ async function saveComment(comment) {
  */
 export async function unwatchComment({ videoId, threadId, channelId }) {
   saveThreads(untrackComment(loadThreads(), { videoId, threadId, channelId }))
+}
+
+/**
+ * Shows the new text of an edited comment in the list of watched comments.
+ * @param {YouTubeCommentTarget} target
+ * @param {string} commentId the full ID, `threadId.replyId` for a reply
+ * @param {string} text
+ */
+export function updateEditedWatchedComment(target, commentId, text) {
+  // The comment is edited, so failing to update the list must not fail the edit.
+  try {
+    const threads = updateWatchedCommentText(loadThreads(), getWatchedCommentPage(target).videoId, commentId, text)
+    if (threads) saveThreads(threads)
+  } catch (error) {
+    console.error('Failed to update an edited watched comment', error)
+  }
 }
 
 /**
@@ -427,6 +444,9 @@ async function checkThreads() {
           seen,
           // Applied to the entry as it is now, which may watch more comments meanwhile.
           comments: checkCommentHearts(threads[index], result.hearts).comments,
+          // Follows edits made elsewhere, as on YouTube, but not over one saved here while it loaded.
+          text: (threads[index].text === thread.text && result.hearts.get(getWatchedCommentId(threads[index]))?.text.slice(0, COMMENT_TEXT_LIMIT)) ||
+            threads[index].text,
           ...(active || hearts.active ? { activeAt: Date.now() } : {})
         }
       } else {

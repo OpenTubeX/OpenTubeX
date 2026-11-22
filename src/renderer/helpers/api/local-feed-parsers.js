@@ -969,7 +969,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         const authorId = authorEndpoint?.payload.browseId ?? channelId
         // Read the handle from the same endpoint as the ID so they always describe the same channel
         const authorHandle = getChannelHandleFromEndpoint(authorEndpoint)
-        const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
+        // The fallback channel name is the uploader's own, even when it contains "and"
+        const hasCollaborators = authorPart?.endpoint == null && author !== channelName && isCollaborativeVideoAuthor(author)
 
         return {
           type: 'video',

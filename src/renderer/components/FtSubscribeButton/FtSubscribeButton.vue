@@ -197,6 +197,17 @@
                       />
                       <bdi>{{ group.name }}</bdi>
                     </button>
+                    <button
+                      type="button"
+                      class="preferenceChip newGroupChip"
+                      @click="openGroupEditor"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'plus']"
+                        aria-hidden="true"
+                      />
+                      <bdi>{{ $t('Subscription Groups.New Group') }}</bdi>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -205,6 +216,11 @@
         </Transition>
       </Teleport>
     </FtMobileSheet>
+    <FtSubscriptionGroupEditor
+      v-if="groupEditorOpen"
+      :initial-channel-ids="[channelId]"
+      @close="groupEditorOpen = false"
+    />
   </div>
 </template>
 
@@ -217,6 +233,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtSubscriptionGroupEditor from '../FtSubscriptionGroupEditor/FtSubscriptionGroupEditor.vue'
 import FtSubscriptionPreferences from '../FtSubscriptionPreferences/FtSubscriptionPreferences.vue'
 
 import store from '../../store/index'
@@ -362,9 +379,23 @@ const isProfileDropdownEnabled = computed(() => {
 /** @type {import('vue').ComputedRef<import('../../helpers/subscription-groups').SubscriptionGroup[]>} */
 const subscriptionGroups = computed(() => store.getters.getSubscriptionGroupList)
 
-const isGroupListEnabled = computed(() => {
-  return !props.hideProfileDropdownToggle && subscriptionGroups.value.length > 0
-})
+// Always listed, so that the first group can be created from here
+const isGroupListEnabled = computed(() => !props.hideProfileDropdownToggle)
+
+const groupEditorOpen = ref(false)
+let pendingGroupEditor = false
+
+function openGroupEditor() {
+  if (profileSheet.value) {
+    // The modal sheet would cover the editor, so it opens once the sheet has closed.
+    pendingGroupEditor = true
+    profileSheetOpen.value = false
+    return
+  }
+  closeProfileDropdown()
+  // After the toggle has focus again, so that closing the editor returns there
+  nextTick(() => { groupEditorOpen.value = true })
+}
 
 /** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
 function isInGroup(group) {
@@ -419,6 +450,8 @@ function finishProfileSheet() {
   isProfileDropdownOpen.value = false
   showUnsubscribePopupForProfile.value = pendingUnsubscribeProfile ?? showUnsubscribePopupForProfile.value
   pendingUnsubscribeProfile = null
+  groupEditorOpen.value = groupEditorOpen.value || pendingGroupEditor
+  pendingGroupEditor = false
 }
 
 let scrollAreaResizeObserver = null

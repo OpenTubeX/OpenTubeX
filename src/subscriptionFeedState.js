@@ -19,6 +19,36 @@ export function preserveSubscriptionSeenEntries(entries, previousEntries, idKey 
   return changed ? merged : entries
 }
 
+/**
+ * The uploads of `entries` with the collaborations of `storedEntries`. A
+ * channel's collaborations are found by their own check, so a videos write
+ * that does not store a check keeps the stored ones, even when another window
+ * stored them after this write was prepared. Their state, such as a premiere
+ * that went live, comes from the write when it lists them too.
+ * @param {object[]} entries
+ * @param {object[] | undefined} storedEntries
+ */
+export function keepStoredSubscriptionCollaborations(entries, storedEntries) {
+  const collaborations = Array.isArray(storedEntries) ? storedEntries.filter(entry => entry?.isCollaboration === true) : []
+  if (collaborations.length === 0 && !entries.some(entry => entry?.isCollaboration === true)) return entries
+  const uploads = entries.filter(entry => entry?.isCollaboration !== true)
+  const uploadIds = new Set(uploads.map(entry => entry.videoId))
+  const written = new Map(entries.filter(entry => entry?.isCollaboration === true).map(entry => [entry.videoId, entry]))
+  return uploads.concat(collaborations
+    .filter(entry => !uploadIds.has(entry.videoId))
+    .map(entry => written.get(entry.videoId) ?? entry))
+}
+
+/**
+ * Whether a write stores the collaborations of a check made before the
+ * stored one, which another window wrote first.
+ * @param {number | null | undefined} checkedAt
+ * @param {number | null | undefined} storedCheckedAt
+ */
+export function isOlderCollaborationCheck(checkedAt, storedCheckedAt) {
+  return typeof checkedAt === 'number' && typeof storedCheckedAt === 'number' && checkedAt < storedCheckedAt
+}
+
 export function subscriptionFeedField(tab) {
   const field = { videos: 'videos', shorts: 'shorts', live: 'liveStreams', posts: 'communityPosts' }[tab]
   if (!field) throw new Error('Invalid subscription feed')

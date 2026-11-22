@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: "Ar re nevesañ da gentañ"
   Oldest First: "Ar re goshañ da gentañ"
   RSS Feeds:
+    Load More Items: Kargañ muioc'h a elfennoù
     Refreshing: O freskaat ar gwazhioù RSS
     Tab: RSS
     Followed Feeds: Gwazhioù RSS heuliet
@@ -497,6 +498,7 @@ Settings:
       Memory: "ar vemor"
       Network: "ar rouedad"
       Disk: "ar bladenn"
+    Label: Digonusted
   General Settings:
     Invidious Instance Username: 'Anv implijer an istañs'
     Invidious Instance Password: 'Ger-tremen an istañs'
@@ -620,6 +622,8 @@ Settings:
       Auto: Emgefreek
     Preferred API Backend:
       Yattee Server: Servijer Yattee
+      Local API Extension Required: An arload web ne c’hall implijout an API lec’hel nemet gant astenn ar merdeer OpenTubeX Local API.
+      Install Local API Extension: Staliañ an astenn
     Yattee Server:
       Server URL: URL ar servijer Yattee
       Username: Anv implijer
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Toggle Playback With Tab Icon: Lenn hag ehanañ gant arlun an ivinell
     Theme and Colors: "Tem ha livioù"
     Font Size: "Ment an nodrezh"
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Son mono'
     Normalize Loudness: 'Reizhañ an ampled'
     Show Mono Audio Toggle: 'Diskouez an afell son mono'
+    Show Mirror Video Toggle: "Diskouez an afell evit melezourañ ar video"
     Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
     Buffering:
       Buffering: Memor c'hortoz
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Gweredekaat skignañ DLNA"
     Skip Unavailable Playlist Videos: "Tremen ar videoioù dizimplij er rolloù lenn"
     Lights Off: Gouloù lazhet
+    Mirror Video: "Melezourañ ar video"
     Show Lights Off Toggle: Diskouez an afell evit lazhañ ar gouloù
     Show Volume Boost Toggle: "Diskouez an afell kreskiñ an ampled"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: N'eus ket bet gallet reizhañ ar reolerezhioù lenn.
     yt-dlp Streaming: "Skignañ yt-dlp"
     Continue Playback When Screen Is Locked: 'Kenderc’hel da lenn pa vez prennet ar skramm'
+    Switch to Audio in Background: 'Gwintañ d’ar mentrezhoù son en drekleur'
     Ignore Headphone Controls: 'Leuskel a-gostez reolerezhioù ar c’hasketoù'
     Music Visualizer: Gweladur sonerezh
     Automatically Open Chapters: "Digeriñ ar chabistroù ent emgefreek"
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Gweredekaat an notennoù gant merk-amzer"
       Obsidian Vault: Kell Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Daou-stokañ gant daou viz evit tremen ar chabistroù"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: "Echu eo naetaat ar c'hadaviñ"
     Cleanup Failed: "C'hwitet eo naetaat ar c'hadaviñ"
   Subscription Settings:
+    Refresh These Feeds Together: "Freskaat ar gwazhioù-mañ asambles"
     Fetch Feed on Startup: "Adtapout ar gwazh el loc'hañ"
     Show New Content Feed: "Diskouez gwazh an endalc'had nevez"
     RSS Feeds: Gwazhioù RSS
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Savennoù all
       Manage Channels: Merañ ar chadennoù heuliet
+      Enable Twitch Page: Gweredekaat pajenn Twitch
       Notify When Live: Kemenn pa grog ar chadennoù Twitch heuliet da skignañ war-eeun
       Auto Refresh Interval: Etrevez adkargañ emgefreek ar savennoù all
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Kuzhat meneger ar sinkronelaat e talbenn an arload
     Hide Repeat Stats: Kuzhat stadegoù an adlenn
     Hide Playlist Stats: Kuzhat stadegoù ar roll-lenn
+    Hide Recommendation Details: Kuzhat abegoù an erbedadennoù hag ar boutonoù ali
     Sections:
       Digital Wellbeing: "Yec'hed niverel"
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
@@ -1652,6 +1664,7 @@ Settings:
     Downloading: O pellgargañ ar rolloù…
     Failed to Download: N'eus ket bet gallet pellgargañ ar rolloù
     Loaded Status: "Chadennoù stanket: {blocked} · Chadennoù merket: {warned} · Hizivaet: {date}"
+  Highlight Changed Settings Label: Kemmet
 Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"
@@ -1933,6 +1946,9 @@ Video:
     Zoom:
       Zoom: "Zoum"
       'Off': "Lazhet"
+    Lock Controls:
+      Lock Controls: "Prennañ ar reolerioù"
+      Hold to Unlock: "Derc'hit evit dibrennañ"
     Volume Boost:
       Volume Boost: "Kreskiñ an ampled"
       'Off': "Lazhet"
@@ -2399,6 +2415,7 @@ Tooltips:
     Normalize Loudness: 'Digreskiñ a ra ampled ar videoioù a zo kreñvoc''h eget ar peurliesañ, evit na lammfe ket an ampled etre ar videoioù. Ar videoioù sioul a vir o ampled. Ne ya en-dro nemet evit ar videoioù karget gant an API lec''hel.'
     Pause on Stream Recovery: "Pa c'hwit al lanv video hag e adkarg al lenner anezhañ pe e tremen d'ur furmad pe d'ur c'heflusker all, e vez ehanet al lenn hag e chom ar fazi e krec'h al lenner betek ma vo kuzhet ganeoc'h. Diweredekaet, e kendalc'h al lenn hag e vez diskouezet ar fazi berr evel ur gemenadenn."
     Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'
+    Switch to Audio in Background: 'Lenn a ra ar mentrezhoù son e-pad ma vez an arload en drekleur pe ma vez lazhet ar skramm, ar pezh a espern roadennoù hag ar batiri. Skeudenn-e-skeudenn a vir ar video. Distreiñ a ra ar video pa zigorit an arload en-dro. Ret eo kenderc’hel al lenn pa vez prennet ar skramm.'
     Ignore Headphone Controls: 'Ober a ra fae ouzh an urzhioù lenn, ehan ha lammat a zeu eus an trobarzhioù Bluetooth, ar selaouelloù orjalennek hag alc''hwezioù media ar c''hlavieroù, evit ma ne vo ket troc''het al lenn gant ur stokadenn dre fazi war ar selaouelloù. Kendalc''h a ra an arloadoù en arload hag er c''hemenn media da labourat.'
     Enable Caption Translations: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ."
     Use Quick Playback Speed Bar: "Diskouez ur varrenn prim evit an tizh lenn e reolerezhioù al lenner war an tu dehou. Ma vez gweredekaet enrollañ tizh lenn pep chadenn gant an dorn, enderc'hel a ra ar varrenn ivez ar bouton da enrollañ an tizh evit ar chadenn vremanel."
@@ -2407,6 +2424,7 @@ Tooltips:
     Use YouTube-style Shorts: "Diskouez ar videoioù berr (Shorts) en ur gael a-serzh war pajennoù ar c'houmanantoù hag ar chadennoù hag implijout al lenner videoioù berr doare YouTube."
     Loop Shorts: "Pa vez gweredekaet e adkrog ar videoioù berr (Shorts) ent emgefreek. Pa vez diweredekaet e paouezont en dibenn hag e tiskouezont ur bouton adlenn."
     Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
+    Show Mirror Video Toggle: "Diskouez un afell enaouiñ pe lazhañ e lañser arventennoù al lenner a dro ar video a-blaen, evit heuliañ aesoc'h ar c'hentelioù dañs, sport ha binvioù-seniñ."
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
@@ -2428,6 +2446,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
     Enable Timestamp Notes: "Ouzhpennañ a ra ur bouton el lenner hag ar verradenn N a ehan ar video hag a zigor un notenn gant ul liamm d'ar mare-mañ. Gallout a reer eilañ an notennoù e Markdown pe, war an urzhiataer, o ouzhpennañ da Obsidian."
     Obsidian Vault: Anv kell Obsidian evit an notennoù gant merk-amzer. Pa vez termenet, e c'haller ouzhpennañ notennoù da Obsidian. Dastumet e vez notennoù pep video en un notenn anvet diwar ar video, e teuliad ar gell evit an notennoù nevez.
+    Double-Tap With Two Fingers to Skip Chapters: "Daou-stokit gant daou viz war tu dehou ar video evit mont d'ar chabistr da-heul, pe war an tu kleiz evit distreiñ da zeroù ar chabistr red. E-pad an 3 eilenn gentañ eus ur chabistr e ya an tu kleiz d'ar chabistr kent kentoc'h, neuze en ur adober e kilit a chabistr da chabistr."
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."
@@ -2458,6 +2477,7 @@ Tooltips:
     Bedtime Reminder: "Ehanañ ar video ha degas da soñj deoc'h paouez da sellet etre an eur deroù hag an eur fin."
     Shorten View Counts: "Diskouez niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù er stumm berr rontaet dija gant YouTube, da skouer 14K e-lec'h 14 000. Diskouezet e vez an niver resis en e bezh bepred."
   Subscription Settings:
+    Refresh These Feeds Together: "Pa freskaez unan eus ar gwazhioù merket, e vez freskaet ar gwazhioù merket all diouzhtu war he lerc'h. Ar freskadurioù emgefre a heuilh atav etrezamzer pep gwazh."
     Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
     Show New Content Feed: "Diskouez un ivinell Nevez gant elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
     Enable RSS Feeds: Diskouez a ra un ivinell RSS war pajenn ar c'houmanantoù gant elfennoù gwazhioù RSS pe Atom, evit ma c'hallfec'h heuliañ krouerien war savennoù all. Digoret e vez e elfennoù gant yt-dlp.
@@ -2468,10 +2488,12 @@ Tooltips:
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
     RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
-    Show Collaborations From Other Channels: "Diskouez a ra ivez ar videoioù graet gant ar chadennoù m'emaoc'h koumanantet dezho asambles gant ur chadenn all he deus o fellgaset. YouTube ne ziskouez anezho nemet war ivinell Degemer ur chadenn, setu e karg pep freskadenn videoioù ur bajenn ouzhpenn evit pep chadenn. N'eus kavet nemet ar c'henlabouradennoù nevesañ diskouezet eno, chadennoù zo ne ziskouezont hini ebet, ha brasjedet eo o deiziadoù embann. N'eo ket hegerz gant API Invidious."
+    Show Collaborations From Other Channels: "Diskouez a ra ivez ar videoioù graet gant ar chadennoù m'emaoc'h koumanantet dezho asambles gant ur chadenn all he deus o fellgaset. YouTube ne ziskouez anezho nemet war ivinell Degemer ur chadenn, setu ne wiri ur freskadenn videoioù nemet un nebeud chadennoù d'ar muiañ, ha gallout a ra ar re nevez kemer un devezh pe muioc'h evit dont war wel. N'eus kavet nemet ar c'henlabouradennoù nevesañ diskouezet eno, chadennoù zo ne ziskouezont hini ebet, ha brasjedet eo o deiziadoù embann. N'eo ket hegerz gant API Invidious."
     Platforms Auto Refresh Interval: Pegen alies e vez adkarget ar chadennoù a heuliit war savennoù all ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Enable Twitch Page: Ma c'hallit digeriñ pajenn Twitch dre ar merdeiñ ha paled arc'hadoù. Enni e c'hallit furchal er rummadoù brudet hag er chadennoù war-eeun ha klask war Twitch.
     Twitch Notify When Live: Ho kemenn a ra pa grog unan eus ar chadennoù Twitch a heuliit da skignañ. Gwiriañ a ra OpenTubeX bep un nebeud munutennoù keit ha ma vez digor, hag ivez keit ha ma vez serret ma nevesa ar c'houmanantoù neuze.
   Theme Settings:
+    Toggle Playback With Tab Icon: Klikañ war arlun un ivinell gant ur video o vezañ lennet pe ehanet a ehan pe a adlañs anezhañ hep mont d’an ivinell-se.
     Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad, en o zouez ar re a ginnig Dizober. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a c'houlenn un diviz, evel ar c'hinnigoù hizivaat. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
     Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
@@ -2530,6 +2552,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Dizober al lamm diwezhañ
   Redo Seek: Adober ul lamm dizobereet
   New Incognito Tab: Krouiñ un ivinell kuzh nevez
+  Shortcuts Label: Berradennoù
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"
@@ -2564,6 +2587,8 @@ CommandPalette:
     Download Finished: "N'emañ ket ar pellgargadenn-mañ war ober ken"
     Video: "Digerit ur video da gentañ"
 Downloads:
+  Stop Recording: "Paouez gant an enrolladenn"
+  Recording: "O enrollañ"
   File Name Template Invalid: 'Implijit un hent keñverel e-barzh an teuliad pellgargañ hep "..", "~", "$", "%" pe ur rakger evel "thumbnail:".'
   Search Completed: "Klask en pellgargadennoù echuet dre ditl pe dre chadenn"
   Format: "Furmad"
@@ -2707,6 +2732,22 @@ App Icon:
   Saved Message: "Enrollet eo an arlun. Un tamm amzer a c'hall bezañ ret d'al lañser evit hizivaat anezhañ."
   Title: "Arlun an arload"
   Error: "N'eus ket bet gallet kargañ pe cheñch arlun an arload"
+
+App Lock:
+  Title: "Prenañ an arload"
+  Enable: "Goulenn prenañ ar skramm"
+  Enable Tooltip: "Goulenn ho siell-biz, ho fas, ho PIN, ho c'hoariad pe ho ger-tremen pa zistroit da OpenTubeX. Diwar Android 13, n'ez eus ket ken a rakwel eus an arload e roll an arloadoù nevez."
+  Lock After: "Prenañ goude"
+  Immediately: "Kerkent"
+  1 Minute: "1 munut"
+  5 Minutes: "5 munut"
+  15 Minutes: "15 munut"
+  1 Hour: "1 eur"
+  Unavailable: "Arventennit ur prenañ skramm e arventennoù Android evit implijout prenañ an arload."
+  Error: "N'haller ket cheñch prenañ an arload"
+  Locked: "Prennet eo OpenTubeX"
+  Unlock: "Dibrennañ"
+  Prompt Title: "Dibrennañ OpenTubeX"
 
 Tray:
   Hide All Windows: "Kuzhat an holl brenestroù"
@@ -2886,6 +2927,33 @@ Platforms:
   Verify: "Gwiriañ"
   Categories: "Rummadoù"
   Category Not Found: "N'eus ket bet kavet ar rummad-mañ."
+  Category Tags: "Tikedennoù ar rummad"
+  Stream Tags: "Tikedennoù ar stream"
+  Language: "Yezh"
+  All Languages: "An holl yezhoù"
+  Other Language: "All"
+  American Sign Language: "yezh sinoù Amerika"
+  Search Tags: "Klask tikedennoù"
+  Add Tag: "Ouzhpennañ un tikedenn"
+  Remove Tag: "Dilemel {tag}"
+  Sort:
+    Viewers: "Gwelerien (eus ar muiañ d'an nebeutañ)"
+    Viewers Ascending: "Gwelerien (eus an nebeutañ d'ar muiañ)"
+    Started: "Krog a-nevez zo"
+    Relevance: "Erbedet"
+    Published: "Embannet a-nevez zo"
+    Views: "Sell (eus ar muiañ d'an nebeutañ)"
+    Top Day: "Ar re wellañ en 24 eur"
+    Top Week: "Ar re wellañ en 7 devezh"
+    Top Month: "Ar re wellañ en 30 devezh"
+    Top All: "Ar re wellañ ever"
+  Video Type:
+    Video Type: "Seurt video"
+    All: "An holl videoioù"
+    Archive: "Skignadennoù tremenet"
+    Highlight: "Mareoù pouezus"
+    Upload: "Videoioù kaset"
+  Anonymous: "Dizanv"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} en deus respontet da {commentAuthor}"
   Like: "Plijout a ra din"
@@ -2920,5 +2988,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Klask war Twitch"
+  Search Placeholder: "Rummadoù ha chadennoù"
 New Incognito Tab: Ivinell kuzh nevez
 Incognito Tab: Ivinell kuzh

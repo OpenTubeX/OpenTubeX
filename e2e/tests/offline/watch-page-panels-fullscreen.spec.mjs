@@ -18,7 +18,9 @@ test('Android fullscreen host keeps watch cards behind the player', async ({ app
       host.requestFullscreen()
     }, { once: true, capture: true })
   })
-  await page.locator('.videoLayout').click({ position: { x: 8, y: 8 } })
+  // Click the player inside the fullscreen host so the top tab bar cannot
+  // intercept a top-left click on `.videoLayout` after Playwright scrolls it.
+  await page.locator('.videoLayout .ftVideoPlayer').click()
   await expect.poll(() => page.evaluate(() => document.fullscreenElement?.classList.contains('videoLayout'))).toBe(true)
 
   await expect.poll(() => page.evaluate(() => {

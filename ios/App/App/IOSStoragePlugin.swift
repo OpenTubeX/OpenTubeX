@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import WebKit
 
 @objc(IOSStoragePlugin)
-public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDelegate {
+public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
     public let identifier = "IOSStoragePlugin"
     public let jsName = "IOSStorage"
     public let pluginMethods: [CAPPluginMethod] = ["saveFile", "chooseDirectory", "getUsage", "clearCache"].map {
@@ -35,8 +35,11 @@ public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDele
                           let bookmark = object["bookmark"], let bytes = Data(base64Encoded: bookmark) else { throw URLError(.noPermissionsToReadFile) }
                     var stale = false
                     let directory = try URL(resolvingBookmarkData: bytes, options: [], bookmarkDataIsStale: &stale)
-                    guard directory.startAccessingSecurityScopedResource() else { throw URLError(.noPermissionsToReadFile) }
-                    defer { directory.stopAccessingSecurityScopedResource() }
+                    let accessed = directory.startAccessingSecurityScopedResource()
+                    defer { if accessed { directory.stopAccessingSecurityScopedResource() } }
+                    guard accessed || FileManager.default.isWritableFile(atPath: directory.path) else {
+                        throw URLError(.noPermissionsToReadFile)
+                    }
                     try data.write(to: directory.appendingPathComponent(name), options: .atomic)
                     call.resolve(["saved": true])
                     return
@@ -63,6 +66,7 @@ public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDele
         }
         pending = call
         picker.delegate = self
+        picker.presentationController?.delegate = self
         picker.allowsMultipleSelection = false
         controller.present(picker, animated: true)
     }
@@ -71,8 +75,13 @@ public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDele
         guard let call = pending else { return }
         defer { cleanup() }
         if temporary != nil { call.resolve(["saved": true]); return }
-        guard let url = urls.first, url.startAccessingSecurityScopedResource() else { call.reject("Folder access was denied"); return }
-        defer { url.stopAccessingSecurityScopedResource() }
+        guard let url = urls.first else { call.reject("Folder access was denied"); return }
+        let accessed = url.startAccessingSecurityScopedResource()
+        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+        guard accessed || FileManager.default.isWritableFile(atPath: url.path) else {
+            call.reject("Folder access was denied")
+            return
+        }
         do {
             let bookmark = try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
             let reference = try JSONSerialization.data(withJSONObject: ["name": url.lastPathComponent, "bookmark": bookmark.base64EncodedString()])
@@ -82,6 +91,11 @@ public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDele
     }
 
     public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        pending?.resolve(temporary == nil ? ["path": NSNull()] : ["saved": false])
+        cleanup()
+    }
+
+    public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         pending?.resolve(temporary == nil ? ["path": NSNull()] : ["saved": false])
         cleanup()
     }

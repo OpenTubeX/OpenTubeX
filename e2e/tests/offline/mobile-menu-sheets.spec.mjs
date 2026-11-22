@@ -215,7 +215,7 @@ test('More sheet clamps bottom scrolling after resize and removing navigation en
   await bottom()
   await page.evaluate(() => {
     const store = window.$store
-    store.commit('setNavigationItems', store.getters.getNavigationItems.filter(id => id !== 'stats'))
+    store.commit('setNavigationItems', store.getters.getNavigationItems.filter(id => id !== 'stats' && id !== 'twitch'))
   })
   await clamped()
   // Sync can also remove pins while the sheet lists them.

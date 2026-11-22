@@ -3,11 +3,13 @@ import { SECRET_SETTINGS } from '../nonTransferableSettings.js'
 
 /**
  * Encrypts and decrypts with a key the system keeps, such as the OS keychain.
- * `decrypt` returns null for a value this key cannot decrypt, and rejects
- * only when the system could not be asked.
+ * `decrypt` returns null for a value this key cannot decrypt, undefined for
+ * one it cannot decrypt for now, and rejects only when the system could not
+ * be asked. A `stale` value decrypts, but should be encrypted again, such as
+ * after the key changed.
  * @typedef {object} SecretCipher
  * @property {(texts: string[]) => Promise<string[]>} encrypt
- * @property {(texts: string[]) => Promise<(string | null)[]>} decrypt
+ * @property {(texts: string[]) => Promise<({ text: string, stale?: boolean } | null | undefined)[]>} decrypt
  */
 
 /**
@@ -46,7 +48,7 @@ export async function encodeSetting(_id, value, cipherPromise) {
  * cannot decrypt, such as one copied from another computer, is deleted, so the
  * user signs in again. When there is no keyring or it could not be asked, such
  * as when KWallet has not started yet, the secrets are only left out, so they
- * come back once it is available.
+ * come back once it is available. Stale secrets are encrypted again.
  * @template {SettingDocument} T
  * @param {T[]} docs
  * @param {import('@seald-io/nedb').default} datastore
@@ -56,26 +58,34 @@ export async function encodeSetting(_id, value, cipherPromise) {
 export async function decodeSettings(docs, datastore, cipherPromise) {
   const encrypted = docs.filter(isEncrypted)
   if (encrypted.length === 0) return docs
-  /** @type {(string | null)[]} */
-  let texts
+  /** @type {SecretCipher | null} */
+  let cipher
+  /** @type {Awaited<ReturnType<SecretCipher['decrypt']>>} */
+  let decrypted
   try {
-    const cipher = await cipherPromise
+    cipher = await cipherPromise
     if (!cipher) {
       console.warn('Leaving out saved credentials, as no system keyring is available to decrypt them')
       return docs.filter(doc => !isEncrypted(doc))
     }
-    texts = await cipher.decrypt(encrypted.map(doc => /** @type {string} */ (doc.encryptedValue)))
+    decrypted = await cipher.decrypt(encrypted.map(doc => /** @type {string} */ (doc.encryptedValue)))
   } catch (error) {
     console.error('Unable to decrypt saved credentials', error)
     return docs.filter(doc => !isEncrypted(doc))
   }
   /** @type {Map<T, unknown>} */
   const values = new Map()
+  /** @type {{ doc: T, text: string }[]} */
+  const stale = []
   for (const [index, doc] of encrypted.entries()) {
-    const text = texts[index]
+    const result = decrypted[index]
+    if (result === undefined) {
+      console.warn(`Leaving out the saved ${doc._id} setting, which cannot be decrypted for now`)
+      continue
+    }
     let value
     try {
-      value = text === null ? undefined : JSON.parse(text)
+      value = result === null ? undefined : JSON.parse(result.text)
     } catch {}
     if (value === undefined) {
       console.warn(`Deleting the saved ${doc._id} setting, which cannot be decrypted on this device`)
@@ -83,6 +93,19 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
       await datastore.removeAsync({ _id: doc._id, encryptedValue: doc.encryptedValue }, {})
     } else {
       values.set(doc, value)
+      if (result?.stale) stale.push({ doc, text: result.text })
+    }
+  }
+  if (stale.length > 0) {
+    try {
+      const reencrypted = await cipher.encrypt(stale.map(({ text }) => text))
+      for (const [index, { doc }] of stale.entries()) {
+        // Only if it was not saved again in the meantime.
+        await datastore.updateAsync({ _id: doc._id, encryptedValue: doc.encryptedValue }, { _id: doc._id, encryptedValue: reencrypted[index] }, {})
+      }
+    } catch (error) {
+      // The stale values still decrypt, so the next read tries again.
+      console.error('Unable to encrypt saved credentials again', error)
     }
   }
   return docs.flatMap(doc => {

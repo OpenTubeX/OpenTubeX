@@ -110,6 +110,7 @@
         mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
         mobileFullscreenSwiping,
         mobileFullscreenSwipeSettling,
+        touchControlsLocked,
         presentationModeChanging,
         videoZoomPannable: videoZoomPanReady,
         videoZoomPanning,
@@ -164,7 +165,7 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack }"
+        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack, mirrored: mirrorVideo }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -786,14 +787,14 @@
         </div>
       </div>
       <!--
-      VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
+      VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection and VR180 videos
       This intentionally doesn't use the "useVrMode" computed prop,
       as that changes depending on the active format,
       but as we initialize the shaka-player UI once per watch page,
       the canvas has to exist even in audio-only mode, because the user may switch to DASH later.
     -->
       <canvas
-        v-if="vrProjection === 'EQUIRECTANGULAR'"
+        v-if="vrProjection === 'EQUIRECTANGULAR' || vrProjection === 'VR180'"
         ref="vrCanvas"
         class="vrCanvas"
       />
@@ -1945,11 +1946,13 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniScrollTop"
-          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached }"
+          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached, isHidden: !scrollMiniPlayPauseVisible }"
           :title="scrollMiniPlayerDetached
             ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
             : $t('Video.Player.Scroll Mini Player.Back to Top')"
           @click.stop.prevent="scrollMiniScrollToTop"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
           @mousedown.stop.prevent
         >
           <ft-icon
@@ -1962,9 +1965,12 @@
           v-if="scrollMiniPlayerDetached && !scrollMiniPlayerStashed"
           type="button"
           class="scrollMiniDismiss"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
           :title="$t('Video.Player.Scroll Mini Player.Hide')"
           :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
           @click.stop.prevent="dismissCrossTabMiniPlayer"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
           @mousedown.stop.prevent
         >
           <ft-icon :icon="['fas', 'times']" />
@@ -2028,7 +2034,7 @@
         <div
           v-if="!scrollMiniPlayerStashed"
           class="scrollMiniVolume"
-          :class="{ isExpanded: scrollMiniVolumeExpanded }"
+          :class="{ isExpanded: scrollMiniVolumeExpanded, isHidden: !scrollMiniPlayPauseVisible }"
           @mouseenter="handleScrollMiniVolumeMouseEnter"
           @mouseleave="handleScrollMiniVolumeMouseLeave"
           @focusin="handleScrollMiniVolumeMouseEnter"
@@ -2123,6 +2129,21 @@
           @mousedown.stop.prevent
         />
       </div>
+      <!-- The lock handles its presses before any element sees them. -->
+      <button
+        v-if="touchControlsLocked"
+        ref="touchControlsUnlockButton"
+        type="button"
+        class="touchControlsUnlockButton"
+        :class="{ shown: touchControlsUnlockButtonShown, holding: touchControlsUnlockHolding }"
+        :style="{ '--unlock-hold-duration': `${HOLD_TO_UNLOCK_MS}ms` }"
+      >
+        <FtIcon
+          :icon="['fas', 'lock']"
+          aria-hidden="true"
+        />
+        {{ $t('Video.Player.Lock Controls.Hold to Unlock') }}
+      </button>
     </div>
     </Teleport>
     <!-- eslint-enable vue/html-indent -->
@@ -2179,6 +2200,7 @@ import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../
 import { normalizeHoldPlaybackRateMultiplier } from '../../helpers/holdPlaybackRate.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
+import { getChapterNavigationTarget } from '../../helpers/player/chapterNavigation'
 import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
@@ -2191,6 +2213,7 @@ import shaka from 'shaka-player'
 import { getCodecPrefixes, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
 import { AutoQualityAbrManager, supportsSmoothCodecSwitching } from '../../helpers/player/AutoQualityAbrManager'
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
+import { renameYouTubeFmp4HlsSegments } from '../../helpers/player/youtubeHlsSegments'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
 import { androidRotationFullscreenHandoffs, bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
@@ -2247,6 +2270,7 @@ import { supportsVoiceOverTranslation } from '../../helpers/voiceOverTranslation
 import { SleepTimer } from './player-components/SleepTimer'
 import { SeekHistoryMenu } from './player-components/SeekHistoryMenu'
 import { VideoInfoButton } from './player-components/VideoInfoButton'
+import { LockControlsButton } from './player-components/LockControlsButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
@@ -2292,7 +2316,7 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, lockCurrentOrientation, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
@@ -2364,6 +2388,7 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
+import { HOLD_TO_UNLOCK_MS, useTouchControlsLock } from './opentubex/useTouchControlsLock'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
@@ -3284,6 +3309,7 @@ const {
   isFullscreenDockOpen,
   isFullscreen,
   isFullWindow: () => fullWindowEnabled.value,
+  isMirrored: () => mirrorVideo.value,
   isPortraitLayout: () => portraitFullscreenDocks.value,
   presentationModeChanging,
 })
@@ -3292,6 +3318,25 @@ const currentChapterTitle = computed(() => {
   return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
 })
 const chaptersAvailable = computed(() => props.chapters.length > 0)
+
+/**
+ * Seeks to the start of the next, previous, or current chapter.
+ * @param {'next' | 'previous' | 'restart'} action
+ * @returns {number | null} the index of the chapter it seeked to
+ */
+function navigateChapters(action) {
+  if (!canSeek() || props.chapters.length === 0) return null
+  const index = getChapterNavigationTarget(props.chapters, video.value.currentTime, action)
+  if (index === null) return null
+  setCurrentTime(props.chapters[index].startSeconds, true)
+  return index
+}
+
+// Two-finger taps belong to chapter navigation even without chapters, so
+// they never reach Shaka's per-touch tap handling and seek instead.
+function mobileChapterTapsEnabled() {
+  return isCapacitorMobilePlayer() && store.getters.getEnableMobileChapterTaps
+}
 // Chapter thumbnails download storyboard sheets, so they are only loaded
 // once a chapter list has been opened for the current video.
 let chapterThumbnailsWanted = false
@@ -3665,6 +3710,41 @@ if (isActiveTab.value) {
   pictureInPictureStartPending.value = false
 }
 
+function isPlayerFullscreenOrFullWindow() {
+  return isNativeFullscreenActive() || fullWindowEnabled.value || androidFullscreenHostActive.value
+}
+
+const touchControlsUnlockButton = useTemplateRef('touchControlsUnlockButton')
+const {
+  touchControlsLocked,
+  unlockButtonShown: touchControlsUnlockButtonShown,
+  unlockHolding: touchControlsUnlockHolding,
+  lockTouchControls,
+  unlockTouchControls,
+} = useTouchControlsLock({
+  isAvailable: () => isActiveTab.value && (isFullscreen.value || fullWindowEnabled.value || androidFullscreenHostActive.value),
+  getUnlockButton: () => touchControlsUnlockButton.value,
+  onLock() {
+    cancelMobileFullscreenGesture()
+    ui?.getControls().hideUI()
+    syncAndroidStatusBarVisibility()
+    // Rotating the phone would otherwise rotate the video or end full screen.
+    lockCurrentOrientation(() => touchControlsLocked.value).catch(() => {})
+  },
+  onUnlock(restoreInterface) {
+    // The lock is already off here, so the fullscreen orientation request applies.
+    if (androidRotationFullscreen) setLandscapeOrientation(androidRotationOrientationLocked).catch(() => {})
+    else if (isNativeFullscreenActive()) requestFullscreenOrientation(true)
+    else setLandscapeOrientation(false).catch(() => {})
+    if (!restoreInterface) return
+    showOverlayControls()
+    syncAndroidStatusBarVisibility()
+  },
+})
+// Runs before the rotation fullscreen handoff, so the next player inherits
+// the orientation policy instead of this lock.
+onBeforeUnmount(() => unlockTouchControls(false))
+
 // Capture the replacement player's initial state. The parent clears its
 // pending SABR state after this player loads, but that must not add autoplay
 // to the same media element afterward.
@@ -3786,6 +3866,13 @@ function silenceSkippingResponseFilter(type, response, context) {
 /** @type {shaka.extern.ResponseFilter} */
 function webmProjectionResponseFilter(type, response) {
   if (type === RequestType.SEGMENT && response.data) voidWebmProjection(response.data)
+}
+
+/** @type {shaka.extern.ResponseFilter} */
+function youtubeHlsSegmentResponseFilter(type, response, context) {
+  if (type !== RequestType.MANIFEST || context?.type !== AdvancedRequestType.MEDIA_PLAYLIST) return
+  const renamed = renameYouTubeFmp4HlsSegments(new TextDecoder().decode(response.data))
+  if (renamed !== null) response.data = new TextEncoder().encode(renamed).buffer
 }
 
 /** @type {shaka.extern.ResponseFilter} */
@@ -4638,6 +4725,11 @@ const seekingIsPossible = computed(() => {
   return props.playbackEngine === 'yt-dlp' && props.manifestSrc.includes('/playlist_type/DVR/')
 })
 
+// Native media controls offer seeking only while the player can seek.
+watch(() => seekingIsPossible.value, () => {
+  if (ui && !shortsNavigationSuspended.value) registerMediaSessionHandlers()
+})
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSabrPlayback = computed(() => {
   return !!process.env.SUPPORTS_LOCAL_API &&
@@ -4759,8 +4851,12 @@ function getPlayerConfig(format, useAutoQuality = false) {
 // #region UI config
 
 const useVrMode = computed(() => {
-  return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
+  return props.format === 'dash' && (props.vrProjection === 'EQUIRECTANGULAR' || props.vrProjection === 'VR180')
 })
+
+// VR renders the video to its own canvas, so there is no image to mirror.
+const mirrorVideoPossible = computed(() => store.getters.getShowMirrorVideoToggle && !audioOnlyMedia.value && !useVrMode.value)
+const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId))
 
 // Like skip silence and voice-over translation, this needs Web Audio
 // processing, which the player does not use on iOS.
@@ -4821,9 +4917,14 @@ const {
   videoZoomStyle,
 } = useVideoZoom({
   container,
+  deferPinch: () => isMobileTwoFingerTapCandidate(),
   isNativeFullscreenActive: () => isNativeFullscreenActive(),
   mediaTabId,
-  onPinchStart: () => cancelMobileFullscreenGesture(),
+  onPinchStart: () => {
+    cancelMobileFullscreenGesture()
+    invalidateMobileTwoFingerTap()
+  },
+  mirrored: mirrorVideo,
   props,
   showValueChange,
   useVrMode,
@@ -4845,6 +4946,7 @@ function trackPlayerPointer(event) {
   window.addEventListener('pointercancel', handlePlayerPointerEnd, true)
 }
 function handlePlayerPointerMove(event) {
+  if (playerPointerIds.has(event.pointerId)) trackMobileTwoFingerTap(event)
   if (event.pointerId === vrClickPointerId &&
     Math.hypot(event.clientX - vrClickStart.x, event.clientY - vrClickStart.y) > 8) {
     vrClickDragged = true
@@ -4853,6 +4955,7 @@ function handlePlayerPointerMove(event) {
 }
 function handlePlayerPointerEnd(event) {
   if (!playerPointerIds.has(event.pointerId)) return
+  trackMobileTwoFingerTap(event)
   playerPointerIds.delete(event.pointerId)
   if (event.type === 'pointercancel' && event.pointerId === vrClickPointerId) {
     vrClickPointerId = null
@@ -4873,6 +4976,7 @@ onBeforeUnmount(clearPlayerPointers)
 /** @param {PointerEvent} event */
 function handleVideoZoomPointerDown(event) {
   trackPlayerPointer(event)
+  trackMobileTwoFingerTap(event)
   if (useVrMode.value && event.button === 0 && event.isPrimary && isPlayerSurfaceTarget(event.target)) {
     vrClickPointerId = event.pointerId
     vrClickStart = { x: event.clientX, y: event.clientY }
@@ -5222,6 +5326,9 @@ const uiConfig = computed(() => {
       ? TrackLabelFormat.LABEL
       : TrackLabelFormat.LANGUAGE,
     displayInVrMode: useVrMode.value,
+    // VR180 streams show a half sphere, with the eyes side by side in each frame
+    defaultVrProjectionMode: props.vrProjection === 'VR180' ? 'halfequirectangular' : 'equirectangular',
+    vrSideBySide: props.vrProjection === 'VR180',
   }
 
   const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
@@ -5258,9 +5365,11 @@ const uiConfig = computed(() => {
     ambientMode: 'ft_ambient_mode',
     lightsOff: 'ft_lights_off',
     videoZoom: 'ft_video_zoom',
+    mirrorVideo: 'ft_mirror_video',
     volumeBoost: 'ft_volume_boost',
     monoAudio: 'ft_mono_audio',
     abRepeat: 'ft_ab_repeat',
+    lockControls: 'ft_lock_controls',
   }
   // Without the full screen title, which opens the video information, the
   // menu offers it instead. It only shows in full screen and full window.
@@ -5387,6 +5496,15 @@ const uiConfig = computed(() => {
 
   if (!showLightsOffToggle.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lights_off')
+  }
+
+  if (!mirrorVideoPossible.value) {
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_mirror_video')
+  }
+
+  // Shorts swipe between videos instead of entering full screen.
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS || props.shortsPlayer) {
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lock_controls')
   }
 
   if (!showMusicModeToggle.value) {
@@ -5795,6 +5913,9 @@ const {
   handleMobilePlayerSurfaceClick,
   handleMobilePlayerTouchEnd,
   handleMobilePlayerTouchMove,
+  handleStoppedPlayerTouchEnd,
+  invalidateMobileTwoFingerTap,
+  isMobileTwoFingerTapCandidate,
   mobileFullscreenSwipeSettling,
   mobileFullscreenSwipeStyle,
   mobileFullscreenSwiping,
@@ -5803,6 +5924,7 @@ const {
   moveMobileFullscreenGesture,
   releaseMobileFullscreenSwipe,
   startMobileFullscreenGesture,
+  trackMobileTwoFingerTap,
 } = useMobileFullscreenGestures({
   getContainer: () => container.value,
   getControls: () => ui?.getControls(),
@@ -5837,6 +5959,13 @@ const {
     const startTime = video.value.currentTime
     seekBySeconds(distance, true, false, false)
     return video.value.currentTime - startTime
+  },
+  isTwoFingerTapEnabled: mobileChapterTapsEnabled,
+  onTwoFingerDoubleTap: direction => {
+    const index = navigateChapters(direction > 0 ? 'next' : 'restart')
+    if (index === null) return false
+    showValueChange(props.chapters[index].title, direction > 0 ? 'step-forward' : 'step-backward', { revealControls: false })
+    return true
   },
   getSwipeAction: side => process.env.IS_CAPACITOR
     ? store.getters[side === 'left' ? 'getMobileLeftSwipeAction' : 'getMobileRightSwipeAction']
@@ -5938,6 +6067,8 @@ function handlePlayerTouchEnd(event) {
   if (suppressTemporaryPlaybackRateClick && event.isTrusted) {
     event.preventDefault()
     event.stopImmediatePropagation()
+    // A drag that canceled the hold showed the controls
+    handleStoppedPlayerTouchEnd()
     return
   }
   handleMobilePlayerTouchEnd(event)
@@ -6656,6 +6787,9 @@ watch(sponsorBlockSubmissionVisibleButtons, () => {
 }, { immediate: true })
 
 let mediaSessionStopped = false
+// Set while a play the viewer requested for this hidden tab, such as from its
+// tab icon, is starting, so it may play without a mini player.
+let backgroundPlayRequested = false
 
 watch(() => props.videoId, () => {
   sponsorBlockRequestGeneration++
@@ -6860,7 +6994,7 @@ function syncAndroidStatusBarVisibility() {
   const visible = shouldShowAndroidStatusBar({
     active,
     fullscreen,
-    controlsShown: !process.env.IS_IOS && controlsContainer?.hasAttribute('shown') === true,
+    controlsShown: !process.env.IS_IOS && !touchControlsLocked.value && controlsContainer?.hasAttribute('shown') === true,
     keepHidden,
   })
   if (visible === androidStatusBarVisible) return
@@ -7029,7 +7163,17 @@ watch(() => store.getters.getKeyboardShortcuts, () => setLocale(locale.value))
 
 function registerMediaSessionHandlers() {
   tabMediaCoordinator.setActionHandlers(mediaTabId, mediaSessionSource, {
-    play: () => video.value?.play(),
+    play: (details = {}) => {
+      const videoElement = video.value
+      if (!videoElement) return
+      setFormatSwitchPaused(false)
+      backgroundPlayRequested = details.allowBackground === true
+      const playPromise = videoElement.play()
+      playPromise.catch(() => {
+        backgroundPlayRequested = false
+      })
+      return playPromise
+    },
     pause,
     stop: () => {
       const videoElement = video.value
@@ -7037,6 +7181,7 @@ function registerMediaSessionHandlers() {
       const wasPaused = videoElement.paused
       mediaSessionStopped = true
       initialAutoplayCanceled = true
+      setFormatSwitchPaused(true)
       if (wasPaused) videoElement.autoplay = false
       videoElement.pause()
       if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
@@ -7046,23 +7191,28 @@ function registerMediaSessionHandlers() {
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
       }
     },
-    seekbackward: (details = {}) => {
-      seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
-    },
-    seekforward: (details = {}) => {
-      seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
-    },
-    seekto: (details = {}) => {
-      const videoElement = video.value
-      if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
-      accumulatedSeekSeconds = 0
-      rememberSeekPosition(details.seekTime, true)
-      if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
-        videoElement.fastSeek(details.seekTime)
-      } else {
-        videoElement.currentTime = details.seekTime
-      }
-    },
+    // Null keys stop another player in the same tab from supplying seek actions this player lacks.
+    ...(seekingIsPossible.value
+      ? {
+          seekbackward: (details = {}) => {
+            seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
+          },
+          seekforward: (details = {}) => {
+            seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
+          },
+          seekto: (details = {}) => {
+            const videoElement = video.value
+            if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
+            accumulatedSeekSeconds = 0
+            rememberSeekPosition(details.seekTime, true)
+            if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
+              videoElement.fastSeek(details.seekTime)
+            } else {
+              videoElement.currentTime = details.seekTime
+            }
+          }
+        }
+      : { seekbackward: null, seekforward: null, seekto: null }),
     enterpictureinpicture: () => {
       if (!audioOnlyMedia.value && ui?.getControls?.().isPiPAllowed()) {
         ui.getControls().togglePiP()
@@ -7168,6 +7318,8 @@ function handleRateChange() {
 }
 
 function handlePlay() {
+  const allowBackgroundPlay = backgroundPlayRequested
+  backgroundPlayRequested = false
   if (shortsNavigationSuspended.value) {
     video.value.pause()
     return
@@ -7184,6 +7336,7 @@ function handlePlay() {
   const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
   if (
     !isActiveTab.value &&
+    !allowBackgroundPlay &&
     !isCurrentPictureInPictureVideo &&
     !scrollMiniPlayerDetached.value &&
     !miniPlayerStartPending.value &&
@@ -7904,7 +8057,7 @@ function handleAndroidRotationPopoverToggle(event) {
 }
 
 function handleAndroidRotation(landscape) {
-  if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
+  if (!isActiveTab.value || !ui || !fullWindowListenerReady || touchControlsLocked.value) return
   if (pictureInPictureActive.value || androidFullscreenEntering) return
   if (!landscape) {
     if (androidRotationFullscreen) exitAndroidRotationFullscreen()
@@ -8081,6 +8234,7 @@ const ambientModeVisible = computed(() => {
     ambientMode.value &&
     !audioOnlyMedia.value &&
     props.vrProjection !== 'EQUIRECTANGULAR' &&
+    props.vrProjection !== 'VR180' &&
     !scrollMiniPlayerActive.value &&
     !scrollMiniPlayerAnimating.value &&
     !scrollMiniPlayerDragStyle.value
@@ -8121,6 +8275,7 @@ const fullscreenAmbientBarsVisible = computed(() => {
 
 const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbientMode({
   enabled: ambientModeVisible,
+  mirrored: mirrorVideo,
   video,
 })
 
@@ -10093,6 +10248,17 @@ function registerVideoInfoButton() {
   )
 }
 
+function registerLockControlsButton() {
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
+
+  events.addEventListener('lockTouchControls', lockTouchControls)
+  registerOwnElement(shakaOverflowMenu, 'ft_lock_controls', {
+    create(rootElement, controls) {
+      return new LockControlsButton(events, rootElement, controls, isPlayerFullscreenOrFullWindow)
+    }
+  })
+}
+
 function registerLegacyQualitySelection() {
   let selectionGeneration = 0
   /**
@@ -10348,6 +10514,21 @@ function registerLightsOffButton() {
         className: 'lights-off-button',
         mappedIcon: 'moon',
         getLabel: () => t('Settings.Player Settings.Lights Off'),
+      }, rootElement, controls)
+    }
+  })
+}
+
+function registerMirrorVideoButton() {
+  registerOwnElement(shakaOverflowMenu, 'ft_mirror_video', {
+    create(rootElement, controls) {
+      return new BooleanSettingButton({
+        value: mirrorVideo,
+        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, value }),
+        events,
+        className: 'mirror-video-button',
+        mappedIcon: 'flip-horizontal',
+        getLabel: () => t('Settings.Player Settings.Mirror Video'),
       }, rootElement, controls)
     }
   })
@@ -11469,16 +11650,14 @@ async function keyboardShortcutHandler(event) {
       changeVolume(-0.05)
       break
     case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
-      if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex > 0) {
+      if (navigateChapters('previous') !== null) {
         event.preventDefault()
-        setCurrentTime(props.chapters[props.currentChapterIndex - 1].startSeconds, true)
         showOverlayControls()
       }
       break
     case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
-      if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
+      if (navigateChapters('next') !== null) {
         event.preventDefault()
-        setCurrentTime(props.chapters[props.currentChapterIndex + 1].startSeconds, true)
         showOverlayControls()
       }
       break
@@ -11891,6 +12070,8 @@ function offlineHandler() {
 
 let androidFullscreenRotationRequested = false
 function requestFullscreenOrientation(fullscreen) {
+  // Locked touch controls keep the orientation they locked, even when the video resizes.
+  if (fullscreen && touchControlsLocked.value) return
   // Keep this until exit finishes: unlocking after a preference/metadata
   // change can still have a rotation in flight when fullscreen closes.
   androidFullscreenRotationRequested ||= shouldRotateFullscreenToLandscape(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
@@ -12362,6 +12543,7 @@ onMounted(async () => {
       request.uris = await Promise.all(request.uris.map(url => getSubtitleRequestUrl(url, store.getters)))
     })
   }
+  player.getNetworkingEngine().registerResponseFilter(youtubeHlsSegmentResponseFilter)
   player.getNetworkingEngine().registerRequestFilter(silenceSkippingRequestFilter)
   player.getNetworkingEngine().registerResponseFilter(silenceSkippingResponseFilter)
   // Runs after the other filters so it sees the final segment data, including redirects
@@ -12396,6 +12578,7 @@ onMounted(async () => {
   registerVolumeBoostSelection()
   registerMonoAudioButton()
   registerLightsOffButton()
+  registerMirrorVideoButton()
   registerSkipSilenceButton()
   registerVoiceOverTranslationButton()
   registerSleepTimer()
@@ -12406,6 +12589,7 @@ onMounted(async () => {
   registerFullWindowButton()
   registerAndroidPictureInPictureButton()
   registerVideoInfoButton()
+  registerLockControlsButton()
 
   if (
     props.autoOpenChapters &&
@@ -12572,7 +12756,9 @@ async function loadPlaybackSource(url, startTime, mimeType) {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
     !props.localFilePlayback && mimeType === MANIFEST_TYPE_SABR &&
     mediaElement.autoplay && !initialAutoplayCanceled &&
-    mediaElement.played.length === 0 && isActiveTab.value) {
+    mediaElement.played.length === 0 && isActiveTab.value &&
+    // A format switch that resumes playback keeps its running service.
+    (pendingFormatSwitchState === null || pendingFormatSwitchState.wasPaused || pendingFormatSwitchState.awaitingAutoplay)) {
     // Android cannot start a fresh playback service from a hidden activity.
     // Metadata can finish after the app-state pause sweep, so defer this
     // initial load until foreground protection can be established, unless
@@ -13090,10 +13276,9 @@ watch(
       pendingFormatSwitchState.playbackPosition = 0
     }
 
+    const switchState = pendingFormatSwitchState
     const {
       oldFormat: sourceFormat,
-      wasPaused,
-      awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
       audioBandwidth,
@@ -13194,7 +13379,8 @@ watch(
     }
 
     pendingFormatSwitchState = null
-    if (wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
+    // A pause during the switch updates its state.
+    if (switchState.wasPaused || (switchState.awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
@@ -13473,6 +13659,7 @@ function isPaused() {
 
 function pause() {
   initialAutoplayCanceled = true
+  setFormatSwitchPaused(true)
   const videoElement = video.value
   if (!videoElement) return
   const wasPaused = videoElement.paused
@@ -13482,7 +13669,19 @@ function pause() {
   if (wasPaused) handlePause()
 }
 
+/**
+ * Records a play or pause request while a format switch loads, as the switch
+ * otherwise restores the state from before it started.
+ * @param {boolean} paused
+ */
+function setFormatSwitchPaused(paused) {
+  if (pendingFormatSwitchState === null) return
+  pendingFormatSwitchState.wasPaused = paused
+  if (!paused) pendingFormatSwitchState.awaitingAutoplay = false
+}
+
 function play() {
+  setFormatSwitchPaused(false)
   return video.value.play()
 }
 
@@ -13879,6 +14078,7 @@ if (process.env.IS_IOS) {
 <style scoped src="./opentubex/phonePlayerOptions.css" />
 <style scoped src="./opentubex/classicPlayerControls.css" />
 <style scoped src="./opentubex/portraitFullscreenDocks.css" />
+<style scoped src="./opentubex/touchControlsLock.css" />
 <style>
 /* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {

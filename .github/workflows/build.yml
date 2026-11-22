@@ -726,6 +726,12 @@ jobs:
           cp "${files[0]}" "release-assets/$artifact_name"
         done
 
+    # The web app's Local API extension. Its name has no version, like on
+    # stable releases.
+    - name: Package the Local API extension
+      working-directory: browser-extension
+      run: zip -q -r -X ../release-assets/opentubex-local-api-extension.zip . -x README.md
+
     - name: Attest build provenance
       id: attest
       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2

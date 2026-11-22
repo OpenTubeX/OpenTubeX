@@ -235,6 +235,7 @@ Subscriptions:
   Newest First: Plej novaj unue
   Oldest First: Plej malnovaj unue
   RSS Feeds:
+    Load More Items: Ŝargi pliajn erojn
     Refreshing: Refreŝigante RSS-fluojn
     Tab: RSS
     Followed Feeds: Sekvataj RSS-fluoj
@@ -539,6 +540,7 @@ Settings:
       Memory: memoro
       Network: reto
       Disk: disko
+    Label: Rendimento
   General Settings:
     Invidious Instance Username: 'Uzantnomo de la nodo'
     Invidious Instance Password: 'Pasvorto de la nodo'
@@ -647,6 +649,8 @@ Settings:
       Entire App: Tuta aplikaĵo
     Preferred API Backend:
       Yattee Server: Yattee-servilo
+      Local API Extension Required: La retaplikaĵo povas uzi la lokan API-on nur kun la retumila etendaĵo OpenTubeX Local API.
+      Install Local API Extension: Instali la etendaĵon
     Video View Type:
       Full Width: Plena larĝo
     Playlist View Type:
@@ -704,6 +708,7 @@ Settings:
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.
   Theme Settings:
+    Toggle Playback With Tab Icon: Ludi kaj paŭzi per la langeta piktogramo
     Theme and Colors: "Etoso kaj koloroj"
     Font Size: Tipara grandeco
     Sections:
@@ -927,9 +932,11 @@ Settings:
       Screenshots: Ekrankopioj
       Timestamp Notes: Tempomarkaj notoj
     Lights Off: Lumoj estingitaj
+    Mirror Video: "Speguli videon"
     Show Lights Off Toggle: Montri baskulon de estingitaj lumoj
     Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
     Show Mono Audio Toggle: Montri baskulon de monofonia sono
+    Show Mirror Video Toggle: "Montri baskulon por speguli videon"
     Show Music Mode Toggle: Montri baskulon de muzika reĝimo
     Swipe Gestures:
       Fullscreen Brightness: Plena heleco en plenekrana reĝimo
@@ -1029,6 +1036,7 @@ Settings:
     Show Seek Bar Filmstrip: "Montri filmstrion de la serĉbreto"
     Pause on Stream Recovery: Paŭzigi je restariĝo de fluo
     Continue Playback When Screen Is Locked: Daŭrigi ludadon kiam la ekrano estas ŝlosita
+    Switch to Audio in Background: 'Ŝanĝi al sonformatoj en la fono'
     Ignore Headphone Controls: 'Ignori kontrolojn de aŭdiloj'
     Voice-over Translation:
       Title: Voĉa traduko
@@ -1092,6 +1100,7 @@ Settings:
     Timestamp Notes:
       Enable: "Ŝalti tempomarkajn notojn"
       Obsidian Vault: Obsidian-trezorejo
+    Double-Tap With Two Fingers to Skip Chapters: "Duoble tuŝeti per du fingroj por salti ĉapitrojn"
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -1330,6 +1339,7 @@ Settings:
     Cleanup Complete: Purigado de konservejo finiĝis
     Cleanup Failed: Purigado de konservejo malsukcesis
   Subscription Settings:
+    Refresh These Feeds Together: "Refreŝigi ĉi tiujn fluojn kune"
     Fetch Feed on Startup: Venigi fluon je startigo
     Show New Content Feed: Montri fluon de nova enhavo
     RSS Feeds: RSS-fluoj
@@ -1350,6 +1360,7 @@ Settings:
     Platforms:
       Other Platforms: Aliaj platformoj
       Manage Channels: Administri sekvatajn kanalojn
+      Enable Twitch Page: Ŝalti la Twitch-paĝon
       Notify When Live: Sciigi kiam sekvataj Twitch-kanaloj komencas rektan elsendon
       Auto Refresh Interval: Intervalo de aŭtomata aktualigo de aliaj platformoj
   Distraction Free Settings:
@@ -1393,6 +1404,7 @@ Settings:
     Hide Header Sync Indicator: Kaŝi sinkronigan indikilon en la kapo
     Hide Repeat Stats: Kaŝi ripetajn statistikojn
     Hide Playlist Stats: Kaŝi statistikojn de ludlisto
+    Hide Recommendation Details: Kaŝi kialojn de rekomendoj kaj butonojn por retrosciigo
     Sections:
       Digital Wellbeing: Cifereca bonfarto
       Visible While Paused: Videbla dum paŭzo en plena fenestro / plena ekrano
@@ -1695,6 +1707,7 @@ Settings:
     Failed to Save Password: Malsukcesis konservi la pasvorton.
     Confirm Password: Konfirmi pasvorton
     Passwords Do Not Match: La pasvortoj ne kongruas.
+  Highlight Changed Settings Label: Ŝanĝitaj
 Tutorial:
   Skip: Preterlasi
   Next: Sekva
@@ -2009,6 +2022,9 @@ Video:
     Zoom:
       Zoom: Zomo
       'Off': 'Malŝaltita'
+    Lock Controls:
+      Lock Controls: "Ŝlosi regilojn"
+      Hold to Unlock: "Tenu por malŝlosi"
     Volume Boost:
       Volume Boost: Laŭteca plifortigo
       'Off': 'Malŝaltita'
@@ -2446,12 +2462,14 @@ Tooltips:
     Use YouTube-style Shorts: Montras videaĵetojn en vertikala krado sur abonaj kaj kanalaj paĝoj kaj uzas ludilon de videaĵetoj laŭ stilo de YouTube.
     Loop Shorts: Kiam ŝaltita, videaĵetoj rekomenciĝas aŭtomate. Kiam malŝaltita, videaĵetoj haltas ĉe la fino kaj montras butonon por reludi.
     Show Skip Silence Toggle: Montras ŝaltilon por salti silenton en la agorda menuo de la ludilo.
+    Show Mirror Video Toggle: "Montras ŝaltilon en la agorda menuo de la ludilo, kiu horizontale spegulas la videon, por ke estu pli facile sekvi lernilojn pri danco, ekzercado kaj muzikiloj."
     Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
     Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
     Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.
     Show Seek Bar Filmstrip: "Treni la tenilon de la serĉbreto montras strion de kadroj ĉirkaŭ la loko, kien vi saltos, kaj tiri supren sur ĝin ebligas precizan saltadon. Se malŝaltita, trenado montras unu bildeton, kiel dum ŝvebado."
     Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
     Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
+    Switch to Audio in Background: 'Ludas sonformatojn dum la aplikaĵo estas en la fono aŭ la ekrano estas malŝaltita, kio ŝparas datumojn kaj baterion. Bildo-en-bildo konservas la videon. La video revenas kiam vi denove malfermas la aplikaĵon. Postulas daŭrigi la ludadon kiam la ekrano estas ŝlosita.'
     Ignore Headphone Controls: 'Ignoras komandojn por ludi, paŭzi kaj salti el Bluetooth-aparatoj, dratitaj aŭdiloj kaj aŭdvidaj klavoj de klavaroj, por ke hazardaj frapetoj sur aŭdiloj ne interrompu la ludadon. La regiloj en la aplikaĵo kaj en la aŭdvida sciigo plu funkcias.'
     Voice-over Translation: Sendas la identigilon, daŭron kaj elektitan lingvon de la videaĵo al la neoficiala voĉtraduka servo de Yandex kiam vi petas tradukon. Defaŭlte malŝaltita.
     Hold to Speed Up: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore multobligi la aktualan ludrapidon per la elektita valoro.
@@ -2472,6 +2490,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
     Enable Timestamp Notes: "Aldonas ludilan butonon kaj la klavkombinon N, kiuj paŭzigas la videon kaj malfermas noton, kiu ligas al la nuna momento. Notojn eblas kopii kiel Markdown aŭ, ĉe labortablo, aldoni al Obsidian."
     Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.
+    Double-Tap With Two Fingers to Skip Chapters: "Duoble tuŝetu per du fingroj la dekstran flankon de la video por salti al la sekva ĉapitro, aŭ la maldekstran flankon por reveni al la komenco de la nuna ĉapitro. Dum la unuaj 3 sekundoj de ĉapitro, la maldekstra flanko anstataŭe iras al la antaŭa ĉapitro, do ripetado paŝas malantaŭen tra la ĉapitroj."
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
     Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.
@@ -2502,6 +2521,7 @@ Tooltips:
     Bedtime Reminder: Paŭzigas la videaĵon kaj memorigas vin ĉesi spekti inter la komenca kaj fina horoj.
     Shorten View Counts: Montras nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj, kiujn YouTube jam rondigis, en mallongigita formo, ekz. 14K anstataŭ 14 000. Ĝustaj nombroj ĉiam estas montrataj plene.
   Subscription Settings:
+    Refresh These Feeds Together: "Kiam vi refreŝigas unu el la markitaj fluoj, la aliaj markitaj fluoj refreŝiĝas tuj poste. Aŭtomataj refreŝigoj ankoraŭ sekvas la propran intervalon de ĉiu fluo."
     Fetch Feed on Startup: Kiam ŝaltita, OpenTubeX aŭtomate venigos vian abonfluon je startigo kaj kiam nova fenestro malfermiĝas.
     Show New Content Feed: Montras langeton "Nova" kun eroj de la abonfluo, kiuj ne ĉeestis dum la antaŭa venigo.
     Enable RSS Feeds: Montras RSS-langeton sur la paĝo de abonoj kun la eroj de RSS- aŭ Atom-fluoj, por ke vi povu sekvi kreantojn en aliaj platformoj. Ĝiaj eroj malfermiĝas per yt-dlp.
@@ -2512,10 +2532,12 @@ Tooltips:
     Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
     RSS Feeds Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas viajn RSS-fluojn dum la aplikaĵo estas malfermita.
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
-    Show Collaborations From Other Channels: "Ankaŭ montras videojn, kiujn kanaloj abonitaj de vi faris kune kun alia kanalo, kiu alŝutis ilin. YouTube listigas ilin nur en la langeto Hejmo de kanalo, do ĉiu aktualigo de videoj ŝargas unu plian paĝon por ĉiu kanalo. Troviĝas nur la plej novaj kunlaboraĵoj montritaj tie, kelkaj kanaloj montras neniun, kaj iliaj publikigaj datoj estas proksimumaj. Ne disponebla kun la API de Invidious."
+    Show Collaborations From Other Channels: "Ankaŭ montras videojn, kiujn kanaloj abonitaj de vi faris kune kun alia kanalo, kiu alŝutis ilin. YouTube listigas ilin nur en la langeto Hejmo de kanalo, do aktualigo de videoj kontrolas maksimume kelkajn kanalojn, kaj novaj povas aperi nur post tago aŭ pli. Troviĝas nur la plej novaj kunlaboraĵoj montritaj tie, kelkaj kanaloj montras neniun, kaj iliaj publikigaj datoj estas proksimumaj. Ne disponebla kun la API de Invidious."
     Platforms Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas la kanalojn, kiujn vi sekvas en aliaj platformoj, dum la aplikaĵo estas malfermita.
+    Enable Twitch Page: Ebligas al vi malfermi la Twitch-paĝon el la navigado kaj la komanda paletro. Tie vi povas foliumi popularajn kategoriojn kaj rektajn kanalojn kaj serĉi en Twitch.
     Twitch Notify When Live: Sciigas vin kiam unu el viaj sekvataj Twitch-kanaloj komencas elsendi. OpenTubeX kontrolas ĉiujn kelkajn minutojn dum ĝi estas malfermita, kaj ankaŭ dum ĝi estas fermita, se ĝi tiam aktualigas abonojn.
   Theme Settings:
+    Toggle Playback With Tab Icon: Alklako sur la piktogramo de langeto kun ludata aŭ paŭzigita video paŭzigas aŭ daŭrigas ĝin sen ŝanĝi al tiu langeto.
     Only Show Important Notifications: Kaŝas sciigojn en la aplikaĵo, kiuj nur konfirmas agon aŭ raportas staton, inkluzive de tiuj, kiuj proponas Malfari. Eraroj, avertoj, memorigoj, kiujn vi agordis, kaj sciigoj, kiuj petas decidon, ekzemple ĝisdatigaj invitoj, ankoraŭ aperas. Fona progreso, ekzemple aktualigo de abonoj, montriĝas en la ĝenerala progresbreto anstataŭ kiel sciigo. Sistemaj sciigoj ne estas tuŝitaj.
     Thumbnail Size: Skalas bildetojn de videaĵoj en kradoj kaj listoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
     Playlist Thumbnail Size: Skalas bildetojn de videaĵoj sur ludlistaj paĝoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
@@ -2585,6 +2607,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Malfari la lastan salton
   Redo Seek: Refari malfaritan salton
   New Incognito Tab: Krei novan inkognitan langeton
+  Shortcuts Label: Ŝparvojoj
 CommandPalette:
   Title: Komanda paletro
   Open: Malfermi komandan paletron
@@ -2619,6 +2642,8 @@ CommandPalette:
     Download Finished: Ĉi tiu elŝuto ne plu ruliĝas
     Video: Unue malfermu videaĵon
 Downloads:
+  Stop Recording: "Ĉesigi registradon"
+  Recording: "Registrado"
   File Name Template Invalid: 'Uzu relativan vojon ene de la elŝuta dosierujo sen "..", "~", "$", "%" aŭ prefikso kiel "thumbnail:".'
   Add Download: Aldoni elŝuton
   Search Completed: Serĉi finitajn elŝutojn laŭ titolo aŭ kanalo
@@ -2758,6 +2783,22 @@ App Icon:
   Saved Message: Piktogramo konservita. Via lanĉilo eble bezonos momenton por ĝisdatiĝi.
   Title: Piktogramo de la aplikaĵo
   Error: Ne eblas ŝargi aŭ ŝanĝi la piktogramon de la aplikaĵo
+App Lock:
+  Title: "Aplika ŝloso"
+  Enable: "Postuli ekranŝloson"
+  Enable Tooltip: "Petas vian fingrospuron, vizaĝon, PIN-kodon, ŝablonon aŭ pasvorton kiam vi revenas al OpenTubeX. En Android 13 kaj pli novaj, lastaj aplikaĵoj ankaŭ ne plu montras antaŭrigardon de la aplikaĵo."
+  Lock After: "Ŝlosi post"
+  Immediately: "Tuj"
+  1 Minute: "1 minuto"
+  5 Minutes: "5 minutoj"
+  15 Minutes: "15 minutoj"
+  1 Hour: "1 horo"
+  Unavailable: "Agordu ekranŝloson en la agordoj de Android por uzi aplikan ŝloson."
+  Error: "Ne eblas ŝanĝi la aplikan ŝloson"
+  Locked: "OpenTubeX estas ŝlosita"
+  Unlock: "Malŝlosi"
+  Prompt Title: "Malŝlosi OpenTubeX"
+
 Tray:
   Hide All Windows: Kaŝi ĉiujn fenestrojn
   Show All Windows: Montri ĉiujn fenestrojn
@@ -2876,6 +2917,33 @@ Platforms:
   Verify: "Konfirmi"
   Categories: "Kategorioj"
   Category Not Found: "Ĉi tiu kategorio ne troviĝis."
+  Category Tags: "Etikedoj de kategorio"
+  Stream Tags: "Etikedoj de elsendo"
+  Language: "Lingvo"
+  All Languages: "Ĉiuj lingvoj"
+  Other Language: "Alia"
+  American Sign Language: "usona signolingvo"
+  Search Tags: "Serĉi etikedojn"
+  Add Tag: "Aldoni etikedon"
+  Remove Tag: "Forigi {tag}"
+  Sort:
+    Viewers: "Spektantoj (de plej multe al malplej)"
+    Viewers Ascending: "Spektantoj (de malplej al plej multe)"
+    Started: "Lastatempe komencitaj"
+    Relevance: "Rekomendita"
+    Published: "Lastatempe publikigitaj"
+    Views: "Rigardoj (de plej multe al malplej)"
+    Top Day: "Plej bonaj de 24 horoj"
+    Top Week: "Plej bonaj de 7 tagoj"
+    Top Month: "Plej bonaj de 30 tagoj"
+    Top All: "Plej bonaj de ĉiam"
+  Video Type:
+    Video Type: "Speco de video"
+    All: "Ĉiuj videaĵoj"
+    Archive: "Pasintaj elsendoj"
+    Highlight: "Elstaraĵoj"
+    Upload: "Alŝutaĵoj"
+  Anonymous: "Anonima"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondis al {commentAuthor}"
   Like: "Ŝati"
@@ -2910,5 +2978,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Serĉi en Twitch"
+  Search Placeholder: "Kategorioj kaj kanaloj"
 New Incognito Tab: Nova inkognita langeto
 Incognito Tab: Inkognita langeto

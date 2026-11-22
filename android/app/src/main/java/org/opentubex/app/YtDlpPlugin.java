@@ -80,7 +80,8 @@ public final class YtDlpPlugin extends Plugin {
         });
     }
     @PluginMethod public void download(PluginCall call) {
-        run(call, () -> downloads.add(call.getObject("payload"), call.getArray("args"), call.getObject("configuration"), call.getData().optLong("retryDownloadId", -1L)));
+        run(call, () -> downloads.add(call.getObject("payload"), call.getArray("args"), call.getObject("configuration"), call.getData().optLong("retryDownloadId", -1L),
+            call.getData().optInt("partLimit", 1)));
     }
     @PluginMethod public void list(PluginCall call) { run(call, () -> new JSONObject().put("downloads", downloads.list())); }
     @PluginMethod public void control(PluginCall call) {

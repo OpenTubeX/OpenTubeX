@@ -6,8 +6,9 @@ import { compileFunction } from 'node:vm'
 const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
 const loaderCode = code.slice(code.indexOf('async function loadYtDlpPlaybackSource('))
 
-function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true, cacheExpiresDuringExtraction = false } = {}) {
+function loader({ mesh = true, flatVideo = false, flatHls = false, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true, cacheExpiresDuringExtraction = false } = {}) {
   const attempts = []
+  const adaptiveUrls = []
   const info = {
     isLive: false,
     liveStatus: 'not_live',
@@ -20,6 +21,7 @@ function loader({ mesh = true, cached = null, panorama = true, incomplete = fals
         ]
       : [
           { protocol: 'https', url: 'https://media.test/video', vcodec: 'avc1', acodec: 'none', formatNote: mesh ? '1080s60, mesh' : '1080p60' },
+          ...(flatVideo ? [{ protocol: 'https', url: 'https://media.test/flat', vcodec: 'avc1', acodec: 'none', formatNote: '720p' }] : []),
           { protocol: 'https', url: 'https://media.test/audio', vcodec: 'none', acodec: 'mp4a' }
         ]
   }
@@ -35,20 +37,25 @@ function loader({ mesh = true, cached = null, panorama = true, incomplete = fals
       }
     },
     isVideoFormat: format => format.vcodec !== 'none',
+    isMeshFormat: format => format.vcodec !== 'none' && /\bmesh\b/.test(format.formatNote ?? ''),
     isAudioFormat: format => format.acodec !== 'none',
     convertLegacyFormats: async formats => formats.map(format => ({ url: format.url })),
-    convertAdaptiveFormats: async formats => formats.map(format => ({ has_video: format.vcodec !== 'none', has_audio: format.acodec !== 'none' })),
+    convertAdaptiveFormats: async formats => {
+      adaptiveUrls.push(...formats.map(format => format.url))
+      return formats.map(format => ({ has_video: format.vcodec !== 'none', has_audio: format.acodec !== 'none' }))
+    },
     getCompatibleAdaptiveFormats: formats => formats,
     FormatUtils: { toDash: async () => '<MPD/>' },
     getEarliestYtDlpFormatExpiry: () => new Date(Date.now() + 3600_000),
     cacheYtDlpPlaybackSource: async () => {},
     probeYtDlpHlsManifest: async () => probePlayable,
+    probeVrHlsManifest: async () => probePlayable ? flatHls ? 'flat' : 'panorama' : null,
     MANIFEST_TYPE_DASH: 'application/dash+xml',
     MANIFEST_TYPE_HLS: 'application/x-mpegurl',
     console,
   }
   const load = compileFunction(`${loaderCode}\nreturn loadYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
-  return { load: (preferVrHls, cachedOnly = false) => load('vjBrN18wiuE', '', undefined, false, cachedOnly, true, preferVrHls), attempts }
+  return { load: (preferVrHls, cachedOnly = false, vr180 = false) => load('vjBrN18wiuE', '', undefined, false, cachedOnly, true, preferVrHls, vr180), attempts, adaptiveUrls }
 }
 
 const localCode = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
@@ -116,6 +123,30 @@ test('a cache-only panorama request ignores a cached flat source without extract
   assert.deepEqual(attempts, [])
 })
 
+test('VR180 videos play the flat formats instead of the panorama or the side-by-side mesh streams', async () => {
+  const { load, attempts, adaptiveUrls } = loader({ flatVideo: true })
+  const source = await load(true, false, true)
+  assert.equal(source.manifestMimeType, 'application/dash+xml')
+  assert.equal(source.vrProjection, null)
+  assert.deepEqual(adaptiveUrls, ['https://media.test/flat', 'https://media.test/audio'])
+  assert.deepEqual(attempts, [false])
+})
+
+test('yt-dlp plays the flat HLS view of a mesh video that the backend could not identify as VR180', async () => {
+  const { load, attempts } = loader({ flatHls: true })
+  const source = await load(true)
+  assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8')
+  assert.equal(source.vrProjection, null)
+  assert.deepEqual(attempts, [false, true])
+})
+
+test('a cached flat HLS view of a VR180 video satisfies a panorama request', async () => {
+  const cached = { subtitlesIncluded: true, vrProjection: null, manifestMimeType: 'application/x-mpegurl' }
+  const { load, attempts } = loader({ cached })
+  assert.equal(await load(true), cached)
+  assert.deepEqual(attempts, [])
+})
+
 test('ordinary videos keep the first playable DASH source', async () => {
   const { load, attempts } = loader({ mesh: false })
   const source = await load(false)
@@ -155,6 +186,109 @@ test('a rejected supplied panorama retries the built-in VR client', async () => 
   assert.equal(watch.vrProjection, 'EQUIRECTANGULAR')
   assert.equal(lookups, 1)
   assert.deepEqual(probed, ['https://media.test/stale.m3u8', 'https://media.test/fresh.m3u8'])
+})
+
+test('built-in VR180 playback keeps the mesh streams instead of the flat panoramic HLS', async () => {
+  const start = watchCode.indexOf("            if (this.vrProjection === 'MESH' && videoInfo.isVr180) {")
+  const end = watchCode.indexOf("if (this.vrProjection === 'MESH' && supportsYtDlp", start)
+  let probes = 0
+  const dependencies = {
+    result: { streaming_data: { hls_manifest_url: 'https://media.test/flat.m3u8' } },
+    videoInfo: { isVr180: true, getVrHlsManifest: async () => 'https://media.test/flat.m3u8' },
+    probeHlsManifest: async () => { probes++; return true },
+  }
+  const select = compileFunction(`return async function () {
+    let vrHlsManifestUrl = null
+    const loadGeneration = 1
+    const videoId = 'vjBrN18wiuE'
+    ${watchCode.slice(start, end)}
+    return vrHlsManifestUrl
+  }`, Object.keys(dependencies))(...Object.values(dependencies))
+  const watch = {
+    vrProjection: 'MESH',
+    playbackEngineSwitchGeneration: 1,
+    isCurrentVideoLoad: () => true,
+    isYtDlpPlaybackRequested: () => false,
+    updateTitle: () => {},
+  }
+  assert.equal(await select.call(watch), null)
+  assert.equal(watch.vrProjection, 'VR180')
+  assert.equal(probes, 0)
+})
+
+test('yt-dlp replaces built-in VR180 playback with its flat view', async () => {
+  const { load } = loader({ flatVideo: true })
+  const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+    (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls, vr180) => load(preferVrHls, false, vr180), 'application/x-mpegurl'
+  )
+  const watch = {
+    vrProjection: 'VR180',
+    manifestMimeType: 'application/dash+xml',
+    builtInPlaybackSource: null,
+    activePlaybackEngine: 'built-in',
+    playbackEngineSwitchGeneration: 1,
+    playbackEngineFallbackTarget: null,
+    captions: [],
+    videoStoryboardSrc: '',
+    hasResolvedVideoTitle: true,
+    isCurrentVideoLoad: () => true,
+    alignActiveFormatWithAvailableSources: () => {},
+  }
+  assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
+  assert.equal(watch.manifestMimeType, 'application/dash+xml')
+  assert.equal(watch.vrProjection, null)
+  assert.equal(watch.builtInPlaybackSource.vrProjection, 'VR180')
+})
+
+test('yt-dlp replaces an unidentified mesh video with the flat HLS view it found', async () => {
+  const { load } = loader({ flatHls: true })
+  const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+    (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls, vr180) => load(preferVrHls, false, vr180), 'application/x-mpegurl'
+  )
+  const watch = {
+    vrProjection: 'MESH',
+    manifestMimeType: 'application/dash+xml',
+    builtInPlaybackSource: null,
+    activePlaybackEngine: 'built-in',
+    playbackEngineSwitchGeneration: 1,
+    playbackEngineFallbackTarget: null,
+    captions: [],
+    videoStoryboardSrc: '',
+    hasResolvedVideoTitle: true,
+    isCurrentVideoLoad: () => true,
+    alignActiveFormatWithAvailableSources: () => {},
+  }
+  assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
+  assert.equal(watch.manifestMimeType, 'application/x-mpegurl')
+  assert.equal(watch.vrProjection, null)
+})
+
+test('failed extraction keeps a cached flat HLS view unmarked', async () => {
+  const cached = { subtitlesIncluded: false, vrProjection: null, manifestMimeType: 'application/x-mpegurl' }
+  const { load } = loader({ unavailable: true, cached })
+  assert.equal(await load(true), cached)
+})
+
+test('Invidious VR180 playback keeps the mesh streams instead of the flat panoramic HLS', async () => {
+  const start = watchCode.indexOf("              if (this.vrProjection === 'MESH' && result.hlsUrl && !this.isYtDlpPlaybackRequested()) {")
+  const end = watchCode.indexOf("if (this.vrProjection === 'MESH' && supportsYtDlp", start)
+  const select = compileFunction(`return async function () {
+    let vrHlsManifestUrl = null
+    const loadGeneration = 1
+    const videoId = 'vjBrN18wiuE'
+    ${watchCode.slice(start, end)}
+    return vrHlsManifestUrl
+  }`, ['result', 'probeVrHlsManifest', 'isYattee'])({ hlsUrl: 'https://media.test/flat.m3u8' }, async () => 'flat', false)
+  const watch = {
+    vrProjection: 'MESH',
+    playbackEngineSwitchGeneration: 1,
+    proxyVideos: false,
+    currentInvidiousInstanceUrl: 'https://invidious.test',
+    isCurrentVideoLoad: () => true,
+    isYtDlpPlaybackRequested: () => false,
+  }
+  assert.equal(await select.call(watch), null)
+  assert.equal(watch.vrProjection, 'VR180')
 })
 
 for (const savedPanorama of [false, true]) {
@@ -282,6 +416,7 @@ for (const backend of ['Local', 'Invidious']) {
       const dependencies = {
         result: { streaming_data: { hls_manifest_url: 'https://media.test/panorama.m3u8' }, hlsUrl: 'https://media.test/panorama.m3u8' },
         probeHlsManifest: () => probe,
+        probeVrHlsManifest: () => probe.then(playable => playable ? 'panorama' : null),
         isYattee: false,
       }
       const select = compileFunction(`return async function () {

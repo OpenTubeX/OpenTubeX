@@ -24,6 +24,12 @@ export function setLandscapeOrientation(landscape) {
     : ScreenOrientation.unlock()
 }
 
+/** @param {() => boolean} stillWanted Checked once the orientation is known. */
+export async function lockCurrentOrientation(stillWanted) {
+  const { type } = await ScreenOrientation.getCurrentOrientation()
+  if (stillWanted()) await ScreenOrientation.lock({ type })
+}
+
 export async function setFullscreenOrientation(fullscreen, video, enabled = true, aspectRatio = null) {
   if (!Capacitor.isNativePlatform()) return
 

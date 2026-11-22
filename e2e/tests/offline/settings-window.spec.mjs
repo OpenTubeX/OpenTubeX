@@ -287,7 +287,8 @@ test.describe('settings', () => {
 
     await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
     await page.mouse.down()
-    await page.mouse.move(handleBounds.x - 600, handleBounds.y - 180)
+    // Shrink to 680px wide, below the 760px desktop layout breakpoint.
+    await page.mouse.move(handleBounds.x - originalBounds.width + 680, handleBounds.y - 180)
     await page.mouse.up()
 
     const resizedBounds = await settingsWindow.boundingBox()

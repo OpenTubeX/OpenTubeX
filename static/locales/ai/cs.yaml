@@ -209,6 +209,7 @@ Subscriptions:
   Newest First: Od nejnovějších
   Oldest First: Od nejstarších
   RSS Feeds:
+    Load More Items: Načíst další položky
     Refreshing: Obnovování kanálů RSS
     Tab: RSS
     Followed Feeds: Sledované RSS kanály
@@ -497,6 +498,7 @@ Settings:
       Memory: paměti
       Network: sítě
       Disk: disku
+    Label: Výkon
   General Settings:
     Invidious Instance Username: 'Uživatelské jméno instance'
     Invidious Instance Password: 'Heslo instance'
@@ -620,6 +622,8 @@ Settings:
       Auto: Automaticky
     Preferred API Backend:
       Yattee Server: Server Yattee
+      Local API Extension Required: Webová aplikace může místní API používat jen s rozšířením prohlížeče OpenTubeX Local API.
+      Install Local API Extension: Nainstalovat rozšíření
     Yattee Server:
       Server URL: URL serveru Yattee
       Username: Uživatelské jméno
@@ -662,6 +666,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Toggle Playback With Tab Icon: Přehrávat a pozastavovat ikonou karty
     Theme and Colors: "Motiv a barvy"
     Font Size: Velikost písma
     Sections:
@@ -877,6 +882,7 @@ Settings:
     Mono Audio: 'Mono zvuk'
     Normalize Loudness: 'Normalizovat hlasitost'
     Show Mono Audio Toggle: 'Zobrazit přepínač mono zvuku'
+    Show Mirror Video Toggle: "Zobrazit přepínač zrcadlení videa"
     Pause on Stream Recovery: "Pozastavit při obnově streamu"
     Buffering:
       Buffering: Vyrovnávací paměť
@@ -904,6 +910,7 @@ Settings:
     Enable DLNA Casting: "Povolit vysílání DLNA"
     Skip Unavailable Playlist Videos: "Přeskakovat nedostupná videa v playlistech"
     Lights Off: Zhasnout
+    Mirror Video: "Zrcadlit video"
     Show Lights Off Toggle: Zobrazit přepínač zhasnutí
     Show Volume Boost Toggle: "Zobrazit přepínač zesílení hlasitosti"
     Swipe Gestures:
@@ -917,6 +924,7 @@ Settings:
       Unavailable: Nepodařilo se upravit ovládání přehrávání.
     yt-dlp Streaming: "Streamování přes yt-dlp"
     Continue Playback When Screen Is Locked: 'Pokračovat v přehrávání při zamčené obrazovce'
+    Switch to Audio in Background: 'Na pozadí přepnout na zvukové formáty'
     Ignore Headphone Controls: 'Ignorovat ovládání ze sluchátek'
     Music Visualizer: Hudební vizualizér
     Automatically Open Chapters: Automaticky otevírat kapitoly
@@ -1050,6 +1058,7 @@ Settings:
     Timestamp Notes:
       Enable: "Povolit poznámky s časovými značkami"
       Obsidian Vault: Trezor Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Dvojitým klepnutím dvěma prsty přeskakovat kapitoly"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1288,6 +1297,7 @@ Settings:
     Cleanup Complete: Čištění úložiště bylo dokončeno
     Cleanup Failed: Čištění úložiště se nezdařilo
   Subscription Settings:
+    Refresh These Feeds Together: "Obnovovat tyto kanály společně"
     Fetch Feed on Startup: Načíst kanál při spuštění
     Show New Content Feed: Zobrazovat kanál s novým obsahem
     RSS Feeds: RSS kanály
@@ -1308,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Jiné platformy
       Manage Channels: Spravovat sledované kanály
+      Enable Twitch Page: Povolit stránku Twitch
       Notify When Live: Upozornit, když sledované kanály na Twitchi začnou vysílat
       Auto Refresh Interval: Interval automatického obnovení jiných platforem
   Distraction Free Settings:
@@ -1353,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Skrýt indikátor synchronizace v záhlaví aplikace
     Hide Repeat Stats: Skrýt statistiky opakování
     Hide Playlist Stats: Skrýt statistiky playlistu
+    Hide Recommendation Details: Skrýt důvody doporučení a zpětnou vazbu
     Sections:
       Digital Wellbeing: "Digitální pohoda"
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky
@@ -1650,6 +1662,7 @@ Settings:
     Downloading: Stahování seznamů…
     Failed to Download: Seznamy se nepodařilo stáhnout
     Loaded Status: "Blokované kanály: {blocked} · Označené kanály: {warned} · Aktualizováno: {date}"
+  Highlight Changed Settings Label: Změněné
 Tutorial:
   Skip: Přeskočit
   Next: Další
@@ -1922,6 +1935,9 @@ Video:
     Zoom:
       Zoom: Přiblížení
       'Off': 'Vypnuto'
+    Lock Controls:
+      Lock Controls: "Zamknout ovládání"
+      Hold to Unlock: "Podržením odemknete"
     Volume Boost:
       Volume Boost: "Zesílení hlasitosti"
       'Off': "Vypnuto"
@@ -2388,6 +2404,7 @@ Tooltips:
     Normalize Loudness: 'Ztiší videa, která jsou hlasitější než většina, aby hlasitost mezi videi neskákala. Tichá videa si zachovají svou hlasitost. Funguje jen u videí načtených přes lokální API.'
     Pause on Stream Recovery: "Když video stream selže a přehrávač ho znovu načte nebo přepne na jiný formát či engine, přehrávání se pozastaví a chyba zůstane v horní části přehrávače, dokud ji nezavřete. Když je vypnuto, přehrávání pokračuje a chyba se krátce zobrazí jako oznámení."
     Continue Playback When Screen Is Locked: 'Ponechá zvuk přehrávaný na pozadí a zpřístupní ovládání médií systému Android. Vypnutím se přehrávání pozastaví, jakmile aplikace přestane být viditelná.'
+    Switch to Audio in Background: 'Přehrává zvukové formáty, když aplikace běží na pozadí nebo je obrazovka vypnutá, což šetří data i baterii. Obraz v obraze video zachová. Video se vrátí, jakmile aplikaci znovu otevřete. Vyžaduje pokračování přehrávání při zamčené obrazovce.'
     Ignore Headphone Controls: 'Ignoruje příkazy k přehrávání, pozastavení a přeskočení z Bluetooth zařízení, kabelových sluchátek a multimediálních kláves na klávesnicích, aby náhodná klepnutí na sluchátka nepřerušila přehrávání. Ovládání v aplikaci a v oznámení médií funguje dál.'
     Enable Caption Translations: Pokud video neposkytuje odpovídající původní stopu, tlačítko titulků a klávesová zkratka C při zapnutí upřednostní automaticky přeloženou stopu v preferovaném jazyce titulků.
     Use Quick Playback Speed Bar: Zobrazí na pravé straně ovládacích prvků přehrávače panel rychlé volby rychlosti. Pokud je zapnuté ruční ukládání rychlosti přehrávání pro jednotlivé kanály, panel obsahuje také tlačítko pro uložení rychlosti aktuálního kanálu.
@@ -2396,6 +2413,7 @@ Tooltips:
     Use YouTube-style Shorts: Zobrazí krátká videa v mřížce na výšku na stránkách odběrů a kanálů a použije pro ně přehrávač ve stylu YouTube.
     Loop Shorts: Pokud je funkce zapnutá, krátká videa se automaticky spustí znovu. Pokud je vypnutá, na konci se zastaví a zobrazí tlačítko pro opakované přehrání.
     Show Skip Silence Toggle: Zobrazí v nabídce nastavení přehrávače přepínač přeskakování ticha.
+    Show Mirror Video Toggle: "Zobrazí v nabídce nastavení přehrávače přepínač, který video vodorovně zrcadlí, aby se snáz dalo cvičit podle tanečních, cvičebních a hudebních návodů."
     Enable Skip Silence by Default: Zapne přeskakování ticha pro nové karty. Změna na jedné kartě neovlivní ostatní karty.
     Enable Video Zoom: Zobrazí v nabídce nastavení přehrávače ovládání přiblížení a zapne jeho klávesové zkratky a posouvání obrazu.
     Enable Seek History: Pamatuje si, odkud jste v každém videu přeskočili, dokud aplikaci nezavřete. Zobrazí seznam historie přeskoků v nabídce nastavení přehrávače a povolí její klávesové zkratky.
@@ -2417,6 +2435,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Před přednačtením všech videí playlistu s více než {count} videi požádá o potvrzení."
     Enable Timestamp Notes: "Přidá do přehrávače tlačítko a zkratku N, které pozastaví video a otevřou poznámku s odkazem na aktuální okamžik. Poznámky lze zkopírovat jako Markdown nebo je na počítači přidat do Obsidianu."
     Obsidian Vault: Název trezoru Obsidian pro poznámky s časovými značkami. Pokud je nastaven, lze poznámky přidávat do Obsidianu. Poznámky ke každému videu se shromažďují v poznámce pojmenované podle videa, ve složce trezoru pro nové poznámky.
+    Double-Tap With Two Fingers to Skip Chapters: "Dvojitým klepnutím dvěma prsty na pravou stranu videa přejdete na další kapitolu, na levou stranu se vrátíte na začátek aktuální kapitoly. Během prvních 3 sekund kapitoly vás levá strana místo toho přesune na předchozí kapitolu, takže opakováním postupně procházíte kapitoly zpět."
   Download Settings:
     Download Folder: Videa se ukládají do této složky. Chcete-li použít systémovou složku Stažené, ponechte pole prázdné.
     Global Additional yt-dlp Arguments: Další argumenty příkazového řádku předávané nástroji yt-dlp při každém stahování, například --cookies-from-browser firefox.
@@ -2447,6 +2466,7 @@ Tooltips:
     Bedtime Reminder: "Pozastaví video a mezi časem začátku a konce vám připomene, abyste přestali sledovat."
     Shorten View Counts: Zobrazí počty zhlédnutí, komentářů a hodnocení komentářů, které YouTube již zaokrouhlil do zkrácené podoby, například 14K místo 14,000. Přesné počty se vždy zobrazují celé.
   Subscription Settings:
+    Refresh These Feeds Together: "Když obnovíte jeden ze zaškrtnutých kanálů, ostatní zaškrtnuté kanály se obnoví hned po něm. Automatické obnovování se dál řídí vlastním intervalem každého kanálu."
     Fetch Feed on Startup: Pokud je funkce zapnutá, OpenTubeX automaticky načte kanál odběrů při spuštění a při otevření nového okna.
     Show New Content Feed: Zobrazí kartu Nové s položkami kanálu odběrů, které při předchozím načtení nebyly dostupné.
     Enable RSS Feeds: Zobrazí na stránce Odběry kartu RSS s položkami kanálů RSS nebo Atom, abyste mohli sledovat tvůrce z jiných platforem. Její položky se otevírají pomocí yt-dlp.
@@ -2457,10 +2477,12 @@ Tooltips:
     Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
     RSS Feeds Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje vaše RSS kanály, když je aplikace otevřená.
     Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
-    Show Collaborations From Other Channels: "Zobrazuje také videa, která odebírané kanály natočily společně s jiným kanálem, jenž je nahrál. YouTube je uvádí pouze na kartě Domů daného kanálu, takže každá aktualizace videí načte pro každý kanál o jednu stránku navíc. Najdou se jen nejnovější spolupráce, které se tam zobrazují, některé kanály žádné nezobrazují a jejich data zveřejnění jsou přibližná. Není k dispozici s rozhraním Invidious API."
+    Show Collaborations From Other Channels: "Zobrazuje také videa, která odebírané kanály natočily společně s jiným kanálem, jenž je nahrál. YouTube je uvádí pouze na kartě Domů daného kanálu, takže aktualizace videí zkontroluje nejvýše několik kanálů a nové se mohou objevit až za den nebo později. Najdou se jen nejnovější spolupráce, které se tam zobrazují, některé kanály žádné nezobrazují a jejich data zveřejnění jsou přibližná. Není k dispozici s rozhraním Invidious API."
     Platforms Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje kanály, které sledujete na jiných platformách, když je aplikace otevřená.
+    Enable Twitch Page: Umožní otevřít stránku Twitch z navigace a z palety příkazů. Najdete na ní oblíbené kategorie a kanály živě a můžete na Twitchi vyhledávat.
     Twitch Notify When Live: Upozorní vás, když některý z vašich sledovaných kanálů na Twitchi začne vysílat. OpenTubeX kontroluje každých několik minut, když je otevřený, a také když je zavřený, pokud v tu dobu aktualizuje odběry.
   Theme Settings:
+    Toggle Playback With Tab Icon: Kliknutím na ikonu karty s přehrávaným nebo pozastaveným videem jej pozastavíte nebo obnovíte, aniž byste na tuto kartu přepnuli.
     Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav, včetně těch s možností Zpět. Chyby, varování, nastavená připomenutí a oznámení vyžadující rozhodnutí, například výzvy k aktualizaci, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
@@ -2519,6 +2541,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Vrátit poslední přeskok zpět
   Redo Seek: Znovu provést vrácený přeskok
   New Incognito Tab: Vytvořit novou anonymní kartu
+  Shortcuts Label: Zkratky
 CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů
@@ -2553,6 +2576,8 @@ CommandPalette:
     Download Finished: Toto stahování již neprobíhá
     Video: Nejprve otevřete video
 Downloads:
+  Stop Recording: "Zastavit nahrávání"
+  Recording: "Nahrává se"
   File Name Template Invalid: 'Použijte relativní cestu uvnitř složky stahování bez "..", "~", "$", "%" nebo předpony jako "thumbnail:".'
   Search Completed: "Hledat dokončená stahování podle názvu nebo kanálu"
   Format: "Formát"
@@ -2696,6 +2721,22 @@ App Icon:
   Saved Message: "Ikona byla uložena. Aktualizace spouštěče může chvíli trvat."
   Title: "Ikona aplikace"
   Error: "Ikonu aplikace se nepodařilo načíst nebo změnit"
+
+App Lock:
+  Title: "Zámek aplikace"
+  Enable: "Vyžadovat zámek obrazovky"
+  Enable Tooltip: "Při návratu do OpenTubeX požádá o otisk prstu, obličej, PIN, gesto nebo heslo. V Androidu 13 a novějším se také v přehledu nedávných aplikací nezobrazuje náhled aplikace."
+  Lock After: "Zamknout po"
+  Immediately: "Okamžitě"
+  1 Minute: "1 minutě"
+  5 Minutes: "5 minutách"
+  15 Minutes: "15 minutách"
+  1 Hour: "1 hodině"
+  Unavailable: "Pokud chcete používat zámek aplikace, nastavte zámek obrazovky v nastavení Androidu."
+  Error: "Zámek aplikace se nepodařilo změnit"
+  Locked: "OpenTubeX je zamčený"
+  Unlock: "Odemknout"
+  Prompt Title: "Odemknout OpenTubeX"
 
 Tray:
   Hide All Windows: "Skrýt všechna okna"
@@ -2875,6 +2916,33 @@ Platforms:
   Verify: "Ověřit"
   Categories: "Kategorie"
   Category Not Found: "Tuto kategorii se nepodařilo najít."
+  Category Tags: "Štítky kategorie"
+  Stream Tags: "Štítky streamu"
+  Language: "Jazyk"
+  All Languages: "Všechny jazyky"
+  Other Language: "Jiný"
+  American Sign Language: "americký znakový jazyk"
+  Search Tags: "Hledat štítky"
+  Add Tag: "Přidat štítek"
+  Remove Tag: "Odebrat {tag}"
+  Sort:
+    Viewers: "Sledující (od nejvyššího po nejnižší)"
+    Viewers Ascending: "Sledující (od nejnižšího po nejvyšší)"
+    Started: "Nedávno zahájené"
+    Relevance: "Doporučené"
+    Published: "Nedávno zveřejněná"
+    Views: "Zhlédnutí (od nejvyššího po nejnižší)"
+    Top Day: "Top za 24 hodin"
+    Top Week: "Top za 7 dní"
+    Top Month: "Top za 30 dní"
+    Top All: "Top za všechny časy"
+  Video Type:
+    Video Type: "Typ videa"
+    All: "Všechna videa"
+    Archive: "Minulá vysílání"
+    Highlight: "Nejzajímavější momenty"
+    Upload: "Nahraná videa"
+  Anonymous: "Anonymní"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpověděl(a) uživateli {commentAuthor}"
   Like: "Líbí se mi"
@@ -2909,5 +2977,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hledat na Twitchi"
+  Search Placeholder: "Kategorie a kanály"
 New Incognito Tab: Nová anonymní karta
 Incognito Tab: Anonymní karta

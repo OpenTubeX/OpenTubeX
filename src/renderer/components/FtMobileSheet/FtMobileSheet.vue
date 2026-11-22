@@ -318,7 +318,9 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
         { transform: docked.value ? 'translateY(100%)' : 'translateY(24px)', opacity: docked.value ? 1 : 0 }
       ], { ...motionTiming('--motion-default-effects', 180, 'ease-in'), fill: 'forwards' }))
       try { await animation.finished } catch { return }
-      if (!closing) return
+      // A reopen can flip props.open back to true before the post-flush watcher
+      // clears `closing`; do not let a finished close animation dismiss it.
+      if (!closing || sequence !== openingSequence || (props.enabled && props.open)) return
     }
     element.close()
     release()

@@ -1,5 +1,6 @@
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
+import { getTwoFingerTapPoint, isTwoFingerDoubleTap, TWO_FINGER_DOUBLE_TAP_GAP } from '../../../helpers/player/twoFingerTap.js'
 
 // A vertical swipe of this distance commits on release, even without a fling.
 const MOBILE_SWIPE_COMMIT_DISTANCE = 64
@@ -35,6 +36,8 @@ export function useMobileFullscreenGestures({
   isScrollMiniPlayerActive,
   isShortsPlayer,
   seekOnDoubleTap,
+  isTwoFingerTapEnabled = () => false,
+  onTwoFingerDoubleTap = () => false,
   getSwipeAction = () => 'disabled',
   getAnimationSpeedMultiplier = () => 1,
   adjustments,
@@ -91,6 +94,8 @@ export function useMobileFullscreenGestures({
   let mobileControlSuppressClickUntil = 0
   let mobileSurfaceSuppressTouchEndUntil = 0
   let mobileAdjustmentTouchEnd = false
+  // Shaka stops its idle timer for touchmoves until a touchend restarts it
+  let mobileShakaTouchMoved = false
   let mobileGestureTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
@@ -135,6 +140,8 @@ export function useMobileFullscreenGestures({
     }
 
     mobileGestureTouchCancelled = false
+    // A canceled touch never reached the touchend that clears this
+    mobileShakaTouchMoved = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
@@ -694,12 +701,15 @@ export function useMobileFullscreenGestures({
     if (!mobileFullscreenGesture || mobileFullscreenGesture.action === 'disabled' || mobileFullscreenGesture.seeking) {
       // This movement stops Shaka's idle timer, so its touch end must restart it.
       mobileAdjustmentTouchEnd = false
+      mobileShakaTouchMoved = true
       return
     }
     event.stopImmediatePropagation()
   }
 
   function handleMobilePlayerTouchEnd(event) {
+    // Shaka gets this touchend, or the synthetic one below unless it never saw the touch move
+    mobileShakaTouchMoved = false
     // Compare the input time so a busy main thread cannot let the touchend of
     // an already handled tap reach Shaka's own surface toggle.
     if (
@@ -726,6 +736,17 @@ export function useMobileFullscreenGestures({
     // Shaka's surface-tap handler is on the child controls container. Notify
     // only the player container so its touchmove-stopped idle timer resumes.
     getContainer()?.dispatchEvent(new Event('touchend'))
+  }
+
+  // For a touchend that the player stops before this composable handles it,
+  // such as after a canceled playback speed hold.
+  function handleStoppedPlayerTouchEnd() {
+    const moved = mobileShakaTouchMoved
+    mobileShakaTouchMoved = false
+    // The gesture suppressed this touchend, not the synthetic one
+    mobileSurfaceSuppressTouchEndUntil = 0
+    // Without a touchend after its touchmoves, Shaka keeps the controls shown
+    if (moved) getContainer()?.dispatchEvent(new Event('touchend'))
   }
 
   function handleMobilePlayerSurfaceClick(event) {
@@ -758,7 +779,116 @@ export function useMobileFullscreenGestures({
     return true
   }
 
+  // #region two-finger taps
+
+  /** @type {{ touches: Map<number, { startX: number, startY: number, maxDistance: number, lifted: boolean }>, startTime: number, valid: boolean, controlsShownAtStart: boolean } | null} */
+  let mobileTwoFingerTap = null
+  /** @type {{ direction: number, endTime: number } | null} */
+  let lastMobileTwoFingerTap = null
+  /** @type {number | null} */
+  let mobileTwoFingerTapTimer = null
+
+  // Whether the fingers on the player could still become a two-finger tap.
+  function isMobileTwoFingerTapCandidate() {
+    return mobileTwoFingerTap?.valid === true && mobileTwoFingerTap.touches.size === 2
+  }
+
+  function clearMobileTwoFingerTaps() {
+    clearTimeout(mobileTwoFingerTapTimer)
+    mobileTwoFingerTapTimer = null
+    mobileTwoFingerTap = null
+    lastMobileTwoFingerTap = null
+  }
+
+  // A pinch that starts zooming is never a tap.
+  function invalidateMobileTwoFingerTap() {
+    if (mobileTwoFingerTap) mobileTwoFingerTap.valid = false
+  }
+
+  /**
+   * Follows every touch on the player, alongside the other gestures, to find
+   * two-finger double taps on either side. Fingers that move past the tap
+   * slop, as in a pinch, or a third finger never count.
+   * @param {PointerEvent} event
+   */
+  function trackMobileTwoFingerTap(event) {
+    if (event.pointerType !== 'touch') return
+    if (event.type === 'pointerdown') {
+      if (event.isPrimary) {
+        clearTimeout(mobileTwoFingerTapTimer)
+        mobileTwoFingerTapTimer = null
+        if (!isCapacitorMobilePlayer() || isScrollMiniPlayerActive() || isShortsPlayer() || !isTwoFingerTapEnabled()) {
+          clearMobileTwoFingerTaps()
+          return
+        }
+        mobileTwoFingerTap = {
+          touches: new Map(),
+          startTime: event.timeStamp,
+          valid: true,
+          controlsShownAtStart: getControls()?.getControlsContainer().hasAttribute('shown') === true,
+        }
+      }
+      if (!mobileTwoFingerTap) return
+      if (mobileTwoFingerTap.touches.size >= 2 || !isPlayerSurfaceTarget(event.target)) {
+        mobileTwoFingerTap.valid = false
+      }
+      mobileTwoFingerTap.touches.set(event.pointerId, { startX: event.clientX, startY: event.clientY, maxDistance: 0, lifted: false })
+      return
+    }
+
+    const tap = mobileTwoFingerTap
+    const touch = tap?.touches.get(event.pointerId)
+    if (!touch || touch.lifted) return
+    if (event.type === 'pointercancel') {
+      clearMobileTwoFingerTaps()
+      return
+    }
+    touch.maxDistance = Math.max(touch.maxDistance, Math.hypot(event.clientX - touch.startX, event.clientY - touch.startY))
+    if (event.type !== 'pointerup') return
+
+    touch.lifted = true
+    const touches = [...tap.touches.values()]
+    const point = tap.valid ? getTwoFingerTapPoint(touches, event.timeStamp - tap.startTime) : null
+    // Shaka would toggle its controls for the touchend of each finger.
+    if (point) mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+    if (touches.some(({ lifted }) => !lifted)) return
+
+    mobileTwoFingerTap = null
+    if (!point) {
+      lastMobileTwoFingerTap = null
+      return
+    }
+    const controls = getControls()
+    if (controls?.anySettingsMenusAreOpen()) {
+      lastMobileTwoFingerTap = null
+      controls.hideSettingsMenus()
+      return
+    }
+    const direction = getMobileTapDirection(point.x)
+    if (isTwoFingerDoubleTap(lastMobileTwoFingerTap, { direction, startTime: tap.startTime })) {
+      lastMobileTwoFingerTap = null
+      if (onTwoFingerDoubleTap(direction)) lightHaptic()
+      return
+    }
+    // A lone two-finger tap toggles the controls like a one-finger tap.
+    if (!direction) {
+      lastMobileTwoFingerTap = null
+      applyMobilePlayerSurfaceTap(!tap.controlsShownAtStart)
+      return
+    }
+    // Pair taps by their input times only: a busy main thread can run this
+    // timer before it handles a second tap that came in time.
+    lastMobileTwoFingerTap = { direction, endTime: event.timeStamp }
+    mobileTwoFingerTapTimer = window.setTimeout(() => {
+      mobileTwoFingerTapTimer = null
+      applyMobilePlayerSurfaceTap(!tap.controlsShownAtStart)
+    }, TWO_FINGER_DOUBLE_TAP_GAP)
+  }
+
+  // #endregion two-finger taps
+
   onUnmounted(() => {
+    clearMobileTwoFingerTaps()
     mobileFullscreenSettleSequence++
     clearMobileMiniPlayerDismiss()
     clearMobileSeekFeedback()
@@ -771,6 +901,7 @@ export function useMobileFullscreenGestures({
     mobilePlayerSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileAdjustmentTouchEnd = false
+    mobileShakaTouchMoved = false
     mobileTitleSuppressClickUntil = 0
     mobileFullscreenTitleGesture = null
     lastMobileFullscreenTitleTap = null
@@ -785,6 +916,9 @@ export function useMobileFullscreenGestures({
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     handleMobilePlayerTouchMove,
+    handleStoppedPlayerTouchEnd,
+    invalidateMobileTwoFingerTap,
+    isMobileTwoFingerTapCandidate,
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
@@ -793,5 +927,6 @@ export function useMobileFullscreenGestures({
     moveMobileFullscreenGesture,
     releaseMobileFullscreenSwipe,
     startMobileFullscreenGesture,
+    trackMobileTwoFingerTap,
   }
 }

@@ -257,6 +257,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
   RSS Feeds:
+    Load More Items: Carrega més elements
     Refreshing: "S'estan actualitzant els canals RSS"
     Tab: RSS
     Followed Feeds: Canals RSS seguits
@@ -631,6 +632,7 @@ Settings:
       Memory: memòria
       Network: xarxa
       Disk: disc
+    Label: Rendiment
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
     Invidious Instance Username: 'Nom d''usuari de la instància'
@@ -763,6 +765,8 @@ Settings:
       Auto: Automàtic
     Preferred API Backend:
       Yattee Server: Servidor Yattee
+      Local API Extension Required: L’aplicació web només pot utilitzar l’API local amb l’extensió de navegador OpenTubeX Local API.
+      Install Local API Extension: Instal·la l’extensió
     Yattee Server:
       Server URL: URL del servidor Yattee
       Username: Nom d'usuari
@@ -803,6 +807,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Toggle Playback With Tab Icon: Reprodueix i posa en pausa amb la icona de la pestanya
     Theme and Colors: "Tema i colors"
     Font Size: Mida de la lletra
     Sections:
@@ -1097,6 +1102,7 @@ Settings:
     Mono Audio: 'Àudio mono'
     Normalize Loudness: 'Normalitza el volum'
     Show Mono Audio Toggle: 'Mostra el commutador d''àudio mono'
+    Show Mirror Video Toggle: "Mostra el commutador per emmirallar el vídeo"
     Default Media Format:
       Default Media Format: 'Format multimèdia predeterminat'
     Pause on Stream Recovery: "Posa en pausa en recuperar el flux"
@@ -1126,6 +1132,7 @@ Settings:
     Enable DLNA Casting: "Activa la transmissió DLNA"
     Skip Unavailable Playlist Videos: "Omet els vídeos no disponibles de les llistes de reproducció"
     Lights Off: Llums apagats
+    Mirror Video: "Emmiralla el vídeo"
     Show Lights Off Toggle: Mostra el commutador per apagar els llums
     Show Volume Boost Toggle: "Mostra el commutador d'amplificació del volum"
     Swipe Gestures:
@@ -1139,6 +1146,7 @@ Settings:
       Unavailable: No s’han pogut ajustar els controls de reproducció.
     yt-dlp Streaming: "Reproducció en continu amb yt-dlp"
     Continue Playback When Screen Is Locked: 'Continua la reproducció amb la pantalla bloquejada'
+    Switch to Audio in Background: 'Canvia als formats d’àudio en segon pla'
     Ignore Headphone Controls: 'Ignora els controls dels auriculars'
     Music Visualizer: Visualitzador de música
     Automatically Open Chapters: Obre els capítols automàticament
@@ -1299,6 +1307,7 @@ Settings:
     Timestamp Notes:
       Enable: "Activa les notes amb marca de temps"
       Obsidian Vault: Magatzem d'Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Toc doble amb dos dits per saltar capítols"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1556,6 +1565,7 @@ Settings:
     Cleanup Complete: Ha acabat la neteja de l'emmagatzematge
     Cleanup Failed: Ha fallat la neteja de l'emmagatzematge
   Subscription Settings:
+    Refresh These Feeds Together: "Actualitza aquests canals alhora"
     Fetch Feed on Startup: Obtén el canal en iniciar
     Show New Content Feed: Mostra el canal de contingut nou
     RSS Feeds: Canals RSS
@@ -1579,6 +1589,7 @@ Settings:
     Platforms:
       Other Platforms: Altres plataformes
       Manage Channels: Gestiona els canals seguits
+      Enable Twitch Page: Activa la pàgina de Twitch
       Notify When Live: Notifica quan els canals de Twitch seguits comencin una emissió en directe
       Auto Refresh Interval: Interval d'actualització automàtica d'altres plataformes
   Distraction Free Settings:
@@ -1624,6 +1635,7 @@ Settings:
     Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Hide Playlist Stats: Amaga les estadístiques de la llista de reproducció
+    Hide Recommendation Details: Amaga els motius de les recomanacions i les valoracions
     Sections:
       Digital Wellbeing: "Benestar digital"
       Side Bar: Barra lateral
@@ -2015,6 +2027,7 @@ Settings:
     Downloading: S'estan baixant les llistes…
     Failed to Download: No s'han pogut baixar les llistes
     Loaded Status: "Canals bloquejats: {blocked} · Canals marcats: {warned} · Actualitzat: {date}"
+  Highlight Changed Settings Label: Canviats
 Tutorial:
   Skip: Omet
   Next: Següent
@@ -2390,6 +2403,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Desactivat
+    Lock Controls:
+      Lock Controls: "Bloqueja els controls"
+      Hold to Unlock: "Mantén premut per desbloquejar"
     Volume Boost:
       Volume Boost: "Amplificació del volum"
       'Off': "Desactivada"
@@ -2939,6 +2955,7 @@ Tooltips:
     Normalize Loudness: 'Abaixa el volum dels vídeos que sonen més fort que la majoria perquè el volum no faci salts entre vídeos. Els vídeos fluixos mantenen el seu volum. Només funciona amb els vídeos carregats amb l''API local.'
     Pause on Stream Recovery: "Quan el flux de vídeo falla i el reproductor el torna a carregar o canvia a un altre format o motor, la reproducció es posa en pausa i l'error es manté a la part superior del reproductor fins que el descartis. Si està desactivat, la reproducció continua i l'error apareix breument com a notificació."
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
+    Switch to Audio in Background: 'Reprodueix formats d’àudio mentre l’aplicació és en segon pla o la pantalla està apagada, cosa que estalvia dades i bateria. La imatge en imatge conserva el vídeo. El vídeo torna quan tornes a obrir l’aplicació. Cal continuar la reproducció amb la pantalla bloquejada.'
     Ignore Headphone Controls: 'Ignora les ordres de reproducció, pausa i salt dels dispositius Bluetooth, els auriculars amb cable i les tecles multimèdia dels teclats, perquè els tocs accidentals als auriculars no interrompin la reproducció. Els controls de l''aplicació i de la notificació multimèdia continuen funcionant.'
     Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
     Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
@@ -2951,6 +2968,7 @@ Tooltips:
     Use YouTube-style Shorts: Mostra els vídeos curts en una quadrícula vertical a les pàgines de subscripcions i canals i utilitza el reproductor de vídeos curts a l'estil de YouTube.
     Loop Shorts: Si s'activa, els vídeos curts es reinicien automàticament. Si es desactiva, s'aturen al final i mostren un botó per tornar-los a reproduir.
     Show Skip Silence Toggle: Mostra un commutador per ometre silencis al menú de configuració del reproductor.
+    Show Mirror Video Toggle: "Mostra un commutador al menú de configuració del reproductor que gira el vídeo horitzontalment, perquè sigui més fàcil seguir tutorials de ball, d'exercici i d'instruments."
     Enable Skip Silence by Default: Activa l'omissió de silencis a les pestanyes noves. Canviar-ho en una pestanya no afecta les altres.
     Enable Video Zoom: Mostra el control de zoom al menú de configuració del reproductor i n'activa les dreceres de teclat i els controls de panoràmica.
     Enable Seek History: Recorda des d'on has saltat en cada vídeo fins que es tanca l'aplicació. Mostra la llista de l'historial de salts al menú de configuració del reproductor i activa les seves dreceres de teclat.
@@ -2972,6 +2990,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Demana confirmació abans de precarregar tots els vídeos d’una llista de reproducció amb més de {count} vídeos."
     Enable Timestamp Notes: "Afegeix un botó al reproductor i la drecera N, que posen en pausa el vídeo i obren una nota que enllaça amb el moment actual. Les notes es poden copiar com a Markdown o, a l'escriptori, afegir a Obsidian."
     Obsidian Vault: Nom del magatzem d'Obsidian per a les notes amb marca de temps. Si s'estableix, les notes es poden afegir a Obsidian. Les notes de cada vídeo es recullen en una nota amb el nom del vídeo, a la carpeta del magatzem per a notes noves.
+    Double-Tap With Two Fingers to Skip Chapters: "Feu doble toc amb dos dits al costat dret del vídeo per saltar al capítol següent, o al costat esquerre per tornar a l'inici del capítol actual. Durant els primers 3 segons d'un capítol, el costat esquerre us porta en canvi al capítol anterior, de manera que, si ho repetiu, aneu retrocedint pels capítols."
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
@@ -3013,6 +3032,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Introduïu una paraula, un fragment de paraula o una frase, sense distinció entre majúscules i minúscules, per ocultar a tot l'OpenTubeX els vídeos, les llistes de reproducció i els canals que la continguin al títol original. Només s'exclouen Historial, Les vostres llistes de reproducció i els vídeos dins de llistes.
     Hide Videos on Watch: Oculta els vídeos vistos de les pestanyes Vídeos, Vídeos curts i En directe de les pàgines de subscripcions i canals. No afecta la pestanya Inici de les pàgines dels canals
   Subscription Settings:
+    Refresh These Feeds Together: "Quan actualitzes un dels canals marcats, els altres canals marcats s'actualitzen just després. Les actualitzacions automàtiques continuen seguint l'interval de cada canal."
     Fetch Feeds from RSS: Si s'activa, l'OpenTubeX utilitza RSS en lloc del mètode predeterminat per obtenir el canal de subscripcions. RSS és més ràpid i evita els bloqueigs d'IP, però no proporciona algunes dades, com ara la durada dels vídeos, l'estat en directe o les publicacions
     Fetch Feed on Startup: Si s'activa, l'OpenTubeX obté automàticament el canal de subscripcions en iniciar-se i en obrir una finestra nova.
     Show New Content Feed: Mostra una pestanya Nou amb els elements del canal de subscripcions que no hi eren en l'obtenció anterior.
@@ -3024,10 +3044,12 @@ Tooltips:
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
     RSS Feeds Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els vostres canals RSS mentre l'aplicació és oberta.
     Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
-    Show Collaborations From Other Channels: "També mostra els vídeos que els canals als quals esteu subscrit han fet juntament amb un altre canal que els ha penjat. YouTube només els mostra a la pestanya Inici d'un canal, de manera que cada actualització de vídeos carrega una pàgina més per canal. Només es troben les col·laboracions més recents que s'hi mostren, alguns canals no en mostren cap i les dates de publicació són aproximades. No disponible amb l'API d'Invidious."
+    Show Collaborations From Other Channels: "També mostra els vídeos que els canals als quals esteu subscrit han fet juntament amb un altre canal que els ha penjat. YouTube només els mostra a la pestanya Inici d'un canal, de manera que una actualització de vídeos comprova com a màxim uns quants canals, i les noves poden trigar un dia o més a aparèixer. Només es troben les col·laboracions més recents que s'hi mostren, alguns canals no en mostren cap i les dates de publicació són aproximades. No disponible amb l'API d'Invidious."
     Platforms Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els canals que seguiu en altres plataformes mentre l'aplicació és oberta.
+    Enable Twitch Page: Permet obrir la pàgina de Twitch des de la navegació i la paleta d'ordres. Hi podeu explorar categories populars i canals en directe i cercar a Twitch.
     Twitch Notify When Live: Et notifica quan un dels canals de Twitch que segueixes comença a emetre. OpenTubeX ho comprova cada pocs minuts mentre és obert, i també mentre és tancat si llavors actualitza les subscripcions.
   Theme Settings:
+    Toggle Playback With Tab Icon: En fer clic a la icona d’una pestanya amb un vídeo en reproducció o en pausa, es posa en pausa o es reprèn sense canviar a aquesta pestanya.
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat, incloses les que ofereixen Desfés. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que demanen una decisió, com ara les sol·licituds d'actualització, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
@@ -3183,6 +3205,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Desfés l'últim salt
   Redo Seek: Refés un salt desfet
   New Incognito Tab: Crea una pestanya d’incògnit nova
+  Shortcuts Label: Dreceres
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres
@@ -3217,6 +3240,8 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  Stop Recording: "Atura l’enregistrament"
+  Recording: "S’està enregistrant"
   File Name Template Invalid: 'Utilitzeu un camí relatiu dins de la carpeta de baixades sense "..", "~", "$", "%" ni un prefix com ara "thumbnail:".'
   Search Completed: "Cerca les baixades completades per títol o canal"
   Format: "Format"
@@ -3358,6 +3383,22 @@ App Icon:
   Saved Message: "Icona desada. El llançador pot trigar un moment a actualitzar-se."
   Title: "Icona de l'aplicació"
   Error: "No s'ha pogut carregar o canviar la icona de l'aplicació"
+
+App Lock:
+  Title: "Bloqueig de l'aplicació"
+  Enable: "Exigeix el bloqueig de pantalla"
+  Enable Tooltip: "Demana l'empremta digital, la cara, el PIN, el patró o la contrasenya quan torneu a OpenTubeX. A Android 13 i posteriors, les aplicacions recents tampoc no mostren una previsualització de l'aplicació."
+  Lock After: "Bloqueja després de"
+  Immediately: "Immediatament"
+  1 Minute: "1 minut"
+  5 Minutes: "5 minuts"
+  15 Minutes: "15 minuts"
+  1 Hour: "1 hora"
+  Unavailable: "Configureu un bloqueig de pantalla a la configuració d'Android per utilitzar el bloqueig de l'aplicació."
+  Error: "No s'ha pogut canviar el bloqueig de l'aplicació"
+  Locked: "OpenTubeX està bloquejat"
+  Unlock: "Desbloqueja"
+  Prompt Title: "Desbloqueja OpenTubeX"
 
 Tray:
   Hide All Windows: "Amaga totes les finestres"
@@ -3523,6 +3564,33 @@ Platforms:
   Verify: "Verifica"
   Categories: "Categories"
   Category Not Found: "No s'ha pogut trobar aquesta categoria."
+  Category Tags: "Etiquetes de la categoria"
+  Stream Tags: "Etiquetes de la retransmissió"
+  Language: "Llengua"
+  All Languages: "Totes les llengües"
+  Other Language: "Altres"
+  American Sign Language: "llengua de signes americana"
+  Search Tags: "Cerca etiquetes"
+  Add Tag: "Afegeix una etiqueta"
+  Remove Tag: "Elimina {tag}"
+  Sort:
+    Viewers: "Espectadors (de més a menys)"
+    Viewers Ascending: "Espectadors (de menys a més)"
+    Started: "Iniciades recentment"
+    Relevance: "Recomanat"
+    Published: "Publicats recentment"
+    Views: "Visualitzacions (de més a menys)"
+    Top Day: "Millors de 24 hores"
+    Top Week: "Millors de 7 dies"
+    Top Month: "Millors de 30 dies"
+    Top All: "Millors de tots els temps"
+  Video Type:
+    Video Type: "Tipus de vídeo"
+    All: "Tots els vídeos"
+    Archive: "Emissions anteriors"
+    Highlight: "Destacats"
+    Upload: "Pujades"
+  Anonymous: "Anònim"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha respost a {commentAuthor}"
   Like: "M'agrada"
@@ -3557,5 +3625,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca a Twitch"
+  Search Placeholder: "Categories i canals"
 New Incognito Tab: Pestanya d’incògnit nova
 Incognito Tab: Pestanya d’incògnit
