@@ -109,14 +109,18 @@ test('deleting a separate profile deletes its data, and deleting another profile
   onScopeDataDeleted(scope => { deletedQueues.push(scope) })
   await Profiles.create({ _id: 'separate', name: 'Kids', separate: true, subscriptions: [] })
   await Profiles.create({ _id: 'shared', name: 'Music', subscriptions: [] })
-  const before = scopedHandlers('separate')
+  const searches = scopedHandlers('separate').searchHistory
+  await searches.upsert({ _id: 'query', query: 'query', lastUpdatedAt: 1 })
+  await searches.delete('query')
 
   await Profiles.delete('shared')
   assert.deepEqual(dropped, [])
   await Profiles.delete('separate')
   assert.deepEqual(dropped, ['separate'])
   assert.deepEqual(deletedQueues, ['separate'])
-  assert.notEqual(scopedHandlers('separate'), before, 'a later profile with this ID starts empty')
+  // A later profile with this ID starts empty, without the deleted profile's searches or their removal marks.
+  await scopedHandlers('separate').searchHistory.upsert({ _id: 'query', query: 'query', lastUpdatedAt: 1 })
+  assert.deepEqual((await scopedHandlers('separate').searchHistory.find()).map(entry => entry.query), ['query'])
   assert.deepEqual(await db.profiles.findAsync({}), [])
 
   // The app keeps a profile whose data failed to delete, so deleting it again finishes the job.
