@@ -108,7 +108,9 @@ test('Takeout selection opens before decoding and previews only selected categor
     computed: getter => ({ get value() { return getter() } }),
     pickFileWithPicker: async () => file,
     listYouTubeTakeoutZipEntries: async () => entries,
-    readImportState: async categories => { reads.push(categories); return {} },
+    readImportState: async (categories, scope) => { reads.push({ categories, scope }); return {} },
+    // Takeout imports into a separate profile compare with its data.
+    store: { getters: { getActiveDataScope: 'separate' } },
     primaryProfile: { value: { subscriptions: [] } },
     IMPORT_DIRECTORY_ID: '',
     START_IN_DIRECTORY: '',
@@ -127,7 +129,8 @@ test('Takeout selection opens before decoding and previews only selected categor
   vm.runInContext('selectedTakeoutTypes.value = ["subscriptions"]', context)
   await context.previewSelectedTakeoutData()
   assert.deepEqual(previewCalls, [[entries[1]]])
-  assert.deepEqual(Array.from(reads[0]), [])
+  assert.deepEqual(Array.from(reads[0].categories), [])
+  assert.equal(reads[0].scope, 'separate')
   assert.equal(vm.runInContext('takeoutPreviewReady.value', context), true)
   vm.runInContext('selectedTakeoutTypes.value.push("history")', context)
   assert.equal(vm.runInContext('takeoutPreviewReady.value', context), false, 'Newly selected categories need a preview before importing')
@@ -160,20 +163,51 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     DBProfileHandlers: Profiles,
     normalizeImportedPlaylistThumbnail: async () => {},
     store: {
+      getters: { getActiveDataScope: null },
       async dispatch(action, playlists) {
         if (action === 'mergePlaylistBackup') for (const playlist of playlists) await Playlists.mergeBackup(playlist)
         return true
       },
     },
+    withDataScope: (_scope, operation) => operation(),
+    getDataScope: () => null,
     compactAllDatastores: async () => true,
     closeBackupImport() {},
     showToast() {},
     t: key => key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
   await context.importUnifiedBackup()
   assert.deepEqual((await db.profiles.findOneAsync({ _id: 'same-profile' })).subscriptions.map(channel => channel.id), ['A', 'B'])
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
+})
+
+test('a restore while a profile switch is pending, with the other profile selected but not yet loaded, writes each profile\'s history to its own data', async () => {
+  const writes = []
+  let dataScope = null
+  const context = vm.createContext({
+    // The switch to the separate profile waits for running writes.
+    store: {
+      getters: { getActiveDataScope: 'separate' },
+      dispatch: async action => { writes.push([action, dataScope]); return true },
+    },
+    getDataScope: () => dataScope,
+    withDataScope: (scope, operation) => {
+      const previous = dataScope
+      dataScope = scope
+      try { return operation() } finally { dataScope = previous }
+    },
+    DBHistoryHandlers: { mergeBackup: async () => { writes.push(['mergeBackup', dataScope]) } },
+  })
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
+  for (const scope of [null, 'separate']) {
+    await context.restoreBackupSections(scope, new Set(['history']), { history: [{ videoId: 'video' }] })
+  }
+  assert.deepEqual(writes, [['mergeBackup', null], ['mergeBackup', 'separate']])
+  // A failed write in another profile's data fails the restore.
+  context.DBHistoryHandlers.mergeBackup = async () => { throw new Error('disk full') }
+  await assert.rejects(context.restoreBackupSections('separate', new Set(['history']), { history: [{ videoId: 'video' }] }), /disk full/)
 })
 
 test('a backup whose settings fail to save reports them instead of the backup as imported', async () => {
@@ -190,6 +224,7 @@ test('a backup whose settings fail to save reports them instead of the backup as
     t: (key, values) => values ? `${key} ${JSON.stringify(values)}` : key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
   vm.runInContext(componentSection('function settingsImportFailureMessage(', 'async function applyImportedSettings('), context)
   await context.importUnifiedBackup()
   assert.deepEqual(toasts, ['Settings.Data Settings.Some settings could not be imported {"failed":1,"total":2}'])

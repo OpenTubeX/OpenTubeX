@@ -1388,6 +1388,7 @@ Settings:
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
     Blur Blocked Items: Niwlio eitemau wedi'u blocio yn lle eu cuddio
   Data Settings:
+    Backup separate profile data: "Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffil hwnnw. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} broffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} phroffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny."
     Subscription cache file: "Mae'r ffeil hon ond yn storio fideos o'ch tanysgrifiadau, nid y sianeli. Dewiswch profiles.db neu allforiad tanysgrifiadau yn lle."
     Settings could not be imported: "Methu mewnforio'r gosodiadau"
     Some settings could not be imported: "Methu mewnforio pob gosodiad ({failed} o {total} wedi methu)"
@@ -1715,6 +1716,13 @@ About:
   Email: E-bost
   Show tutorial: Dangos y tiwtorial
 Profile:
+  Keep Data Separate: "Cadw data ar wahân"
+  Keep Data Separate Tooltip: "Yn rhoi tanysgrifiadau, hanes gwylio, rhestrau chwarae, hanes chwilio, ystadegau gwylio a chiw eu hunain i'r proffil hwn. Nid yw eich proffiliau eraill yn eu gweld, ac nid yw'r proffil hwn yn gweld eu data nhw. Ni allwch newid hyn ar ôl creu'r proffil."
+  Separate Profile: "Proffil ar wahân"
+  Separate Profile Note: "Mae'r proffil hwn yn cadw ei danysgrifiadau, ei hanes a'i restrau chwarae ar wahân i'ch proffiliau eraill."
+  Separate Profile Deletion Warning: "Bydd ei danysgrifiadau, ei hanes gwylio, ei restrau chwarae, ei hanes chwilio, ei ystadegau gwylio a'i giw hefyd yn cael eu dileu."
+  Separate Data Notice: "Mae {profile} yn cadw ei ddata ar wahân, felly dim ond ei danysgrifiadau, ei hanes, ei restrau chwarae a'i hanes chwilio y mae'r mewnforion a'r allforion isod yn eu defnyddio."
+  Separate Data Storage Notice: "Mae {profile} yn cadw ei ddata ar wahân. Dim ond ei ddata ef y mae dileu hanes, ystadegau, hanes chwilio, tanysgrifiadau neu restrau chwarae yma yn ei ddileu, ond mae'r meintiau'n cynnwys data pob proffil."
   Customization: Addasu
   Manage Profile Subscriptions: Rheoli tanysgrifiadau proffil
   Icon Names:

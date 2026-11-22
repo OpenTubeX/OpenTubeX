@@ -315,9 +315,8 @@ const pendingRules = ref(null)
 let ruleUpdateSequence = 0
 const rules = computed(() => parseAutomaticDownloadRules(pendingRules.value ?? store.getters.getYtDlpAutomaticDownloadRules))
 const channels = computed(() => {
-  const allChannelsProfile = store.getters.getProfileList[0]
   const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
-  return [...(allChannelsProfile?.subscriptions ?? [])]
+  return [...store.getters.getSubscriptionRootProfile.subscriptions]
     .sort((a, b) => collator.compare(a.name || a.id, b.name || b.id))
 })
 const enabledRuleCount = computed(() => channels.value.filter(channel => rules.value[channel.id] !== undefined).length)

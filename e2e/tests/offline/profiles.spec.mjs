@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goToSettingsSection, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
@@ -110,7 +110,7 @@ for (const iconPack of ['material']) {
 
     test('new profiles use the default icon until named and retain manually chosen icons', async ({ app, page }, testInfo) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       const createOption = page.locator('.profileSettingsContent .profileList').getByRole('button', { name: 'Create New Profile', exact: true })
       await expect(createOption.locator('[data-icon="user-plus"]')).toHaveAttribute('data-icon-pack', iconPack)
       await expect(createOption.locator('[data-icon="user-plus"]')).toHaveAttribute('aria-hidden', 'true')
@@ -341,6 +341,80 @@ test.describe('profile selector', () => {
   })
 })
 
+test.describe('separate profile', () => {
+  const watched = (videoId, title) => ({
+    _id: videoId,
+    videoId,
+    title,
+    author: 'Channel',
+    authorId: 'UCshared',
+    published: 1700000000000,
+    timeWatched: 1700000001000,
+    description: '',
+    viewCount: 1,
+    lengthSeconds: 60,
+    watchProgress: 0,
+    isWatched: true,
+    isLive: false,
+    type: 'video',
+  })
+  test.use({
+    seed: {
+      settings: { defaultProfile: 'e2eprofile' },
+      profiles: [
+        { ...mainProfile, subscriptions: [{ id: 'UCshared', name: 'Shared channel', thumbnail: channelAvatar }] },
+        { ...secondProfile, name: 'Separate profile', separate: true, subscriptions: [{ id: 'UCseparate', name: 'Separate channel', thumbnail: channelAvatar }] },
+      ],
+      history: [watched('sharedvideo', 'Shared video')],
+    }
+  })
+
+  test('starts with its own data and shows the shared data again after switching back', async ({ page }) => {
+    // As the default profile, it never shows the shared history while starting.
+    await goTo(page, 'history')
+    await expect(page.locator('.historyPage, .ft-card').first()).toBeVisible()
+    await expect(page.getByText('Shared video')).toHaveCount(0)
+    await goTo(page, 'subscribedchannels')
+    await expect(page.getByText('Separate channel')).toBeVisible()
+    await expect(page.getByText('Shared channel')).toHaveCount(0)
+
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'All Channels' }).click()
+    await expect(page.getByText('Shared channel')).toBeVisible()
+    await expect(page.getByText('Separate channel')).toHaveCount(0)
+    await goTo(page, 'history')
+    await expect(page.getByText('Shared video')).toBeVisible()
+
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'Separate profile' }).click()
+    await expect(page.getByText('Shared video')).toHaveCount(0)
+  })
+})
+
+test.describe('separate profile following a shared channel', () => {
+  const channel = { id: 'UCboth', name: 'Shared channel', thumbnail: channelAvatar }
+  test.use({
+    seed: {
+      profiles: [{ ...mainProfile, subscriptions: [channel] }, { ...secondProfile, separate: true, subscriptions: [channel] }],
+    }
+  })
+
+  test('keeps the channel when All Channels removes it', async ({ app, page }) => {
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+    await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
+    await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
+    await page.locator('.selectionActions').getByRole('button', { name: 'Select All', exact: true }).click()
+    await page.locator('.selectionActions').getByRole('button', { name: 'Delete Selected', exact: true }).click()
+    await page.getByRole('button', { name: /^Yes, delete$/i }).click()
+    await expect.poll(() => {
+      const records = readDatastore(app.userDataDir, 'profiles').trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      const latest = id => records.findLast(record => record._id === id)
+      return [latest('allChannels').subscriptions.length, latest('e2eprofile').subscriptions.map(channel => channel.id)]
+    }).toEqual([0, ['UCboth']])
+  })
+})
+
 test.describe('default profile setting', () => {
   test.use({
     seed: {
@@ -370,7 +444,7 @@ test.describe('profile manager presentation', () => {
 
   test('spaces wrapped profile buttons and stacked editor sections on narrow layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     await resizeToCssWidth(app, page, 350, uiScale)
     const actions = page.locator('.profileActions')
@@ -412,7 +486,7 @@ test.describe('profile manager presentation', () => {
 
   test('switches profile tabs without losing draft customization across layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     const customization = page.getByRole('tab', { name: 'Customization', exact: true })
     const subscriptions = page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true })
@@ -509,7 +583,7 @@ test.describe('profile manager presentation', () => {
 
   test('keeps the profile filter scroll range valid after emptying subscriptions', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
     await setWindowSize(app, page, { width: Math.round(400 * uiScale / 100), height: Math.round(700 * uiScale / 100) })
@@ -545,7 +619,7 @@ test.describe('profile manager presentation', () => {
 
   test('disables subscription selection actions when they do not apply', async ({ page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
     const actions = page.locator('.selectionActions')
@@ -602,7 +676,7 @@ test.describe('profile manager', () => {
     for (const scale of [1, 1.25]) {
       test(`resets profile tab scrolling after switching from the bottom at ${scale} scale`, async ({ app, page }) => {
         await openProfileList(page)
-        await page.locator('.profilePanelHeader button').last().click()
+        await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
         await page.locator('.card .profileList').getByText('Second profile').click()
         await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
         await setWindowSize(app, page, { width: Math.round(375 * scale), height: Math.round(700 * scale) })
@@ -631,7 +705,7 @@ test.describe('profile manager', () => {
 
     test('clamps the scroll position after deleting an open profile', async ({ page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
 
       const scroller = page.locator('.settingsSubpageScroll')
@@ -654,7 +728,7 @@ test.describe('profile manager', () => {
 
     test('clamps the scroll positions after searching and deleting from the bottom', { tag: '@scale' }, async ({ page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
       await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
@@ -733,7 +807,7 @@ test.describe('profile manager', () => {
 
     test('pages channel lists and still selects and adds every channel', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
       await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
@@ -781,7 +855,7 @@ test.describe('profile manager', () => {
 
   test('a profile can be created through the UI and persists', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
 
@@ -818,7 +892,7 @@ test.describe('profile manager', () => {
 
     test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
       await page.locator('.themeColorOption').click()
       await page.locator('.profileColorPicker .colorFieldTrigger').click()
@@ -840,7 +914,7 @@ test.describe('profile manager', () => {
 
     test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
 
       await page.locator('.themeColorOption').click()
@@ -902,7 +976,7 @@ test.describe('profile manager', () => {
 
     test('preserves the theme color when cancelling picker changes', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
       await page.locator('.themeColorOption').click()
 
@@ -927,7 +1001,7 @@ test.describe('profile manager', () => {
 
   test('applies opaque black to an image profile that was transparent', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.card .profileList').getByText('All Channels').click()
 
     await page.locator('.imageInput').setInputFiles({
@@ -954,7 +1028,7 @@ test.describe('profile manager', () => {
 
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.card .profileList').getByText('All Channels').click()
 
     const makeDefaultButton = page.getByRole('button', { name: 'Make Default Profile' })

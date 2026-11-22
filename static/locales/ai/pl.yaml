@@ -906,6 +906,7 @@ Settings:
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
     Blur Blocked Items: Rozmywaj zablokowane elementy zamiast je ukrywać
   Data Settings:
+    Backup separate profile data: "Ta kopia zapasowa zawiera też dane {count} oddzielnego profilu, które zostaną przywrócone do tego profilu. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili."
     Subscription cache file: "Ten plik przechowuje w pamięci podręcznej tylko filmy z Twoich subskrypcji, a nie kanały. Zamiast niego wybierz profiles.db lub eksport subskrypcji."
     Settings could not be imported: "Nie udało się zaimportować ustawień"
     Some settings could not be imported: "Nie udało się zaimportować wszystkich ustawień (niepowodzenia: {failed} z {total})"
@@ -1164,6 +1165,13 @@ About:
   Matrix: Matrix
   Show tutorial: Pokaż samouczek
 Profile:
+  Keep Data Separate: "Przechowuj dane osobno"
+  Keep Data Separate Tooltip: "Daje temu profilowi własne subskrypcje, historię oglądania, playlisty, historię wyszukiwania, statystyki oglądania i kolejkę. Twoje pozostałe profile ich nie widzą, a ten profil nie widzi ich danych. Nie można tego zmienić po utworzeniu profilu."
+  Separate Profile: "Oddzielny profil"
+  Separate Profile Note: "Ten profil przechowuje swoje subskrypcje, historię i playlisty osobno od pozostałych profili."
+  Separate Profile Deletion Warning: "Zostaną też usunięte jego subskrypcje, historia oglądania, playlisty, historia wyszukiwania, statystyki oglądania i kolejka."
+  Separate Data Notice: "Profil {profile} przechowuje swoje dane osobno, więc poniższe importy i eksporty używają tylko jego subskrypcji, historii, playlist i historii wyszukiwania."
+  Separate Data Storage Notice: "Profil {profile} przechowuje swoje dane osobno. Usunięcie tutaj historii, statystyk, historii wyszukiwania, subskrypcji lub playlist usuwa tylko jego dane, a rozmiary obejmują dane wszystkich profili."
   Customization: Dostosowanie
   Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu
   Icon Names:

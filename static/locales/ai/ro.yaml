@@ -1389,6 +1389,7 @@ Settings:
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
     Blur Blocked Items: Estompează elementele blocate în loc să le ascunzi
   Data Settings:
+    Backup separate profile data: "Această copie de rezervă conține și datele unui profil separat ({count}), care sunt restaurate în acel profil. | Această copie de rezervă conține și datele a {count} profiluri separate, care sunt restaurate în acele profiluri. | Această copie de rezervă conține și datele a {count} de profiluri separate, care sunt restaurate în acele profiluri."
     Subscription cache file: "Acest fișier stochează în cache doar videoclipurile din abonamentele tale, nu și canalele. Alege în schimb profiles.db sau un export al abonamentelor."
     Settings could not be imported: "Setările nu au putut fi importate"
     Some settings could not be imported: "Nu toate setările au putut fi importate (eșuate: {failed} din {total})"
@@ -1731,6 +1732,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
   Show tutorial: Afișează tutorialul
 Profile:
+  Keep Data Separate: "Păstrează datele separate"
+  Keep Data Separate Tooltip: "Oferă acestui profil propriile abonamente, istoric de vizionări, liste de redare, istoric de căutări, statistici de vizionare și coadă. Celelalte profiluri ale tale nu le văd, iar acest profil nu le vede pe ale lor. Nu poți schimba acest lucru după crearea profilului."
+  Separate Profile: "Profil separat"
+  Separate Profile Note: "Acest profil își păstrează abonamentele, istoricul și listele de redare separate de celelalte profiluri ale tale."
+  Separate Profile Deletion Warning: "Vor fi șterse și abonamentele, istoricul de vizionări, listele de redare, istoricul de căutări, statisticile de vizionare și coada lui."
+  Separate Data Notice: "{profile} își păstrează datele separate, deci importurile și exporturile de mai jos folosesc doar abonamentele, istoricul, listele de redare și istoricul de căutări ale acestuia."
+  Separate Data Storage Notice: "{profile} își păstrează datele separate. Ștergerea aici a istoricului, a statisticilor, a istoricului de căutare, a abonamentelor sau a playlisturilor șterge doar datele acestuia, în timp ce dimensiunile includ datele tuturor profilurilor."
   Customization: Personalizare
   Manage Profile Subscriptions: Gestionează abonamentele profilului
   Icon Names:

@@ -1386,6 +1386,7 @@ Settings:
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
     Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
   Data Settings:
+    Backup separate profile data: "Þetta afrit inniheldur einnig gögn {count} aðskilins notandasniðs, sem eru endurheimt í það notandasnið. | Þetta afrit inniheldur einnig gögn {count} aðskilinna notandasniða, sem eru endurheimt í þau notandasnið."
     Subscription cache file: "Þessi skrá geymir aðeins myndskeið úr áskriftunum þínum í skyndiminni, ekki rásirnar. Veldu frekar profiles.db eða útflutning áskrifta."
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
     Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"
@@ -1711,6 +1712,13 @@ About:
   Email: Netfang
   Show tutorial: Sýna kynningu
 Profile:
+  Keep Data Separate: "Halda gögnum aðskildum"
+  Keep Data Separate Tooltip: "Gefur þessu notandasniði sínar eigin áskriftir, áhorfsferil, spilunarlista, leitarferil, áhorfstölfræði og biðröð. Önnur notandasnið þín sjá þetta ekki og þetta notandasnið sér ekki gögn þeirra. Ekki er hægt að breyta þessu eftir að notandasniðið hefur verið búið til."
+  Separate Profile: "Aðskilið notandasnið"
+  Separate Profile Note: "Þetta notandasnið heldur áskriftum sínum, ferli og spilunarlistum aðskildum frá öðrum notandasniðum þínum."
+  Separate Profile Deletion Warning: "Áskriftum þess, áhorfsferli, spilunarlistum, leitarferli, áhorfstölfræði og biðröð verður einnig eytt."
+  Separate Data Notice: "{profile} heldur gögnum sínum aðskildum, þannig að innflutningur og útflutningur hér að neðan notar aðeins áskriftir þess, feril, spilunarlista og leitarferil."
+  Separate Data Storage Notice: "{profile} heldur gögnum sínum aðskildum. Að eyða ferli, tölfræði, leitarferli, áskriftum eða spilunarlistum hér eyðir aðeins gögnum þess, en stærðirnar innihalda gögn allra notandasniða."
   Customization: Sérsnið
   Manage Profile Subscriptions: Stjórna áskriftum prófíls
   Icon Names:

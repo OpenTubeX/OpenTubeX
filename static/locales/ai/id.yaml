@@ -1388,6 +1388,7 @@ Settings:
     Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
     Blur Blocked Items: Buramkan item yang diblokir alih-alih menyembunyikannya
   Data Settings:
+    Backup separate profile data: "Cadangan ini juga berisi data {count} profil terpisah, yang dipulihkan ke profil tersebut."
     Subscription cache file: "File ini hanya menyimpan cache video dari langganan Anda, bukan salurannya. Pilih profiles.db atau ekspor langganan sebagai gantinya."
     Settings could not be imported: "Pengaturan tidak dapat diimpor"
     Some settings could not be imported: "Tidak semua pengaturan dapat diimpor ({failed} dari {total} gagal)"
@@ -1714,6 +1715,13 @@ About:
   Email: Email
   Show tutorial: Tampilkan tutorial
 Profile:
+  Keep Data Separate: "Pisahkan data"
+  Keep Data Separate Tooltip: "Memberi profil ini langganan, riwayat tontonan, daftar putar, riwayat pencarian, statistik tontonan, dan antrean sendiri. Profil Anda yang lain tidak melihatnya, dan profil ini tidak melihat milik mereka. Anda tidak dapat mengubahnya setelah profil dibuat."
+  Separate Profile: "Profil terpisah"
+  Separate Profile Note: "Profil ini menyimpan langganan, riwayat, dan daftar putarnya terpisah dari profil Anda yang lain."
+  Separate Profile Deletion Warning: "Langganan, riwayat tontonan, daftar putar, riwayat pencarian, statistik tontonan, dan antreannya juga akan dihapus."
+  Separate Data Notice: "{profile} menyimpan datanya secara terpisah, jadi impor dan ekspor di bawah hanya menggunakan langganan, riwayat, daftar putar, dan riwayat pencariannya."
+  Separate Data Storage Notice: "{profile} menyimpan datanya secara terpisah. Menghapus riwayat, statistik, riwayat penelusuran, langganan, atau playlist di sini hanya menghapus datanya, sedangkan ukuran mencakup data semua profil."
   Customization: Penyesuaian
   Manage Profile Subscriptions: Kelola langganan profil
   Icon Names:

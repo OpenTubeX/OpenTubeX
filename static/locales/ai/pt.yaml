@@ -1384,6 +1384,7 @@ Settings:
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
     Blur Blocked Items: Desfocar itens bloqueados em vez de os ocultar
   Data Settings:
+    Backup separate profile data: "Esta cópia de segurança também contém os dados de {count} perfil separado, que são restaurados nesse perfil. | Esta cópia de segurança também contém os dados de {count} de perfis separados, que são restaurados nesses perfis. | Esta cópia de segurança também contém os dados de {count} perfis separados, que são restaurados nesses perfis."
     Subscription cache file: "Este ficheiro só guarda em cache os vídeos das suas subscrições, não os canais. Escolha antes profiles.db ou uma exportação de subscrições."
     Settings could not be imported: "Não foi possível importar as definições"
     Some settings could not be imported: "Não foi possível importar todas as definições (falharam {failed} de {total})"
@@ -1705,6 +1706,13 @@ About:
   Email: Correio eletrónico
   Show tutorial: Mostrar tutorial
 Profile:
+  Keep Data Separate: "Manter os dados separados"
+  Keep Data Separate Tooltip: "Dá a este perfil as suas próprias subscrições, histórico de reprodução, playlists, histórico de pesquisas, estatísticas de visualização e fila. Os seus outros perfis não os veem, e este perfil não vê os deles. Não pode alterar isto depois de criar o perfil."
+  Separate Profile: "Perfil separado"
+  Separate Profile Note: "Este perfil mantém as suas subscrições, histórico e playlists separados dos seus outros perfis."
+  Separate Profile Deletion Warning: "As suas subscrições, histórico de reprodução, playlists, histórico de pesquisas, estatísticas de visualização e fila também serão eliminados."
+  Separate Data Notice: "{profile} mantém os seus dados separados, por isso as importações e exportações abaixo só usam as suas subscrições, histórico, playlists e histórico de pesquisas."
+  Separate Data Storage Notice: "{profile} mantém os seus dados separados. Eliminar aqui o histórico, as estatísticas, o histórico de pesquisa, as subscrições ou as listas de reprodução só elimina os seus dados, enquanto os tamanhos incluem os dados de todos os perfis."
   Customization: Personalização
   Manage Profile Subscriptions: Gerir subscrições do perfil
   Icon Names:

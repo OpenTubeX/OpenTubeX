@@ -2023,6 +2023,7 @@ Settings:
     Import backup: Import backup
     Export backup: Export backup
     Backup description: Save profiles, playlists, history, statistics, and transferable settings in one ZIP file. Importing merges them with data already on this device.
+    Backup separate profile data: This backup also contains the data of {count} separate profile, which is restored into that profile. | This backup also contains the data of {count} separate profiles, which is restored into those profiles.
     Select backup data: Select the data to import
     Profiles and subscriptions: Profiles and subscriptions
     Backup exported: Backup exported successfully
@@ -2449,6 +2450,13 @@ About:
   Donate: Donate
 
 Profile:
+  Keep Data Separate: Keep data separate
+  Keep Data Separate Tooltip: Gives this profile its own subscriptions, watch history, playlists, search history, watch statistics, and queue. Your other profiles don't see them, and this profile doesn't see theirs. You can't change this after creating the profile.
+  Separate Profile: Separate profile
+  Separate Profile Note: This profile keeps its subscriptions, history, and playlists separate from your other profiles.
+  Separate Profile Deletion Warning: Its subscriptions, watch history, playlists, search history, watch statistics, and queue will also be deleted.
+  Separate Data Notice: '{profile} keeps its data separate, so the imports and exports below only use its subscriptions, history, playlists, and search history.'
+  Separate Data Storage Notice: '{profile} keeps its data separate. Deleting history, statistics, search history, subscriptions, or playlists here only deletes its data, while the sizes include the data of every profile.'
   Customization: Customization
   Manage Profile Subscriptions: Manage profile subscriptions
   Icon Names:

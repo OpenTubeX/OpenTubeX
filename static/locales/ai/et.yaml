@@ -1384,6 +1384,7 @@ Settings:
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
     Blur Blocked Items: Hägusta blokeeritud üksused nende peitmise asemel
   Data Settings:
+    Backup separate profile data: "See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse sellesse profiili. | See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse neisse profiilidesse."
     Subscription cache file: "See fail puhverdab ainult sinu tellimuste videoid, mitte kanaleid. Vali selle asemel profiles.db või tellimuste eksport."
     Settings could not be imported: "Seadeid ei õnnestunud importida"
     Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"
@@ -1705,6 +1706,13 @@ About:
   Email: E-post
   Show tutorial: Näita juhendit
 Profile:
+  Keep Data Separate: "Hoia andmed eraldi"
+  Keep Data Separate Tooltip: "Annab sellele profiilile oma tellimused, vaatamisajaloo, esitusloendid, otsinguajaloo, vaatamisstatistika ja järjekorra. Sinu teised profiilid neid ei näe ning see profiil ei näe nende andmeid. Seda ei saa pärast profiili loomist muuta."
+  Separate Profile: "Eraldi profiil"
+  Separate Profile Note: "See profiil hoiab oma tellimusi, ajalugu ja esitusloendeid sinu teistest profiilidest eraldi."
+  Separate Profile Deletion Warning: "Kustutatakse ka selle tellimused, vaatamisajalugu, esitusloendid, otsinguajalugu, vaatamisstatistika ja järjekord."
+  Separate Data Notice: "Profiil {profile} hoiab oma andmed eraldi, seega kasutavad allolevad impordid ja ekspordid ainult selle tellimusi, ajalugu, esitusloendeid ja otsinguajalugu."
+  Separate Data Storage Notice: "Profiil {profile} hoiab oma andmed eraldi. Ajaloo, statistika, otsinguajaloo, tellimuste või esitusloendite kustutamine siin kustutab ainult selle andmed, samas kui suurused hõlmavad kõigi profiilide andmeid."
   Customization: Kohandamine
   Manage Profile Subscriptions: Halda profiili tellimusi
   Icon Names:

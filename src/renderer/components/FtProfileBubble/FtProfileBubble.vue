@@ -18,12 +18,21 @@
       dir="auto"
     >
       {{ translatedProfileName }}
+      <FtIcon
+        v-if="isSeparate"
+        class="separateProfileIcon"
+        :icon="['fas', 'user-lock']"
+        role="img"
+        :title="t('Profile.Separate Profile')"
+        :aria-label="t('Profile.Separate Profile')"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, useId } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
 import { getFirstCharacter } from '../../helpers/strings'
@@ -37,6 +46,11 @@ const props = defineProps({
   isMainProfile: {
     type: Boolean,
     required: true
+  },
+  /** Whether the profile keeps its own data */
+  isSeparate: {
+    type: Boolean,
+    default: false
   },
   backgroundColor: {
     type: String,

@@ -502,8 +502,10 @@ const actions = {
       await forgetAndroidSubscriptionRefreshFingerprints(channelIds)
       await DBSubscriptionCacheHandlers.deleteMultipleChannels(channelIds)
       commit('clearCachesForManyChannels', channelIds)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

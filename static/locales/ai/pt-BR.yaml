@@ -1337,6 +1337,7 @@ Settings:
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
     Blur Blocked Items: Desfocar itens bloqueados em vez de ocultá-los
   Data Settings:
+    Backup separate profile data: "Este backup também contém os dados de {count} perfil separado, que são restaurados nesse perfil. | Este backup também contém os dados de {count} de perfis separados, que são restaurados nesses perfis. | Este backup também contém os dados de {count} perfis separados, que são restaurados nesses perfis."
     Subscription cache file: "Este arquivo só armazena em cache os vídeos das suas inscrições, não os canais. Escolha profiles.db ou uma exportação de inscrições."
     Settings could not be imported: "Não foi possível importar as configurações"
     Some settings could not be imported: "Não foi possível importar todas as configurações ({failed} de {total} falharam)"
@@ -1658,6 +1659,13 @@ About:
   Email: Correio eletrónico
   Show tutorial: Mostrar tutorial
 Profile:
+  Keep Data Separate: "Manter os dados separados"
+  Keep Data Separate Tooltip: "Dá a este perfil suas próprias inscrições, histórico de reprodução, playlists, histórico de pesquisas, estatísticas de visualização e fila. Seus outros perfis não os veem, e este perfil não vê os deles. Não é possível alterar isso depois que o perfil for criado."
+  Separate Profile: "Perfil separado"
+  Separate Profile Note: "Este perfil mantém suas inscrições, histórico e playlists separados dos seus outros perfis."
+  Separate Profile Deletion Warning: "Suas inscrições, histórico de reprodução, playlists, histórico de pesquisas, estatísticas de visualização e fila também serão excluídos."
+  Separate Data Notice: "{profile} mantém seus dados separados, então as importações e exportações abaixo usam apenas suas inscrições, histórico, playlists e histórico de pesquisas."
+  Separate Data Storage Notice: "{profile} mantém seus dados separados. Excluir aqui o histórico, as estatísticas, o histórico de pesquisa, as inscrições ou as playlists exclui apenas os dados dele, enquanto os tamanhos incluem os dados de todos os perfis."
   Customization: Personalização
   Manage Profile Subscriptions: Gerenciar inscrições do perfil
   Icon Names:

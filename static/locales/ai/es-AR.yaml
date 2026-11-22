@@ -1476,6 +1476,7 @@ Settings:
     Hide Channel Shows: Ocultar la pestaña de 'Programas' del canal
     Blur Blocked Items: Desenfocar los elementos bloqueados en lugar de ocultarlos
   Data Settings:
+    Backup separate profile data: "Esta copia de seguridad también contiene los datos de {count} perfil separado, que se restaura en ese perfil. | Esta copia de seguridad también contiene los datos de {count} de perfiles separados, que se restauran en esos perfiles. | Esta copia de seguridad también contiene los datos de {count} perfiles separados, que se restauran en esos perfiles."
     Subscription cache file: "Este archivo solo guarda en caché los videos de tus suscripciones, no los canales. Elegí profiles.db o una exportación de suscripciones."
     Settings could not be imported: "No se pudo importar la configuración"
     Some settings could not be imported: "No se pudo importar toda la configuración (fallaron {failed} de {total})"
@@ -1862,6 +1863,13 @@ About:
   Donate: Donar
   Show tutorial: Mostrar tutorial
 Profile:
+  Keep Data Separate: "Mantener los datos separados"
+  Keep Data Separate Tooltip: "Le da a este perfil sus propias suscripciones, historial de reproducción, listas de reproducción, historial de búsquedas, estadísticas de visualización y cola. Tus otros perfiles no los ven, y este perfil no ve los suyos. No podés cambiarlo después de crear el perfil."
+  Separate Profile: "Perfil separado"
+  Separate Profile Note: "Este perfil mantiene sus suscripciones, historial y listas de reproducción separados de tus otros perfiles."
+  Separate Profile Deletion Warning: "También se eliminarán sus suscripciones, historial de reproducción, listas de reproducción, historial de búsquedas, estadísticas de visualización y cola."
+  Separate Data Notice: "{profile} mantiene sus datos separados, por lo que las importaciones y exportaciones de abajo solo usan sus suscripciones, historial, listas de reproducción e historial de búsquedas."
+  Separate Data Storage Notice: "{profile} mantiene sus datos separados. Eliminar acá el historial, las estadísticas, el historial de búsqueda, las suscripciones o las playlists solo elimina sus datos, mientras que los tamaños incluyen los datos de todos los perfiles."
   Customization: Personalización
   Manage Profile Subscriptions: Gestionar suscripciones del perfil
   Icon Names:

@@ -1384,6 +1384,7 @@ Settings:
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
     Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
   Data Settings:
+    Backup separate profile data: "Táto záloha obsahuje aj údaje {count} samostatného profilu, ktoré sa obnovia do tohto profilu. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov."
     Subscription cache file: "Tento súbor obsahuje iba vyrovnávaciu pamäť videí z vašich odberov, nie samotné kanály. Namiesto neho vyberte profiles.db alebo export odberov."
     Settings could not be imported: "Nastavenia sa nepodarilo importovať"
     Some settings could not be imported: "Niektoré nastavenia sa nepodarilo importovať (zlyhalo {failed} z {total})"
@@ -1705,6 +1706,13 @@ About:
   Email: E-mail
   Show tutorial: Zobraziť sprievodcu
 Profile:
+  Keep Data Separate: "Uchovávať údaje oddelene"
+  Keep Data Separate Tooltip: "Dá tomuto profilu vlastné odbery, históriu pozerania, playlisty, históriu hľadania, štatistiky sledovania a poradie prehrávania. Vaše ostatné profily ich nevidia a tento profil nevidí ich údaje. Po vytvorení profilu to nemožno zmeniť."
+  Separate Profile: "Samostatný profil"
+  Separate Profile Note: "Tento profil uchováva svoje odbery, históriu a playlisty oddelene od vašich ostatných profilov."
+  Separate Profile Deletion Warning: "Odstránia sa aj jeho odbery, história pozerania, playlisty, história hľadania, štatistiky sledovania a poradie prehrávania."
+  Separate Data Notice: "Profil {profile} uchováva svoje údaje oddelene, preto importy a exporty nižšie používajú iba jeho odbery, históriu, playlisty a históriu hľadania."
+  Separate Data Storage Notice: "Profil {profile} uchováva svoje údaje oddelene. Odstránenie histórie, štatistík, histórie vyhľadávania, odberov alebo playlistov tu odstráni iba jeho údaje, no veľkosti zahŕňajú údaje všetkých profilov."
   Customization: Prispôsobenie
   Manage Profile Subscriptions: Spravovať odbery profilu
   Icon Names:

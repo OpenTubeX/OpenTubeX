@@ -1384,6 +1384,7 @@ Settings:
     Paused Interface Hide Delay: Forsinkelse før grensesnittet skjules ved pause
     Blur Blocked Items: Gjør blokkerte elementer uskarpe i stedet for å skjule dem
   Data Settings:
+    Backup separate profile data: "Denne sikkerhetskopien inneholder også dataene til {count} separat profil, som gjenopprettes i den profilen. | Denne sikkerhetskopien inneholder også dataene til {count} separate profiler, som gjenopprettes i disse profilene."
     Subscription cache file: "Denne filen mellomlagrer bare videoene fra abonnementene dine, ikke kanalene. Velg profiles.db eller en eksport av abonnementer i stedet."
     Settings could not be imported: "Innstillingene kunne ikke importeres"
     Some settings could not be imported: "Ikke alle innstillingene kunne importeres ({failed} av {total} mislyktes)"
@@ -1705,6 +1706,13 @@ About:
   Email: E-post
   Show tutorial: Vis veiledning
 Profile:
+  Keep Data Separate: "Hold data adskilt"
+  Keep Data Separate Tooltip: "Gir denne profilen egne abonnementer, visningshistorikk, spillelister, søkehistorikk, seerstatistikk og kø. De andre profilene dine ser dem ikke, og denne profilen ser ikke deres. Du kan ikke endre dette etter at profilen er opprettet."
+  Separate Profile: "Separat profil"
+  Separate Profile Note: "Denne profilen holder abonnementene, historikken og spillelistene sine adskilt fra de andre profilene dine."
+  Separate Profile Deletion Warning: "Abonnementene, visningshistorikken, spillelistene, søkehistorikken, seerstatistikken og køen til profilen slettes også."
+  Separate Data Notice: "{profile} holder dataene sine adskilt, så importene og eksportene nedenfor bruker bare abonnementene, historikken, spillelistene og søkehistorikken til profilen."
+  Separate Data Storage Notice: "{profile} holder dataene sine adskilt. Å slette historikk, statistikk, søkehistorikk, abonnementer eller spillelister her sletter bare dataene til profilen, mens størrelsene omfatter dataene til alle profiler."
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer
   Icon Names:

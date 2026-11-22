@@ -1384,6 +1384,7 @@ Settings:
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
     Blur Blocked Items: Letiltott elemek elhomályosítása elrejtés helyett
   Data Settings:
+    Backup separate profile data: "Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek abba a profilba állíthatók vissza. | Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek azokba a profilokba állíthatók vissza."
     Subscription cache file: "Ez a fájl csak a feliratkozásaid videóit tárolja gyorsítótárban, a csatornákat nem. Válaszd helyette a profiles.db fájlt vagy egy feliratkozás-exportot."
     Settings could not be imported: "A beállításokat nem sikerült importálni"
     Some settings could not be imported: "Nem minden beállítást sikerült importálni ({total} beállításból {failed} sikertelen)"
@@ -1705,6 +1706,13 @@ About:
   Email: E-mail
   Show tutorial: Bemutató megjelenítése
 Profile:
+  Keep Data Separate: "Az adatok különválasztása"
+  Keep Data Separate Tooltip: "Ez a profil saját feliratkozásokat, megtekintési előzményeket, lejátszási listákat, keresési előzményeket, megtekintési statisztikákat és lejátszási sort kap. A többi profilod nem látja ezeket, és ez a profil sem látja az övékét. A profil létrehozása után ez nem módosítható."
+  Separate Profile: "Különálló profil"
+  Separate Profile Note: "Ez a profil a feliratkozásait, az előzményeit és a lejátszási listáit elkülönítve tartja a többi profiltól."
+  Separate Profile Deletion Warning: "A feliratkozásai, megtekintési előzményei, lejátszási listái, keresési előzményei, megtekintési statisztikái és lejátszási sora is törlődik."
+  Separate Data Notice: "A(z) {profile} profil különválasztva tartja az adatait, ezért az alábbi importálások és exportálások csak a feliratkozásait, előzményeit, lejátszási listáit és keresési előzményeit használják."
+  Separate Data Storage Notice: "A(z) {profile} profil különválasztva tartja az adatait. Az előzmények, a statisztikák, a keresési előzmények, a feliratkozások vagy a lejátszási listák törlése itt csak az ő adatait törli, a méretek viszont minden profil adatait tartalmazzák."
   Customization: Testreszabás
   Manage Profile Subscriptions: Profil feliratkozásainak kezelése
   Icon Names:

@@ -1413,6 +1413,7 @@ Settings:
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
     Blur Blocked Items: Slør blokerede elementer i stedet for at skjule dem
   Data Settings:
+    Backup separate profile data: "Denne sikkerhedskopi indeholder også data fra {count} adskilt profil, som gendannes i den profil. | Denne sikkerhedskopi indeholder også data fra {count} adskilte profiler, som gendannes i de profiler."
     Subscription cache file: "Denne fil gemmer kun videoerne fra dine abonnementer i cachen, ikke kanalerne. Vælg profiles.db eller en eksport af abonnementer i stedet."
     Settings could not be imported: "Indstillingerne kunne ikke importeres"
     Some settings could not be imported: "Ikke alle indstillinger kunne importeres ({failed} af {total} mislykkedes)"
@@ -1764,6 +1765,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort muligt af {creditsPageLink}
   Show tutorial: Vis vejledning
 Profile:
+  Keep Data Separate: "Hold data adskilt"
+  Keep Data Separate Tooltip: "Giver denne profil sine egne abonnementer, visningshistorik, playlister, søgehistorik, seerstatistik og kø. Dine andre profiler kan ikke se dem, og denne profil kan ikke se deres. Du kan ikke ændre det, når profilen er oprettet."
+  Separate Profile: "Adskilt profil"
+  Separate Profile Note: "Denne profil holder sine abonnementer, sin historik og sine playlister adskilt fra dine andre profiler."
+  Separate Profile Deletion Warning: "Dens abonnementer, visningshistorik, playlister, søgehistorik, seerstatistik og kø slettes også."
+  Separate Data Notice: "{profile} holder sine data adskilt, så importerne og eksporterne nedenfor bruger kun dens abonnementer, historik, playlister og søgehistorik."
+  Separate Data Storage Notice: "{profile} holder sine data adskilt. Sletning af historik, statistik, søgehistorik, abonnementer eller playlister her sletter kun dens data, mens størrelserne omfatter alle profilers data."
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer
   Icon Names:

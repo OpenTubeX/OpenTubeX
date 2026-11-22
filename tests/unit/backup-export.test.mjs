@@ -5,7 +5,7 @@ import vm from 'node:vm'
 
 const component = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
-const functions = ['exportUnifiedBackup', 'promptAndWriteToFile'].map(name => component.match(new RegExp(`async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0])
+const functions = ['exportUnifiedBackup', 'promptAndWriteToFile', 'readBackupSections'].map(name => component.match(new RegExp(`async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0])
 const writer = utils.match(/export async function writeFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
 
 function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats'], fail = false, electron = false, unsentWrites = 0 } = {}) {
@@ -57,6 +57,8 @@ function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playl
     DBSearchHistoryHandlers: { find: read },
     DBWatchStatsHandlers: { find: read, getHistoricalAdjustment: read },
     deepCopy: value => value,
+    withDataScope: (_scope, operation) => operation(),
+    PROFILE_DATA_SECTIONS: ['playlists', 'history', 'searchHistory', 'watchStats'],
     runBackgroundJob: async (operation, data) => {
       assert.equal(operation, 'createUnifiedBackup')
       if (fail) throw new Error('Backup archive is too large')
@@ -95,7 +97,8 @@ for (const electron of [false, true]) {
     await state.exportBackup()
     assert.deepEqual(Array.from(state.events.find(Array.isArray)), ['searchHistory'])
     if (electron) assert.ok(state.events.includes('no settings'))
-    else assert.equal(state.events.filter(event => event === 'read').length, 1)
+    // The profiles tell which separate profiles' searches to include.
+    else assert.equal(state.events.filter(event => event === 'read').length, 2)
   })
 
   test(`failed ${platform} backup preparation leaves the destination untouched and reports the error`, async () => {

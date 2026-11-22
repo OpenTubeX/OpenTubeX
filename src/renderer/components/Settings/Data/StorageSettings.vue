@@ -236,6 +236,7 @@
       :title="t('Settings.Storage Settings.History Data')"
       :icon="['fas', 'history']"
     >
+      <FtDataScopeNotice storage />
       <StorageItem
         v-if="USING_ELECTRON"
         :icon="['fas', 'film']"
@@ -375,6 +376,7 @@ import { useI18n } from 'vue-i18n'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtDataScopeNotice from '../../FtDataScopeNotice/FtDataScopeNotice.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
@@ -817,16 +819,46 @@ async function handleCleanupPrompt(option) {
   }
 }
 
+/**
+ * Clears the cached feeds of the channels of `roots` that no other profile
+ * follows. It runs before their subscriptions go, so a failure leaves both
+ * for the retry.
+ * @param {object[]} roots profiles that hold every channel of their data
+ */
+async function clearCachedFeedsOf(roots) {
+  const cleared = new Set(roots.map(profile => profile._id))
+  const followedElsewhere = new Set(profileList.value
+    .filter((profile, index) => (index === 0 || profile.separate === true) && !cleared.has(profile._id))
+    .flatMap(profile => profile.subscriptions.map(channel => channel.id)))
+  const channelIds = roots.flatMap(profile => profile.subscriptions.map(channel => channel.id))
+  await requireCleanupSuccess(store.dispatch('clearSubscriptionsCacheForManyChannels', channelIds.filter(id => !followedElsewhere.has(id))))
+}
+
+// Like the other deletions, this only affects the active profile's data:
+// a separate profile's own subscriptions, or the profiles that share theirs.
 async function removeSubscriptionsAndProfiles() {
+  if (store.getters.getActiveDataScope !== null) {
+    const profile = store.getters.getActiveProfile
+    await clearCachedFeedsOf([profile])
+    // Only the channels go, so details saved meanwhile, such as bookmarks, stay.
+    await requireCleanupSuccess(store.dispatch('removeChannelFromProfiles', {
+      channelIds: profile.subscriptions.map(channel => channel.id),
+      profileIds: [profile._id],
+    }))
+    return
+  }
+  // Separate profiles keep the cached feeds of channels they follow too.
+  const hasSeparateProfiles = profileList.value.some(profile => profile.separate === true)
+  if (hasSeparateProfiles) await clearCachedFeedsOf([profileList.value[0]])
   await store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
-  const cleanupResults = await Promise.all(profileList.value.map(profile => {
+  const cleanupResults = await Promise.all(profileList.value.filter(profile => profile.separate !== true).map(profile => {
     if (profile._id === MAIN_PROFILE_ID) {
       return store.dispatch('updateProfile', { ...profile, subscriptions: [] })
     }
     return store.dispatch('removeProfile', profile._id)
   }))
   await requireCleanupSuccess(cleanupResults.every(Boolean))
-  await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
+  if (!hasSeparateProfiles) await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
 }
 
 function updateEnableVideoMetadataCache(value) {

@@ -1529,6 +1529,7 @@ Settings:
     Remove: Fjern
     Blur Blocked Items: Gjer blokkerte element uskarpe i staden for å gøyma dei
   Data Settings:
+    Backup separate profile data: "Denne tryggingskopien inneheld også dataa til {count} separat profil, som blir gjenoppretta i den profilen. | Denne tryggingskopien inneheld også dataa til {count} separate profilar, som blir gjenoppretta i desse profilane."
     Subscription cache file: "Denne fila mellomlagrar berre videoane frå abonnementa dine, ikkje kanalane. Vel profiles.db eller ein eksport av abonnement i staden."
     Settings could not be imported: "Innstillingane kunne ikkje importerast"
     Some settings could not be imported: "Ikkje alle innstillingane kunne importerast ({failed} av {total} mislukkast)"
@@ -1886,6 +1887,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
   Show tutorial: Vis rettleiing
 Profile:
+  Keep Data Separate: "Hald data åtskilde"
+  Keep Data Separate Tooltip: "Gjev denne profilen eigne abonnement, sjåhistorikk, spelelistar, søkjehistorikk, sjåstatistikk og kø. Dei andre profilane dine ser dei ikkje, og denne profilen ser ikkje deira. Du kan ikkje endre dette etter at profilen er oppretta."
+  Separate Profile: "Separat profil"
+  Separate Profile Note: "Denne profilen held abonnementa, historikken og spelelistene sine åtskilde frå dei andre profilane dine."
+  Separate Profile Deletion Warning: "Abonnementa, sjåhistorikken, spelelistene, søkjehistorikken, sjåstatistikken og køen til profilen blir også sletta."
+  Separate Data Notice: "{profile} held dataa sine åtskilde, så importane og eksportane nedanfor brukar berre abonnementa, historikken, spelelistene og søkjehistorikken til profilen."
+  Separate Data Storage Notice: "{profile} held dataa sine åtskilde. Å slette historikk, statistikk, søkjehistorikk, abonnement eller spelelister her slettar berre dataa til profilen, medan storleikane omfattar dataa til alle profilar."
   Customization: Tilpassing
   Manage Profile Subscriptions: Administrer abonnementa til profilen
   Icon Names:

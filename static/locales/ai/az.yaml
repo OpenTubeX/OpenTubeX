@@ -1386,6 +1386,7 @@ Settings:
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
     Blur Blocked Items: Bloklanmış elementləri gizlətmək əvəzinə bulanıqlaşdır
   Data Settings:
+    Backup separate profile data: "Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profilə bərpa olunur. | Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profillərə bərpa olunur."
     Subscription cache file: "Bu fayl yalnız abunəliklərinizin videolarını keşləyir, kanalları yox. Bunun əvəzinə profiles.db və ya abunəlik ixracını seçin."
     Settings could not be imported: "Parametrləri idxal etmək mümkün olmadı"
     Some settings could not be imported: "Bütün parametrləri idxal etmək mümkün olmadı ({total} parametrdən {failed} uğursuz oldu)"
@@ -1708,6 +1709,13 @@ About:
   Email: E-poçt
   Show tutorial: Təlimatı göstər
 Profile:
+  Keep Data Separate: "Məlumatları ayrı saxla"
+  Keep Data Separate Tooltip: "Bu profilə öz abunəliklərini, baxış tarixçəsini, pleylistlərini, axtarış tarixçəsini, baxış statistikasını və növbəsini verir. Digər profilləriniz bunları görmür, bu profil də onlarınkını görmür. Profil yaradıldıqdan sonra bunu dəyişə bilməzsiniz."
+  Separate Profile: "Ayrı profil"
+  Separate Profile Note: "Bu profil abunəliklərini, tarixçəsini və pleylistlərini digər profillərinizdən ayrı saxlayır."
+  Separate Profile Deletion Warning: "Onun abunəlikləri, baxış tarixçəsi, pleylistləri, axtarış tarixçəsi, baxış statistikası və növbəsi də silinəcək."
+  Separate Data Notice: "{profile} məlumatlarını ayrı saxlayır, buna görə aşağıdakı idxal və ixraclar yalnız onun abunəliklərindən, tarixçəsindən, pleylistlərindən və axtarış tarixçəsindən istifadə edir."
+  Separate Data Storage Notice: "{profile} məlumatlarını ayrı saxlayır. Burada tarixçəni, statistikanı, axtarış tarixçəsini, abunəlikləri və ya pleylistləri silmək yalnız onun məlumatlarını silir, ölçülərə isə bütün profillərin məlumatları daxildir."
   Customization: Fərdiləşdirmə
   Manage Profile Subscriptions: Profil abunəliklərini idarə et
   Icon Names:

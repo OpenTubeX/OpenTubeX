@@ -76,6 +76,25 @@
               @input="profileName = $event"
               @keydown.enter="saveProfile"
             />
+            <FtToggleSwitch
+              v-if="isNew"
+              class="separateDataToggle"
+              :label="$t('Profile.Keep Data Separate')"
+              :tooltip="$t('Profile.Keep Data Separate Tooltip')"
+              compact
+              :default-value="keepDataSeparate"
+              @change="keepDataSeparate = $event"
+            />
+            <p
+              v-else-if="profile.separate === true"
+              class="separateDataNote"
+            >
+              <FtIcon
+                :icon="['fas', 'user-lock']"
+                aria-hidden="true"
+              />
+              {{ $t('Profile.Separate Profile Note') }}
+            </p>
             <h3 class="profileIconHeading">
               {{ $t("Profile.Profile Icon") }}
             </h3>
@@ -292,6 +311,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtColorPicker from '../FtColorPicker/FtColorPicker.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
@@ -308,6 +328,7 @@ import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../..
  * @property {string} bgColor
  * @property {string} textColor
  * @property {{type: 'icon'|'emoji'|'image', value: string}|{type: 'initial'}|null|undefined} icon
+ * @property {boolean} [separate] whether the profile keeps its own subscriptions, history, playlists and other data
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
@@ -495,6 +516,9 @@ const editOrCreateProfileNameLabel = computed(() => {
   return props.isNew ? t('Profile.Create Profile Name') : t('Profile.Edit Profile Name')
 })
 
+/** Whether a new profile gets its own data, which can't change later */
+const keepDataSeparate = ref(false)
+
 function saveProfile() {
   if (profileName.value === '') {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
@@ -509,7 +533,9 @@ function saveProfile() {
   }
 
   if (props.isNew) {
-    store.dispatch('createProfile', { ...details, subscriptions: deepCopy(props.profile.subscriptions) })
+    store.dispatch('createProfile', keepDataSeparate.value
+      ? { ...details, separate: true, subscriptions: [] }
+      : { ...details, subscriptions: deepCopy(props.profile.subscriptions) })
     showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
   } else {
@@ -743,7 +769,10 @@ const deletePromptNames = computed(() => [
 ])
 
 const deletePromptLabel = computed(() => {
-  return `${t('Profile.Are you sure you want to delete this profile?')} ${t('Profile["All subscriptions will also be deleted."]')}`
+  const deletedData = props.profile.separate === true
+    ? t('Profile.Separate Profile Deletion Warning')
+    : t('Profile["All subscriptions will also be deleted."]')
+  return `${t('Profile.Are you sure you want to delete this profile?')} ${deletedData}`
 })
 
 const showDeletePrompt = ref(false)
