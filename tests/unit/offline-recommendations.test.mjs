@@ -47,7 +47,7 @@ for (const localFilePlayback of [false, true]) {
       isLoading: false,
       localFilePlayback,
       isOffline: false,
-      recommendedVideos: online,
+      shownRecommendedVideos: online,
       offlineDownloadSuggestions: offline,
       abortAutoplayCountdown() {},
     }

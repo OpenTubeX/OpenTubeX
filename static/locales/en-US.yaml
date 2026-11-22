@@ -1954,6 +1954,7 @@ Settings:
     Hide Upcoming Premieres: Hide Upcoming Premieres
     Hide Sharing Actions: Hide Sharing Actions
     Hide Videos on Watch: Hide Videos on Watch
+    Hide Watched in Search and Recommendations: Hide Watched Videos in Search and Recommendations
     Hide Chapters: Hide Chapters
     Hide Popularity Graph: Hide Popularity Graph
     Disable A-B Repeat: Disable A-B Repeat
@@ -3606,6 +3607,7 @@ Tooltips:
     Hide Subscriptions Live: 'This setting is overridden by the app-wide "{appWideSetting}" setting, in the "{subsection}" section of the "{settingsSection}"'
     Hide Videos, Playlists and Channels Containing Text: Enter a word, word fragment, or phrase (case insensitive) to hide all videos, playlists and channels whose original titles contain it throughout all of OpenTubeX, excluding only History, Your Playlists, and videos inside of playlists.
     Hide Videos on Watch: 'Hides watched videos from the Videos, Shorts, and Live tabs on the Subscription and Channel pages. This does not affect the Home tab on Channel pages'
+    Hide Watched in Search and Recommendations: Hides watched videos from search results, Up Next on the watch page, and YouTube recommendations on Home. Autoplay skips them as well.
     Hide Playlist Stats: Hides the video count, view count, last updated date and total duration on playlist pages.
   Subscription Settings:
     Fetch Feeds from RSS: When enabled, OpenTubeX will use RSS instead of its default

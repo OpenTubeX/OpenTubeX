@@ -62,6 +62,14 @@
           :tooltip="t('Tooltips.Distraction Free Settings.Hide Videos on Watch')"
           @change="updateHideWatchedSubs"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Watched in Search and Recommendations')"
+          :default-value="hideWatchedInSearchAndRecommendations"
+          setting-key="hideWatchedInSearchAndRecommendations"
+          :compact="true"
+          :tooltip="t('Tooltips.Distraction Free Settings.Hide Watched in Search and Recommendations')"
+          @change="store.dispatch('updateHideWatchedInSearchAndRecommendations', $event)"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -1028,6 +1036,9 @@ const hideWatchedSubs = computed(() => store.getters.getHideWatchedSubs)
 function updateHideWatchedSubs(value) {
   store.dispatch('updateHideWatchedSubs', value)
 }
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideWatchedInSearchAndRecommendations = computed(() => store.getters.getHideWatchedInSearchAndRecommendations)
 
 onMounted(() => {
   verifyChannelsHidden()

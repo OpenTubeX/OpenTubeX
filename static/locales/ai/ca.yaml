@@ -1594,6 +1594,7 @@ Settings:
       Notify When Live: Notifica quan els canals de Twitch seguits comencin una emissió en directe
       Auto Refresh Interval: Interval d'actualització automàtica d'altres plataformes
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Oculta els vídeos vistos a la cerca i les recomanacions"
     Hide Full Screen Video Title: Amaga el títol del vídeo a finestra completa o pantalla completa
     Digital Wellbeing:
       Count Watch Time From: "Compta el temps de visualització de"
@@ -3019,6 +3020,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Oculta els vídeos vistos dels resultats de la cerca, d’A continuació a la pàgina de reproducció i de les recomanacions de YouTube a l’Inici. La reproducció automàtica també se’ls salta."
     Hide Playlist Stats: Amaga el nombre de vídeos, el nombre de visualitzacions, la data de l’última actualització i la durada total a les pàgines de llistes de reproducció.
     Count Watch Time From: "\"Tots els dispositius\" compta tots els dispositius que sincronitzen les estadístiques de visualització. \"Aquest dispositiu\" només compta el que mireu aquí."
     When a Limit Is Reached: "\"Posa en pausa la reproducció\" us permet afegir 15 minuts o ignorar el límit per avui. Amb una contrasenya de la configuració, només podeu augmentar un límit a la Configuració."

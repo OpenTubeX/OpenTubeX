@@ -1307,6 +1307,7 @@ Settings:
       Notify When Live: Notify when followed Twitch channels go live
       Auto Refresh Interval: Other platforms auto refresh interval
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Hide Watched Videos in Search and Recommendations"
     Hide Full Screen Video Title: Hide Video Title in Full Window / Full Screen
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
@@ -2453,6 +2454,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Hides watched videos from search results, Up Next on the watch page, and YouTube recommendations on Home. Autoplay skips them as well."
     Hide Playlist Stats: Hides the video count, view count, last updated date and total duration on playlist pages.
     Count Watch Time From: "All devices counts every device that syncs watch statistics. This device counts only what you watch here."
     When a Limit Is Reached: "Pause Playback lets you add 15 minutes or ignore the limit for today. With a settings password, you can only raise a limit in Settings."

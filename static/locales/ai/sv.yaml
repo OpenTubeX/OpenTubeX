@@ -1323,6 +1323,7 @@ Settings:
       Notify When Live: Meddela när följda Twitch-kanaler börjar sända live
       Auto Refresh Interval: Intervall för automatisk uppdatering av andra plattformar
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Dölj sedda videor i sökningar och rekommendationer"
     Hide Full Screen Video Title: Dölj videotitel i helfönster eller helskärm
     Digital Wellbeing:
       Count Watch Time From: "Räkna visningstid från"
@@ -2458,6 +2459,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg krävs för att sammanfoga separata video- och ljudströmmar samt för ljudkonvertering. Som standard förutsätter OpenTubeX att FFmpeg kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
     Use cookies for subtitles: "Använd de konfigurerade kakorna för undertexter och automatiska översättningar. Aktiveras även av ”Använd alltid kakor”."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Döljer sedda videor i sökresultat, Kommer härnäst på uppspelningssidan och YouTube-rekommendationer på startsidan. Automatisk uppspelning hoppar också över dem."
     Hide Playlist Stats: Döljer antalet videor, antalet visningar, datumet för senaste uppdatering och den totala längden på spellistesidor.
     Count Watch Time From: "”Alla enheter” räknar alla enheter som synkroniserar visningsstatistik. ”Den här enheten” räknar bara det du tittar på här."
     When a Limit Is Reached: "Med ”Pausa uppspelningen” kan du lägga till 15 minuter eller ignorera gränsen för i dag. Med ett inställningslösenord kan du bara höja en gräns i inställningarna."

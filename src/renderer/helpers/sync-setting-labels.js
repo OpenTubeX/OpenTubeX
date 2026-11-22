@@ -179,6 +179,7 @@ export const SYNC_SETTING_LABELS = {
   hideVideoLikesAndDislikes: 'Settings.Distraction Free Settings.Hide Video Likes And Dislikes',
   hideVideoViews: 'Settings.Distraction Free Settings.Hide Video Views',
   hideWatchedSubs: 'Settings.Distraction Free Settings.Hide Videos on Watch',
+  hideWatchedInSearchAndRecommendations: 'Settings.Distraction Free Settings.Hide Watched in Search and Recommendations',
   highlightChangedSettings: 'Settings.Highlight Changed Settings',
   historyRetentionDays: ['Settings.Privacy Settings.Automatic History Deletion', 'Settings.Privacy Settings.Watch History Retention'],
   holdPlaybackRateMultiplier: 'Settings.Player Settings.Hold to Speed Up.Hold to Speed Up',

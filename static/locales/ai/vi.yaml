@@ -1323,6 +1323,7 @@ Settings:
       Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
       Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ẩn video đã xem trong tìm kiếm và đề xuất"
     Hide Full Screen Video Title: Ẩn tiêu đề video ở chế độ toàn cửa sổ / toàn màn hình
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
@@ -2474,6 +2475,7 @@ Tooltips:
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ẩn video đã xem khỏi kết quả tìm kiếm, mục Tiếp theo trên trang xem và các đề xuất của YouTube trên Trang chủ. Tự động phát cũng bỏ qua chúng."
     Hide Playlist Stats: Ẩn số lượng video, số lượt xem, ngày cập nhật gần nhất và tổng thời lượng trên các trang danh sách phát.
     Count Watch Time From: "\"Tất cả thiết bị\" tính mọi thiết bị đồng bộ thống kê xem. \"Thiết bị này\" chỉ tính những gì bạn xem tại đây."
     When a Limit Is Reached: "\"Tạm dừng phát\" cho phép bạn thêm 15 phút hoặc bỏ qua giới hạn trong hôm nay. Khi có mật khẩu cài đặt, bạn chỉ có thể tăng giới hạn trong Cài đặt."

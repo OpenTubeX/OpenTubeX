@@ -71,6 +71,7 @@ import store from '../../store/index'
 import { getYouTubeAccountRecommendations } from '../../helpers/api/youtube-account'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { isBlurredByBlockLists } from '../../helpers/blockedItems'
+import { withoutWatchedDiscoveryVideos } from '../../helpers/history'
 import { getYouTubeChannelKey } from '../../helpers/youtube-account-state'
 
 const { t } = useI18n()
@@ -97,7 +98,7 @@ function isBlurred(video) {
 }
 
 // Shorts have their own feeds; this grid keeps to regular videos.
-const videos = computed(() => allVideos.value.filter(video => !video.isShort &&
+const videos = computed(() => withoutWatchedDiscoveryVideos(allVideos.value, store.getters).filter(video => !video.isShort &&
   (blurBlockedItems.value || !blockedChannelNames.value.has(video.author)) &&
   !isVideoHiddenByPreferences(video, {
     hideLiveStreams: store.getters.getHideLiveStreams,

@@ -1323,6 +1323,7 @@ Settings:
       Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
       Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ezkutatu ikusitako bideoak bilaketan eta gomendioetan"
     Hide Full Screen Video Title: Ezkutatu bideoaren izenburua leiho osoan edo pantaila osoan
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
@@ -2468,6 +2469,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
     Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
   Distraction Free Settings:
+    Hide Watched in Search and Recommendations: "Ikusitako bideoak ezkutatzen ditu bilaketa-emaitzetatik, ikusteko orriko Hurrengoa ataletik eta Hasierako YouTube gomendioetatik. Erreprodukzio automatikoak ere saltatu egiten ditu."
     Hide Playlist Stats: Erreprodukzio-zerrenden orrietan bideo kopurua, ikustaldi kopurua, azken eguneratzearen data eta iraupen osoa ezkutatzen ditu.
     Count Watch Time From: "«Gailu guztiak» aukerak ikustaldi-estatistikak sinkronizatzen dituen gailu oro zenbatzen du. «Gailu hau» aukerak hemen ikusten duzuna soilik zenbatzen du."
     When a Limit Is Reached: "«Pausatu erreprodukzioa» aukerarekin 15 minutu gehi ditzakezu edo gaurko muga ez ikusi egin. Ezarpenen pasahitz batekin, muga Ezarpenetan bakarrik igo dezakezu."
