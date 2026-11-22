@@ -93,7 +93,8 @@ test('a separate profile’s history, playlists, searches and watch time never r
 
   // Removing a separate profile's search keeps saving the same search made earlier in the shared profile.
   await separate.searchHistory.delete('query')
-  assert.notEqual(await shared.searchHistory.upsert({ _id: 'query', query: 'query', lastUpdatedAt: 1 }), null)
+  await shared.searchHistory.upsert({ _id: 'query', query: 'query', lastUpdatedAt: 1 })
+  assert.deepEqual((await db.searchHistory.findAsync({})).map(entry => entry.query), ['query'])
 })
 
 test('deleting a separate profile deletes its data, and deleting another profile keeps it', async () => {
