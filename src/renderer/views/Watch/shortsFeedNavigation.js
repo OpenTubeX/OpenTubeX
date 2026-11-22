@@ -3,6 +3,8 @@ import { markRaw, nextTick, reactive } from 'vue'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed.js'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion.js'
 
+const EXPANDED_PLAYER_SELECTOR = '.ftVideoPlayer:is(.fullWindow, :fullscreen)'
+
 /**
  * Moves through a feed of Shorts with swipes, the mouse wheel, the keyboard
  * and document scrolling, and previews the next Short while it loads. It owns
@@ -90,7 +92,20 @@ export function createShortsFeedNavigation({
 
     if (scrollResetPending) {
       scrollResetPending = false
+      // Another movement can arrive before the reset's own scroll event;
+      // measure it from the top the reset moved to.
+      lastWindowScrollY = 0
+      if (scrollY === 0) {
+        return
+      }
+    }
+
+    // A fullscreen or full window player hides the page and its scrollbar,
+    // so the document only scrolls when the browser brings a focused or
+    // clicked control in the player's overlay into view.
+    if (getViewport()?.querySelector(EXPANDED_PLAYER_SELECTOR)) {
       lastWindowScrollY = scrollY
+      resetDocumentScroll()
       return
     }
 
@@ -116,6 +131,10 @@ export function createShortsFeedNavigation({
     // so the page scrollbar and middle-button autoscroll can navigate. Reset
     // it after interpreting the movement; otherwise the next movement at the
     // end of the range cannot emit another scroll event.
+    resetDocumentScroll()
+  }
+
+  function resetDocumentScroll() {
     if (window.scrollY !== 0) {
       scrollResetPending = true
       window.scrollTo({ top: 0 })
@@ -165,7 +184,7 @@ export function createShortsFeedNavigation({
       event.pointerType === 'touch' &&
       event.isPrimary
     ) {
-      const presentationTarget = target?.closest?.('.ftVideoPlayer:is(.fullWindow, :fullscreen)') ?? null
+      const presentationTarget = target?.closest?.(EXPANDED_PLAYER_SELECTOR) ?? null
       state.presentationTarget = presentationTarget ? markRaw(presentationTarget) : null
       state.height = (presentationTarget ?? getViewport()).getBoundingClientRect().height
       state.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragging: false }
