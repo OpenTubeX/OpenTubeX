@@ -701,9 +701,14 @@ function deleteTemplate() {
   loadTemplate('video:best')
 }
 
-// Positions start at 1, like the file names' playlist index
+// Positions start at 1, like the file names' playlist index. Invidious playlists keep the
+// index of each video, which counts the unavailable videos they leave out.
 const selectableVideos = computed(() => props.isPlaylist
-  ? props.videos.map((video, index) => ({ videoId: video.videoId, title: video.title, position: index + 1 }))
+  ? props.videos.map((video, index) => ({
+      videoId: video.videoId,
+      title: video.title,
+      position: props.playlistId !== '' && Number.isSafeInteger(video.index) && video.index >= 0 ? video.index + 1 : index + 1
+    }))
       .filter(video => typeof video.videoId === 'string' && video.videoId !== '')
   : [])
 // New pages of a YouTube playlist load as selected, so remember the deselected videos
