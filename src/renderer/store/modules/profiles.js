@@ -42,6 +42,21 @@ function mergeRootChannelSettings(channel, other) {
   }
 }
 
+/**
+ * The root profile of the given profile, or of the active one, and the
+ * profiles that share its subscriptions, or `null` if it no longer exists.
+ * @param {object} getters
+ * @param {string} [profileId]
+ */
+function getSubscriptionScope(getters, profileId) {
+  const root = profileId === undefined ? getters.getSubscriptionRootProfile : getters.profileById(profileId)
+  if (root == null) return null
+  const profiles = root.separate === true
+    ? [root]
+    : getters.getProfileList.filter(profile => profile.separate !== true)
+  return { root, profiles }
+}
+
 const getters = {
   getProfileList: (state) => {
     return state.profileList
@@ -224,13 +239,20 @@ const actions = {
     return dispatch('batchUpdateSubscriptionDetails', [channel])
   },
 
-  async batchUpdateChannelSettings({ commit, getters }, updates) {
+  /**
+   * @param {{ channelId: string, settings: object }[] | { updates: { channelId: string, settings: object }[], profileId?: string }} payload
+   * the updates, optionally with the root profile they were made in
+   */
+  async batchUpdateChannelSettings({ commit, getters }, payload) {
+    const { updates, profileId } = Array.isArray(payload) ? { updates: payload, profileId: undefined } : payload
     if (updates.length === 0) return true
-    const subscriptionsById = getters.getSubscribedChannelsById
-    const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
+    const scope = getSubscriptionScope(getters, profileId)
+    if (scope === null) return false
+    const subscribedIds = new Set(scope.root.subscriptions.map(channel => channel.id))
+    const availableUpdates = updates.filter(({ channelId }) => subscribedIds.has(channelId))
     if (availableUpdates.length === 0) return false
     const channelIds = new Set(availableUpdates.map(({ channelId }) => channelId))
-    const profiles = getters.getDataScopeProfiles
+    const profiles = scope.profiles
       .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
     const subscriptionsByChannelId = new Map([...channelIds].map(channelId => [channelId, []]))
     for (const profile of profiles) {
@@ -260,15 +282,13 @@ const actions = {
   async updateChannelSettings({ commit, getters }, { channelId, settings, fromSync = false, updatedAt, profileId }) {
     if (fromSync && !isValidSubscriptionSettingsTimestamp(updatedAt)) return false
 
-    // Sync updates the profiles of the scope it syncs, not the active one.
-    const root = profileId === undefined ? getters.getSubscriptionRootProfile : getters.profileById(profileId)
-    const primarySubscription = root?.subscriptions.find(channel => channel.id === channelId)
+    // Sync and queued edits update the profiles of the scope they were made
+    // for, not the active one.
+    const scope = getSubscriptionScope(getters, profileId)
+    const primarySubscription = scope?.root.subscriptions.find(channel => channel.id === channelId)
     if (primarySubscription === undefined) return false
 
-    const scopeProfiles = root.separate === true
-      ? [root]
-      : getters.getProfileList.filter(profile => profile.separate !== true)
-    const profiles = scopeProfiles
+    const profiles = scope.profiles
       .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
     try {
       const editTimestamp = fromSync

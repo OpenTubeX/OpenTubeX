@@ -533,14 +533,16 @@ function persistChannelSettingsUpdates(updates) {
     latestUpdateByChannel.set(channel.id, sequence)
   }
   optimisticChannelSettings.value = optimisticSettings
+  // A profile switch before the queued save runs doesn't move it.
+  const profileId = store.getters.getSubscriptionRootProfile._id
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
     try {
       const payload = updates.map(({ channel, patch }) => ({ channelId: channel.id, settings: patch }))
       saved = updates.length === 1
-        ? await store.dispatch('updateChannelSettings', payload[0])
-        : await store.dispatch('batchUpdateChannelSettings', payload)
+        ? await store.dispatch('updateChannelSettings', { ...payload[0], profileId })
+        : await store.dispatch('batchUpdateChannelSettings', { updates: payload, profileId })
     } catch (error) {
       console.error(error)
     } finally {
