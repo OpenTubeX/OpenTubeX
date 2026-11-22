@@ -1,11 +1,11 @@
 import { parseLegacyDatafile, SqliteDatastore } from './sqlite.js'
+import { claimLibrary, whenLibraryAvailable } from './libraryHandover.js'
 
 /**
  * @param {() => Worker} startWorker
  * @returns {(name: string) => import('./sqlite.js').SqliteDriver}
  */
 function workerDrivers(startWorker) {
-  const { claimLibrary, whenLibraryAvailable } = require('./libraryHandover.js')
   let worker = null
   /** @type {object[] | null} Requests waiting for this tab to start the worker */
   let queued = null
