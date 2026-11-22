@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "全部重试"
     Show All: "显示全部"
     Show Fewer: "收起"
+    Hide Channel: "隐藏 {channel} 的错误"
+    Channel Hidden: "已隐藏 {channel} 的错误。你可以在该频道的订阅设置中重新显示。点击撤销。"
   Cache Load Error: 无法加载已保存的订阅源。
   New video from {channel}: "{channel} 发布了新视频"
   New short from {channel}: "{channel} 发布了新短视频"
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX 已隐藏此视频，因为其标题包含隐藏文本"
     Correct: "正确"
     Incorrect: "错误"
+  Show refresh errors: "显示刷新错误"
 Video:
   Play in Background: "后台播放"
   Info panel source: '来源：{source}'

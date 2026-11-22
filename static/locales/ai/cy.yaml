@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Ceisio pob un eto"
     Show All: "Dangos y cyfan"
     Show Fewer: "Dangos llai"
+    Hide Channel: "Cuddio gwallau gan {channel}"
+    Channel Hidden: "Mae gwallau gan {channel} wedi'u cuddio. Gallwch eu dangos eto yng ngosodiadau tanysgrifio'r sianel. Cliciwch i ddadwneud."
   Cache Load Error: 'Nid oedd modd llwytho''ch ffrydiau tanysgrifio a gadwyd.'
   New video from {channel}: Fideo newydd gan {channel}
   New short from {channel}: Byr newydd gan {channel}
@@ -1784,6 +1786,7 @@ Channel:
   Shows:
     Shows: Sioeau
     This channel does not currently have any shows: Nid oes gan y sianel hon unrhyw sioeau ar hyn o bryd
+  Show refresh errors: "Dangos gwallau adnewyddu"
 Video:
   Play in Background: "Chwarae yn y cefndir"
   Info panel source: 'Ffynhonnell: {source}'

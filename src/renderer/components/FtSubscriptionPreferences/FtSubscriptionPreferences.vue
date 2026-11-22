@@ -104,10 +104,10 @@
     </div>
     <div
       v-if="showMembersOnly !== null"
-      class="membersOnlyPreference"
+      class="togglePreference membersOnlyPreference"
     >
       <FtIcon
-        class="membersOnlyIcon"
+        class="togglePreferenceIcon"
         :icon="['fas', 'users']"
         aria-hidden="true"
       />
@@ -119,6 +119,24 @@
         trailing
         controlled
         @change="value => emit('update-show-members-only', value)"
+      />
+    </div>
+    <div
+      v-if="showRefreshErrors !== null"
+      class="togglePreference refreshErrorsPreference"
+    >
+      <FtIcon
+        class="togglePreferenceIcon"
+        :icon="['fas', 'triangle-exclamation']"
+        aria-hidden="true"
+      />
+      <FtToggleSwitch
+        :label="t('Channel.Show refresh errors')"
+        :default-value="showRefreshErrors"
+        compact
+        trailing
+        controlled
+        @change="value => emit('update-show-refresh-errors', value)"
       />
     </div>
   </div>
@@ -163,10 +181,15 @@ const props = defineProps({
   showMembersOnly: {
     type: [Boolean, String],
     default: null
+  },
+  /** `null` hides the refresh errors switch. */
+  showRefreshErrors: {
+    type: Boolean,
+    default: null
   }
 })
 
-const emit = defineEmits(['toggle-feed-type', 'update-daily-video-limit', 'update-show-members-only'])
+const emit = defineEmits(['toggle-feed-type', 'update-daily-video-limit', 'update-show-members-only', 'update-show-refresh-errors'])
 
 const { t } = useI18n()
 const id = useId()

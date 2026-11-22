@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Yritä kaikkia uudelleen"
     Show All: "Näytä kaikki"
     Show Fewer: "Näytä vähemmän"
+    Hide Channel: "Piilota kanavan {channel} virheet"
+    Channel Hidden: "Kanavan {channel} virheet on piilotettu. Voit näyttää ne uudelleen kanavan tilausasetuksissa. Kumoa napsauttamalla."
   Cache Load Error: Tallennettuja tilaussyötteitä ei voitu ladata.
   New video from {channel}: Uusi video kanavalta {channel}
   New short from {channel}: Uusi Short kanavalta {channel}
@@ -1772,6 +1774,7 @@ Channel:
   Shows:
     Shows: Ohjelmat
     This channel does not currently have any shows: Tällä kanavalla ei ole tällä hetkellä ohjelmia
+  Show refresh errors: "Näytä päivitysvirheet"
 Video:
   Play in Background: "Toista taustalla"
   Info panel source: 'Lähde: {source}'

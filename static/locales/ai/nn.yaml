@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Prøv alle igjen"
     Show All: "Vis alle"
     Show Fewer: "Vis færre"
+    Hide Channel: "Gøym feil frå {channel}"
+    Channel Hidden: "Feil frå {channel} er gøymde. Du kan visa dei att i abonnementsinnstillingane for kanalen. Klikk for å angra."
   Cache Load Error: Kunne ikkje lasta inn dei lagra abonnementsstraumane dine.
   New video from {channel}: Ny video frå {channel}
   New short from {channel}: Ny Shorts-video frå {channel}
@@ -1994,6 +1996,7 @@ Channel:
   Shows:
     Shows: Seriar
     This channel does not currently have any shows: Denne kanalen har ingen seriar enno
+  Show refresh errors: "Vis oppdateringsfeil"
 Video:
   Play in Background: "Spel av i bakgrunnen"
   Info panel source: 'Kjelde: {source}'

@@ -34,14 +34,17 @@ test('shares normalized channel-setting values between settings interfaces', () 
     feedTypes: ['posts', 'invalid', 'videos'],
     notificationFeedTypes: ['live', 'invalid'],
     dailyVideoLimit: 0,
-    showMembersOnly: true
+    showMembersOnly: true,
+    showRefreshErrors: false
   }), {
     feedTypes: ['videos', 'posts'],
     notificationFeedTypes: ['live'],
     dailyVideoLimit: undefined,
-    showMembersOnly: true
+    showMembersOnly: true,
+    showRefreshErrors: false
   })
   assert.deepEqual(normalizeSubscriptionChannelSettings({}).notificationFeedTypes, [])
+  assert.equal(normalizeSubscriptionChannelSettings({}).showRefreshErrors, true)
   assert.equal(formatSubscriptionDailyVideoLimit(undefined), 'global')
   assert.equal(formatSubscriptionDailyVideoLimit(null), 'unlimited')
   assert.equal(formatSubscriptionDailyVideoLimit(2), '2')

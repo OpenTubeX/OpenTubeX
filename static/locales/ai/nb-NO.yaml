@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Prøv alle igjen"
     Show All: "Vis alle"
     Show Fewer: "Vis færre"
+    Hide Channel: "Skjul feil fra {channel}"
+    Channel Hidden: "Feil fra {channel} er skjult. Du kan vise dem igjen i abonnementsinnstillingene for kanalen. Klikk for å angre."
   Cache Load Error: Kunne ikke laste inn de lagrede abonnementsstrømmene dine.
   New video from {channel}: Ny video fra {channel}
   New short from {channel}: Ny Shorts-video fra {channel}
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Video skjult av OpenTubeX fordi tittelen inneholder skjult tekst"
     Correct: "Riktig"
     Incorrect: "Feil"
+  Show refresh errors: "Vis oppdateringsfeil"
 Video:
   Play in Background: "Spill av i bakgrunnen"
   Info panel source: 'Kilde: {source}'

@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Thử lại tất cả"
     Show All: "Hiển thị tất cả"
     Show Fewer: "Hiển thị ít hơn"
+    Hide Channel: "Ẩn lỗi của {channel}"
+    Channel Hidden: "Đã ẩn lỗi của {channel}. Bạn có thể hiển thị lại trong cài đặt đăng ký của kênh. Nhấp để hoàn tác."
   Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.
   New video from {channel}: Video mới từ {channel}
   New short from {channel}: Shorts mới từ {channel}
@@ -1775,6 +1777,7 @@ Channel:
   Shows:
     Shows: Chương trình
     This channel does not currently have any shows: Kênh này hiện không có chương trình nào
+  Show refresh errors: "Hiển thị lỗi làm mới"
 Video:
   Play in Background: "Phát trong nền"
   Info panel source: 'Nguồn: {source}'

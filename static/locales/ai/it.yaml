@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Riprova tutti"
     Show All: "Mostra tutti"
     Show Fewer: "Mostra meno"
+    Hide Channel: "Nascondi errori di {channel}"
+    Channel Hidden: "Gli errori di {channel} sono nascosti. Puoi mostrarli di nuovo nelle impostazioni di iscrizione del canale. Fai clic per annullare."
   Cache Load Error: Impossibile caricare i feed delle iscrizioni salvati.
   New video from {channel}: Nuovo video da {channel}
   New short from {channel}: Nuovo video breve da {channel}
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Video nascosto da OpenTubeX perché il titolo contiene testo nascosto"
     Correct: "Corretto"
     Incorrect: "Sbagliato"
+  Show refresh errors: "Mostra errori di aggiornamento"
 Video:
   Play in Background: "Riproduci in background"
   Info panel source: 'Fonte: {source}'

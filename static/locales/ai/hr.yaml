@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Pokušaj ponovno sve"
     Show All: "Prikaži sve"
     Show Fewer: "Prikaži manje"
+    Hide Channel: "Sakrij pogreške kanala {channel}"
+    Channel Hidden: "Pogreške kanala {channel} su skrivene. Možete ih ponovno prikazati u postavkama pretplate kanala. Kliknite za poništavanje."
   Cache Load Error: Spremljeni feedovi pretplata nisu se mogli učitati.
   New video from {channel}: Novi video s kanala {channel}
   New short from {channel}: Novi kratki video s kanala {channel}
@@ -1789,6 +1791,7 @@ Channel:
   Shows:
     Shows: Emisije
     This channel does not currently have any shows: Ovaj kanal trenutno nema emisije
+  Show refresh errors: "Prikaži pogreške osvježavanja"
 Video:
   Play in Background: "Reproduciraj u pozadini"
   Info panel source: 'Izvor: {source}'

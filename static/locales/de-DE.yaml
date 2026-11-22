@@ -179,6 +179,8 @@ Subscriptions:
     Retry All: Alle erneut versuchen
     Show All: Alle anzeigen
     Show Fewer: Weniger anzeigen
+    Hide Channel: Fehler von {channel} ausblenden
+    Channel Hidden: Fehler von {channel} werden ausgeblendet. Du kannst sie in den Abo-Einstellungen des Kanals wieder einblenden. Klicken, um dies rückgängig zu machen.
   Never show {type} from this channel in feeds again: Nie wieder {type} von diesem Kanal in Feeds anzeigen
     # On Subscriptions Page
   Subscriptions: Abos
@@ -2277,6 +2279,7 @@ Channel:
   Show in subscription feed: Im Abo-Feed anzeigen
   Notify about new uploads: Über neue Uploads benachrichtigen
   Show members-only videos: Videos nur für Mitglieder anzeigen
+  Show refresh errors: Aktualisierungsfehler anzeigen
   Upload Notifications On: "Du wirst über neue Uploads von {channelName} benachrichtigt, wenn deine Abos aktualisiert werden"
   Upload Notifications Off: "Du wirst nicht mehr über neue Uploads von {channelName} benachrichtigt"
   Upload Notifications Disabled In Settings: "Benachrichtigungen für {channelName} sind aktiviert, aber Benachrichtigungen über neue Uploads sind in deinen Einstellungen deaktiviert"

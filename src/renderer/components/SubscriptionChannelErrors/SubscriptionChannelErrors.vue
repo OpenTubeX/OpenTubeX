@@ -75,26 +75,35 @@
         <p class="channelErrorReasons">
           {{ row.unavailable ? t('Channel.This channel does not exist') : row.reasons.join('\n') }}
         </p>
-        <FtSubscribeButton
-          v-if="row.unavailable"
-          class="channelErrorAction"
-          :channel-id="row.id"
-          :channel-name="row.name"
-          :channel-thumbnail="row.thumbnail"
-          hide-profile-dropdown-toggle
-          :open-dropdown-on-subscribe="false"
-        />
-        <FtButton
-          v-else
-          class="channelErrorAction"
-          :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :aria-label="t('Subscriptions.Channel Errors.Retry Channel', { channel: row.name })"
-          :icon="['fas', 'sync']"
-          :disabled="refreshInProgress"
-          :background-color="null"
-          :text-color="null"
-          @click="retrySubscriptionChannels([row], t)"
-        />
+        <div class="channelErrorActions">
+          <FtSubscribeButton
+            v-if="row.unavailable"
+            :channel-id="row.id"
+            :channel-name="row.name"
+            :channel-thumbnail="row.thumbnail"
+            hide-profile-dropdown-toggle
+            :open-dropdown-on-subscribe="false"
+          />
+          <FtButton
+            v-else
+            :label="t('User Playlists.SinglePlaylistView.Retry')"
+            :aria-label="t('Subscriptions.Channel Errors.Retry Channel', { channel: row.name })"
+            :icon="['fas', 'sync']"
+            :disabled="refreshInProgress"
+            :background-color="null"
+            :text-color="null"
+            @click="retrySubscriptionChannels([row], t)"
+          />
+          <!-- For channels the user keeps on purpose, such as terminated ones that might come back -->
+          <FtIconButton
+            :title="t('Subscriptions.Channel Errors.Hide Channel', { channel: row.name })"
+            :icon="['fas', 'eye-slash']"
+            theme="base-no-default"
+            :size="16"
+            :padding="8"
+            @click="setChannelErrorsShown(row, false)"
+          />
+        </div>
       </li>
     </ul>
     <FtButton
@@ -125,9 +134,9 @@ import {
   registerShownSubscriptionErrorBox,
   subscriptionChannelErrors
 } from '../../helpers/subscriptionRefreshErrors'
-import { isSubscriptionFeedTypeEnabled } from '../../helpers/subscription-channels'
+import { listsSubscriptionChannelError } from '../../helpers/subscription-channels'
 import { retrySubscriptionChannels } from '../../helpers/subscriptions'
-import { copyToClipboard } from '../../helpers/utils'
+import { copyToClipboard, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
 const COLLAPSED_ROW_COUNT = 3
@@ -158,8 +167,7 @@ const rows = computed(() => {
   for (const [channelId, errors] of subscriptionChannelErrors) {
     const channel = shownChannelsById.value.get(channelId)
     if (channel === undefined) continue
-    // Feeds turned off for the channel aren't fetched anymore, so they can't be retried
-    const feeds = props.feeds.filter(feed => errors[feed] !== undefined && isSubscriptionFeedTypeEnabled(channel, feed))
+    const feeds = props.feeds.filter(feed => errors[feed] !== undefined && listsSubscriptionChannelError(channel, feed))
     if (feeds.length === 0) continue
 
     const feedErrors = feeds.map(feed => errors[feed])
@@ -183,6 +191,23 @@ const shownRows = computed(() => expanded.value ? rows.value : rows.value.slice(
 
 function copyDetails() {
   copyToClipboard(rows.value.map(row => row.trace).join('\n'))
+}
+
+/**
+ * @param {{ id: string, name: string }} row
+ * @param {boolean} show
+ */
+async function setChannelErrorsShown({ id, name }, show) {
+  const saved = await store.dispatch('updateChannelSettings', { channelId: id, settings: { showRefreshErrors: show } })
+  if (!saved) {
+    showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
+  } else if (!show) {
+    showToast({
+      message: t('Subscriptions.Channel Errors.Channel Hidden', { channel: name }),
+      icon: ['fas', 'eye-slash'],
+      action: () => setChannelErrorsShown({ id, name }, true)
+    })
+  }
 }
 
 function dismiss() {

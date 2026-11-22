@@ -186,6 +186,8 @@ Subscriptions:
     Retry All: "Покушај поново све"
     Show All: "Прикажи све"
     Show Fewer: "Прикажи мање"
+    Hide Channel: "Сакриј грешке канала {channel}"
+    Channel Hidden: "Грешке канала {channel} су сакривене. Можете их поново приказати у подешавањима претплате канала. Кликните да опозовете."
   Cache Load Error: Сачувани фидови претплата нису могли да се учитају.
   New video from {channel}: Нови видео снимак са канала {channel}
   New short from {channel}: Нови кратки снимак са канала {channel}
@@ -1830,6 +1832,7 @@ Channel:
   Shows:
     Shows: Емисије
     This channel does not currently have any shows: Овај канал тренутно нема ниједну емисију
+  Show refresh errors: "Прикажи грешке при освежавању"
 Video:
   Play in Background: "Репродукуј у позадини"
   Info panel source: 'Извор: {source}'

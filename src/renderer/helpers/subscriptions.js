@@ -40,7 +40,7 @@ import {
   showToast,
   showToastOnAllTabs,
 } from './utils'
-import { getSubscriptionsForFeed, isSubscriptionFeedTypeEnabled } from './subscription-channels'
+import { getSubscriptionsForFeed, listsSubscriptionChannelError } from './subscription-channels'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
@@ -471,8 +471,9 @@ export function notifyNewSubscriptionChannelErrors(errors, t) {
   const profileChannels = new Map(store.getters.getActiveProfile.subscriptions.map(channel => [channel.id, channel]))
   const hiddenErrors = errors.filter(({ feed, channelId }) => {
     const channel = profileChannels.get(channelId)
-    // The box leaves out feeds the user turned off for the channel while it was fetched
-    return channel !== undefined && isSubscriptionFeedTypeEnabled(channel, feed) &&
+    // The box leaves out feeds the user turned off for the channel while it was fetched,
+    // and channels whose errors the user hid
+    return channel !== undefined && listsSubscriptionChannelError(channel, feed) &&
       // A later refresh in the same import can load the channel again
       subscriptionChannelErrors.get(channelId)?.[feed] !== undefined &&
       !isSubscriptionChannelErrorShown(feed, channelId)

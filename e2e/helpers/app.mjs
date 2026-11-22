@@ -741,12 +741,41 @@ export async function setPlayerFullscreen(page, fullscreen) {
  */
 async function attachRecordedEvents(testInfo, page) {
   try {
-    const events = await page.evaluate(() => window.__e2eEvents)
+    const events = await withTimeout(page.evaluate(() => window.__e2eEvents), 5000)
     if (events?.length) {
       await testInfo.attach('recorded events', { body: JSON.stringify(events, null, 2), contentType: 'application/json' })
     }
   } catch {
     // ignored on purpose, see above
+  }
+}
+
+/**
+ * Rejects when the promise has not settled within the timeout.
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {number} timeout
+ * @returns {Promise<T>}
+ */
+function withTimeout(promise, timeout) {
+  let timer
+  return Promise.race([
+    promise,
+    new Promise((_resolve, reject) => { timer = setTimeout(() => reject(new Error(`Timed out after ${timeout}ms`)), timeout) })
+  ]).finally(() => clearTimeout(timer))
+}
+
+/**
+ * Whether the renderer still runs JavaScript, so a failed test's teardown can
+ * collect its screenshot and recorded events.
+ * @param {import('@playwright/test').Page} page
+ */
+async function isRendererResponsive(page) {
+  try {
+    await withTimeout(page.evaluate(() => true), 5000)
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -1092,9 +1121,14 @@ export const test = base.extend({
     } finally {
       // A failed launch has not set the test's status yet.
       const failed = settingUp || testInfo.status !== testInfo.expectedStatus
-      if (appHandle && failed) {
+      // A hung renderer never answers a screenshot or evaluate, which would
+      // use up the test timeout before the trace and main process output
+      // below are attached.
+      if (appHandle && failed && await isRendererResponsive(appHandle.page)) {
         await attachScreenshot(testInfo, appHandle.page, 'failure')
         await attachRecordedEvents(testInfo, appHandle.page)
+      } else if (appHandle && failed) {
+        testInfo.annotations.push({ type: 'warning', description: 'The renderer stopped responding or crashed, so no failure screenshot was taken' })
       }
       await diagnostics.finish(failed)
       if (appHandle) {

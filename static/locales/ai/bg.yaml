@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Повторен опит за всички"
     Show All: "Покажи всички"
     Show Fewer: "Покажи по-малко"
+    Hide Channel: "Скриване на грешките от {channel}"
+    Channel Hidden: "Грешките от {channel} са скрити. Можете да ги покажете отново в настройките за абонамент на канала. Щракнете, за да отмените."
   Cache Load Error: Запазените емисии на абонаментите ви не можаха да бъдат заредени.
   New video from {channel}: Ново видео от {channel}
   New short from {channel}: Ново кратко видео от {channel}
@@ -1789,6 +1791,7 @@ Channel:
   Shows:
     Shows: Предавания
     This channel does not currently have any shows: В момента този канал няма никакви предавания
+  Show refresh errors: "Показване на грешките при опресняване"
 Video:
   Play in Background: "Възпроизвеждане във фонов режим"
   Info panel source: 'Източник: {source}'

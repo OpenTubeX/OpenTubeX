@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Försök igen med alla"
     Show All: "Visa alla"
     Show Fewer: "Visa färre"
+    Hide Channel: "Dölj fel från {channel}"
+    Channel Hidden: "Fel från {channel} är dolda. Du kan visa dem igen i kanalens prenumerationsinställningar. Klicka för att ångra."
   Cache Load Error: Dina sparade prenumerationsflöden kunde inte läsas in.
   New video from {channel}: Ny video från {channel}
   New short from {channel}: Ny Short från {channel}
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Video dold av OpenTubeX eftersom titeln innehåller dold text"
     Correct: "Rätt"
     Incorrect: "Fel"
+  Show refresh errors: "Visa uppdateringsfel"
 Video:
   Play in Background: "Spela upp i bakgrunden"
   Info panel source: 'Källa: {source}'

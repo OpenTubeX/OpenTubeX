@@ -152,9 +152,11 @@
               :notification-feed-type-states="uploadNotificationsAvailable ? channelFeedTypeStates(channel, 'notificationFeedTypes') : null"
               :daily-video-limit="channelSettings(channel).dailyVideoLimit"
               :show-members-only="restrictedPlaybackConfigured ? channelSettings(channel).showMembersOnly : null"
+              :show-refresh-errors="channelSettings(channel).showRefreshErrors"
               @toggle-feed-type="(feedType, key) => updateFeedType(channel, feedType, !isFeedTypeEnabled(channel, feedType, key), key)"
               @update-daily-video-limit="value => updateChannelLimit(channel, value)"
               @update-show-members-only="value => updateShowMembersOnly(channel, value)"
+              @update-show-refresh-errors="value => updateShowRefreshErrors(channel, value)"
             />
           </li>
         </ul>
@@ -331,6 +333,7 @@ watch(channels, (channelList) => {
  * @property {string[]|undefined} notificationFeedTypes
  * @property {number|null|undefined} dailyVideoLimit
  * @property {boolean|undefined} showMembersOnly
+ * @property {boolean|undefined} showRefreshErrors
  */
 
 /**
@@ -511,6 +514,14 @@ function updateShowMembersOnly(channel, value) {
 
 /**
  * @param {SubscriptionChannel} channel
+ * @param {boolean} value
+ */
+function updateShowRefreshErrors(channel, value) {
+  persistChannelSettings(channel, { showRefreshErrors: value })
+}
+
+/**
+ * @param {SubscriptionChannel} channel
  */
 function channelSettings(channel) {
   const optimisticSettings = optimisticChannelSettings.value.get(channel.id)
@@ -520,7 +531,7 @@ function channelSettings(channel) {
 
 /**
  * @param {SubscriptionChannel} channel
- * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean }} patch
+ * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean, showRefreshErrors?: boolean }} patch
  */
 function persistChannelSettings(channel, patch) {
   persistChannelSettingsUpdates([{ channel, patch }])

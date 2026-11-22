@@ -143,6 +143,8 @@ Subscriptions:
     Retry All: "Повторить для всех"
     Show All: "Показать все"
     Show Fewer: "Показать меньше"
+    Hide Channel: "Скрыть ошибки канала {channel}"
+    Channel Hidden: "Ошибки канала {channel} скрыты. Их можно снова показать в настройках подписки на канал. Нажмите, чтобы отменить."
   Cache Load Error: Не удалось загрузить сохранённые ленты подписок.
   New video from {channel}: Новое видео на канале {channel}
   New short from {channel}: Новый Шортс на канале {channel}
@@ -1733,6 +1735,7 @@ Channel:
   Shows:
     Shows: Шоу
     This channel does not currently have any shows: На этом канале в настоящее время нет шоу
+  Show refresh errors: "Показывать ошибки обновления"
 Video:
   Play in Background: "Воспроизвести в фоне"
   Info panel source: 'Источник: {source}'

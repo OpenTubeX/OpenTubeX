@@ -95,6 +95,26 @@ test('a route whose code failed to preload still opens on click', async ({ page 
 
   const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.channelName').first()
   const failedRequest = page.waitForEvent('requestfailed', request => request.url().startsWith('app://bundle/'))
+  // On CI, the hover once never requested the route's code. Record the
+  // events that start or cancel the preload intent for the failure report.
+  await page.evaluate(() => {
+    const events = window.__e2eEvents ??= []
+    const describe = (target) => {
+      if (!(target instanceof Element)) return target === document ? 'document' : String(target)
+      const link = target.closest('a[href^="#/"]')?.getAttribute('href')
+      return [target.tagName.toLowerCase(), ...target.classList].join('.') + (link ? ` in ${link}` : '')
+    }
+    for (const type of ['pointermove', 'pointerout', 'pointerdown', 'focusin', 'focusout', 'scroll']) {
+      document.addEventListener(type, (event) => {
+        events.push({
+          t: Math.round(performance.now()),
+          type,
+          target: describe(event.target),
+          ...(event instanceof PointerEvent ? { pointerType: event.pointerType, relatedTarget: event.relatedTarget && describe(event.relatedTarget) } : {}),
+        })
+      }, { capture: true, passive: true })
+    }
+  })
   await link.hover()
   await failedRequest
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)

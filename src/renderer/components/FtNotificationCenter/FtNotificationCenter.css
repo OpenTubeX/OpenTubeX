@@ -29,23 +29,25 @@
   }
 }
 
+/* Matches .capacitorPhoneTabCount, the tab count beside it in the phone header. */
 .notificationCenter[data-unread-count]::after {
   position: absolute;
-  inset-block-start: 4px;
-  inset-inline-end: 2px;
+  inset-block-start: 3px;
+  inset-inline-end: 1px;
+  display: grid;
+  place-items: center;
   box-sizing: border-box;
-  min-inline-size: 18px;
-  block-size: 18px;
-  padding-inline: 5px;
-  border-radius: 9px;
+  min-inline-size: 19px;
+  block-size: 19px;
+  padding-inline: 4px;
+  border: 2px solid var(--card-bg-color);
+  border-radius: var(--shape-corner-full);
   background-color: var(--primary-color);
-  box-shadow: 0 0 0 2px var(--card-bg-color);
   color: var(--text-with-main-color);
   content: attr(data-unread-count);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  line-height: 18px;
-  text-align: center;
+  line-height: 1;
   pointer-events: none;
 }
 

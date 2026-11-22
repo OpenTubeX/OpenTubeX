@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Zkusit znovu vše"
     Show All: "Zobrazit vše"
     Show Fewer: "Zobrazit méně"
+    Hide Channel: "Skrýt chyby kanálu {channel}"
+    Channel Hidden: "Chyby kanálu {channel} jsou skryté. Znovu je můžete zobrazit v nastavení odběru kanálu. Kliknutím akci vrátíte zpět."
   Cache Load Error: Uložené kanály odběrů se nepodařilo načíst.
   New video from {channel}: Nové video od {channel}
   New short from {channel}: Nový Short od {channel}
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, protože jeho název obsahuje skrytý text"
     Correct: "Správně"
     Incorrect: "Špatně"
+  Show refresh errors: "Zobrazovat chyby obnovení"
 Video:
   Play in Background: "Přehrát na pozadí"
   Info panel source: 'Zdroj: {source}'

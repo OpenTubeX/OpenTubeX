@@ -219,6 +219,8 @@ Subscriptions:
     Retry All: "سب دوبارہ آزمائیں"
     Show All: "سب دکھائیں"
     Show Fewer: "کم دکھائیں"
+    Hide Channel: "{channel} کی خرابیاں چھپائیں"
+    Channel Hidden: "{channel} کی خرابیاں چھپا دی گئی ہیں۔ آپ انہیں چینل کی سبسکرپشن ترتیبات میں دوبارہ دکھا سکتے ہیں۔ کالعدم کرنے کے لیے کلک کریں۔"
   Cache Load Error: آپ کی محفوظ کردہ سبسکرپشن فیڈز لوڈ نہیں ہو سکیں۔
   New video from {channel}: '{channel} کی نئی ویڈیو'
   New short from {channel}: '{channel} کا نیا شارٹ'
@@ -1866,6 +1868,7 @@ Channel:
   Shows:
     Shows: شوز
     This channel does not currently have any shows: اس چینل پر فی الحال کوئی شوز نہیں ہیں
+  Show refresh errors: "ریفریش کی خرابیاں دکھائیں"
 Video:
   Play in Background: "پس منظر میں چلائیں"
   Mark As Fully Watched: مکمل دیکھی گئی نشان زد کریں

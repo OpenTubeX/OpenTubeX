@@ -15,6 +15,9 @@ import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
+/** How the downloads page shows the demo video's size, which is above 10 KiB. */
+const demoMediaSize = `${Math.round(DEMO_MEDIA_LENGTH / 1024)} KiB`
+
 function historyEntry(videoId, title) {
   return {
     _id: videoId,
@@ -739,7 +742,7 @@ test.describe('video downloads', () => {
       }))
     })
     await goTo(page, 'downloads')
-    await expect(page.getByText('Total size: 140 KiB', { exact: true })).toBeVisible()
+    await expect(page.getByText(`Total size: ${demoMediaSize}`, { exact: true })).toBeVisible()
     expect(await page.evaluate(async (id) => {
       const download = (await window.ftElectron.ytDlpListDownloads()).find(record => record.id === id)
       return download.sizeBytes
@@ -762,7 +765,7 @@ test.describe('video downloads', () => {
       path.dirname(temporaryPath.slice('temp:'.length)) === downloadFolder
     ))).toBe(true)
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded demo' })
-    await expect(downloadRow.locator('.downloadSummary')).toContainText('140 KiB')
+    await expect(downloadRow.locator('.downloadSummary')).toContainText(demoMediaSize)
     await expect(page.locator('.settingsBackButton')).toHaveCount(0)
     await expect(downloadRow).toHaveCSS('flex-direction', 'column')
     await expect(downloadRow.locator('.downloadMain')).toHaveCSS('flex-direction', 'column')

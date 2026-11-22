@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Klask en-dro an holl"
     Show All: "Diskouez pep tra"
     Show Fewer: "Diskouez nebeutoc'h"
+    Hide Channel: "Kuzhat fazioù {channel}"
+    Channel Hidden: "Kuzhet eo fazioù {channel}. Gallout a rit o diskouez en-dro e arventennoù koumanant ar chadenn. Klikit evit dizober."
   Cache Load Error: 'N''eus ket bet gallet kargañ ho lanvioù koumanantoù enrollet.'
   New video from {channel}: Video nevez gant {channel}
   New short from {channel}: Video berr nevez gant {channel}
@@ -1768,6 +1770,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Video kuzhet gant OpenTubeX peogwir e titl a endalc'h testenn guzhet"
     Correct: "Reizh"
     Incorrect: "Direizh"
+  Show refresh errors: "Diskouez fazioù an adkargañ"
 Video:
   Play in Background: "Lenn en drekleur"
   Info panel source: 'Mammenn: {source}'

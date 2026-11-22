@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Повторити для всіх"
     Show All: "Показати всі"
     Show Fewer: "Показати менше"
+    Hide Channel: "Приховати помилки каналу {channel}"
+    Channel Hidden: "Помилки каналу {channel} приховано. Їх можна знову показати в налаштуваннях підписки на канал. Натисніть, щоб скасувати."
   Cache Load Error: Не вдалося завантажити збережені стрічки підписок.
   New video from {channel}: Нове відео від {channel}
   New short from {channel}: Нове Shorts-відео від {channel}
@@ -1807,6 +1809,7 @@ Channel:
   Shows:
     Shows: Шоу
     This channel does not currently have any shows: На цьому каналі наразі немає шоу
+  Show refresh errors: "Показувати помилки оновлення"
 Video:
   Play in Background: "Відтворити у фоні"
   Info panel source: 'Джерело: {source}'

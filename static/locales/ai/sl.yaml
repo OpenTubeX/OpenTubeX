@@ -223,6 +223,8 @@ Subscriptions:
     Retry All: "Poskusi znova vse"
     Show All: "Pokaži vse"
     Show Fewer: "Pokaži manj"
+    Hide Channel: "Skrij napake kanala {channel}"
+    Channel Hidden: "Napake kanala {channel} so skrite. Znova jih lahko prikažete v nastavitvah naročnine kanala. Kliknite za razveljavitev."
   Cache Load Error: Shranjenih virov naročnin ni bilo mogoče naložiti.
   New video from {channel}: Nov videoposnetek kanala {channel}
   New short from {channel}: Nov posnetek Shorts kanala {channel}
@@ -2150,6 +2152,7 @@ Channel:
   Shows:
     Shows: Oddaje
     This channel does not currently have any shows: Ta kanal trenutno nima oddaj
+  Show refresh errors: "Prikaži napake osveževanja"
 Video:
   Play in Background: "Predvajaj v ozadju"
   Info panel source: 'Vir: {source}'

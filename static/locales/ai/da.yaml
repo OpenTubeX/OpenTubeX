@@ -186,6 +186,8 @@ Subscriptions:
     Retry All: "Prøv alle igen"
     Show All: "Vis alle"
     Show Fewer: "Vis færre"
+    Hide Channel: "Skjul fejl fra {channel}"
+    Channel Hidden: "Fejl fra {channel} er skjult. Du kan vise dem igen i kanalens abonnementsindstillinger. Klik for at fortryde."
   Cache Load Error: Dine gemte abonnementsfeeds kunne ikke indlæses.
   New video from {channel}: Ny video fra {channel}
   New short from {channel}: Ny Short fra {channel}
@@ -1834,6 +1836,7 @@ Channel:
   Shows:
     Shows: Serier
     This channel does not currently have any shows: Denne kanal har i øjeblikket ingen serier
+  Show refresh errors: "Vis opdateringsfejl"
 Video:
   Play in Background: "Afspil i baggrunden"
   Info panel source: 'Kilde: {source}'

@@ -210,6 +210,8 @@ Subscriptions:
     Retry All: "Reprovi ĉiujn"
     Show All: "Montri ĉiujn"
     Show Fewer: "Montri malpli"
+    Hide Channel: "Kaŝi erarojn de {channel}"
+    Channel Hidden: "Eraroj de {channel} estas kaŝitaj. Vi povas remontri ilin en la abonaj agordoj de la kanalo. Alklaku por malfari."
   Cache Load Error: Viaj konservitaj abonaj fluoj ne povis esti ŝargitaj.
   New video from {channel}: Nova videaĵo de {channel}
   New short from {channel}: Nova videaĵeto de {channel}
@@ -1811,6 +1813,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Video kaŝita de OpenTubeX ĉar ĝia titolo enhavas kaŝitan tekston"
     Correct: "Ĝuste"
     Incorrect: "Malĝuste"
+  Show refresh errors: "Montri erarojn de aktualigo"
 Video:
   Play in Background: "Ludi fone"
   Mark As Fully Watched: Marki kiel tute spektita

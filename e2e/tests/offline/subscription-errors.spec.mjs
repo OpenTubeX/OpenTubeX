@@ -121,6 +121,13 @@ test.describe('channels that could not be refreshed in several New feed categori
     expect(requests.length).toBeGreaterThanOrEqual(2)
     expect(requests.every(url => url.includes(channels[1].id.slice(2)))).toBe(true)
 
+    // Hidden errors stay hidden for the channel until the user shows them again
+    await box.getByRole('button', { name: `Hide errors from ${channels[0].name}` }).click()
+    await expect(page.locator('.channelErrors.hasErrors')).toHaveCount(0)
+    expect(await page.evaluate(id => window.$store.getters.getSubscribedChannelsById.get(id).showRefreshErrors, channels[0].id)).toBe(false)
+    await page.locator('.toast', { hasText: `Errors from ${channels[0].name} are hidden` }).click()
+    await expect(box.getByRole('link', { name: channels[0].name })).toBeVisible()
+
     // Feed types turned off for a channel aren't fetched anymore, so their errors can't be retried
     await page.evaluate(channelId => window.$store.dispatch('updateChannelSettings', { channelId, settings: { feedTypes: ['live'] } }), channels[0].id)
     await expect(page.locator('.channelErrors.hasErrors')).toHaveCount(0)

@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "全部重試"
     Show All: "顯示全部"
     Show Fewer: "顯示較少"
+    Hide Channel: "隱藏 {channel} 的錯誤"
+    Channel Hidden: "已隱藏 {channel} 的錯誤。你可以在該頻道的訂閱設定中重新顯示。點擊以復原。"
   Cache Load Error: 無法載入已儲存的訂閱內容動態。
   New video from {channel}: "{channel} 發布了新影片"
   New short from {channel}: "{channel} 發布了新短片"
@@ -1766,6 +1768,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX 已隱藏此影片，因為其標題包含隱藏文字"
     Correct: "正確"
     Incorrect: "錯誤"
+  Show refresh errors: "顯示重新整理錯誤"
 Video:
   Play in Background: "背景播放"
   Info panel source: '來源：{source}'

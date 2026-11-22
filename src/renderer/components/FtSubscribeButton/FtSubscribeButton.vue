@@ -108,9 +108,11 @@
                   :notifications-off="!notificationsEnabled"
                   :daily-video-limit="activeChannelSettings.dailyVideoLimit"
                   :show-members-only="restrictedPlaybackConfigured ? activeChannelSettings.showMembersOnly : null"
+                  :show-refresh-errors="activeChannelSettings.showRefreshErrors"
                   @toggle-feed-type="(feedType, key) => updateFeedType(feedType, !isFeedTypeChecked(feedType, key), key)"
                   @update-daily-video-limit="updateDailyVideoLimit"
                   @update-show-members-only="updateShowMembersOnly"
+                  @update-show-refresh-errors="updateShowRefreshErrors"
                 />
               </div>
             </div>
@@ -316,6 +318,7 @@ const profileDropdownAnchor = `--subscription-${id}`
  * @property {string[]|undefined} subscriptions[].feedTypes
  * @property {number|null|undefined} subscriptions[].dailyVideoLimit
  * @property {boolean|undefined} subscriptions[].showMembersOnly
+ * @property {boolean|undefined} subscriptions[].showRefreshErrors
  */
 
 /**
@@ -538,7 +541,7 @@ const storedChannelSettings = computed(() => {
   return normalizeSubscriptionChannelSettings(subscription)
 })
 
-/** @type {import('vue').Ref<{feedTypes: string[], notificationFeedTypes: string[], dailyVideoLimit: number|null|undefined, showMembersOnly: boolean} | null>} */
+/** @type {import('vue').Ref<{feedTypes: string[], notificationFeedTypes: string[], dailyVideoLimit: number|null|undefined, showMembersOnly: boolean, showRefreshErrors: boolean} | null>} */
 const optimisticChannelSettings = ref(null)
 const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
@@ -900,7 +903,14 @@ function updateShowMembersOnly(value) {
 }
 
 /**
- * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
+ * @param {boolean} value
+ */
+function updateShowRefreshErrors(value) {
+  persistChannelSettings({ showRefreshErrors: value })
+}
+
+/**
+ * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean, showRefreshErrors?: boolean}} patch
  * @returns {Promise<boolean>} whether the settings were saved
  */
 function persistChannelSettings(patch) {

@@ -197,6 +197,8 @@ Subscriptions:
     Retry All: "Reintentar todos"
     Show All: "Mostrar todos"
     Show Fewer: "Mostrar menos"
+    Hide Channel: "Ocultar errores de {channel}"
+    Channel Hidden: "Se ocultaron los errores de {channel}. Puedes volver a mostrarlos en la configuración de suscripción del canal. Haz clic para deshacer."
   Cache Load Error: No se pudieron cargar tus feeds de suscripciones guardados.
   New video from {channel}: Nuevo video de {channel}
   New short from {channel}: Nuevo Short de {channel}
@@ -2033,6 +2035,7 @@ Channel:
   Shows:
     Shows: Programas
     This channel does not currently have any shows: Este canal no tiene programas en este momento
+  Show refresh errors: "Mostrar errores de actualización"
 Video:
   Play in Background: "Reproducir en segundo plano"
   Info panel source: 'Fuente: {source}'

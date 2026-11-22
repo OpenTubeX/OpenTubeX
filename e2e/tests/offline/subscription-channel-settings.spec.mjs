@@ -58,7 +58,7 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
       await card.scrollIntoViewIfNeeded()
       expect.soft(await card.evaluate(element => {
         const bounds = element.getBoundingClientRect()
-        return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .membersOnlyPreference')].some(control => {
+        return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .togglePreference')].some(control => {
           const rect = control.getBoundingClientRect()
           return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 || control.scrollWidth > control.clientWidth + 1
         })
@@ -80,7 +80,7 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
         await page.evaluate(value => { document.body.dir = value }, direction)
         const overflow = await popover.evaluate(element => {
           const bounds = element.getBoundingClientRect()
-          return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .membersOnlyPreference')].some(control => {
+          return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .togglePreference')].some(control => {
             const rect = control.getBoundingClientRect()
             return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 || control.scrollWidth > control.clientWidth + 1
           })
@@ -656,7 +656,9 @@ test('reports a partial write when a requested profile no longer exists', async 
   })
 })
 
-test('clamps the channel list after searching', async ({ page }) => {
+test('clamps the channel list after searching', async ({ app, page }) => {
+  // Tall enough for the single remaining channel to fit without scrolling
+  await setWindowSize(app, page, { width: 1500, height: 1050 })
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
 
