@@ -73,6 +73,7 @@ function workerDrivers(startWorker) {
           start()
           for (const request of requests) worker.postMessage(request)
         } catch (error) {
+          worker?.terminate()
           worker = null
           for (const { id } of requests) settle(id, request => request.reject(error))
         }
