@@ -222,7 +222,7 @@
     </div>
     <div
       ref="commentsContentWrapper"
-      v-overlay-scrollbars
+      v-overlay-scrollbars="commentsScrollInPanel"
       class="commentsContentWrapper"
       @scroll.passive="rememberFullscreenScroll"
     >
@@ -783,6 +783,11 @@ import {
 } from '../../helpers/api/invidious'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
+// Only the fullscreen dock and the phone sheet scroll the comments themselves.
+// Elsewhere the page scrolls them, and a scroll container around them would
+// clip the margin in which Chromium renders the `content-visibility: auto`
+// threads ahead of time, so they would show up blank while scrolling in.
+const commentsScrollInPanel = computed(() => !!(props.fullscreenOverlay || phonePanelHeader?.value))
 const { locale, t } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
@@ -1245,7 +1250,7 @@ let pendingHighlightedCommentScroll = false
 function scrollToHighlightedComment() {
   const wrapper = commentsContentWrapper.value
   if (!pendingHighlightedCommentScroll || wrapper == null || wrapper.clientHeight === 0 ||
-    !(props.fullscreenOverlay || phonePanelHeader?.value)) return
+    !commentsScrollInPanel.value) return
   const target = wrapper.querySelector('.highlightedComment')
   if (target == null) return
   pendingHighlightedCommentScroll = false
@@ -2071,7 +2076,7 @@ const observeVisibilityOptions = computed(() => {
       }
     },
     intersection: {
-      root: (props.fullscreenOverlay || phonePanelHeader?.value) ? commentsContentWrapper.value : null,
+      root: commentsScrollInPanel.value ? commentsContentWrapper.value : null,
       // Only when it intersects with N% above bottom
       rootMargin: '0% 0% 0% 0%',
     },
