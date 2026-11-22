@@ -56,7 +56,7 @@ $grid-mode-grab-bar-padding: 1em;
   }
 }
 
-// Video, playlist, and channel cards outline their thumbnail on hover.
+// Video, playlist, channel, and category cards outline their thumbnail on hover.
 @mixin thumbnail-hover-outline($selector: '.thumbnailLink:hover') {
   // Touch screens would keep it on the last tapped thumbnail
   @media (hover: hover) {

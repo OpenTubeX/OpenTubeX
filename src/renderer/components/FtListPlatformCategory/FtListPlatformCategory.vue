@@ -71,6 +71,8 @@ const viewerText = computed(() => {
 <style scoped lang="scss">
 @use '../../scss-partials/ft-list-item';
 
+@include ft-list-item.thumbnail-hover-outline;
+
 // Box art is portrait, unlike the video thumbnails of grid cards
 .platformCategory.grid .videoThumbnail .thumbnailImage {
   aspect-ratio: 3 / 4;
