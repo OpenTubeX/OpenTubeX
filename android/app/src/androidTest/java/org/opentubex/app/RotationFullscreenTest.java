@@ -213,6 +213,8 @@ public class RotationFullscreenTest {
                 MainActivity main = reference.get();
                 WebView view = main.getBridge().getWebView();
                 awaitCondition(view, "!!document.querySelector('.tabContent[aria-hidden=\"false\"]') && !!document.querySelector('.profileTrigger')");
+                // A hidden but mounted tutorial still locks the page, which hides its native scrollbar.
+                TutorialTestHelper.dismissIfPending(view);
                 evaluate(view, """
                     (() => {
                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
@@ -228,10 +230,6 @@ public class RotationFullscreenTest {
                         window.__rotationFetch = window.fetch;
                         window.fetch = (url, options) => String(url).startsWith('https://localhost/')
                             ? window.__rotationFetch(url, options) : Promise.reject(new Error('Offline rotation test'));
-                        const style = document.createElement('style');
-                        style.id = 'rotation-test-style';
-                        style.textContent = '.tutorialOverlay { display: none !important; }';
-                        document.head.append(style);
                         const root = document.querySelector('#app').__vue_app__._container._vnode.component;
                         const routerKey = Object.getOwnPropertySymbols(root.provides).find(key =>
                             typeof root.provides[key]?.push === 'function' && typeof root.provides[key]?.resolve === 'function');
@@ -325,7 +323,6 @@ public class RotationFullscreenTest {
                             const app = document.querySelector('#app').__vue_app__.config.globalProperties;
                             for (const [key, value] of Object.entries(window.__rotationSettings ?? {})) app.$store.commit('set' + key, value);
                             window.fetch = window.__rotationFetch;
-                            document.querySelector('#rotation-test-style')?.remove();
                             window.__rotationRouter.push('/history');
                             delete window.__rotationSettings;
                             delete window.__rotationFetch;

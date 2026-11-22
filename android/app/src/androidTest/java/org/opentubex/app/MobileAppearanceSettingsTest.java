@@ -213,6 +213,8 @@ public class MobileAppearanceSettingsTest {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
              ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
             WebView view = webView(scenario);
+            // The first-run tutorial locks the page, which hides its native scrollbar.
+            TutorialTestHelper.dismissIfPending(view);
             String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
             String saved = evaluate(view, store + ".getters.getAlwaysShowScrollbars");
             try {
