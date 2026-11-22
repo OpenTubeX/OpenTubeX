@@ -1588,6 +1588,14 @@ watch(verticalTabHeight, () => {
   revealActiveTab()
 }, { flush: 'post' })
 
+// The strip's New Tab button can cover the active tab when it appears, and
+// shortens the scroll range when it goes away.
+watch(newTabButtonNextToTabs, () => {
+  clampTabsScroll()
+  revealActiveTabPending = true
+  revealActiveTab()
+}, { flush: 'post' })
+
 watch(vertical, () => {
   cancelScrollAnimation()
   scrollTarget = null
