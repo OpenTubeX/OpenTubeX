@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis bryter for monolyd'
     Show Mirror Video Toggle: "Vis bryteren for å speilvende video"
+    Show Rotate Video Menu: "Vis menyen Roter video"
     Pause on Stream Recovery: "Sett på pause ved gjenoppretting av strøm"
     Buffering:
       Buffering: Bufring
@@ -1938,6 +1939,12 @@ Video:
     Volume Boost:
       Volume Boost: "Volumforsterkning"
       'Off': "Av"
+    Rotate Video:
+      Rotate Video: "Roter video"
+      'Off': "Av"
+      Right: "90° til høyre"
+      Upside Down: "180°"
+      Left: "90° til venstre"
     Auto-generated Caption Template: '{language} (automatisk generert)'
     Up next in {seconds}: Neste om {seconds}
     Resize dock: Endre størrelsen på dokken
@@ -2411,6 +2418,7 @@ Tooltips:
     Loop Shorts: Når dette er slått på, starter Shorts automatisk på nytt. Når det er slått av, stopper Shorts på slutten og viser en knapp for å spille av på nytt.
     Show Skip Silence Toggle: Viser en bryter for å hoppe over stillhet i innstillingsmenyen til spilleren.
     Show Mirror Video Toggle: "Viser en av/på-bryter i innstillingsmenyen til spilleren som speilvender videoen vannrett, slik at det blir lettere å følge danse-, trenings- og instrumentveiledninger."
+    Show Rotate Video Menu: "Legger til Roter video i avspillerens innstillingsmeny, slik at du kan rotere videoer som er tatt opp sidelengs eller opp ned."
     Enable Skip Silence by Default: Hopper over stillhet som standard i nye faner. Endring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spilleren og slår på hurtigtastene og panoreringskontrollene.
     Enable Seek History: Husker hvor du hoppet fra i hver video til appen lukkes. Viser hopphistorikklisten i avspillerens innstillingsmeny og slår på hurtigtastene for den.

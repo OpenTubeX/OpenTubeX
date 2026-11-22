@@ -427,6 +427,14 @@
           @change="store.dispatch('updateShowMirrorVideoToggle', $event)"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Show Rotate Video Menu')"
+          :compact="true"
+          :default-value="store.getters.getShowRotateVideoMenu"
+          setting-key="showRotateVideoMenu"
+          :tooltip="t('Tooltips.Player Settings.Show Rotate Video Menu')"
+          @change="store.dispatch('updateShowRotateVideoMenu', $event)"
+        />
+        <FtToggleSwitch
           v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"

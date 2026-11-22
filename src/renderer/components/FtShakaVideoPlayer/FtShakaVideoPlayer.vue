@@ -2265,6 +2265,7 @@ import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { TimestampNoteButton } from './player-components/TimestampNoteButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { LevelSelection } from './player-components/LevelSelection'
+import { VideoRotationSelection } from './player-components/VideoRotationSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
 import { supportsVoiceOverTranslation } from '../../helpers/voiceOverTranslation'
 import { SleepTimer } from './player-components/SleepTimer'
@@ -2354,6 +2355,7 @@ import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS, VIDEO_ZOOM_STEP } from '../../helpers/player/videoZoom'
+import { getVideoRotationFit } from '../../helpers/player/videoRotation'
 import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS, VOLUME_BOOST_STEP } from '../../helpers/player/volumeBoost'
 import { getActiveAudioLoudnessDb, getLoudnessNormalizationGain } from '../../helpers/player/loudnessNormalization'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
@@ -4856,7 +4858,15 @@ const useVrMode = computed(() => {
 
 // VR renders the video to its own canvas, so there is no image to mirror.
 const mirrorVideoPossible = computed(() => store.getters.getShowMirrorVideoToggle && !audioOnlyMedia.value && !useVrMode.value)
-const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId))
+const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId, props.videoId))
+
+const rotateVideoPossible = computed(() => store.getters.getShowRotateVideoMenu && !audioOnlyMedia.value && !useVrMode.value)
+const videoRotation = computed(() => rotateVideoPossible.value ? store.getters.getTabVideoRotation(mediaTabId, props.videoId) : 0)
+const videoRotationFit = computed(() => getVideoRotationFit(
+  videoRotation.value,
+  { width: videoElementLayoutWidth.value, height: videoElementLayoutHeight.value },
+  videoIntrinsicSize.value,
+))
 
 // Like skip silence and voice-over translation, this needs Web Audio
 // processing, which the player does not use on iOS.
@@ -4926,6 +4936,8 @@ const {
   },
   mirrored: mirrorVideo,
   props,
+  rotation: videoRotation,
+  rotationFit: videoRotationFit,
   showValueChange,
   useVrMode,
   video,
@@ -5366,6 +5378,7 @@ const uiConfig = computed(() => {
     lightsOff: 'ft_lights_off',
     videoZoom: 'ft_video_zoom',
     mirrorVideo: 'ft_mirror_video',
+    rotateVideo: 'ft_rotate_video',
     volumeBoost: 'ft_volume_boost',
     monoAudio: 'ft_mono_audio',
     abRepeat: 'ft_ab_repeat',
@@ -5500,6 +5513,10 @@ const uiConfig = computed(() => {
 
   if (!mirrorVideoPossible.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_mirror_video')
+  }
+
+  if (!rotateVideoPossible.value) {
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_rotate_video')
   }
 
   // Shorts swipe between videos instead of entering full screen.
@@ -7622,6 +7639,7 @@ function handleCanPlay() {
 }
 
 function handleVideoResize() {
+  updateVideoIntrinsicSize()
   updateAnnotationVideoAspectRatio()
   updateScrollMiniVideoAspectRatio()
   updateScrollMiniPlayer()
@@ -7852,6 +7870,16 @@ const videoElementWidth = ref(0)
 const videoElementHeight = ref(0)
 /** Height of the video element in CSS pixels, used to scale the captions with the player. */
 const videoElementLayoutHeight = ref(0)
+const videoElementLayoutWidth = ref(0)
+const videoIntrinsicSize = ref({ width: 0, height: 0 })
+
+function updateVideoIntrinsicSize() {
+  const width = video.value?.videoWidth ?? 0
+  const height = video.value?.videoHeight ?? 0
+  if (width !== videoIntrinsicSize.value.width || height !== videoIntrinsicSize.value.height) {
+    videoIntrinsicSize.value = { width, height }
+  }
+}
 
 const captionPlayerVariables = computed(() => {
   return {
@@ -8276,6 +8304,7 @@ const fullscreenAmbientBarsVisible = computed(() => {
 const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbientMode({
   enabled: ambientModeVisible,
   mirrored: mirrorVideo,
+  rotation: videoRotation,
   video,
 })
 
@@ -8287,6 +8316,8 @@ function updateVideoElementGeometry() {
     videoElementWidth.value = video_.clientWidth * devicePixelRatio
     videoElementHeight.value = video_.clientHeight * devicePixelRatio
     videoElementLayoutHeight.value = video_.clientHeight
+    videoElementLayoutWidth.value = video_.clientWidth
+    updateVideoIntrinsicSize()
     updateAnnotationVideoAspectRatio()
     updateScrollMiniVideoAspectRatio()
   }
@@ -10524,11 +10555,23 @@ function registerMirrorVideoButton() {
     create(rootElement, controls) {
       return new BooleanSettingButton({
         value: mirrorVideo,
-        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, value }),
+        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, videoId: props.videoId, value }),
         events,
         className: 'mirror-video-button',
         mappedIcon: 'flip-horizontal',
         getLabel: () => t('Settings.Player Settings.Mirror Video'),
+      }, rootElement, controls)
+    }
+  })
+}
+
+function registerRotateVideoSelection() {
+  registerOwnElement(shakaOverflowMenu, 'ft_rotate_video', {
+    create(rootElement, controls) {
+      return new VideoRotationSelection({
+        value: videoRotation,
+        updateValue: value => store.commit('setTabVideoRotation', { tabId: mediaTabId, videoId: props.videoId, value }),
+        events,
       }, rootElement, controls)
     }
   })
@@ -12579,6 +12622,7 @@ onMounted(async () => {
   registerMonoAudioButton()
   registerLightsOffButton()
   registerMirrorVideoButton()
+  registerRotateVideoSelection()
   registerSkipSilenceButton()
   registerVoiceOverTranslationButton()
   registerSleepTimer()

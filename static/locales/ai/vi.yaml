@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Chuẩn hóa âm lượng'
     Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
     Show Mirror Video Toggle: "Hiển thị nút bật/tắt lật video"
+    Show Rotate Video Menu: "Hiện menu Xoay video"
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
     Buffering:
       Buffering: Bộ đệm
@@ -1945,6 +1946,12 @@ Video:
     Volume Boost:
       Volume Boost: "Tăng âm lượng"
       'Off': "Tắt"
+    Rotate Video:
+      Rotate Video: "Xoay video"
+      'Off': "Tắt"
+      Right: "90° sang phải"
+      Upside Down: "180°"
+      Left: "90° sang trái"
     Auto-generated Caption Template: '{language} (tự động tạo)'
     Up next in {seconds}: Tiếp theo sau {seconds}
     Resize dock: Đổi kích thước thanh bên
@@ -2423,6 +2430,7 @@ Tooltips:
     Loop Shorts: Khi bật, video ngắn sẽ tự động phát lại. Khi tắt, video ngắn sẽ dừng ở cuối và hiện nút phát lại.
     Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
     Show Mirror Video Toggle: "Hiện nút bật/tắt trong menu cài đặt của trình phát để lật ngang video, giúp bạn dễ tập theo các video hướng dẫn nhảy, tập luyện và chơi nhạc cụ hơn."
+    Show Rotate Video Menu: "Thêm Xoay video vào menu cài đặt của trình phát, để xoay các video được quay nghiêng hoặc lộn ngược."
     Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
     Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
     Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.

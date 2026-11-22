@@ -303,6 +303,10 @@
     "ri": "flip-horizontal-line",
     "material": "flip-rounded"
   },
+  "rotate-right": {
+    "ri": "clockwise-line",
+    "material": "rotate-90-degrees-cw-outline-rounded"
+  },
   "flag-checkered": {
     "ri": "flag-2-line",
     "material": "sports-score-rounded"

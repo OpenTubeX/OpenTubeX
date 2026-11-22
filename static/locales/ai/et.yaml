@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Normaliseeri helitugevus'
     Show Mono Audio Toggle: 'Näita monoheli lülitit'
     Show Mirror Video Toggle: "Näita video peegeldamise lülitit"
+    Show Rotate Video Menu: "Näita menüüd Pööra videot"
     Pause on Stream Recovery: "Peata voo taastamisel"
     Buffering:
       Buffering: Puhverdamine
@@ -1935,6 +1936,12 @@ Video:
     Volume Boost:
       Volume Boost: "Helitugevuse võimendus"
       'Off': "Väljas"
+    Rotate Video:
+      Rotate Video: "Pööra videot"
+      'Off': "Väljas"
+      Right: "90° paremale"
+      Upside Down: "180°"
+      Left: "90° vasakule"
     Auto-generated Caption Template: '{language} (automaatselt loodud)'
     Up next in {seconds}: Järgmine algab {seconds} pärast
     Resize dock: Muuda doki suurust
@@ -2409,6 +2416,7 @@ Tooltips:
     Loop Shorts: Kui see on lubatud, käivituvad Shortsid automaatselt uuesti. Kui see on välja lülitatud, peatuvad Shortsid lõpus ja kuvatakse uuesti esitamise nupp.
     Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
     Show Mirror Video Toggle: "Kuvab pleieri seadete menüüs lüliti, mis peegeldab videot horisontaalselt, et tantsu-, treening- ja pillimänguõpetustega oleks lihtsam kaasa teha."
+    Show Rotate Video Menu: "Lisab mängija seadete menüüsse valiku Pööra videot, et pöörata külili või tagurpidi salvestatud videoid."
     Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.

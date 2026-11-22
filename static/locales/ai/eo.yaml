@@ -937,6 +937,7 @@ Settings:
     Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
     Show Mono Audio Toggle: Montri baskulon de monofonia sono
     Show Mirror Video Toggle: "Montri baskulon por speguli videon"
+    Show Rotate Video Menu: "Montri menuon Turni videon"
     Show Music Mode Toggle: Montri baskulon de muzika reĝimo
     Swipe Gestures:
       Fullscreen Brightness: Plena heleco en plenekrana reĝimo
@@ -2020,6 +2021,12 @@ Video:
     Volume Boost:
       Volume Boost: Laŭteca plifortigo
       'Off': 'Malŝaltita'
+    Rotate Video:
+      Rotate Video: "Turni videon"
+      'Off': "Malŝaltita"
+      Right: "90° dekstren"
+      Upside Down: "180°"
+      Left: "90° maldekstren"
     Auto-generated Caption Template: '{language} (aŭtomate generita)'
     Up next in {seconds}: Sekve post {seconds}
     Resize dock: Ŝanĝi grandecon de la doko
@@ -2455,6 +2462,7 @@ Tooltips:
     Loop Shorts: Kiam ŝaltita, videaĵetoj rekomenciĝas aŭtomate. Kiam malŝaltita, videaĵetoj haltas ĉe la fino kaj montras butonon por reludi.
     Show Skip Silence Toggle: Montras ŝaltilon por salti silenton en la agorda menuo de la ludilo.
     Show Mirror Video Toggle: "Montras ŝaltilon en la agorda menuo de la ludilo, kiu horizontale spegulas la videon, por ke estu pli facile sekvi lernilojn pri danco, ekzercado kaj muzikiloj."
+    Show Rotate Video Menu: "Aldonas Turni videon al la agorda menuo de la ludilo, por turni videojn registritajn flanke aŭ renverse."
     Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
     Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
     Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.

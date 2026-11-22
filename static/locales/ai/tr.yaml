@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Ses yüksekliğini normalleştir'
     Show Mono Audio Toggle: 'Mono ses düğmesini göster'
     Show Mirror Video Toggle: "Video aynalama düğmesini göster"
+    Show Rotate Video Menu: "Videoyu döndür menüsünü göster"
     Pause on Stream Recovery: "Akış kurtarmada duraklat"
     Buffering:
       Buffering: Arabelleğe Alma
@@ -1933,6 +1934,12 @@ Video:
     Volume Boost:
       Volume Boost: "Ses yükseltme"
       'Off': "Kapalı"
+    Rotate Video:
+      Rotate Video: "Videoyu döndür"
+      'Off': "Kapalı"
+      Right: "Sağa 90°"
+      Upside Down: "180°"
+      Left: "Sola 90°"
     Auto-generated Caption Template: '{language} (otomatik oluşturuldu)'
     Up next in {seconds}: '{seconds} saniye sonra sıradaki'
     Resize dock: Paneli yeniden boyutlandır
@@ -2407,6 +2414,7 @@ Tooltips:
     Loop Shorts: Etkinleştirildiğinde Kısa Videolar otomatik olarak yeniden başlar. Devre dışı bırakıldığında sonunda durur ve yeniden oynatma düğmesi gösterir.
     Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
     Show Mirror Video Toggle: "Oynatıcının ayarlar menüsünde videoyu yatay olarak aynalayan bir açma ve kapatma düğmesi gösterir; böylece dans, egzersiz ve enstrüman derslerini takip etmek kolaylaşır."
+    Show Rotate Video Menu: "Oynatıcının ayarlar menüsüne Videoyu döndür seçeneğini ekler; böylece yan veya baş aşağı kaydedilmiş videoları döndürebilirsiniz."
     Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.

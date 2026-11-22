@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Normalizovať hlasitosť'
     Show Mono Audio Toggle: 'Zobraziť prepínač mono zvuku'
     Show Mirror Video Toggle: "Zobraziť prepínač zrkadlenia videa"
+    Show Rotate Video Menu: "Zobraziť ponuku Otočiť video"
     Pause on Stream Recovery: "Pozastaviť pri obnove streamu"
     Buffering:
       Buffering: Vyrovnávacia pamäť
@@ -1933,6 +1934,12 @@ Video:
     Volume Boost:
       Volume Boost: "Zosilnenie hlasitosti"
       'Off': "Vypnuté"
+    Rotate Video:
+      Rotate Video: "Otočiť video"
+      'Off': "Vypnuté"
+      Right: "90° doprava"
+      Upside Down: "180°"
+      Left: "90° doľava"
     Auto-generated Caption Template: '{language} (automaticky vytvorené)'
     Up next in {seconds}: Ďalšie video o {seconds}
     Resize dock: Zmeniť veľkosť panela
@@ -2406,6 +2413,7 @@ Tooltips:
     Loop Shorts: Po zapnutí sa krátke videá automaticky spustia odznova. Po vypnutí sa na konci zastavia a zobrazia tlačidlo opätovného prehrania.
     Show Skip Silence Toggle: V ponuke nastavení prehrávača zobrazí prepínač preskakovania ticha.
     Show Mirror Video Toggle: "V ponuke nastavení prehrávača zobrazí prepínač, ktorý video vodorovne zrkadlí, aby sa ľahšie dalo cvičiť podľa tanečných, cvičebných a hudobných návodov."
+    Show Rotate Video Menu: "Pridá do ponuky nastavení prehrávača položku Otočiť video, ktorá otočí videá nahraté bokom alebo hore nohami."
     Enable Skip Silence by Default: Zapne preskakovanie ticha na nových kartách. Zmena na jednej karte neovplyvní ostatné karty.
     Enable Video Zoom: V ponuke nastavení prehrávača zobrazí ovládací prvok Priblíženie a zapne jeho klávesové skratky a ovládanie posúvania obrazu.
     Enable Seek History: Pamätá si, odkiaľ ste v každom videu preskočili, kým sa aplikácia nezavrie. Zobrazí zoznam histórie posunov v ponuke nastavení prehrávača a zapne jej klávesové skratky.

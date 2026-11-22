@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: '响度标准化'
     Show Mono Audio Toggle: '显示单声道音频开关'
     Show Mirror Video Toggle: "显示镜像视频开关"
+    Show Rotate Video Menu: "显示“旋转视频”菜单"
     Pause on Stream Recovery: "流恢复时暂停"
     Buffering:
       Buffering: 缓冲
@@ -1933,6 +1934,12 @@ Video:
     Volume Boost:
       Volume Boost: "音量增强"
       'Off': "关闭"
+    Rotate Video:
+      Rotate Video: "旋转视频"
+      'Off': "关"
+      Right: "向右 90°"
+      Upside Down: "180°"
+      Left: "向左 90°"
     Auto-generated Caption Template: '{language}（自动生成）'
     Up next in {seconds}: '{seconds} 秒后播放下一个'
     Resize dock: 调整停靠栏大小
@@ -2406,6 +2413,7 @@ Tooltips:
     Loop Shorts: 启用后，Shorts 会自动重新播放。禁用后，Shorts 会在播放结束时停止，并显示重播按钮。
     Show Skip Silence Toggle: 在播放器的设置菜单中显示跳过静音的开关。
     Show Mirror Video Toggle: "在播放器的设置菜单中显示一个开关，可将视频水平翻转，方便跟着舞蹈、健身和乐器教程练习。"
+    Show Rotate Video Menu: "在播放器的设置菜单中添加“旋转视频”，用于旋转侧拍或倒拍的视频。"
     Enable Skip Silence by Default: 为新标签页启用跳过静音。在一个标签页中更改此设置不会影响其他标签页。
     Enable Video Zoom: 在播放器的设置菜单中显示缩放控件，并启用其键盘快捷键和平移控件。
     Enable Seek History: 在应用关闭前记住你在每个视频中从哪里跳转。在播放器设置菜单中显示跳转历史列表，并启用其键盘快捷键。

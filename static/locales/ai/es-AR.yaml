@@ -960,6 +960,7 @@ Settings:
     Normalize Loudness: 'Normalizar volumen'
     Show Mono Audio Toggle: 'Mostrar el interruptor de audio mono'
     Show Mirror Video Toggle: "Mostrar interruptor para reflejar el video"
+    Show Rotate Video Menu: "Mostrar el menú Girar video"
     Default Media Format:
       Default Media Format: 'Formato multimedia por defecto'
     Pause on Stream Recovery: "Pausar al recuperar la transmisión"
@@ -2290,6 +2291,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificación de volumen"
       'Off': "Desactivada"
+    Rotate Video:
+      Rotate Video: "Girar video"
+      'Off': "Desactivado"
+      Right: "90° a la derecha"
+      Upside Down: "180°"
+      Left: "90° a la izquierda"
     TranslatedCaptionTemplate: '{language} (traducido de "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (generados automáticamente)'
     Audio Tracks: Pistas de audio
@@ -2870,6 +2877,7 @@ Tooltips:
     Loop Shorts: Al activarlo, los Shorts se reinician automáticamente. Si se desactiva, se detienen al final y muestran un botón para volver a reproducirlos.
     Show Skip Silence Toggle: Muestra un interruptor para omitir silencios en el menú de ajustes del reproductor.
     Show Mirror Video Toggle: "Muestra un interruptor en el menú de ajustes del reproductor que voltea el video horizontalmente, para que sea más fácil seguir tutoriales de baile, ejercicio e instrumentos."
+    Show Rotate Video Menu: "Agrega Girar video al menú de configuración del reproductor, para girar videos grabados de costado o al revés."
     Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
     Enable Seek History: Recuerda desde dónde saltaste en cada video hasta que se cierre la app. Muestra la lista del historial de saltos en el menú de configuración del reproductor y activa sus atajos de teclado.

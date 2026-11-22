@@ -297,7 +297,7 @@ const audioTrackLanguage = computed(() => {
 })
 
 // The entries that open a submenu, which the list layout marks with a chevron.
-const SUBMENU_CONTROLS = new Set(['audioTracks', 'captions', 'playbackRate', 'quality', 'sleepTimer', 'seekHistory', 'videoZoom', 'volumeBoost'])
+const SUBMENU_CONTROLS = new Set(['audioTracks', 'captions', 'playbackRate', 'quality', 'sleepTimer', 'seekHistory', 'videoZoom', 'rotateVideo', 'volumeBoost'])
 
 // Mirrors the overflow menu of a video that has every control available, with the current settings.
 const overflowItems = computed(() => {
@@ -320,6 +320,7 @@ const overflowItems = computed(() => {
     lightsOff: store.getters.getShowLightsOffToggle && { icon: ['fas', 'moon'], label: t('Settings.Player Settings.Lights Off'), value: off },
     videoZoom: store.getters.getEnableVideoZoom && { path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX, label: t('Video.Player.Zoom.Zoom'), value: off },
     mirrorVideo: store.getters.getShowMirrorVideoToggle && { icon: ['fas', 'flip-horizontal'], label: t('Settings.Player Settings.Mirror Video'), value: off },
+    rotateVideo: store.getters.getShowRotateVideoMenu && { icon: ['fas', 'rotate-right'], label: t('Video.Player.Rotate Video.Rotate Video'), value: t('Video.Player.Rotate Video.Off') },
     volumeBoost: store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
     monoAudio: store.getters.getShowMonoAudioToggle && !process.env.IS_IOS && { icon: ['fas', 'speaker'], label: t('Settings.Player Settings.Mono Audio'), value: off },
     loop: { path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },

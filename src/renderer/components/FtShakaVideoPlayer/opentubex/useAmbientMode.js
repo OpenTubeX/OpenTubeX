@@ -12,9 +12,10 @@ const AMBIENT_FRAME_HEIGHT = 45
  * @param {object} options
  * @param {import('vue').ComputedRef<boolean>} options.enabled
  * @param {import('vue').Ref<boolean>} options.mirrored
+ * @param {import('vue').Ref<number>} options.rotation clockwise, in degrees
  * @param {import('vue').Ref<HTMLVideoElement | null>} options.video
  */
-export function useAmbientMode({ enabled, mirrored, video }) {
+export function useAmbientMode({ enabled, mirrored, rotation, video }) {
   /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
   const ambientCanvas = ref(null)
   /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
@@ -68,9 +69,14 @@ export function useAmbientMode({ enabled, mirrored, video }) {
     try {
       if (!enabled.value || isAppHidden() || canvas !== ambientCanvas.value || videoElement !== video.value) return
       context.globalAlpha = wasInitialized ? AMBIENT_FRAME_BLEND_ALPHA : 1
-      // Match the glow to a mirrored video.
-      context.setTransform(mirrored.value ? -1 : 1, 0, 0, 1, mirrored.value ? canvas.width : 0, 0)
-      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+      // Match the glow to a rotated or mirrored video, stretching a quarter
+      // turn over the whole canvas like any other frame.
+      const quarterTurned = rotation.value % 180 !== 0
+      const width = quarterTurned ? canvas.height : canvas.width
+      const height = quarterTurned ? canvas.width : canvas.height
+      context.setTransform(mirrored.value ? -1 : 1, 0, 0, 1, canvas.width / 2, canvas.height / 2)
+      context.rotate(rotation.value * Math.PI / 180)
+      context.drawImage(videoElement, -width / 2, -height / 2, width, height)
       hasAmbientFrame = true
       lastVideoTime = videoElement.currentTime
       blendTicksRemaining = wasInitialized ? Math.max(0, blendTicksRemaining - 1) : 0
@@ -156,8 +162,8 @@ export function useAmbientMode({ enabled, mirrored, video }) {
     }
   })
 
-  // Redraw at once, even while paused, instead of blending in the flip.
-  watch(mirrored, () => {
+  // Redraw at once, even while paused, instead of blending in the flip or turn.
+  watch([mirrored, rotation], () => {
     if (enabled.value) {
       stopAmbientFrames()
       startAmbientFrames()

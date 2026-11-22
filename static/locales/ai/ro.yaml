@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Normalizează volumul'
     Show Mono Audio Toggle: 'Afișează comutatorul audio mono'
     Show Mirror Video Toggle: "Afișează comutatorul pentru oglindirea videoclipului"
+    Show Rotate Video Menu: "Afișează meniul Rotește videoclipul"
     Pause on Stream Recovery: "Pauză la recuperarea fluxului"
     Buffering:
       Buffering: Memorie tampon
@@ -1975,6 +1976,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificare volum"
       'Off': "Dezactivată"
+    Rotate Video:
+      Rotate Video: "Rotește videoclipul"
+      'Off': "Dezactivat"
+      Right: "90° la dreapta"
+      Upside Down: "180°"
+      Left: "90° la stânga"
     Auto-generated Caption Template: '{language} (generate automat)'
     Up next in {seconds}: Urmează în {seconds}
     Resize dock: Redimensionează panoul
@@ -2461,6 +2468,7 @@ Tooltips:
     Loop Shorts: Când opțiunea este activată, videoclipurile Shorts repornesc automat. Când este dezactivată, acestea se opresc la sfârșit și afișează un buton de reluare.
     Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
     Show Mirror Video Toggle: "Afișează în meniul de setări al playerului un comutator care oglindește videoclipul pe orizontală, ca să urmărești mai ușor tutorialele de dans, antrenament și instrumente muzicale."
+    Show Rotate Video Menu: "Adaugă Rotește videoclipul în meniul de setări al playerului, pentru a roti videoclipurile filmate lateral sau cu susul în jos."
     Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
     Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
     Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.

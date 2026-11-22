@@ -562,6 +562,7 @@ Settings:
     Normalize Loudness: 'Normalizuj głośność'
     Show Mono Audio Toggle: 'Pokaż przełącznik dźwięku mono'
     Show Mirror Video Toggle: "Pokaż przełącznik odbicia lustrzanego wideo"
+    Show Rotate Video Menu: "Pokaż menu Obróć wideo"
     Pause on Stream Recovery: "Wstrzymaj przy odzyskiwaniu strumienia"
     Buffering:
       Buffering: Buforowanie
@@ -1343,6 +1344,12 @@ Video:
     Volume Boost:
       Volume Boost: "Wzmocnienie głośności"
       'Off': "Wyłączone"
+    Rotate Video:
+      Rotate Video: "Obróć wideo"
+      'Off': "Wyłączone"
+      Right: "90° w prawo"
+      Upside Down: "180°"
+      Left: "90° w lewo"
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
       Collapse Controls: "Zwiń sterowanie"
@@ -1661,6 +1668,7 @@ Tooltips:
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
     Double-Tap With Two Fingers to Skip Chapters: "Stuknij dwukrotnie dwoma palcami w prawą stronę filmu, aby przejść do następnego rozdziału, lub w lewą stronę, aby wrócić do początku bieżącego rozdziału. W ciągu pierwszych 3 sekund rozdziału lewa strona przenosi zamiast tego do poprzedniego rozdziału, więc powtarzając gest, cofasz się kolejno przez rozdziały."
     Show Mirror Video Toggle: "Pokazuje w menu ustawień odtwarzacza przełącznik, który odbija wideo w poziomie, aby łatwiej było ćwiczyć razem z poradnikami tanecznymi, treningowymi i muzycznymi."
+    Show Rotate Video Menu: "Dodaje opcję Obróć wideo do menu ustawień odtwarzacza, aby obracać filmy nagrane bokiem lub do góry nogami."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

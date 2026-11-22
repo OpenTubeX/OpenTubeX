@@ -827,6 +827,7 @@ Settings:
     Normalize Loudness: 'Normalizar volumen'
     Show Mono Audio Toggle: 'Mostrar el interruptor de audio mono'
     Show Mirror Video Toggle: "Mostrar interruptor para reflejar el vídeo"
+    Show Rotate Video Menu: "Mostrar el menú Girar vídeo"
     Default Media Format:
       Default Media Format: 'Formato multimedia predeterminado'
     Pause on Stream Recovery: "Pausar al recuperar la transmisión"
@@ -1893,6 +1894,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificación de volumen"
       'Off': "Desactivada"
+    Rotate Video:
+      Rotate Video: "Girar vídeo"
+      'Off': "Desactivado"
+      Right: "90° a la derecha"
+      Upside Down: "180°"
+      Left: "90° a la izquierda"
     Auto-generated Caption Template: '{language} (generados automáticamente)'
     Up next in {seconds}: A continuación en {seconds}
     Resize dock: Cambiar tamaño del panel
@@ -2367,6 +2374,7 @@ Tooltips:
     Loop Shorts: Al activarlo, los Shorts se reinician automáticamente. Si se desactiva, se detienen al final y muestran un botón para volver a reproducirlos.
     Show Skip Silence Toggle: Muestra un interruptor para omitir silencios en el menú de ajustes del reproductor.
     Show Mirror Video Toggle: "Muestra un interruptor en el menú de ajustes del reproductor que voltea el vídeo horizontalmente, para que sea más fácil seguir tutoriales de baile, ejercicio e instrumentos."
+    Show Rotate Video Menu: "Añade Girar vídeo al menú de ajustes del reproductor, para girar vídeos grabados de lado o boca abajo."
     Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
     Enable Seek History: Recuerda desde dónde has saltado en cada vídeo hasta que se cierre la aplicación. Muestra la lista del historial de saltos en el menú de ajustes del reproductor y activa sus atajos de teclado.

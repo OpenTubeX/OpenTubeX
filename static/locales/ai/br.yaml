@@ -883,6 +883,7 @@ Settings:
     Normalize Loudness: 'Reizhañ an ampled'
     Show Mono Audio Toggle: 'Diskouez an afell son mono'
     Show Mirror Video Toggle: "Diskouez an afell evit melezourañ ar video"
+    Show Rotate Video Menu: "Diskouez al lañser Treiñ ar video"
     Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
     Buffering:
       Buffering: Memor c'hortoz
@@ -1944,6 +1945,12 @@ Video:
     Volume Boost:
       Volume Boost: "Kreskiñ an ampled"
       'Off': "Lazhet"
+    Rotate Video:
+      Rotate Video: "Treiñ ar video"
+      'Off': "Diweredekaet"
+      Right: "90° a-zehou"
+      Upside Down: "180°"
+      Left: "90° a-gleiz"
     Auto-generated Caption Template: "{language} (savet ent emgefreek)"
     Up next in {seconds}: "Da-heul a-benn {seconds}"
     Resize dock: "Kemmañ ment ar gael"
@@ -2417,6 +2424,7 @@ Tooltips:
     Loop Shorts: "Pa vez gweredekaet e adkrog ar videoioù berr (Shorts) ent emgefreek. Pa vez diweredekaet e paouezont en dibenn hag e tiskouezont ur bouton adlenn."
     Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
     Show Mirror Video Toggle: "Diskouez un afell enaouiñ pe lazhañ e lañser arventennoù al lenner a dro ar video a-blaen, evit heuliañ aesoc'h ar c'hentelioù dañs, sport ha binvioù-seniñ."
+    Show Rotate Video Menu: "Ouzhpennañ a ra Treiñ ar video da lañser arventennoù al lenner, evit treiñ ar videoioù enrollet a-gostez pe war o fenn."
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
