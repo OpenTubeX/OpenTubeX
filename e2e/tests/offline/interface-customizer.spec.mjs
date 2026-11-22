@@ -166,8 +166,7 @@ test.describe('interface customizer', () => {
     // Arrow keys follow the new order.
     const selectedIndex = await tabs.evaluateAll(elements => elements.findIndex(element => element.ariaSelected === 'true'))
     const nextTab = tabs.nth((selectedIndex + 1) % labels.length)
-    await tabs.nth(selectedIndex).focus()
-    await page.keyboard.press('ArrowRight')
+    await tabs.nth(selectedIndex).press('ArrowRight')
     await expect(nextTab).toBeFocused()
     await expect(nextTab).toHaveAttribute('aria-selected', 'true')
   })
