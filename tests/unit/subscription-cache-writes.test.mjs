@@ -653,3 +653,27 @@ test('a failed startup cache load can be retried, and a failed reload keeps the 
   assert.equal(state.subscriptionCacheLoadFailed, false)
   assert.equal(state.videoCache.channel.videos[0].videoId, 'video')
 })
+
+test('a channel page write in a separate profile keeps the shared feed state of a video only that profile watched', async () => {
+  const written = []
+  const context = vm.createContext({
+    console,
+    toRaw,
+    ...feedState,
+    ensureSubscriptionFeedEntryState,
+    keepCachedSubscriptionCollaborations,
+    DBSubscriptionCacheHandlers: { async updateVideosByChannelId(_channelId, videos) { written.push(videos) } },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions, mutations, state } = context.cacheModule
+  state.videoCache.channel = { videos: [{ videoId: 'video', isNewInSubscriptionFeed: true, arrivedNewInSubscriptionFeed: true }], timestamp: new Date(1000) }
+  await actions.updateSubscriptionVideosCacheByChannel({
+    state,
+    rootGetters: { getActiveDataScope: 'separate', getHistoryCacheById: { video: { isWatched: true } }, getIncludeSubscriptionCollaborations: false },
+    commit: (type, payload) => mutations[type](state, payload),
+  }, { channelId: 'channel', videos: [{ videoId: 'video' }], timestamp: new Date(1000) })
+
+  const [cached] = state.videoCache.channel.videos
+  assert.deepEqual([feedState.isNewInFeedScope(cached, null), feedState.isNewInFeedScope(cached, 'separate')], [true, false])
+  assert.ok(!('subscriptionFeedScope' in written[0][0]))
+})

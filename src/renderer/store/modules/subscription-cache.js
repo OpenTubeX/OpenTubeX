@@ -7,7 +7,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp, keepCachedSubscriptionCollaborations } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
-import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, seenFeedEntryMark, toCachedFeedEntry } from '../../../subscriptionFeedState'
+import { feedEntryInScope, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, seenFeedEntryMark, toCachedFeedEntry } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
 import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
@@ -154,6 +154,17 @@ function queueVideoCacheWrite(channelId, write) {
 }
 
 /**
+ * Cached entries as the active profile's feeds show them, so that entries
+ * reconciled against them, such as those of a channel page, keep the other
+ * profiles' states.
+ * @param {object[] | null | undefined} entries
+ */
+function entriesInActiveScope(entries, rootGetters) {
+  const scope = rootGetters?.getActiveDataScope ?? null
+  return scope === null || !Array.isArray(entries) ? entries : entries.map(entry => feedEntryInScope(entry, scope))
+}
+
+/**
  * The entries to cache for entries that a profile's feeds show, see `toCachedFeedEntry`.
  * @param {object[] | null | undefined} entries
  */
@@ -164,16 +175,15 @@ function toCachedFeedEntries(entries) {
 }
 
 async function writeVideoCache({ commit, state, rootGetters }, { channelId, videos, collaborationsFetched = false, collaborationsCheckedAt, timestamp = new Date() }) {
-  videos = toCachedFeedEntries(videos)
   const previousCache = state.videoCache[channelId]
   const include = rootGetters.getIncludeSubscriptionCollaborations === true
-  videos = ensureSubscriptionFeedEntryState(
+  videos = toCachedFeedEntries(ensureSubscriptionFeedEntryState(
     keepCachedSubscriptionCollaborations(videos, previousCache?.videos, { include, fetched: collaborationsFetched }),
-    previousCache?.videos,
+    entriesInActiveScope(previousCache?.videos, rootGetters),
     'videoId',
     previousCache?.timestamp,
     rootGetters.getHistoryCacheById
-  )
+  ))
   // Without the setting the collaborations are dropped, so turning it on
   // again checks the channel soon. A write without a check time keeps the
   // stored collaborations instead.
@@ -284,7 +294,11 @@ const actions = {
       const cacheEntry = context.state.videoCache[channelId]
       if (!Array.isArray(cacheEntry?.videos) || context.rootGetters.getIncludeSubscriptionCollaborations !== true) return null
       const checkedAt = Date.now()
-      const videos = mergeSubscriptionCollaborations(cacheEntry, collaborations, context.rootGetters.getHistoryCacheById)
+      const videos = mergeSubscriptionCollaborations(
+        { ...cacheEntry, videos: entriesInActiveScope(cacheEntry.videos, context.rootGetters) },
+        collaborations,
+        context.rootGetters.getHistoryCacheById
+      )
       // The uploads' timestamp tells when they need their next full fetch
       await writeVideoCache(context, { channelId, videos, collaborationsFetched: true, collaborationsCheckedAt: checkedAt, timestamp: cacheEntry.timestamp })
       return context.state.videoCache[channelId]?.collaborationsCheckedAt === checkedAt ? videos : null
@@ -311,15 +325,14 @@ const actions = {
   },
 
   async updateSubscriptionLiveCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
-    videos = toCachedFeedEntries(videos)
     const previousCache = state.liveCache[channelId]
-    videos = ensureSubscriptionFeedEntryState(
+    videos = toCachedFeedEntries(ensureSubscriptionFeedEntryState(
       videos,
-      previousCache?.videos,
+      entriesInActiveScope(previousCache?.videos, rootGetters),
       'videoId',
       previousCache?.timestamp,
       rootGetters.getHistoryCacheById
-    )
+    ))
 
     try {
       if (await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp) === false) return false
@@ -329,15 +342,14 @@ const actions = {
     }
   },
 
-  async updateSubscriptionPostsCacheByChannel({ commit, state }, { channelId, posts, timestamp = new Date() }) {
-    posts = toCachedFeedEntries(posts)
+  async updateSubscriptionPostsCacheByChannel({ commit, state, rootGetters }, { channelId, posts, timestamp = new Date() }) {
     const previousCache = state.postsCache[channelId]
-    posts = ensureSubscriptionFeedEntryState(
+    posts = toCachedFeedEntries(ensureSubscriptionFeedEntryState(
       posts,
-      previousCache?.posts,
+      entriesInActiveScope(previousCache?.posts, rootGetters),
       'postId',
       previousCache?.timestamp
-    )
+    ))
 
     try {
       if (await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp) === false) return false
