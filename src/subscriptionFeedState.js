@@ -1,5 +1,3 @@
-import { profileDatastorePrefix } from './datastores/profileDatastoreNames.js'
-
 // A cached entry's `isNewInSubscriptionFeed` is its state in the feeds of the
 // profiles that share their data. Separate profiles see the entry as new when
 // it arrived as new (`arrivedNewInSubscriptionFeed`), unless they saw it, which
@@ -8,9 +6,12 @@ import { profileDatastorePrefix } from './datastores/profileDatastoreNames.js'
 // `sharedNewInSubscriptionFeed` and the profile in `subscriptionFeedScope`,
 // see `feedEntryInScope`.
 
-/** @param {string} scope A separate profile's ID */
+/**
+ * The prefix keeps any profile ID, such as `__proto__`, an ordinary key.
+ * @param {string} scope A separate profile's ID
+ */
 function feedStateKey(scope) {
-  return profileDatastorePrefix(scope)
+  return `profile:${scope}`
 }
 
 /**

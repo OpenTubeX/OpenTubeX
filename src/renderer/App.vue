@@ -1883,7 +1883,13 @@ onMounted(async () => {
     const scope = store.getters.getActiveDataScope
     if (scope === null) return
     setDataScope(scope)
-    await store.dispatch('loadWatchQueueScope', scope)
+    // The settings loaded the shared seen marks.
+    store.commit('setSubscriptionSeenVideos', '[]')
+    store.commit('setSubscriptionSeenPosts', '[]')
+    await Promise.all([
+      store.dispatch('loadWatchQueueScope', scope),
+      store.dispatch('grabSubscriptionSeenMarks').catch(error => console.error(error)),
+    ])
     // Watch stats load with the settings, before the profiles.
     if (store.getters.getEnableWatchStats) store.dispatch('grabWatchStats')
   })

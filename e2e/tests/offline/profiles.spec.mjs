@@ -391,6 +391,28 @@ test.describe('separate profile', () => {
   })
 })
 
+test.describe('separate default profile with seen marks', () => {
+  test.use({
+    seed: {
+      settings: {
+        defaultProfile: 'e2eprofile',
+        subscriptionSeenVideos: JSON.stringify([{ videoId: 'sharedSeen1', seenAt: 5, isMembersOnly: false }]),
+        // The marks of the separate profile `e2eprofile`, by its ID's UTF-8 bytes as hex
+        'subscriptionSeenVideos.profile-65326570726f66696c65': JSON.stringify([{ videoId: 'separSeen12', seenAt: 5, isMembersOnly: false }]),
+      },
+      profiles: [mainProfile, { ...secondProfile, separate: true }],
+    }
+  })
+
+  test('starts with its own seen marks instead of the shared ones', async ({ page }) => {
+    const marks = () => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos).map(mark => mark.videoId))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getActiveDataScope)).toBe('e2eprofile')
+    await expect.poll(marks).toEqual(['separSeen12'])
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await expect.poll(marks).toEqual(['sharedSeen1'])
+  })
+})
+
 test.describe('separate profile following a shared channel', () => {
   const channel = { id: 'UCboth', name: 'Shared channel', thumbnail: channelAvatar }
   test.use({
