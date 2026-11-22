@@ -25,7 +25,8 @@ export function initializePageScrollbar(
 /**
  * Android draws its page scrollbar outside CSS, even when fullscreen hides
  * document overflow. Keep it hidden for native fullscreen, full-window mode,
- * and maximized settings, which draws its own nested scrollbar.
+ * maximized settings, which draws its own nested scrollbar, and while a sheet
+ * or dialog locks the page, whose root still scrolls when its content shrinks.
  * @param {Document} pageDocument
  * @param {(hidden: boolean) => void} setHidden
  * @returns {() => void}
@@ -35,7 +36,8 @@ export function observePageScrollbarVisibility(pageDocument, setHidden) {
   const update = () => {
     const hidden = pageDocument.fullscreenElement !== null ||
       pageDocument.body.classList.contains('playerFullWindow') ||
-      pageDocument.documentElement.classList.contains('appSettingsMaximized')
+      pageDocument.documentElement.classList.contains('appSettingsMaximized') ||
+      pageDocument.documentElement.classList.contains('appScrollLocked')
     if (hidden === previousHidden) return
     previousHidden = hidden
     setHidden(hidden)
