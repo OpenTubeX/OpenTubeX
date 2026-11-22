@@ -14,8 +14,14 @@ import { mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from 
 import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
-const handlerSource = source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass SubscriptionCache {')) +
-  source.slice(source.indexOf('/** @type {Map<string, ReturnType<typeof createScopedHandlers>>} */'), source.indexOf('function loadDatastores()'))
+function section(start, end) {
+  const from = source.indexOf(start)
+  const to = source.indexOf(end, from)
+  assert.ok(from >= 0 && to > from, `Missing handler source between ${start} and ${end}`)
+  return source.slice(from, to)
+}
+const handlerSource = section('class Settings {', '\nclass SubscriptionCache {') +
+  section('/** @type {Map<string, ReturnType<typeof createScopedHandlers>>} */', 'function loadDatastores()')
 
 function fixture() {
   const store = () => new Datastore({ inMemoryOnly: true })
