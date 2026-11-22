@@ -89,17 +89,33 @@ export function recordNotification(notification) {
 }
 
 /**
- * Marks the unread entries about news that is over read.
- * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} matches
+ * @param {(id: string) => unknown} update
  */
-export async function markOverNotificationsRead(isOver) {
+async function updateNotifications(matches, update) {
   if (!supportsNotificationHistory || isAndroidBackgroundRenderer) return
   try {
     const entries = await notificationHistory.list()
-    await Promise.all(entries.filter(entry => !entry.read && isOver(entry)).map(entry => notificationHistory.markRead(entry.id)))
+    await Promise.all(entries.filter(matches).map(entry => update(entry.id)))
   } catch (error) {
     console.error('Failed to update the notification history', error)
   }
+}
+
+/**
+ * Marks the unread entries about news that is over read.
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
+ */
+export function markOverNotificationsRead(isOver) {
+  return updateNotifications(entry => !entry.read && isOver(entry), id => notificationHistory.markRead(id))
+}
+
+/**
+ * Removes the entries about news that no longer applies, like an installed update.
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
+ */
+export function removeOverNotifications(isOver) {
+  return updateNotifications(isOver, id => notificationHistory.remove(id))
 }
 
 /**
