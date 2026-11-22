@@ -306,11 +306,30 @@ class History {
     return records
   }
 
-  /** Whether the history holds the video, for leaving out its upload notification. */
-  static async _includes(videoId) {
-    return (await db.history.countAsync({ videoId })) > 0
+  /**
+   * Whether any profile's history holds the video, for leaving out its upload
+   * notification. Notifications cover the channels of every profile.
+   */
+  static _includesInAnyScope(videoId) {
+    return everyScopeHistory(async datastore => (await datastore.countAsync({ videoId })) > 0)
+      .then(results => results.includes(true))
   }
   // ******************** //
+
+  /**
+   * The videos watched since `since` in every profile's history, for leaving
+   * out their upload notifications. Each history gives its newest `limit`.
+   * @param {number} since
+   * @param {number} limit
+   * @returns {Promise<{ videoId: string, timeWatched: number }[]>}
+   */
+  static async findRecentlyWatchedInEveryScope(since, limit) {
+    return (await everyScopeHistory(datastore => datastore
+      .findAsync({ timeWatched: { $gte: since } }, { _id: 0, videoId: 1, timeWatched: 1 })
+      .sort({ timeWatched: -1 })
+      .limit(limit)
+    )).flat()
+  }
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
@@ -1874,6 +1893,23 @@ function scopedHandlers(scope) {
     profileScopes.set(scope, handlers)
   }
   return handlers
+}
+
+/**
+ * Reads the shared history and that of every separate profile. Runs in the
+ * seen-state queue, which also deletes a profile's data after its profile, so
+ * no read opens the datastore of a deleted profile again.
+ * @template T
+ * @param {(datastore: any) => Promise<T>} read
+ * @returns {Promise<T[]>}
+ */
+function everyScopeHistory(read) {
+  return Settings.runSeenStateUpdate(async () => {
+    await loadProfilesDatastore()
+    const separate = await db.profiles.findAsync({ separate: true }, { _id: 1 })
+    const scopes = [null, ...separate.map(profile => profile._id).filter(isValidSeparateProfileId)]
+    return Promise.all(scopes.map(scope => read(scopedHandlers(scope).history.db.history)))
+  })
 }
 
 /** @type {Set<(scope: string) => Promise<void> | void>} */
