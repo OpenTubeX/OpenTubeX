@@ -290,8 +290,9 @@ test('phone comment sort opens the context menu sheet and returns focus after ch
   await expect(top).toHaveAttribute('aria-checked', 'true')
   await expect(newest).toHaveAttribute('aria-checked', 'false')
   const positions = await menu.locator('[role="menuitemradio"] > span:not([aria-hidden])').evaluateAll(es => es.map(el => el.getBoundingClientRect().left))
-  expect(positions).toHaveLength(2)
-  expect(positions[0]).toBeCloseTo(positions[1], 1)
+  // Top, Newest, and Timed, the last offered only for videos on the local API.
+  expect(positions).toHaveLength(3)
+  for (const position of positions.slice(1)) expect(position).toBeCloseTo(positions[0], 1)
 
   await newest.click()
   await expect(menu).toHaveCount(0)
