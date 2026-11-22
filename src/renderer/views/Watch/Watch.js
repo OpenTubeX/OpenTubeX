@@ -6287,7 +6287,7 @@ export default defineComponent({
     // Skip to the next video if in a playlist
     // else next recommended video if autoplay enabled
     handleSkipToNext: function () {
-      if (this.playNextQueuedVideo() || this.returnToPlaylistAfterQueue()) {
+      if (this.playNextQueuedVideo() || this.returnToPlaylistAfterQueue(false)) {
         return
       }
       if (this.watchingPlaylist) {
@@ -6351,12 +6351,16 @@ export default defineComponent({
       return true
     },
 
-    /** @returns {boolean} whether it went back to the playlist the watch queue interrupted */
-    returnToPlaylistAfterQueue: function () {
+    /**
+     * @param {boolean} [autoplay] whether to start the video, which manual skips leave
+     * to Start Videos Automatically like other playlist skips
+     * @returns {boolean} whether it went back to the playlist the watch queue interrupted
+     */
+    returnToPlaylistAfterQueue: function (autoplay = true) {
       if (!this.returnsToPlaylist) return false
       const { route } = this.playlistAfterQueue
       this.playlistAfterQueue = null
-      this.queuedPlaybackVideoId = route.path.slice('/watch/'.length)
+      if (autoplay) this.queuedPlaybackVideoId = route.path.slice('/watch/'.length)
       this.tabRouter.push(route)
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true

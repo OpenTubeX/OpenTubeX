@@ -94,6 +94,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     customShortsPlayerActive: false,
     isStandaloneShort: false,
     playNextQueuedVideo: () => false,
+    returnToPlaylistAfterQueue: () => false,
     autoplayEnabled: true,
     blockVideoAutoplay: false,
     watchingPlaylist: true,

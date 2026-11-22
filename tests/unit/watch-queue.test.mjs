@@ -219,6 +219,31 @@ test('bedtime and the daily limit stop autoplay only after the queued videos', a
   assert.equal(continueAfterVideoEnded.call(watch), false)
 })
 
+test('the playlist a queue interrupted continues once, and starts only when autoplay advanced', async () => {
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const route = { path: '/watch/next', query: { playlistId: 'playlist', playlistItemId: 'item' } }
+  const pushes = []
+  const watch = {
+    ...watchMethods(source, ['returnToPlaylistAfterQueue', 'handleSkipToNext']),
+    playlistAfterQueue: { route, queuedVideoId: 'queued' },
+    queuedPlaybackVideoId: null,
+    watchingPlaylist: false,
+    get returnsToPlaylist() { return !this.watchingPlaylist && this.playlistAfterQueue !== null },
+    playNextQueuedVideo: () => false,
+    tabRouter: { push: next => pushes.push(next) },
+    t: key => key,
+  }
+  watch.handleSkipToNext()
+  assert.deepEqual(pushes, [route])
+  assert.equal(watch.queuedPlaybackVideoId, null, 'a manual skip leaves starting it to Start Videos Automatically')
+
+  watch.playlistAfterQueue = { route, queuedVideoId: 'queued' }
+  assert.equal(watch.returnToPlaylistAfterQueue(), true)
+  assert.equal(watch.queuedPlaybackVideoId, 'next', 'autoplay starts the playlist video')
+  assert.equal(watch.returnToPlaylistAfterQueue(), false, 'the playlist continues only once')
+  assert.equal(pushes.length, 2)
+})
+
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
   const methods = watchMethods(source, ['playNextQueuedVideo', 'handleVideoLoaded', 'watchRouteWithoutTimestamp'])
