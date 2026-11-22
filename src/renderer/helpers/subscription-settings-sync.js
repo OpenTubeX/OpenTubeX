@@ -1,5 +1,6 @@
 import { isValidSubscriptionSettingsTimestamp, normalizeSubscriptionChannelSettings } from './subscription-channels.js'
 import { areJsonValuesEqual } from './jsonValues.js'
+import { syncScopeKey } from './sync-data-scope.js'
 
 // Stored in the existing encrypted settings collection; channel records remain
 // the local source of truth.
@@ -16,18 +17,38 @@ function getChannelSettingsEntry(channel) {
   return { value: settings, updatedAt: channel.subscriptionSettingsUpdatedAt }
 }
 
-export function getSubscriptionSettingsForSync(store) {
-  return Object.fromEntries(store.state.profiles.profileList[0].subscriptions.flatMap(channel => {
+/**
+ * The settings entry that holds the channel settings of a separate profile,
+ * which keeps its own channels. The shared entry holds those of the All
+ * Channels profile.
+ * @param {string} profileId
+ */
+export function scopedSubscriptionSettingsSyncKey(profileId) {
+  return `${SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY}.${syncScopeKey(profileId)}`
+}
+
+/** @param {unknown} key A settings entry's key, which comes from the server */
+export function isScopedSubscriptionSettingsSyncKey(key) {
+  return typeof key === 'string' && key.startsWith(`${SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY}.`)
+}
+
+/**
+ * The channel settings of a profile that holds its own channels: the All
+ * Channels profile, or a separate profile.
+ * @param {{ subscriptions: any[] }} profile
+ */
+export function getSubscriptionSettingsForSync(profile) {
+  return Object.fromEntries(profile.subscriptions.flatMap(channel => {
     const entry = getChannelSettingsEntry(channel)
     return entry ? [[channel.id, entry]] : []
   }))
 }
 
 // `merged` holds the local settings the merge used, by default the current ones.
-export async function applySubscriptionSettingsSync(store, value, merged = getSubscriptionSettingsForSync(store)) {
+export async function applySubscriptionSettingsSync(store, value, profile, merged = getSubscriptionSettingsForSync(profile)) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return
 
-  for (const channel of store.state.profiles.profileList[0].subscriptions) {
+  for (const channel of profile.subscriptions) {
     if (!Object.hasOwn(value, channel.id)) continue
     const updatedAt = value[channel.id]?.updatedAt
     if (!isValidSubscriptionSettingsTimestamp(updatedAt)) {
@@ -47,7 +68,7 @@ export async function applySubscriptionSettingsSync(store, value, merged = getSu
       throw new Error('Subscription settings changed during sync. Try again.')
     }
     const saved = await store.dispatch('updateChannelSettings', {
-      channelId: channel.id, settings, fromSync: true, updatedAt, profileId: store.state.profiles.profileList[0]._id
+      channelId: channel.id, settings, fromSync: true, updatedAt, profileId: profile._id
     })
     if (!saved) throw new Error('Failed to apply synced subscription settings')
   }

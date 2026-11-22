@@ -211,7 +211,7 @@ export const SYNC_DELETION_ACTIONS = new Map([
   ['removeProfile', 'profiles'],
 ])
 
-/** The lists of the data of the active data scope, unlike those of profiles and bookmarks */
+/** The lists of the data of the active data scope, unlike those of profiles and bookmarks, which hold every profile's */
 const SCOPED_FAMILIES = new Set(['history', 'playlists'])
 
 /**
@@ -247,8 +247,14 @@ export function syncedIdLists(state, family, mainProfileId, dataScope = null) {
       break
     }
     case 'playlistBookmarks': {
-      const bookmarks = Array.isArray(state.settings?.playlistBookmarks) ? state.settings.playlistBookmarks : []
-      lists.set('playlistBookmarks', new Set(bookmarks.map(bookmark => bookmark?.playlist?.id)))
+      const ids = bookmarks => new Set((Array.isArray(bookmarks) ? bookmarks : []).map(bookmark => bookmark?.playlist?.id))
+      lists.set('playlistBookmarks', ids(state.settings?.playlistBookmarks))
+      // Separate profiles keep their own, which sync with their data.
+      for (const profile of state.profiles?.profileList ?? []) {
+        if (profile.separate === true) {
+          lists.set(syncDeletionListKey('playlistBookmarks', profile._id), ids(profile.playlistBookmarks))
+        }
+      }
       break
     }
     case 'profiles': {

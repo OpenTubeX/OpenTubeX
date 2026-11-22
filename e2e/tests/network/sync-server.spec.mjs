@@ -760,7 +760,7 @@ test.describe('OpenTubeX sync server', () => {
       ...(capabilities.notification_dismissals === 1
         ? [{ collection: 'notificationDismissals', revision: 1, payload: null }]
         : []),
-      ...(capabilities.separate_profiles === 1
+      ...(capabilities.separate_profiles >= 2
         ? [{ collection: 'separateProfiles', revision: 1, payload: null }]
         : [])
     ]
@@ -960,7 +960,7 @@ test.describe('OpenTubeX sync server', () => {
 
   test('keeps the library of a separate profile in its own collections', async ({ page }, testInfo) => {
     const capabilities = await getSyncCapabilities()
-    test.skip(capabilities.encrypted_sync !== 1 || capabilities.separate_profiles !== 1, 'Server with separate profiles required')
+    test.skip(capabilities.encrypted_sync !== 1 || !(capabilities.separate_profiles >= 2), 'Server with separate profiles required')
     const username = `opentubex-separate-${randomUUID()}`
     const password = 'local-test-password'
     const separateId = 'separate-profile'

@@ -80,6 +80,7 @@ import {
 } from '../../helpers/sync-deletions.js'
 import {
   SCOPED_SYNC_COLLECTIONS,
+  supportsSeparateProfiles,
   dataScopeLoading,
   fromSharedSyncDeletionMarks,
   isScopedSyncDeletionKey,
@@ -380,7 +381,9 @@ async function getSyncServerCapabilities(client, { refresh = false, requiredCapa
   const age = syncCapabilities ? Date.now() - syncCapabilities.checkedAt : Infinity
   if (!refresh && syncCapabilities?.identity === identity && syncCapabilities.value &&
       age >= 0 && age < AUTO_SYNC_INTERVAL_MS &&
-      requiredCapabilities.every(capability => syncCapabilities.value[capability] === 1)) {
+      requiredCapabilities.every(capability => capability === 'separate_profiles'
+        ? supportsSeparateProfiles(syncCapabilities.value)
+        : syncCapabilities.value[capability] === 1)) {
     return syncCapabilities.value
   }
   // Failed discovery must not leave previously advertised support reusable.
@@ -619,7 +622,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ...(encrypted ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions && syncsScope ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists && syncsScope ? ['playlists'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
+    ...(settings.syncServerSyncPlaylists && syncsScope ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory && syncsScope ? ['history'] : []),
     ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
     ...(syncsLiveReminders && encrypted &&
@@ -799,7 +802,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
   }
 
-  /** @param {unknown[]} ids Separate profiles the server may still keep data for */
   /** Separate profiles the server may still keep data for, while no profile lists them */
   function removedProfileIds() {
     const ids = [
@@ -811,6 +813,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     // The uploaded list also keeps the profiles this version can't read.
     for (const entry of Array.isArray(uploadedSeparateProfiles) ? uploadedSeparateProfiles : []) remaining.add(entry?.id)
     return [...new Set(ids)].filter(id => isValidSeparateProfileId(id) && !remaining.has(id) && !deletedProfileData.has(id))
+  }
+
+  // The channel settings of the separate profile this sync merges sync in
+  // their own entry, which goes once the profile is deleted.
+  function settingsScope() {
+    return { dataScope, removedProfileIds: removedProfileIds().filter(id => id !== dataScope) }
   }
 
   async function deleteRemovedProfileData() {
@@ -940,7 +948,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         )
         break
       case 'settings':
-        next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot(), { onRetryBaseline })
+        next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot(), { onRetryBaseline, ...settingsScope() })
         result.settings = Object.keys(next.settings).length
         break
       case 'sessionsV2': {
@@ -1006,7 +1014,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
     }
     // Without support, a separate profile's data stays on this device.
-    const separateProfilesSupported = encrypted && capabilities.separate_profiles === 1
+    const separateProfilesSupported = encrypted && supportsSeparateProfiles(capabilities)
     commit('setSyncServerSeparateProfilesSupported', separateProfilesSupported)
     if (!separateProfilesSupported) {
       for (const stage of ['separateProfiles', ...(dataScope === null ? [] : SCOPED_SYNC_COLLECTIONS)]) {
@@ -1338,6 +1346,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                   next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
                     listSnapshot: baseline('settings') ?? {},
                     onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
+                    ...settingsScope(),
                   })
                   result.settings = Object.keys(next.settings).length
                 } else {
@@ -2379,7 +2388,7 @@ const actions = {
         commit('setSyncServerWatchStatsSupported', watchStatsSupported)
         commit('setSyncServerLiveRemindersSupported', privacySupported && capabilities.live_reminders === 1)
         commit('setSyncServerNotificationDismissalsSupported', privacySupported && capabilities.notification_dismissals === 1)
-        commit('setSyncServerSeparateProfilesSupported', privacySupported && capabilities.separate_profiles === 1)
+        commit('setSyncServerSeparateProfilesSupported', privacySupported && supportsSeparateProfiles(capabilities))
         if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
           const account = getSyncAccount(rootState.settings)
           await withSyncLock(async () => {

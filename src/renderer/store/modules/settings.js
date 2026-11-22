@@ -1001,7 +1001,7 @@ const customActions = {
       const bookmarks = update(Array.isArray(profile.playlistBookmarks) ? profile.playlistBookmarks : [])
       const saved = await DBProfileHandlers.updatePlaylistBookmarks(scope, bookmarks)
       if (saved === null) throw new Error('The separate profile is gone')
-      commit('upsertProfileToList', saved)
+      commit('setProfilePlaylistBookmarks', { profileId: scope, playlistBookmarks: saved.playlistBookmarks })
     })
   },
 

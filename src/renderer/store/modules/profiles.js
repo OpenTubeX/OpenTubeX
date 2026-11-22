@@ -529,6 +529,12 @@ const mutations = {
     state.profileList.sort(profileSort)
   },
 
+  /** Sets the YouTube playlists a separate profile saved, see `updateActivePlaylistBookmarks` */
+  setProfilePlaylistBookmarks(state, { profileId, playlistBookmarks }) {
+    const profile = state.profileList.find(profile => profile._id === profileId)
+    if (profile) profile.playlistBookmarks = playlistBookmarks
+  },
+
   upsertProfileToList(state, updatedProfile) {
     const i = state.profileList.findIndex((p) => {
       return p._id === updatedProfile._id

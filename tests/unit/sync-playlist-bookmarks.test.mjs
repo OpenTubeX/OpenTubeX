@@ -21,8 +21,9 @@ function createStore(playlistBookmarks = []) {
   const state = reactive({ settings: { playlistBookmarks } })
   return {
     state,
+    getters: { get getPlaylistBookmarks() { return state.settings.playlistBookmarks } },
     dispatch: async (action, value) => {
-      assert.equal(action, 'updatePlaylistBookmarks')
+      assert.equal(action, 'updateActivePlaylistBookmarks')
       state.settings.playlistBookmarks = value(state.settings.playlistBookmarks)
       return true
     },
@@ -149,7 +150,7 @@ function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmar
     getters: { get getPlaylistBookmarks() { return state.settings.playlistBookmarks } },
     rootGetters: { getActiveDataScope: null },
     commit: (mutation, value) => {
-      if (mutation === 'upsertProfileToList') return
+      if (mutation === 'setProfilePlaylistBookmarks') return
       assert.equal(mutation, 'setPlaylistBookmarks')
       state.settings.playlistBookmarks = value
     },
@@ -216,4 +217,16 @@ test('a separate profile saves and removes YouTube playlists in its own list, ne
   assert.deepEqual(profile.playlistBookmarks.map(bookmark => bookmark.playlist.id), ['PLfirst', 'PLsecond'])
   assert.deepEqual(saved(), shared)
   assert.deepEqual(store.state.settings.playlistBookmarks, shared)
+
+  // Sync merges the profile's own list with its collection on the server.
+  store.getters = { get getPlaylistBookmarks() { return profile.playlistBookmarks } }
+  const local = bookmarks.createPlaylistBookmark({ id: 'PLlocal', title: 'Local', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 2 })
+  await store.dispatch('savePlaylistBookmark', local)
+  const remote = bookmarks.createPlaylistBookmark({ id: 'PLremote', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 3 })
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylistBookmark(bookmarks.playlistBookmarkForSync(remote))
+  await context.syncPlaylistBookmarks(adapter, store, [])
+  assert.deepEqual(profile.playlistBookmarks.map(bookmark => bookmark.playlist.id), ['PLlocal', 'PLremote'])
+  assert.deepEqual((await adapter.getPlaylistBookmarks()).map(bookmark => bookmark.playlist.id).sort(), ['PLlocal', 'PLremote'])
+  assert.deepEqual(saved(), shared)
 })
