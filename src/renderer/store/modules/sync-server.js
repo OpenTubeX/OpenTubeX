@@ -815,10 +815,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     return [...new Set(ids)].filter(id => isValidSeparateProfileId(id) && !remaining.has(id) && !deletedProfileData.has(id))
   }
 
+  // Whether the server keeps the data of separate profiles, see the capability check
+  let separateProfilesSupported = false
   // The channel settings of the separate profile this sync merges sync in
-  // their own entry, which goes once the profile is deleted.
+  // their own entry, which goes once the profile is deleted. Without server
+  // support, they stay on this device like the profile's other data.
   function settingsScope() {
-    return { dataScope, removedProfileIds: removedProfileIds().filter(id => id !== dataScope) }
+    return {
+      dataScope: separateProfilesSupported ? dataScope : null,
+      removedProfileIds: removedProfileIds().filter(id => id !== dataScope),
+    }
   }
 
   async function deleteRemovedProfileData() {
@@ -835,10 +841,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
       case 'seenVideos':
-        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)
+        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store, assertSyncStillActive)
         break
       case 'seenPosts':
-        result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
+        result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store, assertSyncStillActive)
         break
       case 'seenRssItems':
         result.seenRssItems = await syncRssFeedSeenItems(targetClient, store)
@@ -1014,7 +1020,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
     }
     // Without support, a separate profile's data stays on this device.
-    const separateProfilesSupported = encrypted && supportsSeparateProfiles(capabilities)
+    separateProfilesSupported = encrypted && supportsSeparateProfiles(capabilities)
     commit('setSyncServerSeparateProfilesSupported', separateProfilesSupported)
     if (!separateProfilesSupported) {
       for (const stage of ['separateProfiles', ...(dataScope === null ? [] : SCOPED_SYNC_COLLECTIONS)]) {
@@ -1048,8 +1054,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       if (syncsHistory && capabilities.seen_posts === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenPosts')
       }
-      if (syncsHistory && capabilities.seen_rss_items === 1) {
-        stages.splice(stages.indexOf('history') + 1, 0, 'seenRssItems')
+      // RSS feeds are the same in every profile, and so are their seen marks.
+      if (settings.syncServerSyncHistory && capabilities.seen_rss_items === 1) {
+        stages.splice(stages.indexOf(syncsHistory ? 'history' : 'download') + 1, 0, 'seenRssItems')
       }
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')

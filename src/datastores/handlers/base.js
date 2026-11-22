@@ -333,6 +333,8 @@ class History {
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
+      // The deletion of a separate profile may have run first in this queue.
+      await Settings._assertSeenMarksScope(this.scope)
       const updatedRecords = []
       if (acknowledgedRepairs || metadata) {
         const updates = acknowledgedRepairs

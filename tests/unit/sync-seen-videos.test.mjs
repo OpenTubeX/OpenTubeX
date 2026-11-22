@@ -494,6 +494,34 @@ test('failed seen-mark persistence stops sync before uploading stale state', asy
   assert.equal(uploads, 0)
 })
 
+test('a profile switch during seen-mark sync stops it before the other profile’s marks are used', async () => {
+  const switched = new Error('Switched profiles')
+  for (const sync of [seenVideos.syncSubscriptionSeenVideos, seenVideos.syncSubscriptionSeenPosts]) {
+    let profile = 'first'
+    const dispatched = []
+    let uploads = 0
+    const marks = [{ videoId: 'video', postId: 'post', seenAt: 2000, unseenAt: 3000 }]
+    await assert.rejects(sync({
+      getSeenVideos: async () => marks,
+      getSeenPosts: async () => marks,
+      getWatchHistory: async () => [],
+      putSeenVideos: async () => { uploads++ },
+      putSeenPosts: async () => { uploads++ },
+    }, {
+      state: {
+        settings: { subscriptionSeenVideos: JSON.stringify(marks), subscriptionSeenPosts: JSON.stringify(marks) },
+        history: { historyCacheSorted: [{ videoId: 'video', timeWatched: 1000, isWatched: true }] },
+      },
+      dispatch: async (type) => {
+        dispatched.push(type)
+        profile = 'second'
+      },
+    }, () => { if (profile !== 'first') throw switched }), switched)
+    assert.deepEqual(dispatched, [sync === seenVideos.syncSubscriptionSeenVideos ? 'mergeSubscriptionSeenVideos' : 'mergeSubscriptionSeenPosts'])
+    assert.equal(uploads, 0)
+  }
+})
+
 test('marking a video unseen preserves watch progress and restores a seen video', async () => {
   const fixture = cacheFixture()
   fixture.state.videoCache.channel.videos[0].isNewInSubscriptionFeed = false

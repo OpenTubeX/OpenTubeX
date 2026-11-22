@@ -854,15 +854,32 @@ test('a sync that leaves out a list keeps the deletions made in it for a sync th
 })
 
 test('a separate profile does not sync its library without server support', async () => {
-  const f = fixture({ syncServerSyncHistory: true }, {
-    encrypted: true,
-    dataScope: 'separate-1',
-    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1, live_sync: 1 } } : undefined,
-  })
-  f.context.rootState.history = { historyCacheSorted: [{ videoId: 'separate-video', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }] }
-  await f.actions.syncWithSyncServer(f.context)
-  assert.equal(f.context.state.syncServerStatus, 'success')
-  assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats)/.test(request.url)), [])
+  const key = Buffer.alloc(32, 1).toString('base64')
+  for (const separateProfiles of [undefined, 1]) {
+    const f = fixture({ syncServerSyncHistory: true, syncServerSyncSettings: true }, {
+      encrypted: true,
+      dataScope: 'separate-1',
+      respond: url => url.endsWith('/health')
+        ? { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1, seen_rss_items: 1, separate_profiles: separateProfiles } }
+        : undefined,
+    })
+    f.context.rootState.profiles.profileList.push({
+      _id: 'separate-1',
+      name: 'separate-1',
+      separate: true,
+      subscriptions: [{ id: 'separate-channel', name: 'Separate subscription', hideShorts: true }],
+    })
+    f.context.rootState.history = { historyCacheSorted: [{ videoId: 'separate-video', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }] }
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+    assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats|seenVideos)/.test(request.url)), [])
+    // The separate profile's channel settings stay here, while the shared settings and RSS seen marks sync.
+    const settingsUpload = f.requests.find(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings'))
+    const keys = (await privacy.decryptSyncDocument(JSON.parse(settingsUpload.body).payload, key)).map(entry => entry.key)
+    assert.ok(keys.includes('subscriptionChannelSettings'))
+    assert.ok(!keys.some(key => key.startsWith('subscriptionChannelSettings.')))
+    assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/seenRssItems')))
+  }
 })
 
 for (const overrides of [

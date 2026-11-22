@@ -113,10 +113,13 @@ function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids, scope =
 }
 
 // Merges the marks of the data scope the store shows, whose history the
-// videos marked unseen leave.
-export async function syncSubscriptionSeenVideos(client, store) {
+// videos marked unseen leave. `assertActive` throws once the store shows
+// another profile's data, whose marks must not reach this sync's collections.
+export async function syncSubscriptionSeenVideos(client, store, assertActive = () => {}) {
   const remote = await client.getSeenVideos()
+  assertActive()
   await store.dispatch('mergeSubscriptionSeenVideos', remote)
+  assertActive()
   const merged = parseSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos)
   const unseenById = new Map(merged.filter(entry => entry.unseenAt >= entry.seenAt)
     .map(entry => [entry.videoId, entry.unseenAt]))
@@ -127,6 +130,7 @@ export async function syncSubscriptionSeenVideos(client, store) {
       if (isHistoryEntryWatched(history) &&
           unseenById.get(history.videoId) > (history.timeWatched ?? 0)) {
         await store.dispatch('updateHistory', { ...history, isWatched: false })
+        assertActive()
       }
     }
     for (const history of await client.getWatchHistory() ?? []) {
@@ -146,9 +150,11 @@ export async function syncSubscriptionSeenVideos(client, store) {
   return merged.length
 }
 
-export async function syncSubscriptionSeenPosts(client, store) {
+export async function syncSubscriptionSeenPosts(client, store, assertActive = () => {}) {
   const remote = await client.getSeenPosts()
+  assertActive()
   await store.dispatch('mergeSubscriptionSeenPosts', remote)
+  assertActive()
   const merged = parseSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts)
   await client.putSeenPosts(merged)
   return merged.length

@@ -1888,7 +1888,10 @@ onMounted(async () => {
     store.commit('setSubscriptionSeenPosts', '[]')
     await Promise.all([
       store.dispatch('loadWatchQueueScope', scope),
-      store.dispatch('grabSubscriptionSeenMarks').catch(error => console.error(error)),
+      store.dispatch('grabSubscriptionSeenMarks').catch((error) => {
+        console.error(error)
+        store.dispatch('markDataScopeIncomplete', scope)
+      }),
     ])
     // Watch stats load with the settings, before the profiles.
     if (store.getters.getEnableWatchStats) store.dispatch('grabWatchStats')

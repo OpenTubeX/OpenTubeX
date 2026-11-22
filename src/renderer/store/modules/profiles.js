@@ -509,6 +509,11 @@ const actions = {
     })())
     if (scope === getDataScope()) await dispatch('applySyncServerDataScope')
   },
+
+  /** Lets the next {@link loadDataScope} read a data scope again whose startup read failed */
+  markDataScopeIncomplete(_, scope) {
+    if (scope === getDataScope()) incompleteDataScope = scope
+  },
 }
 
 function withDefaultProfileIcon(profile) {
