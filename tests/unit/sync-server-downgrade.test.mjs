@@ -780,47 +780,51 @@ test('a separate profile syncs its library only in its own collections and never
   assert.deepEqual(Object.keys(snapshot.separateProfiles), ['separate-1'])
 })
 
-test('a failed deletion of a removed separate profile\'s data is retried by the next sync', async () => {
-  const key = Buffer.alloc(32, 1).toString('base64')
-  const salt = Buffer.alloc(16, 2).toString('base64')
-  const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
-  const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
-  // This device deleted `gone-1`, which the server still lists.
-  let listed = { revision: 1, payload: await privacy.encryptSyncDocument([entry('kept-1'), entry('gone-1')], key, salt) }
-  let deletesFail = true
-  const respond = async (url, options) => {
-    const path = new URL(url).pathname
-    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
-    if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: listed.revision }], legacy_data: false }
-    if (path !== '/v1/encrypted_sync/separateProfiles') {
-      if (options.method === 'DELETE' && deletesFail) return new Response('{}', { status: 503 })
-      return
+for (const failure of ['deletion', 'later upload']) {
+  test(`a removed separate profile's data is deleted by the next sync after a failed ${failure}`, async () => {
+    const key = Buffer.alloc(32, 1).toString('base64')
+    const salt = Buffer.alloc(16, 2).toString('base64')
+    const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
+    const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
+    // This device deleted `gone-1`, which the server still lists.
+    let listed = { revision: 1, payload: await privacy.encryptSyncDocument([entry('kept-1'), entry('gone-1')], key, salt) }
+    let failing = true
+    const respond = async (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
+      if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: listed.revision }], legacy_data: false }
+      if (path !== '/v1/encrypted_sync/separateProfiles') {
+        // Settings upload after the profiles.
+        if (failing && (failure === 'deletion' ? options.method === 'DELETE' : options.method === 'PUT' && path.endsWith('/settings'))) return new Response('{}', { status: 503 })
+        return
+      }
+      if (options.method !== 'PUT') return listed
+      listed = { revision: listed.revision + 1, payload: JSON.parse(options.body).payload }
+      return { revision: listed.revision }
     }
-    if (options.method !== 'PUT') return listed
-    listed = { revision: listed.revision + 1, payload: JSON.parse(options.body).payload }
-    return { revision: listed.revision }
-  }
-  const settings = {
-    syncServerSyncProfiles: true,
-    syncServerSnapshot: JSON.stringify({ separateProfiles: { 'kept-1': metadata('kept-1'), 'gone-1': metadata('gone-1') } }),
-  }
-  const f = fixture(settings, { encrypted: true, respond })
-  f.context.rootState.profiles.profileList.push({ _id: 'kept-1', name: 'kept-1', bgColor: '#123456', textColor: '#FFFFFF', separate: true, subscriptions: [] })
-  const deletes = () => f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname)
+    const settings = {
+      syncServerSyncProfiles: true,
+      syncServerSyncSettings: failure === 'later upload',
+      syncServerSnapshot: JSON.stringify({ separateProfiles: { 'kept-1': metadata('kept-1'), 'gone-1': metadata('gone-1') } }),
+    }
+    const f = fixture(settings, { encrypted: true, respond })
+    f.context.rootState.profiles.profileList.push({ _id: 'kept-1', name: 'kept-1', bgColor: '#123456', textColor: '#FFFFFF', separate: true, subscriptions: [] })
+    const deletes = () => f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname)
 
-  await assert.rejects(f.actions.syncWithSyncServer(f.context))
-  // The upload no longer lists the profile, but the baseline keeps it until its data is gone.
-  assert.deepEqual((await privacy.decryptSyncDocument(listed.payload, key)).map(profile => profile.id), ['kept-1'])
-  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles).sort(), ['gone-1', 'kept-1'])
+    await assert.rejects(f.actions.syncWithSyncServer(f.context))
+    // The upload no longer lists the profile, but the baseline keeps it until its data is gone.
+    assert.deepEqual((await privacy.decryptSyncDocument(listed.payload, key)).map(profile => profile.id), ['kept-1'])
+    assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles).sort(), ['gone-1', 'kept-1'])
 
-  deletesFail = false
-  const failed = deletes().length
-  await f.actions.syncWithSyncServer(f.context)
-  assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
-  assert.deepEqual(deletes().slice(failed).sort(),
-    ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
-  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles), ['kept-1'])
-})
+    failing = false
+    const failed = deletes().length
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+    assert.deepEqual(deletes().slice(failed).sort(),
+      ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+    assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles), ['kept-1'])
+  })
+}
 
 test('a sync that leaves out a list keeps the deletions made in it for a sync that merges it', async () => {
   const deletions = createSyncDeletionDecisions()
@@ -830,6 +834,20 @@ test('a sync that leaves out a list keeps the deletions made in it for a sync th
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
   assert.deepEqual(Object.keys(deletions.snapshot()), ['subscriptions'])
+
+  // An older server without history or profile groups merges neither.
+  const legacyDeletions = createSyncDeletionDecisions()
+  legacyDeletions.confirm('history', ['removed-video'])
+  legacyDeletions.confirm('profiles', ['removed-profile'])
+  const legacy = fixture({ syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerPrivacySalt: '', syncServerSyncHistory: true, syncServerSyncProfiles: true }, {
+    deletions: legacyDeletions,
+    respond: url => /\/(watch_history|subscriptions\/groups)\//.test(new URL(url).pathname)
+      ? new Response('Resource missing', { status: 404 })
+      : undefined,
+  })
+  await legacy.actions.syncWithSyncServer(legacy.context)
+  assert.equal(legacy.context.state.syncServerStatus, 'success', legacy.context.state.syncServerError)
+  assert.deepEqual(Object.keys(legacyDeletions.snapshot()).sort(), ['history', 'profiles'])
 })
 
 test('a separate profile does not sync its library without server support', async () => {

@@ -480,6 +480,7 @@ const actions = {
         commit('setAllPlaylists', [])
         commit('setPlaylistsReady', false)
         commit('setSearchHistoryEntries', [])
+        commit('clearWatchStats')
         return scope
       })
       if (!load) return scope
