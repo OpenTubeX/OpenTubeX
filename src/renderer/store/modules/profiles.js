@@ -488,13 +488,17 @@ const actions = {
       if (!load) return scope
       const hadRecommendations = rootGetters.getRecommendationEpoch !== null
       commit('clearRecommendationState')
+      const read = (...args) => dispatch(...args).catch(error => {
+        console.error(error)
+        return false
+      })
       const loaded = await Promise.all([
-        dispatch('grabHistory'),
-        dispatch('grabAllPlaylists'),
-        dispatch('grabSearchHistoryEntries', { replace: true }),
-        dispatch('loadWatchQueueScope', scope),
-        rootGetters.getEnableWatchStats ? dispatch('grabWatchStats') : null,
-        hadRecommendations ? dispatch('loadRecommendations') : null,
+        read('grabHistory'),
+        read('grabAllPlaylists'),
+        read('grabSearchHistoryEntries', { replace: true }),
+        read('loadWatchQueueScope', scope),
+        rootGetters.getEnableWatchStats ? read('grabWatchStats') : null,
+        hadRecommendations ? read('loadRecommendations') : null,
       ])
       // A failed read leaves that data empty, and the next load reads it again.
       if (scope === getDataScope() && loaded.includes(false)) incompleteDataScope = scope

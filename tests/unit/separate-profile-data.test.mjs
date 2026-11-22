@@ -254,6 +254,7 @@ test('a profile switch whose read fails shows none of the previous profile’s d
     setDataScope,
     settleScopedActions,
     trackDataScopeLoad,
+    console: { error() {} },
   })
   const shown = { history: ['previous'], watchStats: ['previous'], syncedWatchStats: ['previous'] }
   let failHistory = true
@@ -270,7 +271,10 @@ test('a profile switch whose read fails shows none of the previous profile’s d
       reads.push(name)
       // None of the previous profile's data shows while the switch loads.
       if (name === 'grabHistory') assert.deepEqual(shown, { history: [], watchStats: [], syncedWatchStats: [] })
-      if (name === 'grabHistory') return !failHistory
+      // A read can also reject.
+      if (name === 'grabHistory' && failHistory) throw new Error('Unable to read the history')
+      if (name === 'grabHistory') return true
+      if (name === 'grabAllPlaylists') return !failHistory
       if (name === 'grabWatchStats') shown.watchStats = ['separate']
       return true
     },
