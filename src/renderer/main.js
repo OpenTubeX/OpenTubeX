@@ -100,6 +100,14 @@ function startApp() {
       })
     : Promise.resolve()
 
+  // On Android, start opening the native SQLite datastores right away in parallel
+  // with router, dynamic colors, and network state instead of waiting for them.
+  const androidDatastoresReady = process.env.IS_CAPACITOR && !process.env.IS_IOS
+    ? import('../datastores/index').then(({ waitForDatastores }) => waitForDatastores())
+    : null
+  // Prevent an unhandled rejection if the earlier Promise.all takes another turn.
+  androidDatastoresReady?.catch(() => {})
+
   Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
     // The web app's library lives in browser storage, which can be unavailable
     // (plain http:// addresses) or held by another tab.
@@ -126,8 +134,12 @@ function startApp() {
             }
           })
         }
-        const { waitForDatastores } = await import('../datastores/index')
-        await waitForDatastores()
+        if (androidDatastoresReady) {
+          await androidDatastoresReady
+        } else {
+          const { waitForDatastores } = await import('../datastores/index')
+          await waitForDatastores()
+        }
       } catch (error) {
         console.error('App storage is unavailable:', error)
         await showStorageScreen()

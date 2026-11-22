@@ -31,8 +31,12 @@ const networkSource = (await readFile(new URL('../../src/renderer/helpers/networ
 const errorStoreSource = (await readFile(new URL('../../src/renderer/helpers/subscriptionRefreshErrors.js', import.meta.url), 'utf8'))
   .replace(/^import .* from .*\n/gm, '').replace(/^export /gm, '')
 
+const filtersSource = (await readFile(new URL('../../src/renderer/helpers/subscriptionFilters.js', import.meta.url), 'utf8'))
+  .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '').replace(/^export /gm, '')
+
 const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+  .replace(/^export \{[\s\S]*?\}\n/gm, '')
   .replace(/^export /gm, '')
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
@@ -197,7 +201,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       init?.signal?.addEventListener('abort', () => reject(createAbortError()), { once: true })
     })
   }
-  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannels, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, setSubscriptionChannelError, clearSubscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
+  vm.runInContext(`${errorStoreSource}\n${filtersSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannels, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, setSubscriptionChannelError, clearSubscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
   return {
     get details() {
       return [...context.api.subscriptionChannelErrors.values()].flatMap(errors => Object.values(errors).map(error => error.trace)).join('\n')

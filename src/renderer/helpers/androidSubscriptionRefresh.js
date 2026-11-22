@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshData.js'
+import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshStart.js'
 
 const SubscriptionRefresh = process.env.IS_CAPACITOR && !process.env.IS_IOS
   ? registerPlugin('SubscriptionRefresh')

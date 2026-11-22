@@ -3,7 +3,7 @@ import store from '../store/index'
 import { getSyncedTabPreview } from '../tabs/tabPreview'
 import { fetchChannelInfo, getCachedChannelInfo } from '../helpers/channel-preferences'
 import { mapConcurrently } from '../helpers/concurrent-map'
-import { youtubeImageUrlToInvidious } from '../helpers/api/invidious'
+import { youtubeImageUrlToInvidious } from '../helpers/api/invidious-image-url'
 
 /** Load channel avatars only for the tabs currently being displayed. */
 export function useChannelTabAvatars(tabs) {

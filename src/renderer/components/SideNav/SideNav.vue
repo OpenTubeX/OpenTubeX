@@ -221,7 +221,7 @@ import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
 
 import store from '../../store/index'
 
-import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious-image-url'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { getVideoThumbnailUrl, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'

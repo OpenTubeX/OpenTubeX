@@ -99,6 +99,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
   const pendingSubscriptionAutoRefreshKeys = new Set()
   const cancelledSubscriptionAutoRefreshKeys = new Set()
   let processingSubscriptionAutoRefreshes = false
+  const subscriptionRefreshStartGuard = createSubscriptionRefreshStartGuard()
+  let androidSubscriptionRefreshNotificationWarningShown = false
+  let reconcilingAndroidSubscriptionRefreshResults = null
 
   /** @type {import('vue').ComputedRef<string>} */
   const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubscriptionFeedAutoRefreshInterval)
@@ -145,7 +148,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       migrateLegacySubscriptionAutoRefreshDeadlines()
       synchronizeSubscriptionAutoRefreshProfile(profileId)
     }
-  })
+  }, { immediate: true })
 
   watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
     resetSubscriptionTabAutoRefreshForAllProfiles('videos')
@@ -218,7 +221,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       configuredBackground = null
       console.error('Failed to configure closed-app subscription refreshes', error)
     }
-  })
+  }, { immediate: true })
 
   const uploadNotificationConfiguration = computed(() => {
     if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
@@ -258,13 +261,13 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       configuredUploadNotifications = null
       console.error('Failed to configure upload notifications', error)
     }
-  })
+  }, { immediate: true })
 
   watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
     if ((isCapacitor || isElectron) && ready && cacheReady) {
       reconcileAndroidSubscriptionRefreshResults()
     }
-  })
+  }, { immediate: true })
 
   /**
    * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
@@ -859,9 +862,6 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     })
   }
 
-  const subscriptionRefreshStartGuard = createSubscriptionRefreshStartGuard()
-  let androidSubscriptionRefreshNotificationWarningShown = false
-
   function showAndroidSubscriptionRefreshNotificationWarning() {
     if (androidSubscriptionRefreshNotificationWarningShown) return
     androidSubscriptionRefreshNotificationWarningShown = true
@@ -937,8 +937,6 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         return t('Subscriptions.Refreshing Subscription Videos')
     }
   }
-
-  let reconcilingAndroidSubscriptionRefreshResults = null
 
   function reconcileAndroidSubscriptionRefreshResults() {
     if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults

@@ -28,7 +28,6 @@ import {
   LAST_USED_VERSION_SETTING_ID,
   TUTORIAL_AUDIENCE_SETTING_ID,
 } from '../../helpers/tutorialState.js'
-import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscription-settings-sync'
 import { PLAYLIST_PREFERENCES_SYNC_KEYS } from '../../helpers/playlist-preferences-sync'
@@ -247,7 +246,9 @@ const sideEffectHandlers = {
 
   enableCommentTranslations: (_store, value) => {
     if (!value) {
-      terminateCommentTranslationLanguageDetector()
+      import('../../helpers/comment-translations')
+        .then(({ terminateCommentTranslationLanguageDetector }) => terminateCommentTranslationLanguageDetector())
+        .catch(() => {})
     }
   },
 

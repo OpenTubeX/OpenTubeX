@@ -1,8 +1,5 @@
 import store from '../store/index'
 import { usesInvidiousApi } from '../../apiBackends'
-import { fetchRepairMetadata } from './historyRepair'
-import { getLocalPlaylist, getLocalPlaylistChannelName } from './api/local'
-import { invidiousGetPlaylistInfo } from './api/invidious'
 import { getPostTabTitle } from './tabTitles'
 
 const ROUTE_PATTERN = /^\/(watch|playlist|channel|post)\/([^/]+)/
@@ -20,15 +17,20 @@ async function lookUpTitle(path, query) {
   const usesInvidious = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(store.getters.getBackendPreference)
 
   switch (type) {
-    case 'watch':
-      return store.getters.getHistoryCacheById[id]?.title ||
-        (await fetchRepairMetadata(id, new AbortController().signal, false)).title
+    case 'watch': {
+      const cachedTitle = store.getters.getHistoryCacheById[id]?.title
+      if (cachedTitle) return cachedTitle
+      const { fetchRepairMetadata } = await import('./historyRepair')
+      return (await fetchRepairMetadata(id, new AbortController().signal, false)).title
+    }
     case 'playlist': {
       if (query.playlistType === 'user') return store.getters.getPlaylist(id)?.playlistName
       // Matches the playlist page's title.
       const [title, channelName] = usesInvidious
-        ? await invidiousGetPlaylistInfo(id).then(playlist => [playlist.title, playlist.author])
-        : await getLocalPlaylist(id).then(({ info }) => [info.title, getLocalPlaylistChannelName(info)])
+        ? await (await import('./api/invidious')).invidiousGetPlaylistInfo(id).then(playlist => [playlist.title, playlist.author])
+        : await import('./api/local').then(({ getLocalPlaylist, getLocalPlaylistChannelName }) =>
+            getLocalPlaylist(id).then(({ info }) => [info.title, getLocalPlaylistChannelName(info)])
+          )
       return [title, channelName].filter(Boolean).join(' | ')
     }
     case 'channel':

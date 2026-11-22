@@ -14,6 +14,7 @@ function resetHooks() {
     acknowledge: async () => {},
     addCancelledListener: async () => () => {},
     configureAndroid: async () => {},
+    configureUploadNotifications: async () => {},
     getAndroidState: async () => ({ inProgress: false, ownedByRenderer: true }),
     getNextResult: async () => null,
     requestNotificationPermission: async () => false,
@@ -117,7 +118,7 @@ export async function loadSubscriptionAutoRefresh(env) {
       startAndroidSubscriptionRefresh: call('startAndroid'),
       updateAndroidSubscriptionRefresh: call('updateAndroid'),
     },
-    [sourceUrl('src/renderer/helpers/uploadNotifications.js')]: { configureUploadNotifications: async () => {} },
+    [sourceUrl('src/renderer/helpers/uploadNotifications.js')]: { configureUploadNotifications: call('configureUploadNotifications') },
     [sourceUrl('src/renderer/helpers/notificationHistory.js')]: { getNotificationThumbnailUrl: () => null },
     [sourceUrl('src/renderer/helpers/androidSubscriptionRefreshData.js')]: {
       ...refreshData,

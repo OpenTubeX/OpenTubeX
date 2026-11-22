@@ -8,7 +8,7 @@ import { getChannelHandleFromEndpoint } from '../../src/renderer/helpers/api/loc
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../src/renderer/helpers/restricted-playback.js'
 import { parseLocalCollaboratorItems } from '../../src/renderer/helpers/video-collaborators.js'
 
-const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptionFilters.js', import.meta.url), 'utf8')
 const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
 const isVideoHiddenByPreferences = vm.compileFunction(
   `${subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2).replace('export ', '')}\nreturn isVideoHiddenByPreferences`,

@@ -44,8 +44,9 @@ export function getLastUsedVersion(persistedVersion) {
   return readLocalStorage('opentubex.lastUsedVersion') ?? persistedVersion ?? null
 }
 
-export async function setLastUsedVersion(version) {
+export async function setLastUsedVersion(version, persistedVersion = undefined) {
   writeLocalStorage('opentubex.lastUsedVersion', version)
+  if (persistedVersion === version) return
   try {
     await DBSettingHandlers.upsert(LAST_USED_VERSION_SETTING_ID, version)
   } catch (error) {

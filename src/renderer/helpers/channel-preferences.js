@@ -1,8 +1,11 @@
-import { checkYoutubeChannelId, findChannelTagInfo } from './channels'
 import { getPlatformFetch } from './platformFetch'
 import { showToast } from './utils'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import { getPlatform, getPlatformChannelKey } from '../../platforms/index'
+
+const checkYoutubeChannelId = id => /^UC[\w-]{22}$/.test(id)
+const findChannelTagInfo = (id, backendOptions) =>
+  import('./channels').then(module => module.findChannelTagInfo(id, backendOptions))
 
 /**
  * The settings that can be remembered per channel. They are keyed by YouTube

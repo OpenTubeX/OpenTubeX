@@ -98,10 +98,13 @@ function workerDrivers(startWorker) {
 function nativeDrivers() {
   const { Capacitor, registerPlugin } = require('@capacitor/core')
   const plugin = registerPlugin('LibraryDatabase')
-  // Android writes large reads to a file: fetching it from the local server
-  // is an order of magnitude faster than one multi-megabyte bridge message.
+  // Android returns small reads inline and writes large ones to a file:
+  // fetching a multi-megabyte result from the local server is an order of
+  // magnitude faster than one huge bridge message.
   const read = name => async (sql, params = []) => {
-    const { path } = await plugin.query({ name, sql, params })
+    const result = await plugin.query({ name, sql, params })
+    if (typeof result.rows === 'string') return JSON.parse(result.rows)
+    const { path } = result
     try {
       const response = await fetch(Capacitor.convertFileSrc(path))
       if (!response.ok) throw new Error(`Unable to read library results: ${response.status}`)

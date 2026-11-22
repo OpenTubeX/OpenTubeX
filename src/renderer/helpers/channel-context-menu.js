@@ -1,7 +1,6 @@
 import { shallowRef } from 'vue'
 
 import store from '../store/index'
-import { subscribeToChannel, unsubscribeFromChannel } from './channel-subscriptions'
 import { showToast } from './utils'
 
 /**
@@ -101,10 +100,16 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
     run: async () => {
       if (!subscribed) {
         const profile = getProfile()
-        if (profile) await subscribeToChannel(profile, { id, name, thumbnail }, t)
+        if (profile) {
+          const { subscribeToChannel } = await import('./channel-subscriptions')
+          await subscribeToChannel(profile, { id, name, thumbnail }, t)
+        }
       } else if (await confirmUnsubscription(name)) {
         const profile = getProfile()
-        if (profile) await unsubscribeFromChannel(profile, id, t)
+        if (profile) {
+          const { unsubscribeFromChannel } = await import('./channel-subscriptions')
+          await unsubscribeFromChannel(profile, id, t)
+        }
       }
     }
   }, ...items]

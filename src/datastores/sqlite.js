@@ -284,16 +284,20 @@ export class SqliteDatastore {
   async _open() {
     this.dropped = false
     // Check before any schema statement, so a newer version's database stays untouched.
-    const [[[version]], [[tables]]] = await this.driver.execute([
-      ['PRAGMA user_version'], ["SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'meta'"]
+    const [[[version]], schemaEntries] = await this.driver.execute([
+      ['PRAGMA user_version'],
+      ["SELECT type, name FROM sqlite_master WHERE (type = 'table' AND name = 'meta') OR (type = 'index' AND name LIKE 'docs_%')"],
     ])
     if (version > SCHEMA_VERSION) {
       throw new Error(`This library was created by a newer version of OpenTubeX (schema ${version})`)
     }
-    // A new database gets its tables in the import's first transaction.
-    if (tables === 0 || await this._meta('state') !== 'ready') {
-      await this._import(tables === 0)
-    } else if (this.legacy?.fingerprint && this.legacy.hash) {
+    const hasMeta = schemaEntries.some(([type, name]) => type === 'table' && name === 'meta')
+    // A new database gets its tables and indexes in the import's commit transaction.
+    if (!hasMeta || await this._meta('state') !== 'ready') {
+      await this._import(!hasMeta)
+      return
+    }
+    if (this.legacy?.fingerprint && this.legacy.hash) {
       // Detecting changes needs both: the fingerprint to notice them, the hash to find them.
       try {
         await this._applyLegacyChanges()
@@ -303,7 +307,15 @@ export class SqliteDatastore {
         console.error('Unable to apply library changes from an older version', error)
       }
     }
-    await this._execute([...this.indexes].flatMap(field => this._indexStatements(field)), true)
+    const existingIndexes = new Set(
+      schemaEntries.filter(([type]) => type === 'index').map(([, name]) => name)
+    )
+    const missingIndexStatements = [...this.indexes]
+      .filter(field => !existingIndexes.has(`docs_${field}`) || !existingIndexes.has(`docs_${field}_arrays`))
+      .flatMap(field => this._indexStatements(field))
+    if (missingIndexStatements.length > 0) {
+      await this._execute(missingIndexStatements, true)
+    }
   }
 
   async _readLegacy() {

@@ -8,9 +8,6 @@ const AndroidBack = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPl
 export async function initializeAndroidBack({ getPreview, back, shouldIntercept }) {
   if (!AndroidBack) return () => {}
   const handler = createAndroidBackGestureHandler({ getPreview, back })
-  const listener = await AndroidBack.addListener('backGesture', event => {
-    handler.handle(event).catch(error => console.error('Android back navigation failed', error))
-  })
   let lastEnabled = null
   const update = () => {
     const enabled = shouldIntercept()
@@ -22,12 +19,37 @@ export async function initializeAndroidBack({ getPreview, back, shouldIntercept 
     })
   }
   // Replace App's always-enabled callback so Android can preview Home at root.
+  let listener = null
+  let failed = false
+  let appBackDisabled = false
   try {
-    await AndroidBack.setEnabled({ enabled: shouldIntercept() })
-    await App.toggleBackButtonHandler({ enabled: false })
+    await Promise.all([
+      AndroidBack.addListener('backGesture', event => {
+        handler.handle(event).catch(error => console.error('Android back navigation failed', error))
+      }).then(handle => {
+        if (failed) {
+          Promise.resolve(handle.remove()).catch(() => {})
+          return
+        }
+        listener = handle
+      }),
+      AndroidBack.setEnabled({ enabled: shouldIntercept() }),
+      App.toggleBackButtonHandler({ enabled: false }).then(() => {
+        appBackDisabled = true
+        if (failed) {
+          return App.toggleBackButtonHandler({ enabled: true }).catch(() => {})
+        }
+      }),
+    ])
   } catch (error) {
-    listener.remove()
-    await AndroidBack.setEnabled({ enabled: false })
+    failed = true
+    if (listener) {
+      Promise.resolve(listener.remove()).catch(() => {})
+    }
+    await Promise.all([
+      AndroidBack.setEnabled({ enabled: false }).catch(() => {}),
+      appBackDisabled ? App.toggleBackButtonHandler({ enabled: true }).catch(() => {}) : Promise.resolve(),
+    ])
     throw error
   }
   const stop = watchEffect(update)

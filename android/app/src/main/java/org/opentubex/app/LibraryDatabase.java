@@ -84,6 +84,10 @@ final class LibraryDatabase implements AutoCloseable {
         }
     }
 
+    synchronized void warm() {
+        open();
+    }
+
     /** Runs statements in order; with {@code transaction}, all of them commit or none does. */
     synchronized JSONArray execute(JSONArray list, boolean transaction) throws JSONException {
         open();

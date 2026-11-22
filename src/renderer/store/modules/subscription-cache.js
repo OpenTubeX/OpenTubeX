@@ -9,7 +9,7 @@ import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublish
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
 import { feedEntryInScope, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, seenFeedEntryMark, toCachedFeedEntry } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
-import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
+import { updateVideoListAfterProcessing } from '../../helpers/subscriptionFilters'
 import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
 import { mergeSubscriptionCollaborations } from '../../helpers/subscriptionCollaborationChecks'
 

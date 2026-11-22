@@ -662,7 +662,7 @@ import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
+import { computed, defineAsyncComponent, effectScope, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
 import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useTitleBarOverlay } from './composables/useTitleBarOverlay'
@@ -678,7 +678,6 @@ import WindowControls from './components/WindowControls/WindowControls.vue'
 import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
 import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
-import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
@@ -767,13 +766,11 @@ import {
   shouldPauseAndroidPlaybackOnAppStateChange,
 } from './helpers/androidMediaSession'
 import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
-import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { requestSubscriptionFeedRefresh } from './helpers/subscriptionFeedRefreshRequest'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
-import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
 import { startAndroidNotificationSuppressions } from './helpers/androidNotificationSuppressions'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
@@ -800,7 +797,6 @@ import {
 } from './helpers/tutorialState'
 import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce } from './helpers/sync-auto-sync-notice'
 import { dismissNotice, showNoticeOnce } from './helpers/oneTimeNotice'
-import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { isPlayerRoutePath } from './tabs/playerDockDestination'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
@@ -817,9 +813,9 @@ import { initializeHapticFeedback } from './helpers/mobileHaptics'
 import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
 import { collapseSeparators } from './helpers/menuSeparators'
 import { supportsYouTubeAccount } from './helpers/youtube-account-state'
-import { startYouTubeSync } from './helpers/youtube-sync'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
+const SharedYoutubeLinkPrompt = defineAsyncComponent(() => import('./components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
 const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'))
 const FtSearchFilters = defineAsyncComponent(() => import('./components/FtSearchFilters/FtSearchFilters.vue'))
@@ -1824,7 +1820,11 @@ onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
   let tabsReady = Promise.resolve()
   if (supportsYtDlp) {
-    removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
+    removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(() => {
+      import('./helpers/player/ytDlpPlayback')
+        .then(({ invalidateAllYtDlpPlaybackSources }) => invalidateAllYtDlpPlaybackSources())
+        .catch(error => console.error('Failed to invalidate yt-dlp playback sources', error))
+    })
   }
 
   if (isElectron) {
@@ -1845,15 +1845,17 @@ onMounted(async () => {
   }
 
   const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
-    if (isAndroid) await handleRestoredAndroidAppData(store)
-    if (isCapacitor) {
-      await store.dispatch('loadAndroidProxySettings').catch(() => {
-        showToast({
-          message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      })
-    }
+    await Promise.all([
+      isAndroid ? handleRestoredAndroidAppData(store) : Promise.resolve(),
+      isCapacitor
+        ? store.dispatch('loadAndroidProxySettings').catch(() => {
+            showToast({
+              message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+              icon: ['fas', 'circle-exclamation'],
+            })
+          })
+        : Promise.resolve(),
+    ])
     removeInternetConnectivitySettingsListener = store.watch(
       () => store.getters.getInternetConnectivityChecks,
       enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
@@ -1862,8 +1864,16 @@ onMounted(async () => {
     removeAndroidYtDlpSettingsListener = initializeCapacitorYtDlp()
     return tutorialState
   })
+  let capacitorIntegrationsReady = Promise.resolve()
   if (isCapacitor) {
     tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
+    // Start registering Capacitor listeners as soon as tabs are ready, in
+    // parallel with profiles and library loading.
+    capacitorIntegrationsReady = tabsReady.then(() => (
+      enableCapacitorIntegrations().then(cleanup => {
+        removeCapacitorIntegrationListeners = cleanup
+      })
+    ))
     removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
     removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
@@ -1984,7 +1994,8 @@ onMounted(async () => {
       tutorialState.tutorialAudience
     )
     if (hasExistingInstallation !== null || lastUsedVersion !== null) {
-      await setLastUsedVersion(packageDetails.version)
+      // Persist in the background; when already at the current version this only updates localStorage.
+      setLastUsedVersion(packageDetails.version, tutorialState.lastUsedVersion)
     }
 
     const searchHistoryReady = dataScopeReady.then(() => store.dispatch('grabSearchHistoryEntries'))
@@ -2004,11 +2015,9 @@ onMounted(async () => {
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
       removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
         .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
-    } else if (isCapacitor) {
-      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
     }
 
-    await libraryReady
+    await Promise.all([libraryReady, capacitorIntegrationsReady])
     if (process.env.IS_ELECTRON) {
       // The preload holds back other windows' changes until the app listens,
       // then passes on those that the reads above do not contain.
@@ -2018,7 +2027,11 @@ onMounted(async () => {
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
-    if (supportsYouTubeAccount) startYouTubeSync()
+    if (supportsYouTubeAccount) {
+      import('./helpers/youtube-sync')
+        .then(({ startYouTubeSync }) => { if (!appUnmounted) startYouTubeSync() })
+        .catch(error => console.error('Failed to start YouTube sync', error))
+    }
 
     dataReady.value = true
 
@@ -2030,9 +2043,7 @@ onMounted(async () => {
       })
     }
 
-    if (isCapacitor) {
-      await subscriptionAutoRefresh.listenForNativeCancellation()
-    }
+    startSubscriptionAutoRefresh()
 
     await nextTick()
     // Startup prompts teleport into .app, which only exists after dataReady renders.
@@ -2122,12 +2133,12 @@ onMounted(async () => {
   if (process.env.IS_ELECTRON) {
     removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
   }
-  subscriptionAutoRefresh.start()
   rssFeedAutoRefresh.start()
   platformFeedAutoRefresh.start()
 })
 
 onBeforeUnmount(() => {
+  appUnmounted = true
   cancelPageSwipe()
   removeShimmerVisibility?.()
   removeInternetConnectivitySettingsListener?.()
@@ -2155,7 +2166,8 @@ onBeforeUnmount(() => {
     window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
   }
   cancelWatchSideNavTransitionReset()
-  subscriptionAutoRefresh.stop()
+  subscriptionAutoRefresh?.stop()
+  subscriptionAutoRefreshScope?.stop()
   rssFeedAutoRefresh.stop()
   platformFeedAutoRefresh.stop()
   stopTwitchLiveNotifications?.()
@@ -2293,20 +2305,48 @@ function scheduleRetentionCleanup(action, days) {
   }, HISTORY_CLEANUP_INTERVAL)
 }
 
-const subscriptionAutoRefresh = useSubscriptionAutoRefresh({ dataReady, t })
+let appUnmounted = false
+let subscriptionAutoRefresh = null
+let subscriptionAutoRefreshScope = null
+let subscriptionAutoRefreshPromise = null
+function startSubscriptionAutoRefresh() {
+  if (subscriptionAutoRefreshPromise || appUnmounted) return subscriptionAutoRefreshPromise
+  subscriptionAutoRefreshPromise = import('./composables/useSubscriptionAutoRefresh')
+    .then(async ({ useSubscriptionAutoRefresh }) => {
+      if (appUnmounted) return
+      subscriptionAutoRefreshScope = effectScope()
+      subscriptionAutoRefresh = subscriptionAutoRefreshScope.run(() => useSubscriptionAutoRefresh({ dataReady, t }))
+      subscriptionAutoRefresh.start()
+      if (isCapacitor) {
+        await subscriptionAutoRefresh.listenForNativeCancellation()
+      }
+    })
+    .catch(error => console.error('Failed to start subscription auto refresh', error))
+  return subscriptionAutoRefreshPromise
+}
 const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
 const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
 // Starts once the followed channels and the notification settings have loaded
 let stopTwitchLiveNotifications = null
 let stopCommentReplyNotifications = null
+let commentReplyNotificationsLoading = false
 let stopAndroidNotificationSuppressions = null
 watch(dataReady, (ready) => {
   if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
   if (ready && stopAndroidNotificationSuppressions === null) {
     stopAndroidNotificationSuppressions = startAndroidNotificationSuppressions()
   }
-  if (ready && supportsNotificationHistory && stopCommentReplyNotifications === null) {
-    stopCommentReplyNotifications = startCommentReplyNotifications()
+  if (ready && supportsNotificationHistory && stopCommentReplyNotifications === null && !commentReplyNotificationsLoading) {
+    commentReplyNotificationsLoading = true
+    import('./helpers/commentReplyNotifications')
+      .then(({ startCommentReplyNotifications }) => {
+        if (appUnmounted) return
+        stopCommentReplyNotifications = startCommentReplyNotifications()
+      })
+      .catch(error => {
+        commentReplyNotificationsLoading = false
+        console.error('Failed to start comment reply notifications', error)
+      })
   }
 }, { immediate: true })
 
@@ -4756,46 +4796,109 @@ async function enableCapacitorIntegrations() {
     }
     return handleYoutubeLink(target, { doCreateNewTab })
   }
-  const backButtonHandle = Capacitor.getPlatform() === 'android'
-    ? await CapacitorApp.addListener('backButton', handleAndroidBack)
-    : null
-  const removeAndroidBack = Capacitor.getPlatform() === 'android'
-    ? await initializeAndroidBack({
-        back: handleAndroidBack,
-        getPreview: getAndroidBackPreview,
-        shouldIntercept: shouldInterceptAndroidBack
-      }).catch(error => {
-        console.error('Unable to enable predictive back', error)
-        return null
+  const backButtonHandlePromise = Capacitor.getPlatform() === 'android'
+    ? CapacitorApp.addListener('backButton', handleAndroidBack)
+    : Promise.resolve(null)
+  const isAndroidPlatform = Capacitor.getPlatform() === 'android'
+  // Register independent Capacitor plugin listeners concurrently instead of
+  // serializing each bridge round-trip before the first frame renders.
+  let launchUrl = null
+  let retainedLaunchUrl = null
+  let receivedAppState = false
+  let backgroundStateTimeout = null
+  let appStateVersion = 0
+
+  const [
+    backButtonHandle,
+    removeAndroidBack,
+    urlHandle,
+    shortcutHandle,
+    removeReminderActions,
+    removeMediaActions,
+    appStateHandle,
+  ] = await Promise.all([
+    backButtonHandlePromise,
+    isAndroidPlatform
+      ? initializeAndroidBack({
+          back: handleAndroidBack,
+          getPreview: getAndroidBackPreview,
+          shouldIntercept: shouldInterceptAndroidBack
+        }).catch(error => {
+          console.error('Unable to enable predictive back', error)
+          return null
+        })
+      : Promise.resolve(null),
+    // The listener also receives the launch URL, which it retains until the app
+    // subscribes. Open it once, since notification links open a new tab each time.
+    CapacitorApp.getLaunchUrl().then(result => {
+      launchUrl = result?.url
+      retainedLaunchUrl = launchUrl
+      return CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+        if (retainedLaunchUrl && url === retainedLaunchUrl) {
+          retainedLaunchUrl = null
+          return
+        }
+        // A link tapped during the setup below replaces the launch URL it opens at
+        // its end. Sign-in callbacks are not destinations, so they neither replace
+        // the launch URL nor get replaced.
+        if (!isSyncServerOidcCallbackUrl(url) && !isSyncServerOidcCallbackUrl(launchUrl)) launchUrl = null
+        retainedLaunchUrl = null
+        openUrl(url)
       })
-    : null
-  // The listener also receives the launch URL, which it retains until the app
-  // subscribes. Open it once, since notification links open a new tab each time.
-  let launchUrl = (await CapacitorApp.getLaunchUrl())?.url
-  let retainedLaunchUrl = launchUrl
-  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
-    if (retainedLaunchUrl && url === retainedLaunchUrl) {
-      retainedLaunchUrl = null
-      return
-    }
-    // A link tapped during the setup below replaces the launch URL it opens at
-    // its end. Sign-in callbacks are not destinations, so they neither replace
-    // the launch URL nor get replaced.
-    if (!isSyncServerOidcCallbackUrl(url) && !isSyncServerOidcCallbackUrl(launchUrl)) launchUrl = null
-    retainedLaunchUrl = null
-    openUrl(url)
-  })
-  const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
-    if (shortcutId === 'downloads') {
-      await store.dispatch('showSettingsWindow', 'downloads')
-      return
-    }
-    const path = getAppShortcutPath(shortcutId)
-    if (!path) return
-    if (shortcutId === 'refreshSubscriptions') requestSubscriptionFeedRefresh()
-    await store.dispatch('hideSettingsWindow')
-    await openInternalPath({ path })
-  })
+    }),
+    AppShortcuts.addListener('click', async ({ shortcutId }) => {
+      if (shortcutId === 'downloads') {
+        await store.dispatch('showSettingsWindow', 'downloads')
+        return
+      }
+      const path = getAppShortcutPath(shortcutId)
+      if (!path) return
+      if (shortcutId === 'refreshSubscriptions') requestSubscriptionFeedRefresh()
+      await store.dispatch('hideSettingsWindow')
+      await openInternalPath({ path })
+    }),
+    initializeCapacitorLiveReminderActions((videoId) => {
+      handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`, { doCreateNewTab: true })
+    }, showInAppNotification),
+    addAndroidMediaSessionActionListener(({ action, ...details }) => {
+      tabMediaCoordinator.dispatchAction(action, details)
+    }),
+    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isAndroidPlatform) setAndroidAppActive(isActive)
+      receivedAppState = true
+      appStateVersion += 1
+      const version = appStateVersion
+      playbackScreenWake?.setAppActive(isActive)
+      clearTimeout(backgroundStateTimeout)
+      if (isAndroidPlatform && !isActive) {
+        // The launcher briefly stops the PiP Activity while returning to its
+        // existing task. Do not hide or pause playback for that handoff.
+        const checkBackgroundState = async () => {
+          if (await isAndroidLauncherReturnInProgress()) {
+            if (version === appStateVersion) {
+              backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
+            }
+            return
+          }
+          const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
+          if (version !== appStateVersion || state.isActive) return
+          setAndroidAppVisible(false)
+          if (shouldPauseAndroidPlaybackOnAppStateChange(
+            false,
+            store.getters.getContinuePlaybackWhenScreenIsLocked
+          )) tabMediaCoordinator.pauseAll()
+        }
+        backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
+        return
+      }
+      setAndroidAppVisible(isActive)
+      if (shouldPauseAndroidPlaybackOnAppStateChange(
+        isActive,
+        store.getters.getContinuePlaybackWhenScreenIsLocked
+      )) tabMediaCoordinator.pauseAll()
+    }),
+  ])
+
   const stopShortcutUpdates = watch(locale, () => {
     const shortcuts = createAppShortcuts({
       refreshSubscriptions: t('Feed.Refresh Feed', { subscriptionName: t('Subscriptions.Subscriptions') }),
@@ -4806,12 +4909,6 @@ async function enableCapacitorIntegrations() {
     AppShortcuts.set({ shortcuts: supportsYtDlp ? shortcuts : shortcuts.filter(shortcut => shortcut.id !== 'downloads') }).catch(error => console.error('Failed to update app shortcuts', error))
   }, { immediate: true })
   const stopHomeWidgetUpdates = syncHomeWidgets(store, watch)
-  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`, { doCreateNewTab: true })
-  }, showInAppNotification)
-  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
-    tabMediaCoordinator.dispatchAction(action, details)
-  })
   const stopMediaButtonSetting = watch(
     () => store.getters.getIgnoreHeadphoneControls,
     setAndroidMediaButtonsIgnored,
@@ -4819,46 +4916,9 @@ async function enableCapacitorIntegrations() {
   )
   const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
   window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
-  let receivedAppState = false
-  let backgroundStateTimeout = null
-  let appStateVersion = 0
-  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(isActive)
-    receivedAppState = true
-    appStateVersion += 1
-    const version = appStateVersion
-    playbackScreenWake?.setAppActive(isActive)
-    clearTimeout(backgroundStateTimeout)
-    if (Capacitor.getPlatform() === 'android' && !isActive) {
-      // The launcher briefly stops the PiP Activity while returning to its
-      // existing task. Do not hide or pause playback for that handoff.
-      const checkBackgroundState = async () => {
-        if (await isAndroidLauncherReturnInProgress()) {
-          if (version === appStateVersion) {
-            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
-          }
-          return
-        }
-        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
-        if (version !== appStateVersion || state.isActive) return
-        setAndroidAppVisible(false)
-        if (shouldPauseAndroidPlaybackOnAppStateChange(
-          false,
-          store.getters.getContinuePlaybackWhenScreenIsLocked
-        )) tabMediaCoordinator.pauseAll()
-      }
-      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
-      return
-    }
-    setAndroidAppVisible(isActive)
-    if (shouldPauseAndroidPlaybackOnAppStateChange(
-      isActive,
-      store.getters.getContinuePlaybackWhenScreenIsLocked
-    )) tabMediaCoordinator.pauseAll()
-  })
   const appState = await CapacitorApp.getState()
   if (!receivedAppState) {
-    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(appState.isActive)
+    if (isAndroidPlatform) setAndroidAppActive(appState.isActive)
     playbackScreenWake?.setAppActive(appState.isActive)
     setAndroidAppVisible(appState.isActive)
   }

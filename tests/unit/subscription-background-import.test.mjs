@@ -30,6 +30,7 @@ function electronWindow(overrides = {}) {
   window.ftElectron = {
     subscriptionAutoRefresh: {
       isInProgress: async () => ({ inProgress: false, percentage: 0 }),
+      configureBackground: async () => {},
       backgroundCompleted: async () => {},
       setProgress: () => {},
       onBackgroundResultsAvailable: () => remove,
@@ -247,4 +248,27 @@ test('separate Electron renderers serialize background result imports', async t 
   finish()
   await settle()
   assert.equal(requests, 2)
+})
+
+test('lazy initialization with dataReady already true runs startup timers, configs, and result import', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  localStorage.clear()
+  const calls = []
+  hooks.store = createStore({
+    getSubscriptionFeedAutoRefreshInterval: '60000',
+    getEnableUploadNotifications: false,
+    getNotificationMode: 'off',
+    getAllRootSubscriptions: [],
+  })
+  hooks.configureAndroid = async () => { calls.push('configureAndroid') }
+  hooks.configureUploadNotifications = async () => { calls.push('configureUploadNotifications') }
+  hooks.getNextResult = async () => { calls.push('import'); return null }
+
+  start(t, android, { env: { IS_CAPACITOR: 'true' }, dataReady: true })
+  await settle()
+
+  assert.ok(Number(localStorage.getItem(deadlineKey('all', 'videos'))) > 0, 'schedules the automatic-refresh deadline')
+  assert.ok(calls.includes('configureAndroid'), 'configures closed-app subscription refresh')
+  assert.ok(calls.includes('configureUploadNotifications'), 'configures upload notifications')
+  assert.ok(calls.includes('import'), 'reconciles pending background refresh results')
 })

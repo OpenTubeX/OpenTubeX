@@ -6,7 +6,7 @@ import {
   isSubscriptionFeedTypeEnabled
 } from './subscription-channels'
 import { getSubscriptionVideoSortTimestamp } from './subscription-entries'
-import { isVideoHiddenByPreferences } from './subscriptions'
+import { isVideoHiddenByPreferences } from './subscriptionFilters'
 import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot'
 
 /**
