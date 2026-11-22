@@ -950,7 +950,9 @@ export default defineComponent({
     },
     defaultViewingMode: function () {
       const mode = this.$store.getters.getDefaultViewingMode
-      return process.env.IS_CAPACITOR && ['external_player', 'fullscreen', 'fullscreen_always_on', 'fullwindow', 'fullwindow_always_on', 'pip'].includes(mode)
+      // Android offers its rotation fullscreen, which needs no user gesture.
+      const capacitorModes = process.env.IS_IOS ? ['theatre'] : ['theatre', 'fullscreen', 'fullscreen_always_on']
+      return process.env.IS_CAPACITOR && !capacitorModes.includes(mode)
         ? 'default'
         : mode
     },

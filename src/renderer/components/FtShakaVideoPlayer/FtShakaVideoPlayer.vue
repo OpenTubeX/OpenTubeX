@@ -7610,7 +7610,15 @@ function applyPendingPresentationModes() {
     }
 
     if (startInFullscreen && hasLoaded.value && process.env.IS_CAPACITOR) {
-      if (androidFullscreenHostActive.value) startInFullscreen = false
+      if (androidFullscreenHostActive.value || androidRotationFullscreen) {
+        startInFullscreen = false
+      } else if (!process.env.IS_IOS && fullWindowListenerReady && video.value?.readyState) {
+        // Native fullscreen would need a user gesture, which has expired by now.
+        startInFullscreen = false
+        if (mobileAdjustmentsVisible.value && !touchControlsLocked.value) {
+          enterAndroidRotationFullscreen(shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value))
+        }
+      }
     } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
       startInFullscreen = false
       window.ftElectron.requestFullscreen(tabId)
@@ -8103,7 +8111,14 @@ function handleAndroidRotation(landscape) {
   // Resume can deliver portrait before the visibility event reaches the renderer.
   if (!mobileAdjustmentsVisible.value) return
   // Use display rotation by default; physical rotation is an explicit opt-in.
-  if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || audioOnlyMedia.value || props.shortsPlayer) return
+  if (!enterFullscreenOnDisplayRotate.value) return
+  enterAndroidRotationFullscreen(fullscreenRotationIgnoresSystemLock.value)
+}
+
+// Unlike native fullscreen, this needs no user activation, so it also serves
+// the Full Screen default viewing mode.
+function enterAndroidRotationFullscreen(lockLandscape) {
+  if (scrollMiniPlayerActive.value || audioOnlyMedia.value || props.shortsPlayer) return
   if (!video.value?.readyState || pictureInPictureActive.value) return
   if (androidRotationFullscreen || isNativeFullscreenActive() || !androidFullscreenHost) return
   androidFullscreenHost.setAttribute('popover', 'manual')
@@ -8114,7 +8129,7 @@ function handleAndroidRotation(landscape) {
     exitAndroidRotationFullscreen()
     return
   }
-  if (fullscreenRotationIgnoresSystemLock.value) {
+  if (lockLandscape) {
     androidRotationOrientationLocked = true
     const attempt = ++androidRotationLockAttempt
     setLandscapeOrientation(true).catch(() => {
@@ -12453,6 +12468,8 @@ onMounted(async () => {
     androidFullscreenHost?.addEventListener('toggle', handleAndroidRotationPopoverToggle)
     androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
     isFullscreen.value = androidFullscreenHostActive.value
+    // The previous player's fullscreen continues. Once it ends, start inline.
+    if (androidFullscreenHostActive.value) startInFullscreen = false
   }
 
   screenWakeBinding = playbackScreenWake?.bindVideo(videoElement, () =>
