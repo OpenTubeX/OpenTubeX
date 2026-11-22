@@ -109,6 +109,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     },
     defaultInterval: 5,
     addToYouTubeWatchHistory() {},
+    dropQueuedCopyOfCurrentVideo() {},
     switchToAudioInBackground() {},
     $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null }, commit() {} },
   }

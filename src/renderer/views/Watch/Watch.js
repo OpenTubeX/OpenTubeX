@@ -574,6 +574,8 @@ export default defineComponent({
       oneTimeTimestamp: null,
       playNextTimeout: null,
       queuedPlaybackVideoId: null,
+      // The video whose queued copy was last looked for when it started playing
+      queueCheckedVideoId: null,
       playNextCountDownIntervalId: null,
       autoplayCountdown: null,
       waitingForPlaylistContinuation: false,
@@ -5533,6 +5535,7 @@ export default defineComponent({
         return
       }
       this.$store.commit('markWellbeingPlay', Date.now())
+      this.dropQueuedCopyOfCurrentVideo()
       this.addToYouTubeWatchHistory()
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
@@ -6273,6 +6276,19 @@ export default defineComponent({
       } else if (!this.hideRecommendedVideos && this.nextRecommendedVideo) {
         this.tabRouter.push(this.watchRouteForVideo(this.nextRecommendedVideo))
         showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+      }
+    },
+
+    /**
+     * A video started outside the queue, e.g. from a playlist, would otherwise
+     * play again next from the queue, without its playlist.
+     */
+    dropQueuedCopyOfCurrentVideo: function () {
+      if (this.queueCheckedVideoId === this.videoId) return
+      this.queueCheckedVideoId = this.videoId
+      const nextVideo = this.nextQueuedVideo
+      if (nextVideo?.videoId === this.videoId) {
+        this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
       }
     },
 
