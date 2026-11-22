@@ -5,7 +5,7 @@
     ref="tabBarRef"
     class="tabBar"
     data-tutorial="tabs"
-    :class="[`position-${tabBarPosition}`, { vertical }]"
+    :class="[`position-${tabBarPosition}`, { vertical, newTabButtonNextToTabs }]"
     :style="tabSizeStyle"
   >
     <div class="tabsViewport">
@@ -29,84 +29,103 @@
         @mousedown.middle="handleTabListMiddleMouseDown"
         @auxclick="handleTabListAuxClick"
       >
-        <TransitionGroup
-          ref="tabsContentGroup"
-          tag="div"
-          class="tabsContent"
-          :css="false"
-          data-skip-move
-          @before-enter="stripTransition.onBeforeEnter"
-          @enter="stripTransition.onEnter"
-          @enter-cancelled="stripTransition.onEnterCancelled"
-          @leave="stripTransition.onLeave"
+        <div
+          ref="tabsRow"
+          class="tabsRow"
         >
-          <div
-            v-for="(item, index) in stripItems"
-            :key="item.id"
-            class="tabStripItem"
+          <TransitionGroup
+            ref="tabsContentGroup"
+            tag="div"
+            class="tabsContent"
+            :css="false"
+            data-skip-move
+            @before-enter="stripTransition.onBeforeEnter"
+            @enter="stripTransition.onEnter"
+            @enter-cancelled="stripTransition.onEnterCancelled"
+            @leave="stripTransition.onLeave"
           >
-            <SortableTab
-              v-if="item.type === 'tab'"
-              :tab="item.tab"
-              :group="tabGroupById.get(item.tab.groupId) ?? null"
-              :index="index"
-              :vertical="vertical"
-              :tab-bar-position="tabBarPosition"
-              :offset="tabOffsets[item.id] || 0"
-              :is-dragging="draggingTabIds.has(item.id)"
-              :is-settling="isSettling && settlingTabIds.has(item.id)"
-              :suppress-transition="suppressTransitions"
-              :disable-tooltips="draggingTabIds.size > 0"
-              :close-tooltips-signal="closeTooltipsSignal"
-              :show-icon="showTabIcons"
-              :show-preview="showTabPreviews"
-              :is-selected="selectedTabIds.has(item.id)"
-              :close-label="t('Close Tab')"
-              @activate="handleActivate"
-              @close="closeTab"
-              @middle-click="handleMiddleClick"
-            />
-            <TabTooltip
-              v-else
-              :title="item.group.name"
-              :tabs="item.tabs"
-              :show-icon="showTabIcons"
-              is-group
-              :tab-bar-position="tabBarPosition"
-              :disable-tooltips="draggingTabIds.size > 0"
-              :close-tooltips-signal="closeTooltipsSignal"
-              :show-preview="showTabPreviews"
+            <div
+              v-for="(item, index) in stripItems"
+              :key="item.id"
+              class="tabStripItem"
             >
-              <template #anchor="{ bindings }">
-                <button
-                  v-bind="bindings"
-                  class="tabBarReorderItem collapsedTabGroup"
-                  :class="{
-                    active: item.isActive,
-                    unloaded: item.isUnloaded,
-                    bottom: tabBarPosition === 'bottom',
-                    noTransition: suppressTransitions,
-                    vertical
-                  }"
-                  :data-reorder-id="item.id"
-                  :data-group-id="item.group.id"
-                  :style="collapsedGroupStyle(item)"
-                  :aria-label="collapsedGroupLabel(item)"
-                  :aria-expanded="false"
-                  @click="expandTabGroup(item.group.id)"
-                >
-                  <FtIcon
-                    :icon="['fas', item.group.icon || 'layer-group']"
-                    aria-hidden="true"
-                  />
-                  <span class="collapsedTabGroupName">
-                    {{ item.group.name }}
-                  </span>
-                </button>
-              </template>
-            </TabTooltip>
-          </div>
-        </TransitionGroup>
+              <SortableTab
+                v-if="item.type === 'tab'"
+                :tab="item.tab"
+                :group="tabGroupById.get(item.tab.groupId) ?? null"
+                :index="index"
+                :vertical="vertical"
+                :tab-bar-position="tabBarPosition"
+                :offset="tabOffsets[item.id] || 0"
+                :is-dragging="draggingTabIds.has(item.id)"
+                :is-settling="isSettling && settlingTabIds.has(item.id)"
+                :suppress-transition="suppressTransitions"
+                :disable-tooltips="draggingTabIds.size > 0"
+                :close-tooltips-signal="closeTooltipsSignal"
+                :show-icon="showTabIcons"
+                :show-preview="showTabPreviews"
+                :is-selected="selectedTabIds.has(item.id)"
+                :close-label="t('Close Tab')"
+                @activate="handleActivate"
+                @close="closeTab"
+                @middle-click="handleMiddleClick"
+              />
+              <TabTooltip
+                v-else
+                :title="item.group.name"
+                :tabs="item.tabs"
+                :show-icon="showTabIcons"
+                is-group
+                :tab-bar-position="tabBarPosition"
+                :disable-tooltips="draggingTabIds.size > 0"
+                :close-tooltips-signal="closeTooltipsSignal"
+                :show-preview="showTabPreviews"
+              >
+                <template #anchor="{ bindings }">
+                  <button
+                    v-bind="bindings"
+                    class="tabBarReorderItem collapsedTabGroup"
+                    :class="{
+                      active: item.isActive,
+                      unloaded: item.isUnloaded,
+                      bottom: tabBarPosition === 'bottom',
+                      noTransition: suppressTransitions,
+                      vertical
+                    }"
+                    :data-reorder-id="item.id"
+                    :data-group-id="item.group.id"
+                    :style="collapsedGroupStyle(item)"
+                    :aria-label="collapsedGroupLabel(item)"
+                    :aria-expanded="false"
+                    @click="expandTabGroup(item.group.id)"
+                  >
+                    <FtIcon
+                      :icon="['fas', item.group.icon || 'layer-group']"
+                      aria-hidden="true"
+                    />
+                    <span class="collapsedTabGroupName">
+                      {{ item.group.name }}
+                    </span>
+                  </button>
+                </template>
+              </TabTooltip>
+            </div>
+          </TransitionGroup>
+          <button
+            v-if="newTabButtonNextToTabs"
+            ref="inlineNewTabButton"
+            class="newTabButton stripNewTabButton"
+            :aria-label="t('New Tab')"
+            :title="newTabTooltip"
+            @click="createNewTab"
+          >
+            <FtIcon
+              :icon="['fas', 'plus']"
+              class="newTabIcon"
+              aria-hidden="true"
+            />
+          </button>
+        </div>
       </div>
     </div>
     <div class="tabBarActions">
@@ -123,6 +142,7 @@
         />
       </button>
       <button
+        v-if="!newTabButtonNextToTabs"
         class="newTabButton"
         :aria-label="t('New Tab')"
         :title="newTabTooltip"
@@ -275,6 +295,7 @@ const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getT
 const vertical = computed(() => isVerticalTabBarPosition(tabBarPosition.value))
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
+const newTabButtonNextToTabs = computed(() => store.getters.getNewTabButtonNextToTabs)
 const migratingAvatarTabIds = new Set()
 const attemptedAutomaticAvatarRoutes = new Map()
 
@@ -371,6 +392,9 @@ const tabsContentGroup = useTemplateRef('tabsContentGroup')
 /** @type {import('vue').ComputedRef<HTMLElement | null>} */
 const tabsContentRef = computed(() => tabsContentGroup.value?.$el ?? null)
 const dropZoneRef = useTemplateRef('dropZoneRef')
+/** Holds the tabs and the inline new tab button, and spans the scroll range. */
+const tabsRowRef = useTemplateRef('tabsRow')
+const inlineNewTabButtonRef = useTemplateRef('inlineNewTabButton')
 const closeTooltipsSignal = ref(0)
 
 // Tabs that arrive with the first state update, such as a restored session,
@@ -391,6 +415,8 @@ const stripTransition = useTabStripTransition({
   isVertical: () => vertical.value,
   shouldAnimateEnter: () => animateStripEnter,
   getStrip: () => tabsContentRef.value,
+  // The new tab button after the tabs slides along with them.
+  getTrailingItems: () => inlineNewTabButtonRef.value ? [inlineNewTabButtonRef.value] : [],
   getGhostLayer: () => tabGhostLayer.value,
   // Revealing the opened tab before the strip is measured lets the tabs
   // slide to their scrolled positions.
@@ -435,8 +461,10 @@ const suppressTransitions = ref(false)
  * @property {number} pointerStart
  * @property {number} pointerCurrent
  * @property {number} scrollStart
- * @property {number} viewportStart
- * @property {number} viewportEnd
+ * @property {number} viewportStart where the strip's uncovered viewport starts
+ * @property {number} viewportEnd where the strip's uncovered viewport ends
+ * @property {number} coveredStart how far the new tab button covers the
+ * viewport's start, which the scroll position doesn't include
  * @property {Array<{id: string, start: number, size: number}>} rects
  * @property {number} gap
  * @property {number} groupStartIndex
@@ -536,6 +564,7 @@ function handleTabContainerPointerDown(event) {
 
   const containerRect = container.getBoundingClientRect()
   const containerScroll = containerScrollPosition(container)
+  const [coveredStart, coveredEnd] = getStripNewTabButtonCover(container)
 
   // Layout start = position within the scrollable content (so it stays
   // consistent regardless of the current scroll offset).
@@ -578,8 +607,9 @@ function handleTabContainerPointerDown(event) {
     pointerStart: pointerAxisPosition(event),
     pointerCurrent: pointerAxisPosition(event),
     scrollStart: containerScroll,
-    viewportStart: vertical.value ? containerRect.top : containerRect.left,
-    viewportEnd: vertical.value ? containerRect.bottom : containerRect.right,
+    viewportStart: (vertical.value ? containerRect.top : containerRect.left) + coveredStart,
+    viewportEnd: (vertical.value ? containerRect.bottom : containerRect.right) - coveredEnd,
+    coveredStart,
     rects,
     gap,
     groupStartIndex,
@@ -697,6 +727,26 @@ function startDragAutoScroll() {
 }
 
 /**
+ * The new tab button after the tabs sticks to the end of the strip once they
+ * overflow, which hides the tabs scrolling beneath it.
+ * @param {HTMLElement} container
+ * @returns {[number, number]} how far it covers the viewport's physical start
+ * and end along the strip
+ */
+function getStripNewTabButtonCover(container) {
+  if (!inlineNewTabButtonRef.value) return [0, 0]
+
+  // The strip's scroll padding reserves the button's space when revealing a
+  // tab. A tab revealed there may end a fraction of a pixel inside the button
+  // at fractional zoom levels, which still counts as revealed.
+  const style = getComputedStyle(container)
+  const padding = Number.parseFloat(vertical.value ? style.scrollPaddingBlockEnd : style.scrollPaddingInlineEnd) || 0
+  const size = Math.max(0, padding - 1)
+  const rtl = !vertical.value && style.direction === 'rtl'
+  return rtl ? [size, 0] : [0, size]
+}
+
+/**
  * @returns {number} -1 toward the start to 1 toward the end, growing as the
  * pointer nears or passes that edge
  */
@@ -705,12 +755,12 @@ function getDragAutoScrollSpeed() {
   if (!dragSession?.started || !container) return 0
 
   const {
-    pointerCurrent, viewportStart, viewportEnd,
+    pointerCurrent, viewportStart, viewportEnd, coveredStart,
     rects, groupStartIndex, groupEndIndex, draggedSize
   } = dragSession
   const viewportSize = viewportEnd - viewportStart
   const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, viewportSize / 4)
-  const scroll = containerScrollPosition(container)
+  const scroll = containerScrollPosition(container) + coveredStart
   const [listStart, listEnd] = getRectSpan(rects[0], rects[rects.length - 1])
   const [groupStart, groupEnd] = getRectSpan(rects[groupStartIndex], rects[groupEndIndex])
   // Scroll to that end of the list, past the other pin group, if the dragged
@@ -1181,7 +1231,9 @@ function handleMiddleClick(event, tabId) {
  * @param {EventTarget | null} target
  */
 function isEmptyTabListArea(target) {
-  return target != null && (target === dropZoneRef.value || target === tabsContentRef.value)
+  return target != null && (
+    target === dropZoneRef.value || target === tabsRowRef.value || target === tabsContentRef.value
+  )
 }
 
 /**
@@ -1309,8 +1361,8 @@ onMounted(() => {
         revealActiveTab()
       })
 
-      if (tabsContentRef.value) {
-        resizeObserver.observe(tabsContentRef.value)
+      if (tabsRowRef.value) {
+        resizeObserver.observe(tabsRowRef.value)
       }
 
       if (dropZoneRef.value) {
@@ -1396,7 +1448,7 @@ function cancelScrollAnimation() {
 
 /** @param {HTMLElement} container */
 function getHorizontalScrollRange(container) {
-  const maximumScroll = Math.max(0, tabsContentRef.value.scrollWidth - container.clientWidth)
+  const maximumScroll = Math.max(0, tabsRowRef.value.scrollWidth - container.clientWidth)
   const direction = getComputedStyle(container).direction === 'rtl' ? -1 : 1
   return {
     min: Math.min(0, direction * maximumScroll),
@@ -1474,14 +1526,15 @@ watch(tabBarScrollPosition, (newPosition) => {
 
 function clampTabsScroll() {
   const container = dropZoneRef.value
+  const row = tabsRowRef.value
   const content = tabsContentRef.value
-  if (!container || !content) return
+  if (!container || !row || !content) return
 
   if (vertical.value) {
     // Strip items are `display: contents` wrappers without a box of their own.
-    clampOverlayScrollTop(container, content.lastElementChild?.firstElementChild)
+    clampOverlayScrollTop(container, newTabButtonNextToTabs.value ? row : content.lastElementChild?.firstElementChild)
   } else {
-    clampOverlayScrollLeft(container, content)
+    clampOverlayScrollLeft(container, row)
     if (scrollTarget != null) {
       const { min, max } = getHorizontalScrollRange(container)
       const clampedTarget = Math.max(min, Math.min(max, scrollTarget))

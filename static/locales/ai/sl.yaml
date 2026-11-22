@@ -802,6 +802,7 @@ Settings:
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
     Toggle Playback With Tab Icon: Predvajaj in začasno ustavi z ikono zavihka
+    Show New Tab Button Next to Tabs: Prikaži gumb za nov zavihek ob zavihkih
     Theme and Colors: "Tema in barve"
     Font Size: Velikost pisave
     Sections:

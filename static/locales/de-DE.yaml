@@ -978,6 +978,7 @@ Settings:
     Loaded Tab Icons With Failures: '{loaded} Tab-Symbole geladen; {failed} konnten nicht geladen werden'
     Show Tab Previews: Tab-Vorschauen anzeigen
     Toggle Playback With Tab Icon: Mit dem Tab-Symbol abspielen und pausieren
+    Show New Tab Button Next to Tabs: Schaltfläche „Neuer Tab“ neben den Tabs anzeigen
     Use Fixed Tab Width: Im horizontalen Modus feste Tab-Breite verwenden
     Use Custom Title Bar: Eigene Titelleiste verwenden
     Tab Width: Tab-Breite

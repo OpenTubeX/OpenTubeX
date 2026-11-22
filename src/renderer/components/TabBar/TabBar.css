@@ -47,10 +47,17 @@
   padding-block: calc(var(--tab-bar-block-gap) + var(--horizontal-tab-scrollbar-space, 0px) / 2);
 }
 
-.tabsContent {
+/* Fills the strip, so presses on the empty space after the tabs land on it. */
+.tabsRow {
   display: flex;
   inline-size: max-content;
   min-inline-size: 100%;
+  gap: 2px;
+}
+
+.tabsContent {
+  display: flex;
+  flex: 0 0 auto;
   gap: 2px;
 }
 
@@ -67,7 +74,7 @@
 
 /* The scrollbar's track and hit areas reach past the gap, so the tab row
    stacks above them to keep clicks on a tab's edge on the tab. */
-.tabBar:not(.vertical) .tabsContent {
+.tabBar:not(.vertical) .tabsRow {
   position: relative;
   z-index: 1;
 }
@@ -330,10 +337,48 @@
   overscroll-behavior: contain;
 }
 
-.tabBar.vertical .tabsContent {
+.tabBar.vertical :is(.tabsRow, .tabsContent) {
   flex-direction: column;
   inline-size: auto;
   min-inline-size: 0;
+}
+
+/* The new tab button follows the last tab, and stays in view at the strip's
+   end once the tabs overflow. The scroll padding keeps a tab revealed there
+   clear of it. */
+.tabBar.newTabButtonNextToTabs {
+  --strip-new-tab-button-size: 28px;
+  --strip-new-tab-button-space: calc(var(--strip-new-tab-button-size) + 2px);
+}
+
+.tabBar.newTabButtonNextToTabs:not(.vertical) .tabsContainer {
+  scroll-padding-inline-end: var(--strip-new-tab-button-space);
+}
+
+.tabBar.newTabButtonNextToTabs.vertical .tabsContainer {
+  scroll-padding-block-end: var(--strip-new-tab-button-space);
+}
+
+.stripNewTabButton {
+  box-sizing: border-box;
+  position: sticky;
+  inset-inline-end: 0;
+  inline-size: var(--strip-new-tab-button-size);
+
+  /* Covers the tabs scrolling beneath it, with a gap like between tabs. */
+  background-color: var(--side-nav-color);
+  box-shadow: 0 0 0 2px var(--side-nav-color);
+}
+
+.stripNewTabButton:hover {
+  background-color: var(--side-nav-hover-color);
+}
+
+.tabBar.vertical .stripNewTabButton {
+  flex: none;
+  inset-block-end: 0;
+  inline-size: auto;
+  block-size: var(--strip-new-tab-button-size);
 }
 
 /* Keep the divider outside the tab bar's stacking context so it can straddle
@@ -400,7 +445,7 @@
 /* In a maximized window, flicking the pointer to the screen's top edge reaches
    the tabs and buttons, like a browser's tab strip. The tab list starts at the
    window edge so it doesn't clip their hit areas. */
-:global(.app.customTitleBar .tabBar.position-top :is(.tabBarReorderItem, .newTabButton, .tabOrganizerButton)) {
+:global(.app.customTitleBar .tabBar.position-top :is(.tabBarReorderItem, .newTabButton:not(.stripNewTabButton), .tabOrganizerButton)) {
   position: relative;
 }
 

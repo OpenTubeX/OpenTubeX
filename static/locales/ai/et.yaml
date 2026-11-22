@@ -669,6 +669,7 @@ Settings:
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
     Toggle Playback With Tab Icon: Esita ja peata vahekaardi ikooniga
+    Show New Tab Button Next to Tabs: Kuva uue vahekaardi nupp vahekaartide kõrval
     Theme and Colors: "Kujundus ja värvid"
     Font Size: Fondi suurus
     Sections:

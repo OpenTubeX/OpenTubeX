@@ -113,6 +113,24 @@ for (const position of ['top', 'bottom']) {
     await expect(tab).toHaveClass(/active/)
     await tab.locator('.closeButton').click()
     await expect(page.locator(`.tab[data-tab-id="${id}"]`)).toHaveCount(0)
+
+    // The new tab button after the tabs stays in view at the end of the
+    // overflowing strip without covering the tab revealed beside it.
+    const lastTab = page.locator('.tabBar .tab').last()
+    await page.evaluate(id => window.ftElectron.tabs.activate(id), await lastTab.getAttribute('data-tab-id'))
+    await expect(lastTab).toHaveClass(/active/)
+    const hitAt = locator => locator.evaluate(element => {
+      const box = element.getBoundingClientRect()
+      return document.elementFromPoint(box.right - 2, box.y + box.height / 2)?.closest('.tab, .newTabButton') === element
+    })
+    await expect.poll(() => hitAt(lastTab)).toBe(true)
+    const newTabButton = page.locator('.tabsRow > .newTabButton')
+    await expect.poll(() => hitAt(newTabButton)).toBe(true)
+    await page.locator('.tabBar .tab').first().evaluate(element => element.scrollIntoView())
+    await expect.poll(() => hitAt(newTabButton)).toBe(true)
+    const tabCount = await page.locator('.tabBar .tab').count()
+    await newTabButton.click()
+    await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount + 1)
   })
 }
 
@@ -240,7 +258,7 @@ test('horizontal scrollbar clamps shrinking content at top', { tag: '@scale' }, 
   }
   const expectValidEnd = async () => {
     await expect.poll(() => container.evaluate(element => {
-      const content = element.querySelector('.tabsContent')
+      const content = element.querySelector('.tabsRow')
       const maximum = Math.max(0, content.scrollWidth - element.clientWidth)
       const track = element.querySelector('.os-scrollbar-horizontal')
       const handle = track.querySelector('.os-scrollbar-handle').getBoundingClientRect()

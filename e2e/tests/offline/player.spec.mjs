@@ -2423,7 +2423,8 @@ test.describe('pinned player', () => {
     // Half of this window is shorter than the player, so it docks instead.
     await setWindowSize(app, page, { width: 500, height: 420 })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(scrollbarTop).toBe(0)
+    // Then the page scrollbar starts below the header again.
+    await expect.poll(scrollbarTop).toBeCloseTo(navigationBottom, 0)
   })
 })
 

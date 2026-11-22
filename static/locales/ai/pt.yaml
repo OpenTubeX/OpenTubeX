@@ -669,6 +669,7 @@ Settings:
     Engine Limit: Pode adicionar até {count} motores de pesquisa personalizados.
   Theme Settings:
     Toggle Playback With Tab Icon: Reproduzir e pausar com o ícone do separador
+    Show New Tab Button Next to Tabs: Mostrar o botão de novo separador junto aos separadores
     Theme and Colors: "Tema e cores"
     Font Size: Tamanho do tipo de letra
     Sections:

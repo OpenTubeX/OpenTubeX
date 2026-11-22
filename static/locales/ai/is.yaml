@@ -669,6 +669,7 @@ Settings:
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
     Toggle Playback With Tab Icon: Spila og gera hlé með flipatákninu
+    Show New Tab Button Next to Tabs: Sýna hnappinn fyrir nýjan flipa við hlið flipanna
     Theme and Colors: "Þema og litir"
     Font Size: Leturstærð
     Sections:

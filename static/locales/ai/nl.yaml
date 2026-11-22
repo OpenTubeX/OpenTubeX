@@ -674,6 +674,7 @@ Settings:
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
     Toggle Playback With Tab Icon: Afspelen en pauzeren met het tabbladpictogram
+    Show New Tab Button Next to Tabs: Knop Nieuw tabblad naast de tabbladen tonen
     Theme and Colors: "Thema en kleuren"
     Font Size: Lettergrootte
     Sections:

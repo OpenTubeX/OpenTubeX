@@ -669,6 +669,7 @@ Settings:
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
     Toggle Playback With Tab Icon: Spela upp och pausa med flikikonen
+    Show New Tab Button Next to Tabs: Visa knappen för ny flik bredvid flikarna
     Theme and Colors: "Tema och färger"
     Font Size: Teckenstorlek
     Sections:

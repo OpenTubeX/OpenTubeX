@@ -669,6 +669,7 @@ Settings:
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
     Toggle Playback With Tab Icon: Toista ja keskeytä välilehden kuvakkeella
+    Show New Tab Button Next to Tabs: Näytä uuden välilehden painike välilehtien vieressä
     Theme and Colors: "Teema ja värit"
     Font Size: Fonttikoko
     Sections:

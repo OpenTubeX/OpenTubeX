@@ -1265,7 +1265,7 @@ test.describe('tab bar', () => {
       const tabOrder = () => tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
       // Integer scroll sizes can differ from the fractional offset at non-100% UI scales.
       const distanceFromEnd = toEnd => container.evaluate((element, { vertical, toEnd }) => {
-        const content = element.querySelector('.tabsContent')
+        const content = element.querySelector('.tabsRow')
         const maximum = vertical
           ? content.scrollHeight - element.clientHeight
           : content.scrollWidth - element.clientWidth
@@ -3872,6 +3872,7 @@ test.describe('tab organizer', () => {
     await page.evaluate(async () => {
       const store = window.$store
       store.commit('setTabBarPosition', 'left')
+      store.commit('setNewTabButtonNextToTabs', false)
       await window.ftElectron.setZoomFactor(0.95)
       const tab = await window.ftElectron.tabs.create({
         route: '/history',
@@ -4175,7 +4176,7 @@ for (const tabBarPosition of ['top', 'left']) {
         const observer = new MutationObserver(() => {
           if (document.querySelector(`.tabBar [data-tab-id="${id}"]`)) return
           observer.disconnect()
-          resolve(document.querySelector('.tabBar .tabsContent').getAnimations({ subtree: true }).length)
+          resolve(document.querySelector('.tabBar .tabsRow').getAnimations({ subtree: true }).length)
         })
         observer.observe(document.querySelector('.tabBar .tabsContent'), { childList: true, subtree: true })
         window.ftElectron.tabs.close(id)

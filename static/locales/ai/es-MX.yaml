@@ -701,6 +701,7 @@ Settings:
     Engine Limit: Puedes agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
     Toggle Playback With Tab Icon: Reproducir y pausar con el ícono de la pestaña
+    Show New Tab Button Next to Tabs: Mostrar el botón de nueva pestaña junto a las pestañas
     Theme and Colors: "Tema y colores"
     Font Size: Tamaño de la fuente
     Sections:

@@ -669,6 +669,7 @@ Settings:
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
     Toggle Playback With Tab Icon: タブのアイコンで再生・一時停止
+    Show New Tab Button Next to Tabs: 新しいタブボタンをタブの隣に表示
     Theme and Colors: "テーマと色"
     Font Size: フォントサイズ
     Sections:

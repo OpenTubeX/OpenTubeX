@@ -669,6 +669,7 @@ Settings:
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
     Toggle Playback With Tab Icon: 使用分頁圖示播放與暫停
+    Show New Tab Button Next to Tabs: 在分頁旁顯示新分頁按鈕
     Theme and Colors: "主題和顏色"
     Font Size: 字型大小
     Sections:

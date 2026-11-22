@@ -123,9 +123,15 @@ body > .os-scrollbar {
   inset-inline-end: 0;
 }
 
-/* A pinned Watch page player covers the top of the page. */
+/* The header and a pinned Watch page player cover the top of the page, and a
+   bottom tab bar its bottom. */
 body > .os-scrollbar-vertical {
-  inset-block-start: var(--pinned-player-block-end, 0);
+  inset-block: max(var(--page-header-block-end, 0px), var(--pinned-player-block-end, 0px)) calc(var(--page-footer-block-size, 0px) + var(--os-size));
+}
+
+body > .os-scrollbar-vertical.os-scrollbar-cornerless,
+body > .os-scrollbar-horizontal {
+  inset-block-end: var(--page-footer-block-size, 0);
 }
 
 /* A sticky track can only move within its containing block, so this one

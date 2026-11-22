@@ -103,7 +103,7 @@ test('vertical scrollbar clamps shrinking content at right', { tag: '@scale' }, 
   }
   const expectValidEnd = async () => {
     await expect.poll(() => container.evaluate(element => {
-      const content = element.querySelector('.tabsContent')
+      const content = element.querySelector('.tabsRow')
       const maximum = Math.max(0, content.scrollHeight - element.clientHeight)
       const track = element.querySelector('.os-scrollbar-vertical')
       const handle = track.querySelector('.os-scrollbar-handle').getBoundingClientRect()

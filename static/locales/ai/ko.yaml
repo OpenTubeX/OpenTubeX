@@ -769,6 +769,7 @@ Settings:
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
     Toggle Playback With Tab Icon: 탭 아이콘으로 재생 및 일시정지
+    Show New Tab Button Next to Tabs: 새 탭 버튼을 탭 옆에 표시
     Theme and Colors: "테마 및 색상"
     Font Size: 글꼴 크기
     Sections:

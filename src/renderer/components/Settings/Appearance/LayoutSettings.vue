@@ -198,6 +198,15 @@
             :disabled="!store.getters.getTabsEnabled"
             @change="updateUseFixedTabWidth"
           />
+          <FtToggleSwitch
+            v-if="usingElectron"
+            :label="$t('Settings.Theme Settings.Show New Tab Button Next to Tabs')"
+            compact
+            :default-value="store.getters.getNewTabButtonNextToTabs"
+            setting-key="newTabButtonNextToTabs"
+            :disabled="!store.getters.getTabsEnabled"
+            @change="store.dispatch('updateNewTabButtonNextToTabs', $event)"
+          />
         </div>
         <div class="switchColumn">
           <FtToggleSwitch
