@@ -13,6 +13,7 @@ import * as postData from '../../src/subscriptionSeenPosts.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import * as historyHelpers from '../../src/history.js'
 import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
 const seenVideos = { ...seenSync, ...seenData, ...postData }
@@ -185,7 +186,7 @@ async function settingsFixture(history = []) {
   }
   if (history.length > 0) await db.history.insertAsync(history)
   const { Settings, History } = vm.runInNewContext(baseSource.slice(baseSource.indexOf('class Settings {'),
-    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
+    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...seenMarkSettings, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
   return { db, Settings, History }
 }
 
@@ -322,6 +323,7 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
     const context = vm.createContext({
       ...seenVideos,
       ANDROID_PROXY_SETTING_KEYS: [],
+      getDataScope: () => null,
       DBSettingHandlers: {
         async mergeSeenVideos(entries) {
           const saved = await Settings.mergeSeenVideos(entries)

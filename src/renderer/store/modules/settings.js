@@ -7,6 +7,7 @@ import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEna
 import { resolveSystemLocale } from '../../../systemLocale.js'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers, getDataScope } from '../../../datastores/handlers/index'
+import { SCOPED_SEEN_MARK_SETTINGS, seenMarksSettingId, shownSeenMarksSetting } from '../../../subscriptionSeenMarkSettings.js'
 import { hashPassword } from '../../helpers/passwords'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
@@ -814,13 +815,29 @@ const customActions = {
       commit(defaultMutationId(settingId), settings[settingId])
     }
   },
+  // Marks go to the data scope active when they are made: a separate
+  // profile's own, or the shared ones.
   async mergeSubscriptionSeenVideos({ dispatch }, update) {
+    const scope = getDataScope()
     const saved = await DBSettingHandlers.mergeSeenVideos(update)
-    await dispatch('applySubscriptionSeenVideos', saved)
+    if (scope === getDataScope()) await dispatch('applySubscriptionSeenVideos', saved)
   },
   async mergeSubscriptionSeenPosts({ dispatch }, update) {
+    const scope = getDataScope()
     const saved = await DBSettingHandlers.mergeSeenPosts(update)
-    await dispatch('applySubscriptionSeenPosts', saved)
+    if (scope === getDataScope()) await dispatch('applySubscriptionSeenPosts', saved)
+  },
+  /**
+   * Shows the seen marks of the data scope a profile switch shows, which
+   * clears the previous profile's first.
+   * @returns {Promise<boolean>} whether they loaded
+   */
+  async grabSubscriptionSeenMarks({ commit }) {
+    const scope = getDataScope()
+    const values = await Promise.all(SCOPED_SEEN_MARK_SETTINGS.map(setting => DBSettingHandlers.findValue(seenMarksSettingId(setting, scope))))
+    if (scope !== getDataScope()) return true
+    SCOPED_SEEN_MARK_SETTINGS.forEach((setting, index) => commit(defaultMutationId(setting), values[index] ?? '[]'))
+    return true
   },
   applySubscriptionSeenPosts({ commit, state }, saved) {
     const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
@@ -1196,7 +1213,8 @@ const customActions = {
           alreadyTriggeredSideEffects.push(_id)
         }
 
-        if (mutationIds.includes(defaultMutationId(_id))) {
+        // A separate profile shows its own seen marks, see `grabSubscriptionSeenMarks`.
+        if (mutationIds.includes(defaultMutationId(_id)) && shownSeenMarksSetting(_id, getDataScope()) !== null) {
           commit(defaultMutationId(_id), resolvedValue)
         }
       }
@@ -1493,6 +1511,12 @@ const customActions = {
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
       const applySavedSetting = (settingId, value) => {
+        // Other windows can show another profile's seen marks.
+        const seenMarks = shownSeenMarksSetting(settingId, getDataScope())
+        if (seenMarks !== undefined) {
+          if (seenMarks !== null) commit(defaultMutationId(seenMarks), value)
+          return
+        }
         if (settingsWithSideEffects.includes(settingId)) {
           dispatch(defaultSideEffectsTriggerId(settingId), value)
         }

@@ -7,7 +7,7 @@ import { parseSyncDeletionListKey, syncDeletionListKey } from './sync-deletions.
  * `<collection>.<scope key>`, while sync merges them under these names.
  */
 export const SCOPED_SYNC_COLLECTIONS = new Set([
-  'history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts', 'seenRssItems',
+  'history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts',
 ])
 
 // The deletion lists of those collections, by the collection part of their key.
@@ -15,7 +15,7 @@ const SCOPED_DELETION_COLLECTIONS = new Set(['history', 'playlists', 'playlistVi
 
 /**
  * Whether a server keeps every collection of a separate profile. Servers that
- * report 1 lack its saved playlists and seen marks.
+ * report 1 lack its saved playlists and seen videos and posts.
  * @param {Record<string, unknown> | null | undefined} capabilities
  */
 export function supportsSeparateProfiles(capabilities) {

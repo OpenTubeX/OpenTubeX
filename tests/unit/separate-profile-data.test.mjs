@@ -12,6 +12,11 @@ import { isValidSeparateProfileId, profileDatastorePrefix } from '../../src/data
 import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from '../../src/renderer/helpers/unifiedBackup.js'
 import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
+import * as seenPosts from '../../src/subscriptionSeenPosts.js'
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
+import * as secretSettings from '../../src/datastores/secretSettings.js'
+import { getSecretCipher } from '../../src/datastores/secretCipher.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 function section(start, end) {
@@ -46,7 +51,7 @@ function fixture() {
       scoped.delete(scope)
     },
   }
-  const handlers = vm.runInNewContext(`${handlerSource}\n({ scopedHandlers, onScopeDataDeleted, Profiles })`, {
+  const handlers = vm.runInNewContext(`${handlerSource}\n({ scopedHandlers, onScopeDataDeleted, Profiles, Settings })`, {
     db,
     ...seenVideos,
     migrateLegacyHistoryRecord,
@@ -65,6 +70,11 @@ function fixture() {
     DEFAULT_PROFILE_ICON: {},
     MAIN_PROFILE_ID,
     isValidSeparateProfileId,
+    ...seenMarkSettings,
+    ...seenPosts,
+    ...secretSettings,
+    getSecretCipher,
+    migrateStoredSettings,
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
     crypto,
     console,
@@ -319,4 +329,31 @@ test('a profile switch whose read fails shows none of the previous profile’s d
   } finally {
     setDataScope(null)
   }
+})
+
+test('a separate profile keeps its own feed seen marks, pruned by its own history and deleted with it', async () => {
+  const { db, scopedHandlers, Profiles, Settings } = fixture()
+  await db.settings.insertAsync({ _id: 'historyWatchedStatusMigrated', value: true })
+  await db.profiles.insertAsync({ _id: 'separate', separate: true, subscriptions: [] })
+  const marks = setting => db.settings.findOneAsync({ _id: setting }).then(doc => JSON.parse(doc?.value ?? '[]').map(mark => mark.videoId ?? mark.postId))
+  const separateVideos = seenMarkSettings.seenMarksSettingId('subscriptionSeenVideos', 'separate')
+  const separatePosts = seenMarkSettings.seenMarksSettingId('subscriptionSeenPosts', 'separate')
+
+  // Only the separate profile watched this video, so only its mark leaves.
+  await scopedHandlers('separate').history.upsert({ videoId: 'watchedHere', isWatched: true, timeWatched: 1 })
+  await Settings.mergeSeenVideos({ videos: [{ videoId: 'watchedHere' }, { videoId: 'separateVideo' }] }, 'separate')
+  await Settings.mergeSeenVideos({ videos: [{ videoId: 'watchedHere' }] }, null)
+  await Settings.mergeSeenPosts({ posts: [{ postId: 'separatePost' }] }, 'separate')
+  assert.deepEqual(await marks(separateVideos), ['separateVideo'])
+  assert.deepEqual(await marks('subscriptionSeenVideos'), ['watchedHere'])
+  assert.deepEqual(await marks(separatePosts), ['separatePost'])
+  assert.deepEqual(await marks('subscriptionSeenPosts'), [])
+
+  await Profiles.delete('separate')
+  assert.equal(await db.settings.findOneAsync({ _id: separateVideos }), null)
+  assert.equal(await db.settings.findOneAsync({ _id: separatePosts }), null)
+  assert.deepEqual(await marks('subscriptionSeenVideos'), ['watchedHere'])
+  // A mark that waited behind the deletion doesn't bring the profile's data back.
+  await assert.rejects(Settings.mergeSeenVideos({ videos: [{ videoId: 'late' }] }, 'separate'), /gone/)
+  assert.equal(await db.settings.findOneAsync({ _id: separateVideos }), null)
 })

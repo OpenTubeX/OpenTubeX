@@ -1,3 +1,5 @@
+import { isSeparateProfileSeenMarksSetting } from './subscriptionSeenMarkSettings.js'
+
 // Passwords, keys and account tokens. They are encrypted at rest where the
 // system can hold the key, and never leave this device.
 export const SECRET_SETTINGS = new Set([
@@ -133,7 +135,9 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
  * @returns {Record<string, unknown>}
  */
 export function getTransferableSettings(settings) {
-  const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+  // Separate profiles' seen marks stay on this device like the shared ones.
+  const transferable = Object.fromEntries(Object.entries(settings)
+    .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key) && !isSeparateProfileSeenMarksSetting(key)))
   // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
   if (typeof transferable.defaultInvidiousInstance === 'string') {
     transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim()

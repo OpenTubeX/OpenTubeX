@@ -835,7 +835,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
       case 'seenVideos':
-        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store, { updateHistory: dataScope === null })
+        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)
         break
       case 'seenPosts':
         result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
@@ -1039,13 +1039,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     const liveSupported = encrypted && capabilities.live_sync === 1
     commit('setSyncServerLiveSupported', liveSupported)
     if (encrypted) {
-      if (settings.syncServerSyncHistory && capabilities.seen_videos === 1) {
+      // Seen marks sync with the history, which a separate profile keeps on
+      // this device while the server lacks its collections.
+      const syncsHistory = stages.includes('history')
+      if (syncsHistory && capabilities.seen_videos === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenVideos')
       }
-      if (settings.syncServerSyncHistory && capabilities.seen_posts === 1) {
+      if (syncsHistory && capabilities.seen_posts === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenPosts')
       }
-      if (settings.syncServerSyncHistory && capabilities.seen_rss_items === 1) {
+      if (syncsHistory && capabilities.seen_rss_items === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenRssItems')
       }
       if (!settings.syncServerPrivacyKey) {

@@ -9,6 +9,7 @@ import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import * as secretSettings from '../../src/datastores/secretSettings.js'
 import { getSecretCipher } from '../../src/datastores/secretCipher.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
 const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -23,7 +24,7 @@ async function fixture(fail = false) {
   await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(savedMarks) })
   const records = ['unseen', 'seen', 'unrelated'].map(record)
   await db.history.insertAsync(records)
-  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error() {} } }
+  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, ...seenMarkSettings, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error() {} } }
   const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {')) +
     '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }

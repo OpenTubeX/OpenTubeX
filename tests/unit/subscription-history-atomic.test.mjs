@@ -8,6 +8,7 @@ import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import * as secretSettings from '../../src/datastores/secretSettings.js'
 import { getSecretCipher } from '../../src/datastores/secretCipher.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
@@ -21,7 +22,7 @@ async function fixture(marks = []) {
   const errors = []
   const { Settings, History } = vm.runInNewContext(
     source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {')) + '\n({Settings, History})',
-    { db, ...seenVideos, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
+    { db, ...seenVideos, ...seenMarkSettings, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
   )
   return { db, Settings, History, errors }
 }

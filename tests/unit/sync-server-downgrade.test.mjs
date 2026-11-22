@@ -770,7 +770,7 @@ test('a separate profile syncs its library only in its own collections and never
   // The deleted profile's data is deleted once no profile lists it, and the
   // data of the one this version can't read stays.
   assert.deepEqual(f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname).sort(),
-    ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts', 'seenRssItems'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+    ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
 
   // Neither profile lost channels, and the shared baselines stay for the next shared sync.
   assert.deepEqual(Array.from(f.context.rootState.profiles.profileList, profile => Array.from(profile.subscriptions, channel => channel.id)),
@@ -824,7 +824,7 @@ for (const failure of ['deletion', 'later upload']) {
     await f.actions.syncWithSyncServer(f.context)
     assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
     assert.deepEqual(deletes().slice(failed).sort(),
-      ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts', 'seenRssItems'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+      ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
     assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles), ['kept-1'])
   })
 }

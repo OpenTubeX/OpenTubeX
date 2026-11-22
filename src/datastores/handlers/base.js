@@ -2,6 +2,7 @@ import { uid } from '@seald-io/nedb/lib/customUtils.js'
 import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { isValidSeparateProfileId } from '../profileDatastoreNames.js'
+import { SCOPED_SEEN_MARK_SETTINGS, seenMarksSettingId } from '../../subscriptionSeenMarkSettings.js'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
 import { getSecretCipher } from '../secretCipher'
@@ -37,20 +38,33 @@ class Settings {
     return this.pendingSeenStateUpdate
   }
 
-  static mergeSeenVideos(update) {
-    return this.runSeenStateUpdate(() => this._mergeSeenVideos(update))
+  /**
+   * @param {unknown} update
+   * @param {string | null} [scope] The separate profile whose marks these are, or null for the shared ones
+   */
+  static mergeSeenVideos(update, scope = null) {
+    return this.runSeenStateUpdate(async () => {
+      await this._assertSeenMarksScope(scope)
+      return this._mergeSeenVideos(update, scope)
+    })
   }
 
-  static mergeSeenPosts(update) {
+  /**
+   * @param {unknown} update
+   * @param {string | null} [scope] The separate profile whose marks these are, or null for the shared ones
+   */
+  static mergeSeenPosts(update, scope = null) {
     return this.runSeenStateUpdate(async () => {
-      const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenPosts' })
+      await this._assertSeenMarksScope(scope)
+      const _id = seenMarksSettingId('subscriptionSeenPosts', scope)
+      const saved = await db.settings.findOneAsync({ _id })
       const local = parseSubscriptionSeenPosts(saved?.value)
       const seenAt = local.reduce((timestamp, entry) => Math.max(timestamp, entry.seenAt + 1), Date.now())
       const incoming = Array.isArray(update?.posts)
         ? update.posts.map(post => ({ postId: post?.postId, seenAt }))
         : update
       const value = JSON.stringify(mergeSubscriptionSeenPosts(local, incoming))
-      if (value !== saved?.value) await this.upsert('subscriptionSeenPosts', value)
+      if (value !== saved?.value) await this.upsert(_id, value)
       return value
     })
   }
@@ -72,8 +86,22 @@ class Settings {
     })
   }
 
-  static async _mergeSeenVideos(update) {
-    const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
+  /**
+   * Seen marks are saved for the shared data or a separate profile that
+   * exists. Its data is deleted in the seen-state queue too, so a merge that
+   * waited behind the deletion can't open its history again.
+   * @param {string | null} scope
+   */
+  static async _assertSeenMarksScope(scope) {
+    if (scope !== null && !await Profiles.isSeparate(scope)) throw new Error('The separate profile is gone')
+  }
+
+  /** Runs in the seen-state queue, for a scope that {@link _assertSeenMarksScope} accepted */
+  static async _mergeSeenVideos(update, scope = null) {
+    const _id = seenMarksSettingId('subscriptionSeenVideos', scope)
+    // Watched videos leave the list of the profile whose history has them.
+    const history = scope === null ? db.history : scopedHandlers(scope).history.db.history
+    const saved = await db.settings.findOneAsync({ _id })
     const local = parseSubscriptionSeenVideos(saved?.value)
     // Allocate local action timestamps inside the shared queue. Renderers
     // may still have identical stale getters while another write is pending.
@@ -92,13 +120,13 @@ class Settings {
     // when they arrived.
     const candidates = local.length + incoming.length > MAX_SUBSCRIPTION_SEEN_VIDEOS ? [...local, ...incoming] : incoming
     const videoIds = [...new Set(candidates.map(entry => entry.videoId))]
-    await db.history.ensureIndexAsync({ fieldName: 'videoId' })
+    await history.ensureIndexAsync({ fieldName: 'videoId' })
     const historyById = {}
     // NeDB checks each candidate against every ID in $in. Small indexed
     // batches avoid quadratic work when merging thousands of seen marks.
     const batchSize = 250
     for (let index = 0; index < videoIds.length; index += batchSize) {
-      const history = await db.history.findAsync({ videoId: { $in: videoIds.slice(index, index + batchSize) } }, {
+      const records = await history.findAsync({ videoId: { $in: videoIds.slice(index, index + batchSize) } }, {
         videoId: 1,
         isWatched: 1,
         isLive: 1,
@@ -107,10 +135,10 @@ class Settings {
         watchProgress: 1,
         lengthSeconds: 1,
       })
-      for (const entry of history) historyById[entry.videoId] = entry
+      for (const entry of records) historyById[entry.videoId] = entry
     }
     const value = JSON.stringify(mergeSubscriptionSeenVideos(local, incoming, historyById))
-    if (value !== saved?.value) await this.upsert('subscriptionSeenVideos', value)
+    if (value !== saved?.value) await this.upsert(_id, value)
     return value
   }
 
@@ -333,19 +361,19 @@ class History {
       let seenVideos = null
       try {
         if (unseenVideo) {
-          seenVideos = await Settings._mergeSeenVideos({ videos: [unseenVideo], isUnseen: true })
+          seenVideos = await Settings._mergeSeenVideos({ videos: [unseenVideo], isUnseen: true }, this.scope)
         } else {
           const watchedById = new Map(updatedRecords.filter(record => record.isWatched === true)
             .map(record => [record.videoId, record]))
           if (watchedById.size > 0) {
-            const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
+            const saved = await db.settings.findOneAsync({ _id: seenMarksSettingId('subscriptionSeenVideos', this.scope) })
             const videos = parseSubscriptionSeenVideos(saved?.value)
               .filter(mark => watchedById.has(mark.videoId) && mark.unseenAt >= mark.seenAt)
               .map(mark => ({
                 videoId: mark.videoId,
                 isMembersOnly: watchedById.get(mark.videoId).isMembersOnly === true
               }))
-            if (videos.length > 0) seenVideos = await Settings._mergeSeenVideos({ videos })
+            if (videos.length > 0) seenVideos = await Settings._mergeSeenVideos({ videos }, this.scope)
           }
         }
       } catch (error) {
@@ -1880,6 +1908,10 @@ async function deleteScopeData(scope) {
         ])
       }
       await db.dropProfileDatastores(scope)
+      await db.settings.removeAsync(
+        { _id: { $in: SCOPED_SEEN_MARK_SETTINGS.map(setting => seenMarksSettingId(setting, scope)) } },
+        { multi: true }
+      )
     }),
     ...[...scopeDeletionListeners].map(listener => listener(scope)),
   ])
