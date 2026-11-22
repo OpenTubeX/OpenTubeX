@@ -1677,6 +1677,10 @@ Settings:
     Failed to Download: Nije moguće preuzeti popise
     Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Ažurirano: {date}"
   Highlight Changed Settings Label: Promijenjene
+  Subscription Tabs:
+    Title: "Kartice pretplata"
+    Hint: "Promijenite redoslijed kartica na stranici Pretplate. Skrivene kartice zadržavaju svoje mjesto za kada ih ponovno prikažete."
+    Hidden: "(skriveno)"
 Tutorial:
   Skip: Preskoči
   Next: Dalje

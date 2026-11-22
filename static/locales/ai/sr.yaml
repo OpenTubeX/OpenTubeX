@@ -1714,6 +1714,10 @@ Settings:
     Failed to Download: Није могуће преузети листе
     Loaded Status: "Блокирани канали: {blocked} · Означени канали: {warned} · Ажурирано: {date}"
   Highlight Changed Settings Label: Измењена
+  Subscription Tabs:
+    Title: "Картице праћења"
+    Hint: "Промените редослед картица на страници Праћења. Скривене картице задржавају своје место за када их поново прикажете."
+    Hidden: "(скривено)"
 Tutorial:
   Skip: Прескочи
   Next: Даље

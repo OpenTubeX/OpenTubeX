@@ -2027,6 +2027,10 @@ Settings:
     Failed to Download: No s'han pogut baixar les llistes
     Loaded Status: "Canals bloquejats: {blocked} · Canals marcats: {warned} · Actualitzat: {date}"
   Highlight Changed Settings Label: Canviats
+  Subscription Tabs:
+    Title: "Pestanyes de subscripcions"
+    Hint: "Canvieu l'ordre de les pestanyes de la pàgina Subscripcions. Les pestanyes amagades conserven el seu lloc per quan les torneu a mostrar."
+    Hidden: "(amagada)"
 Tutorial:
   Skip: Omet
   Next: Següent

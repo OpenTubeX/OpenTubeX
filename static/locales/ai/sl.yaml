@@ -1995,6 +1995,10 @@ Settings:
     Failed to Download: Seznamov ni bilo mogoče prenesti
     Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Posodobljeno: {date}"
   Highlight Changed Settings Label: Spremenjene
+  Subscription Tabs:
+    Title: "Zavihki naročnin"
+    Hint: "Spremenite vrstni red zavihkov na strani Naročnine. Skriti zavihki ohranijo svoje mesto za takrat, ko jih znova prikažete."
+    Hidden: "(skrito)"
 Tutorial:
   Skip: Preskoči
   Next: Naprej

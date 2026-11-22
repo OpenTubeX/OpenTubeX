@@ -1122,6 +1122,10 @@ Settings:
   Highlight Changed Settings Label: Zmienione
   Performance Impact:
     Label: Wydajność
+  Subscription Tabs:
+    Title: "Karty subskrypcji"
+    Hint: "Zmień kolejność kart na stronie Subskrypcje. Ukryte karty zachowują swoje miejsce na wypadek ponownego ich wyświetlenia."
+    Hidden: "(ukryta)"
 Tutorial:
   Skip: Pomiń
   Next: Dalej

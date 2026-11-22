@@ -1718,6 +1718,10 @@ Settings:
     Failed to Download: Listerne kunne ikke downloades
     Loaded Status: "Blokerede kanaler: {blocked} · Markerede kanaler: {warned} · Opdateret: {date}"
   Highlight Changed Settings Label: Ændrede
+  Subscription Tabs:
+    Title: "Abonnementsfaner"
+    Hint: "Skift rækkefølgen af fanerne på siden Abonnementer. Skjulte faner beholder deres plads, til du viser dem igen."
+    Hidden: "(skjult)"
 Tutorial:
   Skip: Spring over
   Next: Næste

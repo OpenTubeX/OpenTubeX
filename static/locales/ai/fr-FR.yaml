@@ -1662,6 +1662,10 @@ Settings:
     Failed to Download: Impossible de télécharger les listes
     Loaded Status: "Chaînes bloquées : {blocked} · Chaînes signalées : {warned} · Mise à jour : {date}"
   Highlight Changed Settings Label: Modifiés
+  Subscription Tabs:
+    Title: "Onglets des abonnements"
+    Hint: "Modifiez l’ordre des onglets de la page Abonnements. Les onglets masqués conservent leur place pour quand vous les afficherez à nouveau."
+    Hidden: "(masqué)"
 Tutorial:
   Skip: Ignorer
   Next: Suivant

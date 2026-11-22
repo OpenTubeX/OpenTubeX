@@ -1615,6 +1615,10 @@ Settings:
     Failed to Download: Não foi possível baixar as listas
     Loaded Status: "Canais bloqueados: {blocked} · Canais sinalizados: {warned} · Atualizado em: {date}"
   Highlight Changed Settings Label: Alteradas
+  Subscription Tabs:
+    Title: "Guias de inscrições"
+    Hint: "Altere a ordem das guias na página Inscrições. As guias ocultas mantêm seu lugar para quando você mostrá-las novamente."
+    Hidden: "(oculta)"
 Tutorial:
   Skip: Ignorar
   Next: Seguinte

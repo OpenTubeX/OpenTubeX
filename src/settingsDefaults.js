@@ -15,6 +15,7 @@ import { DEFAULT_YT_DLP_PRELOAD_CONCURRENCY, DEFAULT_YT_DLP_PRELOAD_COUNT } from
 import { DEFAULT_HOME_SECTION_LAYOUT } from './renderer/helpers/homeSections.js'
 import { DEFAULT_QUICK_SETTINGS } from './renderer/helpers/quickSettings.js'
 import { DEFAULT_FULLSCREEN_ACTIONS } from './renderer/helpers/fullscreenActions.js'
+import { DEFAULT_SUBSCRIPTION_TABS } from './renderer/helpers/subscriptionTabs.js'
 import { DEFAULT_CONTROL_BAR_BUTTONS } from './renderer/helpers/controlBarButtons.js'
 import { getDefaultPlayerMenuControls } from './renderer/helpers/playerMenuControls.js'
 import { DEFAULT_NAVIGATION_ITEMS } from './navigationItems.js'
@@ -263,6 +264,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideSubscriptionsShorts: false,
     hideSubscriptionsLive: false,
     hideSubscriptionsCommunity: false,
+    subscriptionTabs: [...DEFAULT_SUBSCRIPTION_TABS],
     hideTrendingVideos: false,
     hideUnsubscribeButton: false,
     hideUpcomingPremieres: false,

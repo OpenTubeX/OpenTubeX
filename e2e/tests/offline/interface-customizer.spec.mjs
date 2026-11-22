@@ -1,4 +1,4 @@
-import { test, expect, expectScrollAtRenderedEnd, openInterfaceCustomizer, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goTo, openInterfaceCustomizer, setWindowSize } from '../../helpers/app.mjs'
 
 test.describe('interface customizer', () => {
   test('previews the control bar order and moves removed buttons into the player menu', async ({ page }) => {
@@ -137,6 +137,38 @@ test.describe('interface customizer', () => {
     await page.evaluate(() => window.$store.dispatch('updateDisableAbRepeat', true))
     await expect(anyRow('abRepeat')).toHaveCount(0)
     expect(await getter('getHiddenPlayerMenuControls')).toEqual([])
+  })
+
+  test('reorders the subscription tabs and keeps hidden tabs in place', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'subscription tabs')
+    const previewLabels = () => customizer.locator('[data-preview-subscription-tab] .previewTabLabel').allTextContents()
+    const row = id => customizer.locator(`[data-subscription-tab-id="${id}"]`)
+
+    await page.evaluate(() => window.$store.dispatch('updateHideSubscriptionsShorts', true))
+    await expect(row('shorts')).toContainText('(hidden)')
+    await expect(customizer.locator('[data-preview-subscription-tab="shorts"]')).toHaveCount(0)
+
+    for (let step = 0; step < 4; step++) {
+      await row('new').getByRole('button', { name: /^Move .* up$/ }).click()
+    }
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionTabs))
+      .toEqual(['new', 'videos', 'shorts', 'live', 'community', 'platforms', 'feeds'])
+    await expect.poll(async () => (await previewLabels())[0]).toBe('New')
+    const labels = await previewLabels()
+
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await goTo(page, 'subscriptions')
+    const tabs = page.locator('.subscriptionsHeader .tabs [role="tab"]')
+    await expect.poll(() => tabs.locator('.tabLabel').evaluateAll(elements => elements.map(element => element.dataset.label)))
+      .toEqual(labels)
+    // Arrow keys follow the new order.
+    const selectedIndex = await tabs.evaluateAll(elements => elements.findIndex(element => element.ariaSelected === 'true'))
+    const nextTab = tabs.nth((selectedIndex + 1) % labels.length)
+    await tabs.nth(selectedIndex).focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(nextTab).toBeFocused()
+    await expect(nextTab).toHaveAttribute('aria-selected', 'true')
   })
 
   test('restores each tab editor scroll position when switching tabs', { tag: '@scale' }, async ({ app, page }) => {

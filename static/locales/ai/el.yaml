@@ -1672,6 +1672,10 @@ Settings:
     Failed to Download: Δεν ήταν δυνατή η λήψη των λιστών
     Loaded Status: "Αποκλεισμένα κανάλια: {blocked} · Επισημασμένα κανάλια: {warned} · Ενημέρωση: {date}"
   Highlight Changed Settings Label: Αλλαγμένες
+  Subscription Tabs:
+    Title: "Καρτέλες συνδρομών"
+    Hint: "Αλλάξτε τη σειρά των καρτελών στη σελίδα «Συνδρομές». Οι κρυφές καρτέλες διατηρούν τη θέση τους για όταν τις εμφανίσετε ξανά."
+    Hidden: "(κρυφή)"
 Tutorial:
   Skip: Παράλειψη
   Next: Επόμενο

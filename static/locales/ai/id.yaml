@@ -1671,6 +1671,10 @@ Settings:
     Failed to Download: Tidak dapat mengunduh daftar
     Loaded Status: "Kanal diblokir: {blocked} · Kanal ditandai: {warned} · Diperbarui: {date}"
   Highlight Changed Settings Label: Diubah
+  Subscription Tabs:
+    Title: "Tab langganan"
+    Hint: "Ubah urutan tab di halaman Langganan. Tab yang disembunyikan tetap di tempatnya untuk saat Anda menampilkannya lagi."
+    Hidden: "(disembunyikan)"
 Tutorial:
   Skip: Lewati
   Next: Berikutnya

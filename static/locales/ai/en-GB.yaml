@@ -1648,6 +1648,10 @@ Settings:
     Failed to Download: Couldn't download the lists
     Loaded Status: "Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}"
   Highlight Changed Settings Label: Changed
+  Subscription Tabs:
+    Title: "Subscription tabs"
+    Hint: "Change the order of the tabs on the Subscriptions page. Hidden tabs keep their place for when you show them again."
+    Hidden: "(hidden)"
 Tutorial:
   Skip: Skip
   Next: Next

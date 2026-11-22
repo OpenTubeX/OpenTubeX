@@ -1677,6 +1677,10 @@ Settings:
     Failed to Download: Списъците не можаха да бъдат изтеглени
     Loaded Status: "Блокирани канали: {blocked} · Отбелязани канали: {warned} · Обновено: {date}"
   Highlight Changed Settings Label: Променени
+  Subscription Tabs:
+    Title: "Раздели с абонаменти"
+    Hint: "Променете реда на разделите на страницата „Абонаменти“. Скритите раздели запазват мястото си, когато ги покажете отново."
+    Hidden: "(скрит)"
 Tutorial:
   Skip: Пропускане
   Next: Напред

@@ -169,6 +169,12 @@ export const SETTINGS_SEARCH_SOURCES = {
     subpage: 'customize-interface',
     subpageTab: 'fullscreenActions'
   }, {
+    type: 'subscription-tabs',
+    key: 'Settings.Subscription Tabs',
+    include: new Set(['Title']),
+    subpage: 'customize-interface',
+    subpageTab: 'subscriptionTabs'
+  }, {
     type: 'navigation',
     key: 'Settings.General Settings.Navigation',
     include: new Set(['Navigation', 'Customize Navigation', 'Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Navigation Bar Labels']),

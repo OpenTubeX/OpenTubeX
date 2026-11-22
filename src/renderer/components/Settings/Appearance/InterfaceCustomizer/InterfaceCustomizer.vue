@@ -102,6 +102,7 @@
             >
               <FtQuickSettingsMenu preview />
             </div>
+            <SubscriptionTabsPreview v-else-if="activeTabId === 'subscriptionTabs'" />
             <PlayerPreview
               v-else
               :state="activePreviewMode"
@@ -118,6 +119,21 @@
           <div class="customizerEditor">
             <NavigationCustomizer v-if="activeTabId === 'navigation'" />
             <QuickSettingsCustomizer v-else-if="activeTabId === 'quickSettings'" />
+            <template v-else-if="activeTabId === 'subscriptionTabs'">
+              <p class="customizerHint">
+                {{ t('Settings.Subscription Tabs.Hint') }}
+              </p>
+              <ActionListCustomizer
+                :definitions="subscriptionTabDefinitions"
+                :items="store.getters.getSubscriptionTabs"
+                :default-items="DEFAULT_SUBSCRIPTION_TABS"
+                :update-items="items => store.dispatch('updateSubscriptionTabs', items)"
+                item-id-attribute="data-subscription-tab-id"
+                reorder-only
+                :disabled-items="hiddenSubscriptionTabs"
+                :disabled-label="t('Settings.Subscription Tabs.Hidden')"
+              />
+            </template>
             <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
             <ControlPlacementCustomizer v-else-if="activeTabId === 'controlBar'" />
             <template v-else>
@@ -156,6 +172,7 @@ import FtSyncedSettingIndicator from '../../../FtSyncedSettingIndicator/FtSynced
 import FtTabs from '../../../FtTabs/FtTabs.vue'
 import NavigationCustomizer from '../../../NavigationCustomizer/NavigationCustomizer.vue'
 import QuickSettingsCustomizer from './QuickSettingsCustomizer.vue'
+import SubscriptionTabsPreview from './SubscriptionTabsPreview.vue'
 import NavigationPreview from './NavigationPreview.vue'
 import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
 import ControlPlacementCustomizer from './ControlPlacementCustomizer.vue'
@@ -163,9 +180,12 @@ import PlayerPreview from './PlayerPreview.vue'
 
 import store from '../../../../store/index'
 import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS, getDisabledFullscreenActions } from '../../../../helpers/fullscreenActions'
+import { DEFAULT_SUBSCRIPTION_TABS, SUBSCRIPTION_TAB_DEFINITIONS } from '../../../../helpers/subscriptionTabs'
 import { supportsYtDlp } from '../../../../helpers/ytDlpCapabilities'
+import { supportsPlatformFollows } from '../../../../helpers/platformFeed'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../../helpers/overlayScrollbars'
 import { usePhoneLayout } from '../../../../composables/usePhoneLayout'
+import { useVisibleSubscriptionTabs } from '../../../../composables/useVisibleSubscriptionTabs'
 
 const { t } = useI18n()
 const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
@@ -185,6 +205,15 @@ onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNa
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const disabledFullscreenActions = computed(() => [...getDisabledFullscreenActions(store.getters, supportsYtDlp)])
+
+// Builds without yt-dlp have neither RSS feeds nor channels on other platforms.
+const subscriptionTabDefinitions = SUBSCRIPTION_TAB_DEFINITIONS.filter(tab => (
+  (tab.id !== 'feeds' || supportsYtDlp) && (tab.id !== 'platforms' || supportsPlatformFollows)
+))
+const visibleSubscriptionTabs = useVisibleSubscriptionTabs()
+const hiddenSubscriptionTabs = computed(() => subscriptionTabDefinitions
+  .map(tab => tab.id)
+  .filter(id => !visibleSubscriptionTabs.value.includes(id)))
 
 const tabs = computed(() => {
   const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
@@ -213,6 +242,14 @@ const tabs = computed(() => {
       icon: ['fas', 'sliders-h'],
       label: t('Settings.Quick Settings.Quick Settings'),
       syncKey: 'quickSettings',
+      previewModes: [],
+    },
+    {
+      id: 'subscriptionTabs',
+      icon: ['fas', 'subscriptions'],
+      // The short page name keeps the narrow tab row on one line.
+      label: t('Subscriptions.Subscriptions'),
+      syncKey: 'subscriptionTabs',
       previewModes: [],
     },
     {

@@ -1698,6 +1698,10 @@ Settings:
     Failed to Download: לא ניתן היה להוריד את הרשימות
     Loaded Status: "ערוצים חסומים: {blocked} · ערוצים מסומנים: {warned} · עודכן: {date}"
   Highlight Changed Settings Label: שהשתנו
+  Subscription Tabs:
+    Title: "לשוניות מינויים"
+    Hint: "שינוי סדר הלשוניות בדף המינויים. לשוניות מוסתרות שומרות על מקומן לכשתציגו אותן שוב."
+    Hidden: "(מוסתרת)"
 Tutorial:
   Skip: דילוג
   Next: הבא

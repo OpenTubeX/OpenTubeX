@@ -1698,6 +1698,10 @@ Settings:
     Failed to Download: Kan de lijsten niet downloaden
     Loaded Status: "Geblokkeerde kanalen: {blocked} · Gemarkeerde kanalen: {warned} · Bijgewerkt: {date}"
   Highlight Changed Settings Label: Gewijzigd
+  Subscription Tabs:
+    Title: "Abonnementstabbladen"
+    Hint: "Wijzig de volgorde van de tabbladen op de pagina Abonnementen. Verborgen tabbladen behouden hun plek voor wanneer je ze weer toont."
+    Hidden: "(verborgen)"
 Tutorial:
   Skip: Overslaan
   Next: Volgende

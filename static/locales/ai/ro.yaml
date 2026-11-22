@@ -1685,6 +1685,10 @@ Settings:
     Failed to Download: Listele nu au putut fi descărcate
     Loaded Status: "Canale blocate: {blocked} · Canale semnalate: {warned} · Actualizat: {date}"
   Highlight Changed Settings Label: Modificate
+  Subscription Tabs:
+    Title: "File abonamente"
+    Hint: "Schimbați ordinea filelor de pe pagina Abonamente. Filele ascunse își păstrează locul pentru când le afișați din nou."
+    Hidden: "(ascunsă)"
 Tutorial:
   Skip: Omite
   Next: Înainte

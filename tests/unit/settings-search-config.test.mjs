@@ -230,6 +230,7 @@ test('settings search retains the subpage containing each control', () => {
     ['appearance', 'Add setting', 'customize-interface', 'quickSettings'],
     ['appearance', 'Customize control bar', 'customize-interface', 'controlBar'],
     ['appearance', 'Add action', 'customize-interface', 'fullscreenActions'],
+    ['appearance', 'Subscription tabs', 'customize-interface', 'subscriptionTabs'],
     ['appearance', 'Customize interface', undefined, undefined],
     ['appearance', 'Theme and colors', undefined, undefined],
     ['appearance', 'Light theme', 'theme', undefined],

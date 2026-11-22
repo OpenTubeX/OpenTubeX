@@ -1662,6 +1662,10 @@ Settings:
     Failed to Download: リストをダウンロードできませんでした
     Loaded Status: "ブロック済みチャンネル: {blocked} · 警告対象チャンネル: {warned} · 更新日時: {date}"
   Highlight Changed Settings Label: 変更済み
+  Subscription Tabs:
+    Title: "登録チャンネルのタブ"
+    Hint: "登録チャンネル ページのタブの順序を変更します。非表示のタブは、再表示したときのために位置が保持されます。"
+    Hidden: "（非表示）"
 Tutorial:
   Skip: スキップ
   Next: 次へ

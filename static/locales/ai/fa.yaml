@@ -1726,6 +1726,10 @@ Settings:
     Failed to Download: دانلود فهرست‌ها ممکن نشد
     Loaded Status: "کانال‌های مسدودشده: {blocked} · کانال‌های علامت‌گذاری‌شده: {warned} · به‌روزرسانی: {date}"
   Highlight Changed Settings Label: تغییرکرده
+  Subscription Tabs:
+    Title: "برگه‌های اشتراک"
+    Hint: "ترتیب برگه‌های صفحهٔ اشتراک‌ها را تغییر دهید. برگه‌های پنهان جای خود را برای زمانی که دوباره نمایششان دهید حفظ می‌کنند."
+    Hidden: "(پنهان)"
 Tutorial:
   Skip: ردکردن
   Next: بعدی

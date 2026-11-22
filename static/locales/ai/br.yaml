@@ -1664,6 +1664,10 @@ Settings:
     Failed to Download: N'eus ket bet gallet pellgargañ ar rolloù
     Loaded Status: "Chadennoù stanket: {blocked} · Chadennoù merket: {warned} · Hizivaet: {date}"
   Highlight Changed Settings Label: Kemmet
+  Subscription Tabs:
+    Title: "Ivinelloù ar c'houmanantoù"
+    Hint: "Kemmañ urzh an ivinelloù war ar bajenn Koumanantoù. An ivinelloù kuzhet a vir o lec'h evit pa vint diskouezet en-dro."
+    Hidden: "(kuzhet)"
 Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"

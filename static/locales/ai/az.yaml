@@ -1665,6 +1665,10 @@ Settings:
     Failed to Download: Siyahılar endirilə bilmədi
     Loaded Status: "Bloklanmış kanallar: {blocked} · İşarələnmiş kanallar: {warned} · Yenilənib: {date}"
   Highlight Changed Settings Label: Dəyişdirilmiş
+  Subscription Tabs:
+    Title: "Abunəlik vərəqləri"
+    Hint: "Abunəliklər səhifəsindəki vərəqlərin sırasını dəyişin. Gizlədilmiş vərəqlər yenidən göstərildikdə öz yerlərini saxlayır."
+    Hidden: "(gizli)"
 Tutorial:
   Skip: Ötür
   Next: Növbəti
