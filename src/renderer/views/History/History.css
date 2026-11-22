@@ -47,9 +47,10 @@
   margin-block: calc(-1 * var(--history-switch-padding));
 }
 
+/* The label text stays one inline run, so its words keep their spaces and
+   wrap between words, centered on the switch track. */
 .toggleOptions :deep(.switch-label-text) {
-  display: inline-flex;
-  align-items: center;
+  align-content: center;
   min-block-size: var(--switch-track-height);
 }
 
@@ -246,8 +247,10 @@
   min-inline-size: 0;
 }
 
+/* The switch moves below the filters button rather than breaking its label
+   inside words when the row is too narrow for both. */
 .historySearchOptions > .toggleOptions {
-  flex: 1 1 100px;
+  flex: 1 1 auto;
   min-inline-size: 0;
 }
 

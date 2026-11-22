@@ -91,9 +91,10 @@
   margin-block: calc(-1 * var(--playlist-switch-padding));
 }
 
+/* The label text stays one inline run, so its words keep their spaces and
+   wrap between words, centered on the switch track. */
 .matchingVideosToggle :deep(.switch-label-text) {
-  display: inline-flex;
-  align-items: center;
+  align-content: center;
   min-block-size: var(--switch-track-height);
 }
 
