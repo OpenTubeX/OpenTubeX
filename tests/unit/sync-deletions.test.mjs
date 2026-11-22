@@ -309,3 +309,16 @@ test('a deletion that finishes after a profile switch confirms nothing in either
   assert.deepEqual(decisions.snapshot(), {})
   assert.deepEqual(decisions.snapshot('separate'), {})
 })
+
+test('deleting the active separate profile confirms its deletion although the app switches away from it', async () => {
+  let scope = 'separate'
+  const { store, decisions } = trackedStore({
+    profiles: { activeProfile: 'separate', profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [] }, { _id: 'separate', separate: true, subscriptions: [] }] },
+  }, () => scope)
+  await store.dispatch('removeProfile', () => {
+    // The removal selects All Channels, whose data then loads.
+    store.state.profiles.profileList.splice(1, 1)
+    scope = undefined
+  })
+  assert.deepEqual(decisions.snapshot().separateProfiles.confirmed, ['separate'])
+})

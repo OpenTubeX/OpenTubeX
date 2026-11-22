@@ -8,10 +8,11 @@ import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { SyncServerDataLossError } from '../../src/renderer/helpers/sync-server-errors.js'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import * as profileSnapshots from '../../src/renderer/helpers/profileSyncSnapshot.js'
+import { isValidSeparateProfileId } from '../../src/datastores/profileDatastoreNames.js'
 
 // Run the real sync code, replacing bundler imports with its profile dependencies.
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, MAIN_PROFILE_ID, SyncServerDataLossError, deepCopy: structuredClone, ...profileSync })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, MAIN_PROFILE_ID, SyncServerDataLossError, isValidSeparateProfileId, deepCopy: structuredClone, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')
@@ -272,6 +273,7 @@ const separateMetadata = (id, overrides = {}) => ({ name: id, bgColor: '#123456'
 test('shared profile and subscription sync never upload, delete, or filter a separate profile', async () => {
   const separate = separateProfile('separate', { subscriptions: [{ id: 'separate-channel', name: 'Separate channel' }] })
   const profileList = [{ _id: MAIN_PROFILE_ID, subscriptions: [{ id: 'main-channel', name: 'Main channel' }] }, separate]
+  const unchanged = structuredClone(separate)
   const created = []
   const client = {
     // An older version's group may claim the separate profile's ID.
@@ -293,7 +295,7 @@ test('shared profile and subscription sync never upload, delete, or filter a sep
   assert.deepEqual(created, [])
   // The separate profile's channels are not in the main profile, and stay.
   assert.deepEqual(Array.from(await context.syncSubscriptions(client, store, ['main-channel'])), ['main-channel'])
-  assert.deepEqual(profileList[1], separate)
+  assert.deepEqual(structuredClone(profileList[1]), unchanged)
 })
 
 test('separate profiles sync creates and updates them locally and uploads local ones', async () => {
@@ -310,6 +312,8 @@ test('separate profiles sync creates and updates them locally and uploads local 
     // Entries a device must not create
     separateEntry(MAIN_PROFILE_ID),
     separateEntry('x'.repeat(65)),
+    // 66 bytes in UTF-8, too long for the server's collection names
+    separateEntry('é'.repeat(33)),
   ]
   let uploaded
   const dispatched = []
@@ -337,7 +341,7 @@ test('separate profiles sync creates and updates them locally and uploads local 
   assert.deepEqual(structuredClone(profileList.find(profile => profile._id === 'edited-there').icon), { type: 'emoji', value: '🎵' })
   assert.equal(profileList.find(profile => profile._id === 'edited-here').name, 'Renamed here')
   assert.deepEqual(Array.from(uploaded, entry => entry.id).sort(),
-    [MAIN_PROFILE_ID, 'edited-here', 'edited-there', 'new-here', 'new-there', 'x'.repeat(65)].sort())
+    [MAIN_PROFILE_ID, 'edited-here', 'edited-there', 'new-here', 'new-there', 'x'.repeat(65), 'é'.repeat(33)].sort())
   assert.equal(uploaded.find(entry => entry.id === 'edited-here').name, 'Renamed here')
   assert.deepEqual(Array.from(Object.keys(next)).sort(), ['edited-here', 'edited-there', 'new-here', 'new-there'])
 })
@@ -366,6 +370,36 @@ test('a separate profile edited in another window during sync keeps that edit', 
   assert.equal(saves, 1)
   assert.equal(profileList[1].name, 'Renamed in another window')
   assert.equal(uploaded[0].name, 'Renamed in another window')
+})
+
+test('a retry keeps a separate profile the failed attempt imported and the user deleted meanwhile deleted', async () => {
+  const profileList = [{ _id: MAIN_PROFILE_ID, subscriptions: [] }]
+  let uploaded
+  const client = {
+    getSeparateProfiles: async () => [separateEntry('first'), separateEntry('second')],
+    putSeparateProfiles: async value => { uploaded = value },
+  }
+  let saves = 0
+  const store = {
+    state: { profiles: { profileList } },
+    dispatch: async (action, value) => {
+      if (action === 'removeProfile') assert.fail('The deletion was made here')
+      assert.equal(action, 'saveSyncedProfile')
+      if (++saves === 2) {
+        // The user deletes the imported profile while the second one saves,
+        // which then reports a change in another window.
+        profileList.splice(profileList.findIndex(profile => profile._id === 'first'), 1)
+        return false
+      }
+      profileList.push(value.profile)
+      return true
+    },
+  }
+
+  const next = await context.syncSeparateProfiles(client, store, {})
+  assert.deepEqual(profileList.map(profile => profile._id), [MAIN_PROFILE_ID, 'second'])
+  assert.deepEqual(Array.from(uploaded, entry => entry.id), ['second'])
+  assert.deepEqual(Array.from(Object.keys(next)), ['second'])
 })
 
 test('a separate profile deleted on another device is deleted here only after confirmation', async () => {

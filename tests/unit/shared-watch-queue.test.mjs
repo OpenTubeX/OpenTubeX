@@ -278,14 +278,18 @@ test('a reply for the previous profile’s queue keeps the next profile’s pend
   }
   const store = createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
   const shared = requests.shift()
-  await store.dispatch('loadWatchQueueScope', 'separate')
+  // The switch finishes once the queue shows the next profile's.
+  let loaded = false
+  const loading = store.dispatch('loadWatchQueueScope', 'separate').then(() => { loaded = true })
+  await settle()
   const read = requests.shift()
   addVideo(store, 'added')
   const addition = requests.shift()
   shared.resolve({ revision: 1, items: [], scope: null })
   await settle()
+  assert.equal(loaded, false)
   read.resolve({ revision: 1, items: [], scope: 'separate' })
-  await settle()
+  await loading
   assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['added'])
   addition.resolve({ revision: 2, items: [{ ...addition.request.payload.video, queueItemId: addition.request.payload.queueItemId }], scope: 'separate' })
   await settle()

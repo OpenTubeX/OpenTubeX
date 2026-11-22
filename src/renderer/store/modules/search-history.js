@@ -54,6 +54,7 @@ const actions = {
       commit(replace ? 'setSearchHistoryEntries' : 'mergeLoadedSearchHistoryEntries', results)
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
     await dispatch('removeSearchHistoryOlderThan', rootGetters.getSearchHistoryRetentionDays)
   },

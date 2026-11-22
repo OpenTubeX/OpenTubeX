@@ -27,7 +27,13 @@ export function scopedActions(actions) {
   }]))
 }
 
-/** Resolves once no wrapped action runs, including ones started meanwhile. */
-export async function settleScopedActions() {
+/**
+ * Resolves once no wrapped action runs, including ones started meanwhile.
+ * @template T
+ * @param {() => T} [then] Runs as soon as none runs, before another can start
+ * @returns {Promise<T | undefined>}
+ */
+export async function settleScopedActions(then) {
   while (running.size > 0) await Promise.allSettled([...running])
+  return then?.()
 }

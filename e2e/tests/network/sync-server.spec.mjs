@@ -1059,16 +1059,22 @@ test.describe('OpenTubeX sync server', () => {
       await expect.poll(() => historyIds(other.page)).toEqual([separateVideoId])
       expect(await other.page.evaluate(id => window.$store.getters.getProfileList.find(profile => profile._id === id).subscriptions.map(channel => channel.id), separateId)).toEqual([channelId])
     } finally {
-      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
-      if (token) {
-        await fetch(`${syncServerUrl}/v1/account/delete`, {
-          method: 'DELETE',
-          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
-          body: JSON.stringify({ password })
-        })
+      try {
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+        if (token) {
+          await fetch(`${syncServerUrl}/v1/account/delete`, {
+            method: 'DELETE',
+            headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+            body: JSON.stringify({ password })
+          })
+        }
+      } finally {
+        try {
+          await other?.electronApp.close()
+        } finally {
+          await rm(otherUserData, { recursive: true, force: true })
+        }
       }
-      await other?.electronApp.close()
-      await rm(otherUserData, { recursive: true, force: true })
     }
   })
 

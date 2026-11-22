@@ -6,6 +6,7 @@ import {
 import { runBackgroundJob } from './background-jobs.js'
 import { historyChanges } from './sync-history-changes.js'
 import { DEFAULT_SYSTEM_THEMES, MAIN_PROFILE_ID } from '../../constants'
+import { isValidSeparateProfileId } from '../../datastores/profileDatastoreNames.js'
 import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
 import { applySyncServerUserAgent } from '../../syncServerUserAgent'
@@ -1538,9 +1539,8 @@ function separateProfileIcon(icon) {
 }
 
 function isValidSeparateProfileEntry(entry) {
-  // Profile IDs name the profile's datastores, which limits their length.
-  return typeof entry?.id === 'string' && entry.id.length > 0 && entry.id.length <= 64 &&
-    entry.id !== MAIN_PROFILE_ID && typeof entry.name === 'string' && entry.name.length > 0 &&
+  // Profile IDs name the profile's datastores and collections, which limits their length.
+  return isValidSeparateProfileId(entry?.id) && entry.id !== MAIN_PROFILE_ID && typeof entry.name === 'string' && entry.name.length > 0 &&
     SEPARATE_PROFILE_COLOR.test(entry.bgColor) && SEPARATE_PROFILE_COLOR.test(entry.textColor)
 }
 
@@ -1567,12 +1567,35 @@ function separateProfileMetadata(entry) {
  * too, so a deletion from another device always asks first.
  * @returns {Promise<Record<string, ReturnType<typeof separateProfileMetadata>>>} The baseline
  */
-// A separate profile edited or added in another window while the server
-// responds would be overwritten, so merge again.
+// A separate profile edited, added, or deleted in another window while the
+// server responds would be overwritten or recreated, so merge again, like
+// `syncProfiles`.
 export async function syncSeparateProfiles(client, store, previous = {}, options = {}) {
+  let baseline = previous
+  let retryOptions = options
   for (let attempt = 0; attempt < 3; attempt++) {
-    const result = await mergeSeparateProfiles(client, store, previous, options)
-    if (result !== PROFILES_CHANGED) return result
+    const read = new Set(store.state.profiles.profileList.filter(profile => profile.separate === true).map(profile => profile._id))
+    const result = await mergeSeparateProfiles(client, store, baseline, retryOptions)
+    if (!(PROFILES_CHANGED in result)) return result
+    // Profiles the attempt already saved are in sync, so later edits to them are local
+    const saved = result[PROFILES_CHANGED]
+    baseline = { ...baseline, ...saved }
+    // A profile deleted here meanwhile would look new on the server without a
+    // baseline. Deleting it in the app confirms the deletion, so it needs no review.
+    const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
+    const deletedIds = [...new Set([...read, ...Object.keys(saved)])].filter(id => !remaining.has(id) && Object.hasOwn(baseline, id))
+    if (deletedIds.length === 0) continue
+    const decision = retryOptions.deletions?.separateProfiles
+    retryOptions = {
+      ...retryOptions,
+      deletions: {
+        ...retryOptions.deletions,
+        separateProfiles: {
+          confirmed: [...(decision?.confirmed ?? []), ...deletedIds],
+          kept: (decision?.kept ?? []).filter(id => !deletedIds.includes(id)),
+        },
+      },
+    }
   }
   throw new Error('Profiles changed during sync. Try again.')
 }
@@ -1634,11 +1657,11 @@ async function mergeSeparateProfiles(client, store, previous, options) {
         subscriptions: [],
         separate: true,
       }
-      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) return PROFILES_CHANGED
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) return { [PROFILES_CHANGED]: next }
     } else if (!metadataEquals(separateProfileMetadata(synced), separateProfileMetadata(localEntry))) {
       const savedIcon = icon ?? localProfile.icon
       const profile = { ...localProfile, name: synced.name, bgColor: synced.bgColor, textColor: synced.textColor, ...(savedIcon ? { icon: savedIcon } : {}) }
-      if (!await store.dispatch('saveSyncedProfile', { profile, previous: localProfile })) return PROFILES_CHANGED
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: localProfile })) return { [PROFILES_CHANGED]: next }
     }
     entries.push(synced)
     next[id] = separateProfileMetadata(synced)

@@ -230,15 +230,19 @@ const actions = {
     commit('upsertPlaylistToList', playlist)
   },
 
-  /** Sets the quick bookmark target of the active profile's playlists */
-  async updateActiveQuickBookmarkTarget({ commit, dispatch }, playlistId) {
+  /**
+   * Sets the quick bookmark target of the active profile's playlists, or of
+   * the data scope an earlier change was made in, for undoing it.
+   * @param {string | { playlistId: string, scope: string | null }} payload
+   */
+  async updateActiveQuickBookmarkTarget({ commit, dispatch }, payload) {
     // The selected profile changes before writes in its predecessor's playlists finish.
-    const scope = getDataScope()
+    const { playlistId, scope = getDataScope() } = typeof payload === 'string' ? { playlistId: payload } : payload
     if (scope === null) {
       await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId, { root: true })
     } else {
       saveScopedQuickBookmarkTarget(scope, playlistId)
-      commit('setScopedQuickBookmarkTarget', playlistId)
+      if (scope === getDataScope()) commit('setScopedQuickBookmarkTarget', playlistId)
     }
   },
 
@@ -616,6 +620,7 @@ const actions = {
       commit('setPlaylistsReady', true)
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

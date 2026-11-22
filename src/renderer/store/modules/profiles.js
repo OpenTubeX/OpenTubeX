@@ -165,6 +165,13 @@ function profileSort(a, b) {
   return collator.compare(nameA, nameB)
 }
 
+/**
+ * A data scope whose data failed to load, so loading it again reads it
+ * instead of keeping the empty state.
+ * @type {string | null | undefined}
+ */
+let incompleteDataScope
+
 const actions = {
   async grabAllProfiles({ rootState, commit, state }, defaultName = null) {
     let profiles
@@ -453,18 +460,32 @@ const actions = {
    * to or from a separate profile.
    */
   async loadDataScope({ dispatch, commit, getters, rootGetters }) {
-    if (getters.getActiveDataScope === getDataScope()) return
+    if (getters.getActiveDataScope === getDataScope() && incompleteDataScope !== getDataScope()) return
     // Sync waits until the store shows this profile's data.
     const scope = await trackDataScopeLoad((async () => {
+      let load = false
       // Writes that already started finish in the data they started in, as
-      // their later requests would otherwise reach this profile's data.
-      await settleScopedActions()
-      const scope = getters.getActiveDataScope
-      if (scope === getDataScope()) return scope
-      setDataScope(scope)
+      // their later requests would otherwise reach this profile's data. The
+      // switch follows the last one before another can start.
+      const scope = await settleScopedActions(() => {
+        const scope = getters.getActiveDataScope
+        load = scope !== getDataScope() || scope === incompleteDataScope
+        if (!load) return scope
+        setDataScope(scope)
+        incompleteDataScope = undefined
+        // Until the load replaces them, the previous profile's data must not
+        // show here, or be marked as watched in this profile's history.
+        commit('setHistoryCacheSorted', [])
+        commit('setHistoryCacheById', {})
+        commit('setAllPlaylists', [])
+        commit('setPlaylistsReady', false)
+        commit('setSearchHistoryEntries', [])
+        return scope
+      })
+      if (!load) return scope
       const hadRecommendations = rootGetters.getRecommendationEpoch !== null
       commit('clearRecommendationState')
-      await Promise.all([
+      const loaded = await Promise.all([
         dispatch('grabHistory'),
         dispatch('grabAllPlaylists'),
         dispatch('grabSearchHistoryEntries', { replace: true }),
@@ -472,6 +493,8 @@ const actions = {
         rootGetters.getEnableWatchStats ? dispatch('grabWatchStats') : null,
         hadRecommendations ? dispatch('loadRecommendations') : null,
       ])
+      // A failed read leaves that data empty, and the next load reads it again.
+      if (scope === getDataScope() && loaded.includes(false)) incompleteDataScope = scope
       return scope
     })())
     if (scope === getDataScope()) await dispatch('applySyncServerDataScope')

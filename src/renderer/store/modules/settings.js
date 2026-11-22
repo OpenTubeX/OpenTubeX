@@ -1007,15 +1007,25 @@ const customActions = {
 
   /**
    * Saves the reset of a data scope's watch statistics: the shared reset, or a
-   * separate profile's. A null reset deletes a separate profile's.
-   * @param {{ scope: string | null, reset: object | null }} payload
+   * separate profile's. A null reset deletes a separate profile's. With
+   * `pendingId`, it only acknowledges that pending reset, because another
+   * window can save a newer one meanwhile.
+   * @param {{ scope: string | null, reset: object | null, pendingId?: string }} payload
    */
-  updateWatchStatsReset: ({ commit, dispatch }, { scope, reset }) => {
-    if (scope === null) return dispatch('updateSyncServerWatchStatsReset', reset)
+  updateWatchStatsReset: ({ commit, dispatch }, { scope, reset, pendingId }) => {
+    const replaces = saved => pendingId === undefined || (saved?.pending === true && saved.id === pendingId)
+    if (scope === null) {
+      return runLockedSettingUpdate('syncServerWatchStatsResetUpdate', async () => {
+        if (replaces(await DBSettingHandlers.findValue('syncServerWatchStatsReset'))) {
+          await dispatch('updateSyncServerWatchStatsReset', reset)
+        }
+      })
+    }
     // Windows that show other separate profiles save theirs meanwhile.
     return runLockedSettingUpdate('syncServerScopedWatchStatsResets', async () => {
       const saved = await DBSettingHandlers.findValue('syncServerScopedWatchStatsResets')
       const resets = { ...(saved && typeof saved === 'object' ? saved : {}) }
+      if (!replaces(resets[scope])) return
       if (reset) resets[scope] = reset
       else delete resets[scope]
       await DBSettingHandlers.upsert('syncServerScopedWatchStatsResets', resets)

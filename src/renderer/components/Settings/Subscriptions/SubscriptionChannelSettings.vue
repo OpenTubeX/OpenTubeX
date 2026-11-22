@@ -231,6 +231,12 @@ let hasFailedChannelSettingsUpdate = false
 let channelSettingsUpdateQueue = Promise.resolve()
 const latestUpdateByChannel = new Map()
 
+// Pending saves keep the profile they were made in, while this one shows its own settings.
+watch(() => store.getters.getSubscriptionRootProfile._id, () => {
+  optimisticChannelSettings.value = new Map()
+  latestUpdateByChannel.clear()
+})
+
 watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()

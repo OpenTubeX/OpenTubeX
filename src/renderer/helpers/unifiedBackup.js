@@ -1,6 +1,7 @@
 import { MAIN_PROFILE_ID } from '../../constants.js'
 import { PLAYLIST_PREFERENCE_TIMESTAMP_KEYS, stampPlaylistPreferenceEdits } from './playlist-preferences-sync.js'
 import { Unzip, UnzipInflate, zipSync, strToU8, strFromU8 } from 'fflate'
+import { isValidSeparateProfileId } from '../../datastores/profileDatastoreNames.js'
 
 export const BACKUP_SECTIONS = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
 /** The sections a separate profile keeps for itself */
@@ -33,9 +34,9 @@ export function mergeImportedProfile(current, imported) {
  * @returns {T}
  */
 export function withProfileSeparation(profile, current = null) {
-  // Longer IDs can't name its datastores, see `profileDatastorePrefix`.
+  // Other IDs can't name its datastores, see `isValidSeparateProfileId`.
   // A new profile without an ID gets a short one.
-  const separate = profile._id !== MAIN_PROFILE_ID && !(profile._id?.length > 64) &&
+  const separate = profile._id !== MAIN_PROFILE_ID && (profile._id === undefined || isValidSeparateProfileId(profile._id)) &&
     (current ? current.separate === true : profile.separate === true)
   const { separate: _separate, ...rest } = profile
   return /** @type {T} */ (separate ? { ...rest, separate: true } : rest)
@@ -243,7 +244,7 @@ export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
   const sections = {
-    profiles: record => object(record) && typeof record._id === 'string' && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
+    profiles: record => object(record) && typeof record._id === 'string' && record._id !== '' && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
     history: record => object(record) && typeof record.videoId === 'string' && (record.timeWatched === undefined || (Number.isFinite(record.timeWatched) && record.timeWatched >= 0)) && (record.watchProgress === undefined || (Number.isFinite(record.watchProgress) && record.watchProgress >= 0)),
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',

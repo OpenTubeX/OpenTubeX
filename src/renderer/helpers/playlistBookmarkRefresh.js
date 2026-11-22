@@ -78,6 +78,8 @@ export async function refreshPlaylistBookmarks() {
   const { signal } = controller
 
   try {
+    // The bookmarks of the profile it started in, which a switch replaces
+    const scope = store.getters.getActiveDataScope
     const bookmarks = store.getters.getPlaylistBookmarks.filter(isValidPlaylistBookmark)
     let failed = 0
     const results = await mapConcurrently(bookmarks, REFRESH_CONCURRENCY, async ({ playlist }) => {
@@ -96,7 +98,7 @@ export async function refreshPlaylistBookmarks() {
     // A cancelled run saves nothing, so its late responses cannot overwrite
     // the results of a newer refresh. The write checks again, as it can wait
     // for another window's bookmark edit.
-    if (signal.aborted) return null
+    if (signal.aborted || store.getters.getActiveDataScope !== scope) return null
 
     // Applying the results to the saved list keeps bookmarks that were saved
     // or removed in the meantime.

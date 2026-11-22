@@ -575,6 +575,11 @@ watch(isSubscribed, (subscribed) => {
   }
 })
 
+// Pending saves keep the profile they were made in, while this one shows its own settings.
+watch(rootProfileId, () => {
+  optimisticChannelSettings.value = null
+})
+
 onBeforeUnmount(() => {
   clearTimeout(justToggledTimeoutId)
   profileListObservationGeneration += 1

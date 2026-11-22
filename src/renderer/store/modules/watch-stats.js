@@ -55,6 +55,7 @@ const actions = {
       commit('setHistoricalWatchTimePlaybackSpeed', historicalAdjustment?.defaultSpeed ?? null)
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

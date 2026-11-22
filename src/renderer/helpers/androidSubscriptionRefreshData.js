@@ -117,8 +117,9 @@ export function createSubscriptionRefreshStartController() {
  * }} input
  */
 export function createAndroidSubscriptionRefreshConfiguration(input) {
-  const automaticChannels = Object.fromEntries(FEED_TYPES.map(feedType => [feedType,
-    (input.profiles?.[0]?.subscriptions ?? []).filter(channel => {
+  /** Channels whose automatic downloads need a feed type, from a profile that holds every channel of its own */
+  const automaticChannelsOf = root => Object.fromEntries(FEED_TYPES.map(feedType => [feedType,
+    (root?.subscriptions ?? []).filter(channel => {
       const rawRule = input.automaticDownloadRules?.[channel.id]
       if (!rawRule || feedType === 'posts') return false
       const rule = normalizeAutomaticDownloadRule(rawRule)
@@ -127,6 +128,7 @@ export function createAndroidSubscriptionRefreshConfiguration(input) {
       return rule.includeVideos || rule.includeLivestreams
     }).map(channel => channel.id)
   ]))
+  const automaticChannels = automaticChannelsOf(input.profiles?.[0])
   const hiddenFeedTypes = new Set(input.hiddenFeedTypes)
   const intervals = Object.fromEntries(FEED_TYPES.map(feedType => {
     const interval = Number(input.intervals[feedType])
@@ -144,6 +146,8 @@ export function createAndroidSubscriptionRefreshConfiguration(input) {
   const profiles = Array.isArray(input.profiles)
     ? input.profiles.flatMap(profile => {
         if (typeof profile?._id !== 'string' || !Array.isArray(profile.subscriptions)) return []
+        // A separate profile holds its channels itself, the others share the all channels profile's.
+        const automatic = profile.separate === true ? automaticChannelsOf(profile) : automaticChannels
 
         const channels = Object.fromEntries(FEED_TYPES.map(feedType => {
           const channelIds = profile.subscriptions
@@ -153,7 +157,7 @@ export function createAndroidSubscriptionRefreshConfiguration(input) {
             (!Array.isArray(channel.feedTypes) || channel.feedTypes.includes(feedType))
             ))
             .map(channel => channel.id)
-          return [feedType, [...new Set([...channelIds, ...automaticChannels[feedType]])]]
+          return [feedType, [...new Set([...channelIds, ...automatic[feedType]])]]
         }))
         return [{ id: profile._id, channels }]
       })

@@ -1,6 +1,7 @@
 import { uid } from '@seald-io/nedb/lib/customUtils.js'
 import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
+import { isValidSeparateProfileId } from '../profileDatastoreNames.js'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
 import { getSecretCipher } from '../secretCipher'
@@ -1069,8 +1070,14 @@ class Profiles {
   }
 
   static async delete(id) {
-    const separate = await this.isSeparate(id)
+    const profile = await db.profiles.findOneAsync({ _id: id }, { separate: 1 })
     const removed = await db.profiles.removeAsync({ _id: id })
+    // The profile stays in the app until this succeeds. Deleting it again
+    // after its data failed to delete no longer finds it, so it deletes the
+    // data such a profile could have left.
+    const separate = profile === null
+      ? id !== MAIN_PROFILE_ID && isValidSeparateProfileId(id)
+      : profile.separate === true
     if (separate) await deleteScopeData(id)
     return removed
   }
@@ -1861,7 +1868,8 @@ function onScopeDataDeleted(listener) {
 async function deleteScopeData(scope) {
   profileScopes.delete(scope)
   await Promise.all([
-    db.dropProfileDatastores(scope),
+    // Seen-state updates queue history writes, which would reopen the datastore.
+    Settings.runSeenStateUpdate(() => db.dropProfileDatastores(scope)),
     ...[...scopeDeletionListeners].map(listener => listener(scope)),
   ])
 }

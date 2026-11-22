@@ -8,7 +8,7 @@ import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistory
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
-import { profileDatastorePrefix } from '../../src/datastores/profileDatastoreNames.js'
+import { isValidSeparateProfileId, profileDatastorePrefix } from '../../src/datastores/profileDatastoreNames.js'
 import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from '../../src/renderer/helpers/unifiedBackup.js'
 import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
@@ -58,6 +58,7 @@ function fixture() {
     loadProfilesDatastore: async () => {},
     DEFAULT_PROFILE_ICON: {},
     MAIN_PROFILE_ID,
+    isValidSeparateProfileId,
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
     crypto,
     console,
@@ -110,6 +111,15 @@ test('deleting a separate profile deletes its data, and deleting another profile
   assert.deepEqual(deletedQueues, ['separate'])
   assert.notEqual(scopedHandlers('separate'), before, 'a later profile with this ID starts empty')
   assert.deepEqual(await db.profiles.findAsync({}), [])
+
+  // The app keeps a profile whose data failed to delete, so deleting it again finishes the job.
+  await Profiles.create({ _id: 'retry', name: 'Retry', separate: true, subscriptions: [] })
+  const drop = db.dropProfileDatastores
+  db.dropProfileDatastores = async () => { throw new Error('busy') }
+  await assert.rejects(Profiles.delete('retry'), /busy/)
+  db.dropProfileDatastores = drop
+  await Profiles.delete('retry')
+  assert.deepEqual(dropped, ['separate', 'retry'])
 })
 
 test('a profile keeps whether its data is separate, and the main profile never is', async () => {
@@ -135,7 +145,7 @@ test('separate profiles get valid, distinct datastore names on every platform', 
   assert.equal(new Set(names).size, names.length)
   // The Android and iOS database plugins only accept these characters.
   for (const name of names) assert.match(`${name}-search-history`, /^[a-z0-9-]+$/)
-  for (const invalid of ['', 'x'.repeat(65), null]) assert.throws(() => profileDatastorePrefix(invalid), TypeError)
+  for (const invalid of ['', 'x'.repeat(65), 'é'.repeat(33), null]) assert.throws(() => profileDatastorePrefix(invalid), TypeError)
 })
 
 test('a write that finishes after a switch to another profile leaves that profile’s shown data alone', async () => {

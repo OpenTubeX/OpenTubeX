@@ -64,6 +64,7 @@ import { liveReminder } from '../../helpers/liveReminders'
 import { syncNotificationDismissals } from '../../helpers/sync-notification-dismissals'
 import { getSettingsNotificationTarget, markOverNotificationsRead, notificationHistory, recordNotification } from '../../helpers/notificationHistory'
 import { MAIN_PROFILE_ID } from '../../../constants'
+import { isValidSeparateProfileId } from '../../../datastores/profileDatastoreNames.js'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
 import {
   SYNC_DELETION_MARKS_COLLECTION,
@@ -338,7 +339,7 @@ function syncedWatchStatsOf(snapshot, rootGetters) {
 /** Keeps the baselines of the separate profiles that still exist */
 function withoutRemovedScopes(snapshot, profiles) {
   if (!snapshot.scopes) return snapshot
-  const keys = new Set(profiles.filter(profile => profile.separate === true && profile._id.length <= 64)
+  const keys = new Set(profiles.filter(profile => profile.separate === true && isValidSeparateProfileId(profile._id))
     .map(profile => syncScopeKey(profile._id)))
   return { ...snapshot, scopes: Object.fromEntries(Object.entries(snapshot.scopes).filter(([key]) => keys.has(key))) }
 }
@@ -795,13 +796,21 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     for (const profile of rootState.profiles.profileList) remaining.add(profile._id)
     // The uploaded list also keeps the profiles this version can't read.
     for (const entry of listed) remaining.add(entry?.id)
-    for (const id of new Set(ids)) {
-      if (typeof id !== 'string' || id.length === 0 || id.length > 64 || remaining.has(id)) continue
-      for (const collection of SCOPED_SYNC_COLLECTIONS) {
-        assertSyncStillActive()
-        // A failure fails the sync before its baseline is saved, so the next
-        // sync finds the removed profile again and retries.
-        await networkClient.deleteEncryptedSyncCollection(scopedSyncCollection(collection, syncScopeKey(id)))
+    const removed = [...new Set(ids)].filter(id => isValidSeparateProfileId(id) && !remaining.has(id))
+    for (const [index, id] of removed.entries()) {
+      try {
+        for (const collection of SCOPED_SYNC_COLLECTIONS) {
+          assertSyncStillActive()
+          await networkClient.deleteEncryptedSyncCollection(scopedSyncCollection(collection, syncScopeKey(id)))
+        }
+      } catch (error) {
+        // The baseline keeps the profiles whose data is left, so the next
+        // sync finds them again and retries. Deleting again is harmless.
+        next.separateProfiles = {
+          ...next.separateProfiles,
+          ...Object.fromEntries(removed.slice(index).map(id => [id, previous.separateProfiles?.[id] ?? null])),
+        }
+        throw error
       }
     }
   }
@@ -1373,8 +1382,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
-    syncDeletions.release(Object.fromEntries(commonDeletions))
-    if (dataScope !== null) syncDeletions.release(Object.fromEntries(scopeDeletions), dataScope)
+    // Lists this sync didn't merge keep their decisions for a sync that does.
+    const merged = ([key]) => {
+      const stage = DELETION_MARK_STAGES[key.split(':', 1)[0]] ?? key.split(':', 1)[0]
+      return appliedCollections.has(stage) && !skippedCollections.has(stage)
+    }
+    syncDeletions.release(Object.fromEntries(commonDeletions.filter(merged)))
+    if (dataScope !== null) syncDeletions.release(Object.fromEntries(scopeDeletions.filter(merged)), dataScope)
     commit('setSyncServerPendingDeletion', null)
     markDataLossNotificationsRead()
     if (progressStarted) commit('setSyncServerLastResult', result)
@@ -1802,16 +1816,17 @@ const actions = {
     return withSyncLock(deleteSession)
   },
 
-  replaceSyncWatchStatsDevice({ commit, dispatch, rootGetters, rootState }, { source, overlap, localDays, currentDays, replacedDevices, localReset }) {
+  replaceSyncWatchStatsDevice({ commit, dispatch, rootGetters, rootState }, { source, overlap, localDays, currentDays, replacedDevices, localReset, previewScope }) {
     const settings = { ...rootState.settings }
     if (!settings.syncServerEnabled || !settings.syncServerToken ||
         settings.syncServerPrivacyMode !== 'enhanced' || !settings.syncServerPrivacyKey ||
         !settings.syncServerSyncWatchStats) {
       throw new Error('Connect to the sync server first')
     }
-    // The statistics of the data the store shows, with their own reset.
+    // The statistics of the data the store shows, with their own reset. A
+    // preview of another profile's statistics would replace this one's.
     const dataScope = shownDataScope(rootGetters)
-    if (dataScope === undefined) throw new SyncServerCancelledError()
+    if (dataScope === undefined || (previewScope !== undefined && previewScope !== dataScope)) throw new SyncServerCancelledError()
     const scopeKey = syncScopeKey(dataScope)
     const collection = scopedSyncCollection('watchStats', scopeKey)
     const savedReset = savedWatchStatsReset(settings, dataScope)
@@ -1862,7 +1877,8 @@ const actions = {
           await dispatch('updateSyncServerSnapshot', JSON.stringify(writeScopedSnapshot(
             snapshot, { ...readScopedSnapshot(snapshot, scopeKey), watchStats: next }, scopeKey
           )), { root: true })
-          commit('setSyncedWatchStats', next)
+          // The profile switched to meanwhile shows its own statistics.
+          if (shownDataScope(rootGetters) === dataScope) commit('setSyncedWatchStats', next)
           return true
         }
       } finally {
