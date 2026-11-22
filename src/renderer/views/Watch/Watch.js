@@ -6336,8 +6336,8 @@ export default defineComponent({
       } else {
         // The playlist continues after the queue, from where the queue interrupted it.
         if (this.watchingPlaylist) {
-          const route = this.$refs.watchVideoPlaylist?.getNextVideoRoute() ?? null
-          this.playlistAfterQueue = route && { route, queuedVideoId: nextVideo.videoId }
+          const playlistRoute = this.$refs.watchVideoPlaylist?.getNextVideoRoute() ?? null
+          this.playlistAfterQueue = playlistRoute && { route: playlistRoute, queuedVideoId: nextVideo.videoId }
         } else if (this.playlistAfterQueue) {
           this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedVideoId: nextVideo.videoId }
         }
