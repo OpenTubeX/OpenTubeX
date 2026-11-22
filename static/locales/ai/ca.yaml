@@ -2895,6 +2895,10 @@ Comments:
   Show original: Mostra l'original
   Translating comment, please wait: S'està traduint el comentari; espereu
   Comment translation failed: Ha fallat la traducció del comentari
+  Timed: "Per moment"
+  Timed comments appear as the video plays: "Els comentaris sobre el que estàs mirant apareixen aquí mentre es reprodueix el vídeo. El següent apareixerà a les {time}."
+  Next timed comment at: "Següent comentari a les {time}"
+  This video has no timed comments: "Aquest vídeo no té comentaris temporitzats"
 Up Next: A continuació
 Description:
   Title: Descripció

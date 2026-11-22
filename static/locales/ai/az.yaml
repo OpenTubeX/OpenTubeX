@@ -2369,6 +2369,10 @@ Comments:
   Show original: Orijinalı göstər
   Translating comment, please wait: Şərh tərcümə edilir, zəhmət olmasa gözləyin
   Comment translation failed: Şərhin tərcüməsi alınmadı
+  Timed: "Zamana görə"
+  Timed comments appear as the video plays: "Baxdığınız hissə haqqında şərhlər video oynadıqca burada görünür. Növbəti şərh {time} anında görünəcək."
+  Next timed comment at: "Növbəti şərh: {time}"
+  This video has no timed comments: "Bu videonun zamana bağlı şərhləri yoxdur"
 Description:
   Title: Təsvir
   Copy Description: Açıqlamanı köçür

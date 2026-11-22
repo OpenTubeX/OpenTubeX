@@ -31,7 +31,7 @@ function createComments() {
   const requests = []
   const notices = []
   const state = {
-    sortNewest: { value: false },
+    sortOrder: { value: 'top' },
     commentData: { value: [] },
     nextPageToken: { value: null },
     moreCommentsLoadFailed: { value: false },
@@ -43,6 +43,8 @@ function createComments() {
   }
   const context = {
     ...state,
+    sortNewest: { get value() { return state.sortOrder.value === 'newest' } },
+    isTimedSort: { get value() { return state.sortOrder.value === 'timed' } },
     props: { id: 'video', offline: false, isPostComments: false },
     canPerformInitialCommentLoading: { get value() { return state.commentData.value.length === 0 && !state.isLoading.value } },
     backendPreference: { value: 'invidious' },

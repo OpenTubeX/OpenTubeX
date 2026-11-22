@@ -2409,6 +2409,10 @@ Comments:
   Show original: عرض الأصلي
   Translating comment, please wait: ترجمة التعليق، يرجى الانتظار
   Comment translation failed: فشلت ترجمة التعليق
+  Timed: "حسب التوقيت"
+  Timed comments appear as the video plays: "تظهر هنا التعليقات حول ما تشاهده أثناء تشغيل الفيديو. سيظهر التعليق التالي عند {time}."
+  Next timed comment at: "التعليق التالي عند {time}"
+  This video has no timed comments: "لا توجد تعليقات موقّتة لهذا الفيديو"
 Description:
   Title: الوصف
   Copy Description: نسخ الوصف

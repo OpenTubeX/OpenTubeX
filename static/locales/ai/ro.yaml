@@ -2411,6 +2411,10 @@ Comments:
   Show original: Afișează originalul
   Translating comment, please wait: Se traduce comentariul, așteptați
   Comment translation failed: Traducerea comentariului a eșuat
+  Timed: "Sincronizate"
+  Timed comments appear as the video plays: "Comentariile despre ce urmărești apar aici în timpul redării videoclipului. Următorul apare la {time}."
+  Next timed comment at: "Următorul comentariu la {time}"
+  This video has no timed comments: "Acest videoclip nu are comentarii sincronizate"
 Description:
   Title: Descriere
   Copy Description: Copiază descrierea

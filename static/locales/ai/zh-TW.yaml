@@ -2359,6 +2359,10 @@ Comments:
   Show original: 顯示原文
   Translating comment, please wait: 正在翻譯留言，請稍候
   Comment translation failed: 留言翻譯失敗
+  Timed: "依時間"
+  Timed comments appear as the video plays: "影片播放時，與你正在觀看的內容相關的留言會顯示在這裡。下一則留言將在 {time} 顯示。"
+  Next timed comment at: "下一則留言：{time}"
+  This video has no timed comments: "這部影片沒有定時留言"
 Description:
   Title: 說明
   Copy Description: 複製說明

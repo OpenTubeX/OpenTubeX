@@ -1611,6 +1611,10 @@ Comments:
   Show original: Pokaż oryginał
   Translating comment, please wait: Tłumaczenie komentarza, zaczekaj
   Comment translation failed: Nie udało się przetłumaczyć komentarza
+  Timed: "Według czasu"
+  Timed comments appear as the video plays: "Komentarze o tym, co oglądasz, pojawiają się tutaj podczas odtwarzania filmu. Następny pojawi się w {time}."
+  Next timed comment at: "Następny komentarz w {time}"
+  This video has no timed comments: "Ten film nie ma komentarzy powiązanych z czasem"
 Description:
   Title: Opis
   Copy Description: Kopiuj opis

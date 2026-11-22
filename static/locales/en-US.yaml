@@ -3396,6 +3396,10 @@ Comments:
   Reload Comments: Reload Comments
   Top comments: Top comments
   Newest first: Newest First
+  Timed: Timed
+  Timed comments appear as the video plays: "Comments about what you're watching appear here as the video plays. The next one appears at {time}."
+  Next timed comment at: "Next comment at {time}"
+  This video has no timed comments: "This video has no timed comments"
   Reply Count: 1 reply | {replyCount} replies
   View {replyCount} replies: View 1 reply | View {replyCount} replies
   Hide {replyCount} replies: Hide 1 reply | Hide {replyCount} replies

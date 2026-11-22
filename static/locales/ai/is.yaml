@@ -2372,6 +2372,10 @@ Comments:
   Show original: Sýna frumtexta
   Translating comment, please wait: Þýði athugasemd, bíddu aðeins
   Comment translation failed: Ekki tókst að þýða athugasemd
+  Timed: "Tímasett"
+  Timed comments appear as the video plays: "Athugasemdir um það sem þú ert að horfa á birtast hér á meðan myndskeiðið spilast. Sú næsta birtist á {time}."
+  Next timed comment at: "Næsta athugasemd á {time}"
+  This video has no timed comments: "Þetta myndskeið er ekki með neinar tímasettar athugasemdir"
 Description:
   Title: Lýsing
   Copy Description: Afrita lýsingu

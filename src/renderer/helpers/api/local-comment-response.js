@@ -75,3 +75,76 @@ export async function normalizeCommentFetchResponse(response, onResponse = undef
   headers.delete('content-length')
   return new Response(JSON.stringify(data), { status: response.status, statusText: response.statusText, headers })
 }
+
+/**
+ * Only the mobile apps offer the Timed sort, so web sessions have no sort
+ * button to follow and the comment section's continuation has to be built
+ * (GetCommentsSectionParams with sort 2).
+ * @param {string} videoId
+ */
+export function getTimedCommentsContinuation(videoId) {
+  const field = (tag, bytes) => [tag, bytes.length, ...bytes]
+  const text = value => Array.from(new TextEncoder().encode(value))
+  const options = [...field(0x22, text(videoId)), 0x30, 2, 0x78, 2]
+  const params = [...field(0x22, options), ...field(0x42, text('comments-section'))]
+  const bytes = [...field(0x12, field(0x12, text(videoId))), 0x18, 6, ...field(0x32, params)]
+  return encodeURIComponent(btoa(String.fromCharCode(...bytes)))
+}
+
+/**
+ * Pairs the comments of a Timed response with the video time they belong to.
+ * The timed list also holds welcome and end messages, which have no comment.
+ * @param {object} data
+ * @returns {{ seconds: number, comment: object, toolbarState: object | undefined }[]}
+ */
+export function getTimedCommentPayloads(data) {
+  const payloads = (data?.frameworkUpdates?.entityBatchUpdate?.mutations ?? []).map(mutation => mutation.payload ?? {})
+  const comments = new Map()
+  const toolbarStates = new Map()
+  for (const payload of payloads) {
+    if (payload.commentEntityPayload) comments.set(payload.commentEntityPayload.properties?.commentId, payload.commentEntityPayload)
+    if (payload.engagementToolbarStateEntityPayload) toolbarStates.set(payload.engagementToolbarStateEntityPayload.key, payload.engagementToolbarStateEntityPayload)
+  }
+
+  return payloads
+    .flatMap(payload => payload.timedMarkersListSyncEntity?.timedListData?.sections ?? [])
+    .flatMap(section => section.timedSyncDataList ?? [])
+    .filter(item => comments.has(item.syncItemId))
+    .map(item => {
+      const comment = comments.get(item.syncItemId)
+      for (const run of comment.properties.content?.commandRuns ?? []) {
+        addWebCommandMetadata(run.onTap?.innertubeCommand)
+      }
+      return {
+        seconds: Number(item.videoTimeMs) / 1000,
+        comment,
+        toolbarState: toolbarStates.get(comment.properties.toolbarStateKey)
+      }
+    })
+    .sort((first, second) => first.seconds - second.seconds)
+}
+
+/**
+ * Android comment links lack the web metadata that youtubei.js reads link
+ * types and URLs from. External links keep their URL in the urlEndpoint.
+ * @param {object | undefined} command
+ */
+function addWebCommandMetadata(command) {
+  if (!command || command.commandMetadata) return
+
+  let webCommandMetadata
+  if (command.watchEndpoint) {
+    const { videoId, startTimeSeconds } = command.watchEndpoint
+    webCommandMetadata = {
+      url: `/watch?v=${videoId}${startTimeSeconds ? `&t=${startTimeSeconds}s` : ''}`,
+      webPageType: 'WEB_PAGE_TYPE_WATCH'
+    }
+  } else if (command.browseEndpoint) {
+    const { browseId, canonicalBaseUrl } = command.browseEndpoint
+    webCommandMetadata = {
+      url: canonicalBaseUrl ?? `/channel/${browseId}`,
+      webPageType: browseId?.startsWith('UC') ? 'WEB_PAGE_TYPE_CHANNEL' : 'WEB_PAGE_TYPE_BROWSE'
+    }
+  }
+  if (webCommandMetadata) command.commandMetadata = { webCommandMetadata }
+}

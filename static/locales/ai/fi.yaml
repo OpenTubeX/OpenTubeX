@@ -2365,6 +2365,10 @@ Comments:
   Show original: Näytä alkuperäinen
   Translating comment, please wait: Kommenttia käännetään, odota
   Comment translation failed: Kommentin kääntäminen epäonnistui
+  Timed: "Ajoitetut"
+  Timed comments appear as the video plays: "Kommentit siitä, mitä katsot, näkyvät tässä videon toiston aikana. Seuraava näkyy kohdassa {time}."
+  Next timed comment at: "Seuraava kommentti kohdassa {time}"
+  This video has no timed comments: "Tällä videolla ei ole ajoitettuja kommentteja"
 Description:
   Title: Kuvaus
   Copy Description: Kopioi kuvaus

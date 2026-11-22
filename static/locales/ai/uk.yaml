@@ -2409,6 +2409,10 @@ Comments:
   Show original: Показати оригінал
   Translating comment, please wait: Перекладаємо коментар, зачекайте
   Comment translation failed: Не вдалося перекласти коментар
+  Timed: "За часом"
+  Timed comments appear as the video plays: "Коментарі про те, що ви дивитеся, з'являються тут під час відтворення відео. Наступний з'явиться о {time}."
+  Next timed comment at: "Наступний коментар о {time}"
+  This video has no timed comments: "Це відео не має коментарів із прив'язкою до часу"
 Description:
   Title: Опис
   Copy Description: Скопіювати опис

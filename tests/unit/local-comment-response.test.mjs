@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Parser, YTNodes } from 'youtubei.js'
-import { FLAT_REPLY_RENDERING_PRIORITY, normalizeCommentFetchResponse, normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
+import { FLAT_REPLY_RENDERING_PRIORITY, getTimedCommentPayloads, normalizeCommentFetchResponse, normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
 
 const comment = id => ({ commentViewModel: { commentId: id, commentKey: id } })
 const continuation = token => ({
@@ -141,4 +141,72 @@ test('preserves unavailable comment images without a source', () => {
   assert.equal(parsed.unavailableText, 'Image unavailable')
   assert.equal(parseLocalCommentImageAttachment(null), undefined)
   assert.equal(parseLocalCommentImageAttachment(undefined), undefined)
+})
+
+test('pairs Timed comments with their video time and skips the welcome and end messages', () => {
+  const timedComment = (id, likes) => ({
+    commentEntityPayload: {
+      key: `${id}-key`,
+      properties: {
+        commentId: id,
+        content: {
+          content: `Comment ${id} 0:42 @mention`,
+          commandRuns: [
+            { startIndex: id.length + 9, length: 4, onTap: { innertubeCommand: { watchEndpoint: { videoId: 'video', startTimeSeconds: 42 } } } },
+            { startIndex: id.length + 14, length: 8, onTap: { innertubeCommand: { browseEndpoint: { browseId: 'UCmention', canonicalBaseUrl: '/@mention' } } } }
+          ]
+        },
+        publishedTime: '1 day ago',
+        toolbarStateKey: `${id}-toolbar`
+      },
+      author: { displayName: '@author', channelId: 'UCtest' },
+      toolbar: { likeCountNotliked: likes, replyCount: '2' }
+    }
+  })
+  const data = {
+    frameworkUpdates: {
+      entityBatchUpdate: {
+        mutations: [
+          { payload: timedComment('second', '5') },
+          { payload: timedComment('first', '1K') },
+          { payload: { engagementToolbarStateEntityPayload: { key: 'first-toolbar', heartState: 'TOOLBAR_HEART_STATE_HEARTED' } } },
+          {
+            payload: {
+              timedMarkersListSyncEntity: {
+                timedListData: {
+                  sections: [{
+                    timedSyncDataList: [
+                      { videoTimeMs: '0', syncItemId: 'timed_comments_welcome_sync_id' },
+                      { videoTimeMs: '42000', syncItemId: 'second' },
+                      { videoTimeMs: '1500', syncItemId: 'first' },
+                      { videoTimeMs: '90000', syncItemId: 'timed_comments_end_sync_id' }
+                    ]
+                  }]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  const payloads = getTimedCommentPayloads(data)
+  assert.deepEqual(payloads.map(({ seconds, comment }) => [seconds, comment.properties.commentId]), [[1.5, 'first'], [42, 'second']])
+
+  const view = new YTNodes.CommentView({ commentId: 'first' })
+  view.applyMutations(payloads[0].comment, payloads[0].toolbarState)
+  assert.equal(view.content.toString(), 'Comment first 0:42 @mention')
+  // Android links come without web metadata, which link parsing needs.
+  const [, timestamp, , mention] = view.content.runs
+  assert.equal(timestamp.text, '0:42')
+  assert.equal(timestamp.endpoint.metadata.page_type, 'WEB_PAGE_TYPE_WATCH')
+  assert.equal(timestamp.endpoint.metadata.url, '/watch?v=video&t=42s')
+  assert.equal(mention.text, '@mention')
+  assert.equal(mention.endpoint.metadata.page_type, 'WEB_PAGE_TYPE_CHANNEL')
+  assert.equal(view.author.id, 'UCtest')
+  assert.equal(view.like_count, '1K')
+  assert.equal(view.reply_count, '2')
+  assert.equal(view.is_hearted, true)
+  assert.equal(getTimedCommentPayloads({}).length, 0)
 })

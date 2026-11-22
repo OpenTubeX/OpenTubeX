@@ -1366,6 +1366,7 @@
             :comments-disabled="commentsDisabled"
             :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"
+            :current-time="isLive || isUpcoming ? null : liveChatCurrentTime"
             @loaded="commentsLoaded = $event"
             @preview-comments="commentPreviews = $event"
             @close-comments="closeFullscreenComments"

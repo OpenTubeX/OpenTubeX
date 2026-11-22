@@ -2367,6 +2367,10 @@ Comments:
   Show original: "Diskouez an orin"
   Translating comment, please wait: "O treiñ an evezhiadenn, gortozit"
   Comment translation failed: "C'hwitet eo treiñ an evezhiadenn"
+  Timed: "Hervez an amzer"
+  Timed comments appear as the video plays: "An evezhiadennoù diwar-benn ar pezh a sellit outañ a zeu war wel amañ e-pad ma vez lennet ar video. An hini da-heul a zeuio war wel da {time}."
+  Next timed comment at: "Evezhiadenn da-heul da {time}"
+  This video has no timed comments: "N'eus evezhiadenn amzeriet ebet evit ar video-mañ"
 Description:
   Title: Deskrivadur
   Copy Description: "Eilañ an deskrivadur"

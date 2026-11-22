@@ -2357,6 +2357,10 @@ Comments:
   Show original: Özgün metni göster
   Translating comment, please wait: Yorum çevriliyor, lütfen bekleyin
   Comment translation failed: Yorum çevrilemedi
+  Timed: "Zamanlı"
+  Timed comments appear as the video plays: "İzlediğiniz bölümle ilgili yorumlar, video oynatılırken burada görünür. Sonraki yorum {time} anında görünecek."
+  Next timed comment at: "Sonraki yorum: {time}"
+  This video has no timed comments: "Bu videoda zamanlı yorum yok"
 Description:
   Title: Açıklama
   Copy Description: Açıklamayı Kopyala

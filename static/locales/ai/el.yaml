@@ -2372,6 +2372,10 @@ Comments:
   Show original: Εμφάνιση πρωτοτύπου
   Translating comment, please wait: Το σχόλιο μεταφράζεται, περιμένετε
   Comment translation failed: Η μετάφραση του σχολίου απέτυχε
+  Timed: "Χρονισμένα"
+  Timed comments appear as the video plays: "Τα σχόλια για αυτό που παρακολουθείτε εμφανίζονται εδώ καθώς παίζει το βίντεο. Το επόμενο θα εμφανιστεί στο {time}."
+  Next timed comment at: "Επόμενο σχόλιο στο {time}"
+  This video has no timed comments: "Αυτό το βίντεο δεν έχει χρονισμένα σχόλια"
 Description:
   Title: Περιγραφή
   Copy Description: Αντιγραφή περιγραφής

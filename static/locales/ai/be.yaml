@@ -2460,6 +2460,10 @@ Comments:
   Show original: Паказаць арыгінал
   Translating comment, please wait: Пераклад каментарыя, пачакайце
   Comment translation failed: Не ўдалося перакласці каментарый
+  Timed: "Па часе"
+  Timed comments appear as the video plays: "Каментарыі пра тое, што вы глядзіце, з'яўляюцца тут падчас прайгравання відэа. Наступны з'явіцца ў {time}."
+  Next timed comment at: "Наступны каментарый у {time}"
+  This video has no timed comments: "У гэтага відэа няма каментарыяў з прывязкай да часу"
 Description:
   Title: Апісанне
   Copy Description: Скапіяваць апісанне

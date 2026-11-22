@@ -2778,6 +2778,10 @@ Comments:
   Show original: Rodyti originalą
   Translating comment, please wait: Komentaras verčiamas, palaukite
   Comment translation failed: Nepavyko išversti komentaro
+  Timed: "Pagal laiką"
+  Timed comments appear as the video plays: "Komentarai apie tai, ką žiūrite, rodomi čia, kol leidžiamas vaizdo įrašas. Kitas pasirodys {time}."
+  Next timed comment at: "Kitas komentaras {time}"
+  This video has no timed comments: "Šis vaizdo įrašas neturi komentarų su laiko žymomis"
 Description:
   Title: Aprašymas
   Expand Description: Rodyti daugiau

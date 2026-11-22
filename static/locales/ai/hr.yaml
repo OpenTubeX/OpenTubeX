@@ -2394,6 +2394,10 @@ Comments:
   Show original: Prikaži izvornik
   Translating comment, please wait: Pričekajte, komentar se prevodi
   Comment translation failed: Prevođenje komentara nije uspjelo
+  Timed: "Vremenski"
+  Timed comments appear as the video plays: "Komentari o onome što gledate pojavljuju se ovdje dok se videozapis reproducira. Sljedeći se pojavljuje u {time}."
+  Next timed comment at: "Sljedeći komentar u {time}"
+  This video has no timed comments: "Ovaj videozapis nema vremenski označenih komentara"
 Description:
   Title: Opis
   Copy Description: Kopiraj opis

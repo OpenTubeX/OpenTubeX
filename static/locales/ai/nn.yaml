@@ -2666,6 +2666,10 @@ Comments:
   Show original: Vis originalen
   Translating comment, please wait: Omset kommentaren, vent litt
   Comment translation failed: Klarte ikkje å omsetje kommentaren
+  Timed: "Tidsbestemt"
+  Timed comments appear as the video plays: "Kommentarar om det du ser på, blir viste her medan videoen spelar. Den neste blir vist ved {time}."
+  Next timed comment at: "Neste kommentar ved {time}"
+  This video has no timed comments: "Denne videoen har ingen tidsbestemte kommentarar"
 Description:
   Title: Skildring
   Expand Description: Vis meir

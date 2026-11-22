@@ -2324,6 +2324,10 @@ Comments:
   Show original: Показать оригинал
   Translating comment, please wait: Перевод комментария…
   Comment translation failed: Не удалось перевести комментарий
+  Timed: "По времени"
+  Timed comments appear as the video plays: "Комментарии о том, что вы смотрите, появляются здесь во время воспроизведения видео. Следующий появится в {time}."
+  Next timed comment at: "Следующий комментарий в {time}"
+  This video has no timed comments: "У этого видео нет комментариев с привязкой ко времени"
 Description:
   Title: Описание
   Copy Description: Копировать описание

@@ -2357,6 +2357,10 @@ Comments:
   Show original: Visa original
   Translating comment, please wait: Översätter kommentaren, vänta
   Comment translation failed: Kommentaröversättningen misslyckades
+  Timed: "Tidsinställda"
+  Timed comments appear as the video plays: "Kommentarer om det du tittar på visas här medan videon spelas upp. Nästa visas vid {time}."
+  Next timed comment at: "Nästa kommentar vid {time}"
+  This video has no timed comments: "Den här videon har inga tidsinställda kommentarer"
 Description:
   Title: Beskrivning
   Copy Description: Kopiera beskrivning

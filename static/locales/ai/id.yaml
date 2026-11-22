@@ -2383,6 +2383,10 @@ Comments:
   Show original: Tampilkan teks asli
   Translating comment, please wait: Menerjemahkan komentar, harap tunggu
   Comment translation failed: Terjemahan komentar gagal
+  Timed: "Berdasarkan waktu"
+  Timed comments appear as the video plays: "Komentar tentang apa yang Anda tonton muncul di sini saat video diputar. Komentar berikutnya muncul pada {time}."
+  Next timed comment at: "Komentar berikutnya pada {time}"
+  This video has no timed comments: "Video ini tidak memiliki komentar berwaktu"
 Description:
   Title: Deskripsi
   Copy Description: Salin Deskripsi

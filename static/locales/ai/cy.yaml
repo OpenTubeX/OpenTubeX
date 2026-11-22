@@ -2394,6 +2394,10 @@ Comments:
   Show original: Dangos y gwreiddiol
   Translating comment, please wait: Wrthi'n cyfieithu'r sylw; arhoswch
   Comment translation failed: Methodd cyfieithu'r sylw
+  Timed: "Wedi'u hamseru"
+  Timed comments appear as the video plays: "Mae sylwadau am yr hyn rydych chi'n ei wylio yn ymddangos yma wrth i'r fideo chwarae. Bydd yr un nesaf yn ymddangos am {time}."
+  Next timed comment at: "Sylw nesaf am {time}"
+  This video has no timed comments: "Does dim sylwadau wedi'u hamseru ar y fideo hwn"
 Description:
   Title: Disgrifiad
   Copy Description: Copïo'r disgrifiad

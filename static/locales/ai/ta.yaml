@@ -2425,6 +2425,10 @@ Comments:
   Show original: அசலைக் காட்டு
   Translating comment, please wait: கருத்து மொழிபெயர்க்கப்படுகிறது, காத்திருக்கவும்
   Comment translation failed: கருத்து மொழிபெயர்ப்பு தோல்வியடைந்தது
+  Timed: "நேரப்படி"
+  Timed comments appear as the video plays: "நீங்கள் பார்க்கும் பகுதியைப் பற்றிய கருத்துகள் வீடியோ இயங்கும்போது இங்கே தோன்றும். அடுத்தது {time} இல் தோன்றும்."
+  Next timed comment at: "அடுத்த கருத்து {time} இல்"
+  This video has no timed comments: "இந்த வீடியோவில் நேரக்குறியிட்ட கருத்துகள் இல்லை"
 Description:
   Title: விளக்கம்
   Copy Description: விளக்கத்தை நகலெடு

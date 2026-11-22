@@ -2356,6 +2356,10 @@ Comments:
   Show original: 原文を表示
   Translating comment, please wait: コメントを翻訳中です。しばらくお待ちください
   Comment translation failed: コメントの翻訳に失敗しました
+  Timed: "時間順"
+  Timed comments appear as the video plays: "再生中のシーンに関するコメントが、動画の再生に合わせてここに表示されます。次のコメントは {time} に表示されます。"
+  Next timed comment at: "次のコメント: {time}"
+  This video has no timed comments: "この動画には時間指定のコメントがありません"
 Description:
   Title: 説明
   Copy Description: 説明をコピー

@@ -2367,6 +2367,10 @@ Comments:
   Show original: Erakutsi jatorrizkoa
   Translating comment, please wait: Iruzkina itzultzen; itxaron
   Comment translation failed: Ezin izan da iruzkina itzuli
+  Timed: "Denboraren arabera"
+  Timed comments appear as the video plays: "Ikusten ari zarenari buruzko iruzkinak hemen agertzen dira bideoa erreproduzitu ahala. Hurrengoa {time} unean agertuko da."
+  Next timed comment at: "Hurrengo iruzkina: {time}"
+  This video has no timed comments: "Bideo honek ez du denborari lotutako iruzkinik"
 Description:
   Title: Deskribapena
   Copy Description: Kopiatu deskribapena

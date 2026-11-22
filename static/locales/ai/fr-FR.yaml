@@ -2355,6 +2355,10 @@ Comments:
   Show original: Afficher l’original
   Translating comment, please wait: Traduction du commentaire en cours, veuillez patienter
   Comment translation failed: Échec de la traduction du commentaire
+  Timed: "Synchronisés"
+  Timed comments appear as the video plays: "Les commentaires sur ce que vous regardez apparaissent ici pendant la lecture de la vidéo. Le prochain apparaîtra à {time}."
+  Next timed comment at: "Prochain commentaire à {time}"
+  This video has no timed comments: "Cette vidéo n’a aucun commentaire synchronisé"
 Description:
   Title: Description
   Copy Description: Copier la description

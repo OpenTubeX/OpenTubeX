@@ -2361,6 +2361,10 @@ Comments:
   Show original: Vis originalen
   Translating comment, please wait: Oversetter kommentaren, vent litt
   Comment translation failed: Kommentaren kunne ikke oversettes
+  Timed: "Tidsbestemt"
+  Timed comments appear as the video plays: "Kommentarer om det du ser på, vises her mens videoen spilles av. Den neste vises ved {time}."
+  Next timed comment at: "Neste kommentar ved {time}"
+  This video has no timed comments: "Denne videoen har ingen tidsbestemte kommentarer"
 Description:
   Title: Beskrivelse
   Copy Description: Kopier beskrivelse

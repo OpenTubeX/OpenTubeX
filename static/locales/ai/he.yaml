@@ -2415,6 +2415,10 @@ Comments:
   Show original: הצגת המקור
   Translating comment, please wait: התגובה מתורגמת, נא להמתין
   Comment translation failed: תרגום התגובה נכשל
+  Timed: "לפי זמן"
+  Timed comments appear as the video plays: "תגובות על מה שאתם צופים בו מופיעות כאן במהלך הפעלת הסרטון. התגובה הבאה תופיע ב-{time}."
+  Next timed comment at: "התגובה הבאה ב-{time}"
+  This video has no timed comments: "לסרטון הזה אין תגובות מתוזמנות"
 Description:
   Title: תיאור
   Copy Description: העתקת התיאור

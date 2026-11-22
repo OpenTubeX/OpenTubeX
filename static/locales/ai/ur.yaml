@@ -2477,6 +2477,10 @@ Comments:
   Show original: اصل دکھائیں
   Translating comment, please wait: کمنٹ کا ترجمہ ہو رہا ہے، براہ کرم انتظار کریں
   Comment translation failed: کمنٹ کا ترجمہ ناکام ہو گیا
+  Timed: "وقت کے مطابق"
+  Timed comments appear as the video plays: "آپ جو دیکھ رہے ہیں اس کے بارے میں تبصرے ویڈیو چلنے کے دوران یہاں ظاہر ہوتے ہیں۔ اگلا تبصرہ {time} پر ظاہر ہوگا۔"
+  Next timed comment at: "اگلا تبصرہ {time} پر"
+  This video has no timed comments: "اس ویڈیو پر وقت سے منسلک کوئی تبصرہ نہیں ہے"
 Description:
   Title: تفصیل
   Copy Description: تفصیل کاپی کریں
