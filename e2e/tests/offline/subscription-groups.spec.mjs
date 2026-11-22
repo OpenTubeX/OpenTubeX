@@ -323,7 +323,8 @@ test.describe('editing subscription groups', () => {
 
     await page.getByRole('button', { name: 'Edit Group' }).click()
     await editor.getByRole('button', { name: 'Delete Group' }).click()
-    const confirmation = page.getByRole('dialog', { name: 'Delete the group "Songs"? Its channels stay subscribed.' })
+    const confirmation = page.getByRole('dialog', { name: 'Delete Group', exact: true })
+    await expect(confirmation).toContainText('Delete the group "Songs"? Its channels stay subscribed.')
     await confirmation.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(editor).toBeHidden()
     await expect(groups(page).getByRole('tab')).toHaveText(['All', 'Empty'])
@@ -341,7 +342,7 @@ test.describe('editing subscription groups', () => {
 
     const editor = page.getByRole('dialog', { name: 'Edit Group' })
     await editor.getByRole('button', { name: 'Delete Group' }).click()
-    await page.getByRole('dialog', { name: 'Delete the group "Music"? Its channels stay subscribed.' })
+    await page.getByRole('dialog', { name: 'Delete Group', exact: true })
       .getByRole('button', { name: 'Yes, Delete' }).click()
 
     await expect(page.getByText('The group could not be deleted.')).toBeVisible()

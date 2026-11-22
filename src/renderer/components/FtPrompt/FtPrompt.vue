@@ -27,7 +27,7 @@
           v-overlay-scrollbars="!fixedLayout"
           :fixed-background="false"
           class="promptCard"
-          :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
+          :class="{ autosize, fixedLayout, optionPrompt: !fixedLayout && !$slots.default, [theme]: true, [cardClass]: cardClass !== '' }"
           :inert="busy"
           role="dialog"
           aria-modal="true"

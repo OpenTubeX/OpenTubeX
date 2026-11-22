@@ -288,7 +288,8 @@
     <FtPrompt
       v-if="showDeletePrompt"
       autosize
-      :label="deletePromptLabel"
+      :label="$t('Profile.Delete Profile')"
+      :extra-labels="[deletePromptMessage]"
       :option-names="deletePromptNames"
       :option-values="DELETE_PROMPT_VALUES"
       :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
@@ -768,7 +769,7 @@ const deletePromptNames = computed(() => [
   t('Cancel')
 ])
 
-const deletePromptLabel = computed(() => {
+const deletePromptMessage = computed(() => {
   const deletedData = props.profile.separate === true
     ? t('Profile.Separate Profile Deletion Warning')
     : t('Profile["All subscriptions will also be deleted."]')

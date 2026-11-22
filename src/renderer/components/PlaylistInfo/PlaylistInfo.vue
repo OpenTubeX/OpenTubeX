@@ -336,9 +336,10 @@
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
         autosize
-        :label="selectedUserPlaylist?.youTube
-          ? $t('User Playlists.Delete YouTube Playlist Confirmation')
-          : $t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
+        :label="t('User Playlists.Delete Playlist')"
+        :extra-labels="[selectedUserPlaylist?.youTube
+          ? t('User Playlists.Delete YouTube Playlist Confirmation')
+          : t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')]"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
@@ -348,7 +349,8 @@
       <FtPrompt
         v-if="showRemoveVideosOnWatchPrompt"
         autosize
-        :label="removeVideosOnWatchPromptLabelText"
+        :label="t('User Playlists.Remove Watched Videos')"
+        :extra-labels="[removeVideosOnWatchPromptLabelText]"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
@@ -358,7 +360,8 @@
       <FtPrompt
         v-if="showRemoveDuplicateVideosPrompt"
         autosize
-        :label="removeDuplicateVideosPromptLabelText"
+        :label="t('User Playlists.Remove Duplicate Videos')"
+        :extra-labels="[removeDuplicateVideosPromptLabelText]"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"

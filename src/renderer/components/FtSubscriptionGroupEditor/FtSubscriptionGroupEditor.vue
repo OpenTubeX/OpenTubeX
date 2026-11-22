@@ -150,7 +150,8 @@
   </FtPrompt>
   <FtPrompt
     v-if="showDeletePrompt"
-    :label="t('Subscription Groups.Delete Prompt', { groupName: group.name })"
+    :label="t('Subscription Groups.Delete Group')"
+    :extra-labels="[t('Subscription Groups.Delete Prompt', { groupName: group.name })]"
     :option-names="[t('Yes, Delete'), t('Cancel')]"
     :option-values="['delete', 'cancel']"
     :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"

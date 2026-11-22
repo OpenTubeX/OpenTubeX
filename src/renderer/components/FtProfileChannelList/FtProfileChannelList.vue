@@ -77,7 +77,8 @@
     <FtPrompt
       v-if="showDeletePrompt"
       autosize
-      :label="deletePromptMessage"
+      :label="t('Profile.Delete Selected')"
+      :extra-labels="[deletePromptMessage]"
       :option-names="deletePromptNames"
       :option-values="DELTE_PROMPT_VALUES"
       :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"

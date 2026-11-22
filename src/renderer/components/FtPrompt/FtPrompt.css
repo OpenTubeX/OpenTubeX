@@ -127,6 +127,15 @@
   max-inline-size: 95%;
 }
 
+/* Wrap long confirmation questions instead of stretching across the window */
+.promptCard.autosize.optionPrompt {
+  max-inline-size: min(95%, 40em);
+}
+
+.promptCard.optionPrompt > h2 {
+  text-wrap: balance;
+}
+
 .promptCard:not(.autosize) {
   inline-size: 95%;
   margin: 0;

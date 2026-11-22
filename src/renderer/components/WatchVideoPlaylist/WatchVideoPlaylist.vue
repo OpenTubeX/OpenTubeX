@@ -263,7 +263,8 @@
         <FtPrompt
           v-if="showRemoveWatchedVideosPrompt"
           autosize
-          :label="removeWatchedVideosPromptLabel"
+          :label="t('User Playlists.Remove Watched Videos')"
+          :extra-labels="[removeWatchedVideosPromptLabel]"
           :option-names="removeWatchedVideosPromptOptionNames"
           :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"
           :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
