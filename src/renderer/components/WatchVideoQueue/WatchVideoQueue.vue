@@ -197,7 +197,11 @@ import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
-const props = defineProps({ fullscreenOverlay: { type: Boolean, default: false } })
+const props = defineProps({
+  fullscreenOverlay: { type: Boolean, default: false },
+  // The video the Watch page shows, which a click on its queued copy doesn't reload
+  currentVideoId: { type: String, default: null },
+})
 const emit = defineEmits(['pause-player', 'close'])
 const { t, locale } = useI18n()
 
@@ -283,8 +287,8 @@ function playQueuedVideo(queueItemId, opensWatchPage = true) {
   emit('pause-player')
   const videoId = items.value.find(item => item.queueItemId === queueItemId)?.videoId
   remove(queueItemId)
-  // External players and native download playback open no Watch page to take it.
-  if (videoId && opensWatchPage) store.commit('setPlayedQueueVideoId', videoId)
+  // External players, native download playback and the current video load no Watch page to take it.
+  if (videoId && opensWatchPage && videoId !== props.currentVideoId) store.commit('setPlayedQueueVideoId', videoId)
 }
 
 function playExternalQueuedVideo(queueItemId, event) {
