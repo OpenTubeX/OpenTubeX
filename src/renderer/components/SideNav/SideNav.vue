@@ -45,6 +45,7 @@
         :reorder-status="reorderStatus"
         :class="{ compactLabels: compactNavigationLabels }"
         @move-pinned="movePinned"
+        @refresh-subscriptions="refreshSubscriptionsInBackground"
       />
       <hr>
       <div
@@ -480,7 +481,7 @@ const subscriptionsHoldRefreshScope = effectScope()
 /** @type {import('vue').ShallowRef<ReturnType<typeof import('../../composables/useSubscriptionsHoldRefresh').useSubscriptionsHoldRefresh> | null>} */
 const subscriptionsHoldRefresh = shallowRef(null)
 
-const { onPointerDown: startSubscriptionsHold } = usePointerHold(async () => {
+async function refreshSubscriptionsInBackground() {
   lightHaptic()
   try {
     if (subscriptionsHoldRefresh.value === null) {
@@ -491,7 +492,9 @@ const { onPointerDown: startSubscriptionsHold } = usePointerHold(async () => {
   } catch (error) {
     console.error('Failed to refresh the subscriptions', error)
   }
-})
+}
+
+const { onPointerDown: startSubscriptionsHold } = usePointerHold(refreshSubscriptionsInBackground)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {
