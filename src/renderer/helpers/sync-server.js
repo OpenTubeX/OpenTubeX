@@ -1682,6 +1682,22 @@ async function mergeSeparateProfiles(client, store, previous, options) {
   return next
 }
 
+/**
+ * A profile's own settings as merged on this device, with the settings of
+ * `remoteEntry` that this device doesn't sync, so that its upload keeps them.
+ * Turning the profile's own settings off drops them all.
+ * @param {{ key: string, value: any, updatedAt: number }} entry the merged settings this device syncs
+ * @param {{ value: unknown } | undefined} remoteEntry
+ * @param {Record<string, unknown> | null | undefined} syncedRemote the settings of `remoteEntry` this device syncs
+ */
+function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
+  if (entry.value === null || !remoteEntry || !syncedRemote) return entry
+  const elsewhere = Object.entries(remoteEntry.value).filter(([key]) => !Object.hasOwn(syncedRemote, key))
+  if (elsewhere.length === 0) return entry
+  const value = Object.fromEntries([...elsewhere, ...Object.entries(entry.value)].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
+  return { ...entry, value }
+}
+
 function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
@@ -1932,14 +1948,23 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const mergeEntry = itemKeys.has(key)
         ? mergeSettingItemsEntry
         : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
+      const profileSettingsKey = profileSettingsProfiles.has(key)
+      // A profile's own settings merge as this device syncs them, and keep the
+      // settings that only other devices sync.
+      const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
       let entry = mergeEntry({
         key,
         value,
-        old,
-        remoteEntry,
+        old: profileSettingsKey ? syncedEntry(old) : old,
+        remoteEntry: profileSettingsKey ? syncedEntry(remoteEntry) : remoteEntry,
         localUpdatedAt: localUpdatedAt[key],
         now,
       })
+      if (profileSettingsKey) {
+        entry = remoteEntry && metadataEquals(entry, syncedEntry(remoteEntry))
+          ? remoteEntry
+          : withSettingsSyncedElsewhere(entry, remoteEntry, syncedEntry(remoteEntry)?.value)
+      }
 
       entry = resolveMergedThemeEntry(
         entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
@@ -1957,7 +1982,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
           : sharedSettingValue(store.state.settings, key)
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)
-        : metadataEquals(currentValue, entry.value)
+        : metadataEquals(currentValue, profileSettingsKey ? syncedProfileSettings(entry.value, isSynced) : entry.value)
       // Edited while this sync saved an earlier setting. Applying the merge would
       // undo the edit, so the server keeps its entry and the next sync merges it.
       const skip = () => {

@@ -180,3 +180,68 @@ test('a profile\'s own settings sync to the same profile on another device, apar
   assert.deepEqual(json(second.state.settings.profileSettingsState.overrides), {})
   assert.deepEqual(json(client.entries.find(entry => entry.key === unknown.key)), unknown)
 })
+
+test('an upload keeps the profile settings that only other devices sync', async () => {
+  const car = profileSettingsId('car')
+  const client = createClient([{ key: car, value: { hideComments: false, uiScale: 150 }, updatedAt: 1 }])
+  // This device doesn't sync uiScale and changed hideComments after the server's entry.
+  const device = createDevice({ car: { hideComments: true } })
+  device.state.settings.syncServerSettingUpdatedAt[car] = 2
+  const previous = { [car]: { key: car, value: { hideComments: false, uiScale: 150 }, updatedAt: 1 } }
+  await context.syncSettings(client, device, previous)
+  assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === car))), {
+    key: car, value: { hideComments: true, uiScale: 150 }, updatedAt: 2,
+  })
+})
+
+const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const between = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end, settingsSource.indexOf(start)))
+
+test('a saved edit of a profile setting keeps the optimistic edits still saving', async () => {
+  const { createSettingUpdateQueue, createSettingWriteTracker } = await import('../../src/renderer/helpers/settingUpdateQueue.js')
+  const id = profileSettingsId('car')
+  const saved = new Map([[id, {}]])
+  const releases = []
+  const overrides = { car: {} }
+  // Objects from the other context have another prototype.
+  const isPlainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+  const mutations = vm.runInNewContext(`({${between('  setProfileOwnSettings: (state', '  // Takes a plan from')}})`, {
+    isPlainObject,
+    withPendingProfileEdits: (...args) => region.withPendingProfileEdits(...args),
+  })
+  const state = { profileSettingsState: { overrides } }
+  const commit = (type, payload) => mutations[type](state, payload)
+  const region = vm.runInNewContext(`${between('function saveProfileSettingValue(', '/** Mutations that can change which settings show')}
+({ updateProfileSetting, withPendingProfileEdits })`, {
+    ...profileSettings,
+    isPlainObject,
+    createSettingUpdateQueue,
+    settingWrites: createSettingWriteTracker(async () => undefined),
+    runLocked: (_name, run) => run(),
+    saveSettingEdit: (_commit, _id, save) => save(),
+    DBSettingHandlers: {
+      findValue: async key => structuredClone(saved.get(key)),
+      // Each save waits until the test lets it finish.
+      upsert: (key, value) => new Promise(resolve => releases.push(() => {
+        saved.set(key, structuredClone(value))
+        resolve()
+      })),
+    },
+    console,
+  })
+  const until = async condition => {
+    while (!condition()) await new Promise(resolve => setImmediate(resolve))
+  }
+
+  // Add A, then add B while A saves, like the quick settings customizer.
+  const first = region.updateProfileSetting(commit, 'car', 'quickSettings', ['a'], true)
+  await until(() => releases.length === 1)
+  const second = region.updateProfileSetting(commit, 'car', 'quickSettings', ['a', 'b'], true)
+  releases.shift()()
+  await first
+  assert.deepEqual(JSON.parse(JSON.stringify(overrides.car.quickSettings)), ['a', 'b'])
+  await until(() => releases.length === 1)
+  releases.shift()()
+  await second
+  assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{ quickSettings: ['a', 'b'] }, { quickSettings: ['a', 'b'] }])
+})

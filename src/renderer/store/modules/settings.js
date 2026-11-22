@@ -687,17 +687,56 @@ function saveProfileSettingValue(commit, profileId, settingId, value) {
 const runProfileSettingUpdate = createSettingUpdateQueue()
 
 /**
+ * Optimistic edits of profiles' own settings that are still saving, by
+ * setting ID and profile. Saved settings that show meanwhile keep them, so the
+ * next edit builds on them.
+ * @type {Map<string, { profileId: string, settingId: string, value: unknown, count: number }>}
+ */
+const pendingProfileEdits = new Map()
+
+/**
+ * @param {string} profileId
+ * @param {Record<string, unknown>} settings saved settings of the profile
+ */
+function withPendingProfileEdits(profileId, settings) {
+  const edits = [...pendingProfileEdits.values()].filter(edit => edit.profileId === profileId)
+  if (edits.length === 0) return settings
+  const shown = { ...settings }
+  for (const { settingId, value } of edits) {
+    if (value === undefined) delete shown[settingId]
+    else shown[settingId] = value
+  }
+  return shown
+}
+
+/**
  * Saves an edit of `settingId` to the own settings of `profileId`. Optimistic
  * edits show right away, so the next edit builds on them.
  * @returns {Promise<boolean>} whether the edit was saved
  */
 function updateProfileSetting(commit, profileId, settingId, value, optimistic = false) {
   const id = profileSettingsId(profileId)
-  if (optimistic) commit('setProfileSettingValue', { profileId, settingId, value })
-  return settingWrites.track(id, () => runProfileSettingUpdate(`${id}/${settingId}`, () => (
+  const key = `${id}/${settingId}`
+  /** @type {{ profileId: string, settingId: string, value: unknown, count: number } | undefined} */
+  let pending
+  if (optimistic) {
+    pending = pendingProfileEdits.get(key) ?? { profileId, settingId, value, count: 0 }
+    pending.value = value
+    pending.count++
+    pendingProfileEdits.set(key, pending)
+    commit('setProfileSettingValue', { profileId, settingId, value })
+  }
+  const settle = () => {
+    if (pending && --pending.count === 0 && pendingProfileEdits.get(key) === pending) pendingProfileEdits.delete(key)
+  }
+  return settingWrites.track(id, () => runProfileSettingUpdate(key, () => (
     saveProfileSettingValue(commit, profileId, settingId, value)
-  ))).then(() => true, async error => {
+  ))).then(() => {
+    settle()
+    return true
+  }, async error => {
     console.error(error)
+    settle()
     if (optimistic) {
       const saved = await DBSettingHandlers.findValue(id).catch(() => undefined)
       if (saved !== undefined) commit('setProfileOwnSettings', { profileId, settings: isPlainObject(saved) ? saved : null })
@@ -922,7 +961,7 @@ const customMutations = {
 
   // `settings` is null when the profile uses the shared settings.
   setProfileOwnSettings: (state, { profileId, settings }) => {
-    if (isPlainObject(settings)) state.profileSettingsState.overrides[profileId] = settings
+    if (isPlainObject(settings)) state.profileSettingsState.overrides[profileId] = withPendingProfileEdits(profileId, settings)
     else delete state.profileSettingsState.overrides[profileId]
   },
 
