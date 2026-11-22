@@ -213,6 +213,23 @@ test('continues a playlist after a Short ends', async ({ app, page }) => {
   await waitForPlayback(page)
 })
 
+test('skips an upcoming playlist video that has nothing to play', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { upcomingVideoIds: ['skipvideo1'] })
+
+  await goTo(page, 'userplaylists')
+  await page.getByText('Skip button playlist').click()
+  await page.getByText(VIDEO_TITLES[0]).first().click()
+  await expect(page).toHaveURL(/#\/watch\/skipvideo0\?/)
+
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => {
+    element.currentTime = Math.max(0, element.duration - 0.25)
+  })
+
+  await expect(page).toHaveURL(/#\/watch\/skipvideo2\?/)
+  await waitForPlayback(page)
+})
+
 test('seeks and skips from the desktop mini player', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
 
