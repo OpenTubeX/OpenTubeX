@@ -259,6 +259,7 @@ test('a profile switch whose read fails shows none of the previous profile’s d
   const shown = { history: ['previous'], watchStats: ['previous'], syncedWatchStats: ['previous'] }
   let failHistory = true
   const reads = []
+  const shownWhileLoading = []
   const context = {
     getters: { getActiveDataScope: 'separate' },
     rootGetters: { getRecommendationEpoch: null, getEnableWatchStats: true },
@@ -269,8 +270,8 @@ test('a profile switch whose read fails shows none of the previous profile’s d
     },
     dispatch: async name => {
       reads.push(name)
-      // None of the previous profile's data shows while the switch loads.
-      if (name === 'grabHistory') assert.deepEqual(shown, { history: [], watchStats: [], syncedWatchStats: [] })
+      // What shows while the switch loads. The loads catch errors, so the test checks it afterwards.
+      if (name === 'grabHistory') shownWhileLoading.push(structuredClone(shown))
       // A read can also reject.
       if (name === 'grabHistory' && failHistory) throw new Error('Unable to read the history')
       if (name === 'grabHistory') return true
@@ -290,6 +291,9 @@ test('a profile switch whose read fails shows none of the previous profile’s d
     reads.length = 0
     await actions.loadDataScope(context)
     assert.deepEqual(reads, [], 'a complete load is not repeated')
+    // None of the previous profile's data shows while a switch loads.
+    const cleared = { history: [], watchStats: [], syncedWatchStats: [] }
+    assert.deepEqual(shownWhileLoading, [cleared, cleared])
   } finally {
     setDataScope(null)
   }
