@@ -1,5 +1,7 @@
 .settingsWindow {
-  --settings-row-gap: calc(20px * var(--ui-density));
+  /* Outlined field labels reach above their field, so Compact keeps enough of a
+     gap that they don't touch the field above. */
+  --settings-row-gap: max(14px, calc(20px * var(--ui-density)));
 
   position: fixed;
   z-index: 9;
