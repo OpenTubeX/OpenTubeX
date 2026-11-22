@@ -255,7 +255,7 @@ test('a profile switch whose read fails shows none of the previous profile’s d
     settleScopedActions,
     trackDataScopeLoad,
   })
-  const shown = { history: ['previous'], watchStats: ['previous'] }
+  const shown = { history: ['previous'], watchStats: ['previous'], syncedWatchStats: ['previous'] }
   let failHistory = true
   const reads = []
   const context = {
@@ -264,9 +264,12 @@ test('a profile switch whose read fails shows none of the previous profile’s d
     commit: name => {
       if (name === 'setHistoryCacheSorted') shown.history = []
       if (name === 'clearWatchStats') shown.watchStats = []
+      if (name === 'setSyncedWatchStats') shown.syncedWatchStats = []
     },
     dispatch: async name => {
       reads.push(name)
+      // None of the previous profile's data shows while the switch loads.
+      if (name === 'grabHistory') assert.deepEqual(shown, { history: [], watchStats: [], syncedWatchStats: [] })
       if (name === 'grabHistory') return !failHistory
       if (name === 'grabWatchStats') shown.watchStats = ['separate']
       return true
@@ -275,7 +278,7 @@ test('a profile switch whose read fails shows none of the previous profile’s d
   try {
     setDataScope(null)
     await actions.loadDataScope(context)
-    assert.deepEqual(shown, { history: [], watchStats: ['separate'] })
+    assert.deepEqual(shown, { history: [], watchStats: ['separate'], syncedWatchStats: [] })
     failHistory = false
     reads.length = 0
     await actions.loadDataScope(context)
