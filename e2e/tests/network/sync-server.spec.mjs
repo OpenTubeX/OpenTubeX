@@ -973,7 +973,7 @@ test.describe('OpenTubeX sync server', () => {
       await clientPage.evaluate(async () => {
         const store = window.$store
         await store.dispatch('updateSyncServerAutoSync', false)
-        for (const collection of ['Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
+        for (const collection of ['Sessions', 'WatchStats', 'LiveReminders', 'Notifications']) {
           await store.dispatch(`updateSyncServerSync${collection}`, false)
         }
       })
@@ -1041,6 +1041,17 @@ test.describe('OpenTubeX sync server', () => {
           type: 'video',
         })
       }, separateVideoId)
+      // Saved playlists, seen videos and channel settings of the profile are its own.
+      await page.evaluate(async ({ channelId }) => {
+        const store = window.$store
+        await store.dispatch('savePlaylistBookmark', {
+          playlist: { id: 'PLseparate', title: 'Separate playlist', description: '', thumbnail_url: null, video_count: 1 },
+          uploader: { id: channelId, name: 'Separate channel', avatar: null, verified: false },
+          savedAt: Date.now(),
+        })
+        await store.dispatch('mergeSubscriptionSeenVideos', { videos: [{ videoId: 'separateSeen', isMembersOnly: false }] })
+        await store.dispatch('updateChannelSettings', { channelId, profileId: store.getters.getActiveProfile._id, settings: { dailyVideoLimit: 3 } })
+      }, { channelId })
 
       // The first sync merges the data of the active separate profile.
       await connect(page, 'register')
@@ -1049,6 +1060,13 @@ test.describe('OpenTubeX sync server', () => {
       expect(JSON.stringify(await readCollection('history') ?? [])).not.toContain(separateVideoId)
       expect(JSON.stringify(await readCollection('profiles') ?? [])).not.toContain(separateId)
       expect((await readCollection('separateProfiles')).map(entry => entry.id)).toEqual([separateId])
+      expect((await readCollection(`playlistBookmarks.${scope}`)).map(bookmark => bookmark.playlist.id)).toEqual(['PLseparate'])
+      expect(JSON.stringify(await readCollection('playlistBookmarks') ?? [])).not.toContain('PLseparate')
+      expect((await readCollection(`seenVideos.${scope}`)).map(mark => mark.videoId)).toEqual(['separateSeen'])
+      expect(JSON.stringify(await readCollection('seenVideos') ?? [])).not.toContain('separateSeen')
+      const settingsEntries = await readCollection('settings')
+      expect(settingsEntries.find(entry => entry.key === `subscriptionChannelSettings.${scope}`)?.value[channelId]?.value.dailyVideoLimit).toBe(3)
+      expect(settingsEntries.find(entry => entry.key === 'subscriptionChannelSettings')?.value[channelId]).toBeUndefined()
 
       // Another device gets the profile, but its library only while the profile is active.
       await connect(other.page, 'login')
@@ -1058,6 +1076,10 @@ test.describe('OpenTubeX sync server', () => {
       await other.page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
       await expect.poll(() => historyIds(other.page)).toEqual([separateVideoId])
       expect(await other.page.evaluate(id => window.$store.getters.getProfileList.find(profile => profile._id === id).subscriptions.map(channel => channel.id), separateId)).toEqual([channelId])
+      await expect.poll(() => other.page.evaluate(() => window.$store.getters.getPlaylistBookmarks.map(bookmark => bookmark.playlist.id))).toEqual(['PLseparate'])
+      await expect.poll(() => other.page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos).map(mark => mark.videoId))).toEqual(['separateSeen'])
+      await expect.poll(() => other.page.evaluate(({ id, channelId }) => window.$store.getters.getProfileList
+        .find(profile => profile._id === id).subscriptions.find(channel => channel.id === channelId).dailyVideoLimit, { id: separateId, channelId })).toBe(3)
     } finally {
       try {
         const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
