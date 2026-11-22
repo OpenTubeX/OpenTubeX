@@ -122,7 +122,8 @@ test.describe('subscriptions feed from cache', () => {
       store.dispatch = (action, payload) => {
         const result = dispatch(action, payload)
         if (action === 'updateChannelSettings' || action === 'batchUpdateChannelSettings') {
-          for (const update of action === 'updateChannelSettings' ? [payload] : payload) {
+          // Bulk saves name the profile they were made in along with the updates.
+          for (const update of action === 'updateChannelSettings' ? [payload] : payload.updates ?? payload) {
             if (update.settings.showMembersOnly === false) {
               window.subscriptionDetailsUpdates.push(dispatch('batchUpdateSubscriptionDetails', [{
                 channelId: update.channelId,
