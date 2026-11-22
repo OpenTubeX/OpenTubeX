@@ -210,7 +210,8 @@ test('bulk IPC reports a missing playlist without broadcasting unpersisted addit
     IpcChannels,
     SyncEvents,
     PlaylistVideoAddResult,
-    baseHandlers: { playlists: Playlists },
+    handlers: { playlists: Playlists },
+    scope: null,
     syncOtherWindows: (...args) => broadcasts.push(args),
     event: {},
   })
@@ -227,13 +228,14 @@ test('bulk IPC broadcasts the committed direction and only the entries actually 
     IpcChannels,
     SyncEvents,
     PlaylistVideoAddResult,
-    baseHandlers: { playlists: Playlists },
+    handlers: { playlists: Playlists },
+    scope: null,
     syncOtherWindows: (...args) => broadcasts.push(args),
     event: {},
   })
   await handle({ _id: 'custom', lastUpdatedAt: 30, deduplicate: true, videos: [{ videoId: 'first' }, { videoId: 'new' }, { videoId: 'new' }] })
   assert.equal(broadcasts.length, 1)
-  const payload = broadcasts[0][2].data
+  const payload = broadcasts[0][3].data
   assert.equal(payload.addVideosToTop, true)
   assert.deepEqual(Array.from(payload.videos, video => video.videoId), ['new'])
   state.playlists[0].addVideosToTop = false

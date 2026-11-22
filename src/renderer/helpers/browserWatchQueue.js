@@ -22,8 +22,10 @@ export function createBrowserWatchQueue() {
     return ready
   }
 
+  // Each separate profile has its own queue.
+  const key = scope => scope === null ? 'queue' : `queue:${scope}`
   return {
-    async update(request) {
+    async update(request, scope = null) {
       const database = await openDatabase()
       const changesQueue = PERSISTED_MUTATIONS.has(request.type)
       return new Promise((resolve, reject) => {
@@ -31,7 +33,7 @@ export function createBrowserWatchQueue() {
         // serializes writes to this store across every tab of the origin.
         const tx = database.transaction('state', changesQueue ? 'readwrite' : 'readonly')
         const records = tx.objectStore('state')
-        const read = records.get('queue')
+        const read = records.get(key(scope))
         let snapshot
         let failure
         read.onsuccess = () => {
@@ -40,8 +42,9 @@ export function createBrowserWatchQueue() {
             if (changesQueue) {
               watchQueueMutations[request.type](snapshot, request.payload)
               snapshot.revision++
-              records.put(snapshot, 'queue')
+              records.put(snapshot, key(scope))
             }
+            snapshot = { ...snapshot, scope }
           } catch (error) {
             failure = error
             tx.abort()
@@ -56,6 +59,15 @@ export function createBrowserWatchQueue() {
             }
           }
         }
+      })
+    },
+    async forget(scope) {
+      const database = await openDatabase()
+      await new Promise((resolve, reject) => {
+        const tx = database.transaction('state', 'readwrite')
+        tx.objectStore('state').delete(key(scope))
+        tx.oncomplete = resolve
+        tx.onabort = () => reject(tx.error)
       })
     },
     onUpdated(handler) {

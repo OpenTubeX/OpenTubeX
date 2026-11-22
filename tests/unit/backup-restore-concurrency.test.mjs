@@ -6,7 +6,7 @@ import { PlaylistVideoAddResult } from '../../src/constants.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
-import { mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile } from '../../src/renderer/helpers/unifiedBackup.js'
+import { mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from '../../src/renderer/helpers/unifiedBackup.js'
 import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
 import { decrementPlaylistVideoCounts, incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
 import { toRaw } from 'vue'
@@ -30,6 +30,7 @@ async function fixture(t) {
     mergeBackupPlaylist,
     mergeBackupProfile,
     mergeImportedProfile,
+    withProfileSeparation,
     profileSyncSnapshot,
     processToBeAddedPlaylistVideo,
     PlaylistVideoAddResult,
@@ -115,7 +116,7 @@ test('restoring several playlists shows each one saved before another window syn
     }
     return read(query, ...args)
   }
-  const { mergePlaylistBackup } = vm.runInNewContext(`({ ${mergeActionSource} })`, { DBPlaylistHandlers: Playlists, console })
+  const { mergePlaylistBackup } = vm.runInNewContext(`({ ${mergeActionSource} })`, { DBPlaylistHandlers: Playlists, console, getDataScope: () => null, withDataScope: (_scope, operation) => operation() })
 
   assert.equal(await mergePlaylistBackup({ commit }, [playlist('a', 'restored-a'), playlist('b', 'restored-b')]), true)
 

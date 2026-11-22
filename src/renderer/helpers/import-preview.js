@@ -18,6 +18,8 @@ export function previewBackupImport(data, current) {
   const rows = []
   const keys = { profiles: record => record._id, playlists: record => record._id, history: record => record.videoId, searchHistory: getSearchHistoryEntryKeyFromEntry, watchStats: record => record.date }
   for (const category of Object.keys(data)) {
+    // Separate profiles' data merges into their own data.
+    if (category === 'profileData') continue
     if (category === 'settings') {
       const settings = migrateLegacySettings(data.settings)
       const accepted = Object.keys(settings).filter(key => Object.hasOwn(current.settings, key))

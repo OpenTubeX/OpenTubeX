@@ -34,10 +34,10 @@ function createStore (state) {
 }
 let remoteDepth = 0
 
-function trackedStore (state) {
+function trackedStore (state, dataScope = () => null) {
   const decisions = createSyncDeletionDecisions()
   const store = createStore({ settings: { syncServerEnabled: true, syncServerToken: 'token' }, ...state })
-  trackLocalSyncDeletions({ isRemoteDispatch: () => remoteDepth > 0, mainProfileId: MAIN_PROFILE_ID, decisions })(store)
+  trackLocalSyncDeletions({ isRemoteDispatch: () => remoteDepth > 0, mainProfileId: MAIN_PROFILE_ID, dataScope, decisions })(store)
   return { store, decisions }
 }
 
@@ -270,4 +270,42 @@ test('deletions are not tracked while sync is off', async () => {
   })
   await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
   assert.deepEqual(decisions.snapshot(), {})
+})
+
+test('deletions in a separate profile are kept apart from the shared ones', async () => {
+  const separate = { _id: 'separate', separate: true, subscriptions: [{ id: 'channel' }] }
+  const { store, decisions } = trackedStore({
+    history: { historyCacheSorted: [{ videoId: 'video' }] },
+    profiles: { activeProfile: 'separate', profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [] }, separate] },
+  }, () => 'separate')
+  await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
+  await store.dispatch('removeChannelFromProfiles', () => {
+    store.state.profiles.profileList[1] = { ...separate, subscriptions: [] }
+  })
+  assert.deepEqual(decisions.snapshot('separate'), {
+    history: { confirmed: ['video'], kept: [] },
+    subscriptions: { confirmed: ['channel'], kept: [] },
+  })
+  assert.deepEqual(decisions.snapshot(), {})
+
+  await store.dispatch('removeProfile', () => { store.state.profiles.profileList.splice(1, 1) })
+  assert.deepEqual(decisions.snapshot().separateProfiles.confirmed, ['separate'])
+  assert.equal(decisions.snapshot().profiles, undefined)
+  decisions.release(decisions.snapshot('separate'), 'separate')
+  assert.deepEqual(decisions.snapshot('separate'), {})
+})
+
+test('a deletion that finishes after a profile switch confirms nothing in either profile', async () => {
+  let scope = null
+  const { store, decisions } = trackedStore({
+    history: { historyCacheSorted: ['a', 'b', 'c'].map(videoId => ({ videoId })) },
+  }, () => scope)
+  await store.dispatch('removeFromHistory', () => {
+    // The switch loads the other profile's history while the removal runs.
+    scope = undefined
+    store.state.history.historyCacheSorted = [{ videoId: 'other' }]
+    scope = 'separate'
+  })
+  assert.deepEqual(decisions.snapshot(), {})
+  assert.deepEqual(decisions.snapshot('separate'), {})
 })

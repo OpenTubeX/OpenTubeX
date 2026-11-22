@@ -28,7 +28,7 @@ export function configureUploadNotifications(value) {
 export function includeNotificationChannels(subscriptions, feedType) {
   if (!supportsUploadNotifications || !store.getters.getEnableUploadNotifications || configuration?.enabled !== true) return subscriptions
   const includedIds = new Set(subscriptions.map(channel => channel.id))
-  const missing = (store.getters.getProfileList[0]?.subscriptions ?? []).filter(channel =>
+  const missing = store.getters.getAllRootSubscriptions.filter(channel =>
     !includedIds.has(channel.id) && configuration.channels[channel.id]?.feedTypes.includes(feedType))
   return missing.length === 0 ? subscriptions : [...subscriptions, ...missing]
 }

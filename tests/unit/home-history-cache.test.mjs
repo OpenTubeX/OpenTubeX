@@ -14,7 +14,7 @@ const source = (await readFile(new URL('../../src/renderer/store/modules/history
 
 function fixture(DBHistoryHandlers = {}, rootGetters = {}) {
   const dependencies = {
-    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord, toRaw, DBHistoryHandlers, readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions,
+    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord, toRaw, DBHistoryHandlers, readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions, getDataScope: () => null,
   }
   const history = compileFunction(source, Object.keys(dependencies))(...Object.values(dependencies))
   return createStore({ modules: { history }, getters: rootGetters })

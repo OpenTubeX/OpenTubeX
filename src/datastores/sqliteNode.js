@@ -137,7 +137,7 @@ export function desktopDatastorePaths(directory, name) {
 
 /**
  * @param {string} filename SQLite file
- * @param {string} legacyFilename NeDB file it replaces
+ * @param {string | null} [legacyFilename] NeDB file it replaces, if any
  * @param {Omit<ConstructorParameters<typeof SqliteDatastore>[0], 'driver' | 'legacy'> & { backupDirectory?: string, createDriver?: ReturnType<typeof createWorkerDrivers> }} [options]
  */
 export function createDesktopDatastore(filename, legacyFilename, { backupDirectory, createDriver = createNodeSqliteDriver, ...options } = {}) {

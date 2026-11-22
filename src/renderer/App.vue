@@ -717,7 +717,8 @@ import {
 import { repairSystemThemeSettings } from './helpers/customThemeSync'
 
 import packageDetails from '../../package.json'
-import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { MAIN_PROFILE_ID, MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { setDataScope } from '../datastores/handlers/index'
 import { updateTrayIcon } from './helpers/trayIcon'
 import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { calculateColorLuminance, resolveColor } from './helpers/colors'
@@ -1812,6 +1813,13 @@ let removeInternetConnectivitySettingsListener = null
 let removeIosContextMenu = null
 let removeShimmerVisibility = null
 
+// Profile switches load the data of the profile switched to, once startup
+// applied the default profile's.
+let dataScopeApplied = false
+watch(() => store.getters.getActiveDataScope, () => {
+  if (dataScopeApplied) store.dispatch('loadDataScope')
+})
+
 onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
   let tabsReady = Promise.resolve()
@@ -1867,10 +1875,27 @@ onMounted(async () => {
   const profilesReady = settingsReady.then(() => (
     store.dispatch('grabAllProfiles', t('Profile.All Channels'))
   ))
+  // A separate default profile shows its own data, so its library waits for
+  // the profiles. Later switches load the data of the profile switched to.
+  const dataScopeReady = settingsReady.then(async () => {
+    if (store.state.settings.defaultProfile === MAIN_PROFILE_ID) return
+    await profilesReady
+    const scope = store.getters.getActiveDataScope
+    if (scope === null) return
+    setDataScope(scope)
+    await store.dispatch('loadWatchQueueScope', scope)
+    // Watch stats load with the settings, before the profiles.
+    if (store.getters.getEnableWatchStats) store.dispatch('grabWatchStats')
+  })
+  dataScopeReady.then(() => {
+    dataScopeApplied = true
+    // A switch during startup loads the data of the profile switched to now.
+    store.dispatch('loadDataScope')
+  })
   // The library needs only settings (history retention) and profiles
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
-    settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
+    dataScopeReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
     profilesReady.then(() => {
       if (process.env.IS_ELECTRON) store.dispatch('setupProfileListenerToSyncWindows')
       return store.dispatch('grabAllSubscriptions')
@@ -1953,7 +1978,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    const searchHistoryReady = store.dispatch('grabSearchHistoryEntries')
+    const searchHistoryReady = dataScopeReady.then(() => store.dispatch('grabSearchHistoryEntries'))
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
