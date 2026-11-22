@@ -269,13 +269,14 @@ Subscriptions:
     All Platforms: Sve platforme
     Followed Channels: Praćeni kanali na drugim platformama
     Description: Pratite kanale na platformama Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de kako biste vidjeli njihove objave na kartici Platforme u svojim pretplatama. Pronađite kanale pretraživanjem ili ih dodajte prema adresi njihove stranice. Njihovi se mediji reproduciraju pomoću yt-dlp.
+    Platform Description: Pratite kanale na platformi {platform} kako biste vidjeli njihove objave na kartici Platforme u svojim pretplatama. Pronađite kanale pretraživanjem ili ih dodajte prema adresi njihove stranice. Njihovi se mediji reproduciraju pomoću yt-dlp.
     Add Channel: Dodaj kanal
     Search Or Paste Channel: Pretražite ili zalijepite adresu kanala
     Invalid Channel: Unesite adresu stranice kanala na platformi Twitch, SoundCloud, PeerTube, Rumble, Odysee ili media.ccc.de.
     Channel Not Found: Na ovoj adresi nema kanala.
     Channel Already Followed: Već pratite ovaj kanal.
     Channel Could Not Be Loaded: Kanal se nije mogao učitati.
-    No Channels: Još ne pratite nijedan kanal na drugim platformama.
+    No Platform Channels: Još ne pratite nijedan kanal na platformi {platform}.
     Unfollow Channel: Prestani pratiti {channel}
     Go To Channel: Idi na kanal {channel}
     Follow: Prati

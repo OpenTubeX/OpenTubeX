@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: Pob llwyfan
     Followed Channels: Sianeli rydych chi'n eu dilyn ar lwyfannau eraill
     Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
+    Platform Description: Dilynwch sianeli ar {platform} i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
     Add Channel: Ychwanegu Sianel
     Search Or Paste Channel: Chwiliwch neu gludwch gyfeiriad sianel
     Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble, Odysee neu media.ccc.de.
     Channel Not Found: Does dim sianel yn y cyfeiriad hwn.
     Channel Already Followed: Rydych eisoes yn dilyn y sianel hon.
     Channel Could Not Be Loaded: Doedd dim modd llwytho'r sianel.
-    No Channels: Dydych chi ddim yn dilyn unrhyw sianeli ar lwyfannau eraill eto.
+    No Platform Channels: Dydych chi ddim yn dilyn unrhyw sianeli ar {platform} eto.
     Unfollow Channel: Dad-ddilyn {channel}
     Go To Channel: Mynd i {channel}
     Follow: Dilyn

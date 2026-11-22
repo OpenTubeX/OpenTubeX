@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: Tutte le piattaforme
     Followed Channels: Canali seguiti su altre piattaforme
     Description: Segui canali su Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de per vedere i loro caricamenti nella scheda Piattaforme delle tue iscrizioni. Trova i canali con la ricerca o aggiungili tramite l’indirizzo della loro pagina. I loro contenuti vengono riprodotti con yt-dlp.
+    Platform Description: Segui canali su {platform} per vedere i loro caricamenti nella scheda Piattaforme delle tue iscrizioni. Trova i canali con la ricerca o aggiungili tramite l’indirizzo della loro pagina. I loro contenuti vengono riprodotti con yt-dlp.
     Add Channel: Aggiungi canale
     Search Or Paste Channel: Cerca o incolla l'indirizzo di un canale
     Invalid Channel: Inserisci l’indirizzo della pagina di un canale su Twitch, SoundCloud, PeerTube, Rumble, Odysee o media.ccc.de.
     Channel Not Found: Non esiste alcun canale a questo indirizzo.
     Channel Already Followed: Segui già questo canale.
     Channel Could Not Be Loaded: Impossibile caricare il canale.
-    No Channels: Non segui ancora nessun canale su altre piattaforme.
+    No Platform Channels: Non segui ancora nessun canale su {platform}.
     Unfollow Channel: Smetti di seguire {channel}
     Go To Channel: Vai a {channel}
     Follow: Segui

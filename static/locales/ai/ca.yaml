@@ -315,13 +315,14 @@ Subscriptions:
     All Platforms: Totes les plataformes
     Followed Channels: Canals seguits en altres plataformes
     Description: Seguiu canals de Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de per veure'n les publicacions a la pestanya Plataformes de les vostres subscripcions. Cerqueu canals amb el cercador o afegiu-los amb l'adreça de la seva pàgina. El seu contingut es reprodueix amb yt-dlp.
+    Platform Description: Seguiu canals de {platform} per veure'n les publicacions a la pestanya Plataformes de les vostres subscripcions. Cerqueu canals amb el cercador o afegiu-los amb l'adreça de la seva pàgina. El seu contingut es reprodueix amb yt-dlp.
     Add Channel: Afegeix un canal
     Search Or Paste Channel: Cerqueu o enganxeu l'adreça d'un canal
     Invalid Channel: Introduïu l'adreça de la pàgina d'un canal de Twitch, SoundCloud, PeerTube, Rumble, Odysee o media.ccc.de.
     Channel Not Found: No hi ha cap canal en aquesta adreça.
     Channel Already Followed: Ja seguiu aquest canal.
     Channel Could Not Be Loaded: No s'ha pogut carregar el canal.
-    No Channels: Encara no seguiu cap canal en altres plataformes.
+    No Platform Channels: Encara no seguiu cap canal de {platform}.
     Unfollow Channel: Deixa de seguir {channel}
     Go To Channel: Ves a {channel}
     Follow: Segueix

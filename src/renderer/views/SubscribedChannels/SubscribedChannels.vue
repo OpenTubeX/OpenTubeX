@@ -86,7 +86,7 @@
           v-if="selectedPlatform !== 'youtube'"
           class="description"
         >
-          {{ $t('Subscriptions.Platforms.Description') }}
+          {{ emptyDescription }}
         </p>
       </ft-flex-box>
       <template v-else>
@@ -326,6 +326,7 @@ const selectedPlatform = computed(() => {
   const requested = route.query.platform ?? storedPlatform
   return PLATFORM_VALUES.includes(requested) ? requested : 'youtube'
 })
+const selectedPlatformName = computed(() => platformNames.value[PLATFORM_VALUES.indexOf(selectedPlatform.value)])
 
 /**
  * @param {string} platform
@@ -474,8 +475,14 @@ const emptyMessage = computed(() => {
   if (selectedPlatform.value === 'youtube') {
     return activeProfileSubscriptions.value.length === 0 ? t('Channels.Empty') : t('Subscription Groups.Empty Group')
   }
-  return selectedPlatform.value === 'all' ? t('Channels.Empty') : t('Subscriptions.Platforms.No Channels')
+  return selectedPlatform.value === 'all'
+    ? t('Channels.Empty')
+    : t('Subscriptions.Platforms.No Platform Channels', { platform: selectedPlatformName.value })
 })
+
+const emptyDescription = computed(() => selectedPlatform.value === 'all'
+  ? t('Subscriptions.Platforms.Description')
+  : t('Subscriptions.Platforms.Platform Description', { platform: selectedPlatformName.value }))
 
 const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(channelList, {
   pageSize: channelsPerPage,

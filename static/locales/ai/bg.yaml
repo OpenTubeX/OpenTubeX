@@ -269,13 +269,14 @@ Subscriptions:
     All Platforms: Всички платформи
     Followed Channels: Следвани канали в други платформи
     Description: Следвайте канали в Twitch, SoundCloud, PeerTube, Rumble, Odysee и media.ccc.de, за да виждате новите им публикации в раздела „Платформи“ на абонаментите си. Намирайте канали чрез търсенето или ги добавяйте по адреса на страницата им. Медиите им се възпроизвеждат с yt-dlp.
+    Platform Description: Следвайте канали в {platform}, за да виждате новите им публикации в раздела „Платформи“ на абонаментите си. Намирайте канали чрез търсенето или ги добавяйте по адреса на страницата им. Медиите им се възпроизвеждат с yt-dlp.
     Add Channel: Добавяне на канал
     Search Or Paste Channel: Търсете или поставете адрес на канал
     Invalid Channel: Въведете адреса на страница на канал в Twitch, SoundCloud, PeerTube, Rumble, Odysee или media.ccc.de.
     Channel Not Found: На този адрес няма канал.
     Channel Already Followed: Вече следвате този канал.
     Channel Could Not Be Loaded: Каналът не можа да бъде зареден.
-    No Channels: Все още не следвате канали в други платформи.
+    No Platform Channels: Все още не следвате канали в {platform}.
     Unfollow Channel: Спиране на следването на {channel}
     Go To Channel: Отваряне на {channel}
     Follow: Следване

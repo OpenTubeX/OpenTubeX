@@ -267,13 +267,14 @@ Subscriptions:
     All Platforms: Toate platformele
     Followed Channels: Canale urmărite pe alte platforme
     Description: Urmărește canale de pe Twitch, SoundCloud, PeerTube, Rumble, Odysee și media.ccc.de pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
+    Platform Description: Urmărește canale de pe {platform} pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
     Add Channel: Adaugă canal
     Search Or Paste Channel: Căutați sau lipiți adresa unui canal
     Invalid Channel: Introdu adresa paginii unui canal de pe Twitch, SoundCloud, PeerTube, Rumble, Odysee sau media.ccc.de.
     Channel Not Found: Nu există niciun canal la această adresă.
     Channel Already Followed: Urmărești deja acest canal.
     Channel Could Not Be Loaded: Canalul nu a putut fi încărcat.
-    No Channels: Încă nu urmărești niciun canal de pe alte platforme.
+    No Platform Channels: Încă nu urmărești niciun canal de pe {platform}.
     Unfollow Channel: Nu mai urmări {channel}
     Go To Channel: Mergi la {channel}
     Follow: Urmărește
