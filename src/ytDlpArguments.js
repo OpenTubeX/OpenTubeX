@@ -304,10 +304,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   let localPlaylistTitle = typeof payload.title === 'string'
     // yt-dlp expands ~ and $VARIABLES in output templates, which contain this title literally
     ? payload.title.replaceAll(/[<>:"/\\|?*$]/g, '_').replace(/^~/, '_')
-      .split('').map(character => {
-        if (character.charCodeAt(0) < 32) return '_'
-        return character
-      }).join('')
+      .split('').map(character => character.charCodeAt(0) < 32 ? '_' : character).join('')
       .replace(/[. ]+$/, '').slice(0, 120) || 'Playlist'
     : 'Playlist'
   if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(localPlaylistTitle)) {

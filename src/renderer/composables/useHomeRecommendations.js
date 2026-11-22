@@ -228,8 +228,11 @@ export function useHomeRecommendations(visible) {
     candidates = mergeRecommendationCandidates([...candidates, ...Object.entries(store.getters.getVideoCache)
       .filter(([id]) => subscriptionIds.has(id))
       .toSorted(([a], [b]) => (learned.channelWeights.get(b) ?? 0) - (learned.channelWeights.get(a) ?? 0))
-      .slice(0, 12).flatMap(([id, entry]) => (entry.videos ?? []).slice(0, 30)
-        .map(video => ({ ...video, recommendationSources: [{ type: 'subscription', id }] })))])
+      .slice(0, 12)
+      .flatMap(([id, entry]) => (entry.videos ?? []).slice(0, 30).map(video => ({
+        ...video,
+        recommendationSources: [{ type: 'subscription', id }],
+      })))])
     requestController = new AbortController()
     const signal = requestController.signal
     const backend = store.getters.getBackendPreference

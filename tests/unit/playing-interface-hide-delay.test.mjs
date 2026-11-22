@@ -8,8 +8,8 @@ test('shipped bundle uses the delay for movement, touch, keyboard and seeking', 
   const scheduled = []
   const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), aa: seconds => scheduled.push(seconds) }
   const container = { classList: { remove() {} }, dataset: {} }
-  const move = vm.runInNewContext(`(${bundle.match(/function KP\(a,b\)\{[\s\S]*?\}(?=function cQ\()/)[0]})`, { LP() {}, TP() {} })
-  const seek = vm.runInNewContext(`({${bundle.match(/di\(a\)\{\(this\.O=\s*a\)[\s\S]*?\}/)[0]}})`).di
+  const move = vm.runInNewContext(`(${bundle.match(/function SP\(a,b\)\{[\s\S]*?\}(?=function kQ\()/)[0]})`, { TP() {}, aQ() {} })
+  const seek = vm.runInNewContext(`({${bundle.match(/gi\(a\)\{\(this\.O=\s*a\)[\s\S]*?\}/)[0]}})`).gi
   const controls = {
     videoContainer_: container,
     controlsContainer_: container,
