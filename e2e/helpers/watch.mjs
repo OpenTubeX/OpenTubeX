@@ -219,6 +219,7 @@ function addCommentImages(body, attachments) {
  * @param {object[]} [options.infoPanels] raw info panel renderers to show below the video
  * @param {string} [options.mediaUrl] serve the demo video's progressive format from this URL
  * @param {Record<string, number>} [options.loudnessDb] YouTube's loudness above its playback target, by video ID
+ * @param {string[]} [options.upcomingVideoIds] serve these videos as scheduled live streams without a trailer
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -238,7 +239,8 @@ export async function mockWatchPage(app, page, {
   contentDisclosures,
   infoPanels,
   mediaUrl,
-  loudnessDb = {}
+  loudnessDb = {},
+  upcomingVideoIds = []
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' ||
@@ -341,6 +343,14 @@ export async function mockWatchPage(app, page, {
       if (!playable) {
         json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
         delete json.streamingData
+      } else if (upcomingVideoIds.includes(videoId)) {
+        json.playabilityStatus = { status: 'LIVE_STREAM_OFFLINE', reason: 'This live event will begin in 1 day.' }
+        delete json.streamingData
+        Object.assign(json.videoDetails, { isUpcoming: true, isLiveContent: true, lengthSeconds: '0' })
+        json.microformat.playerMicroformatRenderer.liveBroadcastDetails = {
+          isLiveNow: false,
+          startTimestamp: new Date(Date.now() + 86_400_000).toISOString()
+        }
       }
 
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(json) })
