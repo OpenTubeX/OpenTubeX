@@ -2458,6 +2458,10 @@ Comments:
   Show original: نمایش متن اصلی
   Translating comment, please wait: دیدگاه در حال ترجمه است، لطفاً صبر کنید
   Comment translation failed: ترجمهٔ دیدگاه ناموفق بود
+  Timed: "زمان‌بندی‌شده"
+  Timed comments appear as the video plays: "نظرهای مربوط به آنچه تماشا می‌کنید، هنگام پخش ویدیو اینجا نمایش داده می‌شوند. نظر بعدی در {time} نمایش داده می‌شود."
+  Next timed comment at: "نظر بعدی در {time}"
+  This video has no timed comments: "این ویدیو نظر زمان‌بندی‌شده‌ای ندارد"
 Description:
   Title: توضیحات
   Copy Description: کپی توضیحات

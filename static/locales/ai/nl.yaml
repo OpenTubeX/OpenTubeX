@@ -2424,6 +2424,10 @@ Comments:
   Show original: Origineel tonen
   Translating comment, please wait: Reactie vertalen, even geduld
   Comment translation failed: Vertalen van reactie mislukt
+  Timed: "Getimed"
+  Timed comments appear as the video plays: "Reacties over wat je bekijkt, verschijnen hier terwijl de video wordt afgespeeld. De volgende verschijnt op {time}."
+  Next timed comment at: "Volgende reactie op {time}"
+  This video has no timed comments: "Deze video heeft geen getimede reacties"
 Description:
   Title: Beschrijving
   Copy Description: Beschrijving kopiëren

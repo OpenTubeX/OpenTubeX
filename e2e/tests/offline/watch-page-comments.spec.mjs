@@ -1117,6 +1117,87 @@ test.describe('manual comment loading', () => {
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     })
 
+    test('clamps fullscreen Timed comment scrolling after seeking back', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      // YouTube's Android client returns the Timed sort with each comment's moment.
+      const timedComments = Array.from({ length: 20 }, (_, index) => ({ id: `timed-${index}`, seconds: index + 1 }))
+      await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+        if (JSON.parse(request.postData() ?? '{}').context?.client?.clientName !== 'ANDROID') return route.fallback()
+        return route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({
+            frameworkUpdates: {
+              entityBatchUpdate: {
+                mutations: [
+                  ...timedComments.map(({ id, seconds }) => ({
+                    payload: {
+                      commentEntityPayload: {
+                        key: id,
+                        properties: { commentId: id, content: { content: `Timed comment at 0:${String(seconds).padStart(2, '0')}` }, publishedTime: '1 day ago' },
+                        author: { displayName: `@timed${seconds}`, channelId: `UC${id}`, avatarThumbnailUrl: 'https://yt3.ggpht.com/avatar' },
+                        toolbar: {}
+                      }
+                    }
+                  })),
+                  {
+                    payload: {
+                      timedMarkersListSyncEntity: {
+                        timedListData: {
+                          sections: [{ timedSyncDataList: timedComments.map(({ id, seconds }) => ({ videoTimeMs: String(seconds * 1000), syncItemId: id })) }]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          })
+        })
+      })
+      await openMockedVideo(page)
+      const video = page.locator('video')
+      await video.evaluate(element => {
+        element.pause()
+        element.currentTime = 25
+      })
+
+      const loadComments = page.locator('.getCommentsTitle')
+      await loadComments.scrollIntoViewIfNeeded()
+      await loadComments.click()
+      await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+      await page.locator('.commentHeaderActions .select-text').click()
+      await page.getByRole('option', { name: 'Timed' }).click()
+      await expect(page.locator('.commentThread')).toHaveCount(timedComments.length)
+      await expect(page.locator('.commentThread').first()).toContainText('Timed comment at 0:20')
+
+      await setPlayerFullscreen(page, true)
+      await page.locator('.fullscreenCommentsToggle').click({ force: true })
+      const dock = page.locator('.fullscreenCommentsOverlay.open')
+      const scroller = dock.locator('.commentsContentWrapper')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      // Seeking back hides the comments for later moments.
+      await video.evaluate(element => { element.currentTime = 12.5 })
+      await expect(dock.locator('.commentThread')).toHaveCount(12)
+      await expect.poll(() => scroller.evaluate(element => {
+        const contentEnd = element.querySelector('.commentThread').parentElement.getBoundingClientRect().bottom +
+          (Number.parseFloat(getComputedStyle(element).paddingBottom) || 0)
+        return element.scrollTop > 0 &&
+          element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
+          contentEnd >= element.getBoundingClientRect().bottom - 1
+      })).toBe(true)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await video.evaluate(element => { element.currentTime = 2.5 })
+      await expect(dock.locator('.commentThread')).toHaveCount(2)
+      await expect(dock.locator('.timedCommentsHint')).toHaveText('Next comment at 0:03')
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    })
+
     test('clamps fullscreen comment scrolling after creator and search filtering', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)

@@ -9,12 +9,12 @@ test('offline reloadCommentData preserves loaded comments without starting a req
   const start = source.indexOf('function reloadCommentData(')
   const end = source.indexOf('\n}\n', start) + 2
   const commentData = ref([{ id: 'loaded-comment' }])
-  const sortNewest = ref(false)
+  const sortOrder = ref('top')
   let requests = 0
   const run = vm.runInNewContext(`${source.slice(start, end)}\nreloadCommentData`, {
     props: { offline: true },
     commentData,
-    sortNewest,
+    sortOrder,
     nextPageToken: ref('continuation'),
     localCommentsInstance: {},
     replyTokens: new Map(),
@@ -24,7 +24,7 @@ test('offline reloadCommentData preserves loaded comments without starting a req
   })
   run('newest')
   assert.equal(commentData.value[0]?.id, 'loaded-comment')
-  assert.equal(sortNewest.value, false)
+  assert.equal(sortOrder.value, 'top')
   assert.equal(requests, 0)
 })
 

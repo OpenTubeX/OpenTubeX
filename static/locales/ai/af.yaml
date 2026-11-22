@@ -2618,6 +2618,10 @@ Comments:
   Show original: Wys oorspronklike
   Translating comment, please wait: Vertaal opmerking, wag asseblief
   Comment translation failed: Vertaling van opmerking het misluk
+  Timed: "Volgens tyd"
+  Timed comments appear as the video plays: "Kommentaar oor wat jy kyk, verskyn hier terwyl die video speel. Die volgende een verskyn om {time}."
+  Next timed comment at: "Volgende kommentaar om {time}"
+  This video has no timed comments: "Hierdie video het geen getydde kommentaar nie"
 Description:
   Title: Beskrywing
   Copy Description: Kopieer beskrywing

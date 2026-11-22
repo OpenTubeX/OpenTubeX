@@ -2359,6 +2359,10 @@ Comments:
   Show original: Kuva originaal
   Translating comment, please wait: Kommentaari tõlkimine, palun oota
   Comment translation failed: Kommentaari tõlge nurjus
+  Timed: "Ajastatud"
+  Timed comments appear as the video plays: "Kommentaarid selle kohta, mida vaatad, ilmuvad siia video esitamise ajal. Järgmine ilmub ajal {time}."
+  Next timed comment at: "Järgmine kommentaar ajal {time}"
+  This video has no timed comments: "Sellel videol pole ajastatud kommentaare"
 Description:
   Title: Kirjeldus
   Copy Description: Kopeeri kirjeldus

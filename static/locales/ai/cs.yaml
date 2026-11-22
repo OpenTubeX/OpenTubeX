@@ -2356,6 +2356,10 @@ Comments:
   Show original: Zobrazit originál
   Translating comment, please wait: Překlad komentáře, čekejte
   Comment translation failed: Překlad komentáře se nezdařil
+  Timed: "Časované"
+  Timed comments appear as the video plays: "Komentáře k tomu, co sledujete, se tu zobrazují během přehrávání videa. Další se zobrazí v čase {time}."
+  Next timed comment at: "Další komentář v čase {time}"
+  This video has no timed comments: "Toto video nemá žádné časované komentáře"
 Description:
   Title: Popis
   Copy Description: Kopírovat popis

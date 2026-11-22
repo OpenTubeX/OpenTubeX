@@ -2373,6 +2373,10 @@ Comments:
   Show original: Hiện bản gốc
   Translating comment, please wait: Đang dịch bình luận, vui lòng chờ
   Comment translation failed: Không thể dịch bình luận
+  Timed: "Theo thời gian"
+  Timed comments appear as the video plays: "Bình luận về nội dung bạn đang xem sẽ xuất hiện ở đây khi video phát. Bình luận tiếp theo xuất hiện lúc {time}."
+  Next timed comment at: "Bình luận tiếp theo lúc {time}"
+  This video has no timed comments: "Video này không có bình luận theo thời gian"
 Description:
   Title: Mô tả
   Copy Description: Sao chép mô tả

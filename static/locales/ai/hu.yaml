@@ -2357,6 +2357,10 @@ Comments:
   Show original: Eredeti megjelenítése
   Translating comment, please wait: Hozzászólás fordítása, kis türelmet
   Comment translation failed: Nem sikerült lefordítani a hozzászólást
+  Timed: "Időzített"
+  Timed comments appear as the video plays: "Az éppen nézett részhez írt kommentek itt jelennek meg a videó lejátszása közben. A következő {time}-kor jelenik meg."
+  Next timed comment at: "Következő komment: {time}"
+  This video has no timed comments: "Ehhez a videóhoz nincsenek időzített kommentek"
 Description:
   Title: Leírás
   Copy Description: Leírás másolása

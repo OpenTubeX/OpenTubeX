@@ -1,4 +1,4 @@
-import { FLAT_REPLY_RENDERING_PRIORITY, normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
+import { FLAT_REPLY_RENDERING_PRIORITY, getTimedCommentPayloads, getTimedCommentsContinuation, normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
 import { createPostCommentsContinuation, createPostPageParams, parsePollResults } from './youtube-account-parsers.js'
 import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
@@ -1585,6 +1585,32 @@ export { parseLocalVideoCollaborators } from '../video-collaborators'
  */
 export async function getLocalComments(id, sortBy = undefined, commentId = undefined) {
   return (await createLocalCommentsClient()).getComments(id, sortBy, commentId)
+}
+
+/**
+ * @typedef {LocalComment & { timedSeconds: number }} LocalTimedComment
+ */
+
+/**
+ * The comments YouTube's Timed sort shows at moments of the video, in video
+ * order. They come on one page, without reply tokens.
+ * @param {string} videoId
+ * @returns {Promise<LocalTimedComment[]>}
+ */
+export async function getLocalTimedComments(videoId) {
+  const innertube = await createInnertube({ generateSessionLocally: false })
+  const { data } = await innertube.actions.execute('/next', {
+    continuation: getTimedCommentsContinuation(videoId),
+    client: 'ANDROID',
+    parse: false
+  })
+
+  return getTimedCommentPayloads(data).map(({ seconds, comment, toolbarState }) => {
+    const view = new YTNodes.CommentView({ commentId: comment.properties.commentId })
+    view.applyMutations(comment, toolbarState)
+    const numReplies = parseLocalSubscriberCount(String(view.reply_count ?? '0'))
+    return { ...parseLocalComment(view), numReplies, timedSeconds: seconds }
+  })
 }
 
 /**

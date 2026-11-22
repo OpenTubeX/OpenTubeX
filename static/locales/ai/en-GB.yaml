@@ -2352,6 +2352,10 @@ Comments:
   Show original: Show original
   Translating comment, please wait: Translating comment, please wait
   Comment translation failed: Comment translation failed
+  Timed: "Timed"
+  Timed comments appear as the video plays: "Comments about what you're watching appear here as the video plays. The next one appears at {time}."
+  Next timed comment at: "Next comment at {time}"
+  This video has no timed comments: "This video has no timed comments"
 Description:
   Title: Description
   Copy Description: Copy Description

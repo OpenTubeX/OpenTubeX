@@ -453,6 +453,12 @@
   text-align: center;
 }
 
+.timedCommentsHint {
+  margin-block: 8px 16px;
+  color: var(--secondary-text-color);
+  font-size: 13px;
+}
+
 .fullscreenCommentCard > .commentTools .commentFilterCount {
   color: var(--primary-text-color);
 }

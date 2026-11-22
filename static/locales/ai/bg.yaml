@@ -2390,6 +2390,10 @@ Comments:
   Show original: Показване на оригинала
   Translating comment, please wait: Коментарът се превежда. Моля, изчакайте…
   Comment translation failed: Преводът на коментара е неуспешен
+  Timed: "По време"
+  Timed comments appear as the video plays: "Коментарите за това, което гледате, се появяват тук, докато видеото се възпроизвежда. Следващият ще се появи в {time}."
+  Next timed comment at: "Следващ коментар в {time}"
+  This video has no timed comments: "Този видеоклип няма коментари с времеви отметки"
 Description:
   Title: Описание
   Copy Description: Копиране на описанието

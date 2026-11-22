@@ -2411,6 +2411,10 @@ Comments:
   Show original: Montri originalon
   Translating comment, please wait: Tradukado de komento, bonvolu atendi
   Comment translation failed: Traduko de komento malsukcesis
+  Timed: "Laŭtempe"
+  Timed comments appear as the video plays: "Komentoj pri tio, kion vi spektas, aperas ĉi tie dum la video ludas. La sekva aperos je {time}."
+  Next timed comment at: "Sekva komento je {time}"
+  This video has no timed comments: "Ĉi tiu video ne havas tempigitajn komentojn"
 Description:
   Title: Priskribo
   Copy Description: Kopii priskribon

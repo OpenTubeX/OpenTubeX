@@ -256,6 +256,14 @@
         v-if="commentEntries.length > 0 && showComments"
         ref="commentsList"
       >
+        <p
+          v-if="nextTimedCommentTime"
+          class="timedCommentsHint"
+        >
+          {{ visibleCommentEntries.length === 0
+            ? $t('Comments.Timed comments appear as the video plays', { time: nextTimedCommentTime })
+            : $t('Comments.Next timed comment at', { time: nextTimedCommentTime }) }}
+        </p>
         <div
           v-for="({ comment, index, replyNodes }) in visibleCommentEntries"
           :id="index === null ? `comment-pinned-${comment.id}` : 'comment' + index"
@@ -617,7 +625,7 @@
           </div>
         </div>
         <p
-          v-if="visibleCommentEntries.length === 0"
+          v-if="visibleCommentEntries.length === 0 && (hasActiveCommentFilters || !isTimedSort)"
           class="noCommentFilterResults"
         >
           {{ $t('Comments.No loaded comments match your filters') }}
@@ -735,7 +743,7 @@ import { createPostedComment, getEditedCommentFields, getRootCommentId, youTubeC
 import { useCommentWatching } from './commentWatching'
 import { getWatchedComments } from '../../helpers/commentReplyNotifications'
 
-import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { debounce, formatDurationAsTimestamp, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getCommentReplyAccessibleLabel,
@@ -761,6 +769,7 @@ import {
 import {
   getLocalCommunityPostComments,
   getLocalComments,
+  getLocalTimedComments,
   parseLocalComment,
   parseLocalSubscriberCount,
   translateCommentText
@@ -838,6 +847,11 @@ const props = defineProps({
   videoTitle: {
     type: String,
     default: '',
+  },
+  // Playback position in seconds, which the Timed sort follows.
+  currentTime: {
+    type: Number,
+    default: null,
   }
 })
 
@@ -1447,8 +1461,37 @@ const commentEntries = computed(() => {
   return mergePinnedCommentSnapshots(commentData.value, personalPinnedCommentSnapshots.value)
 })
 
+// The moment of the latest timed comment that playback has reached. It only
+// changes when a comment appears or disappears, not on every time update.
+const timedCommentCutoff = computed(() => {
+  if (!isTimedSort.value) return Infinity
+  const time = props.currentTime ?? 0
+  return commentData.value.reduce((cutoff, comment) => {
+    return comment.timedSeconds <= time ? Math.max(cutoff, comment.timedSeconds) : cutoff
+  }, -1)
+})
+
+const nextTimedCommentSeconds = computed(() => {
+  if (!isTimedSort.value) return null
+  const time = props.currentTime ?? 0
+  return commentData.value.reduce((next, comment) => {
+    return comment.timedSeconds > time && (next === null || comment.timedSeconds < next) ? comment.timedSeconds : next
+  }, null)
+})
+
+const nextTimedCommentTime = computed(() => {
+  return nextTimedCommentSeconds.value === null ? '' : formatDurationAsTimestamp(nextTimedCommentSeconds.value)
+})
+
+// Comments posted here have no moment and stay at the top.
+function getTimedCommentOrder(comment) {
+  return comment.timedSeconds ?? Number.MAX_SAFE_INTEGER
+}
+
 const visibleCommentEntries = computed(() => {
+  const timedCutoff = timedCommentCutoff.value
   return commentEntries.value
+    .filter(({ comment }) => !(comment.timedSeconds > timedCutoff))
     .map(({ comment, index }) => ({
       comment,
       index,
@@ -1460,7 +1503,9 @@ const visibleCommentEntries = computed(() => {
         replyNodes.length > 0
     })
     .sort(({ comment: first }, { comment: second }) => {
-      return Number(commentTreeHasPersonalPin(second)) - Number(commentTreeHasPersonalPin(first))
+      return Number(commentTreeHasPersonalPin(second)) - Number(commentTreeHasPersonalPin(first)) ||
+        // Timed comments show the latest moment first, as the video reaches them.
+        (isTimedSort.value ? getTimedCommentOrder(second) - getTimedCommentOrder(first) : 0)
     })
 })
 
@@ -1935,7 +1980,15 @@ const canPerformInitialCommentLoading = computed(() => {
   return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
 
-const sortNewest = ref(false)
+/** @type {import('vue').Ref<'top' | 'newest' | 'timed'>} */
+const sortOrder = ref('top')
+const sortNewest = computed(() => sortOrder.value === 'newest')
+const isTimedSort = computed(() => sortOrder.value === 'timed')
+
+// Seeking back hides the comments for later moments.
+watch(timedCommentCutoff, (cutoff, previousCutoff) => {
+  if (cutoff < previousCutoff) clampCommentsScrollAfterRender()
+})
 
 // A failed load brings back the Load comments button and, with it, the
 // auto-load sentinel, which reports itself visible again at once. Without this
@@ -2027,22 +2080,32 @@ const observeVisibilityOptions = computed(() => {
   }
 })
 
-const sortNames = computed(() => [
-  t('Comments.Top comments'),
-  t('Comments.Newest first')
-])
+// Only YouTube's mobile apps offer the Timed sort, so Invidious cannot load it.
+const canSortByTime = computed(() => {
+  return !!process.env.SUPPORTS_LOCAL_API &&
+    !props.isPostComments &&
+    props.currentTime != null &&
+    !usesInvidiousApi(backendPreference.value)
+})
 
-const sortValues = [
-  'top',
-  'newest'
-]
+watch(canSortByTime, (canSort) => {
+  if (!canSort && isTimedSort.value) sortOrder.value = 'top'
+})
+
+const sortValues = computed(() => canSortByTime.value ? ['top', 'newest', 'timed'] : ['top', 'newest'])
+
+const sortNames = computed(() => sortValues.value.map(value => ({
+  top: t('Comments.Top comments'),
+  timed: t('Comments.Timed'),
+  newest: t('Comments.Newest first')
+})[value]))
 
 const sortMenuOpen = ref(false)
 
-const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
+const currentSortValue = computed(() => sortOrder.value)
 
 // Phones show the sort options in the bottom sheet that context menus use.
-const sortSheetActions = computed(() => sortValues.map((value, index) => {
+const sortSheetActions = computed(() => sortValues.value.map((value, index) => {
   const selected = currentSortValue.value === value
   return {
     label: sortNames.value[index],
@@ -2092,14 +2155,13 @@ function openPhoneHeaderOverflowMenu(button) {
 
 function handleSortChange(value) {
   if (props.offline) return
-  const newest = value === 'newest'
   closeCommentMenus()
 
-  if (sortNewest.value === newest) {
+  if (sortOrder.value === value) {
     return
   }
 
-  sortNewest.value = newest
+  sortOrder.value = value
   discardLoadedComments()
   getCommentData()
 }
@@ -2130,7 +2192,8 @@ function handleFullscreenActionsFocusout(event) {
 
 const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded', 'preview-comments'])
 
-watch(() => commentData.value.slice(0, 5).map(comment => ({
+// Timed previews show only the comments playback has reached.
+watch(() => (isTimedSort.value ? visibleCommentEntries.value.map(({ comment }) => comment) : commentData.value).slice(0, 5).map(comment => ({
   id: comment.id,
   author: comment.author,
   authorThumb: comment.authorThumb,
@@ -2291,7 +2354,7 @@ async function getCommentData() {
     if (useInvidious) {
       return props.isPostComments ? await getPostCommentsInvidious() : await getCommentDataInvidious()
     }
-    return await getCommentDataLocal()
+    return isTimedSort.value ? await getTimedCommentDataLocal() : await getCommentDataLocal()
   } finally {
     automaticInitialLoadFailed = canPerformInitialCommentLoading.value
   }
@@ -2402,7 +2465,9 @@ function isReplyLoading(commentId) {
   return loadingReplyIds.value.has(commentId)
 }
 
-/** @type {Map<string, (import('youtubei.js').YTNodes.CommentThread | import('youtubei.js').Misc.CommentsContinuation | string)>} */
+const TIMED_COMMENT_REPLIES = Symbol('timed comment replies')
+
+/** @type {Map<string, (import('youtubei.js').YTNodes.CommentThread | import('youtubei.js').Misc.CommentsContinuation | string | typeof TIMED_COMMENT_REPLIES)>} */
 const replyTokens = new Map()
 
 /**
@@ -2566,7 +2631,7 @@ async function getCommentDataLocal(more = false) {
     if (!comments.page.on_response_received_endpoints?.[1]) {
       throw new Error('The comments response is missing its content')
     }
-    if (loadedSortNewest !== undefined) sortNewest.value = loadedSortNewest
+    if (loadedSortNewest !== undefined) sortOrder.value = loadedSortNewest ? 'newest' : 'top'
 
     if (!more) {
       localCommentsInstance = comments
@@ -2619,6 +2684,57 @@ async function getCommentDataLocal(more = false) {
   }
 }
 
+async function getTimedCommentDataLocal() {
+  const generation = commentListGeneration
+
+  try {
+    const comments = await getLocalTimedComments(props.id)
+    if (generation !== commentListGeneration) {
+      return
+    }
+
+    if (comments.length === 0) {
+      showToast({ message: t('Comments.This video has no timed comments'), icon: ['fas', 'comment'] })
+      sortOrder.value = 'top'
+      return getCommentDataLocal()
+    }
+
+    for (const comment of comments) {
+      comment.hasReplyToken = comment.numReplies > 0
+      if (comment.hasReplyToken) {
+        replyTokens.set(comment.id, TIMED_COMMENT_REPLIES)
+      } else {
+        replyTokens.delete(comment.id)
+      }
+    }
+
+    commentData.value = withLocalCommentChanges(comments)
+    nextPageToken.value = null
+    isLoading.value = false
+    showComments.value = true
+  } catch (err) {
+    if (generation !== commentListGeneration) {
+      return
+    }
+
+    console.error(err)
+    showApiErrorToast(t('Local API Error (Click to copy)'), err)
+    sortOrder.value = 'top'
+    return getCommentDataLocal()
+  }
+}
+
+/**
+ * Timed comments come without reply tokens, so the first time a timed
+ * comment's replies open, its thread loads the way a linked comment does.
+ * @param {string} commentId
+ */
+async function getTimedCommentThread(commentId) {
+  const comments = await getLocalComments(props.id, undefined, commentId)
+  const thread = comments.contents.find(thread => thread.comment?.comment_id === commentId)
+  return thread?.has_replies ? thread : null
+}
+
 /**
  * @param {number} index
  * @param {string | null} commentId
@@ -2627,7 +2743,35 @@ async function getCommentRepliesLocal(index, commentId = null) {
   const targetGeneration = commentListGeneration
   const rootComment = commentData.value[index]
   const comment = rootComment ? findComment(rootComment, commentId) : null
-  const continuation = comment && replyTokens.get(comment.id)
+  let continuation = comment && replyTokens.get(comment.id)
+
+  if (continuation === TIMED_COMMENT_REPLIES) {
+    try {
+      continuation = await getTimedCommentThread(comment.id)
+    } catch (err) {
+      if (targetGeneration === commentListGeneration) {
+        console.error(err)
+        showApiErrorToast(t('Local API Error (Click to copy)'), err)
+      }
+      return
+    }
+    if (targetGeneration !== commentListGeneration) {
+      return
+    }
+    if (continuation === null) {
+      replyTokens.delete(comment.id)
+      comment.hasReplyToken = false
+      comment.numReplies = 0
+      showToast({
+        message: t('Comments.YouTube did not provide advertised replies'),
+        time: 10000,
+        icon: ['fas', 'comment']
+      })
+      return
+    }
+    replyTokens.set(comment.id, continuation)
+  }
+
   const invidiousReplyToken = continuation && typeof continuation !== 'string'
     ? getReplyContinuationToken(continuation)
     : null

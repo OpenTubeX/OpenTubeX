@@ -2742,6 +2742,10 @@ Comments:
   Show original: 원문 표시
   Translating comment, please wait: 댓글 번역 중입니다. 잠시 기다려 주세요
   Comment translation failed: 댓글 번역에 실패했습니다
+  Timed: "시간순"
+  Timed comments appear as the video plays: "동영상이 재생되는 동안 보고 있는 장면에 대한 댓글이 여기에 표시됩니다. 다음 댓글은 {time}에 표시됩니다."
+  Next timed comment at: "다음 댓글: {time}"
+  This video has no timed comments: "이 동영상에는 시간 지정 댓글이 없습니다"
 Description:
   Title: 설명
   Expand Description: 더보기
