@@ -121,7 +121,7 @@ const bookmarkHelpers = settingsProgram
   .filter(node => /PlaylistBookmark|LockedSetting|^runLocked$|^pendingLocks$/.test(node.type === 'VariableDeclaration' ? node.declarations[0].id.name : node.id?.name))
 
 // The real settings actions, against a datastore whose first write waits for `releaseWrite`.
-function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmarks) {
+function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmarks, DBProfileHandlers = undefined) {
   let saved = structuredClone(savedBookmarks)
   let releaseWrite
   const heldWrite = new Promise(resolve => { releaseWrite = resolve })
@@ -130,6 +130,7 @@ function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmar
   const settingsContext = vm.createContext({
     navigator,
     console,
+    DBProfileHandlers,
     DBSettingHandlers: {
       async findValue(_id) {
         assert.equal(_id, 'playlistBookmarks')
@@ -146,7 +147,9 @@ function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmar
   const store = {
     state,
     getters: { get getPlaylistBookmarks() { return state.settings.playlistBookmarks } },
+    rootGetters: { getActiveDataScope: null },
     commit: (mutation, value) => {
+      if (mutation === 'upsertProfileToList') return
       assert.equal(mutation, 'setPlaylistBookmarks')
       state.settings.playlistBookmarks = value
     },
@@ -189,4 +192,28 @@ test('a bookmark saved in another window survives a save here before its broadca
   const ids = ['other-window', 'added-playlist']
   assert.deepEqual(Array.from(store.state.settings.playlistBookmarks, bookmark => bookmark.playlist.id), ids)
   assert.deepEqual(Array.from(saved(), bookmark => bookmark.playlist.id), ids)
+})
+
+test('a separate profile saves and removes YouTube playlists in its own list, never in the shared one', async () => {
+  const shared = [{ playlist: { id: 'PLshared' } }]
+  let profile = { _id: 'kids', separate: true, playlistBookmarks: [{ playlist: { id: 'PLkids' } }] }
+  const { store, saved } = createSettingsStore(shared, shared, {
+    find: async () => [structuredClone(profile)],
+    // A slow write, so edits from two windows would overlap without the lock
+    async updatePlaylistBookmarks(id, playlistBookmarks) {
+      await new Promise(resolve => setTimeout(resolve, 5))
+      profile = { ...profile, playlistBookmarks: structuredClone(playlistBookmarks) }
+      return profile
+    },
+  })
+  store.rootGetters = { getActiveDataScope: 'kids' }
+  store.state.userPlaylistsPinnedIds = []
+  await Promise.all([
+    store.dispatch('savePlaylistBookmark', { playlist: { id: 'PLfirst' } }),
+    store.dispatch('savePlaylistBookmark', { playlist: { id: 'PLsecond' } }),
+  ])
+  await store.dispatch('removePlaylistBookmark', 'PLkids')
+  assert.deepEqual(profile.playlistBookmarks.map(bookmark => bookmark.playlist.id), ['PLfirst', 'PLsecond'])
+  assert.deepEqual(saved(), shared)
+  assert.deepEqual(store.state.settings.playlistBookmarks, shared)
 })

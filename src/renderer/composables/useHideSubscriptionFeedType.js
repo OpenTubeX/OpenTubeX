@@ -39,11 +39,14 @@ export function useHideSubscriptionFeedType(getChannelId, isPost = false) {
     const channelId = getChannelId()
     const typeToHide = feedType.value
     saving.value = true
+    // A profile switch before the queued save runs doesn't move it.
+    const profileId = store.getters.getSubscriptionRootProfile._id
     pendingFeedTypeUpdates = pendingFeedTypeUpdates.then(async () => {
       try {
-        const currentChannel = store.getters.getSubscribedChannelsById.get(channelId)
+        const currentChannel = store.getters.profileById(profileId)?.subscriptions.find(channel => channel.id === channelId)
         const saved = await store.dispatch('updateChannelSettings', {
           channelId,
+          profileId,
           settings: {
             feedTypes: getUpdatedSubscriptionFeedTypes(
               normalizeSubscriptionChannelSettings(currentChannel).feedTypes,

@@ -300,7 +300,7 @@ test('channel tab videos get the channel name from the channel page or the subsc
   }
   const tabVideos = () => ({ videos: [{ videoId: 'a', author: '', authorId: '' }] })
   const context = {
-    store: { getters: { getBackendPreference: 'yattee', getProfileList: [{ subscriptions: [{ id: 'UCsubscribed', name: 'Subscribed channel' }] }] } },
+    store: { getters: { getBackendPreference: 'yattee', getSubscribedChannelsById: new Map([['UCsubscribed', { id: 'UCsubscribed', name: 'Subscribed channel' }]]) } },
     getInvidiousChannelTab: async () => tabVideos(),
     invidiousAPICall: async () => ({ authorId: 'UCvisited', author: 'Visited channel' }),
     normalizeYatteeChannel,

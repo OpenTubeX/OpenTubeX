@@ -443,7 +443,7 @@ const selectedUserPlaylist = computed(() => {
   return store.getters.getPlaylist(props.playlistId)
 })
 
-const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkPlaylistId = computed(() => store.getters.getActiveQuickBookmarkTargetPlaylistId)
 
 const quickBookmarkButtonEnabled = computed(() => {
   if (selectedUserPlaylist.value == null) { return true }

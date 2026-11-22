@@ -434,6 +434,7 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 
 import store from '../../store/index'
+import { getDataScope } from '../../../datastores/handlers/index'
 
 import {
   copyToClipboard,
@@ -1427,7 +1428,9 @@ function handleDeletePlaylistPromptAnswer(option) {
 function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = quickBookmarkPlaylist.value
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', props.id)
+  // An undo after a profile switch restores this profile's target.
+  const scope = getDataScope()
+  store.dispatch('updateActiveQuickBookmarkTarget', props.id)
   if (currentQuickBookmarkTargetPlaylist != null) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
@@ -1435,7 +1438,7 @@ function enableQuickBookmarkForThisPlaylist() {
       }),
       time: 5000,
       action: () => {
-        store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
+        store.dispatch('updateActiveQuickBookmarkTarget', { playlistId: currentQuickBookmarkTargetPlaylist._id, scope })
         showToast({
           message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName

@@ -1,8 +1,11 @@
 import { MAIN_PROFILE_ID } from '../../constants.js'
 import { PLAYLIST_PREFERENCE_TIMESTAMP_KEYS, stampPlaylistPreferenceEdits } from './playlist-preferences-sync.js'
 import { Unzip, UnzipInflate, zipSync, strToU8, strFromU8 } from 'fflate'
+import { isValidSeparateProfileId } from '../../datastores/profileDatastoreNames.js'
 
 export const BACKUP_SECTIONS = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
+/** The sections a separate profile keeps for itself */
+export const PROFILE_DATA_SECTIONS = ['playlists', 'history', 'searchHistory', 'watchStats']
 const MAX_ARCHIVE_SIZE = 128 * 1024 * 1024
 const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const MAX_TOTAL_SIZE = 256 * 1024 * 1024
@@ -12,7 +15,7 @@ const MAX_TOTAL_SIZE = 256 * 1024 * 1024
  * The saved name, colors, and channels with their settings stay as they are.
  */
 export function mergeImportedProfile(current, imported) {
-  if (!current) return imported
+  if (!current) return withProfileSeparation(imported)
   const subscribedIds = new Set(current.subscriptions.map(channel => channel.id))
   const added = imported.subscriptions.filter(channel => !subscribedIds.has(channel.id) && subscribedIds.add(channel.id))
   return {
@@ -22,11 +25,28 @@ export function mergeImportedProfile(current, imported) {
   }
 }
 
+/**
+ * Whether a profile keeps its own data is chosen when it is created. A saved
+ * profile keeps that choice, and the main profile never keeps its data apart.
+ * @template {{ _id?: string, separate?: boolean }} T
+ * @param {T} profile
+ * @param {{ separate?: boolean } | null} [current] the saved profile
+ * @returns {T}
+ */
+export function withProfileSeparation(profile, current = null) {
+  // Other IDs can't name its datastores, see `isValidSeparateProfileId`.
+  // A new profile without an ID gets a short one.
+  const separate = profile._id !== MAIN_PROFILE_ID && (profile._id === undefined || isValidSeparateProfileId(profile._id)) &&
+    (current ? current.separate === true : profile.separate === true)
+  const { separate: _separate, ...rest } = profile
+  return /** @type {T} */ (separate ? { ...rest, separate: true } : rest)
+}
+
 export function mergeBackupProfile(current, imported) {
-  if (!current) return imported
+  if (!current) return withProfileSeparation(imported)
   const subscriptions = new Map(current.subscriptions.map(channel => [channel.id, channel]))
   for (const channel of imported.subscriptions) subscriptions.set(channel.id, channel)
-  return { ...current, ...imported, subscriptions: [...subscriptions.values()] }
+  return withProfileSeparation({ ...current, ...imported, subscriptions: [...subscriptions.values()] }, current)
 }
 
 /**
@@ -94,19 +114,38 @@ export function mergeBackupWatchStatsAdjustment(currentRecords, currentAdjustmen
   return importedAdjustment
 }
 
+/**
+ * The data of each separate profile goes to `profile-data/<index>/`, listed
+ * in the manifest's `profileData`. Only archives with separate profiles or
+ * their data are version 2, so older versions still restore the others and
+ * refuse these clearly.
+ * @param {object} data the sections, and in `profileData` each separate profile's sections by its ID
+ */
 export function createUnifiedBackup(data) {
   const sections = BACKUP_SECTIONS.filter(section => Object.hasOwn(data, section))
   if (sections.length === 0) throw new Error('No backup sections selected')
+  const profileData = Object.entries(data.profileData ?? {})
+    .map(([id, profile]) => ({ id, sections: PROFILE_DATA_SECTIONS.filter(section => sections.includes(section) && Object.hasOwn(profile, section)) }))
+    .filter(profile => profile.sections.length > 0)
+  // Older versions would restore a separate profile as one sharing its data.
+  const hasSeparateProfiles = sections.includes('profiles') && data.profiles.some(profile => profile?.separate === true)
+  const manifest = profileData.length > 0 || hasSeparateProfiles
+    ? { format: 'opentubex-backup', version: 2, createdAt: new Date().toISOString(), sections, profileData }
+    : { format: 'opentubex-backup', version: 1, createdAt: new Date().toISOString(), sections }
   const files = {
-    'manifest.json': strToU8(JSON.stringify({ format: 'opentubex-backup', version: 1, createdAt: new Date().toISOString(), sections }))
+    'manifest.json': strToU8(JSON.stringify(manifest))
   }
   let totalSize = files['manifest.json'].length
-  for (const section of sections) {
-    files[`${section}.json`] = strToU8(JSON.stringify(data[section]))
-    if (files[`${section}.json`].length > MAX_ENTRY_SIZE) throw new Error('Backup entry is too large')
-    totalSize += files[`${section}.json`].length
+  const add = (name, value) => {
+    files[name] = strToU8(JSON.stringify(value))
+    if (files[name].length > MAX_ENTRY_SIZE) throw new Error('Backup entry is too large')
+    totalSize += files[name].length
     if (totalSize > MAX_TOTAL_SIZE) throw new Error('Backup data is too large')
   }
+  for (const section of sections) add(`${section}.json`, data[section])
+  profileData.forEach(({ id, sections: profileSections }, index) => {
+    for (const section of profileSections) add(`profile-data/${index}/${section}.json`, data.profileData[id][section])
+  })
   const archive = zipSync(files, { level: 6 })
   if (archive.length > MAX_ARCHIVE_SIZE) throw new Error('Backup archive is too large')
   return new Blob([archive], { type: 'application/zip' })
@@ -159,19 +198,36 @@ export async function readUnifiedBackup(file) {
   const parse = name => JSON.parse(strFromU8(entries.get(name)))
   if (!entries.has('manifest.json')) throw new Error('Backup archive has missing or unexpected files')
   const manifest = parse('manifest.json')
-  if (manifest?.format !== 'opentubex-backup' || manifest.version !== 1) {
+  if (manifest?.format !== 'opentubex-backup' || (manifest.version !== 1 && manifest.version !== 2)) {
     throw new Error('Unsupported backup version')
   }
   const sections = manifest.sections ?? BACKUP_SECTIONS
-  if (!Array.isArray(sections) || sections.length === 0 || new Set(sections).size !== sections.length || sections.some(section => !BACKUP_SECTIONS.includes(section))) {
+  const validSections = (list, allowed) => Array.isArray(list) && list.length > 0 && new Set(list).size === list.length && list.every(section => allowed.includes(section))
+  if (!validSections(sections, BACKUP_SECTIONS)) {
+    throw new Error('Invalid backup sections')
+  }
+  const profileData = manifest.version === 2 ? manifest.profileData : []
+  if (!Array.isArray(profileData) || new Set(profileData.map(profile => profile?.id)).size !== profileData.length ||
+    !profileData.every(profile => typeof profile?.id === 'string' && profile.id !== '' && profile.id !== MAIN_PROFILE_ID &&
+      validSections(profile.sections, PROFILE_DATA_SECTIONS.filter(section => sections.includes(section))))) {
     throw new Error('Invalid backup sections')
   }
   const expected = new Set(['manifest.json', ...sections.map(section => `${section}.json`)])
+  profileData.forEach((profile, index) => {
+    for (const section of profile.sections) expected.add(`profile-data/${index}/${section}.json`)
+  })
   if (entries.size !== expected.size || [...entries.keys()].some(name => !expected.has(name))) {
     throw new Error('Backup archive has missing or unexpected files')
   }
   const data = Object.fromEntries(sections.map(section => [section, parse(`${section}.json`)]))
   validateUnifiedBackup(data)
+  if (profileData.length > 0) {
+    data.profileData = Object.fromEntries(profileData.map((profile, index) => {
+      const sectionData = Object.fromEntries(profile.sections.map(section => [section, parse(`profile-data/${index}/${section}.json`)]))
+      validateUnifiedBackup(sectionData)
+      return [profile.id, sectionData]
+    }))
+  }
   return { manifest, data }
 }
 
@@ -188,7 +244,9 @@ export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
   const sections = {
-    profiles: record => object(record) && typeof record._id === 'string' && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
+    // A separate profile whose ID can't name its datastores would silently share the others' data.
+    profiles: record => object(record) && typeof record._id === 'string' && record._id !== '' &&
+      (record.separate !== true || record._id === MAIN_PROFILE_ID || isValidSeparateProfileId(record._id)) && (record._id === MAIN_PROFILE_ID ? record.name === null || typeof record.name === 'string' : typeof record.name === 'string' && record.name !== '') && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
     history: record => object(record) && typeof record.videoId === 'string' && (record.timeWatched === undefined || (Number.isFinite(record.timeWatched) && record.timeWatched >= 0)) && (record.watchProgress === undefined || (Number.isFinite(record.watchProgress) && record.watchProgress >= 0)),
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',

@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 import { getContinueWatchingCandidates } from '../../helpers/homeSections'
-import { DBHistoryHandlers } from '../../../datastores/handlers/index'
+import { DBHistoryHandlers, getDataScope } from '../../../datastores/handlers/index'
 import { readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions } from '../../helpers/externalMediaHistory'
 import {
   canMarkHistoryEntryAsWatched,
@@ -74,16 +74,19 @@ const getters = {
 const actions = {
   async grabHistory({ commit, dispatch, rootGetters }) {
     try {
+      const scope = getDataScope()
       const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
-      let results = await DBHistoryHandlers.find()
+      let results = await DBHistoryHandlers.find(true)
       if (cutoff !== null) {
         if (hasExpiredHistory(results, cutoff)) {
           await DBHistoryHandlers.deleteOlderThan(cutoff)
           // Other windows may have changed history during the cleanup, and the
           // main process keeps expired entries they are playing.
-          results = await DBHistoryHandlers.find()
+          results = await DBHistoryHandlers.find(true)
         }
       }
+      // A switch to another profile's data started meanwhile.
+      if (scope !== getDataScope()) return false
 
       const resultsById = {}
       results.forEach(video => {
@@ -93,6 +96,8 @@ const actions = {
       commit('setHistoryCacheSorted', results)
       commit('setHistoryCacheById', resultsById)
 
+      // Older versions kept these positions for the shared history.
+      if (scope !== null) return true
       // Merging sorts the records by watch time and keeps newer saves of the same media.
       const legacyPositions = readLegacyExternalMediaPositions(resultsById, cutoff)
       if (legacyPositions.records.length === 0 || await dispatch('mergeHistoryBackup', legacyPositions.records)) {
@@ -246,9 +251,11 @@ const actions = {
 
   async removeAllHistory({ commit }) {
     try {
+      const scope = getDataScope()
       await DBHistoryHandlers.deleteAll()
-      // Positions a failed migration kept would otherwise return on the next start.
-      removeLegacyExternalMediaPositions(readLegacyExternalMediaPositions({}, null).keys)
+      // Positions a failed migration kept would otherwise return on the next
+      // start. They belong to the shared history.
+      if (scope === null) removeLegacyExternalMediaPositions(readLegacyExternalMediaPositions({}, null).keys)
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
       return true

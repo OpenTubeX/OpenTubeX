@@ -1,12 +1,15 @@
 import { toRaw } from 'vue'
 
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
-import { DBProfileHandlers } from '../../../datastores/handlers/index'
+import { DBProfileHandlers, getDataScope, setDataScope } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp, normalizeSubscriptionChannelSettings } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 import { profileSyncSnapshot } from '../../helpers/profileSyncSnapshot'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { forgetWatchQueueScope } from './watch-queue'
+import { settleScopedActions } from '../../helpers/dataScopeActions'
+import { trackDataScopeLoad } from '../../helpers/sync-data-scope.js'
 
 const state = {
   profileList: [{
@@ -19,6 +22,39 @@ const state = {
   }],
   profilesLoaded: false,
   activeProfile: MAIN_PROFILE_ID
+}
+
+/**
+ * Combines the settings of a channel that several profiles with their own
+ * subscriptions follow, so that background refreshes fetch every feed type
+ * one of them shows and notify about every upload one of them asks for.
+ */
+function mergeRootChannelSettings(channel, other) {
+  const a = normalizeSubscriptionChannelSettings(channel)
+  const b = normalizeSubscriptionChannelSettings(other)
+  // Hidden feed types never notify, so each profile only adds the types it shows.
+  const notifies = settings => settings.notificationFeedTypes.filter(type => settings.feedTypes.includes(type))
+  return {
+    ...channel,
+    feedTypes: [...new Set([...a.feedTypes, ...b.feedTypes])],
+    notificationFeedTypes: [...new Set([...notifies(a), ...notifies(b)])],
+    showMembersOnly: a.showMembersOnly || b.showMembersOnly
+  }
+}
+
+/**
+ * The root profile of the given profile, or of the active one, and the
+ * profiles that share its subscriptions, or `null` if it no longer exists.
+ * @param {object} getters
+ * @param {string} [profileId]
+ */
+function getSubscriptionScope(getters, profileId) {
+  const root = profileId === undefined ? getters.getSubscriptionRootProfile : getters.profileById(profileId)
+  if (root == null) return null
+  const profiles = root.separate === true
+    ? [root]
+    : getters.getProfileList.filter(profile => profile.separate !== true)
+  return { root, profiles }
 }
 
 const getters = {
@@ -37,11 +73,57 @@ const getters = {
     return state.profileList.find(p => p._id === id)
   },
 
-  getSubscribedChannelIdSet: (state) => {
-    // The all channels profile is always the first profile in the array
-    const mainProfile = state.profileList[0]
+  /**
+   * The separate profile whose history, playlists, search history, watch
+   * stats and watch queue the app shows, or null for the data that the other
+   * profiles share.
+   * @returns {string | null}
+   */
+  getActiveDataScope: (state, getters) => {
+    return getters.getActiveProfile?.separate === true ? state.activeProfile : null
+  },
 
-    return mainProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
+  /**
+   * The profile that holds every channel the active profile can show: a
+   * separate profile itself, otherwise the all channels profile, which is
+   * always the first profile in the array.
+   */
+  getSubscriptionRootProfile: (state, getters) => {
+    return getters.getActiveProfile?.separate === true ? getters.getActiveProfile : state.profileList[0]
+  },
+
+  /** The profiles that share subscriptions and data with the active profile */
+  getDataScopeProfiles: (state, getters) => {
+    return getters.getActiveDataScope === null
+      ? state.profileList.filter(profile => profile.separate !== true)
+      : [getters.getActiveProfile]
+  },
+
+  /**
+   * The subscriptions of the all channels profile and of every separate
+   * profile, for work done for every profile, such as notifications and
+   * keeping cached feeds
+   */
+  getAllRootSubscriptions: (state) => {
+    const roots = state.profileList.filter((profile, index) => index === 0 || profile.separate === true)
+    if (roots.length === 1) return roots[0].subscriptions
+    const channels = new Map()
+    for (const profile of roots) {
+      for (const channel of profile.subscriptions) {
+        const known = channels.get(channel.id)
+        channels.set(channel.id, known === undefined ? channel : mergeRootChannelSettings(known, channel))
+      }
+    }
+    return [...channels.values()]
+  },
+
+  /** Every profile's subscriptions by channel, for feeds refreshed for all of them */
+  getAllRootSubscriptionsById: (state, getters) => {
+    return new Map(getters.getAllRootSubscriptions.map(channel => [channel.id, channel]))
+  },
+
+  getSubscribedChannelIdSet: (state, getters) => {
+    return getters.getSubscriptionRootProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
   },
 
   /** Lets every subscribe button answer membership without scanning the active profile */
@@ -50,19 +132,17 @@ const getters = {
   },
 
   /** Cached subscription details, so channel ids can be resolved to names without a network request */
-  getSubscribedChannelsById: (state) => {
-    // The all channels profile is always the first profile in the array
-    const mainProfile = state.profileList[0]
-
-    return new Map(mainProfile.subscriptions.map((channel) => [channel.id, channel]))
+  getSubscribedChannelsById: (state, getters) => {
+    return new Map(getters.getSubscriptionRootProfile.subscriptions.map((channel) => [channel.id, channel]))
   },
 
   /** Channels whose members-only videos are shown, which also requires authenticated playback */
   getMembersOnlyChannelIdSet: (state, getters) => {
     if (!hasConfiguredRestrictedPlaybackAuthentication(getters)) return new Set()
 
-    // Channel settings are kept in sync across profiles, so the main profile has them all
-    return new Set(state.profileList[0].subscriptions
+    // Channel settings are kept in sync across the profiles that share
+    // subscriptions, so their root profile has them all
+    return new Set(getters.getSubscriptionRootProfile.subscriptions
       .filter(channel => channel.showMembersOnly === true)
       .map(channel => channel.id))
   },
@@ -84,6 +164,13 @@ function profileSort(a, b) {
 
   return collator.compare(nameA, nameB)
 }
+
+/**
+ * A data scope whose data failed to load, so loading it again reads it
+ * instead of keeping the empty state.
+ * @type {string | null | undefined}
+ */
+let incompleteDataScope
 
 const actions = {
   async grabAllProfiles({ rootState, commit, state }, defaultName = null) {
@@ -159,13 +246,20 @@ const actions = {
     return dispatch('batchUpdateSubscriptionDetails', [channel])
   },
 
-  async batchUpdateChannelSettings({ commit, state }, updates) {
+  /**
+   * @param {{ channelId: string, settings: object }[] | { updates: { channelId: string, settings: object }[], profileId?: string }} payload
+   * the updates, optionally with the root profile they were made in
+   */
+  async batchUpdateChannelSettings({ commit, getters }, payload) {
+    const { updates, profileId } = Array.isArray(payload) ? { updates: payload, profileId: undefined } : payload
     if (updates.length === 0) return true
-    const subscriptionsById = new Map(state.profileList[0].subscriptions.map(channel => [channel.id, channel]))
-    const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
+    const scope = getSubscriptionScope(getters, profileId)
+    if (scope === null) return false
+    const subscribedIds = new Set(scope.root.subscriptions.map(channel => channel.id))
+    const availableUpdates = updates.filter(({ channelId }) => subscribedIds.has(channelId))
     if (availableUpdates.length === 0) return false
     const channelIds = new Set(availableUpdates.map(({ channelId }) => channelId))
-    const profiles = state.profileList
+    const profiles = scope.profiles
       .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
     const subscriptionsByChannelId = new Map([...channelIds].map(channelId => [channelId, []]))
     for (const profile of profiles) {
@@ -192,14 +286,16 @@ const actions = {
     }
   },
 
-  async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
+  async updateChannelSettings({ commit, getters }, { channelId, settings, fromSync = false, updatedAt, profileId }) {
     if (fromSync && !isValidSubscriptionSettingsTimestamp(updatedAt)) return false
 
-    const primarySubscription = state.profileList[0].subscriptions
-      .find(channel => channel.id === channelId)
+    // Sync and queued edits update the profiles of the scope they were made
+    // for, not the active one.
+    const scope = getSubscriptionScope(getters, profileId)
+    const primarySubscription = scope?.root.subscriptions.find(channel => channel.id === channelId)
     if (primarySubscription === undefined) return false
 
-    const profiles = state.profileList
+    const profiles = scope.profiles
       .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
     try {
       const editTimestamp = fromSync
@@ -334,10 +430,19 @@ const actions = {
     }
   },
 
-  async removeProfile({ commit }, profileId) {
+  async removeProfile({ commit, dispatch, getters, rootState }, profileId) {
     try {
+      const separate = getters.profileById(profileId)?.separate === true
       await DBProfileHandlers.delete(profileId)
       commit('removeProfileFromList', profileId)
+      // The datastores delete the rest of its data. The profile is gone even
+      // if its queue or statistics reset can't be deleted.
+      if (separate) {
+        await forgetWatchQueueScope(profileId).catch(error => console.error(error))
+        if (rootState.settings?.syncServerScopedWatchStatsResets?.[profileId]) {
+          await dispatch('updateWatchStatsReset', { scope: profileId, reset: null }).catch(error => console.error(error))
+        }
+      }
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -347,7 +452,60 @@ const actions = {
 
   updateActiveProfile({ commit }, id) {
     commit('setActiveProfile', id)
-  }
+  },
+
+  /**
+   * Shows the history, playlists, search history, watch stats, watch queue
+   * and recommendations of the active profile's data scope, after switching
+   * to or from a separate profile.
+   */
+  async loadDataScope({ dispatch, commit, getters, rootGetters }) {
+    if (getters.getActiveDataScope === getDataScope() && incompleteDataScope !== getDataScope()) return
+    // Sync waits until the store shows this profile's data.
+    const scope = await trackDataScopeLoad((async () => {
+      let load = false
+      // Writes that already started finish in the data they started in, as
+      // their later requests would otherwise reach this profile's data. The
+      // switch follows the last one before another can start.
+      const scope = await settleScopedActions(() => {
+        const scope = getters.getActiveDataScope
+        load = scope !== getDataScope() || scope === incompleteDataScope
+        if (!load) return scope
+        setDataScope(scope)
+        incompleteDataScope = undefined
+        // Until the load replaces them, the previous profile's data must not
+        // show here, or be marked as watched in this profile's history.
+        commit('setHistoryCacheSorted', [])
+        commit('setHistoryCacheById', {})
+        commit('setAllPlaylists', [])
+        commit('setPlaylistsReady', false)
+        commit('setSearchHistoryEntries', [])
+        commit('clearWatchStats')
+        // Sync shows the other devices' statistics of this profile once it loaded.
+        commit('setSyncedWatchStats', [])
+        return scope
+      })
+      if (!load) return scope
+      const hadRecommendations = rootGetters.getRecommendationEpoch !== null
+      commit('clearRecommendationState')
+      const read = (...args) => dispatch(...args).catch(error => {
+        console.error(error)
+        return false
+      })
+      const loaded = await Promise.all([
+        read('grabHistory'),
+        read('grabAllPlaylists'),
+        read('grabSearchHistoryEntries', { replace: true }),
+        read('loadWatchQueueScope', scope),
+        rootGetters.getEnableWatchStats ? read('grabWatchStats') : null,
+        hadRecommendations ? read('loadRecommendations') : null,
+      ])
+      // A failed read leaves that data empty, and the next load reads it again.
+      if (scope === getDataScope() && loaded.includes(false)) incompleteDataScope = scope
+      return scope
+    })())
+    if (scope === getDataScope()) await dispatch('applySyncServerDataScope')
+  },
 }
 
 function withDefaultProfileIcon(profile) {

@@ -1,20 +1,30 @@
 import { parentPort, workerData } from 'node:worker_threads'
+import { existsSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
+import { profileDatastorePrefix } from '../datastores/profileDatastoreNames.js'
 import { SqliteDatastore } from '../datastores/sqlite.js'
 import { desktopDatastorePaths } from '../datastores/sqliteNode.js'
 import { migrateLegacyHistoryRecord } from '../history.js'
 import { getTransferableSettings } from '../nonTransferableSettings.js'
 import { createDefaultSettings, resolveDefaultLandingPage } from '../settingsDefaults.js'
-import { BACKUP_SECTIONS, createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
+import { BACKUP_SECTIONS, PROFILE_DATA_SECTIONS, createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
 import { migrateLegacySettings } from '../renderer/helpers/settings-migrations.js'
 
 const { profileDirectory, sections = BACKUP_SECTIONS, settings: currentSettings } = workerData
+
+/** Reads like a datastore without documents */
+const emptyDatastore = {
+  findAsync: () => Object.assign(Promise.resolve([]), { sort() { return this } }),
+  findOneAsync: async () => null,
+}
 
 async function prepareArchive() {
   const databases = new Map()
   function open(name, childField) {
     if (databases.has(name)) return databases.get(name).datastore
     const { filename } = desktopDatastorePaths(profileDirectory, name)
+    // A separate profile's datastore only exists once the profile used it.
+    if (name.startsWith('profile-') && !existsSync(filename)) return emptyDatastore
     const database = new DatabaseSync(filename, { readOnly: true })
     // Keep each collection, including playlist children, in one read snapshot.
     database.exec('PRAGMA busy_timeout = 5000; BEGIN')
@@ -33,7 +43,33 @@ async function prepareArchive() {
     databases.set(name, { database, datastore })
     return datastore
   }
+  /**
+   * Reads the playlists, history, search history and watch statistics of a
+   * data scope, whose datastores start with `prefix`.
+   * @param {string} prefix
+   */
+  const dataReaders = prefix => ({
+    // Playlists synced from YouTube stay on YouTube.
+    playlists: () => open(`${prefix}playlists`, 'videos').findAsync({ youTube: { $exists: false } }),
+    async history() {
+      const records = await open(`${prefix}history`).findAsync({}).sort({ timeWatched: -1 })
+      // Like the app's history, keep only the newest record of a video that
+      // older sync runs stored twice.
+      const seen = new Set()
+      return records.filter(record => !seen.has(record.videoId) && seen.add(record.videoId)).map(migrateLegacyHistoryRecord)
+    },
+    searchHistory: () => open(`${prefix}search-history`).findAsync({}).sort({ lastUpdatedAt: -1 }),
+    async watchStats() {
+      const watchStats = open(`${prefix}watch-stats`)
+      const [records, migration] = await Promise.all([
+        watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 }),
+        watchStats.findOneAsync({ _id: 'history-watch-time-v1' }),
+      ])
+      return { records, adjustment: migration?.adjustment ?? null }
+    },
+  })
   const readers = {
+    ...dataReaders(''),
     async settings() {
       if (currentSettings) return currentSettings
       const [savedSettings, savedProfiles] = await Promise.all([
@@ -48,29 +84,20 @@ async function prepareArchive() {
       return getTransferableSettings(resolvedSettings)
     },
     profiles: () => open('profiles').findAsync({}),
-    // Playlists synced from YouTube stay on YouTube.
-    playlists: () => open('playlists', 'videos').findAsync({ youTube: { $exists: false } }),
-    async history() {
-      const records = await open('history').findAsync({}).sort({ timeWatched: -1 })
-      // Like the app's history, keep only the newest record of a video that
-      // older sync runs stored twice.
-      const seen = new Set()
-      return records.filter(record => !seen.has(record.videoId) && seen.add(record.videoId)).map(migrateLegacyHistoryRecord)
-    },
-    searchHistory: () => open('search-history').findAsync({}).sort({ lastUpdatedAt: -1 }),
-    async watchStats() {
-      const watchStats = open('watch-stats')
-      const [records, migration] = await Promise.all([
-        watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 }),
-        watchStats.findOneAsync({ _id: 'history-watch-time-v1' }),
-      ])
-      return { records, adjustment: migration?.adjustment ?? null }
-    },
   }
   let data
   try {
     const selected = sections.filter(section => Object.hasOwn(readers, section))
     data = Object.fromEntries(await Promise.all(selected.map(async section => [section, await readers[section]()])))
+    // A complete backup holds every separate profile's data too.
+    const profileSections = selected.filter(section => PROFILE_DATA_SECTIONS.includes(section))
+    if (profileSections.length > 0) {
+      const separateProfiles = await open('profiles').findAsync({ separate: true }, { _id: 1 })
+      data.profileData = Object.fromEntries(await Promise.all(separateProfiles.map(async ({ _id }) => {
+        const profileReaders = dataReaders(`${profileDatastorePrefix(_id)}-`)
+        return [_id, Object.fromEntries(await Promise.all(profileSections.map(async section => [section, await profileReaders[section]()])))]
+      })))
+    }
   } finally {
     for (const { database } of databases.values()) database.close()
   }

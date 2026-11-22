@@ -1,5 +1,5 @@
 import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
-import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
+import { DBSearchHistoryHandlers, getDataScope } from '../../../datastores/handlers/index'
 import { getRetentionCutoff } from '../../../history'
 import {
   getSearchHistoryEntryQuery,
@@ -44,12 +44,17 @@ const getters = {
   },
 }
 const actions = {
-  async grabSearchHistoryEntries({ commit, dispatch, rootGetters }) {
+  // `replace` drops the searches shown until now, which belong to another
+  // profile after switching.
+  async grabSearchHistoryEntries({ commit, dispatch, rootGetters }, { replace = false } = {}) {
     try {
-      const results = await DBSearchHistoryHandlers.find()
-      commit('mergeLoadedSearchHistoryEntries', results)
+      const scope = getDataScope()
+      const results = await DBSearchHistoryHandlers.find(true)
+      if (scope !== getDataScope()) return
+      commit(replace ? 'setSearchHistoryEntries' : 'mergeLoadedSearchHistoryEntries', results)
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
     await dispatch('removeSearchHistoryOlderThan', rootGetters.getSearchHistoryRetentionDays)
   },

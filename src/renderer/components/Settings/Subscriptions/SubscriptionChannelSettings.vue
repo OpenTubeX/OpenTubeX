@@ -233,6 +233,12 @@ let hasFailedChannelSettingsUpdate = false
 let channelSettingsUpdateQueue = Promise.resolve()
 const latestUpdateByChannel = new Map()
 
+// Pending saves keep the profile they were made in, while this one shows its own settings.
+watch(() => store.getters.getSubscriptionRootProfile._id, () => {
+  optimisticChannelSettings.value = new Map()
+  latestUpdateByChannel.clear()
+})
+
 watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()
@@ -264,7 +270,7 @@ function stopObservingContent() {
 }
 
 const channels = computed(() => {
-  const subscriptions = store.getters.getProfileList[0]?.subscriptions ?? []
+  const subscriptions = store.getters.getSubscriptionRootProfile?.subscriptions ?? []
   const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
 
   return [...subscriptions].sort((a, b) => (
@@ -544,14 +550,16 @@ function persistChannelSettingsUpdates(updates) {
     latestUpdateByChannel.set(channel.id, sequence)
   }
   optimisticChannelSettings.value = optimisticSettings
+  // A profile switch before the queued save runs doesn't move it.
+  const profileId = store.getters.getSubscriptionRootProfile._id
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
     try {
       const payload = updates.map(({ channel, patch }) => ({ channelId: channel.id, settings: patch }))
       saved = updates.length === 1
-        ? await store.dispatch('updateChannelSettings', payload[0])
-        : await store.dispatch('batchUpdateChannelSettings', payload)
+        ? await store.dispatch('updateChannelSettings', { ...payload[0], profileId })
+        : await store.dispatch('batchUpdateChannelSettings', { updates: payload, profileId })
     } catch (error) {
       console.error(error)
     } finally {

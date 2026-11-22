@@ -161,6 +161,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 
 import store from '../../store/index'
+import { getDataScope } from '../../../datastores/handlers/index'
 
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
 import { copyToClipboard, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
@@ -444,7 +445,7 @@ const { channelThumbnail } = useResultChannelAvatar(
 )
 
 /** @type {import('vue').ComputedRef<string | null>} */
-const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkPlaylistId = computed(() => store.getters.getActiveQuickBookmarkTargetPlaylistId)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
@@ -457,7 +458,9 @@ const markedAsQuickBookmarkTarget = computed(() => {
 async function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = store.getters.getQuickBookmarkPlaylist
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistMetadata.value.playlistId)
+  // An undo after a profile switch restores this profile's target.
+  const scope = getDataScope()
+  store.dispatch('updateActiveQuickBookmarkTarget', playlistMetadata.value.playlistId)
 
   if (currentQuickBookmarkTargetPlaylist != null) {
     showToast({
@@ -466,7 +469,7 @@ async function enableQuickBookmarkForThisPlaylist() {
       }),
       time: 5000,
       action: () => {
-        store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
+        store.dispatch('updateActiveQuickBookmarkTarget', { playlistId: currentQuickBookmarkTargetPlaylist._id, scope })
         showToast({
           message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,

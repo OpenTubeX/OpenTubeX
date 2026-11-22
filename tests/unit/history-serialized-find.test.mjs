@@ -87,7 +87,7 @@ async function electronHistory(t) {
     }
     throw new Error(`Unexpected action ${action}`)
   }
-  const context = vm.createContext({ DBActions, newestUniqueHistoryRecords, runBackgroundJob: () => {}, window: { ftElectron: { dbHistory: handle } } })
+  const context = vm.createContext({ DBActions, newestUniqueHistoryRecords, runBackgroundJob: () => {}, getDataScope: () => null, withDataScope: (_scope, operation) => operation(), window: { ftElectron: { dbHistory: handle } } })
   vm.runInContext(electron.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
   return { db, main, renderer: context.history, requests, setBeforeRemovingDuplicates: callback => { beforeRemovingDuplicates = callback } }

@@ -44,7 +44,7 @@ function syncContext(runBackgroundJob) {
 function historyStore(DBHistoryHandlers) {
   const history = vm.compileFunction(historySource
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
-    .replace('export default ', 'return '), ['DBHistoryHandlers', 'compareHistoryRecordsNewestFirst', 'migrateLegacyHistoryRecord', 'toRaw'])(DBHistoryHandlers, compareHistoryRecordsNewestFirst, migrateLegacyHistoryRecord, toRaw)
+    .replace('export default ', 'return '), ['DBHistoryHandlers', 'compareHistoryRecordsNewestFirst', 'migrateLegacyHistoryRecord', 'toRaw', 'getDataScope'])(DBHistoryHandlers, compareHistoryRecordsNewestFirst, migrateLegacyHistoryRecord, toRaw, () => null)
   const store = createStore({ modules: { history } })
   store.subscribe(mutation => historyChanges.record(mutation))
   return store
@@ -147,6 +147,7 @@ test('history edits during serialization prevent stale writes and retry with fre
   const context = vm.createContext({
     DBActions: { HISTORY: { APPLY_SYNC_CHANGES: 'sync' } },
     runBackgroundJob: (...args) => jobs.run(...args),
+    getDataScope: () => null,
     window: { ftElectron: { dbHistory: (action, value) => { writes.push(JSON.parse(value)); return [] } } },
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
@@ -569,6 +570,7 @@ test('large history database writes yield while removing renderer proxies', asyn
   const context = vm.createContext({
     DBActions: { HISTORY: { APPLY_SYNC_CHANGES: 'sync' } },
     runBackgroundJob: (...args) => jobs.run(...args),
+    getDataScope: () => null,
     window: {
       ftElectron: {
         dbHistory: (action, value) => {
@@ -606,6 +608,7 @@ test('cancelling sync during history serialization prevents the database write',
   const context = vm.createContext({
     DBActions: { HISTORY: { APPLY_SYNC_CHANGES: 'sync' } },
     runBackgroundJob: (...args) => jobs.run(...args),
+    getDataScope: () => null,
     window: { ftElectron: { dbHistory: () => { written = true } } },
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
@@ -636,6 +639,7 @@ test('datastore writes reach the main process in call order while large payloads
     runBackgroundJob: (operation, { value }) => new Promise(resolve => {
       finishSerializing = () => resolve(JSON.stringify(value))
     }),
+    getDataScope: () => null,
     window: {
       ftElectron: {
         dbPlaylists: async (action, value) => { sent.push([action, typeof value]) },

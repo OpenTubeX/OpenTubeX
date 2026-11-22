@@ -5,9 +5,13 @@ const DEFAULT_PROFILE_TEXT = '#FFFFFF'
 
 // Channel names, avatars and profile icons are local metadata. Existing remote
 // subscriptions are merged by membership, not updated by metadata refreshes.
+// Separate profiles sync their colors and icons as they are.
 export function getProfileSyncSignature(profiles) {
   return JSON.stringify(profiles.map(profile => {
     const channels = profile.subscriptions.map(channel => channel.id).sort()
+    if (profile.separate === true) {
+      return [profile._id, profile.name, profile.bgColor, profile.textColor, profile.icon ?? null, channels, true]
+    }
     return profile._id === MAIN_PROFILE_ID
       ? [profile._id, channels]
       : [profile._id, profile.name,

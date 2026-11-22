@@ -91,6 +91,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerDeviceId',
   'syncServerDeviceName',
   'syncServerWatchStatsReset',
+  'syncServerScopedWatchStatsResets',
   'syncServerPrivacyMode',
   'syncServerPrivacyKey',
   'syncServerPrivacySalt',

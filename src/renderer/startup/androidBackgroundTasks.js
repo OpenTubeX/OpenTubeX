@@ -1,3 +1,4 @@
+import { MAIN_PROFILE_ID } from '../../constants'
 import { waitForDatastores } from '../../datastores/index'
 import i18n from '../i18n/index'
 import { finishAndroidBackgroundTasks, setPeriodicBackgroundTask } from '../helpers/androidBackgroundSync.js'
@@ -56,6 +57,9 @@ async function sync(store) {
   if (profilesLoaded === null || !historyLoaded || !store.state.playlists.playlistsReady) {
     throw new Error('Unable to load the library')
   }
+  // These are the shared libraries. A separate default profile syncs its own
+  // while it is active in the app.
+  store.commit('setActiveProfile', MAIN_PROFILE_ID)
   // Open tabs and live reminders belong to the app's renderer, so they sync
   // when the app opens.
   try {

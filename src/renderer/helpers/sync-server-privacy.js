@@ -103,6 +103,7 @@ export function createEmptySyncDocument() {
     subscriptionGroups: [],
     playlistBookmarks: [],
     profiles: [],
+    separateProfiles: [],
     settings: [],
     sessions: [],
     sessionsV2: null,
@@ -185,6 +186,7 @@ export class EncryptedSyncAdapter {
     this.document.seenRssItems ??= []
     this.document.playbackSpeeds ??= []
     this.document.profiles ??= []
+    this.document.separateProfiles ??= []
     this.document.settings ??= []
     this.document.sessions ??= []
     this.document.sessionsV2 ??= null
@@ -368,6 +370,14 @@ export class EncryptedSyncAdapter {
       ...entry, channels: entry.channels.filter(channel => channel.id !== channelId),
     }))
   }
+
+  async getSeparateProfiles() {
+    // Merging another form would replace it on the server, and every profile in it.
+    if (!Array.isArray(this.document.separateProfiles)) throw new Error('Invalid separate profiles')
+    return structuredClone(this.document.separateProfiles)
+  }
+
+  async putSeparateProfiles(value) { this.#set('separateProfiles', structuredClone(value)) }
 
   async getSettings() { return structuredClone(this.document.settings) }
   async putSettings(settings) { this.#set('settings', structuredClone(settings)) }

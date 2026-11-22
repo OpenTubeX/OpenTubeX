@@ -46,7 +46,9 @@ export async function applySubscriptionSettingsSync(store, value, merged = getSu
     if (!areJsonValuesEqual(getChannelSettingsEntry(channel), merged[channel.id])) {
       throw new Error('Subscription settings changed during sync. Try again.')
     }
-    const saved = await store.dispatch('updateChannelSettings', { channelId: channel.id, settings, fromSync: true, updatedAt })
+    const saved = await store.dispatch('updateChannelSettings', {
+      channelId: channel.id, settings, fromSync: true, updatedAt, profileId: store.state.profiles.profileList[0]._id
+    })
     if (!saved) throw new Error('Failed to apply synced subscription settings')
   }
 }
