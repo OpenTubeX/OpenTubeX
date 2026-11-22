@@ -8,9 +8,6 @@ const AndroidBack = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPl
 export async function initializeAndroidBack({ getPreview, back, shouldIntercept }) {
   if (!AndroidBack) return () => {}
   const handler = createAndroidBackGestureHandler({ getPreview, back })
-  const listener = await AndroidBack.addListener('backGesture', event => {
-    handler.handle(event).catch(error => console.error('Android back navigation failed', error))
-  })
   let lastEnabled = null
   const update = () => {
     const enabled = shouldIntercept()
@@ -22,12 +19,18 @@ export async function initializeAndroidBack({ getPreview, back, shouldIntercept 
     })
   }
   // Replace App's always-enabled callback so Android can preview Home at root.
+  let listener
   try {
-    await AndroidBack.setEnabled({ enabled: shouldIntercept() })
-    await App.toggleBackButtonHandler({ enabled: false })
+    ;[listener] = await Promise.all([
+      AndroidBack.addListener('backGesture', event => {
+        handler.handle(event).catch(error => console.error('Android back navigation failed', error))
+      }),
+      AndroidBack.setEnabled({ enabled: shouldIntercept() }),
+      App.toggleBackButtonHandler({ enabled: false }),
+    ])
   } catch (error) {
-    listener.remove()
-    await AndroidBack.setEnabled({ enabled: false })
+    listener?.remove()
+    await AndroidBack.setEnabled({ enabled: false }).catch(() => {})
     throw error
   }
   const stop = watchEffect(update)

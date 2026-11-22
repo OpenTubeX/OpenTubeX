@@ -186,7 +186,6 @@ import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
-import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { computeReorderOffsets } from '../../helpers/reorderOffsets'
 import { clampOverlayScrollLeft, clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
@@ -323,14 +322,19 @@ watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
   // Loaded pages fetch and publish their own avatars. Record the
   // attempt before loading so state updates cannot duplicate pending requests
   // or repeatedly retry a failed icon; the settings action can retry it.
-  const missingTabs = getMissingTabAvatarTabs(currentTabs).filter(tab => {
-    if (!tab.isUnloaded) return false
+  const missingTabs = currentTabs.filter(tab => {
+    if (!tab.isUnloaded || getTabAvatarUrl(tab) != null) return false
     const routePath = tab.route.path
+    if (!/^\/(?:channel|watch)\//.test(routePath ?? '')) return false
     if (attemptedAutomaticAvatarRoutes.get(tab.id) === routePath) return false
     attemptedAutomaticAvatarRoutes.set(tab.id, routePath)
     return true
   })
-  if (missingTabs.length > 0) loadMissingTabAvatars(missingTabs)
+  if (missingTabs.length > 0) {
+    import('../../helpers/loadTabAvatars')
+      .then(({ loadMissingTabAvatars }) => loadMissingTabAvatars(missingTabs))
+      .catch(error => console.error('Failed to load missing tab icons:', error))
+  }
 
   for (const tab of currentTabs) {
     const avatarUrl = getTabAvatarUrl(tab)

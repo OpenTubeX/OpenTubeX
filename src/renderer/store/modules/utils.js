@@ -2,7 +2,6 @@ import { markRaw } from 'vue'
 
 import i18n from '../../i18n/index'
 
-import { checkYoutubeChannelId } from '../../helpers/channels'
 import { commitCustomThemesEdit } from '../../helpers/customThemeSync.js'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { trackSettingWrite } from './settings'
@@ -25,6 +24,7 @@ import {
   YOUTUBE_CAPTION_LANGUAGE_CODES,
 } from '../../helpers/player/youtubeCaptionLanguages'
 
+const checkYoutubeChannelId = id => /^UC[\w-]{22}$/.test(id)
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 

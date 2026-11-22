@@ -316,8 +316,7 @@ import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFrom
 import { CHANNEL_HANDLE_REGEX, formatDurationAsTimestamp, formatSubscriberCount, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getChannelHandleFromUrl } from '../../helpers/feed-metadata'
-import { getLocalSearchSuggestions } from '../../helpers/api/local'
-import { getInvidiousSearchSuggestions, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious-image-url'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { getExternalUrlRoute, shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
@@ -325,9 +324,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
 import { getNotificationThumbnailUrl, supportsNotificationHistory } from '../../helpers/notificationHistory'
-import { loadVideoMetadata } from '../../helpers/videoMetadata'
 import { waitForLoadedPageTitle } from '../../helpers/loadedPageTitles'
-import { loadChannelSummary } from '../../helpers/channels'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
@@ -1211,13 +1208,16 @@ async function loadSearchSuggestions(query, controller) {
     let suggestions
     if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
       try {
+        const { getInvidiousSearchSuggestions } = await import('../../helpers/api/invidious')
         suggestions = (await getInvidiousSearchSuggestions(query, signal)).suggestions
       } catch (error) {
         if (signal.aborted || !process.env.SUPPORTS_LOCAL_API || !backendFallback.value) throw error
         showInvidiousFallbackToast(backendPreference.value)
+        const { getLocalSearchSuggestions } = await import('../../helpers/api/local')
         suggestions = await getLocalSearchSuggestions(query, signal)
       }
     } else {
+      const { getLocalSearchSuggestions } = await import('../../helpers/api/local')
       suggestions = await getLocalSearchSuggestions(query, signal)
     }
     if (!signal.aborted) {
@@ -1307,6 +1307,7 @@ async function loadVideoLinkPreview(queryText, videoId, signal) {
 
   linkPreview.value = preview
   try {
+    const { loadVideoMetadata } = await import('../../helpers/videoMetadata')
     const video = await loadVideoMetadata(videoId, signal)
     linkPreview.value = { ...preview, title: video.title, details: getLinkPreviewDetails(video.isLive ? { author: video.author } : video) }
   } catch (error) {
@@ -1362,6 +1363,7 @@ async function loadChannelLinkPreview(queryText, { channelId, url }, signal) {
 
   let channel
   try {
+    const { loadChannelSummary } = await import('../../helpers/channels')
     channel = await loadChannelSummary(channelId, url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
   } catch (error) {
     // Focusing the search again retries.
@@ -1441,7 +1443,11 @@ async function loadSearchHistoryLinkTitle(link, loadsHere) {
   if (loadsHere) {
     return waitForLoadedPageTitle(link.linkType === 'video' ? `video:${link.videoId}` : `channel:${link.url}`, signal)
   }
-  if (link.linkType === 'video') return getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
+  if (link.linkType === 'video') {
+    const { loadVideoMetadata } = await import('../../helpers/videoMetadata')
+    return getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
+  }
+  const { loadChannelSummary } = await import('../../helpers/channels')
   const channel = await loadChannelSummary(link.channelId, link.url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
   return getNonBlankTitle(channel?.name)
 }

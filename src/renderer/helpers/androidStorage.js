@@ -57,9 +57,11 @@ export async function checkAndroidAppDataRestore() {
  * as the installation it came from.
  * @param {import('vuex').Store<any>} store
  */
-export async function handleRestoredAndroidAppData(store) {
+export async function handleRestoredAndroidAppData(store, check = checkAndroidAppDataRestore()) {
   try {
-    const { restored, accept } = await checkAndroidAppDataRestore()
+    const result = await check
+    if (!result) return
+    const { restored, accept } = result
     if (restored) await store.dispatch('forgetRestoredSyncServerDevice')
     accept()
   } catch (error) {

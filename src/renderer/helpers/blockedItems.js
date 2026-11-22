@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 
 import store from '../store/index'
-import { isVideoHiddenByPreferences } from './subscriptions'
+import { isVideoHiddenByPreferences } from './subscriptionFilters'
 
 /**
  * Whether a list shows the entry blurred because a block list matches it.

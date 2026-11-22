@@ -16,7 +16,7 @@ import { parseLocalCollaboratorItems } from '../../src/renderer/helpers/video-co
 
 const CHANNEL_ID = 'UCabcdefghijklmnopqrstuv'
 
-const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptionFilters.js', import.meta.url), 'utf8')
 const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
 const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
 const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,

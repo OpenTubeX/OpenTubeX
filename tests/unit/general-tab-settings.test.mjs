@@ -58,6 +58,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
     isCapacitor: true,
     isAndroid: true,
     handleRestoredAndroidAppData: async () => {},
+    enableCapacitorIntegrations: async () => () => {},
     pageSwipe: { value: null },
     organizerSwipeActive: { value: false },
     computed,
