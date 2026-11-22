@@ -57,7 +57,7 @@ test('Refresh All holds its native batch until every feed and its native finish 
     useRefreshAllSubscriptionFeeds`, {
     computed: get => ({ get value() { return get() } }),
     ref: value => ({ value }),
-    useI18n: () => ({ t: value => value }),
+    i18n: { global: { t: value => value } },
     store: { getters: { getActiveProfile: { subscriptions: [{ id: 'UC1' }] }, getUseRssFeeds: true } },
     supportsYtDlp: false,
     refreshRssFeeds() {},

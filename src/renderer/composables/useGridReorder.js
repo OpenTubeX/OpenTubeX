@@ -399,7 +399,7 @@ function currentTranslation(element) {
  * Releasing a drag, even a cancelled one, would otherwise click the handle it started on.
  * @param {number} pointerId
  */
-function suppressReleaseClick(pointerId) {
+export function suppressReleaseClick(pointerId) {
   const suppress = event => {
     // Keyboard activations are never the release's click.
     if (event.detail === 0) return

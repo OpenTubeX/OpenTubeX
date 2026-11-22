@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 
+import i18n from '../i18n/index'
 import store from '../store/index'
 import { refreshSubscriptionFeeds } from '../helpers/subscriptionFeedRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
@@ -10,8 +10,9 @@ import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 const LARGE_SUBSCRIPTION_COUNT = 125
 
+// Also used outside of setup functions, where useI18n is unavailable
 export function useRefreshAllSubscriptionFeeds() {
-  const { t } = useI18n()
+  const { t } = i18n.global
   const isRefreshing = ref(false)
   const attemptedFetch = ref(false)
   const showRefreshWarning = ref(false)
