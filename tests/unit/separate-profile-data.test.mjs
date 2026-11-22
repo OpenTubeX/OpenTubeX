@@ -237,3 +237,53 @@ test('sync saves a separate profile’s details only while nobody changed them, 
   assert.deepEqual(saved.icon, { type: 'emoji', value: '🚀' })
   assert.equal(saved.separate, true)
 })
+
+test('a profile switch whose read fails shows none of the previous profile’s data and reads it again next time', async () => {
+  const { settleScopedActions } = await import('../../src/renderer/helpers/dataScopeActions.js')
+  const { getDataScope, setDataScope } = await import('../../src/datastores/handlers/dataScope.js')
+  const { trackDataScopeLoad } = await import('../../src/renderer/helpers/sync-data-scope.js')
+  const code = (await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*?from '[^']+'\n/gm, '')
+    .replace('export default', 'const module =')
+  const { actions } = vm.runInNewContext(`${code}\nmodule`, {
+    MAIN_PROFILE_ID,
+    THEME_BG_COLOR: '#000000',
+    THEME_TEXT_COLOR: '#ffffff',
+    DEFAULT_PROFILE_ICON: {},
+    getDataScope,
+    setDataScope,
+    settleScopedActions,
+    trackDataScopeLoad,
+  })
+  const shown = { history: ['previous'], watchStats: ['previous'] }
+  let failHistory = true
+  const reads = []
+  const context = {
+    getters: { getActiveDataScope: 'separate' },
+    rootGetters: { getRecommendationEpoch: null, getEnableWatchStats: true },
+    commit: name => {
+      if (name === 'setHistoryCacheSorted') shown.history = []
+      if (name === 'clearWatchStats') shown.watchStats = []
+    },
+    dispatch: async name => {
+      reads.push(name)
+      if (name === 'grabHistory') return !failHistory
+      if (name === 'grabWatchStats') shown.watchStats = ['separate']
+      return true
+    },
+  }
+  try {
+    setDataScope(null)
+    await actions.loadDataScope(context)
+    assert.deepEqual(shown, { history: [], watchStats: ['separate'] })
+    failHistory = false
+    reads.length = 0
+    await actions.loadDataScope(context)
+    assert.ok(reads.includes('grabHistory'), 'the next load reads the profile again')
+    reads.length = 0
+    await actions.loadDataScope(context)
+    assert.deepEqual(reads, [], 'a complete load is not repeated')
+  } finally {
+    setDataScope(null)
+  }
+})

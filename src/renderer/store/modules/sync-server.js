@@ -546,6 +546,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   // mode the ones whose merge the server also holds
   const appliedCollections = new Set()
   const uploadedCollections = new Set()
+  // The separate profiles this sync uploaded, and those whose data it deleted
+  let uploadedSeparateProfiles = []
+  const deletedProfileData = new Set()
   // The playlists the current playlist merge saved locally, for when a later one fails
   const savedPlaylistIds = new Set()
   let tabRevocationError = null
@@ -761,9 +764,15 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     for (const collection of appliedCollections) {
       if (skippedCollections.has(collection)) continue
       // syncSettings saves the entries it applied on its own
-      const value = !encryptedCollections || uploadedCollections.has(collection)
+      let value = !encryptedCollections || uploadedCollections.has(collection)
         ? next[collection]
         : collection === 'settings' ? undefined : retryBaselines[collection]?.()
+      // The baseline keeps removed profiles whose data the server may still
+      // have, so the next sync finds them again and deletes it. Deleting
+      // again is harmless.
+      if (collection === 'separateProfiles' && value !== undefined && uploadedCollections.has(collection)) {
+        value = { ...value, ...Object.fromEntries(removedProfileIds().map(id => [id, previous.separateProfiles?.[id] ?? null])) }
+      }
       if (value !== undefined) updated[collection] = value
     }
     const snapshot = JSON.stringify(writeScopedSnapshot(saved, updated, scopeKey))
@@ -791,27 +800,26 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   /** @param {unknown[]} ids Separate profiles the server may still keep data for */
-  async function deleteRemovedProfileData(ids, listed) {
+  /** Separate profiles the server may still keep data for, while no profile lists them */
+  function removedProfileIds() {
+    const ids = [
+      ...Object.keys(previous.separateProfiles ?? {}),
+      ...(encryptedCollections?.original.separateProfiles ?? []).map(entry => entry?.id),
+    ]
     const remaining = new Set(Object.keys(next.separateProfiles ?? {}))
     for (const profile of rootState.profiles.profileList) remaining.add(profile._id)
     // The uploaded list also keeps the profiles this version can't read.
-    for (const entry of listed) remaining.add(entry?.id)
-    const removed = [...new Set(ids)].filter(id => isValidSeparateProfileId(id) && !remaining.has(id))
-    for (const [index, id] of removed.entries()) {
-      try {
-        for (const collection of SCOPED_SYNC_COLLECTIONS) {
-          assertSyncStillActive()
-          await networkClient.deleteEncryptedSyncCollection(scopedSyncCollection(collection, syncScopeKey(id)))
-        }
-      } catch (error) {
-        // The baseline keeps the profiles whose data is left, so the next
-        // sync finds them again and retries. Deleting again is harmless.
-        next.separateProfiles = {
-          ...next.separateProfiles,
-          ...Object.fromEntries(removed.slice(index).map(id => [id, previous.separateProfiles?.[id] ?? null])),
-        }
-        throw error
+    for (const entry of Array.isArray(uploadedSeparateProfiles) ? uploadedSeparateProfiles : []) remaining.add(entry?.id)
+    return [...new Set(ids)].filter(id => isValidSeparateProfileId(id) && !remaining.has(id) && !deletedProfileData.has(id))
+  }
+
+  async function deleteRemovedProfileData() {
+    for (const id of removedProfileIds()) {
+      for (const collection of SCOPED_SYNC_COLLECTIONS) {
+        assertSyncStillActive()
+        await networkClient.deleteEncryptedSyncCollection(scopedSyncCollection(collection, syncScopeKey(id)))
       }
+      deletedProfileData.add(id)
     }
   }
 
@@ -877,6 +885,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           next.history = history
           result.history = Object.keys(history).length
         } else {
+          // The server has no history, so this sync merged none.
+          skippedCollections.add(collection)
           commit('setSyncServerHistorySupported', false)
         }
         break
@@ -915,6 +925,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           if (profiles !== null) {
             next.profiles = profiles
             result.profiles = Object.keys(profiles).length
+          } else {
+            // The server has no profile groups, so this sync merged none.
+            skippedCollections.add(collection)
           }
         }
         break
@@ -1197,7 +1210,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           // Live sync replaces periodic syncs, which then still retry these.
           commit('setSyncServerDeletionMarksPending', unsentSyncDeletionMarks.read(deletionMarksAccount).length > 0)
         }
-        let uploadedSeparateProfiles = []
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
           assertSyncStillActive()
@@ -1349,10 +1361,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         }
         // Once no profile lists them, the data of deleted separate profiles goes too.
         if (encryptedCollections.upload.includes('separateProfiles') && !skippedCollections.has('separateProfiles')) {
-          await deleteRemovedProfileData([
-            ...Object.keys(previous.separateProfiles ?? {}),
-            ...(encryptedCollections.original.separateProfiles ?? []).map(entry => entry?.id),
-          ], Array.isArray(uploadedSeparateProfiles) ? uploadedSeparateProfiles : [])
+          await deleteRemovedProfileData()
         }
       })
     }

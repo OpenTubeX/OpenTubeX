@@ -74,7 +74,11 @@ async function openDatabaseFile(name) {
   const poolUtil = await getPool()
   // Separate profiles add databases, so the pool grows to fit every opened
   // one. It never grows on its own, and opening a file in a full pool fails.
-  await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + FILES_PER_DATABASE)
+  // An opened database creates its journal only when it first writes.
+  const files = new Set(poolUtil.getFileNames())
+  const pendingJournals = [...databases.keys()]
+    .filter(opened => opened !== name && !files.has(`/${opened}.sqlite-journal`)).length
+  await poolUtil.reserveMinimumCapacity(poolUtil.getFileCount() + pendingJournals + FILES_PER_DATABASE)
   const { OpfsSAHPoolDb } = poolUtil
   const db = new OpfsSAHPoolDb(`/${name}.sqlite`)
   try {

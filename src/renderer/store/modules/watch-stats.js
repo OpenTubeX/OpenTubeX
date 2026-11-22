@@ -140,6 +140,14 @@ const mutations = {
     state.historicalWatchTimePlaybackSpeed = value
   },
 
+  /** Until the statistics of the profile switched to load */
+  clearWatchStats(state) {
+    state.watchSecondsByDate = {}
+    state.watchStatsLoaded = false
+    state.hasHistoricalWatchTimeEstimate = false
+    state.historicalWatchTimePlaybackSpeed = null
+  },
+
   resetWatchStats(state, resetAt) {
     state.watchSecondsByDate = {}
     state.hasHistoricalWatchTimeEstimate = false
