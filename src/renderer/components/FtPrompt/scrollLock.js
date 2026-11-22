@@ -12,6 +12,7 @@ export function lockBodyScroll() {
     // Lock the root viewport rather than turning the body into an overflow
     // container, which would make its sticky app chrome scroll out of view.
     document.documentElement.style.overflow = 'hidden'
+    document.documentElement.classList.add('appScrollLocked')
 
     if (scrollbarWidth > 0) {
       document.body.style.paddingInlineEnd = `calc(${originalBodyPaddingInlineEnd || '0px'} + ${scrollbarWidth}px)`
@@ -30,6 +31,7 @@ export function unlockBodyScroll() {
 
   if (scrollLockCount === 0) {
     document.documentElement.style.overflow = originalDocumentOverflow
+    document.documentElement.classList.remove('appScrollLocked')
     document.body.style.paddingInlineEnd = originalBodyPaddingInlineEnd
   }
 }
