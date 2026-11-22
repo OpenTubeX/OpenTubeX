@@ -16,8 +16,9 @@ export const PROFILE_DATASTORES = {
  * @param {unknown} profileId
  */
 export function isValidSeparateProfileId(profileId) {
+  // UTF-8 replaces unpaired surrogates, which would give different IDs the same names.
   return typeof profileId === 'string' && profileId.length > 0 && profileId.length <= 64 &&
-    new TextEncoder().encode(profileId).length <= 64
+    profileId.isWellFormed() && new TextEncoder().encode(profileId).length <= 64
 }
 
 /**
