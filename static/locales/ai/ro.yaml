@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Reîncearcă toate"
     Show All: "Afișează tot"
     Show Fewer: "Afișează mai puțin"
+    Hide Channel: "Ascunde erorile de la {channel}"
+    Channel Hidden: "Erorile de la {channel} sunt ascunse. Le poți afișa din nou în setările de abonare ale canalului. Fă clic pentru a anula."
   Cache Load Error: Fluxurile de abonamente salvate nu au putut fi încărcate.
   New video from {channel}: Videoclip nou de la {channel}
   New short from {channel}: Short nou de la {channel}
@@ -1793,6 +1795,7 @@ Channel:
   Shows:
     Shows: Emisiuni
     This channel does not currently have any shows: Acest canal nu are momentan emisiuni
+  Show refresh errors: "Afișează erorile de reîmprospătare"
 Video:
   Play in Background: "Redă în fundal"
   Info panel source: 'Sursă: {source}'

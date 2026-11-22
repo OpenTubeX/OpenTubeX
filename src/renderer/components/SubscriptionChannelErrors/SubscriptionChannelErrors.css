@@ -91,8 +91,11 @@
   white-space: pre-line;
 }
 
-.channelErrorAction {
+.channelErrorActions {
   grid-area: action;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .channelErrorsToggle {
@@ -109,7 +112,7 @@
       '. action';
   }
 
-  .channelErrorAction {
+  .channelErrorActions {
     justify-self: start;
     margin-block-start: 4px;
   }

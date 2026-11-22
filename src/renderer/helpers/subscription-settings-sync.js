@@ -34,10 +34,12 @@ export async function applySubscriptionSettingsSync(store, value, merged = getSu
       throw new Error('Invalid subscription settings timestamp')
     }
     const remote = value[channel.id].value ?? {}
-    // Older clients omit notification choices; keep this device's choice for them.
-    const settings = normalizeSubscriptionChannelSettings(Array.isArray(remote.notificationFeedTypes)
-      ? remote
-      : { ...remote, notificationFeedTypes: channel.notificationFeedTypes })
+    // Older clients omit notification and refresh error choices; keep this device's choices for them.
+    const settings = normalizeSubscriptionChannelSettings({
+      ...remote,
+      ...(!Array.isArray(remote.notificationFeedTypes) && { notificationFeedTypes: channel.notificationFeedTypes }),
+      ...(typeof remote.showRefreshErrors !== 'boolean' && { showRefreshErrors: channel.showRefreshErrors })
+    })
     if (channel.subscriptionSettingsUpdatedAt === updatedAt &&
         areJsonValuesEqual(normalizeSubscriptionChannelSettings(channel), settings)) continue
     // An edit made after the merge read the settings would be overwritten.

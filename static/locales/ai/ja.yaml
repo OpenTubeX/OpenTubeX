@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "すべて再試行"
     Show All: "すべて表示"
     Show Fewer: "表示を減らす"
+    Hide Channel: "{channel} のエラーを非表示"
+    Channel Hidden: "{channel} のエラーを非表示にしました。チャンネルの登録設定で再表示できます。クリックすると元に戻します。"
   Cache Load Error: 保存済みの登録チャンネルのフィードを読み込めませんでした。
   New video from {channel}: "{channel}の新しい動画"
   New short from {channel}: "{channel}の新しいショート動画"
@@ -1758,6 +1760,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "タイトルに非表示のテキストが含まれているため、OpenTubeX が動画を非表示にしました"
     Correct: "正解"
     Incorrect: "不正解"
+  Show refresh errors: "更新エラーを表示"
 Video:
   Play in Background: "バックグラウンドで再生"
   Info panel source: '出典: {source}'

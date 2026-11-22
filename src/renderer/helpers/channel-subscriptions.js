@@ -52,14 +52,15 @@ async function saveSubscription(profile, { id, name, thumbnail = null, handle = 
   }
 
   const saved = store.getters.getSubscribedChannelsById.get(id)
-  const { feedTypes, notificationFeedTypes, showMembersOnly, dailyVideoLimit } = settings ?? normalizeSubscriptionChannelSettings(saved)
+  const { feedTypes, notificationFeedTypes, showMembersOnly, showRefreshErrors, dailyVideoLimit } = settings ?? normalizeSubscriptionChannelSettings(saved)
   const channel = {
     id,
     name,
     thumbnail,
     feedTypes: [...feedTypes],
     notificationFeedTypes: [...notificationFeedTypes],
-    showMembersOnly
+    showMembersOnly,
+    showRefreshErrors
   }
   if (dailyVideoLimit !== undefined) channel.dailyVideoLimit = dailyVideoLimit
   // A saved handle can be newer than the one from a cached result.

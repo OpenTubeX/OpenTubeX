@@ -180,7 +180,7 @@ function describeSubscriptionSettings(before, after, changes, channelNames) {
     if (areJsonValuesEqual(previous, current)) continue
     const channel = channelNames.get(id)
     if (!channel) { addSummary(changes, 'key', 'subscriptionChannelSettings'); continue }
-    for (const detail of ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly']) {
+    for (const detail of ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly', 'showRefreshErrors']) {
       if (areJsonValuesEqual(previous[detail], current[detail])) continue
       const value = detail === 'feedTypes' || detail === 'notificationFeedTypes'
         ? current[detail].join(',')
@@ -188,7 +188,7 @@ function describeSubscriptionSettings(before, after, changes, channelNames) {
           ? current.dailyVideoLimit === undefined
             ? 'global'
             : current.dailyVideoLimit === null ? 'unlimited' : current.dailyVideoLimit
-          : current.showMembersOnly
+          : current[detail]
       changes.push({ key: 'subscriptionChannelSettings', detail, item: channel, value })
     }
   }

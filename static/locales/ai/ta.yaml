@@ -194,6 +194,8 @@ Subscriptions:
     Retry All: "அனைத்தையும் மீண்டும் முயல்க"
     Show All: "அனைத்தையும் காட்டு"
     Show Fewer: "குறைவாகக் காட்டு"
+    Hide Channel: "{channel} இன் பிழைகளை மறை"
+    Channel Hidden: "{channel} இன் பிழைகள் மறைக்கப்பட்டன. சேனலின் சந்தா அமைப்புகளில் அவற்றை மீண்டும் காட்டலாம். செயல்தவிர்க்கக் கிளிக் செய்யவும்."
   Cache Load Error: சேமிக்கப்பட்ட உங்கள் சந்தா ஊட்டங்களை ஏற்ற முடியவில்லை.
   New video from {channel}: "{channel} இலிருந்து புதிய வீடியோ"
   New short from {channel}: "{channel} இலிருந்து புதிய குறுகிய வீடியோ"
@@ -1809,6 +1811,7 @@ Channel:
   Shows:
     Shows: நிகழ்ச்சிகள்
     This channel does not currently have any shows: இந்த சேனலில் தற்போது எந்த நிகழ்ச்சிகளும் இல்லை
+  Show refresh errors: "புதுப்பிப்புப் பிழைகளைக் காட்டு"
 Video:
   Play in Background: "பின்னணியில் இயக்கு"
   Info panel source: 'மூலம்: {source}'

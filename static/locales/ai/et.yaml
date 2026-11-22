@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Proovi kõiki uuesti"
     Show All: "Näita kõiki"
     Show Fewer: "Näita vähem"
+    Hide Channel: "Peida kanali {channel} vead"
+    Channel Hidden: "Kanali {channel} vead on peidetud. Saad need kanali tellimuse seadetes uuesti kuvada. Klõpsa tagasivõtmiseks."
   Cache Load Error: Salvestatud tellimuste vooge ei õnnestunud laadida.
   New video from {channel}: Uus video kanalilt {channel}
   New short from {channel}: Uus lühivideo kanalilt {channel}
@@ -1758,6 +1760,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX peitis video, sest selle pealkiri sisaldab peidetud teksti"
     Correct: "Õige"
     Incorrect: "Vale"
+  Show refresh errors: "Kuva värskendamise vead"
 Video:
   Play in Background: "Esita taustal"
   Info panel source: 'Allikas: {source}'

@@ -271,6 +271,7 @@ const detailLabels = {
   notificationFeedTypes: 'Channel.Notify about new uploads',
   dailyVideoLimit: 'Channel.Videos per day',
   showMembersOnly: 'Search Listing.Label.Members Only',
+  showRefreshErrors: 'Channel.Show refresh errors',
   addVideosToTop: 'User Playlists.Add new videos to the top (custom order)',
   shuffleByDefault: 'User Playlists.Shuffle videos by default',
   removeWatchedVideos: 'User Playlists.Remove videos once watched',

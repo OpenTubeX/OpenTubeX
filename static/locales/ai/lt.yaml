@@ -213,6 +213,8 @@ Subscriptions:
     Retry All: "Bandyti dar kartą visus"
     Show All: "Rodyti visus"
     Show Fewer: "Rodyti mažiau"
+    Hide Channel: "Slėpti kanalo {channel} klaidas"
+    Channel Hidden: "Kanalo {channel} klaidos paslėptos. Jas vėl galite rodyti kanalo prenumeratos nustatymuose. Spustelėkite, kad atšauktumėte."
   Cache Load Error: Nepavyko įkelti išsaugotų prenumeratų sklaidos kanalų.
   New video from {channel}: Naujas vaizdo įrašas iš {channel}
   New short from {channel}: Naujas šortas iš {channel}
@@ -2088,6 +2090,7 @@ Channel:
   Shows:
     Shows: Laidos
     This channel does not currently have any shows: Šiame kanale šiuo metu nėra laidų
+  Show refresh errors: "Rodyti atnaujinimo klaidas"
 Video:
   Play in Background: "Leisti fone"
   Info panel source: 'Šaltinis: {source}'

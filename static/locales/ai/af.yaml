@@ -221,6 +221,8 @@ Subscriptions:
     Retry All: "Probeer almal weer"
     Show All: "Wys alles"
     Show Fewer: "Wys minder"
+    Hide Channel: "Versteek foute van {channel}"
+    Channel Hidden: "Foute van {channel} is versteek. Jy kan hulle weer in die kanaal se intekeninginstellings wys. Klik om te ontdoen."
   Cache Load Error: Jou gestoorde intekeningvoere kon nie gelaai word nie.
   New video from {channel}: Nuwe video van {channel}
   New short from {channel}: Nuwe kortvideo van {channel}
@@ -1995,6 +1997,7 @@ Channel:
   Shows:
     Shows: Programme
     This channel does not currently have any shows: Hierdie kanaal het tans geen programme nie
+  Show refresh errors: "Wys herlaaifoute"
 Video:
   Play in Background: "Speel in die agtergrond"
   Mark As Fully Watched: Merk as volledig gekyk

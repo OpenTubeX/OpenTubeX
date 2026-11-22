@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Coba lagi semua"
     Show All: "Tampilkan semua"
     Show Fewer: "Tampilkan lebih sedikit"
+    Hide Channel: "Sembunyikan galat dari {channel}"
+    Channel Hidden: "Galat dari {channel} disembunyikan. Anda dapat menampilkannya lagi di pengaturan langganan saluran. Klik untuk membatalkan."
   Cache Load Error: Feed langganan tersimpan Anda tidak dapat dimuat.
   New video from {channel}: Video baru dari {channel}
   New short from {channel}: Video singkat baru dari {channel}
@@ -1774,6 +1776,7 @@ Channel:
   Shows:
     Shows: Acara
     This channel does not currently have any shows: Saluran ini saat ini tidak memiliki acara apa pun
+  Show refresh errors: "Tampilkan galat penyegaran"
 Video:
   Play in Background: "Putar di Latar Belakang"
   Info panel source: 'Sumber: {source}'

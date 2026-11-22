@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Tout réessayer"
     Show All: "Tout afficher"
     Show Fewer: "Afficher moins"
+    Hide Channel: "Masquer les erreurs de {channel}"
+    Channel Hidden: "Les erreurs de {channel} sont masquées. Vous pouvez les afficher à nouveau dans les paramètres d’abonnement de la chaîne. Cliquez pour annuler."
   Cache Load Error: 'Impossible de charger vos flux d''abonnements enregistrés.'
   New video from {channel}: Nouvelle vidéo de {channel}
   New short from {channel}: Nouveau Short de {channel}
@@ -1757,6 +1759,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Vidéo masquée par OpenTubeX, car son titre contient du texte masqué"
     Correct: Correct
     Incorrect: Incorrect
+  Show refresh errors: "Afficher les erreurs d’actualisation"
 Video:
   Play in Background: "Lire en arrière-plan"
   Info panel source: 'Source : {source}'

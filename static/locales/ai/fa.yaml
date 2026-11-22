@@ -201,6 +201,8 @@ Subscriptions:
     Retry All: "تلاش دوباره برای همه"
     Show All: "نمایش همه"
     Show Fewer: "نمایش کمتر"
+    Hide Channel: "پنهان کردن خطاهای {channel}"
+    Channel Hidden: "خطاهای {channel} پنهان شدند. می‌توانید آن‌ها را دوباره در تنظیمات اشتراک کانال نمایش دهید. برای واگرد کلیک کنید."
   Cache Load Error: فیدهای اشتراک ذخیره‌شده شما بارگیری نشدند.
   New video from {channel}: ویدئوی جدید از {channel}
   New short from {channel}: ویدئوی کوتاه جدید از {channel}
@@ -1834,6 +1836,7 @@ Channel:
   Shows:
     Shows: برنامه‌ها
     This channel does not currently have any shows: این کانال در حال حاضر هیچ برنامه‌ای ندارد
+  Show refresh errors: "نمایش خطاهای به‌روزرسانی"
 Video:
   Play in Background: "پخش در پس‌زمینه"
   Info panel source: 'منبع: {source}'
