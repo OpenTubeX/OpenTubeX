@@ -227,7 +227,9 @@ export function getCachedChannelInfo(channelId, subscriptionsById) {
  */
 export function rememberChannelInfo(channelId, info) {
   if (channelId && info.name) {
-    resolvedChannels.set(channelId, info)
+    // A page that loaded without an avatar keeps one found earlier.
+    const thumbnail = info.thumbnail || resolvedChannels.get(channelId)?.thumbnail || ''
+    resolvedChannels.set(channelId, { name: info.name, thumbnail })
   }
 }
 
@@ -309,6 +311,10 @@ function releaseChannelRequestSlot() {
 async function resolveChannelInfo(channelId, backendOptions) {
   try {
     const { preferredName, icon, invalidId } = await findChannelTagInfo(channelId, backendOptions)
+    // The channel's page may have loaded its details in the meantime.
+    if (resolvedChannels.has(channelId)) {
+      return resolvedChannels.get(channelId)
+    }
 
     if (invalidId) {
       resolvedChannels.set(channelId, null)
