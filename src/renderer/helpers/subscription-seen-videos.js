@@ -2,18 +2,30 @@ import { computed, isReactive, shallowRef } from 'vue'
 import { parseSubscriptionSeenVideos, mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
 import { isHistoryEntryWatched } from '../../history.js'
 import { parseSubscriptionSeenPosts, mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
+import { feedEntryInScope } from '../../subscriptionFeedState.js'
 
 const cacheSelectors = new WeakMap()
 
-export function applySubscriptionSeenVideosToCache(cache, seenVideos) {
-  return applySubscriptionSeenEntriesToCache(cache, seenVideos, 'videos', 'videoId', mergeSubscriptionSeenVideos)
+/**
+ * The cached feeds as a data scope shows them, with its seen marks.
+ * @param {Record<string, any>} cache
+ * @param {unknown} seenVideos
+ * @param {string | null} [scope] A separate profile's ID, or null for the shared data
+ */
+export function applySubscriptionSeenVideosToCache(cache, seenVideos, scope = null) {
+  return applySubscriptionSeenEntriesToCache(cache, seenVideos, 'videos', 'videoId', mergeSubscriptionSeenVideos, scope)
 }
 
-export function applySubscriptionSeenPostsToCache(cache, seenPosts) {
-  return applySubscriptionSeenEntriesToCache(cache, seenPosts, 'posts', 'postId', mergeSubscriptionSeenPosts)
+/**
+ * @param {Record<string, any>} cache
+ * @param {unknown} seenPosts
+ * @param {string | null} [scope] see {@link applySubscriptionSeenVideosToCache}
+ */
+export function applySubscriptionSeenPostsToCache(cache, seenPosts, scope = null) {
+  return applySubscriptionSeenEntriesToCache(cache, seenPosts, 'posts', 'postId', mergeSubscriptionSeenPosts, scope)
 }
 
-function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idKey, merge) {
+function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idKey, merge, scope) {
   const indexSeenEntries = () => new Map(merge([], seenEntries).map(entry => [entry[idKey], entry]))
   // Plain mutable inputs cannot invalidate computed results. Keep those calls
   // uncached, as with the feed's entry snapshots.
@@ -21,11 +33,12 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
   let selectors
   if (canCache) {
     selectors = cacheSelectors.get(cache)
-    if (!selectors || selectors.entriesKey !== entriesKey) {
+    if (!selectors || selectors.entriesKey !== entriesKey || selectors.scope !== scope) {
       const source = shallowRef(seenEntries)
       selectors = {
         source,
         entriesKey,
+        scope,
         index: computed(() => new Map(merge([], source.value).map(entry => [entry[idKey], entry]))),
         channels: new WeakMap()
       }
@@ -34,7 +47,8 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
     selectors.source.value = seenEntries
   }
   const byId = selectors ? selectors.index.value : indexSeenEntries()
-  if (byId.size === 0) return cache
+  // A separate profile's feeds show its own state even without marks.
+  if (byId.size === 0 && scope === null) return cache
 
   if (selectors) {
     if (!selectors.view) {
@@ -42,7 +56,7 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
         get(target, channelId) {
           const cached = Reflect.get(target, channelId)
           if (!cached?.[entriesKey]) return cached
-          if (!isReactive(cached)) return applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey)
+          if (!isReactive(cached)) return applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey, undefined, scope)
           let channel = selectors.channels.get(cached)
           if (!channel) {
             // Retain each channel's ID list and effective marks across edits to
@@ -63,7 +77,7 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
               })) return previous
               return relevant
             })
-            channel = computed(() => applySeenEntriesToChannel(cached, marks.value, entriesKey, idKey, ids.value))
+            channel = computed(() => applySeenEntriesToChannel(cached, marks.value, entriesKey, idKey, ids.value, scope))
             selectors.channels.set(cached, channel)
           }
           return channel.value
@@ -75,13 +89,14 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
 
   return Object.fromEntries(Object.entries(cache).map(([channelId, cached]) => {
     if (!cached?.[entriesKey]) return [channelId, cached]
-    return [channelId, applySeenEntriesToChannel(cached, byId, entriesKey, idKey)]
+    return [channelId, applySeenEntriesToChannel(cached, byId, entriesKey, idKey, undefined, scope)]
   }))
 }
 
-function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids) {
-  if (byId.size === 0) return cached
-  const entries = cached[entriesKey].map((video, index) => {
+function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids, scope = null) {
+  if (byId.size === 0 && scope === null) return cached
+  const entries = cached[entriesKey].map((cachedVideo, index) => {
+    const video = feedEntryInScope(cachedVideo, scope)
     const seen = byId.get(ids ? ids[index] : video[idKey])
     if (!seen) return video
     if (seen.unseenAt >= seen.seenAt) {
@@ -97,21 +112,25 @@ function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids) {
     : { ...cached, [entriesKey]: entries }
 }
 
-// `updateHistory` is false while a separate profile is active, whose history
-// the videos marked unseen in the shared feed must not change.
-export async function syncSubscriptionSeenVideos(client, store, { updateHistory = true } = {}) {
+// Merges the marks of the data scope the store shows, whose history the
+// videos marked unseen leave. `assertActive` throws once the store shows
+// another profile's data, whose marks must not reach this sync's collections.
+export async function syncSubscriptionSeenVideos(client, store, assertActive = () => {}) {
   const remote = await client.getSeenVideos()
+  assertActive()
   await store.dispatch('mergeSubscriptionSeenVideos', remote)
+  assertActive()
   const merged = parseSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos)
   const unseenById = new Map(merged.filter(entry => entry.unseenAt >= entry.seenAt)
     .map(entry => [entry.videoId, entry.unseenAt]))
-  if (updateHistory && unseenById.size > 0) {
+  if (unseenById.size > 0) {
     // History sync runs first. An older completed record must not undo the
     // reverse action, while watching again after it still counts as watched.
     for (const history of store.state.history.historyCacheSorted) {
       if (isHistoryEntryWatched(history) &&
           unseenById.get(history.videoId) > (history.timeWatched ?? 0)) {
         await store.dispatch('updateHistory', { ...history, isWatched: false })
+        assertActive()
       }
     }
     for (const history of await client.getWatchHistory() ?? []) {
@@ -131,9 +150,11 @@ export async function syncSubscriptionSeenVideos(client, store, { updateHistory 
   return merged.length
 }
 
-export async function syncSubscriptionSeenPosts(client, store) {
+export async function syncSubscriptionSeenPosts(client, store, assertActive = () => {}) {
   const remote = await client.getSeenPosts()
+  assertActive()
   await store.dispatch('mergeSubscriptionSeenPosts', remote)
+  assertActive()
   const merged = parseSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts)
   await client.putSeenPosts(merged)
   return merged.length

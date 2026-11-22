@@ -62,7 +62,8 @@ import { setActiveTimeout } from './activeTimeout'
 import {
   SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
   getSubscriptionSettingsForSync,
-  applySubscriptionSettingsSync
+  applySubscriptionSettingsSync,
+  scopedSubscriptionSettingsSyncKey
 } from './subscription-settings-sync'
 import {
   PLAYLIST_PREFERENCES_SYNC_KEYS,
@@ -917,10 +918,10 @@ async function mergeSubscriptions(client, store, previousIds, options) {
   return { mergedIds: Array.from(mergedIds), remoteIds: Array.from(remoteById.keys()) }
 }
 
+// Merges the bookmarks of the profile whose data the store shows: a separate
+// profile's own, or the shared ones.
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
-  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
-    ? store.state.settings.playlistBookmarks
-    : []).filter(isValidPlaylistBookmark)
+  const localBookmarks = store.getters.getPlaylistBookmarks.filter(isValidPlaylistBookmark)
   const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
   const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
@@ -951,7 +952,7 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
   if (addedIds.length > 0 || removedIds.size > 0) {
     // Apply the merge to the saved list as part of the write, so bookmarks
     // saved or removed meanwhile survive, and the next sync syncs them.
-    const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => {
+    const saved = await store.dispatch('updateActivePlaylistBookmarks', savedBookmarks => {
       const currentBookmarks = savedBookmarks.filter(isValidPlaylistBookmark)
       const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
       return [
@@ -1843,7 +1844,12 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 // rejected result would drop this device's items the server never received.
 // `store.persistSettingsSyncBaseline` receives the server entries this sync
 // merged and applied, so a failed upload cannot make them look like local edits.
-export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null, { listSnapshot = previousSnapshot, onRetryBaseline } = {}) {
+// `options.dataScope` is the separate profile whose data the store shows, whose
+// channel settings sync under their own key. Those of the deleted separate
+// profiles in `options.removedProfileIds` are removed.
+export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null, {
+  listSnapshot = previousSnapshot, onRetryBaseline, dataScope = null, removedProfileIds = [],
+} = {}) {
   const remoteEntries = await client.getSettings()
   // Optimistic edits show their value before saving its edit time. Wait for
   // them, then read the local settings without awaiting anything in between.
@@ -1868,15 +1874,23 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     )),
   ])
 
+  // The profiles whose channel settings sync, by their settings key
+  const channelSettingsProfiles = new Map()
   if (isSettingSyncEnabled(store.state.settings, SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY)) {
-    local[SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY] = getSubscriptionSettingsForSync(store)
+    channelSettingsProfiles.set(SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, store.state.profiles.profileList[0])
+    const separateProfile = dataScope === null
+      ? null
+      : store.state.profiles.profileList.find(profile => profile._id === dataScope && profile.separate === true)
+    if (separateProfile) channelSettingsProfiles.set(scopedSubscriptionSettingsSyncKey(dataScope), separateProfile)
+    for (const id of removedProfileIds) delete merged[scopedSubscriptionSettingsSyncKey(id)]
   }
+  for (const [key, profile] of channelSettingsProfiles) local[key] = getSubscriptionSettingsForSync(profile)
   for (const key of PLAYLIST_PREFERENCES_SYNC_KEYS) {
     if (playlistSnapshot && isSettingSyncEnabled(store.state.settings, key)) {
       local[key] = getPlaylistPreferencesForSync(store.state.playlists.playlists, playlistSnapshot, key)
     }
   }
-  const itemKeys = new Set([SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, ...PLAYLIST_PREFERENCES_SYNC_KEYS])
+  const itemKeys = new Set([...channelSettingsProfiles.keys(), ...PLAYLIST_PREFERENCES_SYNC_KEYS])
 
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
@@ -1933,8 +1947,8 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         continue
       }
       if (!valuesEqual) {
-        if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
-          await applySubscriptionSettingsSync(store, entry.value, value)
+        if (channelSettingsProfiles.has(key)) {
+          await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
         } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
           await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
         } else if (key === CUSTOM_THEMES_SYNC_KEY) {

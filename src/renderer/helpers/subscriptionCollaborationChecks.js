@@ -87,5 +87,13 @@ export function mergeSubscriptionCollaborations(cacheEntry, collaborations, hist
     'videoId',
     checkedAt ?? cacheEntry.timestamp,
     historyById
-  ).map(video => !video.isNewInSubscriptionFeed && isPublishedSinceCheck(video) ? { ...video, isNewInSubscriptionFeed: true } : video))
+  ).map(video => !video.isNewInSubscriptionFeed && isPublishedSinceCheck(video)
+    ? {
+        ...video,
+        isNewInSubscriptionFeed: true,
+        arrivedNewInSubscriptionFeed: true,
+        // In a separate profile's feeds, the shared profiles see it as new too.
+        ...('sharedNewInSubscriptionFeed' in video ? { sharedNewInSubscriptionFeed: true } : {}),
+      }
+    : video))
 }

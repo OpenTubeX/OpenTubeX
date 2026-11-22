@@ -6,10 +6,21 @@ import { parseSyncDeletionListKey, syncDeletionListKey } from './sync-deletions.
  * Collections a separate profile keeps for itself. The server stores them as
  * `<collection>.<scope key>`, while sync merges them under these names.
  */
-export const SCOPED_SYNC_COLLECTIONS = new Set(['history', 'playlists', 'subscriptions', 'watchStats'])
+export const SCOPED_SYNC_COLLECTIONS = new Set([
+  'history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts',
+])
 
 // The deletion lists of those collections, by the collection part of their key.
-const SCOPED_DELETION_COLLECTIONS = new Set(['history', 'playlists', 'playlistVideos', 'subscriptions'])
+const SCOPED_DELETION_COLLECTIONS = new Set(['history', 'playlists', 'playlistVideos', 'subscriptions', 'playlistBookmarks'])
+
+/**
+ * Whether a server keeps every collection of a separate profile. Servers that
+ * report 1 lack its saved playlists and seen videos and posts.
+ * @param {Record<string, unknown> | null | undefined} capabilities
+ */
+export function supportsSeparateProfiles(capabilities) {
+  return Number(capabilities?.separate_profiles) >= 2
+}
 
 /**
  * The scope part of a separate profile's server collection names, or null for

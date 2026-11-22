@@ -123,7 +123,12 @@ const cases = [
 
 for (const scenario of cases) {
   test(`identifies deletions in ${scenario.collection} before applying them`, async () => {
-    const store = { ...playlistBaseline(), state: scenario.state, dispatch: () => assert.fail('Unexpected local change') }
+    const store = {
+      ...playlistBaseline(),
+      state: scenario.state,
+      getters: { getPlaylistBookmarks: scenario.state.settings?.playlistBookmarks ?? [] },
+      dispatch: () => assert.fail('Unexpected local change'),
+    }
     await assert.rejects(context[scenario.method](scenario.client, store, scenario.previous), error => {
       assert.ok(error instanceof errors.SyncServerDataLossError, error.stack)
       assert.equal(error.collection, scenario.collection)

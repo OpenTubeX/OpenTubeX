@@ -13,6 +13,7 @@ import * as postData from '../../src/subscriptionSeenPosts.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import * as historyHelpers from '../../src/history.js'
 import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
 const seenVideos = { ...seenSync, ...seenData, ...postData }
@@ -185,7 +186,7 @@ async function settingsFixture(history = []) {
   }
   if (history.length > 0) await db.history.insertAsync(history)
   const { Settings, History } = vm.runInNewContext(baseSource.slice(baseSource.indexOf('class Settings {'),
-    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
+    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...seenMarkSettings, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
   return { db, Settings, History }
 }
 
@@ -196,6 +197,7 @@ function cacheFixture(applied = true, logger = console) {
     toRaw,
     ...seenVideos,
     ...feedState,
+    withDataScope: (_scope, operation) => operation(),
     DBSubscriptionCacheHandlers: {
       markEntriesAsSeenMany: async () => {},
       updateVideosByChannelId: async () => applied,
@@ -322,6 +324,7 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
     const context = vm.createContext({
       ...seenVideos,
       ANDROID_PROXY_SETTING_KEYS: [],
+      getDataScope: () => null,
       DBSettingHandlers: {
         async mergeSeenVideos(entries) {
           const saved = await Settings.mergeSeenVideos(entries)
@@ -489,6 +492,34 @@ test('failed seen-mark persistence stops sync before uploading stale state', asy
     dispatch: async () => { throw failure },
   }), failure)
   assert.equal(uploads, 0)
+})
+
+test('a profile switch during seen-mark sync stops it before the other profile’s marks are used', async () => {
+  const switched = new Error('Switched profiles')
+  for (const sync of [seenVideos.syncSubscriptionSeenVideos, seenVideos.syncSubscriptionSeenPosts]) {
+    let profile = 'first'
+    const dispatched = []
+    let uploads = 0
+    const marks = [{ videoId: 'video', postId: 'post', seenAt: 2000, unseenAt: 3000 }]
+    await assert.rejects(sync({
+      getSeenVideos: async () => marks,
+      getSeenPosts: async () => marks,
+      getWatchHistory: async () => [],
+      putSeenVideos: async () => { uploads++ },
+      putSeenPosts: async () => { uploads++ },
+    }, {
+      state: {
+        settings: { subscriptionSeenVideos: JSON.stringify(marks), subscriptionSeenPosts: JSON.stringify(marks) },
+        history: { historyCacheSorted: [{ videoId: 'video', timeWatched: 1000, isWatched: true }] },
+      },
+      dispatch: async (type) => {
+        dispatched.push(type)
+        profile = 'second'
+      },
+    }, () => { if (profile !== 'first') throw switched }), switched)
+    assert.deepEqual(dispatched, [sync === seenVideos.syncSubscriptionSeenVideos ? 'mergeSubscriptionSeenVideos' : 'mergeSubscriptionSeenPosts'])
+    assert.equal(uploads, 0)
+  }
 })
 
 test('marking a video unseen preserves watch progress and restores a seen video', async () => {

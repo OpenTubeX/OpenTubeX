@@ -13,6 +13,7 @@ import {
   migrateSyncServerUrl,
 } from '../../src/renderer/helpers/settings-migrations.js'
 import { migrateLegacySyncedSettings } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 test('migrates an enabled legacy subscription progress notification preference', () => {
   assert.deepEqual(migrateLegacySettings({ showSubscriptionRefreshToast: true }), {
@@ -352,6 +353,8 @@ test('startup persists the new sync URL and retries after a failed write without
       defaultMutationId: key => key,
       settingsWithSideEffects: [],
       migrateSyncServerUrl,
+      shownSeenMarksSetting: seenMarkSettings.shownSeenMarksSetting,
+      getDataScope: () => null,
       DBSettingHandlers: {
         async upsert(key, value) {
           writes++

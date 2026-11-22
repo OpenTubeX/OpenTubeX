@@ -242,7 +242,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       utils: { customThemes: [] },
       profiles: { profileList: [{ _id: 'main', subscriptions: [{ id: 'private-channel', name: 'Private subscription' }] }] },
     },
-    rootGetters: { getActiveDataScope: dataScope },
+    rootGetters: {
+      getActiveDataScope: dataScope,
+      get getPlaylistBookmarks() { return Array.isArray(settings.playlistBookmarks) ? settings.playlistBookmarks : [] },
+    },
     state: store.exports.state,
     commit: (action, value) => {
       commits.push([action, value])
@@ -251,8 +254,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     dispatch: async (action, value) => {
       dispatched.push([action, value])
-      if (action === 'updatePlaylistBookmarks') {
-        settings.playlistBookmarks = value(settings.playlistBookmarks)
+      if (action === 'updateActivePlaylistBookmarks') {
+        settings.playlistBookmarks = value(settings.playlistBookmarks ?? [])
         return true
       }
       if (action === 'updateProfileSubscriptionsFromSync') {
@@ -726,7 +729,7 @@ test('a separate profile syncs its library only in its own collections and never
     dataScope: 'separate-1',
     respond: async (url, options) => {
       const path = new URL(url).pathname
-      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 2 } }
       if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: 1 }], legacy_data: false }
       if (path === '/v1/encrypted_sync/separateProfiles' && !options.method) {
         // Another device deleted the profile `gone-1`, and a newer version added
@@ -767,7 +770,7 @@ test('a separate profile syncs its library only in its own collections and never
   // The deleted profile's data is deleted once no profile lists it, and the
   // data of the one this version can't read stays.
   assert.deepEqual(f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname).sort(),
-    ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+    ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
 
   // Neither profile lost channels, and the shared baselines stay for the next shared sync.
   assert.deepEqual(Array.from(f.context.rootState.profiles.profileList, profile => Array.from(profile.subscriptions, channel => channel.id)),
@@ -791,7 +794,7 @@ for (const failure of ['deletion', 'later upload']) {
     let failing = true
     const respond = async (url, options) => {
       const path = new URL(url).pathname
-      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 2 } }
       if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: listed.revision }], legacy_data: false }
       if (path !== '/v1/encrypted_sync/separateProfiles') {
         // Settings upload after the profiles.
@@ -821,7 +824,7 @@ for (const failure of ['deletion', 'later upload']) {
     await f.actions.syncWithSyncServer(f.context)
     assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
     assert.deepEqual(deletes().slice(failed).sort(),
-      ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+      ['history', 'playlists', 'subscriptions', 'watchStats', 'playlistBookmarks', 'seenVideos', 'seenPosts'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
     assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles), ['kept-1'])
   })
 }
@@ -851,15 +854,32 @@ test('a sync that leaves out a list keeps the deletions made in it for a sync th
 })
 
 test('a separate profile does not sync its library without server support', async () => {
-  const f = fixture({ syncServerSyncHistory: true }, {
-    encrypted: true,
-    dataScope: 'separate-1',
-    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1, live_sync: 1 } } : undefined,
-  })
-  f.context.rootState.history = { historyCacheSorted: [{ videoId: 'separate-video', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }] }
-  await f.actions.syncWithSyncServer(f.context)
-  assert.equal(f.context.state.syncServerStatus, 'success')
-  assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats)/.test(request.url)), [])
+  const key = Buffer.alloc(32, 1).toString('base64')
+  for (const separateProfiles of [undefined, 1]) {
+    const f = fixture({ syncServerSyncHistory: true, syncServerSyncSettings: true }, {
+      encrypted: true,
+      dataScope: 'separate-1',
+      respond: url => url.endsWith('/health')
+        ? { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1, seen_rss_items: 1, separate_profiles: separateProfiles } }
+        : undefined,
+    })
+    f.context.rootState.profiles.profileList.push({
+      _id: 'separate-1',
+      name: 'separate-1',
+      separate: true,
+      subscriptions: [{ id: 'separate-channel', name: 'Separate subscription', hideShorts: true }],
+    })
+    f.context.rootState.history = { historyCacheSorted: [{ videoId: 'separate-video', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }] }
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+    assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats|seenVideos)/.test(request.url)), [])
+    // The separate profile's channel settings stay here, while the shared settings and RSS seen marks sync.
+    const settingsUpload = f.requests.find(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings'))
+    const keys = (await privacy.decryptSyncDocument(JSON.parse(settingsUpload.body).payload, key)).map(entry => entry.key)
+    assert.ok(keys.includes('subscriptionChannelSettings'))
+    assert.ok(!keys.some(key => key.startsWith('subscriptionChannelSettings.')))
+    assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/seenRssItems')))
+  }
 })
 
 for (const overrides of [

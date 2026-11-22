@@ -8,6 +8,7 @@ import { numberSyncMessage, readSynced, settingSyncMessage, writeSynced } from '
 import { canRendererWriteSetting } from './settingWriteGuard'
 import { TabManager } from './tabs/TabManager'
 import { recordSubscriptionFeedTitles } from './videoMetadataCache'
+import { seenMarksSettingId } from '../subscriptionSeenMarkSettings.js'
 
 /**
  * Whether a datastore request reads the whole datastore.
@@ -122,14 +123,16 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
     try {
       switch (action) {
         case DBActions.SETTINGS.MERGE_SEEN_VIDEOS: {
-          const value = await baseHandlers.settings.mergeSeenVideos(data)
-          syncSetting('subscriptionSeenVideos', value)
+          const { scope } = await resolveScope(data?.scope)
+          const value = await baseHandlers.settings.mergeSeenVideos(data?.update, scope)
+          syncSetting(seenMarksSettingId('subscriptionSeenVideos', scope), value)
           return value
         }
 
         case DBActions.SETTINGS.MERGE_SEEN_POSTS: {
-          const value = await baseHandlers.settings.mergeSeenPosts(data)
-          syncSetting('subscriptionSeenPosts', value)
+          const { scope } = await resolveScope(data?.scope)
+          const value = await baseHandlers.settings.mergeSeenPosts(data?.update, scope)
+          syncSetting(seenMarksSettingId('subscriptionSeenPosts', scope), value)
           return value
         }
 
@@ -187,7 +190,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
                   data: { insertions: [], updates: result.records, deletions: [] }
                 })
           }
-          if (result.seenVideos != null) syncSetting('subscriptionSeenVideos', result.seenVideos)
+          if (result.seenVideos != null) syncSetting(seenMarksSettingId('subscriptionSeenVideos', scope), result.seenVideos)
           return result
         }
 

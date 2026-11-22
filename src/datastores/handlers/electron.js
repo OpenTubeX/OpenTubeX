@@ -66,12 +66,13 @@ const dbSearchHistory = (action, data, replacesState = false) => (
 const dbSubscriptionCache = (action, data) => window.ftElectron.dbSubscriptionCache(action, toPlain(data))
 
 class Settings {
+  // The marks of the data scope active at the request, see `seenMarksSettingId`
   static mergeSeenPosts(update) {
-    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_POSTS, update)
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_POSTS, { update, scope: getDataScope() })
   }
 
   static mergeSeenVideos(update) {
-    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_VIDEOS, update)
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_VIDEOS, { update, scope: getDataScope() })
   }
 
   static mergeSeenRssItems(update) {

@@ -90,6 +90,7 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['removeVideo', 'playlists'],
   ['removeVideos', 'playlists'],
   ['setPlaylistBookmarks', 'playlists'],
+  ['setProfilePlaylistBookmarks', 'playlists'],
   ['upsertPlaylistToList', 'playlists'],
   ['applyPlaylistMetadataRepairs', 'playlists'],
   ['upsertToHistoryCache', 'history'],

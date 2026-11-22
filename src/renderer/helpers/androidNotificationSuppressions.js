@@ -1,3 +1,4 @@
+import { DBHistoryHandlers } from '../../datastores/handlers/index'
 import store from '../store/index'
 import { suppressAndroidNotifications } from './androidBackgroundSync.js'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory.js'
@@ -11,7 +12,7 @@ const WATCHED_LIMIT = 1000
  * @param {{ videoId: string, timeWatched: number }[]} history newest first
  * @returns {string[]}
  */
-function getRecentlyWatchedIds(history) {
+function getRecentlyWatchedStoreIds(history) {
   const since = Date.now() - WATCHED_WINDOW_MS
   const ids = []
   for (const { videoId, timeWatched } of history) {
@@ -21,9 +22,21 @@ function getRecentlyWatchedIds(history) {
   return ids
 }
 
+/**
+ * The videos watched recently in any profile, newest first. Notifications
+ * cover the channels of every profile, while the store only holds the history
+ * of one data scope.
+ * @returns {Promise<string[]>}
+ */
+async function getRecentlyWatchedIds() {
+  const entries = await DBHistoryHandlers.findRecentlyWatchedInEveryScope(Date.now() - WATCHED_WINDOW_MS, WATCHED_LIMIT)
+  entries.sort((a, b) => b.timeWatched - a.timeWatched)
+  return [...new Set(entries.map(entry => entry.videoId))].slice(0, WATCHED_LIMIT)
+}
+
 /** Keeps Android from announcing videos in the watch history, also ones watched on another device. */
-export function suppressWatchedAndroidNotifications() {
-  return suppressAndroidNotifications({ watched: getRecentlyWatchedIds(store.state.history.historyCacheSorted) })
+export async function suppressWatchedAndroidNotifications() {
+  return suppressAndroidNotifications({ watched: await getRecentlyWatchedIds() })
 }
 
 /**
@@ -36,9 +49,18 @@ export function startAndroidNotificationSuppressions() {
   if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return () => {}
   capacitorNotificationHistory.getDismissals().then(suppressDismissedAndroidNotifications)
   closeDeferredReminders()
+  let update = Promise.resolve()
+  // Reads the histories again when a video joins or leaves the recent history
+  // the store shows, or when separate profiles come or go. Datastore reads
+  // queue behind the history writes the store reflects.
   return store.watch(
-    state => getRecentlyWatchedIds(state.history.historyCacheSorted).join('\n'),
-    ids => suppressAndroidNotifications({ watched: ids ? ids.split('\n') : [] }),
+    state => [
+      ...state.profiles.profileList.filter(profile => profile.separate === true).map(profile => profile._id),
+      ...getRecentlyWatchedStoreIds(state.history.historyCacheSorted),
+    ].join('\n'),
+    () => {
+      update = update.then(suppressWatchedAndroidNotifications).catch(error => console.error(error))
+    },
     { immediate: true }
   )
 }

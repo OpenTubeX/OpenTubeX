@@ -20,12 +20,13 @@ export const subscriptionCache = createBrowserSubscriptionCache(
 // https://www.npmjs.com/package/localforage
 
 class Settings {
+  // The marks of the data scope active at the request, see `seenMarksSettingId`
   static mergeSeenPosts(update) {
-    return baseHandlers.settings.mergeSeenPosts(update)
+    return baseHandlers.settings.mergeSeenPosts(update, getDataScope())
   }
 
   static mergeSeenVideos(update) {
-    return baseHandlers.settings.mergeSeenVideos(update)
+    return baseHandlers.settings.mergeSeenVideos(update, getDataScope())
   }
 
   static mergeSeenRssItems(update) {

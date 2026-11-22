@@ -455,8 +455,8 @@ const actions = {
   },
 
   /**
-   * Shows the history, playlists, search history, watch stats, watch queue
-   * and recommendations of the active profile's data scope, after switching
+   * Shows the history, playlists, search history, watch stats, watch queue,
+   * feed seen marks and recommendations of the active profile's data scope, after switching
    * to or from a separate profile.
    */
   async loadDataScope({ dispatch, commit, getters, rootGetters }) {
@@ -480,6 +480,8 @@ const actions = {
         commit('setAllPlaylists', [])
         commit('setPlaylistsReady', false)
         commit('setSearchHistoryEntries', [])
+        commit('setSubscriptionSeenVideos', '[]')
+        commit('setSubscriptionSeenPosts', '[]')
         commit('clearWatchStats')
         // Sync shows the other devices' statistics of this profile once it loaded.
         commit('setSyncedWatchStats', [])
@@ -496,6 +498,7 @@ const actions = {
         read('grabHistory'),
         read('grabAllPlaylists'),
         read('grabSearchHistoryEntries', { replace: true }),
+        read('grabSubscriptionSeenMarks'),
         read('loadWatchQueueScope', scope),
         rootGetters.getEnableWatchStats ? read('grabWatchStats') : null,
         hadRecommendations ? read('loadRecommendations') : null,
@@ -505,6 +508,11 @@ const actions = {
       return scope
     })())
     if (scope === getDataScope()) await dispatch('applySyncServerDataScope')
+  },
+
+  /** Lets the next {@link loadDataScope} read a data scope again whose startup read failed */
+  markDataScopeIncomplete(_, scope) {
+    if (scope === getDataScope()) incompleteDataScope = scope
   },
 }
 
@@ -527,6 +535,12 @@ const mutations = {
   addProfileToList(state, profile) {
     state.profileList.push(withDefaultProfileIcon(profile))
     state.profileList.sort(profileSort)
+  },
+
+  /** Sets the YouTube playlists a separate profile saved, see `updateActivePlaylistBookmarks` */
+  setProfilePlaylistBookmarks(state, { profileId, playlistBookmarks }) {
+    const profile = state.profileList.find(profile => profile._id === profileId)
+    if (profile) profile.playlistBookmarks = playlistBookmarks
   },
 
   upsertProfileToList(state, updatedProfile) {

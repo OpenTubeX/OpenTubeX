@@ -177,7 +177,7 @@ test('bulk edits keep one channel’s future timestamp out of other channels’ 
   profile.subscriptions[0].subscriptionSettingsUpdatedAtByField = { showMembersOnly: future }
   await db.profiles.updateAsync({ _id: profile._id }, profile)
   other.state.profileList[1] = structuredClone(profile)
-  const old = { value: getSubscriptionSettingsForSync({ state: { profiles: store.state } }) }
+  const old = { value: getSubscriptionSettingsForSync(store.state.profileList[0]) }
   const write = t.mock.method(db.profiles, 'updateAsync')
 
   assert.equal(await store.dispatch('batchUpdateChannelSettings', subscriptions.map(channel => ({
@@ -192,7 +192,7 @@ test('bulk edits keep one channel’s future timestamp out of other channels’ 
       assert.equal(profile.subscriptions[1].showMembersOnly, false)
     }
   }
-  const value = getSubscriptionSettingsForSync({ state: { profiles: store.state } })
+  const value = getSubscriptionSettingsForSync(store.state.profileList[0])
   const remoteEntry = {
     value: {
       ...value,
@@ -291,7 +291,7 @@ for (const dailyVideoLimit of [7, undefined]) {
     }))
     const { db, store, createStore } = await profileStore(subscriptions)
     const other = createStore()
-    const old = { value: getSubscriptionSettingsForSync({ state: { profiles: store.state } }) }
+    const old = { value: getSubscriptionSettingsForSync(store.state.profileList[0]) }
     const laterUpdatedAt = Date.now() + 1000
     let remoteEntry
     const update = db.profiles.updateAsync.bind(db.profiles)
@@ -302,7 +302,7 @@ for (const dailyVideoLimit of [7, undefined]) {
         assert.equal(await other.dispatch('updateChannelSettings', {
           channelId: 'first', settings: { dailyVideoLimit }, fromSync: true, updatedAt: laterUpdatedAt
         }), true)
-        remoteEntry = { value: getSubscriptionSettingsForSync({ state: { profiles: other.state } }) }
+        remoteEntry = { value: getSubscriptionSettingsForSync(other.state.profileList[0]) }
       }
       return update(...args)
     })
@@ -328,7 +328,7 @@ for (const dailyVideoLimit of [7, undefined]) {
       old,
       remoteEntry,
       now: Date.now(),
-      value: getSubscriptionSettingsForSync({ state: { profiles: store.state } })
+      value: getSubscriptionSettingsForSync(store.state.profileList[0])
     })
     assert.equal(merged.value.first.value.showMembersOnly, false)
     assert.equal(merged.value.first.value.dailyVideoLimit, dailyVideoLimit)

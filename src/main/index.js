@@ -851,7 +851,7 @@ function runApp() {
     show: showUrlNotification,
     // Uses the session's proxy settings, like the background refresh requests.
     fetch: (input, init) => net.fetch(input, init),
-    isWatched: videoId => baseHandlers.history._includes(videoId)
+    isWatched: videoId => baseHandlers.history._includesInAnyScope(videoId)
   })
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})

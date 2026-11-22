@@ -3,6 +3,7 @@ import { getConfiguredKeyboardShortcuts } from '../../constants.js'
 import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
+import { isScopedSubscriptionSettingsSyncKey } from './subscription-settings-sync.js'
 import { PLAYLIST_PREFERENCES_SYNC_KEYS, normalizePlaylistPreferences } from './playlist-preferences-sync.js'
 import { parseCaptionSettings } from './player/caption-settings.js'
 
@@ -267,7 +268,8 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
     const previous = new Map((before ?? []).map(entry => [entry.key, entry.value]))
     for (const entry of after ?? []) {
       // The first upload establishes a baseline, rather than hundreds of actions.
-      if (NOISY_ACTIVITY_SETTINGS.has(entry.key) || !previous.has(entry.key) ||
+      // A separate profile's channels stay out of shared activity.
+      if (NOISY_ACTIVITY_SETTINGS.has(entry.key) || isScopedSubscriptionSettingsSyncKey(entry.key) || !previous.has(entry.key) ||
           JSON.stringify(previous.get(entry.key)) === JSON.stringify(entry.value)) continue
       if (entry.key === 'subscriptionChannelSettings' && areJsonValuesEqual(
         subscriptionPreferences(previous.get(entry.key)), subscriptionPreferences(entry.value)

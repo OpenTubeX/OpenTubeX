@@ -127,7 +127,7 @@ test('disabling subscription settings sync preserves local and remote values', a
 test('does not subscribe unknown channels or reset channels absent from remote settings', async () => {
   const store = createStore([{ id: 'local', dailyVideoLimit: 5 }])
   store.dispatch = () => assert.fail('Unrelated channels must not be changed')
-  await subscriptionSync.applySubscriptionSettingsSync(store, { remote: { value: { dailyVideoLimit: 2 }, updatedAt: 1 } })
+  await subscriptionSync.applySubscriptionSettingsSync(store, { remote: { value: { dailyVideoLimit: 2 }, updatedAt: 1 } }, store.state.profiles.profileList[0])
   assert.equal(store.state.profiles.profileList[0].subscriptions.length, 1)
   assert.equal(store.state.profiles.profileList[0].subscriptions[0].dailyVideoLimit, 5)
 })
@@ -340,7 +340,7 @@ test('rejects invalid remote edit times before dispatching channel settings', as
     store.dispatch = () => assert.fail('Invalid timestamps must not be dispatched')
     await assert.rejects(subscriptionSync.applySubscriptionSettingsSync(store, {
       channel: { value: { dailyVideoLimit: 2 }, updatedAt },
-    }), /Invalid subscription settings timestamp/)
+    }, store.state.profiles.profileList[0]), /Invalid subscription settings timestamp/)
     assert.equal(store.state.profiles.profileList[0].subscriptions[0].subscriptionSettingsUpdatedAt, 100)
   }
 })
@@ -359,21 +359,21 @@ test('subscribing with untouched defaults does not upload a per-channel settings
 
 test('explicit resets to defaults remain in the sync payload', () => {
   const store = createStore([{ id: 'reset', subscriptionSettingsUpdatedAt: 123 }])
-  assert.equal(subscriptionSync.getSubscriptionSettingsForSync(store).reset.updatedAt, 123)
+  assert.equal(subscriptionSync.getSubscriptionSettingsForSync(store.state.profiles.profileList[0]).reset.updatedAt, 123)
 })
 
 test('records from clients without notification or refresh error choices keep the local ones', async () => {
   const store = createStore([{ id: 'channel', notificationFeedTypes: ['videos', 'live'], showRefreshErrors: false }])
   const saved = []
   store.dispatch = async (_, payload) => { saved.push(payload.settings); return true }
-  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 5 } })
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 5 } }, store.state.profiles.profileList[0])
   assert.deepEqual(saved[0].notificationFeedTypes, ['videos', 'live'])
   assert.equal(saved[0].showRefreshErrors, false)
   assert.equal(saved[0].dailyVideoLimit, 2)
 
-  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: null }, updatedAt: 6 } })
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: null }, updatedAt: 6 } }, store.state.profiles.profileList[0])
   assert.deepEqual(saved[1].notificationFeedTypes, ['videos', 'live'])
-  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 7 } })
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 7 } }, store.state.profiles.profileList[0])
   assert.deepEqual(saved[2].notificationFeedTypes, [])
 })
 
@@ -497,11 +497,11 @@ test('applying merged settings rejects instead of overwriting an edit made after
     { playlist: { value: { shuffleByDefault: true }, updatedAt: 10 } }, device.snapshot, merged), /changed during sync/)
 
   const store = createStore([{ id: 'channel', dailyVideoLimit: 2, subscriptionSettingsUpdatedAt: 10 }])
-  const mergedChannels = subscriptionSync.getSubscriptionSettingsForSync(store)
+  const mergedChannels = subscriptionSync.getSubscriptionSettingsForSync(store.state.profiles.profileList[0])
   Object.assign(store.state.profiles.profileList[0].subscriptions[0], { dailyVideoLimit: 4, subscriptionSettingsUpdatedAt: 20 })
   store.dispatch = () => assert.fail('A newer local edit must not be overwritten')
   await assert.rejects(subscriptionSync.applySubscriptionSettingsSync(store,
-    { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 10 } }, mergedChannels), /changed during sync/)
+    { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 10 } }, store.state.profiles.profileList[0], mergedChannels), /changed during sync/)
 })
 
 test('a newer local edit back to the synced value beats an older remote edit', () => {
@@ -624,4 +624,41 @@ test('list settings keep items through upload retries, skipped applies, and save
   savedElsewhere = undefined
   await context.syncSettings(client, store, raced)
   assert.equal(settings.forbiddenTitles, '["A","B","C","E","D"]')
+})
+
+test('a separate profile’s channel settings sync in their own entry, which goes once the profile is deleted', async () => {
+  const separateKey = subscriptionSync.scopedSubscriptionSettingsSyncKey('separate')
+  const goneKey = subscriptionSync.scopedSubscriptionSettingsSyncKey('gone')
+  const shared = { _id: 'main', subscriptions: [{ id: 'channel', dailyVideoLimit: 1, subscriptionSettingsUpdatedAt: 10 }] }
+  const separate = { _id: 'separate', separate: true, subscriptions: [{ id: 'channel', dailyVideoLimit: 5, subscriptionSettingsUpdatedAt: 10 }] }
+  const saved = []
+  const store = {
+    state: { profiles: { profileList: [shared, separate] }, settings: { syncServerSettingsExcluded: [] }, utils: { customThemes: [] } },
+    dispatch: async (action, { channelId, settings, updatedAt, profileId }) => {
+      assert.equal(action, 'updateChannelSettings')
+      saved.push(profileId)
+      const profile = store.state.profiles.profileList.find(profile => profile._id === profileId)
+      Object.assign(profile.subscriptions.find(channel => channel.id === channelId), settings, { subscriptionSettingsUpdatedAt: updatedAt })
+      return true
+    },
+  }
+  const client = createClient([
+    { key: separateKey, value: { channel: { dailyVideoLimit: 3 } }, updatedAt: 20 },
+    { key: goneKey, value: { channel: { dailyVideoLimit: 2 } }, updatedAt: 20 },
+  ])
+
+  await context.syncSettings(client, store, {}, null, { dataScope: 'separate', removedProfileIds: ['gone'] })
+  // The newer synced edit reaches only the separate profile.
+  assert.deepEqual(saved, ['separate'])
+  assert.equal(separate.subscriptions[0].dailyVideoLimit, 3)
+  assert.equal(shared.subscriptions[0].dailyVideoLimit, 1)
+  assert.equal(client.entries.find(entry => entry.key === key).value.channel.value.dailyVideoLimit, 1)
+  assert.equal(client.entries.find(entry => entry.key === separateKey).value.channel.value.dailyVideoLimit, 3)
+  assert.equal(client.entries.some(entry => entry.key === goneKey), false)
+
+  // A sync of the shared data keeps the separate profile's entry as it is.
+  const before = structuredClone(client.entries.find(entry => entry.key === separateKey))
+  separate.subscriptions[0] = { id: 'channel', dailyVideoLimit: 9, subscriptionSettingsUpdatedAt: 30 }
+  await context.syncSettings(client, store, {}, null)
+  assert.deepEqual(client.entries.find(entry => entry.key === separateKey), before)
 })
