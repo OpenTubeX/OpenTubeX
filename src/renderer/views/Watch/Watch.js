@@ -3885,8 +3885,9 @@ export default defineComponent({
         this.isLiveDvrEnabled = isLiveDvrEnabled ?? null
         this.isUpcoming = !!result.basic_info.is_upcoming
         // Like a private video, an upcoming one without a trailer has nothing to play
-        // and never ends, so it would stop the playlist until it starts.
-        this.skipUnavailablePlaylistVideo ||= this.isUpcoming && this.playabilityStatus !== 'OK'
+        // and never ends, so it would stop the playlist until it starts. A downloaded
+        // copy already plays, so a metadata-only load must not skip it.
+        if (!metadataOnly) this.skipUnavailablePlaylistVideo ||= this.isUpcoming && this.playabilityStatus !== 'OK'
         this.isLiveContent = !!result.basic_info.is_live_content
         this.isPremiere = isPremiere === true
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
