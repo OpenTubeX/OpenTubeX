@@ -580,7 +580,7 @@ export default defineComponent({
       /**
        * The playlist video to continue with once the watch queue, which interrupted
        * the playlist, has played its videos
-       * @type {{ route: object, queuedVideoId: string } | null}
+       * @type {{ route: object, queuedPath: string } | null}
        */
       playlistAfterQueue: null,
       playNextCountDownIntervalId: null,
@@ -2788,6 +2788,12 @@ export default defineComponent({
           }
         }
 
+        // Opening anything but the queued video the queue opened, even the same video
+        // from another playlist, leaves the interrupted playlist behind.
+        if (this.playlistAfterQueue && this.playlistAfterQueue.queuedPath !== this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)) {
+          this.playlistAfterQueue = null
+        }
+
         // react to route changes...
         const previousVideoId = this.videoId
         this.videoId = this.tabRoute.params.id
@@ -2795,8 +2801,6 @@ export default defineComponent({
         if (videoIdChanged) {
           this.takePlayedQueueVideo()
           this.watchedPlaylistVideoRemoval = null
-          // Opening anything but the next queued video leaves the interrupted playlist behind.
-          if (this.playlistAfterQueue?.queuedVideoId !== this.videoId) this.playlistAfterQueue = null
           this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
           this.androidHttpErrorRecoveryAttemptedForCurrentVideo = false
@@ -6338,11 +6342,12 @@ export default defineComponent({
         this.restartCurrentVideo()
       } else {
         // The playlist continues after the queue, from where the queue interrupted it.
+        const queuedPath = this.watchRouteWithoutTimestamp(nextFullPath)
         if (this.playlistAfterQueue) {
-          this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedVideoId: nextVideo.videoId }
+          this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedPath }
         } else if (this.watchingPlaylist) {
           const playlistRoute = this.$refs.watchVideoPlaylist?.getNextVideoRoute() ?? null
-          this.playlistAfterQueue = playlistRoute && { route: playlistRoute, queuedVideoId: nextVideo.videoId }
+          this.playlistAfterQueue = playlistRoute && { route: playlistRoute, queuedPath }
         }
         this.queuedPlaybackVideoId = nextVideo.videoId
         // Other media plays on its own page.

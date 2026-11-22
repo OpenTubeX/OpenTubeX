@@ -225,7 +225,7 @@ test('the playlist a queue interrupted continues once, and starts only when auto
   const pushes = []
   const watch = {
     ...watchMethods(source, ['returnToPlaylistAfterQueue', 'handleSkipToNext']),
-    playlistAfterQueue: { route, queuedVideoId: 'queued' },
+    playlistAfterQueue: { route, queuedPath: '/watch/queued' },
     queuedPlaybackVideoId: null,
     watchingPlaylist: false,
     get returnsToPlaylist() { return this.playlistAfterQueue !== null },
@@ -237,7 +237,7 @@ test('the playlist a queue interrupted continues once, and starts only when auto
   assert.deepEqual(pushes, [route])
   assert.equal(watch.queuedPlaybackVideoId, null, 'a manual skip leaves starting it to Start Videos Automatically')
 
-  watch.playlistAfterQueue = { route, queuedVideoId: 'queued' }
+  watch.playlistAfterQueue = { route, queuedPath: '/watch/queued' }
   assert.equal(watch.returnToPlaylistAfterQueue(), true)
   assert.equal(watch.queuedPlaybackVideoId, 'next', 'autoplay starts the playlist video')
   assert.equal(watch.returnToPlaylistAfterQueue(), false, 'the playlist continues only once')
@@ -264,14 +264,14 @@ test('a queued video from another playlist keeps the interrupted playlist to con
   }
   watch.playNextQueuedVideo()
   assert.equal(watch.playlistAfterQueue.route, original)
-  assert.equal(watch.playlistAfterQueue.queuedVideoId, 'b1')
+  assert.equal(watch.playlistAfterQueue.queuedPath, '/watch/b1')
 
   // The queued video opened with its own playlist
   watch.tabRoute = { fullPath: '/watch/b1?playlistId=b' }
   watch.$refs.watchVideoPlaylist.getNextVideoRoute = () => ({ path: '/watch/b2', query: { playlistId: 'b' } })
   watch.playNextQueuedVideo()
   assert.equal(watch.playlistAfterQueue.route, original, 'the playlist the queue interrupted continues')
-  assert.equal(watch.playlistAfterQueue.queuedVideoId, 'c')
+  assert.equal(watch.playlistAfterQueue.queuedPath, '/watch/c')
 })
 
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {
