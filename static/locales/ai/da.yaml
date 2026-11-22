@@ -2760,6 +2760,11 @@ Downloads:
   File Name Shortened: Filnavnet blev forkortet, fordi videotitlen var for lang.
   Some Videos Not Downloaded: Nogle videoer i denne playliste kunne ikke downloades.
   Playlist Video Position: Video {index} af {count}
+  Videos Selected: 'Videoer: {selected} af {total} valgt'
+  Loading Remaining Videos: Indlæser de resterende videoer…
+  Unloaded Videos Excluded: Nogle videoer kunne ikke indlæses. De downloades kun, når alle videoer er valgt.
+  Too Many Videos Selected: Vælg op til {max} videoer, eller dem alle.
+  Videos in Progress: Videoer i gang
   Insufficient Disk Space: Der er ikke nok diskplads. Der kræves ca. {required}, og {available} er tilgængelig.
   Unknown Download Size: Downloadens størrelse er ukendt. Der er {available} tilgængelig på destinationsfilsystemet.
   Disk Space Check Unavailable: Den tilgængelige diskplads kunne ikke kontrolleres, før download blev startet.

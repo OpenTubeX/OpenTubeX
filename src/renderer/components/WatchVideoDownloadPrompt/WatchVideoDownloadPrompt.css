@@ -161,6 +161,38 @@
   opacity: 0.4;
 }
 
+.videoSelection .optionSection {
+  padding-block-start: 0;
+}
+
+/* The list stays short, so the other options remain within reach */
+.videoSelectionScroller {
+  /* Room for the checkboxes' state layer, which extends 11px before them */
+  margin-inline: -11px;
+  max-block-size: min(40vh, 360px);
+  overflow-y: auto;
+  padding-inline: 11px;
+  position: relative;
+}
+
+.videoSelectionList {
+  margin-block-start: 0;
+}
+
+.videoSelectionList :deep(.checkboxLabelText) {
+  overflow-wrap: anywhere;
+}
+
+.videoSelectionNote {
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+  margin-block: 8px 0;
+}
+
+.videoSelectionNote.invalidSelection {
+  color: var(--red-500);
+}
+
 .saveTemplatePrompt {
   inline-size: min(420px, 75vw);
   padding-block: 0 10px;
@@ -227,6 +259,12 @@
   text-align: center;
 }
 
+.downloadActiveVideos {
+  inline-size: min(600px, 100%);
+  margin-block-start: 16px;
+  margin-inline: auto;
+}
+
 .downloadProgressBarFill {
   background-color: var(--accent-color);
   block-size: 100%;
@@ -287,6 +325,7 @@
   }
 }
 
+.videoSelection summary,
 .advancedDownloadOptions summary {
   cursor: pointer;
   min-block-size: var(--phone-touch-target, 48px);

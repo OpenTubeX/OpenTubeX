@@ -2769,6 +2769,11 @@ Downloads:
   File Name Shortened: چون عنوان ویدیو بیش‌ازحد طولانی بود، نام فایل کوتاه شد.
   Some Videos Not Downloaded: برخی از ویدیوهای این فهرست پخش بارگیری نشدند.
   Playlist Video Position: ویدیوی {index} از {count}
+  Videos Selected: 'ویدیوها: {selected} از {total} انتخاب شده'
+  Loading Remaining Videos: در حال بارگیری ویدیوهای باقی‌مانده…
+  Unloaded Videos Excluded: برخی ویدیوها بارگیری نشدند. آن‌ها فقط وقتی همهٔ ویدیوها انتخاب شده باشند دانلود می‌شوند.
+  Too Many Videos Selected: حداکثر {max} ویدیو یا همه را انتخاب کنید.
+  Videos in Progress: ویدیوهای در حال انجام
   Insufficient Disk Space: فضای دیسک کافی نیست. حدود {required} لازم است و {available} در دسترس است.
   Unknown Download Size: حجم بارگیری نامشخص است. {available} در فایل‌سیستم مقصد در دسترس است.
   Disk Space Check Unavailable: فضای خالی دیسک پیش از آغاز این بارگیری قابل بررسی نبود.

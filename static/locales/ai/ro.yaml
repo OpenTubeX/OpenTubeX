@@ -2722,6 +2722,11 @@ Downloads:
   File Name Shortened: Numele fișierului a fost scurtat deoarece titlul videoclipului era prea lung.
   Some Videos Not Downloaded: Unele videoclipuri din această listă de redare nu au putut fi descărcate.
   Playlist Video Position: Videoclipul {index} din {count}
+  Videos Selected: 'Videoclipuri: {selected} din {total} selectate'
+  Loading Remaining Videos: Se încarcă videoclipurile rămase…
+  Unloaded Videos Excluded: Unele videoclipuri nu au putut fi încărcate. Acestea sunt descărcate doar când toate videoclipurile sunt selectate.
+  Too Many Videos Selected: Selectați până la {max} videoclipuri sau pe toate.
+  Videos in Progress: Videoclipuri în curs
   Insufficient Disk Space: Spațiu insuficient pe disc. Sunt necesari aproximativ {required}, iar {available} sunt disponibili.
   Unknown Download Size: Dimensiunea descărcării este necunoscută. În sistemul de fișiere de destinație sunt disponibili {available}.
   Disk Space Check Unavailable: Spațiul disponibil pe disc nu a putut fi verificat înainte de pornirea descărcării.

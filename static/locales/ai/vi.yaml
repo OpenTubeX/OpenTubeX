@@ -2682,6 +2682,11 @@ Downloads:
   File Name Shortened: Tên tệp đã được rút gọn vì tiêu đề video quá dài.
   Some Videos Not Downloaded: Không thể tải xuống một số video trong danh sách phát này.
   Playlist Video Position: Video {index}/{count}
+  Videos Selected: 'Video: đã chọn {selected}/{total}'
+  Loading Remaining Videos: Đang tải các video còn lại…
+  Unloaded Videos Excluded: Không thể tải một số video. Chúng chỉ được tải xuống khi tất cả video được chọn.
+  Too Many Videos Selected: Chọn tối đa {max} video, hoặc tất cả.
+  Videos in Progress: Video đang xử lý
   Insufficient Disk Space: Không đủ dung lượng đĩa. Cần khoảng {required}, hiện có {available}.
   Unknown Download Size: Không rõ kích thước tải xuống. Hệ thống tệp đích còn {available}.
   Disk Space Check Unavailable: Không thể kiểm tra dung lượng đĩa còn trống trước khi bắt đầu tải.

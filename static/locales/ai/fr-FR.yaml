@@ -2662,6 +2662,11 @@ Downloads:
   File Name Shortened: Le nom du fichier a été raccourci, car le titre de la vidéo était trop long.
   Some Videos Not Downloaded: Certaines vidéos de cette playlist n'ont pas pu être téléchargées.
   Playlist Video Position: Vidéo {index} sur {count}
+  Videos Selected: 'Vidéos : {selected} sur {total} sélectionnées'
+  Loading Remaining Videos: Chargement des vidéos restantes…
+  Unloaded Videos Excluded: Certaines vidéos n'ont pas pu être chargées. Elles ne sont téléchargées que si toutes les vidéos sont sélectionnées.
+  Too Many Videos Selected: Sélectionnez jusqu'à {max} vidéos, ou toutes.
+  Videos in Progress: Vidéos en cours
   Insufficient Disk Space: Espace disque insuffisant. Environ {required} sont nécessaires et {available} sont disponibles.
   Unknown Download Size: La taille du téléchargement est inconnue. {available} sont disponibles sur le système de fichiers de destination.
   Disk Space Check Unavailable: L’espace disque disponible n’a pas pu être vérifié avant le démarrage de ce téléchargement.

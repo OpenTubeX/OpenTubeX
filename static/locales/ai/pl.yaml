@@ -1842,6 +1842,11 @@ Downloads:
   File Name Shortened: Nazwa pliku została skrócona, ponieważ tytuł filmu był za długi.
   Some Videos Not Downloaded: Nie udało się pobrać niektórych filmów z tej playlisty.
   Playlist Video Position: Film {index} z {count}
+  Videos Selected: 'Filmy: wybrano {selected} z {total}'
+  Loading Remaining Videos: Wczytywanie pozostałych filmów…
+  Unloaded Videos Excluded: Nie udało się wczytać niektórych filmów. Są pobierane tylko wtedy, gdy zaznaczone są wszystkie filmy.
+  Too Many Videos Selected: Wybierz maksymalnie {max} filmów lub wszystkie.
+  Videos in Progress: Filmy w toku
   Insufficient Disk Space: Za mało miejsca na dysku. Potrzeba około {required}, a dostępne jest {available}.
   Unknown Download Size: Rozmiar pobierania jest nieznany. W docelowym systemie plików dostępne jest {available}.
   Disk Space Check Unavailable: Przed rozpoczęciem pobierania nie udało się sprawdzić dostępnego miejsca na dysku.

@@ -2664,6 +2664,11 @@ Downloads:
   File Name Shortened: Video başlığı çok uzun olduğu için dosya adı kısaltıldı.
   Some Videos Not Downloaded: Bu oynatma listesindeki bazı videolar indirilemedi.
   Playlist Video Position: Video {index}/{count}
+  Videos Selected: 'Videolar: {total} videodan {selected} tanesi seçildi'
+  Loading Remaining Videos: Kalan videolar yükleniyor…
+  Unloaded Videos Excluded: Bazı videolar yüklenemedi. Bunlar yalnızca tüm videolar seçildiğinde indirilir.
+  Too Many Videos Selected: En fazla {max} video veya tümünü seçin.
+  Videos in Progress: Devam eden videolar
   Insufficient Disk Space: Yeterli disk alanı yok. Yaklaşık {required} gerekli, {available} kullanılabilir.
   Unknown Download Size: İndirme boyutu bilinmiyor. Hedef dosya sisteminde {available} kullanılabilir.
   Disk Space Check Unavailable: İndirme başlatılmadan önce kullanılabilir disk alanı denetlenemedi.

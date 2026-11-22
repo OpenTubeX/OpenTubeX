@@ -101,6 +101,7 @@
             {{ COMPACT ? compactSummary : summary }}
           </p>
           <div class="downloadNotes">
+            <DownloadActiveVideos :download="download" />
             <p
               v-if="spaceWarningText"
               class="downloadSpaceWarning"
@@ -394,6 +395,7 @@ import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { useI18n } from 'vue-i18n'
 import DownloadFailureHint from '../../components/DownloadFailureHint/DownloadFailureHint.vue'
+import DownloadActiveVideos from '../../components/DownloadActiveVideos/DownloadActiveVideos.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { downloadTemplateName } from '../../helpers/downloadTemplates'

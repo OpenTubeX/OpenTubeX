@@ -2679,6 +2679,11 @@ Downloads:
   File Name Shortened: Το όνομα αρχείου συντομεύτηκε επειδή ο τίτλος του βίντεο ήταν πολύ μεγάλος.
   Some Videos Not Downloaded: Ορισμένα βίντεο αυτής της λίστας αναπαραγωγής δεν ήταν δυνατό να ληφθούν.
   Playlist Video Position: Βίντεο {index} από {count}
+  Videos Selected: 'Βίντεο: {selected} από {total} επιλεγμένα'
+  Loading Remaining Videos: Φόρτωση των υπόλοιπων βίντεο…
+  Unloaded Videos Excluded: Ορισμένα βίντεο δεν ήταν δυνατό να φορτωθούν. Λαμβάνονται μόνο όταν είναι επιλεγμένα όλα τα βίντεο.
+  Too Many Videos Selected: Επιλέξτε έως {max} βίντεο ή όλα.
+  Videos in Progress: Βίντεο σε εξέλιξη
   Insufficient Disk Space: Δεν υπάρχει αρκετός χώρος στον δίσκο. Απαιτούνται περίπου {required} και είναι διαθέσιμα {available}.
   Unknown Download Size: Το μέγεθος της λήψης είναι άγνωστο. Στο σύστημα αρχείων προορισμού είναι διαθέσιμα {available}.
   Disk Space Check Unavailable: Δεν ήταν δυνατός ο έλεγχος του διαθέσιμου χώρου στον δίσκο πριν από την έναρξη αυτής της λήψης.

@@ -2629,6 +2629,11 @@ Downloads:
   File Name Shortened: Имя файла было сокращено из-за слишком длинного названия видео.
   Some Videos Not Downloaded: Не удалось скачать некоторые видео из этого плейлиста.
   Playlist Video Position: Видео {index} из {count}
+  Videos Selected: 'Видео: выбрано {selected} из {total}'
+  Loading Remaining Videos: Загрузка оставшихся видео…
+  Unloaded Videos Excluded: Некоторые видео не удалось загрузить. Они скачиваются, только если выбраны все видео.
+  Too Many Videos Selected: Выберите не более {max} видео или все.
+  Videos in Progress: Видео в процессе
   Insufficient Disk Space: Недостаточно места на диске. Требуется около {required}, доступно {available}.
   Unknown Download Size: Размер загрузки неизвестен. В целевой файловой системе доступно {available}.
   Disk Space Check Unavailable: Не удалось проверить доступное место на диске перед началом загрузки.

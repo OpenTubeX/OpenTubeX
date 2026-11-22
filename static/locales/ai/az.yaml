@@ -2676,6 +2676,11 @@ Downloads:
   File Name Shortened: Videonun başlığı çox uzun olduğu üçün fayl adı qısaldıldı.
   Some Videos Not Downloaded: Bu pleylistdəki bəzi videoları endirmək mümkün olmadı.
   Playlist Video Position: Video {index}/{count}
+  Videos Selected: 'Videolar: {total} videodan {selected} seçilib'
+  Loading Remaining Videos: Qalan videolar yüklənir…
+  Unloaded Videos Excluded: Bəzi videoları yükləmək mümkün olmadı. Onlar yalnız bütün videolar seçildikdə endirilir.
+  Too Many Videos Selected: Ən çox {max} video və ya hamısını seçin.
+  Videos in Progress: Davam edən videolar
   Insufficient Disk Space: Diskdə kifayət qədər yer yoxdur. Təxminən {required} lazımdır, {available} mövcuddur.
   Unknown Download Size: Endirmə ölçüsü məlum deyil. Hədəf fayl sistemində {available} mövcuddur.
   Disk Space Check Unavailable: Bu endirmə başlamazdan əvvəl diskdəki boş yeri yoxlamaq mümkün olmadı.

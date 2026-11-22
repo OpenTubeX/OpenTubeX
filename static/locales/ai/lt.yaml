@@ -3175,6 +3175,11 @@ Downloads:
   File Name Shortened: Failo pavadinimas sutrumpintas, nes vaizdo įrašo pavadinimas buvo per ilgas.
   Some Videos Not Downloaded: Kai kurių šio grojaraščio vaizdo įrašų nepavyko atsisiųsti.
   Playlist Video Position: Vaizdo įrašas {index} iš {count}
+  Videos Selected: 'Vaizdo įrašai: pasirinkta {selected} iš {total}'
+  Loading Remaining Videos: Įkeliami likę vaizdo įrašai…
+  Unloaded Videos Excluded: Kai kurių vaizdo įrašų nepavyko įkelti. Jie atsisiunčiami tik tada, kai pasirinkti visi vaizdo įrašai.
+  Too Many Videos Selected: Pasirinkite iki {max} vaizdo įrašų arba visus.
+  Videos in Progress: Vykdomi vaizdo įrašai
   Insufficient Disk Space: Diske nepakanka vietos. Reikia apie {required}, o yra {available}.
   Unknown Download Size: Atsisiuntimo dydis nežinomas. Paskirties failų sistemoje yra {available} laisvos vietos.
   Disk Space Check Unavailable: Prieš pradedant šį atsisiuntimą nepavyko patikrinti laisvos vietos diske.

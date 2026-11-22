@@ -531,13 +531,16 @@ final class YtDlpDownloads {
 
     /**
      * Shows the earliest video still in progress, with the speed of all parts. A live recording
-     * comes first, so the row offers to stop it instead of pausing it.
+     * comes first, so the row offers to stop it instead of pausing it. A split playlist also
+     * lists the video of every part, like showProgress in src/main/ytDlpDownloads.js.
      */
     static void showProgress(JSONObject record, List<JSONObject> parts, JSONArray videoIds) throws org.json.JSONException {
         JSONObject shown = null;
         List<String> speeds = new ArrayList<>();
+        List<JSONObject> active = new ArrayList<>();
         for (JSONObject part : parts) {
             if (part.optBoolean("done")) continue;
+            if (part.has("currentVideoId")) active.add(part);
             if (!part.isNull("speed")) speeds.add(part.optString("speed"));
             if (shown == null || liveRank(part) > liveRank(shown)
                 || liveRank(part) == liveRank(shown) && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
@@ -550,6 +553,17 @@ final class YtDlpDownloads {
             for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.put(key, shown.opt(key));
         }
         record.put("live", shown.optBoolean("live"));
+        if (parts.size() > 1) {
+            active.sort(Comparator.comparingInt(part -> partPosition(part, videoIds)));
+            JSONArray activeVideos = new JSONArray();
+            for (JSONObject part : active) {
+                activeVideos.put(new JSONObject().put("videoId", part.optString("currentVideoId"))
+                    .put("title", part.optString("currentTitle")).put("playlistIndex", part.opt("playlistIndex"))
+                    .put("status", part.optString("status", "preparing")).put("percent", part.optDouble("percent", 0))
+                    .put("live", part.optBoolean("live")));
+            }
+            record.put("activeVideos", activeVideos);
+        }
         for (String key : asList("recordedSeconds", "recordedBytes")) {
             if (shown.has(key)) record.put(key, shown.get(key));
             else record.remove(key);
@@ -646,7 +660,7 @@ final class YtDlpDownloads {
 
     // A requeued record must not show the video its previous run stopped at.
     private static void clearCurrentVideo(JSONObject record) {
-        for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.remove(key);
+        for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount", "activeVideos")) record.remove(key);
     }
 
     private static Object positiveInteger(String[] fields, int index) {
@@ -660,6 +674,7 @@ final class YtDlpDownloads {
         try {
             JSONObject record = records.get(id);
             record.put("status", status).put("errorMessage", error == null ? JSONObject.NULL : error);
+            if (!asList("preparing", "downloading", "processing").contains(status)) record.remove("activeVideos");
             publish(record);
             save();
         } catch (Exception exception) { throw new IllegalStateException(exception); }

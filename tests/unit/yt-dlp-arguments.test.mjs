@@ -87,6 +87,11 @@ test('local playlists number files by playlist position and escape literal title
   const position = new RegExp(pattern.replaceAll('(?P<', '(?<'))
   assert.deepEqual(args.slice(-2).map(url => url.match(position)?.groups.opentubex_playlist_index), ['1', '2'])
   assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/%\(opentubex_playlist_index\)03d - /)
+  // A selection of a YouTube playlist's videos downloads only them and keeps their playlist positions.
+  const selection = buildYtDlpDownloadArguments({ playlistId: 'PL1234567890', videoIds: [videoId, 'BaW_jenozKc'], playlistIndexes: [2, 5], mode: 'video', isPlaylist: true }).args
+  assert.ok(selection.includes('--no-playlist'))
+  assert.deepEqual(selection.slice(-2), [`https://www.youtube.com/watch?v=${videoId}&index=2`, 'https://www.youtube.com/watch?v=BaW_jenozKc&index=5'])
+  assert.throws(() => buildYtDlpDownloadArguments({ videoIds: [videoId], playlistIndexes: [0], mode: 'video', isPlaylist: true }), /invalid-playlist-indexes/)
 })
 
 test('playlists split into processes that keep playlist order and numbering', () => {

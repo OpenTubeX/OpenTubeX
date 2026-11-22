@@ -63,6 +63,7 @@
         :preload-pending="playlistPreloadPending"
         :preload-requires-confirmation="playlistPreloadRequiresConfirmation"
         :preload-complete="playlistPreloadComplete"
+        :download-videos-loading="loadingPagesForDownload"
         :search-video-mode-allowed="shownVideoCount > 1 || playlistInVideoSearchMode"
         :search-query-text="searchQueryTextRequested"
         :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
@@ -75,6 +76,7 @@
         @prompt-close="promptOpen = false"
         @toggle-playlist-bookmark="togglePlaylistBookmark"
         @preload-playlist="preloadPlaylist"
+        @download-video-selection="downloadVideoSelectionOpen = $event"
       />
     </div>
 
@@ -760,8 +762,14 @@ const loadingPagesForSearch = computed(() =>
   playlistInVideoSearchMode.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
 )
 
-watch([loadingPagesForSearch, isLoadingMore, isLoading], () => {
-  if (loadingPagesForSearch.value && !isLoadingMore.value && !isLoading.value) getNextPage()
+// The download prompt's video selection lists every video, so it loads the remaining pages too
+const downloadVideoSelectionOpen = ref(false)
+const loadingPagesForDownload = computed(() =>
+  downloadVideoSelectionOpen.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
+)
+
+watch([loadingPagesForSearch, loadingPagesForDownload, isLoadingMore, isLoading], () => {
+  if ((loadingPagesForSearch.value || loadingPagesForDownload.value) && !isLoadingMore.value && !isLoading.value) getNextPage()
 })
 
 const sortOrderIcon = computed(() => getIconForSortPreference(sortOrder.value))

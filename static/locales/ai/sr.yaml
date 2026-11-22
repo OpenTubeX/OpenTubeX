@@ -2751,6 +2751,11 @@ Downloads:
   File Name Shortened: Назив датотеке је скраћен јер је наслов видео-снимка предугачак.
   Some Videos Not Downloaded: Неке видео снимке са ове плејлисте није било могуће преузети.
   Playlist Video Position: Видео {index} од {count}
+  Videos Selected: 'Видео снимци: изабрано {selected} од {total}'
+  Loading Remaining Videos: Учитавање преосталих видео снимака…
+  Unloaded Videos Excluded: Неки видео снимци нису могли да се учитају. Преузимају се само када су изабрани сви видео снимци.
+  Too Many Videos Selected: Изаберите до {max} видео снимака или све.
+  Videos in Progress: Видео снимци у току
   Insufficient Disk Space: Нема довољно простора на диску. Потребно је око {required}, а доступно је {available}.
   Unknown Download Size: Величина преузимања није позната. На одредишном систему датотека доступно је {available}.
   Disk Space Check Unavailable: Није било могуће проверити доступан простор на диску пре почетка овог преузимања.
