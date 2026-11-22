@@ -1194,11 +1194,11 @@
 /* The page's scrollbars, children of the body, stay between the header and a
    bottom tab bar. Android and iOS draw them natively. */
 :global(body:has(.app)) {
-  --page-header-block-end: var(--top-nav-height);
+  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
 }
 
 :global(body:has(.app.topTabs)) {
-  --page-header-block-end: calc(var(--top-tab-bar-height) + var(--top-nav-height));
+  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 :global(body:has(.app.bottomTabs)) {

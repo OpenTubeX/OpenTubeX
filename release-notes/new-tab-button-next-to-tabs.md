@@ -3,7 +3,7 @@ category: improvement
 platforms: [desktop]
 ---
 
-The New Tab button now sits right after the last tab, like in a browser. Turn off Show New Tab Button Next to Tabs in Appearance settings to keep it at the end of the tab bar. The page scrollbar no longer runs behind the header or a bottom tab bar.
+The New Tab button now sits right after the last tab, like in a browser, unless you turn off Show New Tab Button Next to Tabs in Appearance settings. The page scrollbar no longer runs behind the header or a bottom tab bar.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/b0575834-ee1b-4972-84e4-890e1c5c47bc">
