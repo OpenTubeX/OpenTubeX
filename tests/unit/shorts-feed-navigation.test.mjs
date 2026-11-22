@@ -17,6 +17,8 @@ globalThis.window = {
 }
 globalThis.document = {
   documentElement: { dataset: { reducedMotion: 'reduce' } },
+  expandedPlayer: null,
+  querySelector() { return this.expandedPlayer },
   ...recordListeners(listeners.document),
 }
 const frames = []
@@ -222,6 +224,22 @@ test('scrolling the document down advances once and resets the scroll range', ()
   window.scrollY = 70
   scroll.listener()
   assert.deepEqual(opened, ['next'], 'a background tab only updates the baseline, and moving up does not navigate')
+  navigation.removeListeners()
+})
+
+test('document scrolling behind a fullscreen or full window player does not navigate', () => {
+  const { navigation, opened } = fixture()
+  navigation.addListeners()
+  const scroll = listeners.window.get('scroll').listener
+  // Clicking a control in the player's overlay can scroll the hidden document.
+  document.expandedPlayer = {}
+  window.scrollY = 4
+  scroll()
+  document.expandedPlayer = null
+  assert.deepEqual(opened, [])
+  assert.equal(window.scrollY, 0, 'resets the document')
+  scroll()
+  assert.deepEqual(opened, [], 'the reset does not navigate either')
   navigation.removeListeners()
 })
 
