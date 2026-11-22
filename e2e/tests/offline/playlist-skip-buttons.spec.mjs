@@ -283,6 +283,33 @@ test('seeks and skips from the desktop mini player', async ({ app, page, attachS
   await expect(page).toHaveURL(/#\/watch\/skipvideo2\?.*playlistId=e2eskipplaylist/)
 })
 
+test('continues the playlist after the queued videos that interrupted it', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  await goTo(page, 'history')
+  const queuedVideo = page.locator('.ft-list-video').filter({ hasText: 'Queued video' })
+  await queuedVideo.hover()
+  await queuedVideo.locator('.title').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Add to Queue' }).click()
+
+  await goTo(page, 'userplaylists')
+  await page.getByText('Skip button playlist').click()
+  await page.getByText(VIDEO_TITLES[0]).first().click()
+  await expect(page).toHaveURL(/#\/watch\/skipvideo0\?/)
+
+  const endVideo = async () => {
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => { element.currentTime = Math.max(0, element.duration - 0.25) })
+  }
+
+  await endVideo()
+  await expect(page).toHaveURL(/#\/watch\/queuevideo0(?!.*playlistId)/)
+
+  await endVideo()
+  await expect(page).toHaveURL(/#\/watch\/skipvideo1\?.*playlistId=e2eskipplaylist/)
+  await waitForPlayback(page)
+})
+
 test('offers skipping to a queued video without a playlist', async ({ page }) => {
   await page.route(/^https?:\/\//, (route) => route.fulfill({ status: 404, body: '' }))
 
