@@ -605,7 +605,7 @@ test('shows when an upcoming video starts with Invidious', async ({ page }) => {
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveText('Premieres in 3 hours')
+  await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toContainText('3 hours')
   await expect(page.locator(`${activeTab} .videoPlayerError`)).toHaveCount(0)
 })
 

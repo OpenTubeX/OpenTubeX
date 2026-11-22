@@ -1463,13 +1463,13 @@ function playNextQueuedItem() {
   const item = nextQueuedItem.value
   if (!item?.videoId) return false
   store.commit('removeVideoFromWatchQueue', item.queueItemId)
-  store.commit('setPlayedQueueVideoId', item.videoId)
   const location = item.route ?? watchRouteForVideo(store.getters, item)
   const fullPath = router.resolve(location).fullPath
   if (withoutTimestamp(fullPath) === withoutTimestamp(route.fullPath)) {
     seekTo(0)
     player.value?.play()
   } else {
+    if (fullPath.startsWith('/watch/')) store.commit('addPlayedQueueVideoId', item.videoId)
     requestQueuedPlayback(tabId, fullPath)
     router.push(location)
   }

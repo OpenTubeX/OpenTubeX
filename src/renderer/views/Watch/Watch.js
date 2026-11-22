@@ -6288,8 +6288,8 @@ export default defineComponent({
       this.queueCheckedVideoId = this.videoId
       // Played from the queue, so a following copy was queued to play it again.
       // Only that video consumes the marker, as it may still be loading in another tab.
-      const playedFromQueue = this.$store.state.watchQueue.playedVideoId === this.videoId
-      if (playedFromQueue) this.$store.commit('setPlayedQueueVideoId', null)
+      const playedFromQueue = this.$store.state.watchQueue.playedVideoIds.includes(this.videoId)
+      if (playedFromQueue) this.$store.commit('consumePlayedQueueVideoId', this.videoId)
       const nextVideo = this.nextQueuedVideo
       if (!playedFromQueue && nextVideo?.videoId === this.videoId) {
         this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
@@ -6303,7 +6303,6 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
-      this.$store.commit('setPlayedQueueVideoId', nextVideo.videoId)
       const route = nextVideo.route ?? this.watchRouteForVideo(nextVideo)
       const nextFullPath = this.tabRouter.resolve(route).fullPath
       if (
@@ -6314,7 +6313,8 @@ export default defineComponent({
       } else {
         this.queuedPlaybackVideoId = nextVideo.videoId
         // Other media plays on its own page.
-        if (!nextFullPath.startsWith('/watch/')) requestQueuedPlayback(this.tabId, nextFullPath)
+        if (nextFullPath.startsWith('/watch/')) this.$store.commit('addPlayedQueueVideoId', nextVideo.videoId)
+        else requestQueuedPlayback(this.tabId, nextFullPath)
         this.tabRouter.push(route)
       }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })

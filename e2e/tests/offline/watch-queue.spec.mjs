@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { answerNextMessageBox, choosePickerPaths, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.describe.configure({ timeout: 120_000 })
@@ -400,8 +400,11 @@ test('drops the next queued video when it starts playing from elsewhere', async 
     window.$store.commit('addVideoToWatchQueue', { video })
     window.$store.commit('addVideoToWatchQueue', { video })
   }, { videoId: 'queuerepeat', title: 'Repeated video', author: 'Queue Test Channel', lengthSeconds: 60 })
+  const previousPlayer = await page.locator(`${activeTab} .ftVideoPlayer`).elementHandle()
   await player.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
   await expect(page).toHaveURL(/#\/watch\/queuerepeat/)
+  await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  await previousPlayer.dispose()
   await waitForPlayback(page)
   await expect(queuedTitles).toHaveText(['Repeated video'])
 })

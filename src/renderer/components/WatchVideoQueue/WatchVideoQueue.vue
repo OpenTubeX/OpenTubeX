@@ -281,9 +281,9 @@ function listVideoData(item) {
 
 function playQueuedVideo(queueItemId) {
   emit('pause-player')
-  const videoId = items.value.find(item => item.queueItemId === queueItemId)?.videoId ?? null
+  const videoId = items.value.find(item => item.queueItemId === queueItemId)?.videoId
   remove(queueItemId)
-  store.commit('setPlayedQueueVideoId', videoId)
+  if (videoId) store.commit('addPlayedQueueVideoId', videoId)
 }
 
 function playExternalQueuedVideo(queueItemId, event) {
