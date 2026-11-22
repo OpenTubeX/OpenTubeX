@@ -88,6 +88,7 @@ test('Play in Background starts its video in the mini player without waiting for
     $store: { commit() {}, getters: {} },
     getPendingVideoTitle: () => '',
     resetVideoState() {},
+    takePlayedQueueVideo() {},
     applyBackgroundStart() { this.hasBeenPresented = true; return true },
     checkIfTimestamp() {},
     checkIfPlaylist() {},

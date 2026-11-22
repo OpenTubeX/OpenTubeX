@@ -395,7 +395,7 @@
                 <RouterLink
                   :to="video.route ?? `/watch/${video.videoId}`"
                   :data-tab-title="video.title"
-                  @click="playQueuedVideo(video.queueItemId, $event)"
+                  @click="playQueuedVideo(video, $event)"
                 >
                   <span class="mediaThumbnail">
                     <FtRetryImage
@@ -913,12 +913,13 @@ function watchProgressPercent(video) {
   return `${Math.min(100, Math.max(0, progress / duration * 100))}%`
 }
 
-function playQueuedVideo(queueItemId, event) {
+function playQueuedVideo(video, event) {
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return
   }
 
-  store.commit('removeVideoFromWatchQueue', queueItemId)
+  store.commit('removeVideoFromWatchQueue', video.queueItemId)
+  store.commit('setPlayedQueueVideoId', video.videoId)
 }
 
 function continueWatchingRoute(video) {

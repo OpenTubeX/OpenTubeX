@@ -558,6 +558,57 @@ test('detects Invidious audio tracks from artist topic channels', async ({ page 
   await watchView.dispose()
 })
 
+test('shows when an upcoming video starts with Invidious', async ({ page }) => {
+  const instanceUrl = 'https://invidious.test'
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
+  await page.route(`${instanceUrl}/api/v1/videos/**`, route => route.fulfill({
+    json: {
+      title: 'Upcoming Invidious stream',
+      viewCount: 0,
+      paid: false,
+      subCountText: '1',
+      likeCount: 0,
+      dislikeCount: 0,
+      genre: 'Gaming',
+      keywords: [],
+      author: 'Example Channel',
+      authorId: 'UC-example-channel',
+      authorThumbnails: [],
+      description: '',
+      descriptionHtml: '',
+      published: 1_900_000_000,
+      recommendedVideos: [],
+      liveNow: false,
+      isUpcoming: true,
+      // Halfway between hours, so the rounded time left stays the same while the test runs
+      premiereTimestamp: Math.floor(Date.now() / 1000) + 3.5 * 60 * 60,
+      isFamilyFriendly: true,
+      isPostLiveDvr: false,
+      isListed: true,
+      captions: [],
+      lengthSeconds: 0,
+      formatStreams: [],
+      adaptiveFormats: [],
+      videoThumbnails: [{ url: '/vi/jNQXAC9IVRw/hqdefault.jpg', width: 480, height: 360 }],
+    }
+  }))
+  await page.evaluate(async (url) => {
+    const store = window.$store
+    await Promise.all([
+      store.dispatch('updateBackendPreference', 'invidious'),
+      store.dispatch('updateDefaultInvidiousInstance', url),
+      store.dispatch('updateBackendFallback', false),
+      store.dispatch('updateHideChapters', true),
+    ])
+  }, instanceUrl)
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toContainText('3 hours')
+  await expect(page.locator(`${activeTab} .videoPlayerError`)).toHaveCount(0)
+})
+
 test('toggles the quick bookmark and opens the playlist prompt with keyboard shortcuts', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

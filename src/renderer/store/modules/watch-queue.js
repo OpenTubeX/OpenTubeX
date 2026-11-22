@@ -142,9 +142,19 @@ export function persistWatchQueue(store, storage, sharedQueue) {
 }
 
 export default {
-  state: createWatchQueueState,
+  state: () => ({
+    ...createWatchQueueState(),
+    // The video this window last opened from the queue, until a Watch page loads.
+    // Not shared with other windows.
+    playedVideoId: null
+  }),
   getters: watchQueueGetters,
-  mutations: watchQueueMutations,
+  mutations: {
+    ...watchQueueMutations,
+    setPlayedQueueVideoId(state, videoId) {
+      state.playedVideoId = videoId
+    }
+  },
   actions: {
     loadWatchQueueScope(_context, scope) {
       return switchScope(scope)

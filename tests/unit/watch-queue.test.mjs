@@ -182,7 +182,7 @@ for (const [name, route, expected] of [
     }
     assert.equal(playNext.call(watch), true)
     assert.deepEqual(JSON.parse(JSON.stringify(navigations)), [route ?? expected])
-    assert.deepEqual(removed, [['removeVideoFromWatchQueue', 1]])
+    assert.deepEqual(removed, [['removeVideoFromWatchQueue', 1], ['setPlayedQueueVideoId', videoId]])
   })
 }
 

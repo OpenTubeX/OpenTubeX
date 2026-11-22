@@ -1254,6 +1254,7 @@
             v-if="$store.getters.getWatchQueueLength > 0"
             ref="watchVideoQueue"
             :fullscreen-overlay="fullscreenQueueOpen"
+            :current-video-id="videoId"
             class="watchVideoSideBar watchVideoQueue"
             @close="closeFullscreenQueue"
             @pause-player="pausePlayer"

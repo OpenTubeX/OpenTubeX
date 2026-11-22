@@ -2,6 +2,8 @@ import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { answerNextMessageBox, choosePickerPaths, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -376,4 +378,33 @@ test('removes a queued video that a click opens in the default external player',
     }
   }).toBe('https://www.youtube.com/watch?v=externalQ01')
   await expect(queue.locator('.queueItem h3')).toHaveText(['Next queued video'])
+})
+
+test('drops the next queued video when it starts playing from elsewhere', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(videos => {
+    for (const video of videos) window.$store.commit('addVideoToWatchQueue', { video })
+  }, [
+    { videoId: 'jNQXAC9IVRw', title: 'Queued current video', author: 'Queue Test Channel', lengthSeconds: 60 },
+    { videoId: 'queuevideo1', title: 'Queue video one', author: 'Queue Test Channel', lengthSeconds: 60 },
+  ])
+
+  // Otherwise it would replay from the queue next, e.g. outside the playlist it started from.
+  const player = await openMockedVideo(page)
+  const queuedTitles = page.locator('.watchQueue .queueItem h3')
+  await expect(queuedTitles).toHaveText(['Queue video one'])
+
+  // A copy that follows a video played from the queue was queued to repeat it.
+  await page.evaluate(video => {
+    window.$store.commit('clearWatchQueue')
+    window.$store.commit('addVideoToWatchQueue', { video })
+    window.$store.commit('addVideoToWatchQueue', { video })
+  }, { videoId: 'queuerepeat', title: 'Repeated video', author: 'Queue Test Channel', lengthSeconds: 60 })
+  const previousPlayer = await page.locator(`${activeTab} .ftVideoPlayer`).elementHandle()
+  await player.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect(page).toHaveURL(/#\/watch\/queuerepeat/)
+  await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  await previousPlayer.dispose()
+  await waitForPlayback(page)
+  await expect(queuedTitles).toHaveText(['Repeated video'])
 })

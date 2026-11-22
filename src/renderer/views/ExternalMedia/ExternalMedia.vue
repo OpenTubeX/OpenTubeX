@@ -1469,6 +1469,7 @@ function playNextQueuedItem() {
     seekTo(0)
     player.value?.play()
   } else {
+    if (fullPath.startsWith('/watch/')) store.commit('setPlayedQueueVideoId', item.videoId)
     requestQueuedPlayback(tabId, fullPath)
     router.push(location)
   }
