@@ -670,6 +670,7 @@ Settings:
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
     Toggle Playback With Tab Icon: Lire et mettre en pause avec l’icône de l’onglet
+    Show New Tab Button Next to Tabs: Afficher le bouton Nouvel onglet à côté des onglets
     Theme and Colors: "Thème et couleurs"
     Font Size: Taille de la police
     Sections:

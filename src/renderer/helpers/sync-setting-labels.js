@@ -310,6 +310,7 @@ export const SYNC_SETTING_LABELS = {
   showTabIcons: 'Settings.Theme Settings.Show Tab Icons',
   showTabPreviews: 'Settings.Theme Settings.Show Tab Previews',
   toggleTabPlaybackWithIcon: 'Settings.Theme Settings.Toggle Playback With Tab Icon',
+  newTabButtonNextToTabs: 'Settings.Theme Settings.Show New Tab Button Next to Tabs',
   tabLoadingIndicator: 'Settings.Theme Settings.Tab Loading Indicator.Tab Loading Indicator',
   showThumbnailPreviews: 'Settings.General Settings.Show Thumbnail Previews',
   showToastTimeoutIndicator: 'Settings.Theme Settings.Show Toast Timeout Indicator',

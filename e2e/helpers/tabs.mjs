@@ -58,6 +58,6 @@ export async function selectChannelTab(page, id) {
  * @param {import('@playwright/test').Page} page
  */
 export async function expectTabStripSettled(page) {
-  await expect.poll(() => page.locator('.tabBar .tabsContent').evaluate(content => content.getAnimations({ subtree: true })
+  await expect.poll(() => page.locator('.tabBar .tabsRow').evaluate(content => content.getAnimations({ subtree: true })
     .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)).length)).toBe(0)
 }

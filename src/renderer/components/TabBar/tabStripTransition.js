@@ -43,6 +43,8 @@ function getLayoutRect(element) {
  * @param {() => boolean} options.shouldAnimateEnter false while the strip shows
  * its initial tabs, which should appear at once
  * @param {() => HTMLElement | null} options.getStrip the element holding the strip items
+ * @param {() => HTMLElement[]} [options.getTrailingItems] elements after the
+ * strip that slide with its items
  * @param {() => HTMLElement | null} options.getGhostLayer a clipping layer over
  * the strip's viewport, outside its scroll range, that shows closing tabs
  * @param {(item: HTMLElement) => void} options.onEnter runs once an opening tab
@@ -50,7 +52,7 @@ function getLayoutRect(element) {
  * @param {(item: HTMLElement) => void} options.onEntered
  * @param {() => void} options.onLeft runs after a closed item is removed
  */
-export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip, getGhostLayer, onEnter: onEnterLayout, onEntered, onLeft }) {
+export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip, getTrailingItems = () => [], getGhostLayer, onEnter: onEnterLayout, onEntered, onLeft }) {
   /** @type {Map<Element, { tab: HTMLElement, animations: Animation[], done: () => void }>} */
   const running = new Map()
   /** Slides of strip items toward their new positions. @type {Map<Element, Animation>} */
@@ -66,8 +68,11 @@ export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip
    */
   function getItems(strip) {
     if (!strip) return []
-    return Array.from(strip.children, wrapper => wrapper.firstElementChild)
-      .filter(item => item instanceof HTMLElement)
+    return [
+      ...Array.from(strip.children, wrapper => wrapper.firstElementChild)
+        .filter(item => item instanceof HTMLElement),
+      ...getTrailingItems()
+    ]
   }
 
   /** @param {HTMLElement[]} items */

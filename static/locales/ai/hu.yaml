@@ -670,6 +670,7 @@ Settings:
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
     Toggle Playback With Tab Icon: Lejátszás és szüneteltetés a lap ikonjával
+    Show New Tab Button Next to Tabs: Új lap gomb megjelenítése a lapok mellett
     Theme and Colors: "Téma és színek"
     Font Size: Betűméret
     Sections:

@@ -1056,6 +1056,7 @@ Settings:
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
     Toggle Playback With Tab Icon: Play and Pause With the Tab Icon
+    Show New Tab Button Next to Tabs: Show New Tab Button Next to Tabs
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width

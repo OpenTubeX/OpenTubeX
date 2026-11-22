@@ -811,6 +811,7 @@ Settings:
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
     Toggle Playback With Tab Icon: Reprodueix i posa en pausa amb la icona de la pestanya
+    Show New Tab Button Next to Tabs: Mostra el botó de pestanya nova al costat de les pestanyes
     Theme and Colors: "Tema i colors"
     Font Size: Mida de la lletra
     Sections:

@@ -302,6 +302,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     showTabIcons: true,
     showTabPreviews: true,
     toggleTabPlaybackWithIcon: false,
+    newTabButtonNextToTabs: true,
     tabLoadingIndicator: 'bar',
     updateRelativeTimestamps: true,
     tabBarPosition: 'top',

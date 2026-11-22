@@ -670,6 +670,7 @@ Settings:
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
     Toggle Playback With Tab Icon: Prehrávať a pozastavovať ikonou karty
+    Show New Tab Button Next to Tabs: Zobraziť tlačidlo novej karty vedľa kariet
     Theme and Colors: "Téma a farby"
     Font Size: Veľkosť písma
     Sections:

@@ -694,6 +694,7 @@ Settings:
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
     Toggle Playback With Tab Icon: Прайграваць і ставіць на паўзу значком укладкі
+    Show New Tab Button Next to Tabs: Паказваць кнопку новай ўкладкі побач з укладкамі
     Theme and Colors: "Тэма і колеры"
     Font Size: Памер шрыфту
     Sections:

@@ -682,6 +682,7 @@ Settings:
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
     Toggle Playback With Tab Icon: Afspil og sæt på pause med fanens ikon
+    Show New Tab Button Next to Tabs: Vis knappen til ny fane ved siden af fanerne
     Theme and Colors: "Tema og farver"
     Font Size: Skriftstørrelse
     Sections:

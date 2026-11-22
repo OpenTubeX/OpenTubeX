@@ -629,6 +629,7 @@ Settings:
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
     Toggle Playback With Tab Icon: Воспроизведение и пауза значком вкладки
+    Show New Tab Button Next to Tabs: Показывать кнопку новой вкладки рядом с вкладками
     Theme and Colors: "Тема и цвета"
     Font Size: Размер шрифта
     Sections:

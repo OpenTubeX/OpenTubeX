@@ -86,6 +86,7 @@
   --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
   --top-tab-bar-height: calc(32px + var(--horizontal-tab-scrollbar-space));
   --bottom-tab-bar-height: calc(34px + var(--horizontal-tab-scrollbar-space));
+  --top-nav-height: 60px;
   --mobile-nav-content-height: 60px;
   --progress-bar-height: 10px;
 }
@@ -97,7 +98,6 @@
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
-  --top-nav-height: 60px;
   --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   --mobile-nav-reveal-transition: transform var(--motion-default-effects);
   --mobile-nav-hide-transition: transform var(--motion-fast-effects);
@@ -1189,6 +1189,20 @@
 
 .app.topTabs {
   --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
+}
+
+/* The page's scrollbars, children of the body, stay between the header and a
+   bottom tab bar. Android and iOS draw them natively. */
+:global(body:has(.app)) {
+  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
+}
+
+:global(body:has(.app.topTabs)) {
+  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-tab-bar-height) + var(--top-nav-height));
+}
+
+:global(body:has(.app.bottomTabs)) {
+  --page-footer-block-size: var(--bottom-tab-bar-height);
 }
 
 @media only screen and (width <= 680px) {
