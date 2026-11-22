@@ -362,7 +362,7 @@ import FtLoader from '../../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, PROFILE_DATA_SECTIONS } from '../../../helpers/unifiedBackup'
 import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
-import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers, withDataScope } from '../../../../datastores/handlers/index'
+import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers, getDataScope, withDataScope } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
   normalizeSearchSettings,
@@ -469,7 +469,9 @@ async function readBackupSections(scope, sections) {
  * @param {object} data
  */
 async function restoreBackupSections(scope, selected, data) {
-  const active = () => scope === store.getters.getActiveDataScope
+  // During a profile switch, the store still shows the previous profile's
+  // data, so both profiles' data gets the explicitly scoped writes.
+  const active = () => scope === getDataScope() && scope === store.getters.getActiveDataScope
   const inScope = operation => withDataScope(scope, operation)
   if (selected.has('playlists') && data.playlists) {
     for (const playlist of data.playlists) await normalizeImportedPlaylistThumbnail(playlist)

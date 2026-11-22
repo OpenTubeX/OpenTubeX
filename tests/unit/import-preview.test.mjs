@@ -170,6 +170,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
       },
     },
     withDataScope: (_scope, operation) => operation(),
+    getDataScope: () => null,
     compactAllDatastores: async () => true,
     closeBackupImport() {},
     showToast() {},
@@ -180,6 +181,30 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   await context.importUnifiedBackup()
   assert.deepEqual((await db.profiles.findOneAsync({ _id: 'same-profile' })).subscriptions.map(channel => channel.id), ['A', 'B'])
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
+})
+
+test('a restore during a profile switch writes each profile\'s history to its own data', async () => {
+  const writes = []
+  let dataScope = null
+  const context = vm.createContext({
+    // The switch to the separate profile waits for running writes.
+    store: {
+      getters: { getActiveDataScope: 'separate' },
+      dispatch: async action => { writes.push([action, dataScope]); return true },
+    },
+    getDataScope: () => dataScope,
+    withDataScope: (scope, operation) => {
+      const previous = dataScope
+      dataScope = scope
+      try { return operation() } finally { dataScope = previous }
+    },
+    DBHistoryHandlers: { mergeBackup: async () => { writes.push(['mergeBackup', dataScope]) } },
+  })
+  vm.runInContext(componentSection('async function restoreBackupSections(', 'function openBackupExport()'), context)
+  for (const scope of [null, 'separate']) {
+    await context.restoreBackupSections(scope, new Set(['history']), { history: [{ videoId: 'video' }] })
+  }
+  assert.deepEqual(writes, [['mergeBackup', null], ['mergeBackup', 'separate']])
 })
 
 test('a backup whose settings fail to save reports them instead of the backup as imported', async () => {
