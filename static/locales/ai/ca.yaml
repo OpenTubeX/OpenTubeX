@@ -224,6 +224,8 @@ Subscriptions:
     Retry All: "Torna-ho a provar amb tots"
     Show All: "Mostra-ho tot"
     Show Fewer: "Mostra'n menys"
+    Hide Channel: "Amaga els errors de {channel}"
+    Channel Hidden: "S'han amagat els errors de {channel}. Pots tornar-los a mostrar a la configuració de subscripció del canal. Fes clic per desfer-ho."
   Cache Load Error: 'No s''han pogut carregar els vostres canals de subscripcions desats.'
   New video from {channel}: Vídeo nou de {channel}
   New short from {channel}: Curt nou de {channel}
@@ -2175,6 +2177,7 @@ Channel:
   Shows:
     Shows: Programes
     This channel does not currently have any shows: Aquest canal no té cap programa ara mateix
+  Show refresh errors: "Mostra els errors d'actualització"
 Video:
   Play in Background: "Reprodueix en segon pla"
   Info panel source: 'Font: {source}'

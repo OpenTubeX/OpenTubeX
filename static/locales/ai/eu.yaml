@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Saiatu berriro guztiekin"
     Show All: "Erakutsi guztiak"
     Show Fewer: "Erakutsi gutxiago"
+    Hide Channel: "Ezkutatu {channel} kanalaren erroreak"
+    Channel Hidden: "{channel} kanalaren erroreak ezkutatu dira. Kanalaren harpidetza-ezarpenetan berriro erakuts ditzakezu. Egin klik desegiteko."
   Cache Load Error: Ezin izan dira gordetako harpidetza-jarioak kargatu.
   New video from {channel}: "{channel} kanalaren bideo berria"
   New short from {channel}: "{channel} kanalaren labur berria"
@@ -1759,6 +1761,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX-ek bideoa ezkutatu du, izenburuak testu ezkutatua duelako"
     Correct: "Zuzena"
     Incorrect: "Okerra"
+  Show refresh errors: "Erakutsi freskatze-erroreak"
 Video:
   Play in Background: "Erreproduzitu atzeko planoan"
   Info panel source: 'Iturria: {source}'

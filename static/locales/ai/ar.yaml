@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "إعادة محاولة الكل"
     Show All: "عرض الكل"
     Show Fewer: "عرض أقل"
+    Hide Channel: "إخفاء أخطاء {channel}"
+    Channel Hidden: "أُخفيت أخطاء {channel}. يمكنك إظهارها مجددًا في إعدادات الاشتراك الخاصة بالقناة. انقر للتراجع."
   Cache Load Error: تعذّر تحميل خلاصات الاشتراكات المحفوظة.
   New video from {channel}: فيديو جديد من {channel}
   New short from {channel}: فيديو قصير جديد من {channel}
@@ -1799,6 +1801,7 @@ Channel:
   Shows:
     Shows: العروض
     This channel does not currently have any shows: هذه القناة لا تحتوي حاليًا على أي عروض
+  Show refresh errors: "إظهار أخطاء التحديث"
 Video:
   Play in Background: "تشغيل في الخلفية"
   Info panel source: 'المصدر: {source}'

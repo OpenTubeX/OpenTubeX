@@ -197,6 +197,8 @@ Subscriptions:
     Retry All: "Паўтарыць для ўсіх"
     Show All: "Паказаць усе"
     Show Fewer: "Паказаць менш"
+    Hide Channel: "Схаваць памылкі {channel}"
+    Channel Hidden: "Памылкі {channel} схаваныя. Іх можна зноў паказаць у наладах падпіскі канала. Націсніце, каб адрабіць."
   Cache Load Error: Не ўдалося загрузіць захаваныя стужкі падпісак.
   New video from {channel}: Новае відэа ад {channel}
   New short from {channel}: Новае кароткае відэа ад {channel}
@@ -1835,6 +1837,7 @@ Channel:
   Shows:
     Shows: Шоу
     This channel does not currently have any shows: Зараз на гэтым канале няма шоу
+  Show refresh errors: "Паказваць памылкі абнаўлення"
 Video:
   Play in Background: "Прайграваць у фоне"
   Info panel source: 'Крыніца: {source}'

@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Összes újrapróbálása"
     Show All: "Összes megjelenítése"
     Show Fewer: "Kevesebb megjelenítése"
+    Hide Channel: "{channel} hibáinak elrejtése"
+    Channel Hidden: "{channel} hibái el vannak rejtve. A csatorna feliratkozási beállításaiban újra megjelenítheted őket. Kattints a visszavonáshoz."
   Cache Load Error: A mentett feliratkozási hírfolyamokat nem sikerült betölteni.
   New video from {channel}: "Új videó: {channel}"
   New short from {channel}: "Új rövid videó: {channel}"
@@ -1758,6 +1760,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Az OpenTubeX elrejtette a videót, mert a címe rejtett szöveget tartalmaz"
     Correct: "Helyes"
     Incorrect: "Helytelen"
+  Show refresh errors: "Frissítési hibák megjelenítése"
 Video:
   Play in Background: "Lejátszás a háttérben"
   Info panel source: 'Forrás: {source}'

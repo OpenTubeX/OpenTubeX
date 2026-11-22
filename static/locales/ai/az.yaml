@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Hamısı üçün yenidən cəhd edin"
     Show All: "Hamısını göstər"
     Show Fewer: "Daha az göstər"
+    Hide Channel: "{channel} kanalının xətalarını gizlət"
+    Channel Hidden: "{channel} kanalının xətaları gizlədildi. Onları kanalın abunəlik ayarlarında yenidən göstərə bilərsiniz. Geri qaytarmaq üçün klikləyin."
   Cache Load Error: Saxlanmış abunəlik lentləriniz yüklənə bilmədi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni Shorts"
@@ -1761,6 +1763,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Başlığında gizlədilmiş mətn olduğu üçün video OpenTubeX tərəfindən gizlədildi"
     Correct: "Düzgün"
     Incorrect: "Səhv"
+  Show refresh errors: "Yeniləmə xətalarını göstər"
 Video:
   Play in Background: "Arxa planda oynat"
   Info panel source: 'Mənbə: {source}'

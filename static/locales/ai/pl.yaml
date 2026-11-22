@@ -66,6 +66,8 @@ Subscriptions:
     Retry All: "Ponów dla wszystkich"
     Show All: "Pokaż wszystkie"
     Show Fewer: "Pokaż mniej"
+    Hide Channel: "Ukryj błędy kanału {channel}"
+    Channel Hidden: "Błędy kanału {channel} są ukryte. Możesz je ponownie wyświetlić w ustawieniach subskrypcji kanału. Kliknij, aby cofnąć."
   Cache Load Error: Nie udało się wczytać zapisanych kanałów subskrypcji.
   New video from {channel}: Nowy film od {channel}
   New short from {channel}: Nowy film Short od {channel}
@@ -1217,6 +1219,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX ukrył film, ponieważ jego tytuł zawiera ukryty tekst"
     Correct: "Poprawnie"
     Incorrect: "Niepoprawnie"
+  Show refresh errors: "Pokazuj błędy odświeżania"
 Video:
   Play in Background: "Odtwarzaj w tle"
   Info panel source: 'Źródło: {source}'

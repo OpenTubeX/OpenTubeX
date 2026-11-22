@@ -1,6 +1,7 @@
 export const SUBSCRIPTION_FEED_TYPES = Object.freeze(['videos', 'shorts', 'live', 'posts'])
 export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
-const CHANNEL_SETTING_KEYS = ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly']
+const CHANNEL_SETTING_KEYS = ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly', 'showRefreshErrors']
+const BOOLEAN_CHANNEL_SETTING_KEYS = ['showMembersOnly', 'showRefreshErrors']
 
 /**
  * @param {{ id: string, name?: string, handle?: string | null }} channel
@@ -25,7 +26,7 @@ export function getSubscriptionFeedTypeOptions(t) {
 export const MAX_SUBSCRIPTION_DAILY_VIDEO_LIMIT = 30
 
 /**
- * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown }} [channel]
+ * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown, showRefreshErrors?: unknown }} [channel]
  */
 export function normalizeSubscriptionChannelSettings(channel) {
   const dailyVideoLimit = channel?.dailyVideoLimit
@@ -42,7 +43,9 @@ export function normalizeSubscriptionChannelSettings(channel) {
       (Number.isInteger(dailyVideoLimit) && dailyVideoLimit > 0)
       ? dailyVideoLimit
       : undefined,
-    showMembersOnly: channel?.showMembersOnly === true
+    showMembersOnly: channel?.showMembersOnly === true,
+    // Hidden errors still refresh the channel, so it returns to the feeds when it comes back.
+    showRefreshErrors: channel?.showRefreshErrors !== false
   }
 }
 
@@ -99,7 +102,7 @@ export function getNextSubscriptionSettingsTimestamp(subscriptions) {
 /**
  * Applies only requested preferences, preserving concurrent edits to other fields.
  * @param {object} subscription
- * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
+ * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean, showRefreshErrors?: boolean }} settings
  * @param {number} updatedAt
  * @param {boolean} [preserveNewerSettings] Keep fields edited at or after this patch.
  */
@@ -115,7 +118,7 @@ export function getChannelWithUpdatedSettings(subscription, settings, updatedAt,
     if (preserveNewerSettings && fieldUpdatedAt[key] >= updatedAt) continue
     if (isList) {
       channel[key] = [...settings[key]]
-    } else if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
+    } else if (settings[key] === undefined || (BOOLEAN_CHANNEL_SETTING_KEYS.includes(key) && typeof settings[key] !== 'boolean')) {
       delete channel[key]
     } else {
       channel[key] = settings[key]
@@ -187,6 +190,17 @@ export function isSubscriptionFeedTypeEnabled(channel, feedType) {
   return !SUBSCRIPTION_FEED_TYPES.includes(feedType) ||
     !Array.isArray(channel.feedTypes) ||
     channel.feedTypes.includes(feedType)
+}
+
+/**
+ * Whether the error boxes list a channel's failed refreshes of a feed. Feeds
+ * turned off for the channel aren't fetched anymore, so they can't be retried,
+ * and the user can hide the errors of channels they keep subscribed to anyway.
+ * @param {{ feedTypes?: unknown, showRefreshErrors?: unknown }} channel
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ */
+export function listsSubscriptionChannelError(channel, feedType) {
+  return isSubscriptionFeedTypeEnabled(channel, feedType) && normalizeSubscriptionChannelSettings(channel).showRefreshErrors
 }
 
 /**

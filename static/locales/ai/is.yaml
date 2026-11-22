@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Reyna aftur við allar"
     Show All: "Sýna allt"
     Show Fewer: "Sýna færri"
+    Hide Channel: "Fela villur frá {channel}"
+    Channel Hidden: "Villur frá {channel} eru faldar. Þú getur sýnt þær aftur í áskriftarstillingum rásarinnar. Smelltu til að afturkalla."
   Cache Load Error: Ekki tókst að hlaða vistuðum áskriftarstraumum þínum.
   New video from {channel}: Nýtt myndskeið frá {channel}
   New short from {channel}: Ný símamynd frá {channel}
@@ -1764,6 +1766,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "OpenTubeX faldi myndskeiðið því titill þess inniheldur falinn texta"
     Correct: "Rétt"
     Incorrect: "Rangt"
+  Show refresh errors: "Sýna villur við uppfærslu"
 Video:
   Play in Background: "Spila í bakgrunni"
   Info panel source: 'Heimild: {source}'

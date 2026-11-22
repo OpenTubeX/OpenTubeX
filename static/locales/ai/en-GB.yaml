@@ -183,6 +183,8 @@ Subscriptions:
     Retry All: "Retry all"
     Show All: "Show all"
     Show Fewer: "Show fewer"
+    Hide Channel: "Hide errors from {channel}"
+    Channel Hidden: "Errors from {channel} are hidden. You can show them again in the channel's subscription settings. Click to undo."
   Cache Load Error: Your saved subscription feeds could not be loaded.
   New video from {channel}: New video from {channel}
   New short from {channel}: New short from {channel}
@@ -1752,6 +1754,7 @@ Channel:
   Shows:
     Shows: Shows
     This channel does not currently have any shows: This channel does not currently have any shows
+  Show refresh errors: "Show refresh errors"
 Video:
   Play in Background: "Play in Background"
   Info panel source: 'Source: {source}'

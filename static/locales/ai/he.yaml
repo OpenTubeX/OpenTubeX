@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "לנסות שוב את כולם"
     Show All: "להציג הכול"
     Show Fewer: "להציג פחות"
+    Hide Channel: "הסתרת שגיאות של {channel}"
+    Channel Hidden: "השגיאות של {channel} מוסתרות. אפשר להציג אותן שוב בהגדרות המינוי של הערוץ. יש ללחוץ כדי לבטל."
   Cache Load Error: לא ניתן היה לטעון את פידי המינויים השמורים שלך.
   New video from {channel}: סרטון חדש מ־{channel}
   New short from {channel}: Short חדש מ־{channel}
@@ -1803,6 +1805,7 @@ Channel:
   Shows:
     Shows: תוכניות
     This channel does not currently have any shows: ערוץ זה אינו כולל כרגע תוכניות
+  Show refresh errors: "הצגת שגיאות רענון"
 Video:
   Play in Background: "הפעלה ברקע"
   Info panel source: 'מקור: {source}'

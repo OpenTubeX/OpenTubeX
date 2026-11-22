@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Alles opnieuw proberen"
     Show All: "Alles tonen"
     Show Fewer: "Minder tonen"
+    Hide Channel: "Fouten van {channel} verbergen"
+    Channel Hidden: "Fouten van {channel} zijn verborgen. Je kunt ze opnieuw tonen in de abonnementsinstellingen van het kanaal. Klik om ongedaan te maken."
   Cache Load Error: Je opgeslagen abonnementsfeeds konden niet worden geladen.
   New video from {channel}: Nieuwe video van {channel}
   New short from {channel}: Nieuwe Short van {channel}
@@ -1806,6 +1808,7 @@ Channel:
   Shows:
     Shows: Programma's
     This channel does not currently have any shows: Dit kanaal heeft momenteel geen programma's
+  Show refresh errors: "Vernieuwingsfouten tonen"
 Video:
   Play in Background: "Op de achtergrond afspelen"
   Info panel source: 'Bron: {source}'

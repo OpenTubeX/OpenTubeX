@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Tümü için yeniden dene"
     Show All: "Tümünü göster"
     Show Fewer: "Daha az göster"
+    Hide Channel: "{channel} kanalının hatalarını gizle"
+    Channel Hidden: "{channel} kanalının hataları gizlendi. Bunları kanalın abonelik ayarlarında yeniden gösterebilirsiniz. Geri almak için tıklayın."
   Cache Load Error: Kaydedilmiş abonelik akışlarınız yüklenemedi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni kısa video"
@@ -1758,6 +1760,7 @@ Channel:
     Video hidden by OpenTubeX because of its title: "Başlığında gizlenen metin bulunduğu için video OpenTubeX tarafından gizlendi"
     Correct: "Doğru"
     Incorrect: "Yanlış"
+  Show refresh errors: "Yenileme hatalarını göster"
 Video:
   Play in Background: "Arka Planda Oynat"
   Info panel source: 'Kaynak: {source}'

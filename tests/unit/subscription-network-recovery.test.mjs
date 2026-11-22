@@ -16,7 +16,7 @@ import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
 import { waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
 import { waitUnlessAborted } from '../../src/renderer/helpers/abortable.js'
 import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic } from '../../src/renderer/helpers/api/requestDiagnostics.js'
-import { getSubscriptionsForFeed, isSubscriptionFeedTypeEnabled } from '../../src/renderer/helpers/subscription-channels.js'
+import { getSubscriptionsForFeed, listsSubscriptionChannelError } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
@@ -130,7 +130,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     classifyRequestFailure,
     formatRequestDiagnostic,
     getSubscriptionsForFeed,
-    isSubscriptionFeedTypeEnabled,
+    listsSubscriptionChannelError,
     reconcileFetchedSubscriptionEntries,
     canKeepSubscriptionFeedWithoutNewUploads,
     hasNoNewSubscriptionUploads,

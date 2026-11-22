@@ -184,6 +184,8 @@ Subscriptions:
     Retry All: "Επανάληψη για όλα"
     Show All: "Εμφάνιση όλων"
     Show Fewer: "Εμφάνιση λιγότερων"
+    Hide Channel: "Απόκρυψη σφαλμάτων από {channel}"
+    Channel Hidden: "Τα σφάλματα από {channel} αποκρύφθηκαν. Μπορείτε να τα εμφανίσετε ξανά στις ρυθμίσεις συνδρομής του καναλιού. Κάντε κλικ για αναίρεση."
   Cache Load Error: Δεν ήταν δυνατή η φόρτωση των αποθηκευμένων ροών συνδρομών σας.
   New video from {channel}: Νέο βίντεο από {channel}
   New short from {channel}: Νέο σύντομο βίντεο από {channel}
@@ -1771,6 +1773,7 @@ Channel:
   Shows:
     Shows: Εκπομπές
     This channel does not currently have any shows: Αυτό το κανάλι δεν έχει προς το παρόν εκπομπές
+  Show refresh errors: "Εμφάνιση σφαλμάτων ανανέωσης"
 Video:
   Play in Background: "Αναπαραγωγή στο παρασκήνιο"
   Info panel source: 'Πηγή: {source}'
