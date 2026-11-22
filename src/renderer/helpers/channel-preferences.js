@@ -220,6 +220,20 @@ export function getCachedChannelInfo(channelId, subscriptionsById) {
 }
 
 /**
+ * Remembers the name and avatar of a channel whose page loaded them, so the
+ * result cards on that page don't request them again.
+ * @param {string} channelId
+ * @param {ChannelInfo} info
+ */
+export function rememberChannelInfo(channelId, info) {
+  if (channelId && info.name) {
+    // A page that loaded without an avatar keeps one found earlier.
+    const thumbnail = info.thumbnail || resolvedChannels.get(channelId)?.thumbnail || ''
+    resolvedChannels.set(channelId, { name: info.name, thumbnail })
+  }
+}
+
+/**
  * Fetches the name and avatar of a channel that isn't known locally and caches them for the session.
  * @param {string} channelId
  * @param {{ preference: string, fallback: boolean }} backendOptions
@@ -297,6 +311,10 @@ function releaseChannelRequestSlot() {
 async function resolveChannelInfo(channelId, backendOptions) {
   try {
     const { preferredName, icon, invalidId } = await findChannelTagInfo(channelId, backendOptions)
+    // The channel's page may have loaded its details in the meantime.
+    if (resolvedChannels.has(channelId)) {
+      return resolvedChannels.get(channelId)
+    }
 
     if (invalidId) {
       resolvedChannels.set(channelId, null)

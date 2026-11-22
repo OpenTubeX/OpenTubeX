@@ -409,6 +409,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
+import { rememberChannelInfo } from '../../helpers/channel-preferences'
 import {
   CHANNEL_SEARCH_FILTERS,
   filterChannelSearchResults,
@@ -947,6 +948,7 @@ async function ensureChannelInstance() {
 // Refresh saved details only from API responses, never from retained display state.
 function updateChannelDetails({ channelId, channelName, channelThumbnailUrl, channelHandle }) {
   hasLoadedDetails.value = true
+  rememberChannelInfo(channelId, { name: channelName, thumbnail: channelThumbnailUrl ?? '' })
   store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl, channelHandle })
   store.dispatch('refreshPinnedChannelMetadata', {
     id: channelId,
