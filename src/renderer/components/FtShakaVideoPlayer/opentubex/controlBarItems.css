@@ -257,12 +257,6 @@
   background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
 }
 
-@media (hover: hover) {
-  :deep(.ft-quick-playback-rate-button.is-current-rate:hover) {
-    background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
-  }
-}
-
 :deep(.ft-quick-playback-rate-button.is-channel-default-rate) {
   text-decoration: underline;
   text-decoration-thickness: 2px;

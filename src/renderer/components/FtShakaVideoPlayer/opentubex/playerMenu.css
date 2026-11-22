@@ -287,6 +287,12 @@
   min-inline-size: 240px;
 }
 
+/* The chosen preset is highlighted like the chosen options of the other menus and the quick playback speeds. */
+:deep(.shaka-playback-rate-presets) {
+  --shaka-rate-preset-active: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  --shaka-rate-preset-border: var(--primary-color);
+}
+
 /* The playback speed and other sliders and their presets each fill a row, instead of shrinking to their content. */
 :deep(.shaka-sub-menu.ft-menu-grid > :is(.shaka-playback-rate-slider-section, .shaka-playback-rate-presets)) {
   box-sizing: border-box;
@@ -603,8 +609,9 @@
   white-space: normal;
 }
 
-:deep(.ft-caption-list-options.ft-menu-grid > button:hover),
-:deep(.ft-caption-list-options.ft-menu-grid > button:focus-visible) {
+/* The selected tile keeps its highlight, like in the other submenus. */
+:deep(.ft-caption-list-options.ft-menu-grid > button:not(:has(.shaka-chosen-item)):hover),
+:deep(.ft-caption-list-options.ft-menu-grid > button:not(:has(.shaka-chosen-item)):focus-visible) {
   background: rgb(255 255 255 / 20%);
 }
 
