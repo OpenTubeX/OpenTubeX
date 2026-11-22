@@ -166,6 +166,7 @@ async function setupCancellation(t, { deadline = Date.now() - 1000, enabled = tr
   autoRefresh.start()
   t.after(() => autoRefresh.stop())
   await settle()
+  if (deadline === null) localStorage.removeItem(deadlineKey('all', 'videos'))
   hooks.store.commits.length = 0
 
   const calls = []
