@@ -183,7 +183,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
 })
 
-test('a restore during a profile switch writes each profile\'s history to its own data', async () => {
+test('a restore while a profile switch is pending, with the other profile selected but not yet loaded, writes each profile\'s history to its own data', async () => {
   const writes = []
   let dataScope = null
   const context = vm.createContext({
