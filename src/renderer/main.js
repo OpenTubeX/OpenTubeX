@@ -6,6 +6,7 @@ import { installNetworkFetch } from './helpers/networkRecovery'
 import i18n from './i18n/index'
 import router from './router/index'
 import store from './store/index'
+import { settingWritesSettled } from './store/modules/settings'
 import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showToast } from './helpers/utils'
@@ -113,10 +114,16 @@ function startApp() {
           }
           // Pages save their progress on beforeunload, while their player is
           // still there. Unmounting stops the rest before the library closes.
-          onLibraryTakenOver(() => {
-            if (!mounted) return
-            window.dispatchEvent(new Event('beforeunload'))
-            app.unmount()
+          onLibraryTakenOver(async () => {
+            if (mounted) {
+              window.dispatchEvent(new Event('beforeunload'))
+              app.unmount()
+            }
+            // A setting can wait for other work, such as loading an icon pack, before it's saved.
+            const timedOut = new Promise(resolve => setTimeout(() => resolve(true), 3000))
+            for (let pending = settingWritesSettled(); pending; pending = settingWritesSettled()) {
+              if (await Promise.race([pending.then(() => false, () => false), timedOut])) break
+            }
           })
         }
         const { waitForDatastores } = await import('../datastores/index')
