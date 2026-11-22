@@ -2088,8 +2088,9 @@ const canSortByTime = computed(() => {
     !usesInvidiousApi(backendPreference.value)
 })
 
-watch(canSortByTime, (canSort) => {
-  if (!canSort && isTimedSort.value) handleSortChange('top')
+// Offline, the switch to Top waits until the connection returns.
+watch([canSortByTime, () => props.offline], ([canSort, offline]) => {
+  if (!canSort && !offline && isTimedSort.value) handleSortChange('top')
 })
 
 const sortValues = computed(() => canSortByTime.value ? ['top', 'newest', 'timed'] : ['top', 'newest'])
