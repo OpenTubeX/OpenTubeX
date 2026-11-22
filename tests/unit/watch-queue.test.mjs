@@ -228,7 +228,7 @@ test('the playlist a queue interrupted continues once, and starts only when auto
     playlistAfterQueue: { route, queuedVideoId: 'queued' },
     queuedPlaybackVideoId: null,
     watchingPlaylist: false,
-    get returnsToPlaylist() { return !this.watchingPlaylist && this.playlistAfterQueue !== null },
+    get returnsToPlaylist() { return this.playlistAfterQueue !== null },
     playNextQueuedVideo: () => false,
     tabRouter: { push: next => pushes.push(next) },
     t: key => key,
@@ -242,6 +242,36 @@ test('the playlist a queue interrupted continues once, and starts only when auto
   assert.equal(watch.queuedPlaybackVideoId, 'next', 'autoplay starts the playlist video')
   assert.equal(watch.returnToPlaylistAfterQueue(), false, 'the playlist continues only once')
   assert.equal(pushes.length, 2)
+})
+
+test('a queued video from another playlist keeps the interrupted playlist to continue with', async () => {
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const original = { path: '/watch/a2', query: { playlistId: 'a' } }
+  const queue = [
+    { videoId: 'b1', queueItemId: 1, route: { path: '/watch/b1', query: { playlistId: 'b' } } },
+    { videoId: 'c', queueItemId: 2 },
+  ]
+  const watch = {
+    ...watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp', 'watchRouteForVideo']),
+    get nextQueuedVideo() { return queue[0] },
+    playlistAfterQueue: null,
+    watchingPlaylist: true,
+    $refs: { watchVideoPlaylist: { getNextVideoRoute: () => original } },
+    $store: { commit: (name) => { if (name === 'removeVideoFromWatchQueue') queue.shift() }, getters: {} },
+    tabRouter: { resolve: route => ({ fullPath: route.path }), push() {} },
+    tabRoute: { fullPath: '/watch/a1?playlistId=a' },
+    t: key => key,
+  }
+  watch.playNextQueuedVideo()
+  assert.equal(watch.playlistAfterQueue.route, original)
+  assert.equal(watch.playlistAfterQueue.queuedVideoId, 'b1')
+
+  // The queued video opened with its own playlist
+  watch.tabRoute = { fullPath: '/watch/b1?playlistId=b' }
+  watch.$refs.watchVideoPlaylist.getNextVideoRoute = () => ({ path: '/watch/b2', query: { playlistId: 'b' } })
+  watch.playNextQueuedVideo()
+  assert.equal(watch.playlistAfterQueue.route, original, 'the playlist the queue interrupted continues')
+  assert.equal(watch.playlistAfterQueue.queuedVideoId, 'c')
 })
 
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {

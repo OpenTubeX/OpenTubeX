@@ -1248,9 +1248,12 @@ export default defineComponent({
       if (this.nextQueuedVideo) { return true }
       return this.watchingPlaylist || this.returnsToPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
     },
-    /** Whether a queued video plays that interrupted a playlist, which continues after it */
+    /**
+     * Whether a queued video plays that interrupted a playlist, which continues after it,
+     * even when the queued video opened with a playlist of its own
+     */
     returnsToPlaylist: function () {
-      return !this.watchingPlaylist && this.playlistAfterQueue !== null
+      return this.playlistAfterQueue !== null
     },
     nextQueuedVideo: function () {
       return this.$store.getters.getNextQueuedVideo
@@ -6335,11 +6338,11 @@ export default defineComponent({
         this.restartCurrentVideo()
       } else {
         // The playlist continues after the queue, from where the queue interrupted it.
-        if (this.watchingPlaylist) {
+        if (this.playlistAfterQueue) {
+          this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedVideoId: nextVideo.videoId }
+        } else if (this.watchingPlaylist) {
           const playlistRoute = this.$refs.watchVideoPlaylist?.getNextVideoRoute() ?? null
           this.playlistAfterQueue = playlistRoute && { route: playlistRoute, queuedVideoId: nextVideo.videoId }
-        } else if (this.playlistAfterQueue) {
-          this.playlistAfterQueue = { ...this.playlistAfterQueue, queuedVideoId: nextVideo.videoId }
         }
         this.queuedPlaybackVideoId = nextVideo.videoId
         // Other media plays on its own page.
