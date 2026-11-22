@@ -141,11 +141,12 @@ test.describe('interface customizer', () => {
 
   test('reorders the subscription tabs and keeps hidden tabs in place', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'subscription tabs')
-    const previewLabels = () => customizer.locator('[data-preview-subscription-tab] .previewTabLabel').allTextContents()
+    const previewTabs = customizer.locator('[data-preview-subscription-tab]')
+    const previewLabels = () => previewTabs.locator('.previewTabLabel').allTextContents()
     const row = id => customizer.locator(`[data-subscription-tab-id="${id}"]`)
 
     await page.evaluate(() => window.$store.dispatch('updateHideSubscriptionsShorts', true))
-    await expect(row('shorts')).toContainText('(hidden)')
+    await expect(row('shorts').locator('.disabledLabel')).toBeVisible()
     await expect(customizer.locator('[data-preview-subscription-tab="shorts"]')).toHaveCount(0)
 
     for (let step = 0; step < 4; step++) {
@@ -153,7 +154,7 @@ test.describe('interface customizer', () => {
     }
     await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionTabs))
       .toEqual(['new', 'videos', 'shorts', 'live', 'community', 'platforms', 'feeds'])
-    await expect.poll(async () => (await previewLabels())[0]).toBe('New')
+    await expect(previewTabs.first()).toHaveAttribute('data-preview-subscription-tab', 'new')
     const labels = await previewLabels()
 
     await page.locator('.settingsCloseButton').click()
