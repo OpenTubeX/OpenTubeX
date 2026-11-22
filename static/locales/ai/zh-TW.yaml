@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "包含其他頻道上傳的合作影片"
     Platforms:
       Other Platforms: 其他平台
-      Manage Channels: 管理追隨的頻道
       Enable Twitch Page: 啟用 Twitch 頁面
       Notify When Live: 追隨的 Twitch 頻道開始直播時通知
       Auto Refresh Interval: 其他平台自動重新整理間隔

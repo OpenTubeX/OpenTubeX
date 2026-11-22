@@ -1345,7 +1345,6 @@ Settings:
     Show Collaborations From Other Channels: "Medtag samarbejder uploadet af andre kanaler"
     Platforms:
       Other Platforms: Andre platforme
-      Manage Channels: Administrer fulgte kanaler
       Enable Twitch Page: Aktivér Twitch-siden
       Notify When Live: Giv besked, når fulgte Twitch-kanaler går live
       Auto Refresh Interval: Interval for automatisk opdatering af andre platforme

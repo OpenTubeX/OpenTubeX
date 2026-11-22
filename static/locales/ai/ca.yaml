@@ -1590,7 +1590,6 @@ Settings:
     Show Collaborations From Other Channels: "Inclou col·laboracions penjades per altres canals"
     Platforms:
       Other Platforms: Altres plataformes
-      Manage Channels: Gestiona els canals seguits
       Enable Twitch Page: Activa la pàgina de Twitch
       Notify When Live: Notifica quan els canals de Twitch seguits comencin una emissió en directe
       Auto Refresh Interval: Interval d'actualització automàtica d'altres plataformes

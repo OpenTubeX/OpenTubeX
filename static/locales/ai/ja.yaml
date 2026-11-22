@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "他のチャンネルがアップロードしたコラボを含める"
     Platforms:
       Other Platforms: 他のプラットフォーム
-      Manage Channels: フォロー中のチャンネルを管理
       Enable Twitch Page: Twitch ページを有効にする
       Notify When Live: フォロー中の Twitch チャンネルが配信を開始したら通知
       Auto Refresh Interval: 他のプラットフォームの自動更新間隔

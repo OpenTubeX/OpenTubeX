@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "Kaasa teiste kanalite üles laaditud koostööd"
     Platforms:
       Other Platforms: Teised platvormid
-      Manage Channels: Halda jälgitavaid kanaleid
       Enable Twitch Page: Luba Twitchi leht
       Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
       Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall

@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "Sisällytä muiden kanavien lataamat yhteistyöt"
     Platforms:
       Other Platforms: Muut alustat
-      Manage Channels: Hallitse seurattuja kanavia
       Enable Twitch Page: Ota Twitch-sivu käyttöön
       Notify When Live: Ilmoita, kun seuratut Twitch-kanavat aloittavat suoratoiston
       Auto Refresh Interval: Muiden alustojen automaattisen päivityksen aikaväli

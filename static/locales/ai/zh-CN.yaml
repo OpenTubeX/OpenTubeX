@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "包含其他频道上传的合作视频"
     Platforms:
       Other Platforms: 其他平台
-      Manage Channels: 管理已关注的频道
       Enable Twitch Page: 启用 Twitch 页面
       Notify When Live: 关注的 Twitch 频道开播时通知
       Auto Refresh Interval: 其他平台自动刷新间隔

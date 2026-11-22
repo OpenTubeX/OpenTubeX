@@ -1517,7 +1517,6 @@ Settings:
     Show Collaborations From Other Channels: "다른 채널이 업로드한 콜라보 포함"
     Platforms:
       Other Platforms: 다른 플랫폼
-      Manage Channels: 팔로우한 채널 관리
       Enable Twitch Page: Twitch 페이지 사용
       Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
       Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격

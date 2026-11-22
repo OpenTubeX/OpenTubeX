@@ -1330,7 +1330,6 @@ Settings:
     Show Collaborations From Other Channels: "تضمين التعاونات التي رفعتها قنوات أخرى"
     Platforms:
       Other Platforms: منصات أخرى
-      Manage Channels: إدارة القنوات المتابَعة
       Enable Twitch Page: تفعيل صفحة Twitch
       Notify When Live: الإشعار عند بدء بث قنوات Twitch المتابَعة
       Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للمنصات الأخرى

@@ -1324,7 +1324,6 @@ Settings:
     Show Collaborations From Other Channels: "Uključi suradnje koje su prenijeli drugi kanali"
     Platforms:
       Other Platforms: Druge platforme
-      Manage Channels: Upravljanje praćenim kanalima
       Enable Twitch Page: Omogući stranicu Twitch
       Notify When Live: Obavijesti kada praćeni Twitch kanali počnu prijenos uživo
       Auto Refresh Interval: Razmak automatskog osvježavanja drugih platformi

@@ -1265,7 +1265,6 @@ Settings:
     Show Collaborations From Other Channels: "Incluir colaboraciones subidas por otros canales"
     Platforms:
       Other Platforms: Otras plataformas
-      Manage Channels: Gestionar canales seguidos
       Enable Twitch Page: Activar la página de Twitch
       Notify When Live: Notificar cuando los canales de Twitch seguidos empiecen un directo
       Auto Refresh Interval: Intervalo de actualización automática de otras plataformas

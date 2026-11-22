@@ -1436,7 +1436,6 @@ Settings:
     Show Collaborations From Other Channels: "Ta med samarbeid lasta opp av andre kanalar"
     Platforms:
       Other Platforms: Andre plattformer
-      Manage Channels: Administrer følgde kanalar
       Enable Twitch Page: Aktiver Twitch-sida
       Notify When Live: Varsle når følgde Twitch-kanalar startar direktesending
       Auto Refresh Interval: Intervall for automatisk oppdatering av andre plattformer

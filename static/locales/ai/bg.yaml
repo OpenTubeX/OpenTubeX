@@ -1324,7 +1324,6 @@ Settings:
     Show Collaborations From Other Channels: "Включване на съвместни видеоклипове, качени от други канали"
     Platforms:
       Other Platforms: Други платформи
-      Manage Channels: Управление на следваните канали
       Enable Twitch Page: Включване на страницата за Twitch
       Notify When Live: Известяване, когато следвани канали в Twitch започнат предаване на живо
       Auto Refresh Interval: Интервал за автоматично опресняване на другите платформи

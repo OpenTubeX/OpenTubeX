@@ -1303,7 +1303,6 @@ Settings:
     Show Collaborations From Other Channels: "Show Collaborations From Other Channels"
     Platforms:
       Other Platforms: Other platforms
-      Manage Channels: Manage followed channels
       Enable Twitch Page: Enable Twitch page
       Notify When Live: Notify when followed Twitch channels go live
       Auto Refresh Interval: Other platforms auto refresh interval

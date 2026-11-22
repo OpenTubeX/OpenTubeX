@@ -299,7 +299,7 @@
             >
               <!-- One row on phones -->
               <div
-                v-if="currentTab === 'new' || currentTab === 'feeds' || currentNewFeedRssTab || currentPlatformsView"
+                v-if="currentTab === 'new' || currentTab === 'feeds' || currentTab === 'platforms'"
                 class="headerControls"
               >
                 <FtIconButton
@@ -324,16 +324,6 @@
                   :size="20"
                   theme="base-no-default"
                   @click="openRssFeedManager"
-                />
-                <FtIconButton
-                  v-if="currentPlatformsView"
-                  class="headerViewToggle headerManageFeeds"
-                  :title="$t('Settings.Subscription Settings.Platforms.Manage Channels')"
-                  :icon="['fas', 'edit']"
-                  :padding="8"
-                  :size="20"
-                  theme="base-no-default"
-                  @click="openPlatformChannelList"
                 />
                 <FtSelect
                   v-if="currentTab === 'new'"
@@ -860,13 +850,6 @@ async function togglePlatformFeedView() {
 
 /** The view of the New feed or the Platforms tab, which have a combined and a tabbed one */
 const currentTabView = computed(() => currentTab.value === 'platforms' ? platformFeedView.value : newFeedView.value)
-
-/** Lists the followed channels of the platforms the feed shows on the channels page */
-function openPlatformChannelList() {
-  // Only the Platforms tab filters by platform, the New feed shows them all
-  const platform = currentTab.value === 'platforms' ? activePlatformFeedFilter.value : 'all'
-  router.push({ name: 'subscribedChannels', query: { platform } })
-}
 
 const platformFilterOptions = computed(() => [
   { id: 'all', label: t('Subscriptions.Platforms.All Platforms'), icon: ['fas', 'globe'] },

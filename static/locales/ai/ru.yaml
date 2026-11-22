@@ -1278,7 +1278,6 @@ Settings:
     Show Collaborations From Other Channels: "Включать совместные видео, загруженные другими каналами"
     Platforms:
       Other Platforms: Другие платформы
-      Manage Channels: Управление отслеживаемыми каналами
       Enable Twitch Page: Включить страницу Twitch
       Notify When Live: Уведомлять, когда отслеживаемые каналы Twitch начинают трансляцию
       Auto Refresh Interval: Интервал автообновления других платформ

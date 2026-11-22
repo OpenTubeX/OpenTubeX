@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "Inclure les collaborations mises en ligne par d'autres chaînes"
     Platforms:
       Other Platforms: Autres plateformes
-      Manage Channels: Gérer les chaînes suivies
       Enable Twitch Page: Activer la page Twitch
       Notify When Live: Notifier quand les chaînes Twitch suivies passent en direct
       Auto Refresh Interval: Intervalle d’actualisation automatique des autres plateformes

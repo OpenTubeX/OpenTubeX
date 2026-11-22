@@ -232,10 +232,10 @@ test.describe('Channels on other platforms', () => {
       await expect(titles).toHaveText(['Streamer newest VOD', 'Streamer older VOD'])
       await expect(page.locator('[data-platform-section="live"]')).toHaveCount(0)
 
-      // The tab's edit button lists the followed channels of the platforms it shows
-      await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
-      await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
-        .toBe('/subscribedchannels?platform=all')
+      // The channels page lists the followed channels of every platform
+      await goTo(page, 'subscribedchannels')
+      await page.getByRole('combobox', { name: 'Platform' }).click()
+      await page.getByRole('option', { name: 'All platforms' }).click()
       const rows = page.locator('#subscribedChannelsList .channel')
       await expect(rows).toHaveCount(1)
       await expect(rows.first()).toContainText('Streamer')
@@ -290,8 +290,8 @@ test.describe('Channels on other platforms', () => {
       await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedChannels))
         .toEqual([followed({ ...OTHER_CHANNEL, login: 'renamed', name: 'Renamed' })])
 
-      // The channel list opens the page of a channel
-      await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
+      // The channel list opens the page of a channel, and keeps the platform chosen last
+      await goTo(page, 'subscribedchannels')
       await rows.locator('.channelName', { hasText: 'Renamed' }).click()
       await expect.poll(() => page.evaluate(() => {
         const { path, query } = window.$router.currentRoute.value
@@ -819,7 +819,7 @@ test.describe('Channels on other platforms', () => {
       const titles = page.locator('#subscriptionsPanel [data-platform-section="videos"] .h3Title')
       await expect(titles).toHaveText(['Streamer newest VOD', 'Streamer older VOD'])
 
-      await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
+      await goTo(page, 'subscribedchannels')
       // Choosing a platform lists only its channels
       await page.getByRole('combobox', { name: 'Platform' }).click()
       await page.getByRole('option', { name: 'Twitch' }).click()

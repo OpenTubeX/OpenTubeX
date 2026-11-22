@@ -1319,7 +1319,6 @@ Settings:
     Show Collaborations From Other Channels: "Más csatornák által feltöltött közös videók belefoglalása"
     Platforms:
       Other Platforms: Más platformok
-      Manage Channels: Követett csatornák kezelése
       Enable Twitch Page: Twitch-oldal engedélyezése
       Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
       Auto Refresh Interval: Más platformok automatikus frissítésének időköze

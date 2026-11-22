@@ -1537,7 +1537,6 @@ Settings:
     Show Collaborations From Other Channels: "Įtraukti kitų kanalų įkeltus bendradarbiavimus"
     Platforms:
       Other Platforms: Kitos platformos
-      Manage Channels: Tvarkyti sekamus kanalus
       Enable Twitch Page: Įjungti Twitch puslapį
       Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
       Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
