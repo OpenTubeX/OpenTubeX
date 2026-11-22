@@ -840,7 +840,11 @@ async function removeSubscriptionsAndProfiles() {
   if (store.getters.getActiveDataScope !== null) {
     const profile = store.getters.getActiveProfile
     await clearCachedFeedsOf([profile])
-    await requireCleanupSuccess(store.dispatch('updateProfile', { ...profile, subscriptions: [] }))
+    // Only the channels go, so details saved meanwhile, such as bookmarks, stay.
+    await requireCleanupSuccess(store.dispatch('removeChannelFromProfiles', {
+      channelIds: profile.subscriptions.map(channel => channel.id),
+      profileIds: [profile._id],
+    }))
     return
   }
   // Separate profiles keep the cached feeds of channels they follow too.
