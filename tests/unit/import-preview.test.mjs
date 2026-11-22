@@ -205,6 +205,9 @@ test('a restore during a profile switch writes each profile\'s history to its ow
     await context.restoreBackupSections(scope, new Set(['history']), { history: [{ videoId: 'video' }] })
   }
   assert.deepEqual(writes, [['mergeBackup', null], ['mergeBackup', 'separate']])
+  // A failed write in another profile's data fails the restore.
+  context.DBHistoryHandlers.mergeBackup = async () => { throw new Error('disk full') }
+  await assert.rejects(context.restoreBackupSections('separate', new Set(['history']), { history: [{ videoId: 'video' }] }), /disk full/)
 })
 
 test('a backup whose settings fail to save reports them instead of the backup as imported', async () => {
