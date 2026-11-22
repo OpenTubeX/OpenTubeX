@@ -4,14 +4,13 @@
 // what it was doing, closes the library and reloads to a page that offers to
 // take it back.
 
-// Held by sqliteWorker.js while it has the library open
-const LIBRARY_LOCK = 'opentubex-library'
+// Held by the tab that may use the library, from before the previous tab
+// releases it until the page ends. sqliteWorker.js holds its own lock while
+// the library is open.
+const OWNER_LOCK = 'opentubex-library-owner'
 const HANDED_OVER_KEY = 'opentubex-library-handed-over'
 
-/** @type {{ time: number, id: number } | null} */
-let claim = null
-/** @type {BroadcastChannel | null} */
-let channel = null
+let claimed = false
 /** @type {() => Promise<void> | void} */
 let takenOver = () => {}
 
@@ -38,11 +37,6 @@ function clearHandedOver() {
   resolveAvailable = null
 }
 
-/** @param {{ time: number, id: number }} other */
-function isNewer(other) {
-  return claim !== null && (other.time > claim.time || (other.time === claim.time && other.id > claim.id))
-}
-
 /**
  * Whether this tab handed the library over and another tab still has it.
  * Otherwise this tab may take it again, for example after the other tab closed.
@@ -50,7 +44,7 @@ function isNewer(other) {
 export async function libraryInUseElsewhere() {
   if (!readHandedOver()) return false
   const { held = [] } = await navigator.locks.query()
-  if (held.some(lock => lock.name === LIBRARY_LOCK)) return true
+  if (held.some(lock => lock.name === OWNER_LOCK)) return true
   clearHandedOver()
   return false
 }
@@ -75,28 +69,20 @@ export function whenLibraryAvailable() {
 }
 
 /**
- * Tells the other tabs that this one opens the library. A tab that has it, or
- * claimed it before this one, hands it over: `release` must finish its
- * requests and close the library, which ends the worker's lock.
+ * Takes the library from the tab that has it, which hands it over once this
+ * tab steals its lock: `release` must finish that tab's requests and close the
+ * library, which ends its worker's lock. Of tabs that claim at the same time,
+ * the last one keeps the library.
  * @param {() => Promise<void>} release
  */
 export function claimLibrary(release) {
-  if (typeof BroadcastChannel === 'undefined') return
-  // Tabs that claim at the same time agree on the last claim as the winner.
-  claim = { time: Date.now(), id: Math.random() }
-  if (!channel) {
-    channel = new BroadcastChannel(LIBRARY_LOCK)
-    channel.onmessage = ({ data }) => {
-      if (isNewer(data)) {
-        claim = null
-        handOver(release)
-      } else if (claim) {
-        // The older claim's tab may have started listening after this tab's claim.
-        channel?.postMessage(claim)
-      }
-    }
-  }
-  channel.postMessage(claim)
+  // Without locks (plain http:// addresses), the worker reports why it cannot open the library.
+  if (claimed || !navigator.locks) return
+  claimed = true
+  navigator.locks.request(OWNER_LOCK, { steal: true }, () => new Promise(() => {})).catch(error => {
+    if (error?.name === 'AbortError') handOver(release)
+    else console.error('Failed to claim the library:', error)
+  })
 }
 
 /** @param {() => Promise<void>} release */

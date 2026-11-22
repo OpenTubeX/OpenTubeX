@@ -111,8 +111,13 @@ function startApp() {
             await showStorageScreen({ inUseElsewhere: true })
             return
           }
-          // Unmounting saves the open pages' progress before the library closes.
-          onLibraryTakenOver(() => { if (mounted) app.unmount() })
+          // Pages save their progress on beforeunload, while their player is
+          // still there. Unmounting stops the rest before the library closes.
+          onLibraryTakenOver(() => {
+            if (!mounted) return
+            window.dispatchEvent(new Event('beforeunload'))
+            app.unmount()
+          })
         }
         const { waitForDatastores } = await import('../datastores/index')
         await waitForDatastores()

@@ -21,15 +21,22 @@ function workerDrivers(startWorker) {
     if (!pending.size) idleWaiters.splice(0).forEach(resolve => resolve())
   }
 
-  // Lets the requests this tab already sent finish, then ends the worker, which
-  // closes the library and releases its lock for the tab that takes it over.
+  // Lets the datastore operations this tab started finish, then ends the worker,
+  // which closes the library and releases its lock for the tab that takes it over.
   async function release() {
+    const timedOut = new Promise(resolve => setTimeout(() => resolve(true), 3000))
     // The writes that saving starts can take a few steps to arrive here.
     await new Promise(resolve => setTimeout(resolve, 100))
-    await Promise.race([
-      pending.size ? new Promise(resolve => idleWaiters.push(resolve)) : null,
-      new Promise(resolve => setTimeout(resolve, 3000)),
-    ])
+    // An operation sends its next request after the reply to the previous one.
+    // Message tasks aren't throttled in background tabs like timers.
+    while (pending.size) {
+      if (await Promise.race([new Promise(resolve => idleWaiters.push(() => resolve(false))), timedOut])) break
+      await new Promise(resolve => {
+        const { port1, port2 } = new MessageChannel()
+        port1.onmessage = resolve
+        port2.postMessage(null)
+      })
+    }
     worker?.terminate()
     worker = null
   }
@@ -60,9 +67,15 @@ function workerDrivers(startWorker) {
     } else {
       queued = [message]
       whenLibraryAvailable().then(() => {
-        start()
-        for (const request of queued) worker.postMessage(request)
+        const requests = queued
         queued = null
+        try {
+          start()
+          for (const request of requests) worker.postMessage(request)
+        } catch (error) {
+          worker = null
+          for (const { id } of requests) settle(id, request => request.reject(error))
+        }
       })
     }
   }

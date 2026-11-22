@@ -15,8 +15,10 @@ test.beforeEach(async ({ context }) => {
 async function libraryTab(context) {
   const page = await context.newPage()
   await page.addInitScript(`${handover}
-window.openLibrary = async () => {
-  if (await libraryInUseElsewhere()) return 'in use elsewhere'
+// Checked on startup, like main.js
+const inUseElsewhere = libraryInUseElsewhere()
+window.openLibrary = async (workerStartup = 0) => {
+  if (await inUseElsewhere) return 'in use elsewhere'
   await whenLibraryAvailable()
   const worker = new AbortController()
   let endWorker
@@ -24,14 +26,16 @@ window.openLibrary = async () => {
     worker.abort()
     endWorker?.()
   })
+  await new Promise(resolve => setTimeout(resolve, workerStartup))
   navigator.locks.request('opentubex-library', { signal: worker.signal }, () => new Promise(resolve => {
     endWorker = resolve
     window.libraryOpen = true
   })).catch(() => {})
   return 'opened'
 }
+window.useLibraryHere = useLibraryHere
 window.libraryState = async () =>
-  window.libraryOpen === true ? 'open' : await libraryInUseElsewhere() ? 'in use elsewhere' : 'waiting'`)
+  window.libraryOpen === true ? 'open' : await inUseElsewhere ? 'in use elsewhere' : 'waiting'`)
   await page.goto('http://localhost/')
   return page
 }
@@ -45,18 +49,24 @@ test('a new tab takes the library over, and the previous tab can take it back', 
   await expect.poll(() => state(first)).toBe('open')
 
   const second = await libraryTab(context)
-  expect(await second.evaluate(() => window.openLibrary())).toBe('opened')
-  await expect.poll(() => state(second)).toBe('open')
+  // Its worker can ask for the library after the previous tab reloaded.
+  const secondOpened = second.evaluate(() => window.openLibrary(1000))
   // The previous tab reloads without the library and doesn't claim it again.
   await expect.poll(() => state(first)).toBe('in use elsewhere')
+  expect(await secondOpened).toBe('opened')
+  await expect.poll(() => state(second)).toBe('open')
   expect(await first.evaluate(() => window.openLibrary())).toBe('in use elsewhere')
-  expect(await state(second)).toBe('open')
 
-  // Once the other tab closed, a reload opens the library again.
-  await second.close()
-  await first.reload()
+  await Promise.all([first.waitForEvent('load'), first.evaluate(() => window.useLibraryHere()).catch(() => {})])
   expect(await first.evaluate(() => window.openLibrary())).toBe('opened')
   await expect.poll(() => state(first)).toBe('open')
+  await expect.poll(() => state(second)).toBe('in use elsewhere')
+
+  // Once the other tab closed, a reload opens the library again.
+  await first.close()
+  await second.reload()
+  expect(await second.evaluate(() => window.openLibrary())).toBe('opened')
+  await expect.poll(() => state(second)).toBe('open')
 })
 
 test('tabs that open at the same time leave exactly one with the library', async ({ context }) => {
