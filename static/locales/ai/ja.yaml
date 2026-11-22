@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'ラウドネスを正規化'
     Show Mono Audio Toggle: 'モノラル音声の切り替えを表示'
     Show Mirror Video Toggle: "動画の左右反転の切り替えを表示"
+    Show Rotate Video Menu: "「動画を回転」メニューを表示"
     Pause on Stream Recovery: "ストリーム復旧時に一時停止"
     Buffering:
       Buffering: バッファリング
@@ -1948,6 +1949,12 @@ Video:
     Volume Boost:
       Volume Boost: "音量ブースト"
       'Off': "オフ"
+    Rotate Video:
+      Rotate Video: "動画を回転"
+      'Off': "オフ"
+      Right: "右に90°"
+      Upside Down: "180°"
+      Left: "左に90°"
     Auto-generated Caption Template: '{language}（自動生成）'
     Up next in {seconds}: '{seconds}秒後に次の動画'
     Resize dock: ドックのサイズを変更
@@ -2421,6 +2428,7 @@ Tooltips:
     Loop Shorts: 有効にするとショート動画を自動的に最初から再生します。無効にすると最後で停止し、再生ボタンを表示します。
     Show Skip Silence Toggle: プレーヤーの設定メニューに、無音スキップのオンとオフを切り替える項目を表示します。
     Show Mirror Video Toggle: "プレーヤーの設定メニューに、動画を左右反転する切り替えを表示します。ダンス、トレーニング、楽器のチュートリアルをまねしやすくなります。"
+    Show Rotate Video Menu: "プレーヤーの設定メニューに「動画を回転」を追加し、横向きや上下逆さまに撮影された動画を回転できるようにします。"
     Enable Skip Silence by Default: 新しいタブで無音スキップを有効にします。あるタブで変更しても、ほかのタブには影響しません。
     Enable Video Zoom: プレーヤーの設定メニューにズーム操作を表示し、キーボードショートカットとパン操作を有効にします。
     Enable Seek History: アプリを閉じるまで、各動画でどこからジャンプしたかを記憶します。プレーヤーの設定メニューにシーク履歴の一覧を表示し、キーボードショートカットを有効にします。

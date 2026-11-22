@@ -1357,6 +1357,7 @@ Settings:
     Show Volume Boost Toggle: Show Volume Boost Toggle
     Show Mono Audio Toggle: Show Mono Audio Toggle
     Show Mirror Video Toggle: Show Mirror Video Toggle
+    Show Rotate Video Menu: Show Rotate Video Menu
     Show Music Mode Toggle: Show Music Mode Toggle
     Swipe Gestures:
       Fullscreen Brightness: Full brightness in fullscreen
@@ -2949,6 +2950,12 @@ Video:
     Volume Boost:
       Volume Boost: Volume Boost
       Off: 'Off'
+    Rotate Video:
+      Rotate Video: Rotate Video
+      Off: 'Off'
+      Right: 90° right
+      Upside Down: 180°
+      Left: 90° left
     TranslatedCaptionTemplate: '{language} (translated from "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (auto-generated)'
     Audio Tracks: Audio Tracks
@@ -3531,6 +3538,7 @@ Tooltips:
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
     Show Mirror Video Toggle: Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials.
+    Show Rotate Video Menu: Adds Rotate Video to the player's settings menu, which turns videos that were recorded sideways or upside down.
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Double-Tap With Two Fingers to Skip Chapters: Double-tap the right side of the video with two fingers to skip to the next chapter, or the left side to return to the start of the current chapter. In the first 3 seconds of a chapter, the left side goes to the previous chapter instead, so repeating it steps back through the chapters.

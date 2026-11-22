@@ -146,6 +146,15 @@
   transform: none !important;
 }
 
+/* The thumbnail drops the zoom but keeps the rotation, and a quarter turn fits its 16:9 box into itself. */
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .player {
+  transform: rotate(var(--video-rotation, 0deg)) !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .player.quarterTurned {
+  transform: rotate(var(--video-rotation)) scale(calc(9 / 16)) !important;
+}
+
 .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar:not([data-mobile-mini-morph]) > .countdownPoster img {
   object-fit: cover;
 }

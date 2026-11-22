@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Normalizatu bolumena'
     Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
     Show Mirror Video Toggle: "Erakutsi bideoa ispilatzeko etengailua"
+    Show Rotate Video Menu: "Erakutsi Biratu bideoa menua"
     Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
     Buffering:
       Buffering: Bufferra
@@ -1959,6 +1960,12 @@ Video:
     Volume Boost:
       Volume Boost: "Bolumen-igoera"
       'Off': "Desaktibatuta"
+    Rotate Video:
+      Rotate Video: "Biratu bideoa"
+      'Off': "Desaktibatuta"
+      Right: "90° eskuinera"
+      Upside Down: "180°"
+      Left: "90° ezkerrera"
     Auto-generated Caption Template: '{language} (automatikoki sortua)'
     Up next in {seconds}: Hurrengoa {seconds} segundo barru
     Resize dock: Aldatu panelaren tamaina
@@ -2432,6 +2439,7 @@ Tooltips:
     Loop Shorts: Gaituta dagoenean, Shorts bideoak automatikoki hasten dira berriro. Desgaituta dagoenean, amaieran gelditzen dira eta berriro erreproduzitzeko botoia erakusten dute.
     Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
     Show Mirror Video Toggle: "Bideoa horizontalki ispilatzen duen etengailua erakusten du erreproduzigailuaren ezarpen-menuan, dantza, ariketa fisiko eta musika-tresnen tutorialak errazago jarraitzeko."
+    Show Rotate Video Menu: "Biratu bideoa gehitzen dio erreproduzigailuaren ezarpen-menuari, alboz edo buruz behera grabatutako bideoak biratzeko."
     Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.

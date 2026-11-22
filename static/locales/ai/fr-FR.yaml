@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Normaliser le volume'
     Show Mono Audio Toggle: 'Afficher le bouton d''audio mono'
     Show Mirror Video Toggle: "Afficher le bouton d'effet miroir"
+    Show Rotate Video Menu: "Afficher le menu Rotation de la vidéo"
     Pause on Stream Recovery: "Mettre en pause lors de la récupération du flux"
     Buffering:
       Buffering: Mise en mémoire tampon
@@ -1947,6 +1948,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplification du volume"
       'Off': "Désactivée"
+    Rotate Video:
+      Rotate Video: "Rotation de la vidéo"
+      'Off': "Désactivée"
+      Right: "90° à droite"
+      Upside Down: "180°"
+      Left: "90° à gauche"
     Auto-generated Caption Template: '{language} (générés automatiquement)'
     Up next in {seconds}: À suivre dans {seconds}
     Resize dock: Redimensionner le panneau
@@ -2420,6 +2427,7 @@ Tooltips:
     Loop Shorts: Lorsque cette option est activée, les Shorts redémarrent automatiquement. Lorsqu’elle est désactivée, ils s’arrêtent à la fin et affichent un bouton de relecture.
     Show Skip Silence Toggle: Affiche un bouton pour activer ou désactiver les silences ignorés dans le menu des paramètres du lecteur.
     Show Mirror Video Toggle: "Affiche dans le menu des paramètres du lecteur un bouton qui retourne la vidéo horizontalement, pour suivre plus facilement les tutoriels de danse, de sport et d'instruments."
+    Show Rotate Video Menu: "Ajoute Rotation de la vidéo au menu des paramètres du lecteur, pour faire pivoter les vidéos filmées de côté ou à l’envers."
     Enable Skip Silence by Default: Active les silences ignorés pour les nouveaux onglets. Toute modification dans un onglet reste sans effet sur les autres.
     Enable Video Zoom: Affiche la commande Zoom dans le menu des paramètres du lecteur et active ses raccourcis clavier ainsi que ses commandes de déplacement.
     Enable Seek History: Mémorise les endroits d'où vous avez sauté dans chaque vidéo jusqu'à la fermeture de l'application. Affiche la liste de l'historique des sauts dans le menu des paramètres du lecteur et active ses raccourcis clavier.

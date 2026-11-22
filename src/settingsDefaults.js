@@ -474,6 +474,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     normalizeLoudness: true,
     showMonoAudioToggle: false,
     showMirrorVideoToggle: false,
+    showRotateVideoMenu: false,
     showSkipSilenceButton: false,
     showDlnaCastButton: false,
     showChromecastButton: false,

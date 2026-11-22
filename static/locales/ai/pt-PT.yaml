@@ -842,6 +842,7 @@ Settings:
     Normalize Loudness: 'Normalizar o volume'
     Show Mono Audio Toggle: 'Mostrar o botão de áudio mono'
     Show Mirror Video Toggle: "Mostrar botão para espelhar o vídeo"
+    Show Rotate Video Menu: "Mostrar o menu Rodar vídeo"
     Default Media Format:
       Default Media Format: 'Formato multimédia padrão'
     Pause on Stream Recovery: "Pausar na recuperação da transmissão"
@@ -1944,6 +1945,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificação do volume"
       'Off': "Desativada"
+    Rotate Video:
+      Rotate Video: "Rodar vídeo"
+      'Off': "Desativado"
+      Right: "90° para a direita"
+      Upside Down: "180°"
+      Left: "90° para a esquerda"
     Auto-generated Caption Template: '{language} (geradas automaticamente)'
     Up next in {seconds}: A seguir dentro de {seconds}
     Resize dock: Redimensionar painel
@@ -2422,6 +2429,7 @@ Tooltips:
     Loop Shorts: Quando esta opção está ativada, os Shorts recomeçam automaticamente. Quando está desativada, param no fim e mostram um botão para os reproduzir novamente.
     Show Skip Silence Toggle: Mostra no menu de definições do reprodutor um botão para ativar ou desativar o avanço sobre períodos de silêncio.
     Show Mirror Video Toggle: "Mostra no menu de definições do reprodutor um botão que espelha o vídeo na horizontal, para ser mais fácil acompanhar tutoriais de dança, exercício e instrumentos."
+    Show Rotate Video Menu: "Adiciona Rodar vídeo ao menu de definições do reprodutor, para rodar vídeos gravados de lado ou de pernas para o ar."
     Enable Skip Silence by Default: Ativa o avanço sobre períodos de silêncio nos novos separadores. Alterar esta opção num separador não afeta os restantes.
     Enable Video Zoom: Mostra o controlo de ampliação no menu de definições do reprodutor e ativa os respetivos atalhos de teclado e controlos de deslocação.
     Enable Seek History: Memoriza de onde saltou em cada vídeo até a aplicação ser fechada. Mostra a lista do histórico de saltos no menu de definições do reprodutor e ativa os respetivos atalhos de teclado.

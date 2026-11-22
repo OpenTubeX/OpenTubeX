@@ -1069,6 +1069,7 @@ Settings:
     Normalize Loudness: 'Normalizuoti garsumą'
     Show Mono Audio Toggle: 'Rodyti mono garso jungiklį'
     Show Mirror Video Toggle: "Rodyti veidrodinio vaizdo jungiklį"
+    Show Rotate Video Menu: "Rodyti meniu „Pasukti vaizdo įrašą“"
     Default Media Format:
       Default Media Format: 'Numatytasis medijos formatas'
     Pause on Stream Recovery: "Pristabdyti atkuriant srautą"
@@ -2311,6 +2312,12 @@ Video:
     Volume Boost:
       Volume Boost: "Garsumo stiprinimas"
       'Off': "Išjungta"
+    Rotate Video:
+      Rotate Video: "Pasukti vaizdo įrašą"
+      'Off': "Išjungta"
+      Right: "90° į dešinę"
+      Upside Down: "180°"
+      Left: "90° į kairę"
     TranslatedCaptionTemplate: '{language} (išversta iš "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (sugeneruota automatiškai)'
     Audio Tracks: Garso takeliai
@@ -2847,6 +2854,7 @@ Tooltips:
     Loop Shorts: Įjungus Shorts automatiškai paleidžiami iš naujo. Išjungus Shorts pabaigoje sustoja ir rodomas pakartojimo mygtukas.
     Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
     Show Mirror Video Toggle: "Leistuvo nustatymų meniu rodo jungiklį, kuris horizontaliai apverčia vaizdo įrašą, kad būtų lengviau sekti šokių, treniruočių ir muzikos instrumentų pamokas."
+    Show Rotate Video Menu: "Prideda „Pasukti vaizdo įrašą“ į grotuvo nustatymų meniu, kad galėtumėte pasukti šonu ar aukštyn kojomis nufilmuotus vaizdo įrašus."
     Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
     Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
     Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.

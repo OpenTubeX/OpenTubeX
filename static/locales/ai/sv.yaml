@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Normalisera ljudstyrka'
     Show Mono Audio Toggle: 'Visa reglage för monoljud'
     Show Mirror Video Toggle: "Visa reglage för att spegelvända video"
+    Show Rotate Video Menu: "Visa menyn Rotera video"
     Pause on Stream Recovery: "Pausa vid återställning av ström"
     Buffering:
       Buffering: Buffring
@@ -1949,6 +1950,12 @@ Video:
     Volume Boost:
       Volume Boost: "Volymförstärkning"
       'Off': "Av"
+    Rotate Video:
+      Rotate Video: "Rotera video"
+      'Off': "Av"
+      Right: "90° åt höger"
+      Upside Down: "180°"
+      Left: "90° åt vänster"
     Auto-generated Caption Template: '{language} (automatiskt genererade)'
     Up next in {seconds}: Härnäst om {seconds}
     Resize dock: Ändra storlek på dockan
@@ -2422,6 +2429,7 @@ Tooltips:
     Loop Shorts: När funktionen är aktiverad startar Shorts om automatiskt. När den är inaktiverad stannar Shorts vid slutet och visar en knapp för att spela upp igen.
     Show Skip Silence Toggle: Visar ett på/av-reglage för att hoppa över tystnad i spelarens inställningsmeny.
     Show Mirror Video Toggle: "Visar ett på/av-reglage i spelarens inställningsmeny som spegelvänder videon vågrätt, så att det blir lättare att följa dans-, tränings- och instrumentlektioner."
+    Show Rotate Video Menu: "Lägger till Rotera video i spelarens inställningsmeny, så att du kan rotera videor som har spelats in på sidan eller upp och ner."
     Enable Skip Silence by Default: Aktiverar överhoppning av tystnad för nya flikar. En ändring i en flik påverkar inte andra flikar.
     Enable Video Zoom: Visar zoomkontrollen i spelarens inställningsmeny och aktiverar dess kortkommandon och panoreringskontroller.
     Enable Seek History: Kommer ihåg var du hoppade ifrån i varje video tills appen stängs. Visar hopphistoriklistan i spelarens inställningsmeny och aktiverar dess kortkommandon.

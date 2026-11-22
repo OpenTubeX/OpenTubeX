@@ -890,6 +890,7 @@ Settings:
     Normalize Loudness: 'נרמול עוצמת קול'
     Show Mono Audio Toggle: 'הצגת מתג שמע מונו'
     Show Mirror Video Toggle: "הצגת מתג להיפוך הסרטון"
+    Show Rotate Video Menu: "הצגת תפריט סיבוב הסרטון"
     Default Media Format:
       Default Media Format: 'תצורת המדיה כברירת המחדל'
     Pause on Stream Recovery: "השהה בעת שחזור הזרם"
@@ -2001,6 +2002,12 @@ Video:
     Volume Boost:
       Volume Boost: "הגברת עוצמת קול"
       'Off': "כבוי"
+    Rotate Video:
+      Rotate Video: "סיבוב הסרטון"
+      'Off': "כבוי"
+      Right: "90° ימינה"
+      Upside Down: "180°"
+      Left: "90° שמאלה"
     Auto-generated Caption Template: '{language} (נוצרו אוטומטית)'
     Up next in {seconds}: הסרטון הבא בעוד {seconds}
     Resize dock: שינוי גודל הלוח
@@ -2480,6 +2487,7 @@ Tooltips:
     Loop Shorts: כשהאפשרות מופעלת, סרטוני Shorts מתחילים מחדש אוטומטית. כשהיא מושבתת, הם נעצרים בסוף ומציגים כפתור להפעלה חוזרת.
     Show Skip Silence Toggle: הצגת מתג להפעלה ולכיבוי של דילוג על שקט בתפריט ההגדרות של הנגן.
     Show Mirror Video Toggle: "הצגת מתג בתפריט ההגדרות של הנגן שהופך את הסרטון אופקית, כדי שיהיה קל יותר לעקוב אחר מדריכי ריקוד, אימון וכלי נגינה."
+    Show Rotate Video Menu: "מוסיף את סיבוב הסרטון לתפריט ההגדרות של הנגן, כדי לסובב סרטונים שצולמו על הצד או הפוך."
     Enable Skip Silence by Default: הפעלת דילוג על שקט בכרטיסיות חדשות. שינוי האפשרות בכרטיסייה אחת אינו משפיע על האחרות.
     Enable Video Zoom: הצגת פקד התקריב בתפריט ההגדרות של הנגן והפעלת קיצורי המקלדת ופקדי ההזזה שלו.
     Enable Seek History: זוכר מאיפה קפצת בכל סרטון עד לסגירת האפליקציה. מציג את רשימת היסטוריית הקפיצות בתפריט ההגדרות של הנגן ומפעיל את קיצורי המקלדת שלה.

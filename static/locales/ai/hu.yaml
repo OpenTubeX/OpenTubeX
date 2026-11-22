@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Hangerő kiegyenlítése'
     Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
     Show Mirror Video Toggle: "Videótükrözés kapcsolójának megjelenítése"
+    Show Rotate Video Menu: "Videó elforgatása menü megjelenítése"
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
       Buffering: Pufferelés
@@ -1948,6 +1949,12 @@ Video:
     Volume Boost:
       Volume Boost: "Hangerő-erősítés"
       'Off': "Ki"
+    Rotate Video:
+      Rotate Video: "Videó elforgatása"
+      'Off': "Ki"
+      Right: "90° jobbra"
+      Upside Down: "180°"
+      Left: "90° balra"
     Auto-generated Caption Template: '{language} (automatikusan létrehozott)'
     Up next in {seconds}: Következik {seconds} múlva
     Resize dock: Dokkolt panel átméretezése
@@ -2422,6 +2429,7 @@ Tooltips:
     Loop Shorts: Bekapcsolva a Shorts-videók automatikusan újraindulnak. Kikapcsolva a végükön megállnak, és megjelenik az újrajátszás gomb.
     Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
     Show Mirror Video Toggle: "Kapcsolót jelenít meg a lejátszó beállítási menüjében, amely vízszintesen tükrözi a videót, így könnyebb követni a tánc-, edzés- és hangszeres oktatóvideókat."
+    Show Rotate Video Menu: "Hozzáadja a Videó elforgatása lehetőséget a lejátszó beállítások menüjéhez, hogy elforgathassa az oldalra fordítva vagy fejjel lefelé rögzített videókat."
     Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
     Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
     Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.

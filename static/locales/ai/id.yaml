@@ -886,6 +886,7 @@ Settings:
     Normalize Loudness: 'Normalkan kenyaringan'
     Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
     Show Mirror Video Toggle: "Tampilkan tombol cerminkan video"
+    Show Rotate Video Menu: "Tampilkan menu Rotasi Video"
     Default Media Format:
       Default Media Format: 'Format Media Bawaan'
     Pause on Stream Recovery: "Jeda saat pemulihan streaming"
@@ -1971,6 +1972,12 @@ Video:
     Volume Boost:
       Volume Boost: "Penguat volume"
       'Off': "Nonaktif"
+    Rotate Video:
+      Rotate Video: "Rotasi video"
+      'Off': "Mati"
+      Right: "90° ke kanan"
+      Upside Down: "180°"
+      Left: "90° ke kiri"
     Auto-generated Caption Template: '{language} (dibuat otomatis)'
     Up next in {seconds}: Berikutnya dalam {seconds}
     Resize dock: Ubah ukuran dok
@@ -2448,6 +2455,7 @@ Tooltips:
     Loop Shorts: Jika diaktifkan, Shorts dimulai ulang secara otomatis. Jika dinonaktifkan, Shorts berhenti di akhir dan menampilkan tombol putar ulang.
     Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
     Show Mirror Video Toggle: "Menampilkan tombol aktif/nonaktif dalam menu pengaturan pemutar yang membalik video secara horizontal, sehingga lebih mudah mengikuti tutorial tari, olahraga, dan alat musik."
+    Show Rotate Video Menu: "Menambahkan Rotasi Video ke menu pengaturan pemutar, untuk merotasi video yang direkam miring atau terbalik."
     Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.

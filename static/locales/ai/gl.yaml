@@ -890,6 +890,7 @@ Settings:
     Normalize Loudness: 'Normalizar o volume'
     Show Mono Audio Toggle: 'Amosar o interruptor de audio mono'
     Show Mirror Video Toggle: "Amosar o interruptor para espellar o vídeo"
+    Show Rotate Video Menu: "Amosar o menú Rotar o vídeo"
     Default Media Format:
       Default Media Format: 'Formato multimedia predeterminado'
     Pause on Stream Recovery: "Pausar ao recuperar a emisión"
@@ -2004,6 +2005,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificación do volume"
       'Off': "Desactivada"
+    Rotate Video:
+      Rotate Video: "Rotar o vídeo"
+      'Off': "Desactivado"
+      Right: "90° á dereita"
+      Upside Down: "180°"
+      Left: "90° á esquerda"
     Auto-generated Caption Template: '{language} (xerados automaticamente)'
     Up next in {seconds}: A continuación en {seconds}
     Resize dock: Redimensionar o panel
@@ -2483,6 +2490,7 @@ Tooltips:
     Loop Shorts: Cando está activado, os vídeos curtos reinícianse automaticamente. Se se desactiva, detéñense ao final e amosan un botón para repetilos.
     Show Skip Silence Toggle: Amosa un interruptor para saltar os silencios no menú de configuración do reprodutor.
     Show Mirror Video Toggle: "Amosa un interruptor no menú de configuración do reprodutor que voltea o vídeo horizontalmente, para que sexa máis doado seguir titoriais de baile, exercicio e instrumentos."
+    Show Rotate Video Menu: "Engade Rotar o vídeo ao menú de axustes do reprodutor, para xirar vídeos gravados de lado ou do revés."
     Enable Skip Silence by Default: Activa o salto de silencios nas lapelas novas. Cambialo nunha lapela non afecta ás demais.
     Enable Video Zoom: Amosa o control de ampliación no menú de configuración do reprodutor e activa os seus atallos de teclado e controis de desprazamento.
     Enable Seek History: Lembra desde onde saltaches en cada vídeo ata que se peche a aplicación. Mostra a lista do historial de saltos no menú de configuración do reprodutor e activa os seus atallos de teclado.

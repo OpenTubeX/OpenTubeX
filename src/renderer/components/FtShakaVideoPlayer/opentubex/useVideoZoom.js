@@ -11,10 +11,12 @@ import {
   VIDEO_ZOOM_LEVELS,
 } from '../../../helpers/player/videoZoom'
 import { TWO_FINGER_TAP_SLOP } from '../../../helpers/player/twoFingerTap'
+import { toVideoCoordinates } from '../../../helpers/player/videoRotation'
 
 /**
  * Zooms into the video, from the zoom menu and shortcuts or with a pinch, and pans the
- * zoomed video with a shift-drag or with the pinch's fingers.
+ * zoomed video with a shift-drag or with the pinch's fingers. The video's `transform`
+ * also turns it by the selected rotation, so the zoom and its panning follow the screen.
  * @param {{
  *   container: import('vue').Ref<HTMLElement | null>,
  *   deferPinch?: () => boolean,
@@ -23,6 +25,8 @@ import { TWO_FINGER_TAP_SLOP } from '../../../helpers/player/twoFingerTap'
  *   mirrored: import('vue').Ref<boolean>,
  *   onPinchStart: () => void,
  *   props: { format: string, shortsPlayer: boolean, videoId: string },
+ *   rotation: import('vue').Ref<number>,
+ *   rotationFit: import('vue').Ref<number>,
  *   showValueChange: (message: string, icons: string, options?: { revealControls?: boolean }) => void,
  *   useVrMode: import('vue').ComputedRef<boolean>,
  *   video: import('vue').Ref<HTMLVideoElement | null>,
@@ -38,6 +42,8 @@ export function useVideoZoom({
   mirrored,
   onPinchStart,
   props,
+  rotation,
+  rotationFit,
   showValueChange,
   useVrMode,
   video,
@@ -83,23 +89,50 @@ export function useVideoZoom({
 
   const videoZoomPannable = computed(() => videoZoom.value !== DEFAULT_VIDEO_ZOOM)
 
+  const quarterTurned = computed(() => rotation.value % 180 !== 0)
+
   const videoZoomStyle = computed(() => {
-    if (!videoZoomPannable.value) {
-      return undefined
+    const transforms = []
+
+    if (rotation.value !== 0) {
+      transforms.push(`rotate(${rotation.value}deg)`)
     }
 
-    // The translation is applied in the video's own coordinate system, which
-    // the scale then magnifies, so the offset that reaches the edge of the
-    // crop shrinks as the zoom grows.
-    const limit = 50 * (videoZoom.value - 1) / videoZoom.value
-    // The offset is in screen space, but a mirrored video applies its
-    // `rotate` around the y axis after this transform, which flips x.
-    const x = videoZoomOffset.x * limit * (mirrored.value ? -1 : 1)
-
-    return {
-      transform: `scale(${videoZoom.value}) translate(${x}%, ${videoZoomOffset.y * limit}%)`
+    if (rotationFit.value !== 1) {
+      transforms.push(`scale(${rotationFit.value})`)
     }
+
+    if (videoZoomPannable.value) {
+      // The translation is applied in the video's own coordinate system, which
+      // the scale then magnifies, so the offset that reaches the edge of the
+      // crop shrinks as the zoom grows.
+      const limit = 50 * (videoZoom.value - 1) / videoZoom.value
+      // The offset is in screen space, but the rotation turns the video's own
+      // axes, and a mirrored video applies its `rotate` around the y axis
+      // after this transform, which flips x.
+      const offset = toVideoCoordinates(videoZoomOffset, rotation.value, mirrored.value)
+      transforms.push(`scale(${videoZoom.value}) translate(${offset.x * limit}%, ${offset.y * limit}%)`)
+    }
+
+    if (transforms.length === 0) return undefined
+
+    // For the layouts that replace this transform but keep the rotation.
+    return { transform: transforms.join(' '), '--video-rotation': `${rotation.value}deg` }
   })
+
+  // The transform animates in fullscreen. Turning the video, or a resize that changes how a
+  // turned video fits, jumps instead, so that a pinch can always divide the fit out of the
+  // rendered scale to get the zoom.
+  watch([rotation, rotationFit], () => {
+    if (video.value) video.value.style.transition = 'none'
+  })
+  watch([rotation, rotationFit], () => {
+    const videoElement = video.value
+    if (!videoElement) return
+    // Applies the new transform before the transition comes back.
+    videoElement.getBoundingClientRect()
+    videoElement.style.transition = ''
+  }, { flush: 'post' })
 
   watch(videoZoomPannable, (pannable) => {
     if (!pannable) {
@@ -187,8 +220,9 @@ export function useVideoZoom({
     const bounds = videoElement.getBoundingClientRect()
     const transform = getComputedStyle(videoElement).transform
     const matrix = transform === 'none' ? new DOMMatrix() : new DOMMatrix(transform)
-    const scale = Math.hypot(matrix.a, matrix.b)
-    // Like videoZoomStyle, in screen space.
+    const scale = Math.hypot(matrix.a, matrix.b) / rotationFit.value
+    // Like videoZoomStyle, in screen space. The rotation is part of the
+    // transform, so only the mirroring is left to undo.
     const translationX = mirrored.value ? -matrix.e : matrix.e
     if (bounds.width <= 0 || bounds.height <= 0 || scale <= 0) return null
     const size = {
@@ -273,7 +307,9 @@ export function useVideoZoom({
         ? getVideoFillZoom(
             { width: container.value.clientWidth, height: container.value.clientHeight },
             geometry.size,
-            { width: video.value.videoWidth, height: video.value.videoHeight },
+            quarterTurned.value
+              ? { width: video.value.videoHeight, height: video.value.videoWidth }
+              : { width: video.value.videoWidth, height: video.value.videoHeight },
           )
         : null,
     }
@@ -433,9 +469,12 @@ export function useVideoZoom({
     }
 
     // `offsetWidth`/`offsetHeight` are the layout size, which the zoom
-    // transform does not change, so this is the overflow the crop hides.
-    const maxX = videoElement.offsetWidth * (videoZoom.value - 1) / 2
-    const maxY = videoElement.offsetHeight * (videoZoom.value - 1) / 2
+    // transform does not change, so this is the overflow the crop hides. A
+    // quarter turn swaps the sides of the layout box on screen.
+    const width = (quarterTurned.value ? videoElement.offsetHeight : videoElement.offsetWidth) * rotationFit.value
+    const height = (quarterTurned.value ? videoElement.offsetWidth : videoElement.offsetHeight) * rotationFit.value
+    const maxX = width * (videoZoom.value - 1) / 2
+    const maxY = height * (videoZoom.value - 1) / 2
 
     if (maxX > 0) {
       videoZoomOffset.x = clampVideoZoomOffset(

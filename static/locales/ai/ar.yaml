@@ -890,6 +890,7 @@ Settings:
     Normalize Loudness: 'توحيد مستوى الصوت'
     Show Mono Audio Toggle: 'إظهار مفتاح الصوت الأحادي'
     Show Mirror Video Toggle: "إظهار مفتاح عكس الفيديو"
+    Show Rotate Video Menu: "إظهار قائمة تدوير الفيديو"
     Default Media Format:
       Default Media Format: 'تنسيق الوسائط الافتراضي'
     Pause on Stream Recovery: "الإيقاف المؤقت عند استعادة البث"
@@ -1995,6 +1996,12 @@ Video:
     Volume Boost:
       Volume Boost: "تعزيز الصوت"
       'Off': "إيقاف"
+    Rotate Video:
+      Rotate Video: "تدوير الفيديو"
+      'Off': "إيقاف"
+      Right: "90° لليمين"
+      Upside Down: "180°"
+      Left: "90° لليسار"
     Auto-generated Caption Template: '{language} (تم إنشاؤه تلقائيًا)'
     Up next in {seconds}: التالي في {seconds}
     Resize dock: تغيير حجم اللوحة
@@ -2463,6 +2470,7 @@ Tooltips:
     Loop Shorts: عند التفعيل، تتم إعادة تشغيل Shorts تلقائيًا. عند إيقاف ميزة Shorts، تتوقف عند النهاية وتعرض زر إعادة التشغيل.
     Show Skip Silence Toggle: يعرض مفتاح تشغيل/إيقاف لتخطي الصمت في قائمة إعدادات المشغل.
     Show Mirror Video Toggle: "يعرض مفتاح تشغيل/إيقاف في قائمة إعدادات المشغل يعكس الفيديو أفقيًا، لتسهيل متابعة دروس الرقص والتمارين الرياضية والعزف على الآلات."
+    Show Rotate Video Menu: "يضيف «تدوير الفيديو» إلى قائمة إعدادات المشغل، لتدوير مقاطع الفيديو التي سُجّلت بشكل جانبي أو مقلوب."
     Enable Skip Silence by Default: تمكن الصمت تخطي علامات التبويب الجديدة. ولا يؤثر تغييره في علامة تبويب واحدة على علامات التبويب الأخرى.
     Enable Video Zoom: يعرض عنصر التحكم في التكبير/التصغير في قائمة إعدادات المشغل ويمكّن اختصارات لوحة المفاتيح وعناصر التحكم في التحريك.
     Enable Seek History: يتذكر المواضع التي انتقلت منها في كل فيديو حتى إغلاق التطبيق. يعرض قائمة سجل التنقل في قائمة إعدادات المشغل ويفعّل اختصارات لوحة المفاتيح الخاصة بها.

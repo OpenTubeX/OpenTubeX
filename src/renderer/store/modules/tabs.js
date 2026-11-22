@@ -1,5 +1,6 @@
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
+import { sanitizeVideoRotation } from '../../helpers/player/videoRotation'
 import { DEFAULT_VOLUME_BOOST } from '../../helpers/player/volumeBoost'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
@@ -28,7 +29,11 @@ const state = {
   videoZoomByTabId: {},
   volumeBoostByTabId: {},
   lightsOffByTabId: {},
+  // Kept for the video they were set for, so the next video in the tab starts without them.
+  /** @type {Record<string, { videoId: string, value: boolean }>} */
   mirrorVideoByTabId: {},
+  /** @type {Record<string, { videoId: string, value: number }>} */
+  videoRotationByTabId: {},
   musicModeByTabId: {},
   skipSilenceByTabId: {}
 }
@@ -38,7 +43,14 @@ const getters = {
   // The web build opens links in browser tabs, which cannot keep the history out
   getIncognitoTabsEnabled: (_state, getters) => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && getters.getTabsEnabled,
   getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
-  getTabMirrorVideo: (state) => (tabId) => state.mirrorVideoByTabId[tabId] ?? false,
+  getTabMirrorVideo: (state) => (tabId, videoId) => {
+    const mirror = state.mirrorVideoByTabId[tabId]
+    return mirror?.videoId === videoId && mirror.value
+  },
+  getTabVideoRotation: (state) => (tabId, videoId) => {
+    const rotation = state.videoRotationByTabId[tabId]
+    return rotation?.videoId === videoId ? rotation.value : 0
+  },
   getTabMusicMode: (state) => (tabId) => state.musicModeByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,
   getTabGroups: (state) => state.groups,
@@ -163,6 +175,11 @@ const mutations = {
     for (const tabId of Object.keys(state.mirrorVideoByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.mirrorVideoByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.videoRotationByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.videoRotationByTabId[tabId]
       }
     }
     for (const tabId of Object.keys(state.skipSilenceByTabId)) {
@@ -306,8 +323,12 @@ const mutations = {
     state.lightsOffByTabId[tabId] = value === true
   },
 
-  setTabMirrorVideo(state, { tabId, value }) {
-    state.mirrorVideoByTabId[tabId] = value === true
+  setTabMirrorVideo(state, { tabId, videoId, value }) {
+    state.mirrorVideoByTabId[tabId] = { videoId, value: value === true }
+  },
+
+  setTabVideoRotation(state, { tabId, videoId, value }) {
+    state.videoRotationByTabId[tabId] = { videoId, value: sanitizeVideoRotation(value) }
   },
 
   setTabMusicMode(state, { tabId, value }) {

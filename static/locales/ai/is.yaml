@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Jafna hljóðstyrk'
     Show Mono Audio Toggle: 'Sýna rofa fyrir einóma hljóð'
     Show Mirror Video Toggle: "Sýna rofa til að spegla myndskeið"
+    Show Rotate Video Menu: "Sýna valmyndina Snúa myndskeiði"
     Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
       Buffering: Biðminni
@@ -1964,6 +1965,12 @@ Video:
     Volume Boost:
       Volume Boost: "Hljóðstyrksaukning"
       'Off': "Slökkt"
+    Rotate Video:
+      Rotate Video: "Snúa myndskeiði"
+      'Off': "Slökkt"
+      Right: "90° til hægri"
+      Upside Down: "180°"
+      Left: "90° til vinstri"
     Auto-generated Caption Template: '{language} (útbúið sjálfkrafa)'
     Up next in {seconds}: Næst eftir {seconds}
     Resize dock: Breyta stærð spjalds
@@ -2437,6 +2444,7 @@ Tooltips:
     Loop Shorts: Þegar þetta er virkt hefjast Shorts sjálfkrafa aftur. Ef slökkt er á þessu stöðvast þau í lokin og hnappur til að spila aftur birtist.
     Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
     Show Mirror Video Toggle: "Sýnir rofa í stillingavalmynd spilarans sem speglar myndskeiðið lárétt, svo auðveldara sé að fylgja dans-, æfinga- og hljóðfærakennslu."
+    Show Rotate Video Menu: "Bætir Snúa myndskeiði við stillingavalmynd spilarans, til að snúa myndskeiðum sem voru tekin upp á hlið eða á hvolfi."
     Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.

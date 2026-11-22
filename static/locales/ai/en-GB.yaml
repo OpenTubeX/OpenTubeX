@@ -870,6 +870,7 @@ Settings:
     Normalize Loudness: 'Normalise Loudness'
     Show Mono Audio Toggle: 'Show Mono Audio Toggle'
     Show Mirror Video Toggle: "Show Mirror Video Toggle"
+    Show Rotate Video Menu: "Show Rotate Video Menu"
     Pause on Stream Recovery: "Pause on Stream Recovery"
     Buffering:
       Buffering: Buffering
@@ -1938,6 +1939,12 @@ Video:
     Volume Boost:
       Volume Boost: "Volume Boost"
       'Off': "Off"
+    Rotate Video:
+      Rotate Video: "Rotate Video"
+      'Off': "Off"
+      Right: "90° right"
+      Upside Down: "180°"
+      Left: "90° left"
     Auto-generated Caption Template: "{language} (auto-generated)"
     Up next in {seconds}: Up next in {seconds}
     Resize dock: Resize dock
@@ -2417,6 +2424,7 @@ Tooltips:
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
     Show Mirror Video Toggle: "Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials."
+    Show Rotate Video Menu: "Adds Rotate Video to the player's settings menu, which turns videos that were recorded sideways or upside down."
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.

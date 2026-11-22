@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Normalisoi äänenvoimakkuus'
     Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
     Show Mirror Video Toggle: "Näytä videon peilauskytkin"
+    Show Rotate Video Menu: "Näytä Kierrä videota -valikko"
     Pause on Stream Recovery: "Keskeytä striimin palautuksessa"
     Buffering:
       Buffering: Puskurointi
@@ -1956,6 +1957,12 @@ Video:
     Volume Boost:
       Volume Boost: "Äänenvoimakkuuden vahvistus"
       'Off': "Pois käytöstä"
+    Rotate Video:
+      Rotate Video: "Kierrä videota"
+      'Off': "Pois"
+      Right: "90° oikealle"
+      Upside Down: "180°"
+      Left: "90° vasemmalle"
     Auto-generated Caption Template: '{language} (luotu automaattisesti)'
     Up next in {seconds}: Seuraavaksi {seconds} kuluttua
     Resize dock: Muuta telakan kokoa
@@ -2430,6 +2437,7 @@ Tooltips:
     Loop Shorts: Kun asetus on käytössä, Shorts-videot alkavat automaattisesti alusta. Muussa tapauksessa ne pysähtyvät lopussa ja näyttävät uudelleentoistopainikkeen.
     Show Skip Silence Toggle: Näyttää hiljaisuuden ohittamisen käyttöönottokytkimen soittimen asetusvalikossa.
     Show Mirror Video Toggle: "Näyttää soittimen asetusvalikossa kytkimen, joka peilaa videon vaakasuunnassa, jotta tanssi-, treeni- ja soitinopetusten seuraaminen on helpompaa."
+    Show Rotate Video Menu: "Lisää soittimen asetusvalikkoon Kierrä videota -kohdan, jolla voit kiertää sivuttain tai ylösalaisin kuvattuja videoita."
     Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
     Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
     Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.

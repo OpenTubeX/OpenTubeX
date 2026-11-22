@@ -967,6 +967,7 @@ Settings:
     Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis brytar for monolyd'
     Show Mirror Video Toggle: "Vis brytar for å spegelvende video"
+    Show Rotate Video Menu: "Vis menyen Roter video"
     Default Media Format:
       Default Media Format: 'Medieformat'
     Pause on Stream Recovery: "Set på pause ved gjenoppretting av straum"
@@ -2201,6 +2202,12 @@ Video:
     Volume Boost:
       Volume Boost: "Volumforsterking"
       'Off': "Av"
+    Rotate Video:
+      Rotate Video: "Roter video"
+      'Off': "Av"
+      Right: "90° til høgre"
+      Upside Down: "180°"
+      Left: "90° til venstre"
     TranslatedCaptionTemplate: '{language} (omsett frå "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (automatisk generert)'
     Audio Tracks: Lydspor
@@ -2734,6 +2741,7 @@ Tooltips:
     Loop Shorts: Når dette er slått på, startar Shorts automatisk på nytt. Når det er slått av, stoppar Shorts på slutten og viser ein knapp for ny avspeling.
     Show Skip Silence Toggle: Viser ein av/på-brytar for å hoppe over stille parti i innstillingsmenyen til spelaren.
     Show Mirror Video Toggle: "Viser ein av/på-brytar i innstillingsmenyen til spelaren som spegelvender videoen vassrett, slik at det blir lettare å følgje danse-, trenings- og instrumentrettleiingar."
+    Show Rotate Video Menu: "Legg til Roter video i innstillingsmenyen til avspelaren, slik at du kan rotere videoar som er tekne opp sidelengs eller opp ned."
     Enable Skip Silence by Default: Hoppar som standard over stille parti i nye faner. Endringar i éi fane påverkar ikkje andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spelaren og slår på hurtigtastane og panoreringskontrollane.
     Enable Seek History: Hugsar kvar du hoppa frå i kvar video til appen vert lukka. Viser hopphistorikklista i innstillingsmenyen til avspelaren og slår på snøggtastane for ho.

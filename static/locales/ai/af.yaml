@@ -1070,6 +1070,7 @@ Settings:
     Show Volume Boost Toggle: Wys volumeversterking-wisselaar
     Show Mono Audio Toggle: Wys mono-oudio-wisselaar
     Show Mirror Video Toggle: "Wys video-spieëlwisselaar"
+    Show Rotate Video Menu: "Wys Draai video-kieslys"
     Show Music Mode Toggle: Wys musiekmodus-wisselaar
     Swipe Gestures:
       Fullscreen Brightness: Volle helderheid in volskerm
@@ -2235,6 +2236,12 @@ Video:
     Volume Boost:
       Volume Boost: Volumeversterking
       'Off': 'Af'
+    Rotate Video:
+      Rotate Video: "Draai video"
+      'Off': "Af"
+      Right: "90° regs"
+      Upside Down: "180°"
+      Left: "90° links"
     Auto-generated Caption Template: '{language} (outomaties gegenereer)'
     Up next in {seconds}: Volgende oor {seconds}
     Resize dock: Verander grootte van dok
@@ -2677,6 +2684,7 @@ Tooltips:
     Loop Shorts: Wanneer geaktiveer, begin kortvideo’s outomaties weer. Wanneer gedeaktiveer, stop kortvideo’s aan die einde en wys ’n herspeelknoppie.
     Show Skip Silence Toggle: Wys ’n aan/af-wisselaar vir die oorslaan van stilte in die speler se instellingskieslys.
     Show Mirror Video Toggle: "Wys ’n aan/af-wisselaar in die speler se instellingskieslys wat die video horisontaal spieël, sodat dit makliker is om dans-, oefen- en instrumenttutoriale te volg."
+    Show Rotate Video Menu: "Voeg Draai video by die speler se instellingskieslys, wat video’s draai wat sywaarts of onderstebo opgeneem is."
     Enable Skip Silence by Default: Aktiveer die oorslaan van stilte vir nuwe oortjies. As u dit in een oortjie verander, raak dit nie ander oortjies nie.
     Enable Video Zoom: Wys die zoemkontrole in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie en panneerkontroles daarvan.
     Enable Seek History: Onthou waarvandaan u in elke video gespring het totdat die toep sluit. Wys die spoelgeskiedenislys in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie daarvan.

@@ -885,6 +885,7 @@ Settings:
     Normalize Loudness: 'Normalizza il volume'
     Show Mono Audio Toggle: 'Mostra l''interruttore dell''audio mono'
     Show Mirror Video Toggle: "Mostra l'interruttore per specchiare il video"
+    Show Rotate Video Menu: "Mostra il menu Ruota video"
     Pause on Stream Recovery: "Metti in pausa al ripristino dello stream"
     Buffering:
       Buffering: Buffering
@@ -1948,6 +1949,12 @@ Video:
     Volume Boost:
       Volume Boost: "Amplificazione del volume"
       'Off': "Disattivata"
+    Rotate Video:
+      Rotate Video: "Ruota video"
+      'Off': "Disattivato"
+      Right: "90° a destra"
+      Upside Down: "180°"
+      Left: "90° a sinistra"
     Auto-generated Caption Template: '{language} (generati automaticamente)'
     Up next in {seconds}: Prossimo video tra {seconds}
     Resize dock: Ridimensiona pannello
@@ -2421,6 +2428,7 @@ Tooltips:
     Loop Shorts: Se abilitato, gli Shorts ricominciano automaticamente. Se disabilitato, si fermano alla fine e mostrano un pulsante per riprodurli di nuovo.
     Show Skip Silence Toggle: Mostra nel menu delle impostazioni del lettore un interruttore per attivare o disattivare il salto dei silenzi.
     Show Mirror Video Toggle: "Mostra nel menu delle impostazioni del lettore un interruttore che capovolge il video in orizzontale, per seguire più facilmente tutorial di danza, allenamento e strumenti musicali."
+    Show Rotate Video Menu: "Aggiunge Ruota video al menu delle impostazioni del lettore, per ruotare i video registrati di lato o capovolti."
     Enable Skip Silence by Default: Abilita il salto dei silenzi nelle nuove schede. La modifica in una scheda non influisce sulle altre.
     Enable Video Zoom: Mostra il controllo Zoom nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera e i controlli di panoramica.
     Enable Seek History: Ricorda da dove sei saltato in ogni video fino alla chiusura dell'app. Mostra l'elenco della cronologia dei salti nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera.

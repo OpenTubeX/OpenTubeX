@@ -900,6 +900,7 @@ Settings:
     Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis knap til monolyd'
     Show Mirror Video Toggle: "Vis kontakt til at spejlvende video"
+    Show Rotate Video Menu: "Vis menuen Rotér video"
     Default Media Format:
       Default Media Format: 'Standardmedieformat'
     Pause on Stream Recovery: "Sæt på pause ved genopretning af stream"
@@ -2025,6 +2026,12 @@ Video:
     Volume Boost:
       Volume Boost: "Lydstyrkeforstærkning"
       'Off': "Fra"
+    Rotate Video:
+      Rotate Video: "Rotér video"
+      'Off': "Fra"
+      Right: "90° til højre"
+      Upside Down: "180°"
+      Left: "90° til venstre"
     Auto-generated Caption Template: '{language} (automatisk genereret)'
     Up next in {seconds}: Næste om {seconds}
     Resize dock: Tilpas panelets størrelse
@@ -2511,6 +2518,7 @@ Tooltips:
     Loop Shorts: Når funktionen er slået til, starter Shorts automatisk forfra. Når den er slået fra, stopper Shorts ved slutningen og viser en knap til genafspilning.
     Show Skip Silence Toggle: Viser en til/fra-knap til at springe stilhed over i afspillerens indstillingsmenu.
     Show Mirror Video Toggle: "Viser en til/fra-knap i afspillerens indstillingsmenu, der spejlvender videoen vandret, så det er nemmere at følge med i danse-, trænings- og instrumentvejledninger."
+    Show Rotate Video Menu: "Tilføjer Rotér video til afspillerens indstillingsmenu, så du kan rotere videoer, der er optaget sidelæns eller på hovedet."
     Enable Skip Silence by Default: Slår overspringning af stilhed til for nye faner. En ændring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomknappen i afspillerens indstillingsmenu og slår dens tastaturgenveje og panoreringsknapper til.
     Enable Seek History: Husker, hvor du sprang fra i hver video, indtil appen lukkes. Viser listen med spolehistorik i afspillerens indstillingsmenu og slår dens tastaturgenveje til.

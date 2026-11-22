@@ -1118,6 +1118,7 @@ Settings:
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
     Show Mono Audio Toggle: Schalter für Mono-Audio anzeigen
     Show Mirror Video Toggle: Schalter für „Video spiegeln“ anzeigen
+    Show Rotate Video Menu: Menü „Video drehen“ anzeigen
     Show Music Mode Toggle: Schalter für den Musikmodus anzeigen
     Swipe Gestures:
       Fullscreen Brightness: Volle Helligkeit im Vollbild
@@ -2719,6 +2720,12 @@ Video:
     Volume Boost:
       Volume Boost: Lautstärkeverstärkung
       'Off': Aus
+    Rotate Video:
+      Rotate Video: Video drehen
+      'Off': Aus
+      Right: 90° nach rechts
+      Upside Down: 180°
+      Left: 90° nach links
     Resize dock: Leiste in der Größe ändern
     Resize dock width: Leistenbreite ändern
     Google Cast:
@@ -3207,6 +3214,7 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
     Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
     Show Mirror Video Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter an, der das Video horizontal spiegelt. So kannst du Tanz-, Fitness- und Instrumenten-Tutorials leichter folgen.
+    Show Rotate Video Menu: Fügt dem Einstellungsmenü des Players „Video drehen“ hinzu, womit sich seitlich oder kopfüber aufgenommene Videos drehen lassen.
     Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Speed Up: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend mit dem gewählten Wert zu multiplizieren.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.

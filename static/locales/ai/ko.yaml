@@ -1048,6 +1048,7 @@ Settings:
     Normalize Loudness: '음량 평준화'
     Show Mono Audio Toggle: '모노 오디오 토글 표시'
     Show Mirror Video Toggle: "동영상 좌우 반전 토글 표시"
+    Show Rotate Video Menu: "동영상 회전 메뉴 표시"
     Default Media Format:
       Default Media Format: '기본 미디어 포맷'
     Pause on Stream Recovery: "스트림 복구 시 일시 정지"
@@ -2277,6 +2278,12 @@ Video:
     Volume Boost:
       Volume Boost: "볼륨 증폭"
       'Off': "끄기"
+    Rotate Video:
+      Rotate Video: "동영상 회전"
+      'Off': "끔"
+      Right: "오른쪽으로 90°"
+      Upside Down: "180°"
+      Left: "왼쪽으로 90°"
     TranslatedCaptionTemplate: '{language} ("{originalLanguage}"에서 번역됨)'
     Auto-generated Caption Template: '{language} (자동 생성됨)'
     Audio Tracks: 오디오 트랙
@@ -2810,6 +2817,7 @@ Tooltips:
     Loop Shorts: 활성화하면 Shorts를 자동으로 다시 시작합니다. 비활성화하면 끝에서 멈추고 다시 재생 버튼을 표시합니다.
     Show Skip Silence Toggle: 플레이어 설정 메뉴에 무음 구간 건너뛰기 켜기/끄기 전환 버튼을 표시합니다.
     Show Mirror Video Toggle: "플레이어 설정 메뉴에 동영상을 좌우로 반전하는 켜기/끄기 전환 버튼을 표시하여 댄스, 운동, 악기 튜토리얼을 더 쉽게 따라 할 수 있습니다."
+    Show Rotate Video Menu: "플레이어 설정 메뉴에 동영상 회전을 추가하여 옆으로 눕거나 거꾸로 촬영된 동영상을 회전합니다."
     Enable Skip Silence by Default: 새 탭에서 무음 구간 건너뛰기를 활성화합니다. 한 탭에서 변경해도 다른 탭에는 영향을 주지 않습니다.
     Enable Video Zoom: 플레이어 설정 메뉴에 확대/축소 컨트롤을 표시하고 키보드 단축키와 화면 이동 컨트롤을 활성화합니다.
     Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.

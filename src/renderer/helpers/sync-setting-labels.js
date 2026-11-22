@@ -296,6 +296,7 @@ export const SYNC_SETTING_LABELS = {
   showVolumeBoostToggle: 'Settings.Player Settings.Show Volume Boost Toggle',
   showMonoAudioToggle: 'Settings.Player Settings.Show Mono Audio Toggle',
   showMirrorVideoToggle: 'Settings.Player Settings.Show Mirror Video Toggle',
+  showRotateVideoMenu: 'Settings.Player Settings.Show Rotate Video Menu',
   showLiveChatTimestamps: 'Video.Show Live Chat Timestamps',
   showMusicModeToggle: 'Settings.Player Settings.Show Music Mode Toggle',
   showNewSubscriptionFeed: 'Settings.Subscription Settings.Show New Content Feed',
