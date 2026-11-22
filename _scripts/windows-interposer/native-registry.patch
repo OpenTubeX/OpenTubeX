@@ -1,0 +1,156 @@
+diff --git a/LANCommander.Interposer/dll/src/config.cpp b/LANCommander.Interposer/dll/src/config.cpp
+index b968cfd..3070514 100644
+--- a/LANCommander.Interposer/dll/src/config.cpp
++++ b/LANCommander.Interposer/dll/src/config.cpp
+@@ -21,7 +21,7 @@ std::wstring g_username;
+ std::wstring g_computername;
+ 
+ bool                      g_fastdlEnabled             = false;
+-bool                      g_logFastDL                 = true;
++bool                      g_logFastDL                 = false;
+ std::wstring              g_fastdlBaseUrl;
+ std::vector<std::wstring> g_fastdlAllowedExtensions;
+ std::vector<FastDLPath>   g_fastdlPaths;
+@@ -37,7 +37,7 @@ std::vector<PortRange>    g_fastdlFilteredPorts       = {{ 23000, 23009 }};
+ bool         g_logPlugins       = false;
+ bool         g_logIdentity     = false;
+ bool         g_logRichPresence  = false;
+-bool         g_logDnsRedirects = true;
++bool         g_logDnsRedirects = false;
+ bool         g_logNetwork      = false;
+ bool         g_logDirectInput  = false;
+ 
+@@ -1022,7 +1022,7 @@ void LoadConfig()
+         if (logging["Registry"])
+             g_logRegistry = logging["Registry"].as<bool>(false);
+         if (logging["Downloads"])
+-            g_logFastDL = logging["Downloads"].as<bool>(true);
++            g_logFastDL = logging["Downloads"].as<bool>(false);
+         if (logging["Plugins"])
+             g_logPlugins = logging["Plugins"].as<bool>(false);
+         if (logging["Identity"])
+@@ -1030,7 +1030,7 @@ void LoadConfig()
+         if (logging["RichPresence"])
+             g_logRichPresence = logging["RichPresence"].as<bool>(false);
+         if (logging["DnsRedirects"])
+-            g_logDnsRedirects = logging["DnsRedirects"].as<bool>(true);
++            g_logDnsRedirects = logging["DnsRedirects"].as<bool>(false);
+         if (logging["Network"])
+             g_logNetwork = logging["Network"].as<bool>(false);
+         if (logging["DirectInput"])
+@@ -1365,6 +1365,11 @@ void LoadConfig()
+     }
+ 
+     // ── Open log at .interposer\Logs\<timestamp>.log ──────────────────────────
++    if (!g_logFiles && !g_logRegistry && !g_logFastDL && !g_logPlugins &&
++        !g_logIdentity && !g_logRichPresence && !g_logDnsRedirects &&
++        !g_logNetwork && !g_logDirectInput)
++        return;
++
+     CreateDirectoryW(interposerDir.c_str(), nullptr);
+ 
+     std::wstring logsDir = interposerDir + L"Logs\\";
+diff --git a/LANCommander.Interposer/dll/src/dllmain.cpp b/LANCommander.Interposer/dll/src/dllmain.cpp
+index 7989945..b05107e 100644
+--- a/LANCommander.Interposer/dll/src/dllmain.cpp
++++ b/LANCommander.Interposer/dll/src/dllmain.cpp
+@@ -1,55 +1,23 @@
+-#define WIN32_LEAN_AND_MEAN
+-#define NOMINMAX
+ #include <windows.h>
+ #include "hooks.h"
++#include <exception>
++#include <cstring>
+ 
+-static void WriteLog(const wchar_t* message)
++BOOL APIENTRY DllMain(HMODULE instance, DWORD reason, LPVOID reserved)
+ {
+-    wchar_t temporaryPath[MAX_PATH];
+-    
+-    GetTempPathW(MAX_PATH, temporaryPath);
+-    
+-    wcscat_s(temporaryPath, L"Interposer.log");
+-    
+-    HANDLE fileHandle = CreateFileW(temporaryPath, FILE_APPEND_DATA, FILE_SHARE_READ,
+-        nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+-    
+-    if (fileHandle == INVALID_HANDLE_VALUE) 
+-        return;
+-    
+-    DWORD written;
+-    
+-    WriteFile(fileHandle, message, static_cast<DWORD>(wcslen(message) * sizeof(wchar_t)), &written, nullptr);
+-    WriteFile(fileHandle, L"\r\n", 4, &written, nullptr);
+-    CloseHandle(fileHandle);
+-}
+-
+-BOOL APIENTRY DllMain(HMODULE hInstance, DWORD fdwReason, LPVOID /*lpvReserved*/)
+-{
+-    switch (fdwReason)
+-    {
+-    case DLL_PROCESS_ATTACH:
+-        DisableThreadLibraryCalls(hInstance);
+-        WriteLog(L"DLL_PROCESS_ATTACH: calling InstallHooks");
+-        __try
+-        {
+-            InstallHooks();
+-            WriteLog(L"InstallHooks returned OK");
++    if (reason == DLL_PROCESS_ATTACH) {
++        DisableThreadLibraryCalls(instance);
++        try { InstallHooks(); }
++        catch (const std::exception& error) {
++            DWORD written;
++            const char* message = error.what();
++            WriteFile(GetStdHandle(STD_ERROR_HANDLE), message, static_cast<DWORD>(std::strlen(message)), &written, nullptr);
++            WriteFile(GetStdHandle(STD_ERROR_HANDLE), "\n", 1, &written, nullptr);
++            return FALSE;
+         }
+-        __except (EXCEPTION_EXECUTE_HANDLER)
+-        {
+-            wchar_t buf[64];
+-            wsprintfW(buf, L"InstallHooks EXCEPTION code=0x%08X", GetExceptionCode());
+-            WriteLog(buf);
+-        }
+-        break;
+-
+-    case DLL_PROCESS_DETACH:
++        catch (...) { return FALSE; }
++    } else if (reason == DLL_PROCESS_DETACH && !reserved) {
+         RemoveHooks();
+-        break;
+-
+-    default:
+-        break;
+     }
+     return TRUE;
+ }
+diff --git a/LANCommander.Interposer/dll/src/hooks.cpp b/LANCommander.Interposer/dll/src/hooks.cpp
+index 432e6bd..a84f9dc 100644
+--- a/LANCommander.Interposer/dll/src/hooks.cpp
++++ b/LANCommander.Interposer/dll/src/hooks.cpp
+@@ -11,6 +11,7 @@
+ #include "richpresence.h"
+ 
+ #include <MinHook.h>
++#include <stdexcept>
+ 
+ // ---------------------------------------------------------------------------
+ // Public API
+@@ -25,7 +26,7 @@ void InstallHooks()
+     __debugbreak();
+ #endif
+ 
+-    MH_Initialize();
++    if (MH_Initialize() != MH_OK) throw std::runtime_error("Cannot initialize portable hooks");
+ 
+     LoadConfig();
+     InstallRegistryHooks();
+@@ -35,7 +36,7 @@ void InstallHooks()
+     InstallIdentityHooks();
+     InstallDirectInputHooks();
+ 
+-    MH_EnableHook(MH_ALL_HOOKS);
++    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) throw std::runtime_error("Cannot enable portable hooks");
+ 
+     ConnectEventPipe();
+ 

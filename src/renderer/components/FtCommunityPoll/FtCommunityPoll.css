@@ -1,6 +1,8 @@
 .vote-count {
   padding-block-end: 6px;
   font-size: smaller;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .empty-circle {
@@ -30,20 +32,37 @@
   margin-inline-start: 10px;
 }
 
+/* Choices are neutral filled bars. The transparent border keeps the box size
+   of the former outline, and the correct answer recolors it. */
 .option {
   display: flex;
   align-items: center;
   padding-block: 5px;
-  border-radius: 5px;
-  border-style: solid;
-  border-width: 1px;
+  border: 1px solid transparent;
+  border-radius: var(--shape-corner-medium);
   padding-inline-start: 10px;
   margin-block-end: 10px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--secondary-card-bg-color));
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects);
 }
 
-.option > img {
+.option > .pollImage {
   margin-inline-start: 10px;
   block-size: 125px;
+  border-radius: var(--shape-corner-small);
+}
+
+.pollImage.retryImagePlaceholder {
+  display: grid;
+  place-items: center;
+  color: var(--secondary-text-color);
+}
+
+.pollImage.retryImagePlaceholder :deep(.ft-icon__glyph) {
+  block-size: 48px;
+  inline-size: 48px;
 }
 
 .correct-option {
@@ -58,9 +77,110 @@
 .reveal-answer {
   justify-content: center;
   cursor: pointer;
+  font-weight: 500;
+}
+
+/* The radius only transitions under the pointer, so UI Roundness changes stay
+   instant. */
+.reveal-answer:is(:hover, :active) {
+  transition:
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
 }
 
 .reveal-answer:hover,
 .reveal-answer:focus {
-  background-color: var(--side-nav-hover-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, var(--secondary-card-bg-color));
+}
+
+.reveal-answer:active {
+  border-radius: var(--shape-corner-small);
+}
+
+.wrong-option {
+  border-color: var(--destructive-color);
+  border-width: 2px;
+}
+
+.wrong-option .filled-circle {
+  background-color: var(--destructive-color);
+}
+
+.votableOption {
+  box-sizing: border-box;
+  inline-size: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.votableOption:hover,
+.votableOption:focus-visible {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, var(--secondary-card-bg-color));
+}
+
+.votableOption:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.votableOption[aria-pressed='true'] {
+  border-color: var(--primary-color);
+}
+
+.votableOption[aria-pressed='true'] .filled-circle {
+  background-color: var(--primary-color);
+}
+
+/* After voting, each choice fills with its share of the votes. */
+.resultOption {
+  position: relative;
+  overflow: hidden;
+}
+
+.resultOption::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--poll-share);
+  background-color: color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+  content: '';
+}
+
+.resultOption.votedOption::before {
+  background-color: color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+
+.resultOption > * {
+  position: relative;
+}
+
+.optionShare {
+  margin-inline-start: auto;
+  padding-inline: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.quizResult {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block: 0 6px;
+  font-weight: 600;
+}
+
+/* Only the icon takes the color, which is too light for text on light themes. */
+.quizResultCorrect .quizResultIcon {
+  color: #78da71;
+}
+
+.quizResultWrong .quizResultIcon {
+  color: var(--destructive-color);
+}
+
+.quizExplanation {
+  margin-block: 0 10px;
+  white-space: pre-wrap;
 }

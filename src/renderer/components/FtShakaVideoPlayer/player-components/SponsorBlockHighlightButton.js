@@ -1,0 +1,86 @@
+import shaka from 'shaka-player'
+
+import { PlayerIcons, SPONSORBLOCK_ICON_VIEWBOX } from '../../../../constants'
+import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
+import i18n from '../../../i18n/index'
+
+export class SponsorBlockHighlightButton extends shaka.ui.Element {
+  /**
+   * @param {EventTarget} events
+   * @param {HTMLElement} parent
+   * @param {shaka.ui.Controls} controls
+   * @param {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean } | null} initialState
+   *   state already announced to earlier buttons, which is only dispatched again when it changes
+   */
+  constructor(events, parent, controls, initialState) {
+    super(parent, controls)
+
+    /** @private */
+    this.button_ = document.createElement('button')
+    this.button_.classList.add('ft-shaka-highlight-button', 'shaka-tooltip', 'shaka-hidden')
+
+    // eslint-disable-next-line no-new
+    new shaka.ui.Icon(this.button_, {
+      path: PlayerIcons.SPONSORBLOCK_HIGHLIGHT,
+      viewBox: SPONSORBLOCK_ICON_VIEWBOX,
+    })
+
+    /** @private */
+    this.nameSpan_ = document.createElement('span')
+    this.nameSpan_.classList.add('ft-shaka-highlight-button-label')
+    this.button_.appendChild(this.nameSpan_)
+    this.parent.appendChild(this.button_)
+
+    /** @private */
+    this.shortcutAvailable_ = true
+
+    this.eventManager.listen(this.button_, 'click', () => {
+      events.dispatchEvent(new CustomEvent('skipToSponsorBlockHighlight'))
+    })
+
+    this.eventManager.listen(events, 'sponsorBlockHighlightStateChanged', (/** @type {CustomEvent} */ event) => {
+      this.updateVisibility_(event.detail)
+    })
+
+    this.eventManager.listen(events, 'localeChanged', () => {
+      this.updateLocalisedStrings_()
+    })
+
+    this.updateLocalisedStrings_()
+
+    if (initialState) {
+      this.updateVisibility_(initialState)
+    }
+  }
+
+  /** @private */
+  updateLocalisedStrings_() {
+    const name = i18n.global.t('Video.Player.SponsorBlock.SkipToHighlight')
+    const label = this.shortcutAvailable_
+      ? addKeyboardShortcutToActionTitle(name, i18n.global.t('Keys.enter'))
+      : name
+    const tooltipLabel = name.replace(/\?$/, '')
+
+    this.nameSpan_.textContent = label
+    this.button_.ariaLabel = tooltipLabel
+  }
+
+  /**
+   * @private
+   * @param {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean }} state
+   */
+  updateVisibility_(state) {
+    if (state.shortcutAvailable !== this.shortcutAvailable_) {
+      this.shortcutAvailable_ = state.shortcutAvailable
+      this.updateLocalisedStrings_()
+    }
+
+    this.button_.classList.toggle('ft-shaka-highlight-button-collapsed', !state.labelVisible)
+
+    if (state.visible) {
+      this.button_.classList.remove('shaka-hidden')
+    } else {
+      this.button_.classList.add('shaka-hidden')
+    }
+  }
+}

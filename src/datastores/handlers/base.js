@@ -1,67 +1,179 @@
+import { uid } from '@seald-io/nedb/lib/customUtils.js'
+import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
+import { isValidSeparateProfileId } from '../profileDatastoreNames.js'
+import { SCOPED_SEEN_MARK_SETTINGS, seenMarksSettingId } from '../../subscriptionSeenMarkSettings.js'
+import { updateSettingIfUnchanged } from '../settingRepair'
+import { migrateStoredSettings } from '../settingsMigrations'
+import { getSecretCipher } from '../secretCipher'
+import { decodeSettings, encodeSetting, migrateSecretSettings } from '../secretSettings'
+import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
+import { hasReachedWatchedThreshold, mergeLibreTubeHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
+import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
+import { createRecommendationStore } from '../recommendations'
+import { createIdQuery } from '../idQuery'
+import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
+import { isOlderCollaborationCheck, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
+import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
+import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
+import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats, withProfileSeparation } from '../../renderer/helpers/unifiedBackup'
+import { processToBeAddedPlaylistVideo } from '../../renderer/helpers/playlists'
+import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
+import { profileSyncSnapshot } from '../../renderer/helpers/profileSyncSnapshot'
+
+const recommendations = createRecommendationStore(db.recommendations)
+
+const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
 
 class Settings {
-  static async find() {
-    const currentLocale = await db.settings.findOneAsync({ _id: 'currentLocale' })
+  static pendingSeenStateUpdate = Promise.resolve()
+  static migrationPromise = null
 
-    // In FreeTube 0.21.3 and earlier the locales 'en-GB', 'es-AR' and 'nb-NO' had underscores instead of a hyphens
-    // This is a one time migration for users that are using one of those locales
-    if (currentLocale?.value.includes('_')) {
-      await this.upsert('currentLocale', currentLocale.value.replace('_', '-'))
-    }
-
-    // In FreeTube 0.22.0 and earlier the external player arguments were displayed in a text box,
-    // with the user manually entering `;` to separate the different arguments.
-    // This is a one time migration that converts the old string to a JSON array
-    const externalPlayerCustomArgs = await db.settings.findOneAsync({ _id: 'externalPlayerCustomArgs' })
-
-    if (externalPlayerCustomArgs && !externalPlayerCustomArgs.value.startsWith('[')) {
-      let newValue = '[]'
-
-      if (externalPlayerCustomArgs.value.length > 0) {
-        newValue = JSON.stringify(externalPlayerCustomArgs.value.split(';'))
-      }
-
-      await this.upsert('externalPlayerCustomArgs', newValue)
-    }
-
-    // In FreeTube 0.23.0, the "Enable Theatre Mode by Default" setting was incoporated as an option
-    // of the "Default Viewing Mode" setting. This is a one time migration to preserve users'
-    // Theater Mode preference through this change.
-    const defaultTheatreMode = await db.settings.findOneAsync({ _id: 'defaultTheatreMode' })
-
-    if (defaultTheatreMode) {
-      if (defaultTheatreMode.value) {
-        await this.upsert('defaultViewingMode', 'theatre')
-      }
-
-      await db.settings.removeAsync({ _id: 'defaultTheatreMode' })
-    }
-
-    const saveWatchedProgress = await db.settings.findOneAsync({ _id: 'saveWatchedProgress' })
-    const watchedProgressSavingMode = await db.settings.findOneAsync({ _id: 'watchedProgressSavingMode' })
-    if (saveWatchedProgress && !watchedProgressSavingMode) {
-      if (!saveWatchedProgress.value) {
-        await this.upsert('watchedProgressSavingMode', 'never')
-      }
-
-      await db.settings.removeAsync({ _id: 'saveWatchedProgress' })
-    }
-
-    // In FreeTube 0.24.0, the "Screenshot Mode" setting only had two options that were represented as a toggle named "Ask path"
-    // This is a one time migration to preserve users' Screenshot prompt preference through this change.
-    const screenshotAskPath = await db.settings.findOneAsync({ _id: 'screenshotAskPath' })
-
-    if (screenshotAskPath) {
-      await this.upsert('screenshotMode', screenshotAskPath.value ? 'prompt_folder' : 'default_folder')
-      await db.settings.removeAsync({ _id: 'screenshotAskPath' })
-    }
-
-    return db.settings.findAsync({ _id: { $ne: 'bounds' } })
+  static runSeenStateUpdate(operation) {
+    // Share one queue for complete history-status and subscription-mark edits
+    // across Electron windows, so another action cannot split their writes.
+    this.pendingSeenStateUpdate = this.pendingSeenStateUpdate.catch(() => {}).then(operation)
+    return this.pendingSeenStateUpdate
   }
 
-  static upsert(_id, value) {
-    return db.settings.updateAsync({ _id }, { _id, value }, { upsert: true })
+  /**
+   * @param {unknown} update
+   * @param {string | null} [scope] The separate profile whose marks these are, or null for the shared ones
+   */
+  static mergeSeenVideos(update, scope = null) {
+    return this.runSeenStateUpdate(async () => {
+      await this._assertSeenMarksScope(scope)
+      return this._mergeSeenVideos(update, scope)
+    })
+  }
+
+  /**
+   * @param {unknown} update
+   * @param {string | null} [scope] The separate profile whose marks these are, or null for the shared ones
+   */
+  static mergeSeenPosts(update, scope = null) {
+    return this.runSeenStateUpdate(async () => {
+      await this._assertSeenMarksScope(scope)
+      const _id = seenMarksSettingId('subscriptionSeenPosts', scope)
+      const saved = await db.settings.findOneAsync({ _id })
+      const local = parseSubscriptionSeenPosts(saved?.value)
+      const seenAt = local.reduce((timestamp, entry) => Math.max(timestamp, entry.seenAt + 1), Date.now())
+      const incoming = Array.isArray(update?.posts)
+        ? update.posts.map(post => ({ postId: post?.postId, seenAt }))
+        : update
+      const value = JSON.stringify(mergeSubscriptionSeenPosts(local, incoming))
+      if (value !== saved?.value) await this.upsert(_id, value)
+      return value
+    })
+  }
+
+  /**
+   * @param {{ keys: string[], seen: boolean } | unknown} update items marked
+   * now, or marks to merge, such as synced ones
+   */
+  static mergeSeenRssItems(update) {
+    return this.runSeenStateUpdate(async () => {
+      const saved = await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })
+      const local = parseRssFeedSeenItems(saved?.value)
+      const incoming = Array.isArray(update?.keys)
+        ? createRssFeedSeenMarks(local, update.keys, update.seen === true)
+        : update
+      const value = JSON.stringify(mergeRssFeedSeenItems(local, incoming))
+      if (value !== saved?.value) await this.upsert('rssFeedSeenItems', value)
+      return value
+    })
+  }
+
+  /**
+   * Seen marks are saved for the shared data or a separate profile that
+   * exists. Its data is deleted in the seen-state queue too, so a merge that
+   * waited behind the deletion can't open its history again.
+   * @param {string | null} scope
+   */
+  static async _assertSeenMarksScope(scope) {
+    if (scope !== null && !await Profiles.isSeparate(scope)) throw new Error('The separate profile is gone')
+  }
+
+  /** Runs in the seen-state queue, for a scope that {@link _assertSeenMarksScope} accepted */
+  static async _mergeSeenVideos(update, scope = null) {
+    const _id = seenMarksSettingId('subscriptionSeenVideos', scope)
+    // Watched videos leave the list of the profile whose history has them.
+    const history = scope === null ? db.history : scopedHandlers(scope).history.db.history
+    const saved = await db.settings.findOneAsync({ _id })
+    const local = parseSubscriptionSeenVideos(saved?.value)
+    // Allocate local action timestamps inside the shared queue. Renderers
+    // may still have identical stale getters while another write is pending.
+    const timestamp = nextSubscriptionSeenTimestamp(local)
+    const incoming = parseSubscriptionSeenVideos(Array.isArray(update?.videos)
+      ? update.videos.map(video => ({
+          videoId: video.videoId,
+          isMembersOnly: video.isMembersOnly,
+          seenAt: timestamp,
+          ...(update.isUnseen === true ? { unseenAt: timestamp } : {})
+        }))
+      : update)
+    // Watched videos leave the list. Checking every stored mark reads a
+    // history record per mark, so that only happens once the list is full and
+    // eviction would otherwise drop recent marks; stored marks were checked
+    // when they arrived.
+    const candidates = local.length + incoming.length > MAX_SUBSCRIPTION_SEEN_VIDEOS ? [...local, ...incoming] : incoming
+    const videoIds = [...new Set(candidates.map(entry => entry.videoId))]
+    await history.ensureIndexAsync({ fieldName: 'videoId' })
+    const historyById = {}
+    // NeDB checks each candidate against every ID in $in. Small indexed
+    // batches avoid quadratic work when merging thousands of seen marks.
+    const batchSize = 250
+    for (let index = 0; index < videoIds.length; index += batchSize) {
+      const records = await history.findAsync({ videoId: { $in: videoIds.slice(index, index + batchSize) } }, {
+        videoId: 1,
+        isWatched: 1,
+        isLive: 1,
+        isUpcoming: 1,
+        premiereTimestamp: 1,
+        watchProgress: 1,
+        lengthSeconds: 1,
+      })
+      for (const entry of records) historyById[entry.videoId] = entry
+    }
+    const value = JSON.stringify(mergeSubscriptionSeenVideos(local, incoming, historyById))
+    if (value !== saved?.value) await this.upsert(_id, value)
+    return value
+  }
+
+  static async find() {
+    await this.migrate()
+    return decodeSettings(await db.settings.findAsync({ _id: { $ne: 'bounds' } }), db.settings, this.cipher())
+  }
+
+  /** Where secret settings are encrypted, the system's cipher for them. */
+  static cipher() {
+    return getSecretCipher()
+  }
+
+  static migrate() {
+    this.migrationPromise ??= migrateStoredSettings(db.settings).catch(error => {
+      this.migrationPromise = null
+      throw error
+    }).then(() => migrateSecretSettings(db.settings, this.cipher()).catch(error => {
+      // Secrets left as they are keep working, and the next start tries again.
+      console.error('Unable to migrate saved credentials', error)
+    }))
+    return this.migrationPromise
+  }
+
+  static async upsert(_id, value) {
+    await this.migrate()
+    return db.settings.updateAsync({ _id }, await encodeSetting(_id, value, this.cipher()), { upsert: true })
+  }
+
+  static _updateIfUnchanged(_id, expectedValue, value) {
+    return updateSettingIfUnchanged(db.settings, _id, expectedValue, value)
+  }
+
+  static delete(_id) {
+    return db.settings.removeAsync({ _id })
   }
 
   // ******************** //
@@ -77,22 +189,22 @@ class Settings {
           'proxyPort',
           'backendFallback',
           'backendPreference',
-          'hideToTrayOnMinimize'
+          'useTrayIcon',
+          'hideToTrayOnClose',
+          'hideToTrayOnMinimize',
+          'iconPack',
+          'notificationMode',
+          'thumbnailPreference',
+          'blurThumbnails'
         ]
       }
     })
   }
 
-  static _findOne(_id) {
-    return db.settings.findOneAsync({ _id })
-  }
-
-  static _findSidenavSettings() {
-    return {
-      hideTrendingVideos: db.settings.findOneAsync({ _id: 'hideTrendingVideos' }),
-      hidePopularVideos: db.settings.findOneAsync({ _id: 'hidePopularVideos' }),
-      hidePlaylists: db.settings.findOneAsync({ _id: 'hidePlaylists' }),
-    }
+  static async _findOne(_id) {
+    const doc = await db.settings.findOneAsync({ _id })
+    if (!doc) return null
+    return (await decodeSettings([doc], db.settings, this.cipher()))[0] ?? null
   }
 
   static _updateBounds(value) {
@@ -101,33 +213,365 @@ class Settings {
   // ******************** //
 }
 
+// Records are replaced by video ID. A cached or duplicate record can carry
+// another document's `_id`, which NeDB refuses to change, so keep the stored one.
+function historyReplacement(record) {
+  const { _id, ...fields } = migrateLegacyHistoryRecord(record)
+  return fields
+}
+
+// Bounds each transaction and, on mobile, each bridge message.
+const HISTORY_UPDATE_BATCH_SIZE = 100
+
+/**
+ * Applies history updates in batches, each committed in one transaction.
+ * @param {import('../sqlite.js').SqliteDatastore} store
+ * @param {{ query: object, update: object, options?: object }[]} updates
+ * @returns {Promise<({ numAffected: number, affectedDocuments: unknown } | { error: Error })[]>}
+ *   each update's result, or its error, which is also every update's in a batch that could not be saved
+ */
+async function updateHistoryRecords(store, updates) {
+  const results = []
+  for (let index = 0; index < updates.length; index += HISTORY_UPDATE_BATCH_SIZE) {
+    const batch = updates.slice(index, index + HISTORY_UPDATE_BATCH_SIZE)
+    try {
+      if (typeof store.updateManyAsync === 'function') {
+        results.push(...await store.updateManyAsync(batch))
+      } else {
+        // NeDB, used by unit tests, cannot batch them.
+        for (const { query, update, options } of batch) {
+          try {
+            results.push(await store.updateAsync(query, update, options))
+          } catch (error) {
+            results.push({ error })
+          }
+        }
+      }
+    } catch (error) {
+      results.push(...batch.map(() => ({ error })))
+    }
+  }
+  return results
+}
+
+/** Throws the first failed update's error. */
+function throwHistoryUpdateError(results) {
+  const failed = results.find(result => result.error)
+  if (failed) throw failed.error
+}
+
+// History, watch stats, playlists and search history are kept per data scope:
+// the shared one, or a separate profile's (see `scopedHandlers`). Their methods
+// reach the datastores through `this.db`, which each scope's subclass replaces.
+
 class History {
-  static find() {
-    return db.history.findAsync({}).sort({ timeWatched: -1 })
+  static db = db
+  static get recommendations() { return recommendations }
+  /** The separate profile whose data this is, or null for the shared data */
+  static scope = null
+  static migrationPromise = null
+
+  static async find() {
+    await this.migrateWatchedStatus()
+    // Queue the read with the writes, so none can land on a duplicate that is
+    // about to be removed.
+    const records = await Settings.runSeenStateUpdate(async () => {
+      // Keep the newest record of each video so updates by video ID and the
+      // cache agree on one document.
+      const { records, duplicateIds } = newestUniqueHistoryRecords(await this.db.history.findAsync({}))
+      if (duplicateIds.length > 0) await this.db.history.removeAsync(createIdQuery('_id', duplicateIds), { multi: true })
+      return records
+    })
+    await this.prepareVideoIdIndex()
+    return records
+  }
+
+  // Prepare the index once the datastore is loaded, before playback and bulk
+  // edits start writing by video ID. Seen-mark merging is not always enabled.
+  static prepareVideoIdIndex() {
+    return this.db.history.ensureIndexAsync({ fieldName: 'videoId' })
+  }
+
+  // ******************** //
+  // Unique Electron main process handlers
+  /**
+   * Every record as its stored JSON text, unsorted. The renderer parses and
+   * sorts them with `newestUniqueHistoryRecords` and asks for `find` to
+   * remove duplicates, so this process never builds the records.
+   */
+  static async _findSerialized() {
+    await this.migrateWatchedStatus()
+    const records = await Settings.runSeenStateUpdate(() => this.db.history.findSerializedAsync())
+    await this.prepareVideoIdIndex()
+    return records
+  }
+
+  /**
+   * Whether any profile's history holds the video, for leaving out its upload
+   * notification. Notifications cover the channels of every profile.
+   */
+  static _includesInAnyScope(videoId) {
+    return everyScopeHistory(async datastore => (await datastore.countAsync({ videoId })) > 0)
+      .then(results => results.includes(true))
+  }
+  // ******************** //
+
+  /**
+   * The videos watched since `since` in every profile's history, for leaving
+   * out their upload notifications. Each history gives its newest `limit`.
+   * @param {number} since
+   * @param {number} limit
+   * @returns {Promise<{ videoId: string, timeWatched: number }[]>}
+   */
+  static async findRecentlyWatchedInEveryScope(since, limit) {
+    return (await everyScopeHistory(datastore => datastore
+      .findAsync({ timeWatched: { $gte: since } }, { _id: 0, videoId: 1, timeWatched: 1 })
+      .sort({ timeWatched: -1 })
+      .limit(limit)
+    )).flat()
+  }
+
+  static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
+    return Settings.runSeenStateUpdate(async () => {
+      // The deletion of a separate profile may have run first in this queue.
+      await Settings._assertSeenMarksScope(this.scope)
+      const updatedRecords = []
+      if (acknowledgedRepairs || metadata) {
+        const updates = acknowledgedRepairs
+          // Only clear the repair that reached the server. Another repair or
+          // deletion while an upload was pending must remain untouched.
+          ? acknowledgedRepairs.map(repair => ({
+              query: { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
+              update: { $unset: { pendingDurationRepair: true } },
+            }))
+          : metadata.flatMap(patch => {
+              const fields = {}
+              for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
+                if (patch[key] !== undefined) fields[key] = patch[key]
+              }
+              return Object.keys(fields).length === 0 ? [] : [{ query: { videoId: patch.videoId }, update: { $set: fields } }]
+            })
+        let failedCount = 0
+        const results = await updateHistoryRecords(this.db.history, updates.map(update => ({ ...update, options: { returnUpdatedDocs: true } })))
+        for (const { error, affectedDocuments } of results) {
+          if (error) {
+            console.error(error)
+            failedCount++
+          } else if (affectedDocuments) {
+            updatedRecords.push(affectedDocuments)
+          }
+        }
+        return { records: updatedRecords, seenVideos: null, failedCount }
+      }
+      if (unseenVideo) {
+        const { affectedDocuments } = await this.db.history.updateAsync(
+          { videoId: unseenVideo.videoId },
+          { $set: { isWatched: false } },
+          { returnUpdatedDocs: true }
+        )
+        if (affectedDocuments) updatedRecords.push(affectedDocuments)
+      } else {
+        const results = await updateHistoryRecords(this.db.history, records.map(record => {
+          const migratedRecord = historyReplacement(record)
+          return { query: { videoId: migratedRecord.videoId }, update: migratedRecord, options: { upsert: true, returnUpdatedDocs: true } }
+        }))
+        throwHistoryUpdateError(results)
+        updatedRecords.push(...results.map(result => result.affectedDocuments))
+      }
+
+      let seenVideos = null
+      try {
+        if (unseenVideo) {
+          seenVideos = await Settings._mergeSeenVideos({ videos: [unseenVideo], isUnseen: true }, this.scope)
+        } else {
+          const watchedById = new Map(updatedRecords.filter(record => record.isWatched === true)
+            .map(record => [record.videoId, record]))
+          if (watchedById.size > 0) {
+            const saved = await db.settings.findOneAsync({ _id: seenMarksSettingId('subscriptionSeenVideos', this.scope) })
+            const videos = parseSubscriptionSeenVideos(saved?.value)
+              .filter(mark => watchedById.has(mark.videoId) && mark.unseenAt >= mark.seenAt)
+              .map(mark => ({
+                videoId: mark.videoId,
+                isMembersOnly: watchedById.get(mark.videoId).isMembersOnly === true
+              }))
+            if (videos.length > 0) seenVideos = await Settings._mergeSeenVideos({ videos }, this.scope)
+          }
+        }
+      } catch (error) {
+        // History already persisted. Return it even if the subscription mark
+        // fails, so caches and bulk-action results still reflect the write.
+        console.error(error)
+      }
+      return { records: updatedRecords, seenVideos }
+    })
   }
 
   static upsert(record) {
-    return db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
+    const migratedRecord = historyReplacement(record)
+    return Settings.runSeenStateUpdate(() => this.db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true }))
   }
 
-  static async overwrite(records) {
-    await db.history.removeAsync({}, { multi: true })
+  /**
+   * Merges restored history records with the saved ones. Reading and writing in
+   * the history queue keeps playback, sync and other windows from saving a change
+   * in between that the merge would then overwrite.
+   * @param {object[]} records
+   * @returns {Promise<object[]>} the merged records as saved
+   */
+  static mergeBackup(records) {
+    return this._mergeRecords(records, mergeBackupHistoryRecord)
+  }
 
-    await db.history.insertAsync(records)
+  /**
+   * Merges imported records with the saved ones when they are written, so a
+   * watch another window records during the import is kept.
+   * @param {object[]} records
+   * @param {'replace' | 'takeout' | 'libretube'} rule whether imported records replace saved ones or only fill what they lack
+   * @returns {Promise<object[]>} the saved records
+   */
+  static importRecords(records, rule) {
+    const merge = { takeout: mergeTakeoutHistoryRecord, libretube: mergeLibreTubeHistoryRecord }[rule] ?? ((_current, imported) => imported)
+    return this._mergeRecords(records, merge)
+  }
+
+  static _mergeRecords(records, merge) {
+    return Settings.runSeenStateUpdate(async () => {
+      const saved = new Map((await this.db.history.findAsync(createIdQuery('videoId', records.map(record => record.videoId))))
+        .map(record => [record.videoId, record]))
+      const merged = new Map()
+      for (const record of records) {
+        merged.set(record.videoId, merge(merged.get(record.videoId) ?? saved.get(record.videoId), record))
+      }
+      const replacements = [...merged.values()].map(historyReplacement)
+      throwHistoryUpdateError(await updateHistoryRecords(this.db.history, replacements.map(record => ({
+        query: { videoId: record.videoId }, update: record, options: { upsert: true },
+      }))))
+      return replacements
+    })
+  }
+
+  static overwrite(records) {
+    // A queued sync must not insert a record between the removal and insertion.
+    return Settings.runSeenStateUpdate(async () => {
+      const migratedRecords = records.map(migrateLegacyHistoryRecord)
+      const retained = new Set(migratedRecords.map(record => record.videoId))
+      const removed = (await this.db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
+
+      // SQLite replaces the history in one transaction, so an invalid imported
+      // record keeps the saved history. NeDB, used by unit tests, cannot.
+      if (typeof this.db.history.replaceAllAsync === 'function') {
+        await this.db.history.replaceAllAsync(migratedRecords)
+      } else {
+        await this.db.history.removeAsync({}, { multi: true })
+        await this.db.history.insertAsync(migratedRecords)
+      }
+      if (removed.length) await this.recommendations.remove(removed)
+    })
+  }
+
+  static applySyncChanges(changes) {
+    // Writes that can create a record share this queue, so none can store a
+    // video between the lookup below and the insertion.
+    return Settings.runSeenStateUpdate(() => this._applySyncChanges(changes))
+  }
+
+  static async _applySyncChanges({ insertions, updates, deletions }) {
+    if (deletions.length > 0) {
+      await this.recommendations.remove(deletions)
+      await this.db.history.removeAsync(createIdQuery('videoId', deletions), { multi: true })
+    }
+    // Playback can store a video while the merge waits on the server. Update
+    // it instead of inserting a duplicate, unless it was watched more recently.
+    const insertionIds = insertions.map(record => record.videoId)
+    const stored = insertionIds.length > 0
+      ? new Map((await this.db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1, timeWatched: 1 }))
+          .map(record => [record.videoId, record.timeWatched]))
+      : new Map()
+    // Progress-only records have no watch time, so a synced record replaces them.
+    const skipped = new Set(insertions
+      .filter(record => Number.isFinite(stored.get(record.videoId)) && !(record.timeWatched > stored.get(record.videoId)))
+      .map(record => record.videoId))
+    const migratedInsertions = insertions.filter(record => !stored.has(record.videoId)).map(historyReplacement)
+    const migratedUpdates = [
+      ...updates,
+      ...insertions.filter(record => stored.has(record.videoId) && !skipped.has(record.videoId)),
+    ].map(historyReplacement)
+    throwHistoryUpdateError(await updateHistoryRecords(this.db.history, migratedUpdates.map(record => ({
+      query: { videoId: record.videoId }, update: record, options: { upsert: true },
+    }))))
+    if (migratedInsertions.length > 0) {
+      await this.db.history.insertAsync(migratedInsertions)
+    }
+    // Caches must keep the newer stored records too.
+    return [...skipped]
+  }
+
+  static migrateWatchedStatus() {
+    // A separate profile's history only ever holds migrated records.
+    if (this.scope !== null) return Promise.resolve()
+    this.migrationPromise ??= this._migrateWatchedStatus().catch(error => {
+      this.migrationPromise = null
+      throw error
+    })
+    return this.migrationPromise
+  }
+
+  static async _migrateWatchedStatus() {
+    // `isWatched` isn't indexed, so the lookup below is a full collection scan
+    // that history loading blocks on. Once every record has been migrated the
+    // answer can never change, so record that and skip the scan on later runs.
+    //
+    // Skipping it later is safe even though `updateWatchProgress` can upsert a
+    // record without the field: such a record has no `lengthSeconds`, so the
+    // migration would only ever have derived `isWatched: false` for it, and
+    // `isHistoryEntryWatched` falls back to the same threshold when the field
+    // is absent. Every path that writes a full record (`upsert`, `overwrite`,
+    // `applySyncChanges`) migrates it inline, so a legacy-shaped record can no
+    // longer appear after this point either.
+    const migrationMarker = await db.settings.findOneAsync({ _id: HISTORY_WATCHED_STATUS_MIGRATION_ID })
+    if (migrationMarker?.value === true) {
+      return
+    }
+
+    const records = await this.db.history.findAsync({ isWatched: { $exists: false } })
+    throwHistoryUpdateError(await updateHistoryRecords(this.db.history, records.map(record => {
+      const migratedRecord = migrateLegacyHistoryRecord(record)
+      const updates = { isWatched: migratedRecord.isWatched }
+
+      if (migratedRecord.watchProgress !== record.watchProgress) {
+        updates.watchProgress = migratedRecord.watchProgress
+      }
+
+      if (migratedRecord.isLive !== record.isLive) {
+        updates.isLive = migratedRecord.isLive
+      }
+
+      return { query: { _id: record._id }, update: { $set: updates } }
+    })))
+
+    if (records.length > 0) {
+      await this.db.history.compactDatafileAsync()
+    }
+
+    await db.settings.updateAsync(
+      { _id: HISTORY_WATCHED_STATUS_MIGRATION_ID },
+      { _id: HISTORY_WATCHED_STATUS_MIGRATION_ID, value: true },
+      { upsert: true }
+    )
   }
 
   static updateWatchProgress(videoId, watchProgress) {
-    return db.history.updateAsync({ videoId }, { $set: { watchProgress } }, { upsert: true })
+    return Settings.runSeenStateUpdate(() => this.db.history.updateAsync({ videoId }, { $set: { watchProgress } }, { upsert: true }))
   }
 
   static updateLastViewedPlaylist(videoId, lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId) {
-    return db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true })
+    return Settings.runSeenStateUpdate(() => this.db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true }))
   }
 
   static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
-    return db.history.updateAsync(
+    return this.db.history.updateAsync(
       {
-        videoId: { $in: videoIds },
+        ...createIdQuery('videoId', videoIds),
         lastViewedPlaylistId: lastViewedPlaylistId
       },
       { $unset: { lastViewedPlaylistId: '', lastViewedPlaylistType: '', lastViewedPlaylistItemId: '' } },
@@ -136,7 +580,7 @@ class History {
   }
 
   static unsetLastViewedPlaylists(lastViewedPlaylistIds) {
-    return db.history.updateAsync(
+    return this.db.history.updateAsync(
       {
         lastViewedPlaylistId: { $in: lastViewedPlaylistIds }
       },
@@ -146,119 +590,846 @@ class History {
   }
 
   static delete(videoId) {
-    return db.history.removeAsync({ videoId })
+    // Queue with the history writes, so an earlier pending upsert cannot recreate the record.
+    return Settings.runSeenStateUpdate(async () => {
+      await this.recommendations.remove([videoId])
+      return this.db.history.removeAsync({ videoId })
+    })
+  }
+
+  static deleteOlderThan(cutoff, excludedVideoIds = []) {
+    // Queue with the history writes, so a video watched again meanwhile isn't removed.
+    return Settings.runSeenStateUpdate(async () => {
+      const query = { timeWatched: { $lt: cutoff } }
+      if (excludedVideoIds.length > 0) {
+        query.videoId = { $nin: excludedVideoIds }
+      }
+
+      const records = await this.db.history.findAsync(query)
+      const videoIds = records.map(record => record.videoId)
+
+      if (videoIds.length > 0) {
+        await this.recommendations.remove(videoIds)
+        await this.db.history.removeAsync(createIdQuery('videoId', videoIds), { multi: true })
+      }
+
+      return videoIds
+    })
   }
 
   static deleteAll() {
-    return db.history.removeAsync({}, { multi: true })
+    return Settings.runSeenStateUpdate(async () => {
+      await this.recommendations.reset()
+      return this.db.history.removeAsync({}, { multi: true })
+    })
   }
+}
+
+class WatchStats {
+  static db = db
+  static get History() { return History }
+  static migrationId = 'history-watch-time-v1'
+  static defaultChannelKey = '__default__'
+  static pendingWrite = Promise.resolve()
+
+  static runWrite(operation) {
+    this.pendingWrite = this.pendingWrite.catch(() => {}).then(operation)
+    return this.pendingWrite
+  }
+
+  static find() {
+    return this.db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
+  }
+
+  static mergeBackup(backup) {
+    validateBackupWatchStats(backup)
+    return this.runWrite(async () => {
+      const currentRecords = await this.find()
+      const currentAdjustment = await this.getHistoricalAdjustment()
+      const byDate = new Map(currentRecords.map(record => [record.date, record]))
+      for (const imported of backup.records) {
+        byDate.set(imported.date, mergeBackupWatchStatsRecord(byDate.get(imported.date), imported))
+      }
+      const records = [...byDate.values()]
+      const retainedCurrent = currentRecords.filter(record => byDate.get(record.date) === record)
+      const retainedImported = backup.records.filter(record => byDate.get(record.date) === record)
+      const adjustment = mergeBackupWatchStatsAdjustment(
+        retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
+      )
+      const currentByDate = new Map(currentRecords.map(record => [record.date, record]))
+      // Imported ids could match another stored document, so days keep their
+      // stored id and new ones get their own.
+      const changed = records
+        .filter(record => record !== currentByDate.get(record.date))
+        .map(record => ({ ...record, _id: currentByDate.get(record.date)?._id ?? uid(16) }))
+      await this._replaceDocuments([
+        ...changed,
+        { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
+      ])
+      this.migrationPromise = null
+      return { records, adjustment }
+    })
+  }
+
+  /**
+   * Replaces or inserts whole documents. The desktop and mobile datastores
+   * commit them in one transaction, which costs one disk sync instead of one
+   * per day. NeDB, used by unit tests, writes them one by one.
+   * @param {object[]} docs documents with their `_id`
+   */
+  static async _replaceDocuments(docs) {
+    if (typeof this.db.watchStats.replaceManyAsync === 'function') return this.db.watchStats.replaceManyAsync(docs)
+    for (const doc of docs) await this.db.watchStats.updateAsync({ _id: doc._id }, doc, { upsert: true })
+  }
+
+  static addWatchTime(date, seconds) {
+    return this.runWrite(() => this.db.watchStats.updateAsync(
+      { date },
+      { $inc: { seconds }, $set: { date } },
+      { upsert: true }
+    ))
+  }
+
+  static addHistoricalWatchTime(date, secondsByChannel) {
+    return this.runWrite(() => this._addHistoricalWatchTime(date, secondsByChannel))
+  }
+
+  static async _addHistoricalWatchTime(date, secondsByChannel) {
+    const existingRecord = await this.db.watchStats.findOneAsync({ date })
+    if (existingRecord?.historyEstimateApplied) { return true }
+
+    const historyEstimateSeconds = Object.values(secondsByChannel)
+      .reduce((total, seconds) => total + seconds, 0)
+
+    await this.db.watchStats.updateAsync(
+      { date },
+      {
+        $inc: { seconds: historyEstimateSeconds },
+        $set: {
+          date,
+          historyEstimateApplied: true,
+          historyEstimateSeconds,
+          historyAdjustedSeconds: historyEstimateSeconds,
+          historyEstimateByChannel: secondsByChannel,
+        }
+      },
+      { upsert: true }
+    )
+    return true
+  }
+
+  static getHistoricalAdjustment() {
+    return this.db.watchStats.findOneAsync({ _id: this.migrationId })
+      .then(record => record?.adjustment ?? null)
+  }
+
+  static _getEstimatedSeconds(record) {
+    const lengthSeconds = Number(record.lengthSeconds)
+    const watchProgress = Number(record.watchProgress)
+
+    let seconds = Number.isFinite(watchProgress) ? watchProgress : 0
+    const reachedLegacyWatchedThreshold = hasReachedWatchedThreshold(watchProgress, lengthSeconds)
+
+    if ((record.isWatched === true || reachedLegacyWatchedThreshold) && lengthSeconds > 0) {
+      seconds = lengthSeconds
+    } else if (Number.isFinite(lengthSeconds)) {
+      seconds = Math.min(seconds, lengthSeconds)
+    }
+
+    return seconds > 0 ? seconds : 0
+  }
+
+  static async _getHistoryEstimates(completedAt = Number.POSITIVE_INFINITY) {
+    const history = await this.db.history.findAsync({})
+    const estimatesByDate = new Map()
+
+    for (const record of history) {
+      const timestamp = Number(record.timeWatched)
+      if (!Number.isFinite(timestamp) || timestamp > completedAt) { continue }
+
+      const seconds = this._getEstimatedSeconds(record)
+      if (seconds === 0) { continue }
+
+      const watchedAt = new Date(timestamp)
+      const date = [
+        watchedAt.getFullYear(),
+        String(watchedAt.getMonth() + 1).padStart(2, '0'),
+        String(watchedAt.getDate()).padStart(2, '0'),
+      ].join('-')
+      const channelId = record.authorId || this.defaultChannelKey
+      const secondsByChannel = estimatesByDate.get(date) ?? {}
+      secondsByChannel[channelId] = (secondsByChannel[channelId] ?? 0) + seconds
+      estimatesByDate.set(date, secondsByChannel)
+    }
+
+    return estimatesByDate
+  }
+
+  static adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
+    return this.runWrite(() => this._adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds))
+  }
+
+  static async _adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
+    const normalizedDefaultSpeed = Number(defaultSpeed)
+    if (!Number.isFinite(normalizedDefaultSpeed) || normalizedDefaultSpeed <= 0) {
+      throw new Error('watch stats: invalid historical playback speed')
+    }
+
+    const migration = await this.db.watchStats.findOneAsync({ _id: this.migrationId })
+    if (!migration?.hadEstimates) {
+      throw new Error('watch stats: no historical estimate to adjust')
+    }
+
+    const normalizedChannelSpeeds = Object.fromEntries(
+      Object.entries(channelPlaybackSpeeds)
+        .map(([channelId, speed]) => [channelId, Number(speed)])
+        .filter(([, speed]) => Number.isFinite(speed) && speed > 0)
+    )
+    const reconstructedEstimates = await this._getHistoryEstimates(migration.completedAt)
+    const records = await this.db.watchStats.findAsync({ historyEstimateApplied: true })
+    const adjusted = []
+
+    for (const record of records) {
+      const secondsByChannel = record.historyEstimateByChannel ?? reconstructedEstimates.get(record.date) ?? {}
+      const reconstructedSeconds = Object.values(secondsByChannel)
+        .reduce((total, seconds) => total + seconds, 0)
+      // Records created by the original migration did not store the imported
+      // contribution separately, so reconstruct it before falling back to the
+      // day's total (which may also contain newly recorded watch time).
+      const baselineSeconds = Number(record.historyEstimateSeconds) ||
+        reconstructedSeconds ||
+        Number(record.seconds) ||
+        0
+      const previousAdjustedSeconds = Number(record.historyAdjustedSeconds) || baselineSeconds
+
+      if (reconstructedSeconds < baselineSeconds) {
+        secondsByChannel[this.defaultChannelKey] = (secondsByChannel[this.defaultChannelKey] ?? 0) +
+          baselineSeconds - reconstructedSeconds
+      }
+
+      const adjustedSeconds = Object.entries(secondsByChannel).reduce((total, [channelId, seconds]) => {
+        const speed = normalizedChannelSpeeds[channelId] ?? normalizedDefaultSpeed
+        return total + seconds / speed
+      }, 0)
+      const seconds = Math.max(0, Number(record.seconds) - previousAdjustedSeconds + adjustedSeconds)
+
+      adjusted.push({
+        ...record,
+        seconds,
+        historyEstimateSeconds: baselineSeconds,
+        historyAdjustedSeconds: adjustedSeconds,
+        historyEstimateByChannel: secondsByChannel,
+      })
+    }
+
+    const adjustment = { defaultSpeed: normalizedDefaultSpeed, updatedAt: Date.now() }
+    await this._replaceDocuments([...adjusted, { ...migration, adjustment }])
+
+    return { records: await this.find(), ...adjustment }
+  }
+
+  static deleteAll() {
+    return this.runWrite(() => this._deleteAll())
+  }
+
+  static async _deleteAll() {
+    await this.db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
+    await this.db.watchStats.updateAsync(
+      { _id: this.migrationId },
+      { $set: { hadEstimates: false, adjustment: null } },
+      { upsert: true }
+    )
+    this.migrationPromise = null
+  }
+
+  static migrateHistory() {
+    this.migrationPromise ??= this.runWrite(() => this._migrateHistory()).catch(error => {
+      this.migrationPromise = null
+      throw error
+    })
+    return this.migrationPromise
+  }
+
+  static async _migrateHistory() {
+    const alreadyMigrated = await this.db.watchStats.findOneAsync({ _id: this.migrationId })
+    if (alreadyMigrated) { return alreadyMigrated.hadEstimates === true }
+
+    await this.History.migrateWatchedStatus()
+
+    const secondsByDate = await this._getHistoryEstimates()
+
+    let hadEstimates = false
+    for (const [date, secondsByChannel] of secondsByDate) {
+      const imported = await this._addHistoricalWatchTime(date, secondsByChannel)
+      hadEstimates ||= imported
+    }
+
+    await this.db.watchStats.insertAsync({
+      _id: this.migrationId,
+      completedAt: Date.now(),
+      hadEstimates,
+      adjustment: null,
+    })
+    return hadEstimates
+  }
+}
+
+/**
+ * Saves a record merged with the stored one, retrying when another window
+ * changes or creates it between reading and writing.
+ * @param {object} datastore
+ * @param {string} _id
+ * @param {(current: object | null) => { record: object, unchanged: () => boolean }} merge
+ *   `unchanged` is a `$where` test that the stored record still equals `current`
+ * @returns {Promise<object>} the saved record
+ */
+async function saveRestoredRecord(datastore, _id, merge) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const current = await datastore.findOneAsync({ _id })
+    const { record, unchanged } = merge(current)
+    if (current === null) {
+      try {
+        await datastore.insertAsync(record)
+        return record
+      } catch (error) {
+        if (error?.errorType !== 'uniqueViolated') throw error
+        continue
+      }
+    }
+    const { numAffected } = await datastore.updateAsync({ _id, $where: unchanged }, record)
+    if (numAffected > 0) return record
+  }
+  throw new Error(`Unable to restore ${_id}: repeated concurrent changes`)
 }
 
 class Profiles {
   static create(profile) {
-    return db.profiles.insertAsync(profile)
+    return db.profiles.insertAsync(withProfileSeparation(profile))
   }
 
-  static find() {
+  static async find() {
+    await loadProfilesDatastore()
+    try {
+      await db.profiles.updateAsync(
+        { _id: MAIN_PROFILE_ID, $or: [{ icon: null }, { icon: { $exists: false } }] },
+        { $set: { icon: { ...DEFAULT_PROFILE_ICON } } }
+      )
+    } catch (error) {
+      console.error(error)
+    }
     return db.profiles.findAsync({})
   }
 
-  static upsert(profile) {
-    return db.profiles.updateAsync({ _id: profile._id }, profile, { upsert: true })
+  static async upsert(profile) {
+    const current = await db.profiles.findOneAsync({ _id: profile._id }, { separate: 1 })
+    return db.profiles.updateAsync({ _id: profile._id }, withProfileSeparation(profile, current), { upsert: true })
+  }
+
+  /**
+   * Saves the YouTube playlists a separate profile saved, which it keeps
+   * instead of the shared bookmarks.
+   * @returns {Promise<object | null>} the saved profile, or null if it is gone
+   */
+  static async updatePlaylistBookmarks(profileId, playlistBookmarks) {
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      { _id: profileId, separate: true },
+      { $set: { playlistBookmarks } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
+  }
+
+  /** Whether a profile with this ID exists and keeps its own data */
+  static async isSeparate(profileId) {
+    return await db.profiles.findOneAsync({ _id: profileId, separate: true }, { _id: 1 }) !== null
   }
 
   static addChannelToProfiles(channel, profileIds) {
+    // Another window can subscribe to the same channel first
+    const notSubscribed = { $not: { subscriptions: { $elemMatch: { id: channel.id } } } }
     if (profileIds.length === 1) {
       return db.profiles.updateAsync(
-        { _id: profileIds[0] },
+        { _id: profileIds[0], ...notSubscribed },
         { $push: { subscriptions: channel } }
       )
     } else {
       return db.profiles.updateAsync(
-        { _id: { $in: profileIds } },
+        { _id: { $in: profileIds }, ...notSubscribed },
         { $push: { subscriptions: channel } },
         { multi: true }
       )
     }
   }
 
-  static removeChannelFromProfiles(channelId, profileIds) {
+  static removeChannelFromProfiles(channelIds, profileIds) {
+    const update = { $pull: { subscriptions: { id: { $in: channelIds } } } }
     if (profileIds.length === 1) {
-      return db.profiles.updateAsync(
-        { _id: profileIds[0] },
-        { $pull: { subscriptions: { id: channelId } } }
-      )
+      return db.profiles.updateAsync({ _id: profileIds[0] }, update)
     } else {
-      return db.profiles.updateAsync(
-        { _id: { $in: profileIds } },
-        { $pull: { subscriptions: { id: channelId } } },
-        { multi: true }
-      )
+      return db.profiles.updateAsync({ _id: { $in: profileIds } }, update, { multi: true })
     }
   }
 
-  static delete(id) {
-    return db.profiles.removeAsync({ _id: id })
+  /** Saves the name, colors, and icon without rewriting subscriptions other windows or sync may have changed */
+  static updateDetails(profileId, { name, bgColor, textColor, icon }) {
+    return db.profiles.updateAsync({ _id: profileId }, { $set: { name, bgColor, textColor, icon } })
+  }
+
+  static async updateChannelSettings(channel, profileIds) {
+    const profiles = await db.profiles.findAsync({
+      _id: { $in: profileIds },
+      subscriptions: { $elemMatch: { id: channel.id } }
+    })
+    const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
+      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) return null
+      return profile.subscriptions.map(subscription => subscription.id === channel.id
+        ? copySubscriptionChannelSettings(subscription, channel)
+        : subscription)
+    })
+    return updatedProfileIds
+  }
+
+  static async batchUpdateChannelSettings(updates, profileIds) {
+    const updatesById = new Map(updates.map(update => [update.channelId, update]))
+    const profiles = await db.profiles.findAsync({
+      _id: { $in: profileIds },
+      subscriptions: { $elemMatch: { id: { $in: [...updatesById.keys()] } } }
+    })
+    const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
+      if (!profile.subscriptions.some(subscription => updatesById.has(subscription.id))) return null
+      return profile.subscriptions.map(subscription => {
+        const update = updatesById.get(subscription.id)
+        if (!update) return subscription
+        return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
+      })
+    })
+    return updatedProfileIds
+  }
+
+  static async updateSubscriptionDetails(channels) {
+    const profiles = await db.profiles.findAsync({})
+    return this.updateSubscriptions(profiles, profile => (
+      getProfileWithUpdatedSubscriptionDetails(profile, channels)?.subscriptions ?? null
+    ))
+  }
+
+  /**
+   * Saves a profile from sync only while the saved one still matches
+   * `previous`, or `null` for a new profile, so a sync neither undoes an edit
+   * made meanwhile nor recreates a deleted profile.
+   * @returns {Promise<object | null>} the saved profile, or null if it changed
+   */
+  static async saveFromSyncIfUnchanged(profile, previous) {
+    if (previous === null) {
+      try {
+        return await db.profiles.insertAsync(withProfileSeparation(profile))
+      } catch (error) {
+        if (error?.errorType === 'uniqueViolated') return null
+        throw error
+      }
+    }
+    const snapshot = profileSyncSnapshot(previous)
+    const { name, bgColor, textColor, subscriptions } = profile
+    // Sync saves the icon of a profile that has one.
+    const syncsIcon = Object.hasOwn(profile, 'icon')
+    const icon = JSON.stringify(previous.icon ?? null)
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      {
+        _id: profile._id,
+        $where() { return profileSyncSnapshot(this) === snapshot && (!syncsIcon || JSON.stringify(this.icon ?? null) === icon) }
+      },
+      { $set: { name, bgColor, textColor, subscriptions, ...(syncsIcon ? { icon: profile.icon } : {}) } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
+  }
+
+  /** Saves `subscriptions` only while the saved ones still equal `previous`, returning the updated profile or null */
+  static async updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      { _id: profileId, $where() { return JSON.stringify(this.subscriptions) === snapshot } },
+      { $set: { subscriptions } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
+  }
+
+  /**
+   * Retry against current subscriptions when another window changes them
+   * between reading and saving, up to five attempts per profile.
+   * Never write a stale whole-profile snapshot.
+   * Retain completed writes if a later profile fails so windows can sync them.
+   * @param {object[]} profiles
+   * @param {(profile: object) => object[] | null} update
+   * @returns {Promise<{profileIds: string[], success: boolean}>}
+   */
+  static async updateSubscriptions(profiles, update) {
+    const updatedProfileIds = []
+    try {
+      for (let profile of profiles) {
+        let attempts = 0
+        while (profile != null) {
+          const subscriptions = update(profile)
+          if (subscriptions === null) break
+          if (++attempts > 5) {
+            throw new Error(`Unable to update subscriptions for profile ${profile._id}: repeated concurrent changes`)
+          }
+          const { numAffected } = await db.profiles.updateAsync(
+            { _id: profile._id, subscriptions: profile.subscriptions },
+            { $set: { subscriptions } }
+          )
+          if (numAffected > 0) {
+            updatedProfileIds.push(profile._id)
+            break
+          }
+          profile = await db.profiles.findOneAsync({ _id: profile._id })
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      return { profileIds: updatedProfileIds, success: false }
+    }
+    return { profileIds: updatedProfileIds, success: true }
+  }
+
+  /**
+   * Merges a restored profile with the saved one when it is written, so a
+   * subscription another window adds during the restore is kept.
+   * @param {object} imported
+   * @returns {Promise<object>} the merged profile as saved
+   */
+  static mergeBackup(imported) {
+    return this._saveMerged(imported, mergeBackupProfile)
+  }
+
+  /** Merges an imported profile when it is written, so subscriptions added meanwhile stay */
+  static mergeImported(imported) {
+    return this._saveMerged(imported, mergeImportedProfile)
+  }
+
+  static _saveMerged(imported, merge) {
+    return saveRestoredRecord(db.profiles, imported._id, current => {
+      const snapshot = JSON.stringify(current)
+      return {
+        record: merge(current, imported),
+        unchanged() { return JSON.stringify(this) === snapshot },
+      }
+    })
+  }
+
+  static async delete(id) {
+    const profile = await db.profiles.findOneAsync({ _id: id }, { separate: 1 })
+    const removed = await db.profiles.removeAsync({ _id: id })
+    // The profile stays in the app until this succeeds. Deleting it again
+    // after its data failed to delete no longer finds it, so it deletes the
+    // data such a profile could have left.
+    const separate = profile === null
+      ? id !== MAIN_PROFILE_ID && isValidSeparateProfileId(id)
+      : profile.separate === true
+    if (separate) await deleteScopeData(id)
+    return removed
   }
 }
 
 class Playlists {
+  static db = db
+  // Keep insertions from exhausting each other's concurrent-edit retries.
+  static pendingVideoInsertions = new Map()
+
   static create(playlists) {
-    return db.playlists.insertAsync(playlists)
+    return this.db.playlists.insertAsync(playlists)
   }
 
   static find() {
-    return db.playlists.findAsync({})
+    return this.db.playlists.findAsync({})
   }
 
   static upsert(playlist) {
-    return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
+    return this.db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
+  /**
+   * Unlike `upsert`, this never recreates a playlist that was deleted, which
+   * a partial update would leave without its videos.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  static async update(playlist) {
+    const { numAffected } = await this.db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist })
+    return numAffected > 0
+  }
+
+  /** Unlike `upsert`, this never recreates a playlist that was deleted */
+  static async updateSortOrder(_id, sortOrder) {
+    const { numAffected } = await this.db.playlists.updateAsync({ _id }, { $set: { sortOrder } }, { upsert: false })
+    return numAffected > 0
+  }
+
+  static async upsertIfUnchanged(playlist, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { numAffected } = await this.db.playlists.updateAsync(
+      { _id: playlist._id, $where() { return JSON.stringify(this) === snapshot } },
+      { $set: playlist },
+      { upsert: false }
+    )
+    return numAffected > 0
+  }
+
+  static async repairMetadata({ playlistIds, metadata }, onUpdate = () => {}) {
+    const updates = []
+    const repaired = new Set()
+    const failed = new Set()
+    const byId = new Map(metadata.map(info => [info.videoId, info]))
+    const selectedIds = [...new Set(playlistIds)]
+    const targets = await this.db.playlists.findAsync({
+      _id: { $in: selectedIds },
+      videos: { $elemMatch: { videoId: { $in: [...byId.keys()] } } }
+    })
+    const targetsById = new Map(targets.map(playlist => [playlist._id, playlist]))
+    for (const _id of selectedIds) {
+      const target = targetsById.get(_id)
+      if (!target) continue
+      // If a later read fails, count only videos this playlist could change.
+      let pendingIds = [...new Set(target.videos
+        .filter(video => byId.has(video.videoId) && playlistRepairPatch(video, byId.get(video.videoId)))
+        .map(video => video.videoId))]
+      if (!pendingIds.length) continue
+      try {
+        // Re-read and conditionally save so edits made in another window during
+        // the lookup cannot be overwritten or resurrect deleted entries.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const current = await this.db.playlists.findOneAsync({ _id })
+          if (!current) break
+          const changed = new Set()
+          const changes = []
+          const videos = current.videos.map(video => {
+            const info = byId.get(video.videoId)
+            const patch = info && playlistRepairPatch(video, info)
+            if (!patch) return video
+            changed.add(video.videoId)
+            const fields = { ...patch }
+            delete fields.videoId
+            const previous = Object.fromEntries(Object.keys(fields).map(key => [key, video[key]]))
+            changes.push({ videoId: video.videoId, playlistItemId: video.playlistItemId, fields, previous })
+            return { ...video, ...fields }
+          })
+          pendingIds = [...changed]
+          if (!changed.size) break
+          const snapshot = JSON.stringify(current.videos)
+          const { affectedDocuments } = await this.db.playlists.updateAsync(
+            { _id, $where() { return JSON.stringify(this.videos) === snapshot } },
+            { $set: { videos } },
+            { returnUpdatedDocs: true }
+          )
+          if (affectedDocuments) {
+            // Return conditional metadata changes, never an earlier full playlist
+            // snapshot that could replace edits made while later writes await.
+            const update = { _id, changes }
+            updates.push(update)
+            onUpdate(update)
+            for (const id of changed) repaired.add(id)
+            break
+          }
+          if (attempt === 2) for (const id of changed) failed.add(id)
+        }
+      } catch (error) {
+        console.error(error)
+        for (const id of pendingIds) failed.add(id)
+      }
+    }
+    // Progress counts unique videos. A video is failed if any selected occurrence
+    // could not be saved, even when its other occurrences were repaired.
+    for (const id of failed) repaired.delete(id)
+    return { updates, repaired: repaired.size, failed: failed.size }
+  }
+
+  /**
+   * Adds a single video to a playlist, unless an entry with the same video id
+   * is already there.
+   *
+   * Every window writes through this one datastore, so it is the only place
+   * that can order two of them adding the same video at the same time.
+   * `upsertVideosByPlaylistId` is the bulk path and still allows duplicates.
+   *
+   * @returns {Promise<{status: 'added' | 'already-present' | 'playlist-missing', videos?: object[], addVideosToTop?: boolean, lastUpdatedAt?: number}>}
+   */
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
-    return db.playlists.updateAsync(
-      { _id },
-      {
-        $push: { videos: videoData },
-        $set: { lastUpdatedAt }
-      },
-      { upsert: true }
-    )
+    return this.insertVideos(_id, lastUpdatedAt, [videoData], true)
   }
 
-  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {
-    return db.playlists.updateAsync(
-      { _id },
-      {
-        $push: { videos: { $each: videos } },
-        $set: { lastUpdatedAt }
-      },
-      { upsert: true }
-    )
+  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos, deduplicate = false) {
+    return this.insertVideos(_id, lastUpdatedAt, videos, deduplicate)
+  }
+
+  static insertVideos(_id, lastUpdatedAt, videos, deduplicate = false) {
+    const previous = this.pendingVideoInsertions.get(_id) ?? Promise.resolve()
+    const operation = previous.catch(() => {}).then(() => this._insertVideos(_id, lastUpdatedAt, videos, deduplicate))
+    this.pendingVideoInsertions.set(_id, operation)
+    return operation.finally(() => {
+      if (this.pendingVideoInsertions.get(_id) === operation) this.pendingVideoInsertions.delete(_id)
+    })
+  }
+
+  /**
+   * Whether two video lists hold the same entries in the same order. Compares
+   * the flat entry fields directly, so a concurrent edit is detected without
+   * serializing every video, even one stamped in the same millisecond.
+   * @param {object[]} videos
+   * @param {object[]} others
+   */
+  static _sameVideoEntries(videos, others) {
+    if (videos.length !== others.length) return false
+    for (let index = 0; index < videos.length; index++) {
+      const video = videos[index]
+      const other = others[index]
+      const keys = Object.keys(video)
+      if (keys.length !== Object.keys(other).length) return false
+      for (const key of keys) {
+        const value = video[key]
+        const otherValue = other[key]
+        if (value === otherValue) continue
+        if (typeof value !== 'object' || value === null || typeof otherValue !== 'object' || otherValue === null) return false
+        if (JSON.stringify(value) !== JSON.stringify(otherValue)) return false
+      }
+    }
+    return true
+  }
+
+  static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
+    // Retry if another window changes the playlist between reading and saving it.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      // Appending needs neither the stored entries nor more than the matching
+      // ones for the duplicate check. Prepending rewrites them all.
+      let playlist = await this.db.playlists.findOneAsync({ _id }, { videos: 0 })
+      if (playlist?.addVideosToTop === true) playlist = await this.db.playlists.findOneAsync({ _id })
+      if (!playlist) return { status: PlaylistVideoAddResult.PLAYLIST_MISSING }
+      let inserted = videos
+      if (deduplicate) {
+        const stored = playlist.videos ?? await this.db.playlists.findMembersAsync(_id, 'videoId', [...new Set(videos.map(video => video.videoId))])
+        const present = new Set(stored.map(video => video.videoId))
+        inserted = videos.filter(video => {
+          if (present.has(video.videoId)) return false
+          present.add(video.videoId)
+          return true
+        })
+        if (inserted.length === 0) return { status: PlaylistVideoAddResult.ALREADY_PRESENT }
+      }
+
+      const addVideosToTop = playlist.addVideosToTop === true
+      const updatedAt = Math.max(playlist.lastUpdatedAt || 0, lastUpdatedAt)
+      if (!addVideosToTop) {
+        // Appending neither reads nor rewrites the stored entries, so it cannot
+        // restore removed videos or undo metadata repairs. Anything else that
+        // adds entries also changes lastUpdatedAt, which keeps the duplicate
+        // check valid.
+        const { numAffected } = await this.db.playlists.updateAsync(
+          { _id, addVideosToTop: { $ne: true }, lastUpdatedAt: playlist.lastUpdatedAt === undefined ? { $exists: false } : playlist.lastUpdatedAt },
+          { $push: { videos: { $each: inserted } }, $set: { lastUpdatedAt: updatedAt } }
+        )
+        if (numAffected > 0) return { status: PlaylistVideoAddResult.ADDED, videos: inserted, addVideosToTop, lastUpdatedAt: updatedAt }
+        continue
+      }
+
+      // NeDB cannot prepend atomically, so compare the whole list.
+      const { numAffected } = await this.db.playlists.updateAsync(
+        {
+          _id,
+          $where() {
+            return this.lastUpdatedAt === playlist.lastUpdatedAt && (this.addVideosToTop === true) === addVideosToTop &&
+              Playlists._sameVideoEntries(this.videos, playlist.videos)
+          }
+        },
+        {
+          $set: {
+            videos: inserted.concat(playlist.videos),
+            lastUpdatedAt: updatedAt
+          }
+        }
+      )
+      if (numAffected > 0) return { status: PlaylistVideoAddResult.ADDED, videos: inserted, addVideosToTop, lastUpdatedAt: updatedAt }
+    }
+    throw new Error(`Unable to add videos to playlist ${_id}: repeated concurrent changes`)
+  }
+
+  /**
+   * Puts the given entries into the given order, in the positions they hold
+   * now. Entries added since the order was taken keep their positions, and
+   * removed ones stay removed.
+   * @param {string} _id
+   * @param {number} lastUpdatedAt
+   * @param {string[]} playlistItemIds
+   * @returns {Promise<object[] | null>} the saved videos, or null when the playlist is gone
+   */
+  static async reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    const order = new Map(playlistItemIds.map((id, index) => [id, index]))
+    // Retry if another window changes the playlist between reading and saving it.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const playlist = await this.db.playlists.findOneAsync({ _id })
+      if (!playlist) return null
+      const moved = playlist.videos.filter(video => order.has(video.playlistItemId))
+        .sort((a, b) => order.get(a.playlistItemId) - order.get(b.playlistItemId))
+      let next = 0
+      const videos = playlist.videos.map(video => order.has(video.playlistItemId) ? moved[next++] : video)
+      const { numAffected } = await this.db.playlists.updateAsync(
+        { _id, $where() { return Playlists._sameVideoEntries(this.videos, playlist.videos) } },
+        { $set: { videos, lastUpdatedAt } }
+      )
+      if (numAffected > 0) return videos
+    }
+    throw new Error(`Unable to reorder playlist ${_id}: repeated concurrent changes`)
+  }
+
+  /**
+   * Merges a restored playlist with the saved one when it is written, so a
+   * video another window adds during the restore is kept.
+   * @param {object} imported
+   * @returns {Promise<object>} the merged playlist as saved
+   */
+  static mergeBackup(imported) {
+    return saveRestoredRecord(this.db.playlists, imported._id, current => {
+      const merged = mergeBackupPlaylist(current, imported)
+      // Reordering finds entries by playlistItemId, so restored entries need
+      // one. Copies keep the backup unchanged for a retry's duplicate check.
+      const videos = merged.videos.map(video => {
+        const copy = { ...video }
+        processToBeAddedPlaylistVideo(copy)
+        return copy
+      })
+      // The restore stamps the time it started, so keep a later edit's time
+      const record = { ...merged, videos, lastUpdatedAt: Math.max(current?.lastUpdatedAt ?? 0, merged.lastUpdatedAt ?? 0) }
+      if (!Number.isFinite(record.createdAt)) record.createdAt = record.lastUpdatedAt
+      const { videos: currentVideos = [], ...currentFields } = current ?? {}
+      const fieldSnapshot = JSON.stringify(currentFields)
+      return {
+        record,
+        unchanged() {
+          const { videos = [], ...fields } = this
+          return JSON.stringify(fields) === fieldSnapshot && Playlists._sameVideoEntries(videos, currentVideos)
+        },
+      }
+    })
   }
 
   static delete(_id) {
-    return db.playlists.removeAsync({ _id, protected: { $ne: true } })
+    return this.db.playlists.removeAsync({ _id, protected: { $ne: true } })
   }
 
   static deleteVideoIdByPlaylistId(_id, lastUpdatedAt, videoId, playlistItemId) {
     if (playlistItemId != null) {
-      return db.playlists.updateAsync(
+      return this.db.playlists.updateAsync(
         { _id },
         {
           $pull: { videos: { playlistItemId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else if (videoId != null) {
-      return db.playlists.updateAsync(
+      return this.db.playlists.updateAsync(
         { _id },
         {
           $pull: { videos: { videoId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else {
       throw new Error(`Both videoId & playlistItemId are absent, _id: ${_id}`)
@@ -266,147 +1437,543 @@ class Playlists {
   }
 
   static deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds) {
-    return db.playlists.updateAsync(
+    return this.db.playlists.updateAsync(
       { _id },
       {
-        $pull: { videos: { playlistItemId: { $in: playlistItemIds } } },
+        $pull: { videos: createIdQuery('playlistItemId', playlistItemIds) },
         $set: { lastUpdatedAt }
-      },
-      { upsert: true }
+      }
     )
   }
 
   static deleteAllVideosByPlaylistId(_id) {
-    return db.playlists.updateAsync(
-      { _id },
-      { $set: { videos: [] } },
-      { upsert: true }
-    )
+    return this.db.playlists.updateAsync({ _id }, { $set: { videos: [] } })
   }
 
   static deleteMultiple(ids) {
-    return db.playlists.removeAsync({ _id: { $in: ids }, protected: { $ne: true } })
+    return this.db.playlists.removeAsync({ _id: { $in: ids }, protected: { $ne: true } }, { multi: true })
   }
 
   static deleteAll() {
-    return db.playlists.removeAsync({}, { multi: true })
+    return this.db.playlists.removeAsync({}, { multi: true })
   }
 }
 
 class SearchHistory {
+  static db = db
+  static writes = Promise.resolve()
+  /** When the history was last cleared, so a search made before it, such as a link that waited for its title, is not saved. */
+  static clearedAt = -Infinity
+  /** When each query was last removed, for the same reason. */
+  static removedAt = new Map()
+
+  /**
+   * Writes read the saved searches first, so they run one at a time and an
+   * import cannot replace a search saved between its read and its write.
+   * @template T
+   * @param {() => Promise<T>} operation
+   * @returns {Promise<T>}
+   */
+  static runWrite(operation) {
+    const write = this.writes.then(operation)
+    this.writes = write.catch(() => {})
+    return write
+  }
+
   static find() {
-    return db.searchHistory.findAsync({}).sort({ lastUpdatedAt: -1 })
+    return this.db.searchHistory.findAsync({}).sort({ lastUpdatedAt: -1 })
   }
 
   static upsert(searchHistoryEntry) {
-    return db.searchHistory.updateAsync({ _id: searchHistoryEntry._id }, searchHistoryEntry, { upsert: true })
+    return this.runWrite(() => this._upsert(searchHistoryEntry))
   }
 
-  static async overwrite(records) {
-    await db.searchHistory.removeAsync({}, { multi: true })
+  /** @returns {Promise<object | null>} the saved entry, or null when the history was cleared or the entry removed after the search */
+  static async _upsert(searchHistoryEntry) {
+    const removedAt = Math.max(this.clearedAt, this.removedAt.get(searchHistoryEntry.query) ?? -Infinity)
+    if (searchHistoryEntry.lastUpdatedAt < removedAt) return null
 
-    await db.searchHistory.insertAsync(records)
+    const matchingCandidates = await this.db.searchHistory.findAsync({
+      $or: [
+        { _id: searchHistoryEntry._id },
+        { _id: searchHistoryEntry.query },
+        { query: searchHistoryEntry.query },
+      ],
+    })
+    const resolvedEntry = resolveSearchHistoryEntry(searchHistoryEntry, matchingCandidates)
+
+    await this.db.searchHistory.updateAsync({ _id: resolvedEntry._id }, resolvedEntry, { upsert: true })
+    return resolvedEntry
+  }
+
+  /**
+   * Merges imported searches with the saved ones when they are written.
+   * @returns {Promise<object[]>} every saved search, newest first
+   */
+  static mergeImported(entries) {
+    return this.runWrite(async () => {
+      const merged = mergeSearchHistoryEntries(await this.db.searchHistory.findAsync({}), entries)
+      sortSearchHistoryByLastUpdatedAt(merged)
+      // One transaction, so a failed import keeps the saved history
+      await this.db.searchHistory.replaceAllAsync(merged)
+      return merged
+    })
   }
 
   static delete(_id) {
-    return db.searchHistory.removeAsync({ _id: _id })
+    const removedAt = Date.now()
+    return this.runWrite(async () => {
+      const [entry] = await this.db.searchHistory.findAsync({ _id })
+      if (entry != null) this.removedAt.set(entry.query ?? entry._id, removedAt)
+      return this.db.searchHistory.removeAsync({ _id: _id })
+    })
+  }
+
+  /**
+   * @param {number} cutoff Searches last used before this timestamp are removed
+   * @returns {Promise<object[] | null>} The remaining searches, or null when none were removed
+   */
+  static deleteOlderThan(cutoff) {
+    return this.runWrite(async () => {
+      const removed = await this.db.searchHistory.removeAsync({ lastUpdatedAt: { $lt: cutoff } }, { multi: true })
+      return removed > 0 ? this.find() : null
+    })
   }
 
   static deleteAll() {
-    return db.searchHistory.removeAsync({}, { multi: true })
+    this.clearedAt = Date.now()
+    this.removedAt.clear()
+    return this.runWrite(() => this.db.searchHistory.removeAsync({}, { multi: true }))
   }
 }
 
 class SubscriptionCache {
+  static pendingUpdates = new Map()
+  // Clearing the cache waits for every pending update, and later updates wait
+  // for it, so no update can write back a channel it read before the clear.
+  static clearing = Promise.resolve()
+  static FEED_FIELDS = new Set(['videos', 'shorts', 'liveStreams', 'communityPosts'])
+
+  /**
+   * Runs `operation` after the pending updates of the given channels and
+   * before later ones. Updates replace whole channel documents, so every
+   * feed of a channel shares its queue.
+   * @template T
+   * @param {string[]} channelIds
+   * @param {() => Promise<T>} operation
+   * @returns {Promise<T>}
+   */
+  static queueUpdates(channelIds, operation) {
+    const previous = channelIds.map(channelId => this.pendingUpdates.get(channelId) ?? Promise.resolve())
+    const update = Promise.allSettled([this.clearing, ...previous]).then(operation)
+    for (const channelId of channelIds) this.pendingUpdates.set(channelId, update)
+    return update.finally(() => {
+      for (const channelId of channelIds) {
+        if (this.pendingUpdates.get(channelId) === update) this.pendingUpdates.delete(channelId)
+      }
+    })
+  }
+
+  static queueUpdate(channelId, operation) {
+    return this.queueUpdates([channelId], operation)
+  }
+
+  /**
+   * Stores fetched feeds for many channels in one SQLite transaction. A feed whose
+   * stored timestamp is newer than the fetched one stays as it is. Video feeds
+   * can also store when their collaborations were last checked.
+   * @param {{ channelId: string, field: string, entries: object[], timestamp: Date | string, collaborationsCheckedAt?: number | null }[]} updates
+   * @returns {Promise<boolean[]>} whether each update was applied
+   */
+  static updateFeeds(updates) {
+    for (const { field } of updates) {
+      if (!this.FEED_FIELDS.has(field)) throw new Error(`Unknown subscription feed: ${field}`)
+    }
+    const channelIds = [...new Set(updates.map(({ channelId }) => channelId))]
+    return this.queueUpdates(channelIds, async () => {
+      const documents = await this._loadDocuments(channelIds)
+      const changed = new Set()
+      const applied = []
+      for (const update of updates) {
+        const { channelId, field, timestamp, collaborationsCheckedAt } = update
+        const current = documents.get(channelId)
+        const timestampField = `${field}Timestamp`
+        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime() ||
+          isOlderCollaborationCheck(collaborationsCheckedAt, current?.collaborationsCheckedAt)) {
+          applied.push(false)
+          continue
+        }
+        // Without a check time, the write keeps the stored collaborations.
+        // The update is changed too, so other windows receive them.
+        if (field === 'videos' && collaborationsCheckedAt === undefined) {
+          update.entries = keepStoredSubscriptionCollaborations(update.entries, current?.videos)
+        }
+        documents.set(channelId, {
+          ...current,
+          _id: channelId,
+          [field]: preserveSubscriptionSeenEntries(update.entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
+          [timestampField]: timestamp,
+          ...(collaborationsCheckedAt !== undefined ? { collaborationsCheckedAt } : {}),
+        })
+        changed.add(channelId)
+        applied.push(true)
+      }
+      await this._replaceDocuments([...changed].map(channelId => documents.get(channelId)))
+      return applied
+    })
+  }
+
+  static async updateFeed(channelId, entries, timestamp, field) {
+    return (await this.updateFeeds([{ channelId, field, entries, timestamp }]))[0]
+  }
+
+  /** @returns {Promise<Map<string, object>>} the stored channel documents by ID */
+  static async _loadDocuments(channelIds) {
+    // SQLite, the desktop datastore, looks `_id` lists up through its primary
+    // key. createIdQuery's `$where` for large lists would scan every row there.
+    const docs = await db.subscriptionCache.findAsync({ _id: { $in: channelIds } })
+    return new Map(docs.map(doc => [doc._id, doc]))
+  }
+
+  /**
+   * The desktop datastore is SQLite, which replaces the documents in one
+   * transaction. NeDB, used by unit tests, has no transactional bulk replace,
+   * so its fallback writes the documents one by one, without atomicity.
+   */
+  static _replaceDocuments(docs) {
+    if (docs.length === 0) return Promise.resolve()
+    if (typeof db.subscriptionCache.replaceManyAsync === 'function') return db.subscriptionCache.replaceManyAsync(docs)
+    return Promise.all(docs.map(doc => db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })))
+  }
+
   static find() {
     return db.subscriptionCache.findAsync({})
   }
 
-  static updateVideosByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { videos: entries, videosTimestamp: timestamp } },
-      { upsert: true }
-    )
+  // ******************** //
+  // Unique Electron main process handlers
+  /**
+   * Every channel's document as its stored JSON text, which the renderer
+   * parses, see `History._findSerialized`.
+   */
+  static _findSerialized() {
+    return db.subscriptionCache.findSerializedAsync()
+  }
+  // ******************** //
+
+  /**
+   * Marks entries of many channel feeds as seen in one SQLite transaction.
+   * @param {{ channelId: string, tab: string, entries: object[] }[]} marks
+   */
+  static markEntriesAsSeenMany(marks) {
+    const channelIds = [...new Set(marks.map(({ channelId }) => channelId))]
+    return this.queueUpdates(channelIds, async () => {
+      const documents = await this._loadDocuments(channelIds)
+      const changed = new Set()
+      for (const { channelId, tab, entries } of marks) {
+        const field = subscriptionFeedField(tab)
+        const current = documents.get(channelId)
+        if (!current?.[field]) continue
+        const marked = preserveSubscriptionSeenEntries(current[field], entries, tab === 'posts' ? 'postId' : 'videoId')
+        if (marked === current[field]) continue
+        documents.set(channelId, { ...current, [field]: marked })
+        changed.add(channelId)
+      }
+      await this._replaceDocuments([...changed].map(channelId => documents.get(channelId)))
+    })
+  }
+
+  static markEntriesAsSeen(channelId, tab, entries) {
+    return this.markEntriesAsSeenMany([{ channelId, tab, entries }])
+  }
+
+  static async updateVideosByChannelId(channelId, entries, timestamp, collaborationsCheckedAt) {
+    return (await SubscriptionCache.updateFeeds([{ channelId, field: 'videos', entries, timestamp, collaborationsCheckedAt }]))[0]
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { liveStreams: entries, liveStreamsTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'liveStreams')
   }
 
   static updateShortsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { shorts: entries, shortsTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'shorts')
   }
 
-  static async updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
-    const doc = await db.subscriptionCache.findOneAsync({ _id: channelId }, { shorts: 1 })
+  static updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
+    return SubscriptionCache.queueUpdate(channelId, async () => {
+      const doc = await db.subscriptionCache.findOneAsync({ _id: channelId }, { shorts: 1 })
 
-    if (!Array.isArray(doc?.shorts)) {
-      return
-    }
+      if (!Array.isArray(doc?.shorts)) {
+        return
+      }
 
-    let hasUpdates = false
+      let hasUpdates = false
 
-    doc.shorts.forEach(cachedVideo => {
-      const channelVideo = entries.find(short => cachedVideo.videoId === short.videoId)
-      if (!channelVideo) { return }
+      doc.shorts.forEach(cachedVideo => {
+        const channelVideo = entries.find(short => cachedVideo.videoId === short.videoId)
+        if (!channelVideo) { return }
 
-      hasUpdates = true
+        hasUpdates = true
 
-      // authorId probably never changes, so we don't need to update that
-      cachedVideo.title = channelVideo.title
-      cachedVideo.author = channelVideo.author
+        // authorId probably never changes, so we don't need to update that
+        cachedVideo.title = channelVideo.title
+        cachedVideo.author = channelVideo.author
 
-      // as the channel shorts page only has compact view counts for numbers above 1000 e.g. 12k
-      // and the RSS feeds include an exact value, we only want to overwrite it when the number is larger than the cached value
-      // 12345 vs 12000 => 12345
-      // 12345 vs 15000 => 15000
-      if (channelVideo.viewCount > cachedVideo.viewCount) {
-        cachedVideo.viewCount = channelVideo.viewCount
+        // as the channel shorts page only has compact view counts for numbers above 1000 e.g. 12k
+        // and the RSS feeds include an exact value, we only want to overwrite it when the number is larger than the cached value
+        // 12345 vs 12000 => 12345
+        // 12345 vs 15000 => 15000
+        if (channelVideo.viewCount > cachedVideo.viewCount) {
+          cachedVideo.viewCount = channelVideo.viewCount
+        }
+      })
+
+      if (hasUpdates) {
+        await db.subscriptionCache.updateAsync(
+          { _id: channelId },
+          { $set: { shorts: doc.shorts } }
+        )
       }
     })
-
-    if (hasUpdates) {
-      await db.subscriptionCache.updateAsync(
-        { _id: channelId },
-        { $set: { shorts: doc.shorts } }
-      )
-    }
   }
 
   static updateCommunityPostsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { communityPosts: entries, communityPostsTimestamp: timestamp } },
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'communityPosts')
+  }
+
+  static deleteMultipleChannels(channelIds) {
+    // Updates replace whole documents, so a deletion between their read and
+    // write would be undone. Queue it with the channels' updates.
+    return this.queueUpdates(channelIds, () => db.subscriptionCache.removeAsync({ _id: { $in: channelIds } }, { multi: true }))
+  }
+
+  static deleteAll() {
+    this.clearing = Promise.allSettled([this.clearing, ...this.pendingUpdates.values()])
+      .then(() => db.subscriptionCache.removeAsync({}, { multi: true }))
+    return this.clearing
+  }
+}
+
+/**
+ * The items of the followed RSS feeds and channels on other platforms, one
+ * document per feed or channel, with the IDs that tell which items are new.
+ * Windows keep them in memory and write the documents that changed.
+ */
+class FeedCache {
+  static find() {
+    return db.feedCache.findAsync({})
+  }
+
+  // ******************** //
+  // Unique Electron main process handlers
+  /** Every document as its stored JSON text, see `SubscriptionCache._findSerialized` */
+  static _findSerialized() {
+    return db.feedCache.findSerializedAsync()
+  }
+  // ******************** //
+
+  /**
+   * @param {{ docs: object[], removed: string[] }} change documents to replace
+   * or insert, and the IDs of documents to remove
+   */
+  static async write({ docs, removed }) {
+    if (docs.length > 0) {
+      // NeDB, used by unit tests, has no bulk replace
+      if (typeof db.feedCache.replaceManyAsync === 'function') await db.feedCache.replaceManyAsync(docs)
+      else await Promise.all(docs.map(doc => db.feedCache.updateAsync({ _id: doc._id }, doc, { upsert: true })))
+    }
+    if (removed.length > 0) await db.feedCache.removeAsync({ _id: { $in: removed } }, { multi: true })
+  }
+
+  static deleteAll() {
+    return db.feedCache.removeAsync({}, { multi: true })
+  }
+}
+
+class TabSession {
+  static async load(sessionId = 'session') {
+    const doc = await db.tabSession.findOneAsync({ _id: sessionId })
+    if (doc && doc.value) {
+      return doc.value
+    }
+    return null
+  }
+
+  static async loadAll() {
+    const docs = await db.tabSession.findAsync({})
+    return docs
+      .filter(doc => doc && doc.value)
+      .map(doc => ({ sessionId: doc._id, ...doc.value }))
+  }
+
+  static async save(sessionId, sessionData) {
+    // Backwards-compatible single argument form: treat as legacy singleton record.
+    if (typeof sessionId !== 'string') {
+      sessionData = sessionId
+      sessionId = 'session'
+    }
+    return db.tabSession.updateAsync(
+      { _id: sessionId },
+      { _id: sessionId, value: sessionData },
       { upsert: true }
     )
   }
 
-  static deleteMultipleChannels(channelIds) {
-    return db.subscriptionCache.removeAsync({ _id: { $in: channelIds } }, { multi: true })
+  static async clear(sessionId = 'session') {
+    return db.tabSession.removeAsync({ _id: sessionId })
   }
 
-  static deleteAll() {
-    return db.subscriptionCache.removeAsync({}, { multi: true })
+  /** Replaces every session in one transaction, so a failed write keeps the saved ones. */
+  static replaceAll(sessions) {
+    return db.tabSession.replaceAllAsync(sessions.map(({ sessionId, ...value }) => ({ _id: sessionId, value })))
   }
+
+  static async clearAll() {
+    return db.tabSession.removeAsync({}, { multi: true })
+  }
+}
+
+let profilesLoadPromise
+
+function loadProfilesDatastore() {
+  profilesLoadPromise ??= db.profiles.loadDatabaseAsync()
+  return profilesLoadPromise
+}
+
+/** @type {Map<string, ReturnType<typeof createScopedHandlers>>} */
+const profileScopes = new Map()
+
+function createScopedHandlers(scope) {
+  const scopedDb = { ...db, ...db.profileDatastores(scope) }
+  const scopedRecommendations = createRecommendationStore(scopedDb.recommendations)
+  const ScopedHistory = class extends History {
+    static db = scopedDb
+    static recommendations = scopedRecommendations
+    static scope = scope
+    static migrationPromise = null
+  }
+  return {
+    history: ScopedHistory,
+    watchStats: class extends WatchStats {
+      static db = scopedDb
+      static History = ScopedHistory
+      static pendingWrite = Promise.resolve()
+      static migrationPromise = null
+    },
+    recommendations: scopedRecommendations,
+    playlists: class extends Playlists {
+      static db = scopedDb
+      static pendingVideoInsertions = new Map()
+    },
+    searchHistory: class extends SearchHistory {
+      static db = scopedDb
+      static writes = Promise.resolve()
+      static clearedAt = -Infinity
+      static removedAt = new Map()
+    },
+  }
+}
+
+const sharedScope = {
+  history: History,
+  watchStats: WatchStats,
+  recommendations,
+  playlists: Playlists,
+  searchHistory: SearchHistory,
+}
+
+/**
+ * The handlers of a data scope's history, watch stats, recommendations,
+ * playlists and search history.
+ * @param {string | null | undefined} scope a separate profile's ID, or null for the shared data
+ */
+function scopedHandlers(scope) {
+  if (scope == null) return sharedScope
+  let handlers = profileScopes.get(scope)
+  if (!handlers) {
+    handlers = createScopedHandlers(scope)
+    profileScopes.set(scope, handlers)
+  }
+  return handlers
+}
+
+/**
+ * Reads the shared history and that of every separate profile. Runs in the
+ * seen-state queue, which also deletes a profile's data after its profile, so
+ * no read opens the datastore of a deleted profile again.
+ * @template T
+ * @param {(datastore: any) => Promise<T>} read
+ * @returns {Promise<T[]>}
+ */
+function everyScopeHistory(read) {
+  return Settings.runSeenStateUpdate(async () => {
+    await loadProfilesDatastore()
+    const separate = await db.profiles.findAsync({ separate: true }, { _id: 1 })
+    const scopes = [null, ...separate.map(profile => profile._id).filter(isValidSeparateProfileId)]
+    return Promise.all(scopes.map(scope => read(scopedHandlers(scope).history.db.history)))
+  })
+}
+
+/** @type {Set<(scope: string) => Promise<void> | void>} */
+const scopeDeletionListeners = new Set()
+
+/**
+ * Called when a separate profile's data is deleted, for data kept outside
+ * these datastores.
+ * @param {(scope: string) => Promise<void> | void} listener
+ */
+function onScopeDataDeleted(listener) {
+  scopeDeletionListeners.add(listener)
+}
+
+/**
+ * Deletes a separate profile's data. Requests that are still queued for it
+ * finish first, and the handlers are recreated on its next use.
+ * @param {string} scope
+ */
+async function deleteScopeData(scope) {
+  const handlers = profileScopes.get(scope)
+  profileScopes.delete(scope)
+  await Promise.all([
+    // Queued writes would reopen the datastores they write to: seen-state
+    // updates write history, and the handlers queue their own writes.
+    Settings.runSeenStateUpdate(async () => {
+      if (handlers) {
+        await Promise.allSettled([
+          handlers.watchStats.pendingWrite,
+          handlers.searchHistory.writes,
+          ...handlers.playlists.pendingVideoInsertions.values(),
+        ])
+      }
+      await db.dropProfileDatastores(scope)
+      await db.settings.removeAsync(
+        { _id: { $in: SCOPED_SEEN_MARK_SETTINGS.map(setting => seenMarksSettingId(setting, scope)) } },
+        { multi: true }
+      )
+    }),
+    ...[...scopeDeletionListeners].map(listener => listener(scope)),
+  ])
 }
 
 function loadDatastores() {
   return Promise.allSettled([
     db.settings.loadDatabaseAsync(),
+    db.tabSession.loadDatabaseAsync(),
+  ])
+}
+
+function loadDeferredDatastores() {
+  return Promise.allSettled([
     db.history.loadDatabaseAsync(),
-    db.profiles.loadDatabaseAsync(),
+    db.watchStats.loadDatabaseAsync(),
+    db.recommendations.loadDatabaseAsync(),
+    loadProfilesDatastore(),
     db.playlists.loadDatabaseAsync(),
     db.searchHistory.loadDatabaseAsync(),
     db.subscriptionCache.loadDatabaseAsync(),
+    db.liveReminders.loadDatabaseAsync(),
+    db.videoMetadataCache.loadDatabaseAsync(),
+    db.feedCache.loadDatabaseAsync(),
   ])
 }
 
@@ -414,21 +1981,35 @@ function compactAllDatastores() {
   return Promise.allSettled([
     db.settings.compactDatafileAsync(),
     db.history.compactDatafileAsync(),
+    db.watchStats.compactDatafileAsync(),
+    db.recommendations.compactDatafileAsync(),
     db.profiles.compactDatafileAsync(),
     db.playlists.compactDatafileAsync(),
     db.searchHistory.compactDatafileAsync(),
-    db.subscriptionCache.compactDatafileAsync(),
+    // IndexedDB stores each browser cache record directly and needs no compaction.
+    ...(db.subscriptionCache ? [db.subscriptionCache.compactDatafileAsync()] : []),
+    db.tabSession.compactDatafileAsync(),
+    db.liveReminders.compactDatafileAsync(),
+    db.videoMetadataCache.compactDatafileAsync(),
+    db.feedCache.compactDatafileAsync(),
   ])
 }
 
 export {
   Settings as settings,
   History as history,
+  WatchStats as watchStats,
+  recommendations,
   Profiles as profiles,
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  FeedCache as feedCache,
+  TabSession as tabSession,
 
+  scopedHandlers,
+  onScopeDataDeleted,
   loadDatastores,
+  loadDeferredDatastores,
   compactAllDatastores,
 }

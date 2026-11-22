@@ -1,0 +1,247 @@
+import shaka from 'shaka-player'
+import { Fragment, h, render } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+
+import i18n from '../../../i18n/index'
+import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
+import { getQuickPlaybackRateLabel } from '../../../helpers/player/quickPlaybackRateLabel'
+
+/**
+ * @typedef {{ speed: number, name?: string }} QuickPlaybackRateOption
+ */
+
+/**
+ * @typedef {object} QuickPlaybackRateBarContext
+ * @property {() => QuickPlaybackRateOption[]} getPlaybackRateOptions
+ * @property {() => number | null} getDisplayedPlaybackRate
+ * @property {() => number | null} getSavedChannelPlaybackRate
+ * @property {() => boolean} getCanSaveChannelPlaybackSpeed
+ * @property {EventTarget} events
+ */
+
+/**
+ * Shaka's element registry is shared by every player in the renderer. Resolve
+ * instance-specific state through the Controls object instead of capturing the
+ * state of whichever player registered the global factory most recently.
+ * @type {WeakMap<shaka.ui.Controls, QuickPlaybackRateBarContext>}
+ */
+const quickPlaybackRateBarContexts = new WeakMap()
+
+/**
+ * @param {shaka.ui.Controls} controls
+ * @param {QuickPlaybackRateBarContext} context
+ * @returns {() => void}
+ */
+export function setQuickPlaybackRateBarContext(controls, context) {
+  quickPlaybackRateBarContexts.set(controls, context)
+
+  return () => {
+    if (quickPlaybackRateBarContexts.get(controls) === context) {
+      quickPlaybackRateBarContexts.delete(controls)
+    }
+  }
+}
+
+export class QuickPlaybackRateBar extends shaka.ui.Element {
+  /**
+   * @param {HTMLElement} parent
+   * @param {shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    super(parent, controls)
+
+    /** @private */
+    this.root_ = document.createElement('div')
+    this.root_.classList.add('ft-quick-playback-rate-bar', 'shaka-no-propagation')
+
+    /** @private */
+    this.saveButton_ = document.createElement('button')
+    this.saveButton_.classList.add('ft-quick-playback-rate-button', 'ft-quick-playback-rate-save')
+    this.saveButton_.type = 'button'
+    this.root_.appendChild(this.saveButton_)
+
+    /** @private @type {Array<{speed: number, button: HTMLButtonElement}>} */
+    this.rateButtons_ = []
+
+    /** @private @type {number | null} */
+    this.scrollTarget_ = null
+
+    this.parent.appendChild(this.root_)
+
+    this.eventManager.listen(this.root_, 'scrollend', () => {
+      this.scrollTarget_ = null
+    })
+
+    this.eventManager.listen(this.root_, 'wheel', (event) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
+        return
+      }
+
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? this.root_.clientWidth : 1
+
+      const maximum = Math.max(0, this.root_.scrollWidth - this.root_.clientWidth)
+      // Accumulate ticks against the destination while the animation is running.
+      // Clamp it first in case the presets or available width changed.
+      const target = Math.min(Math.max(this.scrollTarget_ ?? this.root_.scrollLeft, 0), maximum)
+      this.scrollTarget_ = Math.min(Math.max(target + delta * unit, 0), maximum)
+      // Keep the actual fractional offset at a boundary at non-100% UI scales.
+      if (this.scrollTarget_ !== target) {
+        this.root_.scrollTo({
+          left: this.scrollTarget_,
+          behavior: isReducedMotionEnabled() ? 'instant' : 'smooth'
+        })
+      }
+
+      // Keep wheel input inside the bar even at its ends or without overflow.
+      event.preventDefault()
+      event.stopPropagation()
+    }, { passive: false })
+
+    this.eventManager.listen(this.saveButton_, 'click', () => {
+      quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent(this.saveButton_.dataset.remove === 'true' ? 'removeChannelPlaybackSpeed' : 'saveChannelPlaybackSpeed'))
+    })
+
+    this.eventManager.listen(this.player, 'ratechange', () => {
+      this.updateButtonStates_()
+    })
+
+    this.eventManager.listen(this.video, 'ratechange', () => {
+      this.updateButtonStates_()
+    })
+
+    const context = quickPlaybackRateBarContexts.get(this.controls)
+    if (context) {
+      this.eventManager.listen(context.events, 'quickPlaybackRateBarStateChanged', () => {
+        this.rebuildRateButtons_()
+        this.updateButtonStates_()
+      })
+
+      this.eventManager.listen(context.events, 'localeChanged', () => {
+        this.updateLocalizedStrings_()
+        this.updateButtonStates_()
+      })
+    }
+
+    this.rebuildRateButtons_()
+    this.updateLocalizedStrings_()
+    this.updateButtonStates_()
+  }
+
+  /** @private */
+  rebuildRateButtons_() {
+    for (const { button } of this.rateButtons_) {
+      button.remove()
+    }
+
+    this.rateButtons_ = []
+
+    const context = quickPlaybackRateBarContexts.get(this.controls)
+    for (const { speed } of context?.getPlaybackRateOptions() ?? []) {
+      const button = document.createElement('button')
+      button.classList.add('ft-quick-playback-rate-button')
+      button.type = 'button'
+      button.dataset.rate = String(speed)
+
+      button.addEventListener('click', () => {
+        this.setPlaybackRate_(speed)
+      })
+
+      this.rateButtons_.push({ speed, button })
+      this.root_.appendChild(button)
+    }
+
+    this.updateLocalizedStrings_()
+  }
+
+  /** @private */
+  updateLocalizedStrings_() {
+    const options = quickPlaybackRateBarContexts.get(this.controls)?.getPlaybackRateOptions() ?? []
+
+    for (const [index, { speed, name }] of options.entries()) {
+      const entry = this.rateButtons_[index]
+      if (!entry) {
+        continue
+      }
+
+      const label = this.getPlaybackRateLabel_(speed, name)
+
+      entry.button.textContent = label
+      entry.button.title = label
+      entry.button.ariaLabel = label
+    }
+  }
+
+  /**
+   * @private
+   * @param {number} speed
+   * @param {string | null | undefined} name
+   * @returns {string}
+   */
+  getPlaybackRateLabel_(speed, name) {
+    return getQuickPlaybackRateLabel(speed, name, i18n.global.t)
+  }
+
+  /** @private */
+  updateButtonStates_() {
+    const context = quickPlaybackRateBarContexts.get(this.controls)
+    const currentRate = context?.getDisplayedPlaybackRate?.() ?? this.player.getPlaybackRate?.() ?? this.video.playbackRate
+    const savedRate = context?.getSavedChannelPlaybackRate() ?? null
+    const canSave = context?.getCanSaveChannelPlaybackSpeed() ?? false
+
+    const remove = savedRate != null && this.isSameRate_(currentRate, savedRate)
+    this.saveButton_.dataset.remove = String(remove)
+    const label = remove ? i18n.global.t('Delete') : i18n.global.t('Video.Player.Set Default')
+    this.saveButton_.title = remove ? i18n.global.t('Settings.Channel Settings.Forget Value') : i18n.global.t('Video.Save Channel Playback Speed')
+    this.saveButton_.ariaLabel = this.saveButton_.title
+    render(h(Fragment, null, [
+      h(FtIcon, { icon: ['fas', remove ? 'trash' : 'floppy-disk'], 'aria-hidden': 'true' }),
+      h('span', label)
+    ]), this.saveButton_)
+
+    if (canSave) {
+      this.saveButton_.classList.remove('shaka-hidden')
+    } else {
+      this.saveButton_.classList.add('shaka-hidden')
+    }
+
+    for (const { speed, button } of this.rateButtons_) {
+      const isCurrentRate = this.isSameRate_(currentRate, speed)
+      const isSavedRate = savedRate != null && this.isSameRate_(savedRate, speed)
+
+      button.classList.toggle('is-current-rate', isCurrentRate)
+      button.classList.toggle('is-channel-default-rate', isSavedRate)
+      button.ariaPressed = String(isCurrentRate)
+    }
+  }
+
+  release() {
+    render(null, this.saveButton_)
+    super.release()
+  }
+
+  /**
+   * @private
+   * @param {number} rate
+   */
+  setPlaybackRate_(rate) {
+    quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
+      detail: rate
+    }))
+    this.updateButtonStates_()
+  }
+
+  /**
+   * @private
+   * @param {number | null | undefined} a
+   * @param {number | null | undefined} b
+   * @returns {boolean}
+   */
+  isSameRate_(a, b) {
+    return Number.isFinite(a) &&
+      Number.isFinite(b) &&
+      Math.abs(a - b) < 0.01
+  }
+}

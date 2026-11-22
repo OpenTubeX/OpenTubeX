@@ -1,0 +1,33 @@
+/* The heading holds the tooltip, so the selects only keep room for their
+   sync and reset icons. */
+.autoRefreshIntervalSelects.settingsSelectGrid > .select {
+  --select-indicator-space: calc(8px + 22px + 22px);
+}
+
+/* The four short selects share a row when it has room for them. */
+@container settings-content (width > 1160px) {
+  .autoRefreshIntervalSelects {
+    --settings-select-grid-columns: 4;
+  }
+}
+
+/* The slider is centered under the switches of its column, or under the
+   stacked switches. Its end keeps as much room as the changed-setting
+   marker gutter takes at its start, so the track is centered too. */
+.onlyShowLatestFromChannelNumber {
+  inline-size: 100%;
+}
+
+.onlyShowLatestFromChannelNumber :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 380px;
+  margin-inline: auto;
+  padding-inline-end: max(5px, var(--settings-marker-gutter, 0px));
+}
+
+.subscriptionChannelSettingsManager {
+  display: flex;
+  justify-content: center;
+}
+

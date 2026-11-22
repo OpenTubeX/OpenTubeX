@@ -1,4 +1,13 @@
 import * as baseHandlers from './base'
+import { loadLegacySubscriptionCache, removeLegacySubscriptionCache } from '../index'
+import { createBrowserSubscriptionCache } from '../browserSubscriptionCache'
+import { getDataScope } from './dataScope.js'
+
+export const subscriptionCache = createBrowserSubscriptionCache(
+  loadLegacySubscriptionCache,
+  'opentubex-subscription-cache',
+  removeLegacySubscriptionCache
+)
 
 // TODO: Syncing
 // Syncing on the web would involve a different implementation
@@ -11,17 +20,69 @@ import * as baseHandlers from './base'
 // https://www.npmjs.com/package/localforage
 
 class Settings {
+  // The marks of the data scope active at the request, see `seenMarksSettingId`
+  static mergeSeenPosts(update) {
+    return baseHandlers.settings.mergeSeenPosts(update, getDataScope())
+  }
+
+  static mergeSeenVideos(update) {
+    return baseHandlers.settings.mergeSeenVideos(update, getDataScope())
+  }
+
+  static mergeSeenRssItems(update) {
+    return baseHandlers.settings.mergeSeenRssItems(update)
+  }
+
   static find() {
     return baseHandlers.settings.find()
+  }
+
+  static async findValue(_id) {
+    return (await baseHandlers.settings._findOne(_id))?.value
   }
 
   static upsert(_id, value) {
     return baseHandlers.settings.upsert(_id, value)
   }
+
+  static delete(_id) {
+    return baseHandlers.settings.delete(_id)
+  }
+}
+
+// The app has one window, so no other window changes the feed cache
+export const feedCache = {
+  find: () => baseHandlers.feedCache.find(),
+  write: change => baseHandlers.feedCache.write(change),
+  deleteAll: () => baseHandlers.feedCache.deleteAll(),
+  onChange: () => {},
 }
 
 // For the settings we use the wrapper class to hide some methods only needed in the Electron main process
 export { Settings as settings }
 
+/**
+ * Forwards each call to the handlers of the data scope active at that moment.
+ * @param {'history' | 'watchStats' | 'recommendations' | 'playlists' | 'searchHistory'} key
+ */
+function scoped(key) {
+  return new Proxy({}, {
+    get(_, property) {
+      const handlers = baseHandlers.scopedHandlers(getDataScope())[key]
+      const value = handlers[property]
+      return typeof value === 'function' ? value.bind(handlers) : value
+    },
+  })
+}
+
+export const history = scoped('history')
+export const watchStats = scoped('watchStats')
+export const recommendations = scoped('recommendations')
+export const playlists = scoped('playlists')
+export const searchHistory = scoped('searchHistory')
+
 // These classes don't require any changes from the base classes, so can be exported as-is.
-export { history, profiles, playlists, searchHistory, subscriptionCache } from './base'
+export {
+  profiles,
+  compactAllDatastores,
+} from './base'

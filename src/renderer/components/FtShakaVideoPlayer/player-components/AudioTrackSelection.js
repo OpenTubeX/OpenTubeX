@@ -24,6 +24,15 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
     /** @private */
     this._checkmarkIcon = checkmarkIcon
 
+    /** @private */
+    this.audioTrackCount_ = 0
+
+    /**
+     * The tracks the menu shows, so events that leave them unchanged keep it.
+     * @private
+     */
+    this.renderedTracks_ = null
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
@@ -51,14 +60,20 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
 
   /** @override */
   checkAvailability() {
-    this.updateAudioTracks_()
+    this.updateVisibility_()
   }
 
   /**
    * @private
    */
   updateAudioTracks_() {
-    const tracks = deduplicateAudioTracks(this.player.getAudioTracks()).values()
+    const tracks = [...deduplicateAudioTracks(this.player.getAudioTracks()).values()]
+
+    // Adaptation and variant changes fire throughout playback. Rebuilding an
+    // unchanged list would cancel a scrollbar drag and reset the menu.
+    const renderedTracks = JSON.stringify(tracks)
+    if (renderedTracks === this.renderedTracks_) return
+    this.renderedTracks_ = renderedTracks
 
     const menu = this.menu
 
@@ -71,6 +86,7 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
     menu.appendChild(backButton)
 
     let count = 0
+    let languageDisplayNames
 
     for (const track of tracks) {
       const button = document.createElement('button')
@@ -82,7 +98,12 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
       const span = document.createElement('span')
       button.appendChild(span)
 
-      span.textContent = track.label || new Intl.DisplayNames('en', { type: 'language', languageDisplay: 'standard' }).of(track.language)
+      if (track.label) {
+        span.textContent = track.label
+      } else {
+        languageDisplayNames ??= new Intl.DisplayNames('en', { type: 'language', languageDisplay: 'standard' })
+        span.textContent = languageDisplayNames.of(track.language)
+      }
 
       if (track.active) {
         button.appendChild(this._checkmarkIcon)
@@ -100,13 +121,14 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
 
     menu.querySelector('shaka-chosen-item')?.parentElement.focus()
 
-    this.button.setAttribute('shaka-status', this.currentSelection.innerText)
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent)
+    this.audioTrackCount_ = count
+    this.updateVisibility_()
+  }
 
-    if (count > 1 && !this.isSubMenuOpened) {
-      this.button.classList.remove('shaka-hidden')
-    } else {
-      this.button.classList.add('shaka-hidden')
-    }
+  /** @private */
+  updateVisibility_() {
+    this.button.classList.toggle('shaka-hidden', this.audioTrackCount_ <= 1 || this.isSubMenuOpened)
   }
 
   /**

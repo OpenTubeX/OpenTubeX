@@ -1,0 +1,640 @@
+import { calculatePublishedDate } from '../feed-metadata.js'
+import { createLocalFeedParsers } from './local-feed-parsers.js'
+
+// Signed-in requests use the YouTube TV client, the only one that accepts
+// tokens from the TV sign-in. Its responses use TV renderers, which
+// youtubei.js does not parse.
+
+const { parseLocalSubscriberCount } = createLocalFeedParsers(() => false)
+
+/**
+ * @typedef {'LIKE' | 'DISLIKE' | 'INDIFFERENT'} YouTubeRating
+ * @typedef {'like' | 'unlike' | 'dislike' | 'undislike' | 'delete'} YouTubeCommentAction
+ */
+
+/**
+ * @param {unknown} text a TV text object with `simpleText` or `runs`
+ * @returns {string}
+ */
+function readText(text) {
+  if (!text || typeof text !== 'object') return ''
+  if (typeof text.simpleText === 'string') return text.simpleText
+  if (Array.isArray(text.runs)) return text.runs.map(run => run?.text ?? '').join('')
+  return ''
+}
+
+/**
+ * @param {{ url?: string, width?: number }[] | undefined} thumbnails
+ * @returns {string | null}
+ */
+function bestThumbnail(thumbnails) {
+  if (!Array.isArray(thumbnails) || thumbnails.length === 0) return null
+  const url = thumbnails.reduce((best, thumbnail) => (thumbnail.width ?? 0) > (best.width ?? 0) ? thumbnail : best).url
+  if (typeof url !== 'string' || url === '') return null
+  return url.startsWith('//') ? `https:${url}` : url
+}
+
+// Protobuf, only as much as the comment parameters need: varints, strings and
+// nested messages, written in the order given.
+
+/**
+ * @param {number[]} out
+ * @param {number} value
+ */
+function writeVarint(out, value) {
+  let remaining = value
+  while (remaining > 0x7f) {
+    out.push((remaining & 0x7f) | 0x80)
+    remaining = Math.floor(remaining / 128)
+  }
+  out.push(remaining)
+}
+
+/**
+ * @typedef {[number, number | string | ProtoField[]]} ProtoField
+ * @param {ProtoField[]} fields
+ * @returns {number[]}
+ */
+function encodeProto(fields) {
+  const out = []
+  for (const [field, value] of fields) {
+    if (typeof value === 'number') {
+      writeVarint(out, field << 3)
+      writeVarint(out, value)
+      continue
+    }
+
+    const bytes = typeof value === 'string' ? [...new TextEncoder().encode(value)] : encodeProto(value)
+    writeVarint(out, (field << 3) | 2)
+    writeVarint(out, bytes.length)
+    out.push(...bytes)
+  }
+  return out
+}
+
+/**
+ * Standard base64, URL-encoded, as YouTube's clients send these parameters.
+ * @param {ProtoField[]} fields
+ */
+function encodeParams(fields) {
+  return encodeURIComponent(btoa(String.fromCharCode(...encodeProto(fields))))
+}
+
+/**
+ * The continuation that loads a video's comments with this thread first, like
+ * youtubei.js builds it for a linked comment.
+ * @param {string} videoId
+ * @param {string} threadId
+ */
+export function createLinkedCommentsContinuation(videoId, threadId) {
+  return encodeParams([[2, [[2, videoId]]], [3, 6], [6, [[4, [[4, videoId], [15, 2], [16, threadId]]], [8, 'comments-section']]]])
+}
+
+/**
+ * What comments are on: a video, or a post, which YouTube identifies with its
+ * channel.
+ * @typedef {{ videoId: string } | { postId: string, channelId: string }} YouTubeCommentTarget
+ */
+
+/**
+ * The continuation that loads a post's comments, optionally with a linked
+ * comment's thread first, like the website links a comment on a post.
+ * @param {string} postId
+ * @param {string} channelId
+ * @param {boolean} [newestFirst]
+ * @param {string} [commentId] a linked reply comes after its thread's comment
+ */
+export function createPostCommentsContinuation(postId, channelId, newestFirst = false, commentId = undefined) {
+  /** @type {ProtoField[]} */
+  const options = [[15, 2], [29, postId], [30, channelId]]
+  if (commentId) options.splice(1, 0, [16, commentId])
+  if (newestFirst) options.unshift([6, 1])
+  // The inner parameters are URL-safe base64 inside the standard base64 token.
+  const params = decodeURIComponent(encodeParams([[2, 'posts'], [53, [[4, options], [8, 'comments-section']]]]))
+    .replaceAll('+', '-').replaceAll('/', '_')
+  return decodeURIComponent(encodeParams([[80226972, [[2, 'FEcomment_post_detail_page_web_top_level'], [3, encodeURIComponent(params)]]]]))
+}
+
+/** @param {YouTubeCommentTarget} target */
+export function createCommentParams(target) {
+  if ('postId' in target) return encodeParams([[5, [[1, 0]]], [10, 1], [20, target.postId], [21, target.channelId]])
+  return encodeParams([[2, target.videoId], [5, []], [10, 7]])
+}
+
+/**
+ * Parent fields in `createCommentParams` would post a top-level comment.
+ * @param {YouTubeCommentTarget} target
+ * @param {string} commentId the comment to reply to; a reply's ID is `parentId.replyId`
+ */
+export function createReplyParams(target, commentId) {
+  const threadId = commentId.split('.')[0]
+  /** @type {ProtoField[]} */
+  const fields = 'postId' in target
+    ? [[4, threadId], [5, [[1, 0]]], [10, 1]]
+    : [[2, target.videoId], [4, threadId], [5, [[1, 0]]], [10, 7]]
+  // The replied-to reply, which nests the new reply under it like on YouTube's website.
+  if (threadId !== commentId) fields.push([14, commentId])
+  if ('postId' in target) fields.push([20, target.postId], [21, target.channelId])
+  return encodeParams(fields)
+}
+
+/**
+ * Comments and replies take the same parameters, in the layout of YouTube's
+ * website, the only client that offers editing.
+ * @param {YouTubeCommentTarget} target
+ * @param {string} commentId a reply's ID is `parentId.replyId`
+ */
+export function updateCommentParams(target, commentId) {
+  if ('postId' in target) {
+    return encodeParams([[1, commentId], [5, [[1, 0]]], [8, 1], [10, target.postId], [11, target.channelId], [18, []]])
+  }
+  return encodeParams([[1, commentId], [4, target.videoId], [5, [[1, 0]]], [8, 12], [18, []]])
+}
+
+const COMMENT_ACTION_TYPES = { like: 5, unlike: 5, dislike: 4, undislike: 4, delete: 6 }
+
+/**
+ * The TV client reads these from each comment. They only identify the
+ * comment, so they are built here for comments from any client.
+ * @param {YouTubeCommentAction} action
+ * @param {string} commentId a reply's ID is `parentId.replyId`
+ * @param {YouTubeCommentTarget} target
+ */
+export function commentActionParams(action, commentId, target) {
+  /** @type {ProtoField[]} */
+  const fields = 'postId' in target
+    ? [[1, COMMENT_ACTION_TYPES[action]], [2, 7], [3, commentId], [22, target.postId], [23, target.channelId]]
+    : [[1, COMMENT_ACTION_TYPES[action]], [2, 2], [3, commentId], [5, target.videoId]]
+  if (action === 'unlike' || action === 'undislike') fields.push([7, 1])
+  return encodeParams(fields)
+}
+
+/**
+ * Votes for a choice of a post's poll, or takes the vote back. Voting for
+ * another choice moves the vote. Quizzes take votes as answers, and the
+ * website also tells whether the answer is correct.
+ * @param {string} postId
+ * @param {string} channelId
+ * @param {number} choiceIndex
+ * @param {boolean} vote
+ * @param {boolean} [isCorrectAnswer] whether the choice is a quiz's correct answer, unset for polls
+ */
+export function pollVoteParams(postId, channelId, choiceIndex, vote, isCorrectAnswer = undefined) {
+  /** @type {ProtoField[]} */
+  const fields = [[1, vote ? 9 : 10], [3, postId], [11, channelId], [12, choiceIndex]]
+  if (isCorrectAnswer !== undefined) fields.push([40, 1], [41, isCorrectAnswer ? 1 : 0])
+  return encodeParams(fields)
+}
+
+/**
+ * Likes or dislikes a post, or takes the rating back. Liking replaces a
+ * dislike and the reverse.
+ * @param {'like' | 'unlike' | 'dislike' | 'undislike'} action
+ * @param {string} postId
+ * @param {string} channelId
+ */
+export function postRatingParams(action, postId, channelId) {
+  const undo = action === 'unlike' || action === 'undislike'
+  return encodeParams([[1, COMMENT_ACTION_TYPES[action]], [3, postId], [7, undo ? 1 : 0], [11, channelId], [56, 2]])
+}
+
+/**
+ * The parameters of a post's page, as youtubei.js builds them.
+ * @param {string} postId
+ * @param {string} channelId
+ */
+export function createPostPageParams(postId, channelId) {
+  return decodeURIComponent(encodeParams([[56, [[2, channelId], [3, postId], [11, channelId]]]]))
+}
+
+/**
+ * @typedef {{ count: number, ratio: number }} PollChoiceShare
+ * @typedef {{ selected: PollChoiceShare, unselected: PollChoiceShare }} PollChoiceResult
+ *   `selected` counts the viewer's vote for the choice, and `unselected` leaves it out
+ */
+
+/**
+ * The share of the votes of each choice of a post's poll. Only the Android
+ * client's post page has them for viewers who did not vote.
+ * @param {any} data Android `browse` response for the post's page
+ * @returns {PollChoiceResult[] | null}
+ */
+export function parsePollResults(data) {
+  /** @type {any[] | null} */
+  let choices = null
+  /** @param {any} value */
+  const find = value => {
+    if (choices || !value || typeof value !== 'object') return
+    if (Array.isArray(value.choices) && value.choices.some(choice => choice?.pollChoiceViewModel)) {
+      choices = value.choices
+      return
+    }
+    for (const child of Object.values(value)) find(child)
+  }
+  find(data?.contents)
+  if (!choices) return null
+
+  /** @param {any} state */
+  const share = state => ({
+    count: Number.isFinite(state?.voteCount) ? state.voteCount : 0,
+    ratio: Number.isFinite(state?.progressBarWidth) ? Math.min(1, Math.max(0, state.progressBarWidth)) : 0
+  })
+  const results = choices.map(choice => choice?.pollChoiceViewModel)
+  if (results.some(choice => !choice?.selectedStateData || !choice.unselectedStateData)) return null
+  return results.map(choice => ({ selected: share(choice.selectedStateData), unselected: share(choice.unselectedStateData) }))
+}
+
+/**
+ * @typedef {object} YouTubeProfile
+ * @property {string} name
+ * @property {string | null} handle
+ * @property {string | null} thumbnail
+ * @property {string | null} pageId identifies a brand account's channel; null for the Google account's own
+ */
+
+/**
+ * The channels the signed-in Google account can use: its own and those of
+ * its brand accounts.
+ * @param {any} data `account/accounts_list` response
+ * @returns {{ profiles: YouTubeProfile[], selectedPageId: string | null }}
+ */
+export function parseAccountProfiles(data) {
+  const items = (data?.contents ?? [])
+    .flatMap(content => content?.accountSectionListRenderer?.contents ?? [])
+    .flatMap(section => section?.accountItemSectionRenderer?.contents ?? [])
+    .map(item => item?.accountItem)
+    .filter(item => item && !item.isDisabled)
+
+  const profiles = items.map(item => {
+    const handle = readText(item.channelHandle)
+    const pageId = (item.serviceEndpoint?.selectActiveIdentityEndpoint?.supportedTokens ?? [])
+      .map(token => token?.pageIdToken?.pageId)
+      .find(id => typeof id === 'string' && id !== '') ?? null
+    return {
+      name: readText(item.accountName),
+      handle: handle.startsWith('@') ? handle : null,
+      thumbnail: bestThumbnail(item.accountPhoto?.thumbnails),
+      pageId
+    }
+  })
+  const selectedPageId = profiles[items.findIndex(item => item.isSelected)]?.pageId ?? null
+
+  return {
+    // The Google account's own channel first, then its brand accounts'.
+    profiles: profiles.toSorted((a, b) => Number(a.pageId !== null) - Number(b.pageId !== null)),
+    selectedPageId
+  }
+}
+
+/**
+ * The TV Subscriptions page lists the channels as tabs, newest first and again
+ * from A to Z.
+ * @param {any} data TV `browse` response for `FEsubscriptions`
+ * @returns {{ id: string, name: string, thumbnail: string | null }[]}
+ */
+export function parseSubscribedChannels(data) {
+  // Sync removes the channels missing here, so a page it cannot read must not count as empty.
+  if (!data?.contents?.tvBrowseRenderer) throw new Error('YouTube returned no subscriptions page')
+  const nav = data.contents.tvBrowseRenderer.content?.tvSecondaryNavRenderer
+  const sections = nav?.sections ?? []
+  // The channels on a later page would count as unsubscribed.
+  if (nav?.continuations || sections.some(section => section?.tvSecondaryNavSectionRenderer?.continuations ||
+    section?.tvSecondaryNavSectionRenderer?.tabs?.some(entry => entry?.continuationItemRenderer))) {
+    throw new Error('YouTube listed only some of the subscriptions')
+  }
+  const channels = new Map()
+
+  for (const section of sections) {
+    for (const entry of section?.tvSecondaryNavSectionRenderer?.tabs ?? []) {
+      const tab = entry?.tabRenderer ?? entry?.expandableTabRenderer
+      const params = tab?.endpoint?.browseEndpoint?.params
+      if (typeof params !== 'string') continue
+
+      let decoded
+      try {
+        decoded = atob(decodeURIComponent(params).replaceAll('-', '+').replaceAll('_', '/'))
+      } catch {
+        continue
+      }
+      const id = decoded.match(/UC[\w-]{22}/)?.[0]
+      if (!id || channels.has(id)) continue
+
+      channels.set(id, {
+        id,
+        name: typeof tab.title === 'string' ? tab.title : readText(tab.title),
+        thumbnail: bestThumbnail(tab.thumbnail?.thumbnails)
+      })
+    }
+  }
+
+  return [...channels.values()]
+}
+
+/** @param {string} text */
+function durationToSeconds(text) {
+  if (!/^\d+(?::\d+){0,2}$/.test(text)) return ''
+  return text.split(':').reduce((total, part) => total * 60 + Number(part), 0)
+}
+
+/**
+ * @param {any} tile a TV `tileRenderer`
+ * @returns {object | null} a video in the shape of the local API's feed parsers
+ */
+export function parseTile(tile) {
+  const isShort = tile?.contentType === 'TILE_CONTENT_TYPE_SHORTS'
+  if (tile?.contentType !== 'TILE_CONTENT_TYPE_VIDEO' && !isShort) return null
+
+  const command = tile.onSelectCommand
+  const videoId = tile.contentId ?? command?.watchEndpoint?.videoId ?? command?.reelWatchEndpoint?.videoId
+  if (typeof videoId !== 'string' || videoId === '') return null
+
+  const metadata = tile.metadata?.tileMetadataRenderer
+  const lines = (metadata?.lines ?? []).map(line => (line?.lineRenderer?.items ?? []).map(item => item?.lineItemRenderer))
+  const lineTexts = lines.map(items => items.map(item => readText(item?.text)).filter(text => text !== '' && text !== '•'))
+  const badges = lines.flat().map(item => item?.badge?.metadataBadgeRenderer).filter(Boolean)
+
+  // The first line names the channel, unless it is the views and date line.
+  const isDetail = text => /\b(?:views?|watching|ago)\b/i.test(text)
+  const hasAuthorLine = lineTexts.length > 1 && !lineTexts[0].some(isDetail)
+  const author = hasAuthorLine ? (lineTexts[0][0] ?? '') : ''
+  const details = (hasAuthorLine ? lineTexts.slice(1) : lineTexts).flat()
+  const viewsText = details.find(text => /\b(?:views?|watching)\b/i.test(text))
+  const publishedText = details.find(text => /\bago\b/i.test(text))
+
+  const timeStatus = (tile.header?.tileHeaderRenderer?.thumbnailOverlays ?? [])
+    .map(overlay => overlay?.thumbnailOverlayTimeStatusRenderer)
+    .find(Boolean)
+  const liveNow = timeStatus?.style === 'LIVE'
+  const isUpcoming = timeStatus?.style === 'UPCOMING'
+
+  let viewCount = null
+  if (viewsText) {
+    const views = parseLocalSubscriberCount(viewsText)
+    if (!isNaN(views)) viewCount = views
+  }
+
+  return {
+    type: 'video',
+    dataSource: 'local',
+    videoId,
+    title: readText(metadata?.title).trim(),
+    author,
+    viewCount,
+    published: calculatePublishedDate(publishedText, liveNow, isUpcoming),
+    lengthSeconds: liveNow || isUpcoming || !timeStatus ? '' : durationToSeconds(readText(timeStatus.text)),
+    liveNow,
+    isUpcoming,
+    isShort,
+    is4k: badges.some(badge => badge.label === '4K'),
+    hasCaptions: badges.some(badge => badge.label === 'CC'),
+    isMembersOnly: badges.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY')
+  }
+}
+
+/**
+ * Home rows are shelves of tiles. The first page and its continuations use
+ * the same rows.
+ * @param {any} data TV `browse` response for `default` or one of its continuations
+ * @returns {{ videos: object[], continuation: string | null }}
+ */
+export function parseHomeFeed(data) {
+  const sectionList = data?.continuationContents?.sectionListContinuation ??
+    data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer?.content?.sectionListRenderer
+  const videos = (sectionList?.contents ?? [])
+    .flatMap(section => section?.shelfRenderer?.content?.horizontalListRenderer?.items ?? [])
+    .map(item => parseTile(item?.tileRenderer))
+    .filter(Boolean)
+  const continuation = sectionList?.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+
+  return { videos, continuation }
+}
+
+/**
+ * @typedef {object} YouTubePlaylistSummary
+ * @property {string} playlistId
+ * @property {string} title
+ * @property {number | null} videoCount
+ * @property {string} signature changes with the video count and the first video,
+ *   the only signs of a change the list shows
+ *
+ * @typedef {object} YouTubePlaylistVideo
+ * @property {string} videoId
+ * @property {string | null} setVideoId identifies the entry in the playlist; edits need it
+ * @property {string} title
+ * @property {string} author
+ * @property {string} authorId
+ * @property {number | ''} lengthSeconds
+ * @property {number | null} published
+ * @property {number | null} viewCount
+ */
+
+/**
+ * The account's playlists, including Watch later (`WL`), Liked videos (`LL`),
+ * and playlists saved from other channels.
+ * @param {any} data TV `browse` response for `FEplaylist_aggregation` or one of its continuations
+ * @returns {{ playlists: YouTubePlaylistSummary[], continuation: string | null }}
+ */
+export function parsePlaylistLibrary(data) {
+  const grid = data?.continuationContents?.tvSurfaceContentContinuation?.content?.gridRenderer ??
+    data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer?.content?.gridRenderer
+  // Sync removes the playlists missing here, so a page it cannot read must not count as empty.
+  if (!grid) throw new Error('YouTube returned no playlist list')
+
+  const playlists = (grid.items ?? [])
+    .map(item => item?.tileRenderer)
+    .filter(tile => tile?.contentType === 'TILE_CONTENT_TYPE_PLAYLIST' && typeof tile.contentId === 'string')
+    .map(tile => {
+      const header = tile.header?.tileHeaderRenderer
+      const count = (header?.thumbnailOverlays ?? [])
+        .map(overlay => readText(overlay?.thumbnailOverlayTimeStatusRenderer?.text))
+        .find(text => text !== '') ?? ''
+      // The thumbnail URL carries signing parameters that change between requests.
+      const thumbnail = bestThumbnail(header?.thumbnail?.thumbnails)?.split('?')[0] ?? ''
+      // "No videos" has no number.
+      const digits = count.replaceAll(/\D/g, '')
+      return {
+        playlistId: tile.contentId,
+        title: readText(tile.metadata?.tileMetadataRenderer?.title).trim(),
+        videoCount: digits !== '' ? Number(digits) : count !== '' ? 0 : null,
+        signature: `${count}\n${thumbnail}`
+      }
+    })
+  const continuation = grid.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+
+  return { playlists, continuation }
+}
+
+/**
+ * The playlists the account can add videos to: its own and Watch later. The
+ * playlist list also has playlists saved from other channels, which look the same.
+ * @param {any} data `playlist/get_add_to_playlist` response
+ * @returns {Set<string>}
+ */
+export function parseOwnedPlaylistIds(data) {
+  const renderer = (data?.contents ?? []).map(content => content?.addToPlaylistRenderer).find(Boolean)
+  const ids = new Set((renderer?.playlists ?? [])
+    .map(entry => entry?.playlistAddToOptionRenderer?.playlistId)
+    .filter(id => typeof id === 'string'))
+  // Watch later is always there. Without it, sync would remove every playlist.
+  if (ids.size === 0) throw new Error('YouTube returned no playlists to add to')
+  return ids
+}
+
+/**
+ * @param {any} tile a TV `tileRenderer` of a playlist page
+ * @returns {YouTubePlaylistVideo | null}
+ */
+function parsePlaylistTile(tile) {
+  const video = parseTile(tile)
+  if (!video) return null
+
+  const authorId = (tile.metadata?.tileMetadataRenderer?.lines ?? [])
+    .flatMap(line => line?.lineRenderer?.items ?? [])
+    .flatMap(item => item?.lineItemRenderer?.text?.runs ?? [])
+    .map(run => run?.navigationEndpoint?.browseEndpoint?.browseId)
+    .find(id => typeof id === 'string' && id.startsWith('UC')) ?? ''
+  // Only the menu's remove action names the entry.
+  const setVideoId = (tile.onLongPressCommand?.showMenuCommand?.menu?.menuRenderer?.items ?? [])
+    .flatMap(item => Object.values(item ?? {}))
+    .flatMap(item => item?.serviceEndpoint?.playlistEditEndpoint?.actions ?? [])
+    .find(action => action?.action === 'ACTION_REMOVE_VIDEO' && typeof action.setVideoId === 'string')
+    ?.setVideoId ?? null
+
+  return {
+    videoId: video.videoId,
+    setVideoId,
+    title: video.title,
+    author: video.author,
+    authorId,
+    lengthSeconds: video.lengthSeconds,
+    published: video.published ?? null,
+    viewCount: video.viewCount
+  }
+}
+
+/**
+ * The TV app shows a description in a popup behind the playlist's Information
+ * button, and has an empty `description` without one.
+ * @param {any} metadata the playlist page's `entityMetadataRenderer`
+ * @returns {string | null} null when the page shows neither
+ */
+function parsePlaylistDescription(metadata) {
+  const messages = (metadata?.buttons ?? [])
+    .flatMap(button => button?.buttonRenderer?.command?.openPopupAction?.popup?.overlaySectionRenderer?.overlay
+      ?.overlayTwoPanelRenderer?.actionPanel?.overlayPanelRenderer?.content?.scrollPaneRenderer?.content
+      ?.scrollPaneItemListRenderer?.items ?? [])
+    .map(item => item?.overlayMessageRenderer?.subtitle)
+    .filter(Boolean)
+  if (messages.length > 0) return messages.map(readText).join('\n').trim()
+  if (metadata && Object.hasOwn(metadata, 'description')) return readText(metadata.description).trim()
+  return null
+}
+
+/**
+ * A page of a playlist's videos. The first page also has the title and
+ * description, and an empty playlist has no video list at all.
+ * @param {any} data TV `browse` response for `VL` and the playlist ID, or one of its continuations
+ * @returns {{ title: string | null, description: string | null, videos: YouTubePlaylistVideo[], continuation: string | null }}
+ */
+export function parsePlaylistPage(data) {
+  const continuationList = data?.continuationContents?.playlistVideoListContinuation
+  const columns = data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer?.content?.twoColumnRenderer
+  // Removing what is missing here would empty the playlist.
+  if (!continuationList && !columns) throw new Error('YouTube returned no playlist page')
+
+  const list = continuationList ?? columns.rightColumn?.playlistVideoListRenderer
+  const metadata = columns?.leftColumn?.entityMetadataRenderer
+  const titleText = readText(metadata?.title).trim()
+  const videos = (list?.contents ?? [])
+    .map(item => parsePlaylistTile(item?.tileRenderer))
+    .filter(Boolean)
+  const continuation = list?.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+
+  return {
+    title: titleText === '' ? null : titleText,
+    description: parsePlaylistDescription(metadata),
+    videos,
+    continuation
+  }
+}
+
+/**
+ * @param {any} data TV `next` response for the video
+ * @returns {YouTubeRating | null}
+ */
+export function parseVideoRating(data) {
+  const ratings = ['LIKE', 'DISLIKE', 'INDIFFERENT']
+  const buttonStatus = (data?.transportControls?.transportControlsRenderer?.buttons ?? [])
+    .map(button => button?.button?.likeButtonRenderer?.likeStatus)
+    .find(status => ratings.includes(status))
+  if (buttonStatus) return buttonStatus
+
+  return (data?.frameworkUpdates?.entityBatchUpdate?.mutations ?? [])
+    .map(mutation => mutation?.payload?.likeStatusEntity?.likeStatus)
+    .find(status => ratings.includes(status)) ?? null
+}
+
+/**
+ * @param {any} value
+ * @returns {any}
+ */
+function findCommentRenderer(value) {
+  if (!value || typeof value !== 'object') return null
+  if (typeof value.commentRenderer?.commentId === 'string') return value.commentRenderer
+  for (const child of Object.values(value)) {
+    const found = findCommentRenderer(child)
+    if (found) return found
+  }
+  return null
+}
+
+/**
+ * YouTube nests the new comment differently for comments and replies.
+ * @param {any} data `comment/create_comment` or `comment/create_comment_reply` response
+ * @returns {{ id: string, author: string, authorThumb: string, text: string }}
+ */
+export function parseCreatedComment(data) {
+  const result = data?.actionResult
+  if (result?.status !== 'STATUS_SUCCEEDED') {
+    throw new Error(readText(result?.feedbackText) || 'Comment failed to post.')
+  }
+
+  const comment = findCommentRenderer(data?.actions)
+  if (!comment) throw new Error('The posted comment is missing from the response.')
+
+  return {
+    id: comment.commentId,
+    author: readText(comment.authorText),
+    authorThumb: bestThumbnail(comment.authorThumbnail?.thumbnails) ?? '',
+    text: readText(comment.contentText)
+  }
+}
+
+/**
+ * @param {any} data `comment/perform_comment_action` response
+ * @param {YouTubeCommentAction} action
+ * @param {string} commentId
+ */
+export function isCommentActionSuccessful(data, action, commentId) {
+  if (action === 'delete') {
+    return (data?.actions ?? []).some(entry => entry?.removeCommentAction?.commentId === commentId &&
+      entry.removeCommentAction.actionResult?.status === 'STATUS_SUCCEEDED')
+  }
+  return (data?.actionResults ?? []).some(result => result?.status === 'STATUS_SUCCEEDED')
+}
+
+/**
+ * @param {any} data TV `player` response
+ * @returns {string | null}
+ */
+export function parseWatchHistoryUrl(data) {
+  if (data?.playabilityStatus?.status !== 'OK') return null
+  const url = data.playbackTracking?.videostatsPlaybackUrl?.baseUrl
+  return typeof url === 'string' && url.startsWith('https://') ? url : null
+}

@@ -1,0 +1,912 @@
+import { computed, shallowRef } from 'vue'
+
+import store from '../store/index'
+import i18n from '../i18n/index'
+import { startProgressBarOperation } from './progressBar'
+import { shouldShowProgressStartToast } from './progressPresentation'
+import { showToastOnAllTabs } from './utils'
+import { appFetch } from './rssHub'
+import { supportsYtDlp } from './ytDlpCapabilities'
+import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
+import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
+import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
+import { parsePodcastDuration } from './podcasts.js'
+import { createFeedCacheMirror } from './feedCacheStore.js'
+import { RSS_FEED_CACHE_PREFIX } from '../../feedCache.js'
+
+const FETCH_TIMEOUT_MS = 15_000
+
+/**
+ * @typedef {{ url: string, title: string, avatar?: string }} RssFeed
+ * @typedef {{
+ *   id: string,
+ *   url: string,
+ *   title: string,
+ *   author: string,
+ *   thumbnail: string,
+ *   published: number | null,
+ *   feedUrl: string,
+ *   duration?: number,
+ *   enclosure?: boolean,
+ *   isNew?: boolean
+ * }} RssFeedItem
+ */
+
+/**
+ * Feed items and images load from the user's own servers. Only plain web URLs
+ * without embedded credentials are accepted.
+ * @param {unknown} value
+ * @param {string} [base]
+ * @returns {string | null}
+ */
+export function normalizeHttpUrl(value, base) {
+  if (typeof value !== 'string' || value.trim() === '') return null
+  try {
+    const url = new URL(value.trim(), base)
+    if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.username || url.password) return null
+    return url.href
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {Element} parent
+ * @param {string[]} names
+ */
+function childElements(parent, names) {
+  return Array.from(parent.children).filter(child => names.includes(child.localName))
+}
+
+/**
+ * @param {Element} parent
+ * @param {string[]} names
+ */
+function childText(parent, names) {
+  for (const child of childElements(parent, names)) {
+    const text = child.textContent?.trim()
+    if (text) return text
+  }
+  return ''
+}
+
+/**
+ * Atom text constructs can contain HTML. Only the text of the inert parsed
+ * document is kept, so supplied markup never renders.
+ * @param {Element} parent
+ * @param {string[]} names
+ */
+function childPlainText(parent, names) {
+  const element = childElements(parent, names).find(child => child.textContent?.trim())
+  const text = element?.textContent?.trim() ?? ''
+  return element?.getAttribute('type') === 'html'
+    ? new DOMParser().parseFromString(text, 'text/html').body.textContent?.trim() ?? ''
+    : text
+}
+
+/**
+ * Podcast episodes play from their media, their page often only has show notes.
+ * @param {Element} item
+ * @param {string} base
+ * @returns {string | null}
+ */
+function itemMedia(item, base) {
+  const media = [
+    ...childElements(item, ['enclosure']).map(element => [element.getAttribute('url'), element.getAttribute('type')]),
+    ...childElements(item, ['link']).filter(link => link.getAttribute('rel') === 'enclosure')
+      .map(link => [link.getAttribute('href'), link.getAttribute('type')])
+  ].find(([url, type]) => /^(?:audio|video)\//.test(type ?? '') && normalizeHttpUrl(url, base))
+  return media ? normalizeHttpUrl(media[0], base) : null
+}
+
+/**
+ * The page of an item
+ * @param {Element} item
+ * @param {string} base
+ * @returns {string | null}
+ */
+function itemLink(item, base) {
+  const links = childElements(item, ['link'])
+
+  // Atom links carry their target in `href`, preferring the alternate page
+  const atomLink = links.find(link => link.hasAttribute('href') && (link.getAttribute('rel') ?? 'alternate') === 'alternate')
+  const link = normalizeHttpUrl(atomLink?.getAttribute('href') ?? links.find(link => !link.hasAttribute('href'))?.textContent, base)
+  if (link) return link
+
+  const guid = childElements(item, ['guid'])[0]
+  if (guid && guid.getAttribute('isPermaLink') !== 'false') {
+    const permalink = normalizeHttpUrl(guid.textContent, base)
+    if (permalink) return permalink
+  }
+  return null
+}
+
+/**
+ * Podcast episodes link their audio as an enclosure.
+ * @param {Element} item
+ */
+function isPodcastEpisode(item) {
+  return [
+    ...childElements(item, ['enclosure']),
+    ...childElements(item, ['link']).filter(link => link.getAttribute('rel') === 'enclosure')
+  ].some(element => element.getAttribute('type')?.startsWith('audio/'))
+}
+
+/**
+ * @param {Element} item
+ * @param {string} base
+ */
+function itemThumbnail(item, base) {
+  const descendants = Array.from(item.getElementsByTagName('*'))
+  const candidates = [
+    ...descendants.filter(element => element.localName === 'thumbnail').map(element => element.getAttribute('url')),
+    ...descendants.filter(element => element.localName === 'content' &&
+      (element.getAttribute('medium') === 'image' || element.getAttribute('type')?.startsWith('image/')))
+      .map(element => element.getAttribute('url')),
+    ...childElements(item, ['enclosure']).filter(element => element.getAttribute('type')?.startsWith('image/'))
+      .map(element => element.getAttribute('url')),
+    ...childElements(item, ['image']).map(element => element.getAttribute('href'))
+  ]
+  for (const candidate of candidates) {
+    const url = normalizeHttpUrl(candidate, base)
+    if (url) return url
+  }
+
+  // Feeds such as RSSHub put the thumbnail into the HTML description. The
+  // parsed document is inert, so its images don't load.
+  for (const html of childElements(item, ['encoded', 'content', 'description', 'summary'])) {
+    const source = html.getAttribute('type') === 'xhtml' ? html.innerHTML : html.textContent
+    if (!source?.includes('<img')) continue
+    const image = new DOMParser().parseFromString(source, 'text/html').querySelector('img[src]')
+    const url = normalizeHttpUrl(image?.getAttribute('src'), base)
+    if (url) return url
+  }
+  return ''
+}
+
+/**
+ * @param {Element} item
+ */
+function itemAuthor(item) {
+  const atomAuthor = childElements(item, ['author']).find(author => author.children.length > 0)
+  if (atomAuthor) return childText(atomAuthor, ['name'])
+  // RSS 2.0 authors are email addresses, usually followed by the name
+  const author = childText(item, ['creator', 'author'])
+  return author.match(/^\S+@\S+\s+\((.+)\)$/)?.[1] ?? author
+}
+
+/**
+ * @param {Element} item
+ */
+function itemPublished(item) {
+  // Publication dates win over update dates, whatever their order in the feed
+  for (const name of ['published', 'pubDate', 'issued', 'date', 'updated']) {
+    const published = Date.parse(childText(item, [name]))
+    if (!Number.isNaN(published)) return published
+  }
+  return null
+}
+
+/**
+ * The feed's own image, for example a podcast cover or a channel avatar.
+ * @param {Element} channel
+ * @param {string} base
+ */
+function feedImage(channel, base) {
+  const candidates = [
+    ...childElements(channel, ['image']).flatMap(image => [image.getAttribute('href'), childText(image, ['url'])]),
+    childText(channel, ['icon']),
+    childText(channel, ['logo'])
+  ]
+  for (const candidate of candidates) {
+    const url = normalizeHttpUrl(candidate, base)
+    if (url) return url
+  }
+  return null
+}
+
+/**
+ * RSSHub routes that belong to a single creator. RSSHub instances run on any
+ * host, so the routes only apply to feeds that RSSHub generated.
+ * @type {{ pattern: RegExp, creator: (match: RegExpMatchArray) => Record<string, string> }[]}
+ */
+const RSSHUB_CREATOR_ROUTES = [
+  {
+    pattern: /^\/twitch\/(?:video|live|schedule)\/([a-zA-Z0-9_]+)(?:\/|$)/,
+    creator: ([, login]) => ({ webpage_url: `https://www.twitch.tv/${login.toLowerCase()}`, channel: login.toLowerCase() })
+  }
+]
+
+/**
+ * The creator of an RSSHub feed, in the shape of yt-dlp metadata for the
+ * creator avatar lookup.
+ * @param {string} feedUrl
+ */
+export function getRssHubCreator(feedUrl) {
+  try {
+    const { pathname } = new URL(feedUrl)
+    for (const route of RSSHUB_CREATOR_ROUTES) {
+      const match = pathname.match(route.pattern)
+      if (match) return route.creator(match)
+    }
+  } catch { }
+  return null
+}
+
+/**
+ * Reads RSS 2.0, RSS 1.0 (RDF) and Atom feeds.
+ * @param {string} source
+ * @param {string} feedUrl the followed address, which identifies the feed's items
+ * @param {string} [baseUrl] the address after redirects, for relative links
+ * @returns {{ title: string, items: RssFeedItem[], image: string | null, isRssHub: boolean }}
+ */
+export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
+  const document = new DOMParser().parseFromString(source, 'application/xml')
+  const root = document.documentElement
+  if (document.getElementsByTagName('parsererror').length > 0 || !['rss', 'RDF', 'feed'].includes(root.localName)) {
+    throw new Error('Not an RSS or Atom feed')
+  }
+
+  const channel = root.localName === 'feed' ? root : childElements(root, ['channel'])[0]
+  if (!channel) throw new Error('Not an RSS or Atom feed')
+
+  const title = childPlainText(channel, ['title']) || new URL(feedUrl).hostname
+  const image = feedImage(channel, baseUrl)
+  const entries = root.localName === 'feed'
+    ? childElements(root, ['entry'])
+    : childElements(root.localName === 'RDF' ? root : channel, ['item'])
+
+  const items = entries.flatMap(entry => {
+    // Podcast feeds without a page link still point to their media
+    const media = itemMedia(entry, baseUrl) ??
+      (itemLink(entry, baseUrl) ? null : normalizeHttpUrl(childElements(entry, ['enclosure'])[0]?.getAttribute('url'), baseUrl))
+    const url = media ?? itemLink(entry, baseUrl)
+    if (!url) return []
+    const podcastEpisode = isPodcastEpisode(entry)
+    const duration = podcastEpisode ? parsePodcastDuration(childText(entry, ['duration'])) : undefined
+    return [{
+      id: childText(entry, ['id', 'guid']) || url,
+      url,
+      title: childPlainText(entry, ['title']) || url,
+      author: itemAuthor(entry) || title,
+      // Episodes without their own image show the podcast's cover
+      thumbnail: itemThumbnail(entry, baseUrl) || (podcastEpisode ? image ?? '' : ''),
+      published: itemPublished(entry),
+      feedUrl,
+      ...(duration === undefined ? {} : { duration }),
+      // Media files carry no title or cover of their own, so the item supplies them
+      ...(media === null ? {} : { enclosure: true })
+    }]
+  })
+  items.sort(compareFeedItems)
+  return {
+    title,
+    items,
+    image,
+    isRssHub: childText(channel, ['generator']).startsWith('RSSHub')
+  }
+}
+
+/**
+ * Newest first, undated items last.
+ * @param {RssFeedItem} a
+ * @param {RssFeedItem} b
+ */
+function compareFeedItems(a, b) {
+  return (b.published ?? -Infinity) - (a.published ?? -Infinity)
+}
+
+/** The site only lets browsers through after a check, such as a Cloudflare challenge */
+export class RssFeedBrowserCheckError extends Error {}
+
+/**
+ * @param {Response} response
+ */
+async function isBrowserCheck(response) {
+  if (response.headers.get('cf-mitigated') === 'challenge') return true
+  if (!response.headers.get('content-type')?.includes('text/html')) return false
+  return /challenges\.cloudflare\.com|_cf_chl_opt|<title>Just a moment\.\.\.<\/title>/i.test(await response.text())
+}
+
+/**
+ * @param {string} url
+ * @param {AbortSignal} [signal]
+ */
+export async function fetchRssFeed(url, signal) {
+  const response = await appFetch(url, {
+    credentials: 'omit',
+    referrerPolicy: 'no-referrer',
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(FETCH_TIMEOUT_MS)]) : AbortSignal.timeout(FETCH_TIMEOUT_MS)
+  })
+  if (!response.ok) {
+    if (await isBrowserCheck(response)) throw new RssFeedBrowserCheckError(`Feed requires a browser check (HTTP ${response.status})`)
+    throw new Error(`Feed returned HTTP ${response.status}`)
+  }
+  return parseRssFeed(await response.text(), url, response.url || url)
+}
+
+const NEXT_AUTO_REFRESH_STORAGE_KEY = 'rssFeedsNextAutoRefresh'
+const LAST_REFRESH_STORAGE_KEY = 'rssFeedsLastRefresh'
+const MAX_SEEN_HISTORY_PER_FEED = 500
+
+/**
+ * @returns {Map<string, boolean>} whether each marked item is seen
+ */
+function loadRssFeedSeenMarks() {
+  return toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
+}
+
+/**
+ * Items marked as seen are no longer new, items marked as unseen are new again.
+ * @param {RssFeedItem[]} items
+ * @param {Map<string, boolean>} marks whether each marked item is seen
+ */
+function applySeenMarks(items, marks) {
+  if (marks.size === 0) return items
+  let changed = false
+  const marked = items.map((item) => {
+    const seen = marks.get(getRssFeedItemKey(item))
+    if (seen === undefined || seen === (item.isNew !== true)) return item
+    changed = true
+    return { ...item, isNew: !seen }
+  })
+  return changed ? marked : items
+}
+
+/**
+ * The cache keeps a document for each feed with its last loaded items, so that
+ * they show right away after a restart and stay when their feed fails to
+ * refresh, and its seen history, see `seenHistory`.
+ * @typedef {{ items: RssFeedItem[], seen?: string[] }} RssFeedCacheDocument
+ */
+const feedCache = createFeedCacheMirror(RSS_FEED_CACHE_PREFIX, (changes) => {
+  if (changes === null) {
+    // The cache was cleared, so every feed loads again
+    rssFeedItems.value = []
+    seenHistory = new Map()
+    refreshedFeedUrls = new Set()
+  } else {
+    applyCachedFeeds(/** @type {Map<string, RssFeedCacheDocument | null>} */ (changes))
+  }
+})
+
+/**
+ * Takes over the cached feeds that loaded or that other windows changed.
+ * @param {Map<string, RssFeedCacheDocument | null>} documents by feed URL, `null` for removed feeds
+ */
+function applyCachedFeeds(documents) {
+  const items = rssFeedItems.value.filter(item => !documents.has(item.feedUrl))
+  const history = new Map([...seenHistory].filter(([url]) => !documents.has(url)))
+  for (const [url, document] of documents) {
+    if (Array.isArray(document?.items)) items.push(...document.items)
+    if (Array.isArray(document?.seen)) history.set(url, document.seen)
+  }
+  rssFeedItems.value = applySeenMarks(items.sort(compareFeedItems), loadRssFeedSeenMarks())
+  seenHistory = history
+}
+
+// Earlier versions kept the cache in the local storage
+const LOCAL_STORAGE_CACHE_KEYS = { itemsKey: 'rssFeedItems', historyKey: 'rssFeedSeenHistory' }
+
+/** @returns {Map<string, RssFeedCacheDocument> | null} */
+function readLocalStorageCache() {
+  const { itemsKey, historyKey } = LOCAL_STORAGE_CACHE_KEYS
+  try {
+    if (localStorage.getItem(itemsKey) === null && localStorage.getItem(historyKey) === null) return null
+    const items = JSON.parse(localStorage.getItem(itemsKey) ?? '[]')
+    const history = JSON.parse(localStorage.getItem(historyKey) ?? '{}')
+    /** @type {Map<string, RssFeedCacheDocument>} */
+    const documents = new Map()
+    for (const item of Array.isArray(items) ? items : []) {
+      if (typeof item?.feedUrl !== 'string') continue
+      if (!documents.has(item.feedUrl)) documents.set(item.feedUrl, { items: [] })
+      documents.get(item.feedUrl).items.push(item)
+    }
+    for (const [url, ids] of Object.entries(history !== null && typeof history === 'object' ? history : {})) {
+      if (Array.isArray(ids)) documents.set(url, { items: documents.get(url)?.items ?? [], seen: ids })
+    }
+    return documents
+  } catch {
+    return new Map()
+  }
+}
+
+/**
+ * Resolves once the cached items and seen history loaded. Before, a refresh
+ * would take every feed for new.
+ */
+export const rssFeedCacheLoaded = feedCache.loaded.then((documents) => {
+  const migrated = documents.size === 0 ? readLocalStorageCache() : null
+  applyCachedFeeds(/** @type {Map<string, RssFeedCacheDocument>} */ (migrated ?? documents))
+  // Kept until the datastore has them, so a failed write loses nothing
+  if (migrated) {
+    saveRssFeedCache().then((saved) => { if (saved) removeLocalStorageCache() })
+  } else {
+    removeLocalStorageCache()
+  }
+})
+
+function removeLocalStorageCache() {
+  try {
+    for (const key of Object.values(LOCAL_STORAGE_CACHE_KEYS)) localStorage.removeItem(key)
+  } catch {
+    // Without access, there is nothing to remove either
+  }
+}
+
+/** Writes the documents of the feeds that changed */
+function saveRssFeedCache() {
+  return feedCache.save(() => {
+    /** @type {Map<string, RssFeedCacheDocument>} */
+    const documents = new Map()
+    for (const item of rssFeedItems.value) {
+      if (!documents.has(item.feedUrl)) documents.set(item.feedUrl, { items: [] })
+      documents.get(item.feedUrl).items.push(item)
+    }
+    for (const [url, seen] of seenHistory) documents.set(url, { items: documents.get(url)?.items ?? [], seen })
+    return documents
+  })
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+function setRssFeedItems(items) {
+  rssFeedItems.value = items
+  return saveRssFeedCache()
+}
+
+/**
+ * @param {Map<string, string[]>} history
+ */
+function setSeenHistory(history) {
+  seenHistory = history
+  return saveRssFeedCache()
+}
+
+/**
+ * @param {Map<string, string[]>} history updated in place
+ * @param {string} feedUrl
+ * @param {RssFeedItem[]} items the freshly loaded items of the feed
+ * @param {RssFeedItem[]} previousItems the items of the feed it replaces
+ */
+function recordSeenHistory(history, feedUrl, items, previousItems) {
+  // Items seen since the last refresh may have left the feed already
+  const seenIds = new Set([...items, ...previousItems].filter(item => item.isNew !== true).map(item => item.id))
+  const ids = new Set(items.map(item => item.id))
+  // The seen items of the feed all stay, however many it has
+  history.set(feedUrl, [
+    ...seenIds,
+    ...(history.get(feedUrl) ?? []).filter(id => !seenIds.has(id) && !ids.has(id))
+  ].slice(0, Math.max(MAX_SEEN_HISTORY_PER_FEED, seenIds.size)))
+}
+
+/**
+ * @param {string} key
+ * @returns {number | null}
+ */
+function loadStoredTimestamp(key) {
+  try {
+    const timestamp = Number(localStorage.getItem(key))
+    return timestamp > 0 ? timestamp : null
+  } catch {
+    return null
+  }
+}
+
+/** @returns {number | null} */
+export function loadRssFeedsNextAutoRefresh() {
+  return loadStoredTimestamp(NEXT_AUTO_REFRESH_STORAGE_KEY)
+}
+
+/**
+ * The deadline is shared, so that only one window refreshes the feeds.
+ * @param {number | null} timestamp
+ */
+export function setRssFeedsNextAutoRefresh(timestamp) {
+  rssFeedsNextAutoRefresh.value = timestamp
+  try {
+    if (timestamp === null) {
+      localStorage.removeItem(NEXT_AUTO_REFRESH_STORAGE_KEY)
+    } else {
+      localStorage.setItem(NEXT_AUTO_REFRESH_STORAGE_KEY, String(timestamp))
+    }
+  } catch (error) {
+    console.error('Failed to save the next RSS feed refresh', error)
+  }
+}
+
+/**
+ * The auto refresh interval in milliseconds, 0 while it doesn't apply.
+ */
+export function getRssFeedsAutoRefreshInterval() {
+  if (!supportsYtDlp || !store.getters.getEnableRssFeeds || store.getters.getFollowedRssFeeds.length === 0) {
+    return 0
+  }
+  return Math.max(Number.parseInt(store.getters.getRssFeedsAutoRefreshInterval, 10) || 0, 0)
+}
+
+/** @type {import('vue').ShallowRef<RssFeedItem[]>} */
+export const rssFeedItems = shallowRef([])
+/** URLs of the feeds that failed in the last refresh */
+export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
+/** Whether the user closed the banner for the current failed feeds */
+export const rssFeedErrorsDismissed = shallowRef(false)
+/** When any window last refreshed every feed, kept across restarts like the items */
+export const rssFeedsLastRefresh = shallowRef(loadStoredTimestamp(LAST_REFRESH_STORAGE_KEY))
+/** Whether this window refreshed every feed */
+let refreshedAllHere = false
+const refreshingHere = shallowRef(false)
+/** The locks that other windows hold while they refresh the feeds */
+const otherWindowRefreshes = shallowRef(/** @type {Set<string>} */ (new Set()))
+/** Whether this or another window refreshes the feeds */
+export const rssFeedsRefreshing = computed(() => refreshingHere.value || otherWindowRefreshes.value.size > 0)
+export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
+/** The feeds that the cached items belong to */
+let refreshedFeedUrls = new Set()
+/**
+ * The IDs of the items that weren't new in each feed that loaded before,
+ * newest first. Unlike the cached items, they outlast items that leave their
+ * feed, so that the items keep their state when they come back. A feed that
+ * loaded empty, such as a live stream feed, has no IDs, so that its first item
+ * still becomes new.
+ * @type {Map<string, string[]>}
+ */
+let seenHistory = new Map()
+let activeRefresh = null
+/** Names this window's running refresh to the others */
+let activeRefreshLockName = null
+/** Feeds that were added or retried on their own during the active refresh, with their items cached */
+let loadedDuringRefresh = new Set()
+
+const REFRESH_LOCK_PREFIX = 'opentubex-rss-feeds-refresh:'
+/** @type {BroadcastChannel | null} */
+let refreshChannel = null
+
+/**
+ * @param {string} lockName held by another window until its refresh ends
+ */
+function trackOtherWindowRefresh(lockName) {
+  if (otherWindowRefreshes.value.has(lockName)) return
+  otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value, lockName])
+  // Granted once the refresh ends, also when its window closes or crashes
+  navigator.locks.request(lockName, () => {
+    otherWindowRefreshes.value = new Set([...otherWindowRefreshes.value].filter(name => name !== lockName))
+  })
+}
+
+if (typeof window !== 'undefined') {
+  // Other windows refresh the feeds too
+  window.addEventListener('storage', (event) => {
+    if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
+    if (event.key === null || event.key === LAST_REFRESH_STORAGE_KEY) rssFeedsLastRefresh.value = loadStoredTimestamp(LAST_REFRESH_STORAGE_KEY)
+  })
+
+  // Every window shows the refreshes of the others and can cancel them
+  if (navigator.locks && typeof BroadcastChannel !== 'undefined') {
+    refreshChannel = new BroadcastChannel('opentubex-rss-feeds-refresh')
+    refreshChannel.addEventListener('message', ({ data }) => {
+      if (data?.type === 'started' && typeof data.lockName === 'string') trackOtherWindowRefresh(data.lockName)
+      // Only the refreshes the other window saw, not one that started since
+      if (data?.type === 'cancel' && data.lockNames?.includes(activeRefreshLockName)) activeRefresh?.abort()
+    })
+    navigator.locks.query().then(({ held }) => {
+      for (const { name } of held ?? []) {
+        if (name?.startsWith(REFRESH_LOCK_PREFIX)) trackOtherWindowRefresh(name)
+      }
+    })
+  }
+}
+
+/**
+ * @param {RssFeedItem} item
+ */
+export function getRssFeedItemKey(item) {
+  return `${item.feedUrl}\n${item.id}`
+}
+
+/**
+ * Items that appeared since the previous load of their feed are new until
+ * they are seen. The first load of a feed has nothing to compare to.
+ * @param {string} feedUrl
+ * @param {RssFeedItem[]} items
+ * @param {RssFeedItem[]} previousItems the cached items of the same feed
+ */
+function reconcileNewItems(feedUrl, items, previousItems) {
+  // Items can be marked on another device before they load here
+  const entries = parseRssFeedSeenItems(store.getters.getRssFeedSeenItems)
+  unwatchItemsMarkedUnseen(items, entries)
+  const marks = toRssFeedSeenMarks(entries)
+  const seenIds = seenHistory.get(feedUrl)
+  if (seenIds === undefined && previousItems.length === 0) return applySeenMarks(items, marks)
+  const previousById = new Map(previousItems.map(item => [item.id, item]))
+  const seenBefore = new Set(seenIds)
+  return items.map((item) => {
+    const previous = previousById.get(item.id)
+    const seen = marks.get(getRssFeedItemKey(item))
+    return (seen === undefined ? (previous ? previous.isNew === true : !seenBefore.has(item.id)) : !seen)
+      ? { ...item, isNew: true }
+      : item
+  })
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+export function markRssFeedItemsAsSeen(items) {
+  setRssFeedItemsSeen(items, true)
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+export function markRssFeedItemsAsUnseen(items) {
+  setRssFeedItemsSeen(items, false)
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ * @param {boolean} seen
+ */
+function setRssFeedItemsSeen(items, seen) {
+  const keys = new Set(items.map(getRssFeedItemKey))
+  // A fresh unseen mark also outlasts an older seen mark from another device,
+  // even for a new item that is only out of the New feed because it was watched
+  const changedKeys = rssFeedItems.value
+    .filter(item => (!seen || item.isNew === true) && keys.has(getRssFeedItemKey(item)))
+    .map(getRssFeedItemKey)
+  if (changedKeys.length === 0) return
+  store.dispatch('mergeRssFeedSeenItems', { keys: changedKeys, seen }).catch((error) => {
+    console.error('Failed to save the seen RSS feed items', error)
+  })
+  setRssFeedItems(applySeenMarks(rssFeedItems.value, new Map(changedKeys.map(key => [key, seen]))))
+}
+
+// Marks also change in other windows and with syncs
+store.watch((_, getters) => getters.getRssFeedSeenItems, () => {
+  const items = applySeenMarks(rssFeedItems.value, loadRssFeedSeenMarks())
+  if (items !== rssFeedItems.value) setRssFeedItems(items)
+})
+
+/**
+ * Devices can watch an item and mark it as unseen without knowing about each
+ * other. The later change wins, so an unseen mark after the item was last
+ * saved as watched unmarks it as watched, and brings it back to the New feed.
+ * Items that are out of their feed when a mark syncs catch up when they load.
+ * @param {RssFeedItem[]} items
+ * @param {import('./rssFeedSeenItems').RssFeedSeenItem[]} entries
+ */
+function unwatchItemsMarkedUnseen(items, entries) {
+  const unseenAt = new Map(entries.filter(entry => !isRssFeedItemSeen(entry)).map(entry => [entry.key, entry.unseenAt ?? 0]))
+  if (unseenAt.size === 0) return
+  for (const item of items) {
+    const timestamp = unseenAt.get(getRssFeedItemKey(item))
+    if (timestamp !== undefined) unwatchExternalMediaMarkedUnseen(store, item.url, timestamp)
+  }
+}
+
+onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(rssFeedItems.value, entries))
+
+/**
+ * The feeds whose cached items don't need a refresh. Removed feeds are filtered
+ * out of the cached items, added ones need a refresh. Before the first refresh
+ * in a window, the items cached by earlier sessions cover the feeds that loaded
+ * before (those with a seen history), unless feeds are fetched on startup.
+ * @returns {Set<string>}
+ */
+export function getCachedRssFeedUrls() {
+  if (refreshedAllHere) return new Set(refreshedFeedUrls)
+  if (store.getters.getFetchSubscriptionsAutomatically) return new Set()
+  return new Set([...seenHistory.keys(), ...refreshedFeedUrls])
+}
+
+/**
+ * The cached item whose media file is at `url`, such as a podcast episode, and
+ * the followed feed it belongs to.
+ * @param {string} url
+ * @returns {{ item: RssFeedItem, feed: RssFeed | null } | null}
+ */
+export function findRssFeedMediaItem(url) {
+  const item = rssFeedItems.value.find(candidate => candidate.enclosure === true && candidate.url === url)
+  if (!item) return null
+  /** @type {RssFeed[]} */
+  const feeds = store.getters.getFollowedRssFeeds
+  return { item, feed: feeds.find(feed => feed.url === item.feedUrl) ?? null }
+}
+
+/**
+ * Creator avatars of RSSHub feeds come from the creator's platform, other
+ * feeds can supply their own image.
+ * @param {string} feedUrl
+ * @param {{ image: string | null, isRssHub: boolean }} feed
+ * @returns {Promise<string | null>}
+ */
+export async function resolveRssFeedAvatar(feedUrl, { image, isRssHub }) {
+  const creator = isRssHub ? getRssHubCreator(feedUrl) : null
+  const avatar = creator ? await resolveYtDlpCreatorAvatarUrl(creator, appFetch) : null
+  return avatar ?? image
+}
+
+/** Feeds whose avatar was already looked up in this window */
+const avatarLookups = new Set()
+
+/**
+ * Looks up the avatars of followed feeds that don't have one yet, once per window.
+ * @param {[RssFeed, { image: string | null, isRssHub: boolean }][]} results
+ */
+export async function updateMissingRssFeedAvatars(results) {
+  const pending = results.filter(([feed]) => !feed.avatar && !avatarLookups.has(feed.url))
+  if (pending.length === 0) return
+  pending.forEach(([feed]) => avatarLookups.add(feed.url))
+
+  const avatars = new Map()
+  await Promise.all(pending.map(async ([feed, result]) => {
+    const avatar = await resolveRssFeedAvatar(feed.url, result).catch(() => null)
+    if (avatar) avatars.set(feed.url, avatar)
+  }))
+  if (avatars.size === 0) return
+
+  // Feeds can change while the lookups run
+  await store.dispatch('updateFollowedRssFeeds', feeds => feeds.map(feed => (
+    avatars.has(feed.url) && !feed.avatar ? { ...feed, avatar: avatars.get(feed.url) } : feed
+  )))
+}
+
+/**
+ * Adds a freshly loaded feed to the cached items, so that adding or retrying a
+ * feed doesn't reload the others.
+ * @param {RssFeed} feed
+ * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
+ * @returns {Promise<void>} once the items are cached
+ */
+export async function addLoadedRssFeed(feed, result) {
+  await rssFeedCacheLoaded
+  const previousItems = rssFeedItems.value.filter(item => item.feedUrl === feed.url)
+  const items = reconcileNewItems(feed.url, result.items, previousItems)
+  setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...items].sort(compareFeedItems))
+  const history = new Map(seenHistory)
+  recordSeenHistory(history, feed.url, items, previousItems)
+  const saved = setSeenHistory(history)
+  refreshedFeedUrls.add(feed.url)
+  loadedDuringRefresh.add(feed.url)
+  setRssFeedErrors(rssFeedErrors.value.filter(url => url !== feed.url))
+  await saved
+}
+
+/**
+ * A closed banner stays closed until the set of failed feeds changes.
+ * @param {string[]} urls
+ */
+function setRssFeedErrors(urls) {
+  const previous = new Set(rssFeedErrors.value)
+  if (urls.length !== previous.size || urls.some(url => !previous.has(url))) {
+    rssFeedErrorsDismissed.value = false
+  }
+  rssFeedErrors.value = urls
+}
+
+/**
+ * @param {RssFeed} feed
+ */
+export async function retryRssFeed(feed) {
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
+  try {
+    const result = await fetchRssFeed(feed.url)
+    await addLoadedRssFeed(feed, result)
+    updateMissingRssFeedAvatars([[feed, result]])
+  } finally {
+    releaseBackgroundHold()
+  }
+}
+
+const AUTO_REFRESH_TOAST_DURATION = 5000
+
+/**
+ * @param {RssFeed[]} feeds
+ * @param {{ automatic?: boolean, cachedUrls?: Set<string> }} [options] `cachedUrls`
+ * are feeds that keep their cached items instead of loading, such as the
+ * feeds that loaded in an earlier session. The refresh then only loads the
+ * others, and doesn't count as a refresh of all feeds.
+ */
+export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = new Set() } = {}) {
+  activeRefresh?.abort()
+  const controller = new AbortController()
+  activeRefresh = controller
+  loadedDuringRefresh = new Set()
+  refreshingHere.value = true
+  let finish
+  const finished = new Promise(resolve => { finish = resolve })
+  if (refreshChannel) {
+    const lockName = REFRESH_LOCK_PREFIX + crypto.randomUUID()
+    activeRefreshLockName = lockName
+    navigator.locks.request(lockName, () => {
+      refreshChannel.postMessage({ type: 'started', lockName })
+      return finished
+    })
+  }
+  // Shown as a notification or in the progress bar, like subscription refreshes
+  const message = i18n.global.t('Subscriptions.RSS Feeds.Refreshing')
+  const progress = startProgressBarOperation(store, { icon: ['fas', 'rss'], message, percentage: 0 })
+  if (automatic && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
+    showToastOnAllTabs(message, AUTO_REFRESH_TOAST_DURATION, ['fas', 'rss'])
+  }
+
+  // Keep a hidden Android app running until the refresh ends. Subscription
+  // refresh batches must not wait for RSS feeds, so this holds on its own.
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
+  try {
+    const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
+    const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))
+    let settledCount = 0
+    const results = await Promise.allSettled(fetchedFeeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
+      if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / fetchedFeeds.length) * 100 })
+    })))
+    await rssFeedCacheLoaded
+    if (controller.signal.aborted) return
+
+    // Feeds added or retried while this refresh ran keep their own, newer result,
+    // and cached feeds and feeds that fail keep their previous items
+    const loadedUrls = loadedDuringRefresh
+    const failedUrls = new Set(fetchedFeeds.filter((feed, index) => results[index].status === 'rejected' && !loadedUrls.has(feed.url))
+      .map(feed => feed.url))
+    const previousItems = rssFeedItems.value
+    /** @type {Map<string, RssFeedItem[]>} */
+    const refreshedItems = new Map(results.flatMap((result, index) => (
+      result.status === 'fulfilled' && !loadedUrls.has(fetchedFeeds[index].url)
+        ? [[fetchedFeeds[index].url, reconcileNewItems(fetchedFeeds[index].url, result.value.items, previousItems.filter(item => item.feedUrl === fetchedFeeds[index].url))]]
+        : []
+    )))
+    setRssFeedItems([
+      ...rssFeedItems.value.filter(item => cachedFeedUrls.has(item.feedUrl) || loadedUrls.has(item.feedUrl) || failedUrls.has(item.feedUrl)),
+      ...[...refreshedItems.values()].flat()
+    ].sort(compareFeedItems))
+    setRssFeedErrors([...rssFeedErrors.value.filter(url => cachedFeedUrls.has(url)), ...failedUrls])
+    if (cachedFeedUrls.size === 0) {
+      refreshedAllHere = true
+      rssFeedsLastRefresh.value = Date.now()
+      try {
+        localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(rssFeedsLastRefresh.value))
+      } catch (error) {
+        console.error('Failed to save the last RSS feed refresh', error)
+      }
+      const interval = getRssFeedsAutoRefreshInterval()
+      setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
+    }
+    refreshedFeedUrls = new Set([...feeds.map(feed => feed.url), ...loadedUrls])
+    // Removed feeds start over when they are added again
+    const feedUrls = new Set(feeds.map(feed => feed.url))
+    const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
+    for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items, previousItems.filter(item => item.feedUrl === url))
+    const saved = setSeenHistory(history)
+    updateMissingRssFeedAvatars(fetchedFeeds.flatMap((feed, index) => {
+      const result = results[index]
+      return result.status === 'fulfilled' ? [[feed, result.value]] : []
+    }))
+    // A hidden Android app keeps running until the items are written
+    await saved
+  } finally {
+    releaseBackgroundHold()
+    finish()
+    progress.finish()
+    if (activeRefresh === controller) {
+      activeRefresh = null
+      activeRefreshLockName = null
+      refreshingHere.value = false
+    }
+  }
+}
+
+/**
+ * Stops the running refreshes of every window. Their feeds keep their previous
+ * items and errors.
+ */
+export function cancelRssFeedsRefresh() {
+  activeRefresh?.abort()
+  refreshChannel?.postMessage({ type: 'cancel', lockNames: [...otherWindowRefreshes.value] })
+}
+
+export function openRssFeedManager() {
+  store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'rss-feeds' })
+  store.dispatch('showSettingsWindow')
+}

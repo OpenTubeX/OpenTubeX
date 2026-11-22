@@ -1,0 +1,533 @@
+import { sel, readDatastore } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
+import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
+
+// The official Blender channel.
+const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
+const CHANNEL_ID = 'UCSMOQeBJ2RAnuFungnQOxLg'
+const GLITCH_CHANNEL_URL = 'https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g'
+
+test.describe('channel page', () => {
+  test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
+
+  test('loads the GLITCH channel home and playlists tabs', async ({ app, page }) => {
+    await page.locator(sel.searchInput).fill(GLITCH_CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
+    await page.getByRole('tab', { name: 'Home' }).click()
+    await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
+
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].setSize(1600, 900)
+    })
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 95))
+    await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
+      return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+    }), { message: 'Gap to Home content at 1600px and 95% UI scale' }).toBe(46)
+    await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
+      const header = card.previousElementSibling.getBoundingClientRect()
+      return Math.round(card.getBoundingClientRect().top - header.bottom) || 0
+    }), { message: 'Spacing between Home cards at 1600px and 95% UI scale' }).toBe(10)
+
+    await page.getByRole('tab', { name: 'Playlists' }).click()
+    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'transitionProperty', 'opacity, scale')
+    await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    const show = page.locator('#playlistPanel .ft-list-video')
+      .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
+      .filter({ has: page.locator('a.title[href^="#/playlist/PLTqcR5ouTGRU?"]') })
+    await expect(show.locator('.videoCountContainer .inner > div').first()).toHaveText('3 seasons')
+    expect(await show.locator('.videoCountContainer').evaluate(element => {
+      const badge = element.getBoundingClientRect()
+      const label = element.querySelector('.inner > div').getBoundingClientRect()
+      return label.left >= badge.left && label.right <= badge.right
+    })).toBe(true)
+    await expect(show.getByRole('link', { name: 'Meta Runner' })).toHaveAttribute('href', /^#\/playlist\/PLTqcR5ouTGRU\?/)
+    await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
+  })
+
+  test('shows channel info and videos', async ({ page }, testInfo) => {
+    const pendingLinkIcons = []
+    let failLinkIcons = false
+    await page.route('https://encrypted-tbn2.gstatic.com/favicon-tbn**', route => {
+      if (failLinkIcons) return route.abort()
+      pendingLinkIcons.push(route)
+    })
+    let releaseVideos
+    const heldVideos = new Promise(resolve => { releaseVideos = resolve })
+    let videosRequested = false
+    const keyFor = request => fixtureKey(request.url(), request.postData())
+
+    await page.route(/\/youtubei\/v1\/browse/, async route => {
+      if (keyFor(route.request()) !== 'browse-43cf009333cb') {
+        return route.fallback()
+      }
+
+      videosRequested = true
+      await heldVideos
+      return route.fallback()
+    })
+
+    await page.locator(sel.searchInput).fill(CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg/)
+    await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
+    try {
+      // The channel opens on its Home tab and loads other tabs when they are
+      // first opened, so opening Videos starts the held request.
+      await expect(page.getByRole('tab', { name: 'Home' })).toHaveAttribute('aria-selected', 'true')
+      expect(videosRequested).toBe(false)
+      await page.getByRole('tab', { name: 'Videos' }).click()
+      await expect.poll(() => videosRequested).toBe(true)
+      await page.getByRole('tab', { name: 'Shorts' }).click()
+      await expect(page.locator('#shortPanel .ft-list-video').first()).toBeVisible()
+      await page.getByRole('tab', { name: 'Videos' }).click()
+      await expect(page.locator('.elementList')).toHaveCount(0)
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+      await expect(page.getByText('This channel has videos but none could be displayed, try fetching more')).toHaveCount(0)
+    } finally {
+      releaseVideos()
+    }
+    await expect(page.locator('#videoPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('body')).toHaveCSS('--ui-roundness', '2')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '32px')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '32px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '32px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '32px')
+    await page.evaluate(() => {
+      window.$store.commit('setUiRoundness', 200)
+    })
+    await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
+    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'borderRadius', '48px')
+
+    await page.locator('body').evaluate(element => {
+      element.style.fontFamily = 'Arial, sans-serif'
+    })
+
+    const aboutTab = page.getByRole('tab', { name: 'About' })
+    await expect(aboutTab).toHaveAttribute('aria-selected', 'false')
+    const widthBeforeHover = (await aboutTab.boundingBox()).width
+    await aboutTab.hover()
+    expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
+
+    const selectedTab = page.locator('.channelDetails .selectedTab')
+    const selectedIndicator = selectedTab
+    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    await expectTabHighlightStyle(selectedTab, 'opacity', '1')
+    await expectTabHighlightStyle(aboutTab, 'opacity', '0')
+    await page.keyboard.press('Tab')
+    await selectedTab.focus()
+    await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expectTabHighlightStyle(selectedIndicator, 'backgroundColor', selectedIndicatorColor)
+    await page.mouse.move(0, 0)
+    await aboutTab.focus()
+    await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expectTabHighlightStyle(aboutTab, 'opacity', '0')
+
+    // Channel tab changes must update the route and title without creating a
+    // new history entry for every tab selection (796650405, 912e5ea6e).
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    const historyLength = await page.evaluate(() => history.length)
+
+    const channelSearch = page.locator('.channelSearch input')
+    await channelSearch.fill('animation')
+    await channelSearch.press('Enter')
+    await expect(page).toHaveURL(/searchQueryText=animation/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
+
+    const searchTypeFilters = page.getByRole('group', { name: 'Search result types' })
+    const allResultsFilter = searchTypeFilters.getByRole('button', { name: 'All' })
+    const shortsResultsFilter = searchTypeFilters.getByRole('button', { name: 'Shorts' })
+    const playlistResultsFilter = searchTypeFilters.getByRole('button', { name: 'Playlists' })
+    const videoResults = page.locator('.channelSearchResults .ft-list-video:not(:has(.videoCountContainer))')
+    const playlistResults = page.locator('.channelSearchResults .ft-list-video:has(.videoCountContainer)')
+    await expect(allResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults.first()).toBeVisible()
+    await expect(playlistResults.first()).toBeVisible()
+
+    await shortsResultsFilter.click()
+    await expect(shortsResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults.first()).toBeVisible()
+    await expect(playlistResults).toHaveCount(0)
+
+    await playlistResultsFilter.click()
+    await expect(playlistResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults).toHaveCount(0)
+    await expect(playlistResults.first()).toBeVisible()
+
+    await expect(page.locator('.channelSearch input')).toHaveAttribute('type', 'search')
+    await page.locator('.channelSearch input').fill('')
+    await expect(page).not.toHaveURL(/searchQueryText=/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+
+    await page.locator(sel.newTabButton).click()
+    // The new tab is selected once main has created it; switching back earlier
+    // would leave it to take over afterwards.
+    await expect(page.locator(sel.activeTab)).not.toContainText('Blender')
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
+
+    const selectedChannelTab = page.locator('.channelDetails [role="tab"][aria-selected="true"]')
+    const initialChannelTabId = await selectedChannelTab.getAttribute('id')
+
+    const subscribeButton = page.locator('.ftSubscribeButton .subscribeButton').first()
+    await subscribeButton.focus()
+    await subscribeButton.press('ArrowRight')
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+    await subscribeButton.evaluate((button) => button.blur())
+
+    await page.keyboard.press('ArrowRight')
+    await expect(selectedChannelTab).not.toHaveAttribute('id', initialChannelTabId)
+    await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+    await page.keyboard.press('ArrowLeft')
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+    await page.keyboard.press('ArrowLeft')
+    await expect(selectedChannelTab).toHaveAttribute('id', 'aboutTab')
+    const aboutPanel = page.locator('#aboutPanel')
+    await expect(aboutPanel).toHaveAttribute('role', 'tabpanel')
+    const websiteLink = aboutPanel.getByRole('link', { name: 'blender.org https://www.blender.org/' })
+    await expect(websiteLink).toHaveAttribute('href', 'https://www.blender.org/')
+    await expect(aboutPanel.locator('.aboutLinks a')).toHaveCount(8)
+    await expect(aboutPanel.locator('.aboutLinkIcon')).toHaveCount(8)
+    await expect.poll(() => pendingLinkIcons.length).toBeGreaterThan(0)
+    const linkIcon = websiteLink.locator('.aboutLinkIcon')
+    await expect(linkIcon.locator('img')).toBeHidden()
+    await expect(linkIcon.locator('.retryImagePlaceholder[data-icon="link"]')).toBeVisible()
+    const iconBounds = await linkIcon.locator('.retryImagePlaceholder').boundingBox()
+    expect(iconBounds.width).toBe(24)
+    expect(iconBounds.height).toBe(24)
+    await aboutPanel.locator('.aboutLinks').screenshot({ path: testInfo.outputPath('channel-link-placeholders.png') })
+    failLinkIcons = true
+    while (pendingLinkIcons.length) await pendingLinkIcons.shift().abort()
+    await expect(linkIcon.locator('img')).toHaveCount(0)
+    await expect(linkIcon.locator('[data-icon="link"]')).toBeVisible()
+    const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await page.setViewportSize({ width: 375, height: 812 })
+    const longLink = aboutPanel.locator('.aboutLinks a').first()
+    const longUrl = longLink.locator('.aboutLinkUrl')
+    await longUrl.evaluate(element => {
+      element.textContent = `https://example.com/${'very-long-path-segment'.repeat(8)}`
+    })
+    expect(await longLink.evaluate(link => link.scrollWidth <= link.clientWidth)).toBe(true)
+    await page.setViewportSize(originalViewport)
+
+    const sourceTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    const tagLink = aboutPanel.locator('.aboutTagLink').first()
+    await expect(tagLink).toBeVisible()
+    const tagName = (await tagLink.textContent()).trim()
+    await tagLink.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', sourceTabId)
+    await expect(page).toHaveURL(/\/about$/)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.route.path.startsWith('/search/'))?.id
+    })).toBeTruthy()
+    const tagTabId = await page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.route.path.startsWith('/search/')).id
+    })
+    await expect(page.locator(`.tab[data-tab-id="${tagTabId}"]`)).toContainText(tagName)
+    await page.evaluate(id => window.ftElectron.tabs.close(id), tagTabId)
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    await aboutPanel.dispatchEvent('keydown', { key: 'ArrowRight', bubbles: true })
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+
+    const channelTabIds = await page.locator('.channelDetails [role="tab"]:not(.moreTab)').evaluateAll((tabs) => (
+      tabs.map((tab) => tab.id)
+    ))
+    const initialChannelTabIndex = channelTabIds.indexOf(initialChannelTabId)
+    const rapidArrowTabId = channelTabIds[(initialChannelTabIndex + 3) % channelTabIds.length]
+    await page.evaluate(() => {
+      for (let index = 0; index < 3; index++) {
+        document.body.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          bubbles: true
+        }))
+      }
+    })
+    await expect(selectedChannelTab).toHaveAttribute('id', rapidArrowTabId)
+    await expect(page).toHaveURL(new RegExp(`/${rapidArrowTabId.replace('Tab', '')}$`))
+    await expect(page.locator('[data-tab-loading-indicator].fullscreen')).toHaveCount(0)
+    await page.locator(`#${initialChannelTabId}`).click()
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+
+    await page.locator(sel.tabs).nth(1).click()
+    const subscriptionVideosTab = page.locator('[data-subscription-feed-tab="videos"]')
+    const subscriptionShortsTab = page.locator('[data-subscription-feed-tab="shorts"]')
+    const subscriptionTabs = page.locator('.subscriptionsHeader [role="tab"]')
+    await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('ArrowRight')
+    await expect(subscriptionShortsTab).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+    await page.keyboard.press('ArrowLeft')
+    await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('ArrowLeft')
+    await expect(subscriptionTabs.last()).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('ArrowRight')
+    await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('Alt+ArrowRight')
+    await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
+
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+
+    const channelSearchInput = page.locator('.channelSearch input')
+    await channelSearchInput.focus()
+    await channelSearchInput.press('ArrowRight')
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+
+    const videosTab = page.getByRole('tab', { name: 'Videos' })
+    await videosTab.click()
+    await expect(videosTab).toHaveAttribute('aria-selected', 'true')
+    await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg\/videos/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
+    expect(await page.evaluate(() => history.length)).toBe(historyLength)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+  })
+
+  test('subscribing writes the channel to the profile and back out again', async ({ app, page }) => {
+    await page.locator(sel.searchInput).fill(CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
+
+    const readSubscriptions = async () => {
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      const main = records.filter((record) => record._id === 'allChannels').at(-1)
+      return main?.subscriptions?.map((channel) => channel.id) ?? []
+    }
+
+    const subscribeButton = page.locator('.ftSubscribeButton .subscribeButton').first()
+    await expect(subscribeButton).toHaveText(/^\s*Subscribe/)
+    await subscribeButton.click()
+
+    await expect(subscribeButton).toHaveText(/^\s*Unsubscribe/)
+    await expect.poll(readSubscriptions).toContain(CHANNEL_ID)
+
+    // Unsubscribing is immediate (no confirmation popup by default).
+    await subscribeButton.click()
+    await expect(subscribeButton).toHaveText(/^\s*Subscribe/)
+    await expect.poll(readSubscriptions).not.toContain(CHANNEL_ID)
+  })
+})
+
+test.describe('channel route changes', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
+
+  test('explains when channel videos cannot be displayed and more can be fetched', async ({ page }) => {
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, route => {
+      const url = new URL(route.request().url())
+      if (url.pathname.endsWith('/videos')) {
+        return route.fulfill({
+          json: url.searchParams.has('continuation')
+            ? { videos: [] }
+            : { videos: [], continuation: 'next' }
+        })
+      }
+      return route.fulfill({
+        json: {
+          author: 'Example channel',
+          authorId: CHANNEL_ID,
+          authorThumbnails: [],
+          authorBanners: [],
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          description: '',
+          relatedChannels: [],
+          isFamilyFriendly: true,
+          tabs: ['videos']
+        }
+      })
+    })
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+      json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
+    }))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+    })
+    await page.locator(sel.searchInput).fill(CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+
+    const message = page.getByText('This channel has videos but none could be displayed, try fetching more')
+    await expect(message).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Fetch more' })).toBeVisible()
+    await page.getByRole('button', { name: 'Fetch more' }).click()
+    await expect(message).toHaveCount(0)
+    await expect(page.getByText('This channel does not currently have any videos')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Fetch more' })).toHaveCount(0)
+  })
+
+  test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
+    const videos = [1, 2].map(number => ({
+      videoId: `alpha00000${number}`,
+      title: `Video ${number}`,
+      author: 'Alpha',
+      authorId: CHANNEL_ID,
+      videoThumbnails: [],
+      lengthSeconds: 120,
+      viewCount: 10,
+      published: 1700000000
+    }))
+
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
+      return route.fulfill({
+        json: {
+          author: 'Alpha',
+          authorId: CHANNEL_ID,
+          authorThumbnails: [],
+          authorBanners: [],
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          description: '',
+          relatedChannels: [],
+          isFamilyFriendly: true,
+          tabs: ['videos']
+        }
+      })
+    })
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+      json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
+    }))
+    await page.evaluate((videos) => {
+      const store = window.$store
+      store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+
+      // Resolve video fetches in the renderer so the two completions can be
+      // ordered without Chromium queuing one intercepted network request.
+      const originalFetch = window.fetch.bind(window)
+      window.releaseChannelResponses = {}
+      window.fetch = (...args) => {
+        const url = new URL(args[0] instanceof Request ? args[0].url : args[0])
+        if (!url.pathname.endsWith('/videos')) return originalFetch(...args)
+        const sort = url.searchParams.get('sort_by')
+        if (sort === 'newest' && !url.searchParams.has('continuation')) {
+          return Promise.resolve(Response.json({ videos, continuation: 'next' }))
+        }
+        return new Promise(resolve => {
+          window.releaseChannelResponses[sort] = () => resolve(Response.json({ videos: [] }))
+        })
+      }
+    }, videos)
+
+    try {
+      await page.locator(sel.searchInput).fill(CHANNEL_URL)
+      await page.locator(sel.searchInput).press('Enter')
+      await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}/videos$`))
+      await expect(page.locator('.select-container .select-text').first()).toBeVisible()
+      await expect.poll(() => page.evaluate(() => typeof window.releaseChannelResponses.newest === 'function')).toBe(true)
+      await page.locator('.select-container .select-text').first().click()
+      await page.getByRole('option', { name: 'Most Popular' }).click()
+      await expect.poll(() => page.evaluate(() => typeof window.releaseChannelResponses.popular === 'function')).toBe(true)
+
+      await page.evaluate(() => window.releaseChannelResponses.newest())
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+      await expect(page.getByText('This channel has videos but none could be displayed, try fetching more')).toHaveCount(0)
+    } finally {
+      await page.evaluate(() => Object.values(window.releaseChannelResponses).forEach(release => release()))
+    }
+  })
+
+  for (const tab of ['videos', 'shorts']) {
+    test(`keeps the new channel loading when an older ${tab} request finishes`, async ({ page }) => {
+      const firstId = CHANNEL_ID
+      const secondId = 'UCfMJ2MchTSW2kWaT0kK94Yw'
+      const releaseVideos = new Map()
+      const emptyMessage = tab === 'videos'
+        ? 'This channel does not currently have any videos'
+        : 'This channel does not currently have any shorts'
+
+      await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
+        const parts = new URL(route.request().url()).pathname.split('/')
+        const channelId = parts[4]
+
+        if (parts[5] === tab) {
+          await new Promise(resolve => { releaseVideos.set(channelId, resolve) })
+          return route.fulfill({ json: { videos: [] } })
+        }
+        if (parts[5] === 'videos') return route.fulfill({ json: { videos: [] } })
+
+        return route.fulfill({
+          json: {
+            author: channelId === firstId ? 'Alpha' : 'Beta',
+            authorId: channelId,
+            authorThumbnails: [],
+            authorBanners: [],
+            subCount: 0,
+            totalViews: 0,
+            joined: 0,
+            description: '',
+            relatedChannels: [],
+            isFamilyFriendly: true,
+            tabs: ['videos', 'shorts']
+          }
+        })
+      })
+      await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+        json: {
+          pageType: 'WEB_PAGE_TYPE_CHANNEL',
+          ucid: route.request().url().includes(secondId) ? secondId : firstId
+        }
+      }))
+
+      await page.evaluate(() => {
+        const store = window.$store
+        store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+      })
+
+      try {
+        await page.locator(sel.searchInput).fill(CHANNEL_URL)
+        await page.locator(sel.searchInput).press('Enter')
+        await expect(page).toHaveURL(/#\/channel\//)
+        await expect(page.getByText('Alpha').first()).toBeVisible()
+        if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
+        await expect.poll(() => releaseVideos.has(firstId)).toBe(true)
+        await expect(page).toHaveURL(new RegExp(`#/channel/${firstId}/${tab}$`))
+
+        await page.locator(sel.searchInput).fill(`https://www.youtube.com/channel/${secondId}`)
+        await page.locator(sel.searchInput).press('Enter')
+        await expect(page).toHaveURL(new RegExp(`#/channel/${secondId}`))
+        await expect(page.getByText('Beta').first()).toBeVisible()
+        if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
+        await expect.poll(() => releaseVideos.has(secondId)).toBe(true)
+        await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+
+        const oldResponse = page.waitForResponse(response => response.url().includes(`/channels/${firstId}/${tab}`))
+        releaseVideos.get(firstId)()
+        await oldResponse
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+        await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+        await expect(page.getByText(emptyMessage)).toHaveCount(0)
+      } finally {
+        for (const release of releaseVideos.values()) release()
+      }
+
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
+      await expect(page.getByText(emptyMessage)).toBeVisible()
+    })
+  }
+})

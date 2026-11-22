@@ -1,0 +1,130 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import test from 'node:test'
+import vm from 'node:vm'
+import { getNotificationOpenUrl } from '../../src/notificationHistory.js'
+import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
+import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
+
+const app = readFileSync('src/renderer/App.vue', 'utf8')
+const start = app.indexOf('  const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
+const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start))
+
+function urlOpener(supportsYtDlp = true, platform = 'android') {
+  const youtube = []
+  const externalMedia = []
+  const externalLinks = []
+  const dispatched = []
+  const browserClosed = []
+  const newTabs = []
+  const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, {
+    URL,
+    isSyncServerOidcCallbackUrl,
+    Capacitor: { getPlatform: () => platform },
+    Browser: { close: async () => { browserClosed.push(true) } },
+    getHomeWidgetPage: () => null,
+    getNotificationOpenUrl,
+    handleYoutubeLink: (url, { doCreateNewTab } = {}) => {
+      youtube.push(url)
+      if (doCreateNewTab) newTabs.push(url)
+    },
+    openExternalMedia: async (url, doCreateNewTab) => {
+      externalMedia.push(url)
+      if (!doCreateNewTab) return
+      newTabs.push(url)
+      // On a cold start, a new tab is presented only after the app's setup, which awaits this.
+      await new Promise(() => {})
+    },
+    handleExternalLink: url => externalLinks.push(url),
+    shouldOpenExternalMediaUrl,
+    supportsYtDlp,
+    store: {
+      dispatch: async (...args) => { dispatched.push(args) },
+      getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' },
+    }
+  })
+  return { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed, newTabs }
+}
+
+for (const platform of ['android', 'ios']) {
+  test(`${platform} hands sync server OIDC callbacks to sync instead of opening them`, async () => {
+    const { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed } = urlOpener(true, platform)
+    await openUrl('opentubex://oidc?token=a.b.c')
+    assert.deepEqual(dispatched, [['receiveSyncServerOidcCallback', 'opentubex://oidc?token=a.b.c']])
+    // Android returns to the app on its own; iOS keeps the browser above it.
+    assert.equal(browserClosed.length, platform === 'ios' ? 1 : 0)
+    assert.deepEqual([...youtube, ...externalMedia, ...externalLinks], [])
+  })
+}
+
+for (const [input, expected] of [
+  ['opentubex-nightly://https//youtu.be/test', 'https://youtu.be/test'],
+  ['opentubex-nightly:https://youtu.be/test', 'https://youtu.be/test'],
+]) {
+  test(`Capacitor opens ${input} as a YouTube URL`, async () => {
+    const { openUrl, youtube, externalMedia } = urlOpener()
+    await openUrl(input)
+    assert.deepEqual(youtube, [expected])
+    assert.deepEqual(externalMedia, [])
+  })
+}
+
+test('Android notification links open in a new tab, and other links in the current one', async () => {
+  const { openUrl, youtube, externalMedia, newTabs } = urlOpener()
+  await openUrl('opentubex://notification?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabcdefghijk')
+  // Settles without waiting for the new tab, which a cold start presents only after setup.
+  let settled = false
+  openUrl('opentubex://notification?url=https%3A%2F%2Fwww.twitch.tv%2Fstreamer').then(() => { settled = true })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(settled, true)
+  await openUrl('https://www.youtube.com/watch?v=bcdefghijkl')
+  assert.deepEqual(youtube, ['https://www.youtube.com/watch?v=abcdefghijk', 'https://www.youtube.com/watch?v=bcdefghijkl'])
+  assert.deepEqual(externalMedia, ['https://www.twitch.tv/streamer'])
+  assert.deepEqual(newTabs, ['https://www.youtube.com/watch?v=abcdefghijk', 'https://www.twitch.tv/streamer'])
+})
+
+test('Capacitor opens links from other sites with yt-dlp', async () => {
+  const { openUrl, youtube, externalMedia } = urlOpener()
+  await openUrl('https://www.instagram.com/reel/Chunk8-jurw/')
+  await openUrl('opentubex://https//vimeo.com/56015672')
+  await openUrl('https://invidious.example/watch?v=abcdefghijk')
+  assert.deepEqual(externalMedia, ['https://www.instagram.com/reel/Chunk8-jurw/', 'https://vimeo.com/56015672'])
+  assert.deepEqual(youtube, ['https://invidious.example/watch?v=abcdefghijk'])
+})
+
+test('builds without yt-dlp pass other links to the YouTube URL handler', async () => {
+  const { openUrl, youtube, externalMedia } = urlOpener(false)
+  await openUrl('https://www.instagram.com/reel/Chunk8-jurw/')
+  assert.deepEqual(youtube, ['https://www.instagram.com/reel/Chunk8-jurw/'])
+  assert.deepEqual(externalMedia, [])
+})
+
+test('Facebook watch landing URLs without a numeric video ID follow the external link setting', async () => {
+  const urls = [
+    'https://www.facebook.com/watch/',
+    'https://facebook.com/watch',
+    'https://m.facebook.com/watch/?v=',
+    'https://www.facebook.com/watch/?v=invalid',
+    'https://www.facebook.com/watch/?v=123abc',
+    'opentubex://https://www.facebook.com/watch/?ref=tab',
+  ]
+  const { openUrl, youtube, externalMedia, externalLinks } = urlOpener()
+  for (const url of urls) await openUrl(url)
+  assert.deepEqual(externalLinks, urls.map(url => url.replace('opentubex://', '')))
+  assert.deepEqual(externalMedia, [])
+  assert.deepEqual(youtube, [])
+})
+
+test('Facebook watch links with numeric video IDs still open with yt-dlp', async () => {
+  const urls = [
+    'https://www.facebook.com/watch?v=1234567890',
+    'https://m.facebook.com/watch/?v=1234567890&ref=sharing',
+    'https://www.facebook.com/reel/1234567890',
+    'https://facebook.com.example/watch/',
+  ]
+  const { openUrl, youtube, externalMedia, externalLinks } = urlOpener()
+  for (const url of urls) await openUrl(url)
+  assert.deepEqual(externalMedia, urls)
+  assert.deepEqual(externalLinks, [])
+  assert.deepEqual(youtube, [])
+})

@@ -1,0 +1,29 @@
+.scheduledBackups p {
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.scheduledBackups [role='status'] p:last-child {
+  margin-block-end: var(--settings-control-margin);
+}
+
+.backupFolderChoice {
+  justify-content: center;
+}
+
+.backupFolder {
+  overflow-wrap: anywhere;
+}
+
+.backupControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.backupControls > * {
+  flex: 1 1 220px;
+  min-inline-size: 0;
+}

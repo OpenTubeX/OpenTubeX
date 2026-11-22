@@ -231,7 +231,7 @@ Settings:
     Select Export Type: 'Selecciona tipus d''exportació'
     Import Subscriptions: 'Importa les subscripcions'
     Export Subscriptions: 'Exporta subscripcions'
-    Export FreeTube: 'Exporta FreeTube'
+    Export OpenTubeX: 'Exporta OpenTubeX'
     Export YouTube: 'Exporta YouTube'
     Export NewPipe: 'Exporta NewPipe'
     Import History: 'Importa l''historial'
@@ -315,7 +315,7 @@ About:
   Donate: Dona
   Translate: Tradueix
   GitHub releases: Llançaments del GitHub
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
 Profile:
   Profile Select: 'Selecciona perfil'
   All Channels: 'Tots els canals'
@@ -366,6 +366,7 @@ Channel:
       Newest: 'Més Nou'
       Oldest: 'Més Vell'
       Most Popular: 'Més Popular'
+    This channel does not currently have any videos: 'Aquest canal no té actualment cap vídeo'
   Playlists:
     Playlists: 'Llistes De Reproducció'
     This channel does not currently have any playlists: 'Aquest canal no té actualment cap llista de reproducció'

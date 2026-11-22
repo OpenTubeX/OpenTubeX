@@ -1,0 +1,281 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+
+import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import {
+  requestSubscriptionFeedRefresh,
+  takeSubscriptionFeedRefreshRequest,
+} from '../../src/renderer/helpers/subscriptionFeedRefreshRequest.js'
+import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
+import { getNotificationOpenUrl } from '../../src/notificationHistory.js'
+import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
+import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
+import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
+
+const pages = ['subscriptions', 'refreshSubscriptions', 'userplaylists', 'history', 'downloads']
+
+async function loadKeyboardShortcutHandler(context) {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('function handleKeyboardShortcuts(event) {')
+  const handlerSource = source.slice(start, source.indexOf('\n/**', start))
+  return vm.runInNewContext(`${handlerSource}\nhandleKeyboardShortcuts`, context)
+}
+
+test('unknown shortcut IDs cannot navigate to arbitrary routes', () => {
+  for (const id of ['settings', '../history', '/history', '__proto__', '', null, undefined]) {
+    assert.equal(getAppShortcutPath(id), null)
+  }
+})
+
+test('retained startup clicks and running-app clicks navigate and update localized shortcuts', async () => {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('async function enableCapacitorIntegrations() {')
+  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
+  const listeners = new Map()
+  const paths = []
+  const youtubeLinks = []
+  const updates = []
+  const wakeStates = []
+  let settingsOpen = true
+  let updateLocale
+  let stopped = false
+  let widgetSyncStopped = false
+  const appWindow = new EventTarget()
+  let searchFocusRequests = 0
+  appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
+  const locale = { value: 'en-US' }
+  const refreshRequests = []
+  let startupLaunchUrl = 'opentubex://https//www.youtube.com/feed/history'
+  // A link tapped while the app is still starting, after the launch URL.
+  let newerStartupTap = null
+  const oidcCallbacks = []
+  const context = {
+    window: appWindow,
+    document: { getElementById: () => null },
+    CustomEvent,
+    dataReady: { value: true },
+    isAnyPromptOpen: { value: false },
+    getHomeWidgetPage,
+    getNotificationOpenUrl,
+    shouldOpenExternalMediaUrl,
+    isSyncServerOidcCallbackUrl,
+    syncHomeWidgets: () => () => { widgetSyncStopped = true },
+    playDownloadFromHomeWidget: async id => { paths.push(`download:${id}`) },
+    Capacitor: { getPlatform: () => 'android' },
+    supportsYtDlp: true,
+    handleAndroidBack() {},
+    initializeAndroidBack: async () => () => {},
+    getAndroidBackPreview() {},
+    shouldInterceptAndroidBack() {},
+    CapacitorApp: {
+      addListener: async (name, callback) => {
+        listeners.set(name, callback)
+        // Native plugins also retain the launch URL until the renderer subscribes.
+        if (name === 'appUrlOpen') callback({ url: startupLaunchUrl })
+        return { remove: () => listeners.delete(name) }
+      },
+      getState: async () => {
+        if (newerStartupTap) listeners.get('appUrlOpen')({ url: newerStartupTap })
+        return { isActive: true }
+      },
+      getLaunchUrl: async () => ({ url: startupLaunchUrl }),
+    },
+    AppShortcuts: {
+      addListener: async (name, callback) => {
+        assert.equal(name, 'click')
+        listeners.set(name, callback)
+        // Native plugins retain shortcut clicks until the renderer subscribes.
+        await callback({ shortcutId: 'subscriptions' })
+        return { remove: () => listeners.delete(name) }
+      },
+      set: async ({ shortcuts }) => { updates.push(shortcuts) },
+    },
+    initializeCapacitorLiveReminderActions: async () => () => {},
+    showInAppNotification: () => {},
+    addAndroidMediaSessionActionListener: async () => () => {},
+    setAndroidMediaButtonsIgnored: () => {},
+    setAndroidAppVisible() {},
+    setAndroidAppActive() {},
+    clearTimeout,
+    playbackScreenWake: { setAppActive: active => wakeStates.push(active) },
+    store: {
+      getters: {},
+      dispatch: async (action, view) => {
+        if (action === 'showSettingsWindow') {
+          paths.push(`settings:${view}`)
+          return
+        }
+        if (action === 'receiveSyncServerOidcCallback') {
+          oidcCallbacks.push(view)
+          return
+        }
+        assert.equal(action, 'hideSettingsWindow')
+        settingsOpen = false
+      },
+    },
+    watch: (watchedLocale, callback, options) => {
+      if (typeof watchedLocale === 'function') return () => {}
+      assert.equal(watchedLocale, locale)
+      assert.equal(options.immediate, true)
+      updateLocale = callback
+      callback()
+      return () => { stopped = true }
+    },
+    locale,
+    t: key => `${locale.value}:${key}`,
+    createAppShortcuts,
+    getAppShortcutPath,
+    requestSubscriptionFeedRefresh: () => { refreshRequests.push(paths.length) },
+    openInternalPath: ({ path, query }) => {
+      assert.equal(settingsOpen, false, 'settings must not cover the destination')
+      paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
+    },
+    handleYoutubeLink: url => { youtubeLinks.push(url) },
+  }
+  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, context)
+  const cleanup = await enable()
+  assert.deepEqual(wakeStates, [true])
+  assert.deepEqual(paths, ['/subscriptions'])
+  for (const page of pages.slice(1)) {
+    settingsOpen = true
+    await listeners.get('click')({ shortcutId: page })
+  }
+  await listeners.get('click')({ shortcutId: 'settings' })
+  assert.deepEqual(paths, ['/subscriptions', '/subscriptions', '/userplaylists', '/history', 'settings:downloads'])
+  assert.deepEqual(refreshRequests, [1], 'only the refresh shortcut requests a refresh, before opening the page')
+  listeners.get('appUrlOpen')({ url: 'https://youtu.be/123' })
+  listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
+  listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
+  assert.deepEqual(youtubeLinks, ['https://www.youtube.com/feed/history', 'https://youtu.be/123', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'https://www.youtube.com/feed/subscriptions'])
+  for (const page of ['subscriptions', 'watch-later', 'search', 'stats', 'downloads', 'download/7']) {
+    settingsOpen = true
+    listeners.get('appUrlOpen')({ url: `opentubex://open/${page}` })
+    await new Promise(resolve => setImmediate(resolve))
+  }
+  assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user', '/stats', 'settings:downloads', 'download:7'])
+  assert.equal(searchFocusRequests, 1)
+  assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
+  assert.equal(updates[0].length, 4, 'iOS and Pixel launchers show four shortcuts')
+  assert.equal(updates[0][2].title, 'en-US:History.History')
+  assert.equal(updates[0][0].path, undefined, 'paths stay out of the native shortcut list')
+  locale.value = 'de-DE'
+  updateLocale()
+  assert.equal(updates[1][2].title, 'de-DE:History.History')
+  cleanup()
+  assert.deepEqual(wakeStates, [true, false])
+  assert.equal(stopped, true)
+  assert.equal(widgetSyncStopped, true)
+  assert.equal(listeners.size, 0)
+
+  // A newer link tapped during startup stays the destination instead of the launch URL.
+  newerStartupTap = 'https://youtu.be/456'
+  const openedBefore = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBefore), ['https://youtu.be/456'])
+
+  // A sign-in callback is not a destination, so a newer tap does not replace it.
+  startupLaunchUrl = 'opentubex://oidc?token=a.b.c'
+  ;(await enable())()
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c'])
+
+  // Nor does a sign-in callback that arrives during startup replace the launch URL.
+  startupLaunchUrl = 'https://youtu.be/789'
+  newerStartupTap = 'opentubex://oidc?token=d.e.f'
+  const openedBeforeCallback = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBeforeCallback), ['https://youtu.be/789'])
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c', 'opentubex://oidc?token=d.e.f'])
+})
+
+test('a feed refresh request runs once, after the page has loaded', () => {
+  const state = { presented: false, hasTab: true, refreshing: false, ready: false }
+  const take = () => takeSubscriptionFeedRefreshRequest(() => state)
+  assert.equal(take(), false, 'nothing was requested')
+  requestSubscriptionFeedRefresh()
+  assert.equal(take(), false, 'a page in a background tab leaves the request')
+  state.presented = true
+  assert.equal(take(), false, 'the feed is still loading')
+  state.ready = true
+  assert.equal(take(), true)
+  assert.equal(take(), false, 'the request must not repeat')
+
+  requestSubscriptionFeedRefresh()
+  state.refreshing = true
+  assert.equal(take(), false, 'a running refresh fulfills the request')
+  state.refreshing = false
+  assert.equal(take(), false)
+
+  requestSubscriptionFeedRefresh()
+  state.hasTab = false
+  assert.equal(take(), false, 'a page without feed tabs drops the request')
+  state.hasTab = true
+  assert.equal(take(), false)
+})
+
+test('tab organizer shortcut opens and closes it again with its search focused', async () => {
+  const tabOrganizerOpen = { value: false }
+  const handler = await loadKeyboardShortcutHandler({
+    showTutorial: { value: false },
+    commandPaletteOpen: { value: false },
+    tabOrganizerOpen,
+    findbarVisible: { value: false },
+    tabSwitcherVisible: { value: false },
+    process: { env: { IS_ELECTRON: true } },
+    isElectron: true,
+    KeyboardShortcuts: { APP: { GENERAL: { OPEN_TAB_ORGANIZER: 'organizer' } } },
+    matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'organizer',
+    isTypingTarget: () => tabOrganizerOpen.value,
+    openTabOrganizer: () => { tabOrganizerOpen.value = true },
+    closeTabOrganizer: () => { tabOrganizerOpen.value = false },
+  })
+  const event = { key: 'o', preventDefault() {} }
+  handler(event)
+  assert.equal(tabOrganizerOpen.value, true)
+  handler({ ...event, repeat: true })
+  assert.equal(tabOrganizerOpen.value, true, 'holding the shortcut must not close the organizer')
+  handler(event)
+  assert.equal(tabOrganizerOpen.value, false)
+  handler({ ...event, repeat: true })
+  assert.equal(tabOrganizerOpen.value, false, 'holding the shortcut must not reopen the organizer')
+})
+
+test('copy-current-URL shortcut copies only portable active-route URLs', async () => {
+  const copied = []
+  let prevented = false
+  const appWindow = {
+    location: {
+      href: 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/watch/abcdefghijk?playlistId=PL123&timestamp=42'
+    }
+  }
+  const handler = await loadKeyboardShortcutHandler({
+    showTutorial: { value: false },
+    isElectron: false,
+    commandPaletteOpen: { value: false },
+    tabOrganizerOpen: { value: false },
+    window: appWindow,
+    KeyboardShortcuts: { APP: { GENERAL: { COPY_CURRENT_URL: 'copy-url' } } },
+    matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'copy-url',
+    resolveMobileContextLinkCopyUrl,
+    copyToClipboard: async (url, options) => { copied.push({ url, options }) },
+    t: key => key,
+  })
+
+  handler({ preventDefault: () => { prevented = true } })
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(prevented, true)
+  assert.equal(copied.length, 1)
+  assert.equal(copied[0].url, 'https://youtu.be/abcdefghijk?list=PL123&t=42')
+  assert.equal(copied[0].options.messageOnSuccess, 'Share.YouTube URL copied to clipboard')
+
+  appWindow.location.href = 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
+
+  appWindow.location.href =
+    'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/playlist/PL_PRIVATE?playlistType=user'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
+})

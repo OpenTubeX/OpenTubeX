@@ -1,0 +1,54 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+
+import { findLegacyFormatForQuality } from '../../src/renderer/helpers/player/legacyFormats.js'
+
+const LANDSCAPE_FORMATS = [
+  { width: 640, height: 360, bitrate: 500_000 },
+  { width: 426, height: 240, bitrate: 250_000 },
+  { width: 256, height: 144, bitrate: 100_000 }
+]
+
+const PORTRAIT_FORMATS = [
+  { width: 360, height: 640, bitrate: 500_000 },
+  { width: 240, height: 426, bitrate: 250_000 }
+]
+
+test('the highest legacy format below the preferred quality is used', () => {
+  // regression: an operator precedence bug made the filters match every format,
+  // so the first one in the list was always used, no matter the preferred quality
+  const format = findLegacyFormatForQuality(LANDSCAPE_FORMATS, 240)
+
+  assert.equal(findLegacyFormatForQuality(LANDSCAPE_FORMATS, 1080).height, 360)
+  assert.equal(format.height, 240)
+  assert.equal(findLegacyFormatForQuality(LANDSCAPE_FORMATS, 200).height, 144)
+})
+
+test('the first of equal legacy formats is used', () => {
+  // Invidious lists a WebM and an MP4 360p format with the same bitrate
+  const formats = [{ width: 640, height: 360, bitrate: 200_000, itag: 43 }, { width: 640, height: 360, bitrate: 200_000, itag: 18 }]
+
+  assert.equal(findLegacyFormatForQuality(formats, 1080).itag, 43)
+})
+
+test('the lowest legacy format is used when they are all above the preferred quality', () => {
+  const format = findLegacyFormatForQuality(LANDSCAPE_FORMATS, 100)
+
+  assert.equal(format.height, 144)
+})
+
+test('portrait videos are matched on their width', () => {
+  assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 240).width, 240)
+  assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 1080).width, 360)
+})
+
+test('formats without a width or bitrate are matched on their height', () => {
+  // Twitch clips list progressive formats from lowest to highest with only a height
+  const formats = [360, 480, 720, 1080].map(height => ({ width: null, height, bitrate: null }))
+
+  assert.equal(findLegacyFormatForQuality(formats, 1080).height, 1080)
+  assert.equal(findLegacyFormatForQuality(formats, 900).height, 720)
+  assert.equal(findLegacyFormatForQuality(formats, 240).height, 360)
+  // a format without dimensions is no match below the preferred quality
+  assert.equal(findLegacyFormatForQuality([...formats, { width: null, height: null, bitrate: null }], 240).height, 360)
+})

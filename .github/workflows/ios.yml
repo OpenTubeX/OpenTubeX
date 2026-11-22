@@ -1,0 +1,103 @@
+name: iOS and iPadOS
+
+on:
+  schedule:
+    - cron: '45 3 * * *'
+  workflow_dispatch:
+    inputs:
+      playback:
+        description: Test live YouTube search and playback (requires network access)
+        type: boolean
+        default: false
+
+permissions: {}
+cache-mode: none
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [ iPhone, iPad ]
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: '3.14'
+    - run: pnpm run ci
+    - run: pnpm run capacitor:sync:ios
+      env:
+        GH_TOKEN: ${{ github.token }}
+    - run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+    - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p 'ios_*python_test.py'
+    - name: Boot an installed simulator
+      timeout-minutes: 5
+      env:
+        DEVICE_FAMILY: ${{ matrix.device }}
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
+        devices = [device for runtime, group in data['devices'].items() if '.iOS-' in runtime
+                   for device in group if device['name'].startswith(os.environ['DEVICE_FAMILY'])]
+        if not devices:
+            raise SystemExit('No matching iOS simulator installed')
+        device = devices[-1]
+        # bootstatus -b boots if needed and also waits for an ongoing boot.
+        subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True, timeout=240)
+        with open(os.environ['GITHUB_ENV'], 'a') as output:
+            output.write('SIMULATOR_ID=' + device['udid'] + '\n')
+        PY
+    - name: Build and test without Apple credentials
+      env:
+        TEST_PLAYBACK: ${{ inputs.playback || 'false' }}
+      run: |
+        args=(-skip-testing:AppTests/AppTests/testYtDlpPersistenceSeed -skip-testing:AppTests/AppTests/testYtDlpPersistenceAfterRelaunch)
+        if [ "$TEST_PLAYBACK" != true ]; then
+          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown -skip-testing:AppTests/AppTests/testYtDlpLiveExternalPlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubePlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubeDownload -skip-testing:AppTests/AppTests/testYtDlpConcurrentPlaybackAndDownload)
+        fi
+        # A wedged simulator test fails and the runner restarts for the rest
+        # of the suite instead of blocking until the job timeout.
+        xcodebuild -project ios/App/App.xcodeproj -scheme App \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+          -parallel-testing-enabled NO \
+          -test-timeouts-enabled YES -maximum-test-execution-time-allowance 300 \
+          -derivedDataPath ios/DerivedData -resultBundlePath ios/TestResults \
+          "${args[@]}" \
+          CODE_SIGN_IDENTITY=- test
+    - name: Preserve simulator test results
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ios-${{ matrix.device }}-tests
+        path: ios/TestResults.xcresult
+        if-no-files-found: ignore
+
+  device:
+    name: Package device IPA
+    if: github.event_name == 'workflow_dispatch'
+    needs: simulator
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      snapshot: true

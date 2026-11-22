@@ -1,13 +1,75 @@
-import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
+import { toRaw } from 'vue'
+import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
+import { PlaylistVideoAddResult } from '../../../constants'
+import { DBPlaylistHandlers, getDataScope, withDataScope } from '../../../datastores/handlers/index'
+import {
+  decrementPlaylistVideoCounts,
+  incrementPlaylistVideoCounts,
+  resetPlaylistVideoCounts
+} from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { stampPlaylistPreferenceEdits } from '../../helpers/playlist-preferences-sync'
 import { deepCopy } from '../../helpers/utils'
+import { reportYouTubePlaylistChange } from '../../helpers/youtube-playlist-changes'
 
 function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
 }
 
+/**
+ * In-flight `addVideo` writes, keyed by `playlistId:videoId`.
+ *
+ * The toggle style controls (add to playlist popover, quick bookmark button) all
+ * derive their state from the store, which only updates once the write commits.
+ * A second activation during that window - including from a different control
+ * for the same video - would otherwise append a duplicate entry.
+ *
+ * Callers share the pending promise rather than getting an early result, so they
+ * all report the outcome the write actually had.
+ *
+ * This only saves a redundant write within one window. Two windows racing is
+ * caught by `upsertVideoByPlaylistId`, which refuses to add a video the playlist
+ * already has and reports back whether it wrote anything.
+ *
+ * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
+ */
+const pendingVideoAdds = new Map()
+
 function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
+}
+
+/** Attributes playlist entries are not meant to carry, even with `null` values */
+const UNDESIRED_VIDEO_ATTRIBUTES = [
+  'authorUrl',
+  'description',
+  'index',
+  'liveNow',
+  'videoThumbnails',
+  // Identifies an entry in the YouTube playlist it was synced from, not in the one it is added to.
+  'youTubeSetVideoId',
+]
+
+/**
+ * A copy of a playlist synced from YouTube, for reporting an edit after the
+ * state changed again. Other playlists are not reported, so they need none.
+ * @param {any} playlist
+ */
+function youTubeSnapshot(playlist) {
+  return playlist?.youTube ? deepCopy(toRaw(playlist)) : null
+}
+
+/**
+ * Mutates the given video, so it must be a copy the caller owns.
+ * @param {any} videoData
+ */
+function removeUndesiredVideoAttributes(videoData) {
+  for (const attrName of UNDESIRED_VIDEO_ATTRIBUTES) {
+    if (typeof videoData[attrName] !== 'undefined') {
+      delete videoData[attrName]
+    }
+  }
 }
 
 /*
@@ -51,8 +113,8 @@ function processNewPlayist(playlist) {
   }
 
   const now = Date.now()
-  playlist.createdAt = now
-  playlist.lastUpdatedAt = now
+  if (!Number.isFinite(playlist.createdAt)) { playlist.createdAt = now }
+  if (!Number.isFinite(playlist.lastUpdatedAt)) { playlist.lastUpdatedAt = now }
 
   // Ensure all videos have required attributes
   if (Array.isArray(playlist.videos)) {
@@ -60,12 +122,44 @@ function processNewPlayist(playlist) {
   }
 }
 
+// A separate profile's quick bookmark target is a choice of this device, as
+// the synced setting names a playlist of the shared data.
+const QUICK_BOOKMARK_TARGET_STORAGE_PREFIX = 'quickBookmarkTarget/'
+
+/** @param {string} scope */
+function readScopedQuickBookmarkTarget(scope) {
+  try {
+    return localStorage.getItem(QUICK_BOOKMARK_TARGET_STORAGE_PREFIX + scope)
+  } catch (error) {
+    console.error('Failed to read the quick bookmark playlist', error)
+    return null
+  }
+}
+
+/**
+ * @param {string} scope
+ * @param {string} playlistId
+ */
+function saveScopedQuickBookmarkTarget(scope, playlistId) {
+  try {
+    localStorage.setItem(QUICK_BOOKMARK_TARGET_STORAGE_PREFIX + scope, playlistId)
+  } catch (error) {
+    console.error('Failed to save the quick bookmark playlist', error)
+  }
+}
+
 const state = {
+  /** The quick bookmark target while a separate profile is active */
+  scopedQuickBookmarkTarget: null,
+  // The separate profile whose playlists the state holds, or null for the shared ones
+  playlistsScope: null,
   // Playlist loading takes time on app load (new windows)
   // This is necessary to let components to know when to start data loading
   // which depends on playlist data being ready
   playlistsReady: false,
   playlists: [],
+  /** @type {import('../../helpers/playlist-video-counts').PlaylistVideoCounts} */
+  playlistVideoCounts: new Map(),
   defaultPlaylists: [
     {
       playlistName: 'Favorites',
@@ -78,6 +172,7 @@ const state = {
       playlistName: 'Watch Later',
       protected: false,
       description: 'Videos to watch later',
+      quickBookmarkIcon: 'clock',
       videos: [],
       _id: 'watchLater',
     },
@@ -87,57 +182,126 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
+  // `has(videoId)` answers "is this video in any playlist". Kept incrementally
+  // by the mutations below rather than derived, because every list item reads
+  // it: deriving it made one playlist edit rescan every saved video and
+  // invalidate the answer for all of them at once.
+  getPlaylistVideoCounts: (state) => state.playlistVideoCounts,
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
+  /** @returns {string | null} */
+  getActiveQuickBookmarkTargetPlaylistId(state, _getters, _rootState, rootGetters) {
+    // The target of the playlists shown, also while a profile switch waits for their writes
+    return state.playlistsScope === null
+      ? rootGetters.getQuickBookmarkTargetPlaylistId
+      : state.scopedQuickBookmarkTarget
+  },
   getQuickBookmarkPlaylist(state, getters) {
-    const playlistId = getters.getQuickBookmarkTargetPlaylistId
+    const playlistId = getters.getActiveQuickBookmarkTargetPlaylistId
 
     if (!playlistId) {
       return undefined
     }
 
     return state.playlists.find((playlist) => playlist._id === playlistId)
+  },
+  // Share one index across all mounted cards and watch tabs. Each consumer
+  // previously scanned the entire target playlist for its own video.
+  getQuickBookmarkVideoIds(_state, getters) {
+    return new Set(getters.getQuickBookmarkPlaylist?.videos.map(video => video.videoId))
+  },
+  getQuickBookmarkIcon(state, getters) {
+    const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
+    return typeof icon === 'string' ? ['far', icon] : icon
   }
 }
 
 const actions = {
-  async addPlaylist({ state, commit, rootState, dispatch }, payload) {
+  async repairPlaylistMetadata({ commit }, payload) {
+    const result = await DBPlaylistHandlers.repairMetadata(payload)
+    for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
+    return { repaired: result.repaired, failed: result.failed }
+  },
+
+  async importPlaylist({ commit }, playlist) {
+    processNewPlayist(playlist)
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
+  },
+
+  /**
+   * Sets the quick bookmark target of the active profile's playlists, or of
+   * the data scope an earlier change was made in, for undoing it.
+   * @param {string | { playlistId: string, scope: string | null }} payload
+   */
+  async updateActiveQuickBookmarkTarget({ commit, dispatch }, payload) {
+    // The selected profile changes before writes in its predecessor's playlists finish.
+    const { playlistId, scope = getDataScope() } = typeof payload === 'string' ? { playlistId: payload } : payload
+    if (scope === null) {
+      await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId, { root: true })
+    } else {
+      saveScopedQuickBookmarkTarget(scope, playlistId)
+      if (scope === getDataScope()) commit('setScopedQuickBookmarkTarget', playlistId)
+    }
+  },
+
+  async addPlaylist({ state, commit, getters, dispatch }, payload) {
     processNewPlayist(payload)
 
     try {
+      const scope = getDataScope()
       await DBPlaylistHandlers.create([payload])
+      // Saved in a profile whose playlists are no longer shown
+      if (scope !== getDataScope()) return true
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
-      if (noQuickBookmarkSet) {
-        dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
-      }
-
+      const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
       commit('addPlaylist', payload)
+      if (noQuickBookmarkSet) {
+        // Settings persist asynchronously; wait so a playlist added right after
+        // this one sees the new target instead of replacing it. The playlist is
+        // already saved, so a failed settings write must not report it as lost.
+        try {
+          await dispatch('updateActiveQuickBookmarkTarget', payload._id)
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
-  async addPlaylists({ state, commit, rootState, dispatch }, payload) {
+  async addPlaylists({ state, commit, getters, dispatch }, payload) {
     payload.forEach(processNewPlayist)
 
     try {
+      const scope = getDataScope()
       await DBPlaylistHandlers.create(payload)
+      // Saved in a profile whose playlists are no longer shown
+      if (scope !== getDataScope()) return true
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+      const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
       if (noQuickBookmarkSet) {
         const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-        dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+        dispatch('updateActiveQuickBookmarkTarget', chosenPlaylist._id)
       }
 
       commit('addPlaylists', payload)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
-  async updatePlaylist({ commit }, playlist) {
+  async updatePlaylist({ commit, state }, playlist) {
+    const current = state.playlists.find(item => item._id === playlist._id)
+    const previousDetails = current?.youTube ? { playlistName: current.playlistName, description: current.description ?? '' } : null
+    // Sync merges these per playlist by their edit time
+    if (current) stampPlaylistPreferenceEdits(playlist, current)
     // Ensure playlist name trimmed
     if (typeof playlist.playlistName === 'string') {
       playlist.playlistName = playlist.playlistName.trim()
@@ -150,11 +314,76 @@ const actions = {
     playlist.lastUpdatedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (!await DBPlaylistHandlers.update(playlist)) return false
       commit('upsertPlaylistToList', playlist)
+      if (previousDetails) {
+        const playlistName = typeof playlist.playlistName === 'string' && playlist.playlistName !== previousDetails.playlistName ? playlist.playlistName : null
+        const description = typeof playlist.description === 'string' && playlist.description !== previousDetails.description ? playlist.description : null
+        if (playlistName !== null || description !== null) {
+          const snapshot = youTubeSnapshot(state.playlists.find(item => item._id === playlist._id))
+          if (snapshot) reportYouTubePlaylistChange({ type: 'details', playlist: snapshot, playlistName, description })
+        }
+      }
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
+  },
+
+  /**
+   * Merges playlists restored from a backup with the saved ones. Each is shown
+   * once saved, so a stale copy cannot replace edits other windows sync later.
+   * @param {any} param0
+   * @param {object[]} playlists
+   * @returns {Promise<boolean>} whether every playlist was saved
+   */
+  // Restores into the data scope active when it is dispatched, see `withDataScope`.
+  async mergePlaylistBackup({ commit, rootGetters }, playlists) {
+    const scope = getDataScope()
+    const lastUpdatedAt = Date.now()
+    try {
+      for (const playlist of playlists) {
+        const saved = await withDataScope(scope, () => DBPlaylistHandlers.mergeBackup({
+          ...playlist,
+          playlistName: playlist.playlistName.trim(),
+          ...(typeof playlist.description === 'string' ? { description: playlist.description.trim() } : {}),
+          lastUpdatedAt,
+        }))
+        if (scope === (rootGetters?.getActiveDataScope ?? null)) commit('upsertPlaylistToList', saved)
+      }
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous, keepLastUpdatedAt = false }) {
+    if (!keepLastUpdatedAt) playlist.lastUpdatedAt = Date.now()
+    const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
+    if (!saved) return false
+    const current = state.playlists.find(item => item._id === playlist._id)
+    if (JSON.stringify(current) !== JSON.stringify(previous)) return false
+    commit('upsertPlaylistToList', playlist)
+    return true
+  },
+
+  /**
+   * Saves a new order of the given entries. Entries added or removed by
+   * another window meanwhile are kept as they are.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  async reorderPlaylistVideos({ commit, state }, { _id, playlistItemIds }) {
+    const previous = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))?.videos
+    const lastUpdatedAt = Date.now()
+    const videos = await DBPlaylistHandlers.reorderVideos(_id, lastUpdatedAt, playlistItemIds)
+    if (videos === null) return false
+    commit('upsertPlaylistToList', { _id, lastUpdatedAt, videos })
+    const snapshot = previous && youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
+    if (snapshot) reportYouTubePlaylistChange({ type: 'reorder', playlist: snapshot, previous })
+    return true
   },
 
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
@@ -163,35 +392,77 @@ const actions = {
     playlist.lastPlayedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
+      if (await DBPlaylistHandlers.update(playlist)) commit('upsertPlaylistToList', playlist)
     } catch (errMessage) {
       console.error(errMessage)
     }
   },
 
-  async addVideo({ commit }, payload) {
+  async updatePlaylistSortOrder({ commit, state }, { _id, sortOrder }) {
+    // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
     try {
-      const { _id, videoData } = payload
-
-      processToBeAddedPlaylistVideo(videoData)
-
-      const lastUpdatedAt = Date.now()
-
-      await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
-
-      payload.lastUpdatedAt = lastUpdatedAt
-      commit('addVideo', payload)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (await DBPlaylistHandlers.updateSortOrder(_id, sortOrder)) {
+        commit('upsertPlaylistToList', { _id, sortOrder })
+        const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
+        if (snapshot) reportYouTubePlaylistChange({ type: 'order', playlist: snapshot, sortOrder })
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }
+  },
+
+  addVideo({ commit }, payload) {
+    const { _id, videoData } = payload
+    const pendingKey = `${_id}:${videoData.videoId}`
+
+    // Another activation is already adding this video, wait on that write
+    // instead of issuing a second one
+    const pending = pendingVideoAdds.get(pendingKey)
+    if (pending != null) {
+      return pending
+    }
+
+    const promise = (async () => {
+      try {
+        processToBeAddedPlaylistVideo(videoData)
+        removeUndesiredVideoAttributes(videoData)
+
+        const lastUpdatedAt = Date.now()
+
+        const result = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+
+        if (result.status === PlaylistVideoAddResult.ADDED) {
+          payload.lastUpdatedAt = result.lastUpdatedAt
+          payload.addVideosToTop = result.addVideosToTop
+          commit('addVideo', payload)
+          reportYouTubePlaylistChange({ type: 'add', localId: _id, videoIds: [videoData.videoId] })
+        }
+
+        // ALREADY_PRESENT means another window got there first, so the video is
+        // in the playlist and its sync event brings it into our state. Committing
+        // as well would show it twice. PLAYLIST_MISSING is a genuine failure:
+        // the playlist is gone, so the caller must not report a saved video.
+        return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
+      } catch (errMessage) {
+        console.error(errMessage)
+
+        return false
+      } finally {
+        pendingVideoAdds.delete(pendingKey)
+      }
+    })()
+
+    pendingVideoAdds.set(pendingKey, promise)
+
+    return promise
   },
 
   async addVideos({ commit }, payload) {
     // Assumes videos are added NOT from export
     // Since this action will ensure uniqueness of `playlistItemId` of added video entries
     try {
-      const { _id, videos } = payload
+      const { _id, videos, deduplicate = false } = payload
 
       const currentTime = Date.now()
 
@@ -206,44 +477,51 @@ const actions = {
         if (videoData.type == null) {
           videoData.type = 'video'
         }
-        // Undesired attributes, even with `null` values
-        [
-          'authorUrl',
-          'description',
-          'index',
-          'liveNow',
-          'videoThumbnails',
-          'viewCount',
-        ].forEach(attrName => {
-          if (typeof videoData[attrName] !== 'undefined') {
-            delete videoData[attrName]
-          }
-        })
+        removeUndesiredVideoAttributes(videoData)
 
         return videoData
       })
 
       const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects)
-      commit('addVideos', { _id, lastUpdatedAt, videos: newVideoObjects })
+      const result = await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects, deduplicate)
+      if (result.status === PlaylistVideoAddResult.ADDED) {
+        commit('addVideos', { _id, lastUpdatedAt: result.lastUpdatedAt, addVideosToTop: result.addVideosToTop, videos: result.videos })
+        reportYouTubePlaylistChange({ type: 'add', localId: _id, videoIds: result.videos.map(video => video.videoId) })
+      }
+      return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
-  async grabAllPlaylists({ rootState, commit, dispatch, state }) {
+  async grabAllPlaylists({ commit, dispatch, getters, state }) {
     try {
-      const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
+      // Writes stay in this scope, and a switch to another profile's data
+      // meanwhile leaves the state to that profile's load.
+      const scope = getDataScope()
+      const inScope = operation => withDataScope(scope, operation)
+      const payload = (await DBPlaylistHandlers.find(true)).filter((e) => e != null)
+      if (scope !== getDataScope()) return
+      commit('setScopedQuickBookmarkTarget', scope === null ? null : readScopedQuickBookmarkTarget(scope))
+      commit('setPlaylistsScope', scope)
       if (payload.length === 0) {
-        // Not using `addPlaylists` to ensure required attributes with dynamic values added
-        state.defaultPlaylists.forEach(playlist => {
-          dispatch('addPlaylist', deepCopy(playlist))
-        })
+        // Another profile's playlists may be shown until now.
+        commit('setAllPlaylists', [])
+        // Not using `addPlaylists` to ensure required attributes with dynamic values added.
+        // Create them in order and wait, so the first default becomes the quick
+        // bookmark target and the playlists exist before `playlistsReady` is set.
+        for (const playlist of state.defaultPlaylists) {
+          if (scope !== getDataScope()) return
+          // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
+          await inScope(() => dispatch('addPlaylist', deepCopy(playlist)))
+        }
       } else {
         const dateNow = Date.now()
         const currentTime = Date.now()
 
+        const repairs = []
         payload.forEach((playlist) => {
           let anythingUpdated = false
           // Assign generated playlist ID in case DB data corrupted
@@ -270,6 +548,11 @@ const actions = {
             playlist.lastUpdatedAt = dateNow
             anythingUpdated = true
           }
+          // Older versions could recreate a deleted playlist without videos
+          if (!Array.isArray(playlist.videos)) {
+            playlist.videos = []
+            anythingUpdated = true
+          }
           playlist.videos.forEach((v) => {
             // Ensure all videos has `timeAdded` property
             if (v.timeAdded == null) {
@@ -292,7 +575,6 @@ const actions = {
             // Undesired attributes, even with `null` values
             [
               'description',
-              'viewCount',
             ].forEach(attrName => {
               if (typeof v[attrName] !== 'undefined') {
                 delete v[attrName]
@@ -302,64 +584,35 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            DBPlaylistHandlers.upsert(playlist)
+            repairs.push(inScope(() => DBPlaylistHandlers.update(playlist)))
           }
         })
+        // A failed repair write must be logged, not left as an unhandled rejection.
+        for (const result of await Promise.allSettled(repairs)) {
+          if (result.status === 'rejected') console.error(result.reason)
+        }
 
-        const favoritesPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Favorites' || playlist._id === 'favorites'
-        })
-        const watchLaterPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Watch Later' || playlist._id === 'watchLater'
-        })
-
-        if (favoritesPlaylist != null) {
-          const defaultFavoritesPlaylist = state.defaultPlaylists.find((e) => e._id === 'favorites')
-
-          // Update existing matching playlist only if it exists
-          if (favoritesPlaylist._id !== defaultFavoritesPlaylist._id || favoritesPlaylist.protected !== defaultFavoritesPlaylist.protected) {
-            const oldId = favoritesPlaylist._id
-            favoritesPlaylist._id = defaultFavoritesPlaylist._id
-            favoritesPlaylist.protected = defaultFavoritesPlaylist.protected
-            if (oldId === defaultFavoritesPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(favoritesPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(favoritesPlaylist)
+        // Names are editable and non-unique. Only the stable ID identifies a
+        // built-in playlist; replacing a namesake can delete user data.
+        for (const defaultPlaylist of state.defaultPlaylists) {
+          const playlist = payload.find((entry) => entry._id === defaultPlaylist._id)
+          if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
+            playlist.protected = defaultPlaylist.protected
+            try {
+              await inScope(() => DBPlaylistHandlers.update(playlist))
+            } catch (errMessage) {
+              console.error(errMessage)
             }
           }
         }
 
-        if (watchLaterPlaylist != null) {
-          const defaultWatchLaterPlaylist = state.defaultPlaylists.find((e) => e._id === 'watchLater')
-
-          // Update existing matching playlist only if it exists
-          if (watchLaterPlaylist._id !== defaultWatchLaterPlaylist._id || watchLaterPlaylist.protected !== defaultWatchLaterPlaylist.protected) {
-            const oldId = watchLaterPlaylist._id
-            watchLaterPlaylist._id = defaultWatchLaterPlaylist._id
-            watchLaterPlaylist.protected = defaultWatchLaterPlaylist.protected
-            if (oldId === defaultWatchLaterPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(watchLaterPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(watchLaterPlaylist)
-            }
-          }
-        }
+        if (scope !== getDataScope()) return
 
         // if no quick bookmark is set, try to find another playlist
-        const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+        const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
         if (noQuickBookmarkSet && payload.length > 0) {
           const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-          dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+          dispatch('updateActiveQuickBookmarkTarget', chosenPlaylist._id)
         }
 
         commit('setAllPlaylists', payload)
@@ -367,6 +620,7 @@ const actions = {
       commit('setPlaylistsReady', true)
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -377,8 +631,24 @@ const actions = {
 
       await DBPlaylistHandlers.deleteAll()
       commit('removeAllPlaylists')
+      await dispatch('unpinPlaylists', playlistIds)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
+    }
+  },
+
+  async unpinPlaylists({ dispatch, getters, rootGetters }, playlistIds) {
+    // Protected playlists survive deletion requests, so only unpin removed ones.
+    const remainingIds = new Set(getters.getAllPlaylists.map(playlist => playlist._id))
+    const removedIds = new Set(playlistIds.filter(id => !remainingIds.has(id)))
+    const unpin = ids => ids.filter(id => !removedIds.has(id))
+    if (rootGetters.getPinnedPlaylistIds.some(id => removedIds.has(id))) {
+      await dispatch('updatePinnedPlaylistIds', unpin)
+    }
+    if (rootGetters.getUserPlaylistsPinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updateUserPlaylistsPinnedIds', unpin)
     }
   },
 
@@ -393,12 +663,15 @@ const actions = {
     }
   },
 
-  async removePlaylist({ commit, dispatch }, playlistId) {
+  async removePlaylist({ commit, dispatch, state }, playlistId) {
     try {
+      const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === playlistId))
       await dispatch('unsetLastViewedPlaylists', [playlistId])
 
       await DBPlaylistHandlers.delete(playlistId)
       commit('removePlaylist', playlistId)
+      if (snapshot) reportYouTubePlaylistChange({ type: 'delete', playlist: snapshot })
+      await dispatch('unpinPlaylists', [playlistId])
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -410,14 +683,16 @@ const actions = {
 
       await DBPlaylistHandlers.deleteMultiple(playlistIds)
       commit('removePlaylists', playlistIds)
+      await dispatch('unpinPlaylists', playlistIds)
     } catch (errMessage) {
       console.error(errMessage)
     }
   },
 
-  async removeVideo({ commit, dispatch }, payload) {
+  async removeVideo({ commit, dispatch, state }, payload) {
     try {
       const { _id, videoId, playlistItemId } = payload
+      const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
 
       await dispatch('unsetLastViewedPlaylistForVideos', { videoIds: [videoId], lastViewedPlaylistId: _id })
 
@@ -428,37 +703,76 @@ const actions = {
       payload.lastUpdatedAt = lastUpdatedAt
 
       commit('removeVideo', payload)
+      if (snapshot) {
+        const videos = snapshot.videos.filter(video => playlistItemId != null ? video.playlistItemId === playlistItemId : video.videoId === videoId)
+        if (videos.length > 0) reportYouTubePlaylistChange({ type: 'remove', playlist: snapshot, videos })
+      }
+
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+
+      return false
     }
   },
 
-  async removeVideos({ commit, dispatch }, payload) {
-    try {
-      const { _id, playlistItemIds, videoIds } = payload
+  async removeVideos({ commit, dispatch, state }, payload) {
+    const { _id, playlistItemIds, videoIds } = payload
+    const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
 
-      await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
+    await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
 
-      const lastUpdatedAt = Date.now()
+    const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
+    await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
 
-      payload.lastUpdatedAt = lastUpdatedAt
+    payload.lastUpdatedAt = lastUpdatedAt
 
-      commit('removeVideos', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
+    commit('removeVideos', payload)
+    if (snapshot) {
+      const removedIds = new Set(playlistItemIds)
+      const videos = snapshot.videos.filter(video => removedIds.has(video.playlistItemId))
+      if (videos.length > 0) reportYouTubePlaylistChange({ type: 'remove', playlist: snapshot, videos })
     }
   },
 }
 
+/**
+ * Removes the matching videos from a playlist and stops counting them, in one
+ * pass over the playlist.
+ *
+ * @param {object} state
+ * @param {{ videos: object[] }} playlist
+ * @param {(video: object) => boolean} matches
+ */
+function dropPlaylistVideos(state, playlist, matches) {
+  const removed = []
+  const kept = []
+
+  // Iterating the proxy would store reactive proxies in the new raw array.
+  for (const video of toRaw(playlist.videos)) {
+    (matches(video) ? removed : kept).push(video)
+  }
+
+  decrementPlaylistVideoCounts(state.playlistVideoCounts, removed)
+  playlist.videos = kept
+}
+
 const mutations = {
+  applyPlaylistMetadataRepairs(state, update) {
+    applyPlaylistRepairUpdate(state.playlists, update)
+  },
+
   addPlaylist(state, payload) {
     state.playlists.push(payload)
+    incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
   },
 
   addPlaylists(state, payload) {
     state.playlists.push(...payload)
+    for (const playlist of payload) {
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+    }
   },
 
   upsertPlaylistToList(state, updatedPlaylist) {
@@ -468,73 +782,113 @@ const mutations = {
 
     if (i === -1) {
       state.playlists.push(updatedPlaylist)
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
     } else {
       const foundPlaylist = state.playlists[i]
+      // Playback timestamps and metadata edits leave membership unchanged.
+      // Recount only when the update actually replaces the video list.
+      const replacesVideos = Object.hasOwn(updatedPlaylist, 'videos')
+      if (replacesVideos) decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
       state.playlists.splice(i, 1, Object.assign(foundPlaylist, updatedPlaylist))
+      if (replacesVideos) incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
     }
   },
 
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos.push(payload.videoData)
+      // Video lists are always replaced, never changed in place, so readers
+      // can iterate the raw arrays of large playlists and still update.
+      const videos = toRaw(playlist.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? [payload.videoData, ...videos]
+        : [...videos, payload.videoData]
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }
   },
 
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos = [].concat(playlist.videos, payload.videos)
+      const videos = toRaw(playlist.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? payload.videos.concat(videos)
+        : videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
   },
 
   removeAllPlaylists(state) {
     state.playlists = []
+    state.playlistVideoCounts.clear()
   },
 
   removeAllVideos(state, playlistId) {
     const playlist = state.playlists.find(playlist => playlist._id === playlistId)
     if (playlist) {
+      decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
       playlist.videos = []
     }
   },
 
   removeVideo(state, { _id, lastUpdatedAt, videoId, playlistItemId }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
-    if (playlist) {
-      if (playlistItemId != null) {
-        playlist.videos = playlist.videos.filter(video => video.playlistItemId !== playlistItemId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      } else if (videoId != null) {
-        playlist.videos = playlist.videos.filter(video => video.videoId !== videoId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      }
+    if (!playlist) {
+      return
+    }
+
+    if (playlistItemId != null) {
+      dropPlaylistVideos(state, playlist, video => video.playlistItemId === playlistItemId)
+      playlist.lastUpdatedAt = lastUpdatedAt
+    } else if (videoId != null) {
+      dropPlaylistVideos(state, playlist, video => video.videoId === videoId)
+      playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removeVideos(state, { _id, lastUpdatedAt, playlistItemIds }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
     if (playlist) {
-      playlist.videos = playlist.videos.filter(video => {
-        const playlistItemIdMatches = playlistItemIds.includes(video.playlistItemId)
-        return !playlistItemIdMatches
-      })
+      const removedIds = new Set(playlistItemIds)
+      dropPlaylistVideos(state, playlist, video => removedIds.has(video.playlistItemId))
       playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removePlaylist(state, playlistId) {
-    state.playlists = state.playlists.filter(playlist => playlist._id !== playlistId || playlist.protected)
+    mutations.removePlaylists(state, [playlistId])
+  },
+
+  removePlaylists(state, playlistIds) {
+    const removedIds = new Set(playlistIds)
+    const isKept = playlist => !removedIds.has(playlist._id) || playlist.protected
+
+    for (const playlist of state.playlists) {
+      if (!isKept(playlist)) {
+        decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+      }
+    }
+
+    state.playlists = toRaw(state.playlists).filter(isKept)
   },
 
   setAllPlaylists(state, payload) {
     state.playlists = payload
+    resetPlaylistVideoCounts(state.playlistVideoCounts, payload)
   },
 
   setPlaylistsReady(state, payload) {
     state.playlistsReady = payload
+  },
+
+  setPlaylistsScope(state, scope) {
+    state.playlistsScope = scope
+  },
+
+  setScopedQuickBookmarkTarget(state, playlistId) {
+    state.scopedQuickBookmarkTarget = playlistId
   },
 }
 

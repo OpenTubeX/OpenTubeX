@@ -1,0 +1,169 @@
+name: Update FFmpeg builds
+
+# The app downloads managed FFmpeg only from the builds and SHA-256 hashes pinned in
+# src/main/ffmpegBuilds.json, so a compromised download host cannot serve a different
+# binary. Dependabot cannot track them, so this opens a PR when a newer build exists.
+# A PR opened with GITHUB_TOKEN would not run CI, so the PR step uses UPSTREAM_SYNC_TOKEN.
+on:
+  schedule:
+    - cron: "29 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ffmpeg-builds
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          persist-credentials: false
+
+      - name: Update pinned builds
+        id: update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          shopt -s inherit_errexit
+          file=src/main/ffmpegBuilds.json
+          downloads="$RUNNER_TEMP/ffmpeg-builds"
+          mkdir -p "$downloads"
+
+          # Downloads an archive and prints its SHA-256 after checking it against the checksum
+          # its publisher lists, which catches truncated or corrupted downloads.
+          download() {
+            local url=$1 published=$2 hash
+            curl -fsSL --retry 3 -o "$downloads/$(basename "$url")" "$url"
+            hash=$(sha256sum "$downloads/$(basename "$url")" | cut -d ' ' -f 1)
+            if [[ "$hash" != "$published" ]]; then
+              echo "::error::$url has the SHA-256 $hash, but its publisher lists ${published:-nothing}." >&2
+              return 1
+            fi
+            echo "$hash"
+          }
+
+          pin() {
+            local key=$1 binary=$2 url=$3 hash=$4
+            jq --arg key "$key" --arg binary "$binary" --arg url "$url" --arg hash "$hash" \
+              '.[$key][$binary] = { url: $url, sha256: $hash }' "$file" > "$file.new"
+            mv "$file.new" "$file"
+          }
+
+          # Linux and macOS: the latest FFmpeg release builds from https://ffmpeg.martin-riedl.de,
+          # which keeps every release build at its URL.
+          for target in linux-x64:linux/amd64 linux-arm64:linux/arm64 darwin-x64:macos/amd64 darwin-arm64:macos/arm64; do
+            key=${target%%:*}
+            path=${target#*:}
+            # The redirect answers HEAD requests with 404, so this reads it from a GET request.
+            url=$(curl -fsS -o /dev/null -w '%{redirect_url}' \
+              "https://ffmpeg.martin-riedl.de/redirect/latest/$path/release/ffmpeg.zip")
+            if [[ ! "$url" =~ ^https://ffmpeg\.martin-riedl\.de/download/$path/([0-9]+_([0-9.]+))/ffmpeg\.zip$ ]]; then
+              echo "::error::Unexpected $path FFmpeg build: ${url:-nothing}."
+              exit 1
+            fi
+            build=${BASH_REMATCH[1]}
+            version=${BASH_REMATCH[2]}
+            # FFprobe must come from the same build, which a build published in between would break.
+            ffprobe=$(curl -fsS -o /dev/null -w '%{redirect_url}' \
+              "https://ffmpeg.martin-riedl.de/redirect/latest/$path/release/ffprobe.zip")
+            if [[ "$ffprobe" != "${url%/*}/ffprobe.zip" ]]; then
+              echo "::error::FFmpeg and FFprobe resolve to different $path builds."
+              exit 1
+            fi
+            current=$(jq -r --arg key "$key" '.[$key].ffmpeg.url // empty' "$file")
+            if [[ "$url" == "$current" && "$ffprobe" == "$(jq -r --arg key "$key" '.[$key].ffprobe.url // empty' "$file")" ]]; then
+              continue
+            fi
+            for binary in ffmpeg ffprobe; do
+              url="${url%/*}/$binary.zip"
+              published=$(curl -fsSL "$url.sha256" | grep -oP "^[0-9a-f]{64}(?=  $binary\.zip$)" || true)
+              hash=$(download "$url" "$published")
+              if [[ "$(zipinfo -1 "$downloads/$binary.zip")" != "$binary" ]]; then
+                echo "::error::$url does not contain only $binary."
+                exit 1
+              fi
+              pin "$key" "$binary" "$url" "$hash"
+            done
+            from=${current%/*}
+            echo "- $key: [FFmpeg $version](https://ffmpeg.martin-riedl.de/info/history/$path/release) build \`$build\` (from \`${from##*/}\`)" >> "$RUNNER_TEMP/changes.md"
+          done
+
+          # Windows: yt-dlp's patched FFmpeg builds. Their daily releases are deleted after two
+          # weeks, apart from the last one of each month, which util/prunetags.sh keeps for two
+          # years, so this pins the newest build of a finished month.
+          repository=yt-dlp/FFmpeg-Builds
+          month=$(date -u +%Y-%m)
+          tag=$(gh api --paginate "repos/$repository/releases" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' |
+            grep -E '^autobuild-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}$' |
+            awk -v month="$month" 'substr($0, 11, 7) < month' | sort | tail -n 1)
+          if [[ -z "$tag" ]]; then
+            echo "::error::Cannot find a $repository build from before $month."
+            exit 1
+          fi
+          # The digest is the SHA-256 that GitHub recorded when the asset was uploaded.
+          assets=$(gh api "repos/$repository/releases/tags/$tag" \
+            --jq '.assets[] | select(.name | test("^ffmpeg-N-[0-9]+-g[0-9a-f]+-win64-gpl\\.zip$")) | "\(.name) \(.digest // "" | ltrimstr("sha256:"))"')
+          read -r name digest <<< "$assets"
+          if [[ "$(wc -l <<< "$assets")" != 1 || ! "$digest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::$repository $tag has no single win64 GPL build with a digest."
+            exit 1
+          fi
+          url="https://github.com/$repository/releases/download/$tag/$name"
+          current=$(jq -r '."win32-x64".ffmpeg.url // empty' "$file")
+          current_ffprobe=$(jq -r '."win32-x64".ffprobe.url // empty' "$file")
+          if [[ "$current" != "$url" || "$current_ffprobe" != "$url" ]]; then
+            hash=$(download "$url" "$digest")
+            entries=$(zipinfo -1 "$downloads/$name")
+            for binary in ffmpeg ffprobe; do
+              if ! grep -qxF "${name%.zip}/bin/$binary.exe" <<< "$entries"; then
+                echo "::error::$url does not contain $binary.exe."
+                exit 1
+              fi
+              pin win32-x64 "$binary" "$url" "$hash"
+            done
+            from=${current%/*}
+            echo "- win32-x64: [$repository $tag](https://github.com/$repository/releases/tag/$tag) \`${name%.zip}\` (from \`${from##*/}\`)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
+            {
+              echo 'changes<<EOF'
+              cat "$RUNNER_TEMP/changes.md"
+              echo EOF
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update pull request
+        if: steps.update.outputs.changes
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: ffmpeg-builds
+          delete-branch: true
+          add-paths: src/main/ffmpegBuilds.json
+          commit-message: "build(downloads): update pinned FFmpeg builds"
+          title: "build(downloads): update pinned FFmpeg builds"
+          body: |
+            Updates the managed FFmpeg and FFprobe builds pinned in `src/main/ffmpegBuilds.json`:
+
+            ${{ steps.update.outputs.changes }}
+
+            The hashes are the SHA-256 of the archives this workflow downloaded. Each matched the checksum its publisher lists: the `.sha256` file next to the Linux and macOS builds, and the digest GitHub recorded when the Windows build was uploaded. The app only installs archives that match these hashes. Before merging, check that each new build comes from its publisher's expected release.
+
+            ## Release note
+            - [x] No release note needed

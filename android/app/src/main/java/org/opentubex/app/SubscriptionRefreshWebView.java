@@ -1,0 +1,82 @@
+package org.opentubex.app;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
+
+import com.getcapacitor.CapacitorWebView;
+
+import java.lang.ref.WeakReference;
+
+/** Keep media playback, active refreshes and syncs out of Chromium's hidden-page freezer. */
+public final class SubscriptionRefreshWebView extends CapacitorWebView {
+    private static WeakReference<SubscriptionRefreshWebView> activeView = new WeakReference<>(null);
+    private static boolean playbackActive;
+    private static boolean syncActive;
+
+    private boolean refreshActive;
+    private boolean incognitoKeyboard;
+    private int actualWindowVisibility = VISIBLE;
+
+    public SubscriptionRefreshWebView(Context context, AttributeSet attributes) {
+        super(context, attributes);
+        // Let the themed native surface show through the blank startup page.
+        setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        AndroidProxy.protectWebView(this);
+        activeView = new WeakReference<>(this);
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        actualWindowVisibility = visibility;
+        super.onWindowVisibilityChanged(keepRunning() ? VISIBLE : visibility);
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        InputConnection connection = super.onCreateInputConnection(outAttrs);
+        // Like a browser's incognito tab, ask the keyboard not to learn from what is typed
+        if (incognitoKeyboard) outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;
+        return connection;
+    }
+
+    void setIncognitoKeyboard(boolean enabled) {
+        if (incognitoKeyboard == enabled) return;
+        incognitoKeyboard = enabled;
+        // A connected keyboard only reads the options when its input starts again
+        InputMethodManager inputMethodManager = getContext().getSystemService(InputMethodManager.class);
+        if (inputMethodManager != null && inputMethodManager.isActive(this)) inputMethodManager.restartInput(this);
+    }
+
+    void setRefreshActive(boolean active) {
+        refreshActive = active;
+        // This changes Chromium's lifecycle, not Android's window visibility.
+        // Renderer UI behavior uses the actual activity state via appVisibility.
+        updateVisibility();
+    }
+
+    static void setPlaybackActive(boolean active) {
+        playbackActive = active;
+        updateActiveView();
+    }
+
+    static void setSyncActive(boolean active) {
+        syncActive = active;
+        updateActiveView();
+    }
+
+    private static void updateActiveView() {
+        SubscriptionRefreshWebView view = activeView.get();
+        if (view != null) view.updateVisibility();
+    }
+
+    private boolean keepRunning() {
+        return refreshActive || playbackActive || syncActive;
+    }
+
+    private void updateVisibility() {
+        super.onWindowVisibilityChanged(keepRunning() ? VISIBLE : actualWindowVisibility);
+    }
+}

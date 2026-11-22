@@ -1,0 +1,121 @@
+import { test, expect } from '../../helpers/app.mjs'
+import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+
+test.use({ seed: { settings: { animationSpeed: 0, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+test('sleep timer offers the current chapter and stops before the next one', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => { vm.videoChapters = [] })
+  const chapterEnd = await video.evaluate(element => element.currentTime + 3)
+  const chapterOption = page.locator('.sleep-timer-menu button').filter({ hasText: 'End of current chapter' })
+
+  await openPlayerOptions(page)
+  await page.locator('.sleep-timer-button').click()
+  await expect(chapterOption).toHaveClass(/shaka-hidden/)
+
+  // The slider and its step buttons set durations between the presets and keep the menu open.
+  const menu = page.locator('.sleep-timer-menu')
+  await menu.getByRole('slider', { name: 'Sleep timer' }).press('ArrowRight')
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '10:00 remaining')
+  await menu.getByRole('button', { name: '+' }).click()
+  await expect(menu.getByRole('menuitemradio', { name: '15 min' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '15:00 remaining')
+
+  // The wheel starts its duration once it rests, but not after a preset was chosen meanwhile.
+  const slider = menu.getByRole('slider', { name: 'Sleep timer' })
+  await slider.hover()
+  await page.mouse.wheel(0, -100)
+  await menu.getByRole('menuitemradio', { name: '45 min' }).click()
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', /^4[45]:\d\d remaining$/)
+  // Choosing the running duration again leaves the timer as it is, so the slider must return to it.
+  // A preset returns to the player options.
+  await page.locator('.sleep-timer-button').click()
+  await slider.hover()
+  await page.mouse.wheel(0, 100)
+  await expect(slider).toHaveValue('40')
+  await menu.getByRole('menuitemradio', { name: '45 min' }).click()
+  // Proving that nothing happens needs a wait past the wheel's 500 ms rest.
+  await page.waitForTimeout(800)
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', /^4[45]:\d\d remaining$/)
+  await page.locator('.sleep-timer-button').click()
+  await expect(slider).toHaveValue('45')
+
+  // Late chapters no longer rebuild the controls, so close the menu before reopening it.
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.sleep-timer-button')).toBeHidden()
+
+  await watch.evaluate((vm, endSeconds) => {
+    vm.videoChapters = [
+      { title: 'Current', startSeconds: 0, endSeconds, source: 'description' },
+      { title: 'Next', startSeconds: endSeconds, endSeconds: 30, source: 'description' },
+    ]
+  }, chapterEnd)
+  await openPlayerOptions(page)
+  await page.locator('.sleep-timer-button').click()
+  await expect(chapterOption).toBeVisible()
+  await chapterOption.click()
+  await video.evaluate(element => element.play())
+
+  await expect.poll(() => video.evaluate(element => element.paused), { timeout: 10_000 }).toBe(true)
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(chapterEnd)
+})
+
+test('sleep timer clamps its scrolled menu when the chapter option disappears', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => {
+    vm.videoChapters = [
+      { title: 'First', startSeconds: 0, endSeconds: 10 },
+      { title: 'Second', startSeconds: 15, endSeconds: 30 },
+    ]
+  })
+  await openPlayerOptions(page)
+  await page.locator('.sleep-timer-button').click()
+
+  const menu = page.locator('.ftVideoPlayer .shaka-overflow-menu')
+  const chapterOption = menu.locator('.sleep-timer-menu button').filter({ hasText: 'End of current chapter' })
+  await expect(chapterOption).toBeVisible()
+  // A running timer shows Cancel timer, so that the chapter option is alone in its row and hiding it shortens the menu.
+  await menu.locator('.sleep-timer-menu').getByRole('button', { name: '+' }).click()
+  await expect(menu.locator('.sleep-timer-cancel')).toBeVisible()
+  await menu.evaluate(element => {
+    element.style.inlineSize = '200px'
+    element.style.maxBlockSize = '130px'
+    element.style.minBlockSize = '0'
+  })
+  // The submenu scrolls its options below its header.
+  const scroller = menu.locator('.sleep-timer-menu')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const originalOffset = await scroller.evaluate(element => element.scrollTop)
+
+  await video.evaluate(element => { element.currentTime = 12 })
+  await expect(chapterOption).toHaveClass(/shaka-hidden/)
+  await expect.poll(() => scroller.evaluate((element, originalOffset) => {
+    const buttons = [...element.children]
+      .filter(button => button instanceof HTMLButtonElement && !button.classList.contains('shaka-hidden'))
+    const lastButton = buttons.at(-1)
+    const contentEnd = lastButton.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+      element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const realMaximum = Math.max(0, contentEnd - element.clientHeight)
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const thumb = scrollbar?.querySelector('.os-scrollbar-handle')?.getBoundingClientRect()
+    const track = scrollbar?.querySelector('.os-scrollbar-track')?.getBoundingClientRect()
+    const scrollbarMatches = realMaximum <= 1
+      ? scrollbar?.classList.contains('os-scrollbar-unusable')
+      : thumb && track && Math.abs(thumb.bottom - track.bottom) <= 2
+    return {
+      clamped: element.scrollTop <= realMaximum + 2 && element.scrollTop < originalOffset,
+      scrollbarMatches: Boolean(scrollbarMatches),
+    }
+  }, originalOffset)).toEqual({ clamped: true, scrollbarMatches: true })
+})
