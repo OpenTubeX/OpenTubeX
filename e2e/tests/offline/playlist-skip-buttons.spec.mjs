@@ -299,11 +299,16 @@ test('continues the playlist after the queued videos that interrupted it', async
 
   const endVideo = async () => {
     const video = await waitForPlayback(page)
+    const player = await video.elementHandle()
     await video.evaluate(element => { element.currentTime = Math.max(0, element.duration - 0.25) })
+    return player
   }
 
-  await endVideo()
+  const playlistPlayer = await endVideo()
   await expect(page).toHaveURL(/#\/watch\/queuevideo0(?!.*playlistId)/)
+  // The ended player still reports playback until the queued video replaces it.
+  await expect.poll(() => playlistPlayer.evaluate(element => element.isConnected)).toBe(false)
+  await playlistPlayer.dispose()
 
   await endVideo()
   await expect(page).toHaveURL(/#\/watch\/skipvideo1\?.*playlistId=e2eskipplaylist/)

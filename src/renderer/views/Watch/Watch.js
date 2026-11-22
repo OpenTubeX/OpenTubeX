@@ -2755,6 +2755,12 @@ export default defineComponent({
         this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       }
       if (this.queuedPlaybackVideoId !== requestedVideoId) this.queuedPlaybackVideoId = null
+      // Opening anything but the route the queue opened, even the same video from
+      // another playlist, leaves the interrupted playlist behind. Before the first
+      // await, so a skip during the load cannot go back to it.
+      if (this.playlistAfterQueue && this.playlistAfterQueue.queuedPath !== this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)) {
+        this.playlistAfterQueue = null
+      }
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
@@ -2786,12 +2792,6 @@ export default defineComponent({
               this.shortsPlayerReloads[this.videoId] = (this.shortsPlayerReloads[this.videoId] ?? 0) + 1
             }
           }
-        }
-
-        // Opening anything but the queued video the queue opened, even the same video
-        // from another playlist, leaves the interrupted playlist behind.
-        if (this.playlistAfterQueue && this.playlistAfterQueue.queuedPath !== this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)) {
-          this.playlistAfterQueue = null
         }
 
         // react to route changes...
