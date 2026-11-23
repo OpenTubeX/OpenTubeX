@@ -171,9 +171,10 @@
 // Include at the end of the page's .videoLayout rule, so the responsive
 // templates override page-specific ones.
 @mixin watch-layout-responsive {
+  // Theater mode keeps the same side gaps as the default layout.
   @media (width > 1350px) {
     @container route (width >= 1051px) {
-      &:not(.useTheatreMode, .noSidebar, .shortsPlayerActive) {
+      &:not(.noSidebar, .shortsPlayerActive) {
         .videoAreaMargin,
         .watchVideo {
           margin-inline: 8px;
@@ -199,10 +200,6 @@
   @container route (width >= 1051px) {
     &.useTheatreMode {
       @include theatre-mode-template;
-
-      .watchVideoSideBar {
-        margin-inline-end: 0;
-      }
     }
   }
 
