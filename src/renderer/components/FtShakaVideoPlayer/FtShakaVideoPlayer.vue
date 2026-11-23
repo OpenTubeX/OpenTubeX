@@ -12234,10 +12234,12 @@ function retainAndroidFullscreenDuringRotation(unlocked) {
   // read after unlock. If native rotation has arrived but the WebView has
   // not resized yet, keep protecting it until resize or the safety deadline.
   // A busy device can take seconds to apply the unlock itself, so the
-  // settling time starts once it has.
-  let timeout = null
-  Promise.resolve(unlocked).then(() => {
-    if (finishAndroidFullscreenExit !== finish) return
+  // settling time starts once it has, or after 5 s if it never answers.
+  let settling = false
+  const settle = () => {
+    if (settling || finishAndroidFullscreenExit !== finish) return
+    settling = true
+    clearTimeout(timeout)
     timeout = window.setTimeout(() => {
       timeout = window.setTimeout(finish, 4500)
       getAndroidDisplayOrientation().then(orientation => {
@@ -12247,7 +12249,9 @@ function retainAndroidFullscreenDuringRotation(unlocked) {
         if (finishAndroidFullscreenExit === finish) finish()
       })
     }, 500)
-  })
+  }
+  let timeout = window.setTimeout(settle, 5000)
+  Promise.resolve(unlocked).then(settle)
   finishAndroidFullscreenExit = finish
   window.addEventListener('resize', resized)
 }
