@@ -7094,7 +7094,8 @@ function resized(entries) {
   // Mini-player controls are separate from Shaka's hidden inline controls.
   // Changing their layout here rebuilds every Shaka control at both ends of
   // the animation, even though the inline layout often has not changed.
-  if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
+  // Mobile players always use the overflow menu.
+  if (!ui?.isMobile() && !scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
     onlyUseOverFlowMenu.value = inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
   }
   rememberInlinePlayerLayoutHeight()
@@ -12718,10 +12719,11 @@ onMounted(async () => {
     // Default to the full control bar; the resize/presentation remeasure
     // decides the real layout once the tab is visible.
     onlyUseOverFlowMenu.value = initialWidth > 0 && initialWidth <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
-
-    containerResizeObserver = new ResizeObserver(resized)
-    containerResizeObserver.observe(container.value)
   }
+  // Also remembers the inline height, which a mini player docking from a
+  // hidden Watch view needs on phones too.
+  containerResizeObserver = new ResizeObserver(resized)
+  containerResizeObserver.observe(container.value)
 
   controls.addEventListener('uiupdated', addUICustomizations)
   controls.addEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)

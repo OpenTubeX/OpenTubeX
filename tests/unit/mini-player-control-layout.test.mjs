@@ -16,6 +16,7 @@ for (const [active, animating] of [[true, false], [false, true]]) {
       scrollMiniPlayerAnimating: { value: animating },
       scrollMiniPlayerDragStyle: { value: null },
       USE_OVERFLOW_MENU_WIDTH_THRESHOLD: 634,
+      ui: { isMobile: () => false },
       rememberInlinePlayerLayoutHeight() {},
       repairScrollMiniPlaceholderHeight() {},
     })
@@ -31,6 +32,7 @@ test('a settled inline player still adapts its controls to the actual width', ()
     scrollMiniPlayerAnimating: { value: false },
     scrollMiniPlayerDragStyle: { value: null },
     USE_OVERFLOW_MENU_WIDTH_THRESHOLD: 634,
+    ui: { isMobile: () => false },
     rememberInlinePlayerLayoutHeight() {},
     repairScrollMiniPlaceholderHeight() {},
   })
