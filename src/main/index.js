@@ -2902,11 +2902,16 @@ function runApp() {
     }
   })
 
+  let baseThemeRequest = 0
+
   /** @param {unknown} baseTheme */
   async function applyBaseTheme(baseTheme) {
     if (typeof baseTheme !== 'string') return
+    const request = ++baseThemeRequest
     if (isCustomThemeValue(baseTheme)) {
-      nativeTheme.themeSource = (await getSelectedCustomTheme(baseTheme))?.isDark ? 'dark' : 'light'
+      const customTheme = await getSelectedCustomTheme(baseTheme)
+      // A newer theme can have been applied while the custom one loaded.
+      if (request === baseThemeRequest) nativeTheme.themeSource = customTheme?.isDark ? 'dark' : 'light'
     } else {
       updateThemeSource(baseTheme)
     }

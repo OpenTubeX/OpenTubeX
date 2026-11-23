@@ -1792,6 +1792,7 @@ Profile:
   Own Settings Notice: "{profile} își păstrează setările separat, așa că modificările de aici se aplică doar lui. Setările dispozitivului, cum ar fi sincronizarea, proxy-ul și copiile de rezervă, rămân comune."
   Use Shared Settings: "Folosește setările comune"
   Use Shared Settings Warning: "{profile} va folosi din nou setările comune, iar setările pe care le-ai modificat pentru el vor fi șterse."
+  Profile Could Not Be Saved: "Profilul nu a putut fi salvat"
 Channel:
   Hide Watched: Ascunde vizionatele
   All Videos Watched: "Ai vizionat toate aceste videoclipuri. Dezactivează „Ascunde vizionatele” pentru a le afișa."

@@ -2142,6 +2142,7 @@ Profile:
   Own Settings Notice: "{profile} manté la seva configuració separada, així que els canvis d'aquí només s'hi apliquen a ell. La configuració del dispositiu, com la sincronització, el servidor intermediari i les còpies de seguretat, continua compartida."
   Use Shared Settings: "Utilitza la configuració compartida"
   Use Shared Settings Warning: "{profile} tornarà a utilitzar la configuració compartida i se suprimirà la configuració que hi has canviat."
+  Profile Could Not Be Saved: "No s'ha pogut desar el perfil"
 Channel:
   Hide Watched: Amaga els vistos
   All Videos Watched: "Has vist tots aquests vídeos. Desactiva «Amaga els vistos» per mostrar-los."

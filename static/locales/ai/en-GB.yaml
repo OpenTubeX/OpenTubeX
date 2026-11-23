@@ -1752,6 +1752,7 @@ Profile:
   Own Settings Notice: "{profile} keeps its settings separate, so changes here only apply to it. Device settings, such as sync, proxy, and backups, stay shared."
   Use Shared Settings: "Use shared settings"
   Use Shared Settings Warning: "{profile} will use your shared settings again, and the settings you changed for it will be deleted."
+  Profile Could Not Be Saved: "The profile could not be saved"
 Channel:
   Hide Watched: Hide Watched
   All Videos Watched: "You've watched all of these videos. Turn off Hide Watched to show them."

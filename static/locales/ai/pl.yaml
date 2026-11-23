@@ -1224,6 +1224,7 @@ Profile:
   Own Settings Notice: "{profile} ma oddzielne ustawienia, więc zmiany tutaj dotyczą tylko jego. Ustawienia urządzenia, takie jak synchronizacja, proxy i kopie zapasowe, pozostają wspólne."
   Use Shared Settings: "Użyj wspólnych ustawień"
   Use Shared Settings Warning: "{profile} będzie znowu używać wspólnych ustawień, a ustawienia zmienione dla niego zostaną usunięte."
+  Profile Could Not Be Saved: "Nie udało się zapisać profilu"
 Channel:
   Hide Watched: Ukryj obejrzane
   All Videos Watched: "Obejrzano wszystkie te filmy. Wyłącz „Ukryj obejrzane”, aby je wyświetlić."

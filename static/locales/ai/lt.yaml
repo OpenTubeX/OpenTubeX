@@ -2055,6 +2055,7 @@ Profile:
   Own Settings Notice: "{profile} laiko savo nustatymus atskirai, todėl pakeitimai čia taikomi tik jam. Įrenginio nustatymai, pvz., sinchronizavimas, tarpinis serveris ir atsarginės kopijos, lieka bendri."
   Use Shared Settings: "Naudoti bendrus nustatymus"
   Use Shared Settings Warning: "{profile} vėl naudos jūsų bendrus nustatymus, o jam pakeisti nustatymai bus ištrinti."
+  Profile Could Not Be Saved: "Profilio išsaugoti nepavyko"
 Channel:
   Hide Watched: Slėpti peržiūrėtus
   All Videos Watched: "Peržiūrėjote visus šiuos vaizdo įrašus. Kad jie būtų rodomi, išjunkite „Slėpti peržiūrėtus“."

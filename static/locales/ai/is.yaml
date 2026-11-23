@@ -1771,6 +1771,7 @@ Profile:
   Own Settings Notice: "{profile} heldur stillingum sínum aðskildum, svo breytingar hér gilda aðeins fyrir það. Tækjastillingar, eins og samstilling, milliþjónn og öryggisafrit, haldast sameiginlegar."
   Use Shared Settings: "Nota sameiginlegar stillingar"
   Use Shared Settings Warning: "{profile} mun aftur nota sameiginlegu stillingarnar þínar og stillingunum sem þú breyttir fyrir það verður eytt."
+  Profile Could Not Be Saved: "Ekki tókst að vista prófílinn"
 Channel:
   Hide Watched: Fela áhorfð
   All Videos Watched: "Þú hefur horft á öll þessi myndskeið. Slökktu á „Fela áhorfð“ til að sýna þau."

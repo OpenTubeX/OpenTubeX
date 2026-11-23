@@ -1774,6 +1774,7 @@ Profile:
   Own Settings Notice: "{profile} memisahkan pengaturannya, jadi perubahan di sini hanya berlaku untuknya. Pengaturan perangkat, seperti sinkronisasi, proksi, dan cadangan, tetap dibagikan."
   Use Shared Settings: "Gunakan pengaturan bersama"
   Use Shared Settings Warning: "{profile} akan kembali menggunakan pengaturan bersama Anda, dan pengaturan yang Anda ubah untuknya akan dihapus."
+  Profile Could Not Be Saved: "Profil tidak dapat disimpan"
 Channel:
   Hide Watched: Sembunyikan yang sudah ditonton
   All Videos Watched: "Anda sudah menonton semua video ini. Matikan “Sembunyikan yang sudah ditonton” untuk menampilkannya."

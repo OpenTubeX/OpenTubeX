@@ -1992,6 +1992,7 @@ Profile:
   Own Settings Notice: "{profile} hou sy instellings apart, dus geld veranderinge hier net daarvoor. Toestelinstellings, soos sinkronisering, instaanbediener en rugsteun, bly gedeel."
   Use Shared Settings: "Gebruik gedeelde instellings"
   Use Shared Settings Warning: "{profile} sal weer jou gedeelde instellings gebruik, en die instellings wat jy daarvoor verander het, sal uitgevee word."
+  Profile Could Not Be Saved: "Die profiel kon nie gestoor word nie"
 Channel:
   Hide Watched: Versteek gekykte
   All Videos Watched: "Jy het al hierdie video’s gekyk. Skakel „Versteek gekykte” af om hulle te wys."

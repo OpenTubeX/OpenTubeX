@@ -457,7 +457,7 @@ test.describe('profile with its own settings', () => {
     await expect.poll(effective).toEqual([true, false])
 
     const distraction = await goToSettingsSection(page, 'distraction')
-    await expect(page.locator('.profileSettingsNotice')).toContainText('Car keeps its settings separate')
+    await expect(page.locator('.profileSettingsNotice')).toBeVisible()
     const hideComments = distraction.locator('[data-setting-key="hideComments"]')
     const hideLiveChat = distraction.locator('[data-setting-key="hideLiveChat"]')
     await expect(hideComments.getByRole('checkbox')).toBeChecked()

@@ -1765,6 +1765,7 @@ Profile:
   Own Settings Notice: "{profile} holder innstillingene sine atskilt, så endringer her gjelder bare for den. Enhetsinnstillinger, som synkronisering, mellomtjener og sikkerhetskopier, forblir delte."
   Use Shared Settings: "Bruk delte innstillinger"
   Use Shared Settings Warning: "{profile} vil bruke de delte innstillingene dine igjen, og innstillingene du endret for den, slettes."
+  Profile Could Not Be Saved: "Profilen kunne ikke lagres"
 Channel:
   Hide Watched: Skjul sette
   All Videos Watched: "Du har sett alle disse videoene. Slå av «Skjul sette» for å vise dem."

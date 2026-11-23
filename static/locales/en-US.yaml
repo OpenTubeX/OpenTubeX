@@ -2479,6 +2479,7 @@ Profile:
   Own Settings Notice: '{profile} keeps its settings separate, so changes here only apply to it. Device settings, such as sync, proxy, and backups, stay shared.'
   Use Shared Settings: Use shared settings
   Use Shared Settings Warning: '{profile} will use your shared settings again, and the settings you changed for it will be deleted.'
+  Profile Could Not Be Saved: The profile could not be saved
   Separate Profile Note: This profile keeps its subscriptions, history, and playlists separate from your other profiles.
   Separate Profile Deletion Warning: Its subscriptions, watch history, playlists, search history, watch statistics, and queue will also be deleted.
   Separate Data Notice: '{profile} keeps its data separate, so the imports and exports below only use its subscriptions, history, playlists, and search history.'

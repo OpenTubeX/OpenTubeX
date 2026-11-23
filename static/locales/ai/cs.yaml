@@ -1765,6 +1765,7 @@ Profile:
   Own Settings Notice: "{profile} má oddělená nastavení, takže změny zde platí jen pro něj. Nastavení zařízení, jako je synchronizace, proxy a zálohy, zůstávají sdílená."
   Use Shared Settings: "Použít sdílená nastavení"
   Use Shared Settings Warning: "{profile} bude znovu používat sdílená nastavení a nastavení, která jste pro něj změnili, budou smazána."
+  Profile Could Not Be Saved: "Profil se nepodařilo uložit"
 Channel:
   Hide Watched: Skrýt zhlédnuté
   All Videos Watched: "Zhlédli jste všechna tato videa. Chcete-li je zobrazit, vypněte „Skrýt zhlédnuté“."

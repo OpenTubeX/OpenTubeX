@@ -1810,6 +1810,7 @@ Profile:
   Own Settings Notice: "{profile} tenas siajn agordojn apartaj, do ŝanĝoj ĉi tie validas nur por ĝi. Aparataj agordoj, kiel sinkronigo, prokurilo kaj savkopioj, restas komunaj."
   Use Shared Settings: "Uzi komunajn agordojn"
   Use Shared Settings Warning: "{profile} denove uzos viajn komunajn agordojn, kaj la agordoj, kiujn vi ŝanĝis por ĝi, estos forigitaj."
+  Profile Could Not Be Saved: "La profilo ne povis esti konservita"
 Channel:
   Hide Watched: Kaŝi spektitajn
   All Videos Watched: "Vi spektis ĉiujn ĉi tiujn videojn. Malŝaltu „Kaŝi spektitajn“ por montri ilin."

@@ -1961,6 +1961,7 @@ Profile:
   Own Settings Notice: "{profile} mantiene su configuración separada, así que los cambios acá solo se aplican a él. La configuración del dispositivo, como la sincronización, el proxy y las copias de seguridad, sigue compartida."
   Use Shared Settings: "Usar la configuración compartida"
   Use Shared Settings Warning: "{profile} va a volver a usar tu configuración compartida, y se va a borrar la configuración que cambiaste para él."
+  Profile Could Not Be Saved: "No se pudo guardar el perfil"
 Channel:
   Hide Watched: Ocultar vistos
   All Videos Watched: "Ya viste todos estos videos. Desactivá «Ocultar vistos» para mostrarlos."

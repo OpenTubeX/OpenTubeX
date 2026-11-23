@@ -1802,6 +1802,7 @@ Profile:
   Own Settings Notice: "{profile} שומר את ההגדרות שלו בנפרד, ולכן שינויים כאן חלים רק עליו. הגדרות המכשיר, כמו סנכרון, שרת מתווך וגיבויים, נשארות משותפות."
   Use Shared Settings: "להשתמש בהגדרות המשותפות"
   Use Shared Settings Warning: "{profile} ישתמש שוב בהגדרות המשותפות שלך, וההגדרות ששינית עבורו יימחקו."
+  Profile Could Not Be Saved: "לא ניתן היה לשמור את הפרופיל"
 Channel:
   Hide Watched: הסתרת סרטונים שנצפו
   All Videos Watched: "צפית בכל הסרטונים האלה. כבה את „הסתרת סרטונים שנצפו” כדי להציג אותם."

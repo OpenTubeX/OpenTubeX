@@ -8,6 +8,7 @@ import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 import { profileSyncSnapshot } from '../../helpers/profileSyncSnapshot'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { forgetWatchQueueScope } from './watch-queue'
+import { withProfileSettingsLock } from './settings'
 import { settleScopedActions } from '../../helpers/dataScopeActions'
 import { trackDataScopeLoad } from '../../helpers/sync-data-scope.js'
 
@@ -318,12 +319,16 @@ const actions = {
     }
   },
 
-  // Takes the profile, with `ownSettings` to give it its own settings.
+  // Takes the profile, with `ownSettings` to give it its own settings. If they
+  // can't be saved, the profile isn't kept either.
   async createProfile({ commit, dispatch }, { ownSettings = false, ...profile }) {
     try {
       const newProfile = await DBProfileHandlers.create(profile)
       commit('addProfileToList', newProfile)
-      if (ownSettings) return await dispatch('setProfileOwnSettingsEnabled', { profileId: newProfile._id, enabled: true })
+      if (ownSettings && !await dispatch('setProfileOwnSettingsEnabled', { profileId: newProfile._id, enabled: true })) {
+        await dispatch('removeProfile', newProfile._id)
+        return false
+      }
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -435,7 +440,8 @@ const actions = {
   async removeProfile({ commit, dispatch, getters, rootState }, profileId) {
     try {
       const separate = getters.profileById(profileId)?.separate === true
-      await DBProfileHandlers.delete(profileId)
+      // Its own settings, which the datastore deletes too, can be saving.
+      await withProfileSettingsLock(profileId, () => DBProfileHandlers.delete(profileId))
       commit('removeProfileFromList', profileId)
       // The datastore deleted its own settings too.
       commit('setProfileOwnSettings', { profileId, settings: null })

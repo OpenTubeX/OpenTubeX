@@ -1805,6 +1805,7 @@ Profile:
   Own Settings Notice: "{profile} houdt zijn instellingen apart, dus wijzigingen hier gelden alleen voor dit profiel. Apparaatinstellingen, zoals synchronisatie, proxy en back-ups, blijven gedeeld."
   Use Shared Settings: "Gedeelde instellingen gebruiken"
   Use Shared Settings Warning: "{profile} gebruikt dan weer je gedeelde instellingen, en de instellingen die je ervoor hebt gewijzigd, worden verwijderd."
+  Profile Could Not Be Saved: "Het profiel kon niet worden opgeslagen"
 Channel:
   Hide Watched: Bekeken verbergen
   All Videos Watched: "Je hebt al deze video’s bekeken. Schakel ‘Bekeken verbergen’ uit om ze te tonen."

@@ -1781,6 +1781,7 @@ Profile:
   Own Settings Notice: "{profile} drži svoje postavke odvojeno, pa promjene ovdje vrijede samo za njega. Postavke uređaja, poput sinkronizacije, proxyja i sigurnosnih kopija, ostaju zajedničke."
   Use Shared Settings: "Koristi zajedničke postavke"
   Use Shared Settings Warning: "{profile} će ponovno koristiti tvoje zajedničke postavke, a postavke koje si promijenio/la za njega bit će izbrisane."
+  Profile Could Not Be Saved: "Profil nije moguće spremiti"
 Channel:
   Hide Watched: Sakrij pogledane
   All Videos Watched: "Pogledali ste sve ove videozapise. Isključite „Sakrij pogledane” da biste ih prikazali."

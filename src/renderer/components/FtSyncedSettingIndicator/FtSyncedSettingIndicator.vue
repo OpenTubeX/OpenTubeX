@@ -140,11 +140,9 @@ const profileSettingLabel = computed(() => t('Settings.Profile Setting', {
   profile: store.getters.getActiveProfile?.name ?? ''
 }))
 
-async function useSharedValue() {
+function useSharedValue() {
   if (props.disabled) return
-  for (const settingKey of profileSpecificKeys.value) {
-    await store.dispatch('useSharedSettingValue', settingKey)
-  }
+  store.dispatch('useSharedSettingValue', profileSpecificKeys.value)
 }
 
 function settingsValuesEqual(currentValue, defaultValue) {

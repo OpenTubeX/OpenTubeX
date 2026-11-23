@@ -1771,6 +1771,7 @@ Profile:
   Own Settings Notice: "{profile} tách riêng cài đặt, vì vậy các thay đổi ở đây chỉ áp dụng cho hồ sơ này. Cài đặt thiết bị, như đồng bộ hóa, proxy và bản sao lưu, vẫn được dùng chung."
   Use Shared Settings: "Dùng cài đặt dùng chung"
   Use Shared Settings Warning: "{profile} sẽ dùng lại cài đặt dùng chung của bạn, và các cài đặt bạn đã thay đổi cho hồ sơ này sẽ bị xóa."
+  Profile Could Not Be Saved: "Không thể lưu hồ sơ"
 Channel:
   Hide Watched: Ẩn video đã xem
   All Videos Watched: "Bạn đã xem tất cả các video này. Tắt \"Ẩn video đã xem\" để hiển thị chúng."

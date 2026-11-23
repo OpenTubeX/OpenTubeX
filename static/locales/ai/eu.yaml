@@ -1766,6 +1766,7 @@ Profile:
   Own Settings Notice: "{profile} profilak bere ezarpenak bereizita ditu, beraz hemengo aldaketak berari bakarrik aplikatzen zaizkio. Gailuaren ezarpenak, hala nola sinkronizazioa, proxya eta babeskopiak, partekatuta geratzen dira."
   Use Shared Settings: "Erabili ezarpen partekatuak"
   Use Shared Settings Warning: "{profile} profilak zure ezarpen partekatuak erabiliko ditu berriro, eta harentzat aldatu dituzun ezarpenak ezabatu egingo dira."
+  Profile Could Not Be Saved: "Ezin izan da profila gorde"
 Channel:
   Hide Watched: Ezkutatu ikusitakoak
   All Videos Watched: "Bideo hauek guztiak ikusi dituzu. Desaktibatu “Ezkutatu ikusitakoak” erakusteko."

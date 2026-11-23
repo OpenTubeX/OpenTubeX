@@ -1765,6 +1765,7 @@ Profile:
   Own Settings Notice: "{profile} hoiab oma seadeid eraldi, seega kehtivad siinsed muudatused ainult sellele. Seadme seaded, näiteks sünkroonimine, puhverserver ja varukoopiad, jäävad ühiseks."
   Use Shared Settings: "Kasuta ühiseid seadeid"
   Use Shared Settings Warning: "{profile} kasutab jälle sinu ühiseid seadeid ja seaded, mida selle jaoks muutsid, kustutatakse."
+  Profile Could Not Be Saved: "Profiili ei õnnestunud salvestada"
 Channel:
   Hide Watched: Peida vaadatud
   All Videos Watched: "Oled kõiki neid videoid vaadanud. Nende näitamiseks lülita „Peida vaadatud“ välja."

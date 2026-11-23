@@ -1768,6 +1768,7 @@ Profile:
   Own Settings Notice: "{profile} ayarlarını ayrı saxlayır, ona görə də buradakı dəyişikliklər yalnız ona aid olur. Sinxronizasiya, proksi və ehtiyat nüsxələr kimi cihaz ayarları ortaq qalır."
   Use Shared Settings: "Ortaq ayarlardan istifadə et"
   Use Shared Settings Warning: "{profile} yenidən ortaq ayarlarınızdan istifadə edəcək və onun üçün dəyişdiyiniz ayarlar silinəcək."
+  Profile Could Not Be Saved: "Profil yadda saxlanıla bilmədi"
 Channel:
   Hide Watched: Baxılanları gizlət
   All Videos Watched: "Bu videoların hamısına baxmısınız. Onları göstərmək üçün “Baxılanları gizlət” seçimini söndürün."

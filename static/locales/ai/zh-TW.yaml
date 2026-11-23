@@ -1765,6 +1765,7 @@ Profile:
   Own Settings Notice: "{profile} 分開保留其設定，因此此處的變更僅套用於它。裝置設定（如同步、代理和備份）會維持共用。"
   Use Shared Settings: "使用共用設定"
   Use Shared Settings Warning: "{profile} 將重新使用你的共用設定，你為其變更的設定將被刪除。"
+  Profile Could Not Be Saved: "無法儲存設定檔"
 Channel:
   Hide Watched: 隱藏已觀看
   All Videos Watched: "這些影片你都看過了。關閉「隱藏已觀看」即可顯示。"

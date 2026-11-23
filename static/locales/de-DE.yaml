@@ -3068,6 +3068,7 @@ Profile:
   Own Settings Notice: '{profile} hält seine Einstellungen getrennt, daher gelten Änderungen hier nur für dieses Profil. Geräteeinstellungen wie Synchronisierung, Proxy und Sicherungen bleiben gemeinsam.'
   Use Shared Settings: Gemeinsame Einstellungen verwenden
   Use Shared Settings Warning: '{profile} verwendet dann wieder deine gemeinsamen Einstellungen, und die Einstellungen, die du dafür geändert hast, werden gelöscht.'
+  Profile Could Not Be Saved: Das Profil konnte nicht gespeichert werden
   Separate Profile Note: Dieses Profil hält seine Abos, seinen Verlauf und seine Playlists von deinen anderen Profilen getrennt.
   Separate Profile Deletion Warning: Seine Abos, sein Wiedergabe- und Suchverlauf, seine Playlists, Wiedergabestatistiken und Warteschlange werden ebenfalls gelöscht.
   Separate Data Notice: '{profile} hält seine Daten getrennt. Die Importe und Exporte unten verwenden daher nur seine Abos, seinen Verlauf, seine Playlists und seinen Suchverlauf.'

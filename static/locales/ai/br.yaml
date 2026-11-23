@@ -1767,6 +1767,7 @@ Profile:
   Own Settings Notice: "{profile} a vir e arventennoù a-ziforc'h, neuze ne dalvez ar c'hemmoù amañ nemet evitañ. Arventennoù an trevnad, evel ar goubredañ, ar proksi hag an enrolladennoù-gwareziñ, a chom rannet."
   Use Shared Settings: "Implijout an arventennoù rannet"
   Use Shared Settings Warning: "{profile} a implijo en-dro hoc'h arventennoù rannet, hag an arventennoù kemmet ganeoc'h evitañ a vo dilamet."
+  Profile Could Not Be Saved: "N'eus ket bet gallet enrollañ ar profil"
 Channel:
   Hide Watched: Kuzhat ar re sellet
   All Videos Watched: "Sellet ho peus ouzh an holl videoioù-mañ. Diweredekait « Kuzhat ar re sellet » evit o diskouez."

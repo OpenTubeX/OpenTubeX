@@ -1768,6 +1768,7 @@ Profile:
   Own Settings Notice: "{profile} pitää asetuksensa erillään, joten täällä tehdyt muutokset koskevat vain sitä. Laitteen asetukset, kuten synkronointi, välityspalvelin ja varmuuskopiot, pysyvät jaettuina."
   Use Shared Settings: "Käytä jaettuja asetuksia"
   Use Shared Settings Warning: "{profile} käyttää taas jaettuja asetuksiasi, ja sille muuttamasi asetukset poistetaan."
+  Profile Could Not Be Saved: "Profiilia ei voitu tallentaa"
 Channel:
   Hide Watched: Piilota katsotut
   All Videos Watched: "Olet katsonut kaikki nämä videot. Näytä ne poistamalla ”Piilota katsotut” käytöstä."

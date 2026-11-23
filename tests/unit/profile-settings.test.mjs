@@ -13,7 +13,7 @@ import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSetti
 const { collectProfileSettings, planProfileSettingsOf, profileIdFromSettingsId, profileSettingsId } = profileSettings
 
 test('profile settings IDs name exactly one profile, also when the server sends malformed keys', () => {
-  for (const profileId of ['A1b2C3d4E5f6G7h8', 'Профиль 🚗']) {
+  for (const profileId of ['A1b2C3d4E5f6G7h8', 'Профиль 🚗', '\uFEFFcar']) {
     assert.equal(profileIdFromSettingsId(profileSettingsId(profileId)), profileId)
   }
   const car = profileSettingsId('car')
@@ -209,11 +209,12 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
     isPlainObject,
     withPendingProfileEdits: (...args) => region.withPendingProfileEdits(...args),
   })
-  const state = { profileSettingsState: { overrides } }
+  const state = { quickSettings: ['shared'], profileSettingsState: { overrides } }
   const commit = (type, payload) => mutations[type](state, payload)
   const region = vm.runInNewContext(`${between('function saveProfileSettingValue(', '/** Mutations that can change which settings show')}
 ({ updateProfileSetting, withPendingProfileEdits })`, {
     ...profileSettings,
+    state,
     isPlainObject,
     createSettingUpdateQueue,
     settingWrites: createSettingWriteTracker(async () => undefined),
@@ -229,21 +230,57 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
     },
     console,
   })
-  const until = async condition => {
-    while (!condition()) await new Promise(resolve => setImmediate(resolve))
+  // Waits until `edit` starts its save, and fails if it settles before.
+  const untilSaving = async edit => {
+    let settled = false
+    edit.then(() => { settled = true })
+    while (releases.length === 0) {
+      assert.ok(!settled, 'the edit finished without saving')
+      await new Promise(resolve => setImmediate(resolve))
+    }
   }
 
   // Add A, then add B while A saves, like the quick settings customizer.
   const first = region.updateProfileSetting(commit, 'car', 'quickSettings', ['a'], true)
-  await until(() => releases.length === 1)
+  await untilSaving(first)
   const second = region.updateProfileSetting(commit, 'car', 'quickSettings', ['a', 'b'], true)
   releases.shift()()
   await first
   assert.deepEqual(JSON.parse(JSON.stringify(overrides.car.quickSettings)), ['a', 'b'])
-  await until(() => releases.length === 1)
+  await untilSaving(second)
   releases.shift()()
   await second
   assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{ quickSettings: ['a', 'b'] }, { quickSettings: ['a', 'b'] }])
+
+  // Setting the shared value saves no own value, so the profile follows later shared changes.
+  const third = region.updateProfileSetting(commit, 'car', 'quickSettings', ['shared'], true)
+  await untilSaving(third)
+  releases.shift()()
+  assert.equal(await third, true)
+  assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{}, {}])
+})
+
+test('a failed shared write of a setting the active profile replaces keeps the previous shared value', async () => {
+  const { createOptimisticSettingUpdater, createSettingWriteTracker } = await import('../../src/renderer/helpers/settingUpdateQueue.js')
+  // The car profile shows its own order while the shared one is kept aside.
+  const settings = { quickSettings: ['car'], profileSettingsState: { applied: 'car', shared: { quickSettings: ['shared'] } } }
+  const { updateOrderedSetting } = vm.runInNewContext(`${between('function updateOrderedSetting(', 'const editSavedSetting')}
+({ updateOrderedSetting })`, {
+    ...profileSettings,
+    // Sync and imports save the shared settings, see `withSharedSettings`.
+    settingTarget: () => null,
+    updateOptimisticSetting: createOptimisticSettingUpdater(),
+    settingWrites: createSettingWriteTracker(async () => undefined),
+    defaultMutationId: settingId => `set${settingId}`,
+    saveSettingEdit: async () => { throw new Error('The datastore is unavailable') },
+    console: { error() {} },
+  })
+  // Like `set<Setting>` mutations, see `assignSharedSetting`.
+  const commit = (_type, value) => { settings.profileSettingsState.shared.quickSettings = value }
+  assert.equal(await updateOrderedSetting(commit, settings, 'quickSettings', ['synced']), false)
+  assert.deepEqual(JSON.parse(JSON.stringify(settings)), {
+    quickSettings: ['car'], profileSettingsState: { applied: 'car', shared: { quickSettings: ['shared'] } },
+  })
 })
 
 test('replacing the active profile\'s own settings with others of the same value tracks the new shared values', () => {

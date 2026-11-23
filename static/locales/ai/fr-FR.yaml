@@ -1764,6 +1764,7 @@ Profile:
   Own Settings Notice: "{profile} garde ses paramètres séparés, donc les modifications ici ne s’appliquent qu’à lui. Les paramètres de l’appareil, comme la synchronisation, le proxy et les sauvegardes, restent partagés."
   Use Shared Settings: "Utiliser les paramètres partagés"
   Use Shared Settings Warning: "{profile} utilisera de nouveau vos paramètres partagés, et les paramètres que vous avez modifiés pour lui seront supprimés."
+  Profile Could Not Be Saved: "Le profil n’a pas pu être enregistré"
 Channel:
   Hide Watched: Masquer les vidéos visionnées
   All Videos Watched: "Vous avez regardé toutes ces vidéos. Désactivez « Masquer les vidéos visionnées » pour les afficher."

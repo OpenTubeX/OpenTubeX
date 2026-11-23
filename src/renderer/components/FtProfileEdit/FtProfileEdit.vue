@@ -561,7 +561,7 @@ function handleSharedSettingsPrompt(response) {
  * @param {boolean} [confirmedSharedSettings] whether the user agreed to delete
  *   the profile's own settings
  */
-function saveProfile(confirmedSharedSettings = false) {
+async function saveProfile(confirmedSharedSettings = false) {
   if (profileName.value === '') {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
     return
@@ -580,20 +580,30 @@ function saveProfile(confirmedSharedSettings = false) {
     icon: deepCopy(profileIcon.value)
   }
 
+  const showSaveError = () => showToast({ message: t('Profile.Profile Could Not Be Saved'), icon: ['fas', 'circle-exclamation'] })
   if (props.isNew) {
     const ownSettings = keepSettingsSeparate.value
-    store.dispatch('createProfile', keepDataSeparate.value
+    const created = store.dispatch('createProfile', keepDataSeparate.value
       ? { ...details, separate: true, subscriptions: [], ownSettings }
       : { ...details, subscriptions: deepCopy(props.profile.subscriptions), ownSettings })
-    showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
-  } else {
-    // Leave subscriptions out so channels added elsewhere since this page loaded stay
-    store.dispatch('updateProfileDetails', { profileId: profileId.value, details })
-    if (ownSettingsChanged) {
-      store.dispatch('setProfileOwnSettingsEnabled', { profileId: profileId.value, enabled: keepSettingsSeparate.value })
+    if (await created) {
+      showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
+    } else {
+      showSaveError()
     }
-    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+  } else {
+    const id = profileId.value
+    // Leave subscriptions out so channels added elsewhere since this page loaded stay
+    const [detailsSaved, settingsSaved] = await Promise.all([
+      store.dispatch('updateProfileDetails', { profileId: id, details }),
+      ownSettingsChanged ? store.dispatch('setProfileOwnSettingsEnabled', { profileId: id, enabled: keepSettingsSeparate.value }) : true,
+    ])
+    if (detailsSaved && settingsSaved) {
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    } else {
+      showSaveError()
+    }
   }
 }
 

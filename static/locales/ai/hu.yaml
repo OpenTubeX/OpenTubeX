@@ -1765,6 +1765,7 @@ Profile:
   Own Settings Notice: "{profile} külön tartja a beállításait, így az itteni módosítások csak rá vonatkoznak. Az eszközbeállítások, például a szinkronizálás, a proxy és a biztonsági mentések, közösek maradnak."
   Use Shared Settings: "Közös beállítások használata"
   Use Shared Settings Warning: "{profile} ismét a közös beállításaidat fogja használni, és a számára módosított beállítások törlődnek."
+  Profile Could Not Be Saved: "A profilt nem sikerült menteni"
 Channel:
   Hide Watched: Megtekintettek elrejtése
   All Videos Watched: "Az összes videót megnézted. A megjelenítésükhöz kapcsold ki a „Megtekintettek elrejtése” lehetőséget."

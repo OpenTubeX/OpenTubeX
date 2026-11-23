@@ -99,7 +99,8 @@ export const SHARED_ONLY_SETTINGS = new Set([
  * @returns {profileId is string}
  */
 export function canHaveOwnSettings(profileId) {
-  return profileId !== MAIN_PROFILE_ID && isValidSeparateProfileId(profileId)
+  // `__proto__` can't key the own settings of each profile in plain objects.
+  return profileId !== MAIN_PROFILE_ID && profileId !== '__proto__' && isValidSeparateProfileId(profileId)
 }
 
 /**
@@ -119,7 +120,8 @@ export function isProfileSettingsId(settingId) {
   return typeof settingId === 'string' && settingId.startsWith(PROFILE_SETTINGS_PREFIX)
 }
 
-const decoder = new TextDecoder('utf-8', { fatal: true })
+// Keeps a leading U+FEFF, which profile IDs can start with.
+const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true })
 
 /**
  * The profile whose own settings a setting holds, or null for other settings.
@@ -224,12 +226,14 @@ export function sharedSettingValue(settings, settingId) {
  * @param {Record<string, any>} settings
  * @param {string | null} target the profile whose own settings to show, or null for the shared ones
  * @param {(settingId: string) => boolean} isProfileSpecific
+ * @param {(settingId: string, value: unknown) => unknown} [normalize] gives a profile's own value as the setting saves it
  * @returns {{ applied: string | null, shared: Record<string, unknown>, values: Record<string, unknown>, changed: string[] }}
  *   `shared` holds the shared values that `values` replace, and `changed` the settings whose value changes
  */
-export function planProfileSettingsOf(settings, target, isProfileSpecific) {
+export function planProfileSettingsOf(settings, target, isProfileSpecific, normalize = (_, value) => value) {
   const current = settings.profileSettingsState
-  const own = profileSettingsOf(target === null ? null : current.overrides[target], isProfileSpecific)
+  const own = Object.fromEntries(Object.entries(profileSettingsOf(target === null ? null : current.overrides[target], isProfileSpecific))
+    .map(([key, value]) => [key, normalize(key, value)]))
   /** @type {Record<string, unknown>} */
   const shared = {}
   /** @type {Record<string, unknown>} */

@@ -20,7 +20,7 @@ import { applyCapacitorNotificationMode } from '../../helpers/liveReminders'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { clearSeekHistories } from '../../helpers/player/seekHistory'
-import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
+import { isIconPack, loadIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 import { normalizeAppFont } from '../../helpers/appFont.js'
@@ -373,13 +373,19 @@ const sideEffectHandlers = {
 
   iconPack: async (_, value) => {
     const preferredPack = isIconPack(value) ? value : 'material'
-    if (await setIconPack(preferredPack)) {
+    const preferred = await loadIconPack(preferredPack)
+    // A newer selection, such as that of a profile switch, shows its own pack.
+    if (preferred === 'applied' || preferred === 'superseded') {
       return preferredPack
     }
 
     const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
-    if (await setIconPack(fallbackPack)) {
+    const fallback = await loadIconPack(fallbackPack)
+    if (fallback === 'applied') {
       return fallbackPack
+    }
+    if (fallback === 'superseded') {
+      return preferredPack
     }
 
     throw new Error(`Unable to apply icon pack: ${value}`)
@@ -616,7 +622,21 @@ export function syncedProfileSettings(settings, isSynced) {
  * @param {string | null} target
  */
 export function planProfileSettings(settings, target) {
-  return planProfileSettingsOf(settings, target, isProfileSpecificSetting)
+  return planProfileSettingsOf(settings, target, isProfileSpecificSetting, normalizeProfileSetting)
+}
+
+/**
+ * A profile's own value as the setting's mutation would save it, as restored
+ * or synced values skip it.
+ * @param {string} settingId
+ * @param {unknown} value
+ */
+function normalizeProfileSetting(settingId, value) {
+  switch (settingId) {
+    case 'preferredCaptionLocale': return normalizeYouTubeCaptionLanguageCode(value)
+    case 'tabBarPosition': return normalizeTabBarPosition(value)
+    default: return value
+  }
 }
 
 let sharedSettingWrites = 0
@@ -656,6 +676,18 @@ function assignSharedSetting(settingsState, settingId, value) {
   const shared = settingsState.profileSettingsState.shared
   if (Object.hasOwn(shared, settingId)) shared[settingId] = value
   else settingsState[settingId] = value
+}
+
+/**
+ * Runs `run` inside the lock that writes of a profile's own settings take, so
+ * deleting the profile can't run between a write's read and save.
+ * @template T
+ * @param {string} profileId
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+export function withProfileSettingsLock(profileId, run) {
+  return canHaveOwnSettings(profileId) ? runLocked(`opentubex-setting-${profileSettingsId(profileId)}`, run) : run()
 }
 
 /**
@@ -715,6 +747,9 @@ function withPendingProfileEdits(profileId, settings) {
  * @returns {Promise<boolean>} whether the edit was saved
  */
 function updateProfileSetting(commit, profileId, settingId, value, optimistic = false) {
+  // A profile saves only the values that differ from the shared ones, so it
+  // follows later changes of the others.
+  if (value !== undefined && sameSettingValue(value, sharedSettingValue(state, settingId))) value = undefined
   const id = profileSettingsId(profileId)
   const key = `${id}/${settingId}`
   /** @type {{ profileId: string, settingId: string, value: unknown, count: number } | undefined} */
@@ -969,7 +1004,9 @@ const customMutations = {
   /** Shows an edit of a profile's own setting before it is saved */
   setProfileSettingValue: (state, { profileId, settingId, value }) => {
     const settings = state.profileSettingsState.overrides[profileId]
-    if (isPlainObject(settings)) settings[settingId] = value
+    if (!isPlainObject(settings)) return
+    if (value === undefined) delete settings[settingId]
+    else settings[settingId] = value
   },
 
   // Takes a plan from `planProfileSettings`.
@@ -1048,7 +1085,9 @@ function updateOrderedSetting(commit, settings, settingId, value) {
   const target = settingTarget(settingId)
   if (target !== null) return updateProfileSetting(commit, target, settingId, value, true)
   return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
-    read: () => settings[settingId],
+    // The shared value, also while the active profile replaces it, so a failed
+    // write restores it rather than the profile's.
+    read: () => sharedSettingValue(settings, settingId),
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
     persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
   })).then(() => true).catch(error => {
@@ -1073,7 +1112,7 @@ const editSavedSetting = createSavedSettingEditor()
 function updateSharedSetting(commit, settings, settingId, update) {
   const edit = typeof update === 'function' ? update : () => update
   return settingWrites.track(settingId, () => editSavedSetting(settingId, edit, {
-    read: () => settings[settingId],
+    read: () => sharedSettingValue(settings, settingId),
     commit: value => commit(defaultMutationId(settingId), value),
     readSaved: async () => (await DBSettingHandlers.findValue(settingId)) ?? structuredClone(DEFAULT_SETTINGS[settingId]),
     write: value => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value)),
@@ -1453,25 +1492,28 @@ const customActions = {
     normalizeTabBarPosition(value)
   ),
 
-  updateIconPack: ({ commit }, value) => {
+  updateIconPack: async ({ commit, state }, value) => {
+    if (!isIconPack(value)) return false
     const target = settingTarget('iconPack')
-    // The profile's icons load once it saved them, see `applyActiveProfileSettings`.
-    if (target !== null) return isIconPack(value) ? updateProfileSetting(commit, target, 'iconPack', value) : false
+    // The active profile's own icons keep showing.
+    const shown = target !== null || !isSettingReplaced('iconPack')
+    if (shown && !await setIconPack(value)) return false
+    // The profile's own pack is shown again once it is saved, see `applyActiveProfileSettings`.
+    if (target !== null) {
+      const saved = await updateProfileSetting(commit, target, 'iconPack', value)
+      if (!saved && isIconPack(state.iconPack)) await setIconPack(state.iconPack)
+      return saved
+    }
     return settingWrites.track('iconPack', async () => {
-      const previousIconPack = currentIconPack.value
-      // The active profile's own icons keep showing.
-      const shown = !isSettingReplaced('iconPack')
-      if (!isIconPack(value) || (shown && !await setIconPack(value))) {
-        return false
-      }
-
       try {
         await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
         commit('setIconPack', value)
         return true
       } catch (error) {
-        if (shown && isIconPack(previousIconPack)) {
-          await setIconPack(previousIconPack)
+        // Show the pack of the settings that show now, which a profile switch
+        // meanwhile can have changed.
+        if (shown && isIconPack(state.iconPack)) {
+          await setIconPack(state.iconPack)
         }
         console.error(error)
         return false
@@ -1502,11 +1544,18 @@ const customActions = {
     }))
   },
 
-  /** Lets the active profile use the shared value of a setting again */
-  useSharedSettingValue: ({ commit, state }, settingId) => {
+  /**
+   * Lets the active profile use the shared values of settings again. They all
+   * go to the profile active now, even if another one becomes active meanwhile.
+   * @param {string[]} settingIds
+   * @returns {Promise<boolean>} whether every one was saved
+   */
+  useSharedSettingValue: ({ commit, state }, settingIds) => {
     const profileId = state.profileSettingsState.applied
-    if (profileId === null || !isProfileSpecificSetting(settingId)) return Promise.resolve(false)
-    return updateProfileSetting(commit, profileId, settingId, undefined)
+    const ids = settingIds.filter(isProfileSpecificSetting)
+    if (profileId === null || ids.length === 0) return Promise.resolve(false)
+    return Promise.all(ids.map(settingId => updateProfileSetting(commit, profileId, settingId, undefined)))
+      .then(results => results.every(Boolean))
   },
 
   /**
@@ -1589,9 +1638,13 @@ const customActions = {
       // The icons load alongside the other settings' side effects. A pack that
       // cannot load is replaced by the other one, which is then saved.
       let iconPackApplied
-      const applyIconPack = (value) => {
+      // `owner` is the profile whose own pack `value` is, or null for the shared one.
+      const applyIconPack = (value, owner = null) => {
         iconPackApplied = dispatch(defaultSideEffectsTriggerId('iconPack'), value).then(async (resolvedValue) => {
-          if (resolvedValue !== value) {
+          if (resolvedValue === value) return
+          if (owner !== null) {
+            await updateProfileSetting(commit, owner, 'iconPack', resolvedValue)
+          } else {
             await DBSettingHandlers.upsert('iconPack', resolvedValue)
             commit('setIconPack', resolvedValue)
           }
@@ -1848,7 +1901,7 @@ const customActions = {
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            applyIconPack(state[_id])
+            applyIconPack(state[_id], Object.hasOwn(startupProfileSettings, 'iconPack') ? startupProfile : null)
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), state[_id])

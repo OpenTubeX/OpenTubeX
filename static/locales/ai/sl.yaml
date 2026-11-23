@@ -2110,6 +2110,7 @@ Profile:
   Own Settings Notice: "{profile} ima ločene nastavitve, zato spremembe tukaj veljajo samo zanj. Nastavitve naprave, kot so sinhronizacija, posredniški strežnik in varnostne kopije, ostanejo skupne."
   Use Shared Settings: "Uporabi skupne nastavitve"
   Use Shared Settings Warning: "{profile} bo znova uporabljal vaše skupne nastavitve, nastavitve, ki ste jih spremenili zanj, pa bodo izbrisane."
+  Profile Could Not Be Saved: "Profila ni bilo mogoče shraniti"
 Channel:
   Hide Watched: Skrij ogledane
   All Videos Watched: "Ogledali ste si vse te videoposnetke. Za prikaz izklopite »Skrij ogledane«."
