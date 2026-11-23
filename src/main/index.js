@@ -49,7 +49,7 @@ import { FcastManager } from './fcast'
 import { handleTwitchAdFreeLivePlaylist, handleTwitchChatReplayPage, handleTwitchLiveVod, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { createTwitchLiveNotifier } from './twitchLiveNotifications'
-import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, setFinishedDownloadListener, shutdownYtDlpDownloads } from './ytDlp'
+import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, setEndedDownloadListener, setFinishedDownloadListener, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
 import { disableSpellChecker } from './spellChecker'
@@ -807,6 +807,13 @@ function runApp() {
   })
   setAutomaticDownloadNotifier(notify)
   // The bell keeps the downloads the user started, which only the renderers' toasts announce.
+  // The entry that announced an automatic download's start is over once it ended,
+  // which can happen while no window is open.
+  setEndedDownloadListener(async id => {
+    const started = (await notificationHistory.list())
+      .filter(entry => entry.kind === 'download-started' && entry.query?.downloadId === String(id))
+    await Promise.all(started.map(entry => notificationHistory.remove(entry.id)))
+  })
   setFinishedDownloadListener(async download => {
     const t = await getMainTranslator()
     // The mode can change while the translations load.

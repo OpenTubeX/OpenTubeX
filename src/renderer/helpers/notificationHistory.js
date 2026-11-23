@@ -1,4 +1,5 @@
 import { getUploadTarget } from '../../notificationHistory'
+import { parseTwitchChannelLogin } from '../../twitchFollows'
 import { isAndroidBackgroundRenderer } from './androidBackgroundSync'
 import { takeAndroidUploadNotifications } from './androidSubscriptionRefresh'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
@@ -103,19 +104,42 @@ async function updateNotifications(matches, update) {
 }
 
 /**
- * Marks the unread entries about news that is over read.
- * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
- */
-export function markOverNotificationsRead(isOver) {
-  return updateNotifications(entry => !entry.read && isOver(entry), id => notificationHistory.markRead(id))
-}
-
-/**
  * Removes the entries about news that no longer applies, like an installed update.
  * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
  */
 export function removeOverNotifications(isOver) {
   return updateNotifications(isOver, id => notificationHistory.remove(id))
+}
+
+/**
+ * Marks the unread entries about news the user has seen read, also on other devices.
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isSeen
+ */
+function markSeenNotificationsRead(isSeen) {
+  return updateNotifications(entry => !entry.read && isSeen(entry), id => notificationHistory.markRead(id))
+}
+
+// News about something to watch, which the user has seen once it plays.
+const WATCH_KINDS = ['video', 'short', 'live', 'live-reminder']
+
+/** @param {string} videoId */
+export function markVideoNotificationsRead(videoId) {
+  return markSeenNotificationsRead(entry => WATCH_KINDS.includes(entry.kind) && entry.path === `/watch/${videoId}`)
+}
+
+/** @param {string} login the Twitch channel whose live stream plays */
+export function markTwitchLiveNotificationsRead(login) {
+  return markSeenNotificationsRead(entry => entry.kind === 'live' && entry.path === '/external-media' &&
+    parseTwitchChannelLogin(entry.query?.url) === login)
+}
+
+/**
+ * Removes the entries about downloads that were played or removed.
+ * @param {number[]} downloadIds
+ */
+export function removeDownloadNotifications(downloadIds) {
+  const ids = new Set(downloadIds.map(String))
+  return removeOverNotifications(entry => entry.kind.startsWith('download-') && ids.has(entry.query?.downloadId ?? ''))
 }
 
 /**

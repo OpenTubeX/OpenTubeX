@@ -62,7 +62,7 @@ import { DBSettingHandlers, DBWatchStatsHandlers, getDataScope } from '../../../
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { syncNotificationDismissals } from '../../helpers/sync-notification-dismissals'
-import { getSettingsNotificationTarget, markOverNotificationsRead, notificationHistory, recordNotification } from '../../helpers/notificationHistory'
+import { getSettingsNotificationTarget, notificationHistory, recordNotification, removeOverNotifications } from '../../helpers/notificationHistory'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { isValidSeparateProfileId } from '../../../datastores/profileDatastoreNames.js'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
@@ -486,8 +486,8 @@ function showDataLossToast(allTabs) {
 }
 
 /** A sync that finished, or signing out, leaves no deletions to review. */
-function markDataLossNotificationsRead() {
-  markOverNotificationsRead(entry => entry.kind === 'sync-blocked')
+function removeDataLossNotifications() {
+  removeOverNotifications(entry => entry.kind === 'sync-blocked')
 }
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
@@ -1420,7 +1420,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     syncDeletions.release(Object.fromEntries(commonDeletions.filter(merged)))
     if (dataScope !== null) syncDeletions.release(Object.fromEntries(scopeDeletions.filter(merged)), dataScope)
     commit('setSyncServerPendingDeletion', null)
-    markDataLossNotificationsRead()
+    removeDataLossNotifications()
     if (progressStarted) commit('setSyncServerLastResult', result)
     if (tabRevocationError) throw tabRevocationError
     finishProgress()
@@ -2186,7 +2186,7 @@ const actions = {
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
     commit('setSyncServerPendingDeletion', null)
-    markDataLossNotificationsRead()
+    removeDataLossNotifications()
     syncDeletions.clear()
     unsentSyncDeletionMarks.clear()
   },

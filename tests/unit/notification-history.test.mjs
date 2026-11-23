@@ -82,10 +82,12 @@ test('entries lead to the uploaded item or the download', () => {
   assert.deepEqual(getDownloadTarget('completed', 'abc', 4), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
   assert.deepEqual(getDownloadTarget('completed', 'abc', 4, 'audio'), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
   // The player plays only downloaded videos and audio.
-  assert.deepEqual(getDownloadTarget('completed', 'abc', 4, 'subtitles'), { kind: 'download-completed', path: '/downloads' })
-  assert.deepEqual(getDownloadTarget('completed', undefined, 4), { kind: 'download-completed', path: '/downloads' })
+  assert.deepEqual(getDownloadTarget('completed', 'abc', 4, 'subtitles'), { kind: 'download-completed', path: '/downloads', query: { downloadId: '4' } })
+  assert.deepEqual(getDownloadTarget('completed', undefined, 4), { kind: 'download-completed', path: '/downloads', query: { downloadId: '4' } })
   assert.deepEqual(getDownloadTarget('started', 'abc', null), { kind: 'download-started', path: '/downloads' })
   assert.deepEqual(getDownloadTarget('failed', 'abc', null), { kind: 'download-failed', path: '/downloads' })
+  // so the app can remove the entry once the download was played or removed
+  assert.deepEqual(getDownloadTarget('started', 'abc', 4), { kind: 'download-started', path: '/downloads', query: { downloadId: '4' } })
 })
 
 test('the app records only its own kinds of news, with paths inside the app', () => {

@@ -60,7 +60,7 @@ import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScr
 import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched, withoutWatchedDiscoveryVideos } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
-import { withThumbnail } from '../../helpers/notificationHistory'
+import { markVideoNotificationsRead, removeDownloadNotifications, withThumbnail } from '../../helpers/notificationHistory'
 import { markWatchedThreadOpened } from '../../helpers/commentReplyNotifications'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
@@ -5564,6 +5564,14 @@ export default defineComponent({
       this.$store.commit('markWellbeingPlay', Date.now())
       this.dropQueuedCopyOfCurrentVideo()
       this.addToYouTubeWatchHistory()
+      // A background tab's brief autoplay attempt is not watching. Each play
+      // updates again, which catches news that arrived in between.
+      if (this.isPlaybackPresented()) {
+        // Its upload or reminder was seen, except in incognito tabs, which leave no trace.
+        if (!this.isIncognitoTab) markVideoNotificationsRead(this.videoId)
+        // The download was announced so it could be played.
+        if (this.localFilePlayback) removeDownloadNotifications([this.localPlaybackDownloadId])
+      }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
       // Resuming consumes the recovery pause, so later format switches or

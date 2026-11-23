@@ -14,7 +14,7 @@ import { installViewTransitions } from './helpers/viewTransitions'
 import { installTitleTooltips } from './helpers/titleTooltips'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
-import { recordNotification, withThumbnail } from './helpers/notificationHistory'
+import { recordNotification, removeDownloadNotifications, withThumbnail } from './helpers/notificationHistory'
 import { getDownloadTarget } from '../notificationHistory'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
@@ -210,6 +210,8 @@ if (supportsYtDlp && !isAndroidBackgroundRenderer) {
   })
 
   ytDlp.handleYtDlpDownloadsRemoved((ids) => {
+    // Their entries lead nowhere now, and a retried download has a new ID.
+    removeDownloadNotifications(ids)
     for (const id of ids) {
       removedDownloadIds.add(id)
       store.commit('removeYtDlpDownload', id)

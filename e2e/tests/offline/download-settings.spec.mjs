@@ -457,6 +457,10 @@ test.describe('automatic download authorization', () => {
     await expect.poll(() => app.electronApp.evaluate(() => (
       globalThis.automaticDownloadNotifications.map(notification => notification.title)
     ))).toContain('Automatic download finished')
+    const bellKinds = () => page.evaluate(async id => (await window.ftElectron.notificationHistory.list())
+      .filter(entry => entry.query?.downloadId === String(id)).map(entry => entry.kind), result.id)
+    // The bell drops the start once the download ended,
+    await expect.poll(bellKinds).toStrictEqual(['download-completed'])
     await app.electronApp.evaluate(() => {
       globalThis.automaticDownloadNotifications
         .find(notification => notification.title === 'Automatic download finished')
@@ -473,6 +477,8 @@ test.describe('automatic download authorization', () => {
       route: `/watch/ccccccccccc?downloadId=${result.id}`
     })
     await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+    // and the completion once the download plays.
+    await expect.poll(bellKinds).toStrictEqual([])
     await expect(page.locator('.legacy-quality-button')).toHaveAttribute('shaka-status', '640×360 • Local file')
 
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')

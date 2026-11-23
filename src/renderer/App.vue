@@ -1507,6 +1507,9 @@ const tabSwitcherSelectedTabId = computed(() => {
   return tab ? `tab-switcher-option-${tab.id}` : undefined
 })
 
+// When each managed tool last downloaded or updated fine, kept across restarts.
+const MANAGED_TOOL_UPDATES_KEY = 'managedToolUpdatedAt'
+
 /**
  * Falls back to OpenTubeX-managed external software when the configured system
  * executables are unavailable. Selected managed executables are updated when
@@ -1660,6 +1663,16 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
       }
     }))
     const failures = results.filter(({ result }) => result === null || 'error' in result)
+    let updatedAt = {}
+    try { updatedAt = JSON.parse(localStorage.getItem(MANAGED_TOOL_UPDATES_KEY) ?? '{}') ?? {} } catch {}
+    for (const { binary, result } of results) {
+      if (result !== null && !('error' in result)) updatedAt[binary] = Date.now()
+    }
+    localStorage.setItem(MANAGED_TOOL_UPDATES_KEY, JSON.stringify(updatedAt))
+    // An earlier failure is over once each of its tools updated fine since,
+    // possibly in separate updates.
+    removeOverNotifications(entry => entry.kind === 'tool-update-failed' && !!entry.query?.tools &&
+      entry.query.tools.split(',').every(tool => (updatedAt[tool] ?? -Infinity) > entry.createdAt))
     const updatedBinaries = results
       .filter(({ result }) => result !== null && 'version' in result && result.updated)
       .map(({ binary }) => binary)
@@ -1679,9 +1692,12 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
         const message = t('Settings.Download Settings.Managed Tools Download Error Template', { errors })
         showToast({ message, icon: ['fas', 'circle-exclamation'] })
+        const target = getSettingsNotificationTarget('external-software')
         recordNotification({
           kind: 'tool-update-failed',
-          ...getSettingsNotificationTarget('external-software'),
+          ...target,
+          // Lets a later update remove the entry once these tools work again.
+          query: { ...target.query, tools: failures.map(({ binary }) => binary).join(',') },
           title: t('Settings.External Software Settings.External Software Settings'),
           body: message
         })

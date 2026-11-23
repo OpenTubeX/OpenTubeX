@@ -145,7 +145,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       onDismissed: () => () => {},
     },
     recordNotification: () => {},
-    markOverNotificationsRead: () => {},
+    removeOverNotifications: () => {},
     getSettingsNotificationTarget: section => ({ path: '/settings', query: { section } }),
     dispatchRemoteSyncAction,
     isRecentSync,

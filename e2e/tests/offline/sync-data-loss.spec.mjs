@@ -162,8 +162,10 @@ test.describe('destructive sync', () => {
     await warning.getByRole('button', { name: 'Keep items', exact: true }).click()
     await expect(warning).toBeHidden()
     await expect(page.locator('.toast', { hasText: 'Sync completed' })).toBeVisible()
-    // Nothing is left to review, so the warning in the bell is read.
+    // Nothing is left to review, so the warning leaves the bell.
     await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
+    await expect.poll(() => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
+      .filter(entry => entry.kind === 'sync-blocked').length)).toBe(0)
     expect(uploads).toHaveLength(profiles.length)
     await expect(autoSync).toBeChecked()
     expect(await page.evaluate(() => window.$store.getters.getProfileList.length)).toBe(profiles.length + 1)
