@@ -455,8 +455,16 @@ function hasAutomaticDownloadRecord(videoId) {
   ))
 }
 
+/** @type {Promise<void> | null} */
+let pendingDownloadRecordsSave = null
+
 function saveDownloadRecords() {
-  return enqueueDownloadRecordsSave(async () => {
+  // A download changes status several times in a row, and each change asked for
+  // a write of the whole history. Changes made before a queued write starts
+  // share it, as it saves the records it finds when it runs.
+  if (pendingDownloadRecordsSave !== null) return pendingDownloadRecordsSave
+  const save = enqueueDownloadRecordsSave(async () => {
+    if (pendingDownloadRecordsSave === save) pendingDownloadRecordsSave = null
     // Saved records the history could not read yet would be lost.
     await loadDownloadRecords()
     const records = [...downloadRecords.values()]
@@ -477,6 +485,8 @@ function saveDownloadRecords() {
     // and reset the id counter.
     return writeFileAtomic(getDownloadRecordsPath(), JSON.stringify(savedRecords))
   })
+  pendingDownloadRecordsSave = save
+  return save
 }
 
 export function flushYtDlpDownloadRecords() {
@@ -1712,10 +1722,11 @@ export async function handleYtDlpListDownloads(event) {
       destinationCount: destinations.length,
       sizeBytes,
       completedAt: record.completedAt ?? (legacyCompletedAt || undefined),
-      files: getDownloadFiles(record).map(file => ({
+      // Asynchronous, as the list can hold thousands of files.
+      files: await Promise.all(getDownloadFiles(record).map(async file => ({
         ...file,
-        available: existsSync(file.path)
-      }))
+        available: await stat(file.path).then(() => true, () => false)
+      })))
     }
   }))
 }
