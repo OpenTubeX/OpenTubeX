@@ -269,7 +269,7 @@ func TestNonFatalCastCertificateParsing(t *testing.T) {
 func TestDeviceAuthenticationVerification(t *testing.T) {
 	device, intermediate, _, key, roots := authFixture(t)
 	nonce, peerDER := []byte("challenge nonce!"), []byte("TLS certificate DER")
-	for _, scenario := range []string{"valid", "wrong nonce", "changed TLS certificate", "bad signature", "untrusted", "missing intermediate", "expired", "wrong hash", "wrong signature algorithm", "malformed certificate"} {
+	for _, scenario := range []string{"valid", "wrong nonce", "changed TLS certificate", "bad signature", "untrusted", "missing intermediate", "expired", "wrong hash", "wrong signature algorithm", "malformed certificate", "missing credentials"} {
 		t.Run(scenario, func(t *testing.T) {
 			response := signedResponse(t, device, intermediate, key, nonce, peerDER)
 			pool, now, peer := roots, time.Now(), peerDER
@@ -292,6 +292,9 @@ func TestDeviceAuthenticationVerification(t *testing.T) {
 				response.SignatureAlgorithm = proto.Uint32(2)
 			case "malformed certificate":
 				response.ClientAuthCertificate = []byte("invalid")
+			case "missing credentials":
+				// Receivers without provisioned Cast keys, such as Google TV emulators, reply like this.
+				response.ClientAuthCertificate, response.IntermediateCertificate, response.Signature = nil, nil, nil
 			}
 			err := verifyReceiver(response, nonce, peer, pool, now)
 			if (err == nil) != (scenario == "valid") {
@@ -301,7 +304,8 @@ func TestDeviceAuthenticationVerification(t *testing.T) {
 			if errors.Is(err, errUntrustedCastCertificate) != untrusted {
 				t.Fatalf("unexpected certificate error classification for %s: %v", scenario, err)
 			}
-			invalid := scenario == "wrong nonce" || scenario == "changed TLS certificate" || scenario == "bad signature" || scenario == "wrong hash" || scenario == "wrong signature algorithm"
+			invalid := scenario == "wrong nonce" || scenario == "changed TLS certificate" || scenario == "bad signature" || scenario == "wrong hash" || scenario == "wrong signature algorithm" ||
+				scenario == "malformed certificate" || scenario == "missing credentials"
 			if errors.Is(err, errInvalidCastAuthentication) != invalid {
 				t.Fatalf("unexpected authentication error classification for %s: %v", scenario, err)
 			}

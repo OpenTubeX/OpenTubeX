@@ -18,13 +18,16 @@ export function castSourceAvailable(source) {
   } catch { return false }
 }
 
+// Google TV receivers answer LOAD while the media still loads, as IDLE with an extended LOADING state.
+const isLoading = status => status.playerState === 'IDLE' && status.extendedStatus?.playerState === 'LOADING'
+
 function mediaState(status) {
   return {
     connected: true,
     currentTime: Number.isFinite(status.currentTime) ? status.currentTime : 0,
     duration: Number.isFinite(status.media?.duration) ? status.media.duration : 0,
-    paused: status.playerState === 'PAUSED' || status.playerState === 'IDLE',
-    buffering: status.playerState === 'BUFFERING',
+    paused: status.playerState === 'PAUSED' || (status.playerState === 'IDLE' && !isLoading(status)),
+    buffering: status.playerState === 'BUFFERING' || isLoading(status),
     ended: status.playerState === 'IDLE' && status.idleReason === 'FINISHED',
     volume: status.volume?.level ?? 1,
     muted: status.volume?.muted ?? false,
@@ -113,7 +116,8 @@ export class ChromecastSession {
         this.cleanup(cast)
         return
       }
-      cast.status = { ...cast.status, ...status, volume: cast.status.volume, media: { ...cast.status.media, ...status.media } }
+      // Receivers send the extended state only while it applies.
+      cast.status = { ...cast.status, ...status, extendedStatus: status.extendedStatus, volume: cast.status.volume, media: { ...cast.status.media, ...status.media } }
       if (this.active === cast) this.updatePowerSaveBlocker(cast)
     })
     let loaded = false
@@ -164,10 +168,10 @@ export class ChromecastSession {
       })
       loaded = true
       const status = result.status?.[0]
-      if (!Number.isInteger(status?.mediaSessionId) || status.playerState === 'IDLE') throw Object.assign(new Error('Cast media failed to load'), { code: 'CAST_LOAD_FAILED' })
+      if (!Number.isInteger(status?.mediaSessionId) || (status.playerState === 'IDLE' && !isLoading(status))) throw Object.assign(new Error('Cast media failed to load'), { code: 'CAST_LOAD_FAILED' })
       if (sender.closed) throw Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })
       cast.mediaSessionId = status.mediaSessionId
-      cast.status = { ...cast.status, ...status, volume: cast.status.volume }
+      cast.status = { ...cast.status, ...status, extendedStatus: status.extendedStatus, volume: cast.status.volume }
       this.active = cast
       this.updatePowerSaveBlocker(cast)
       cast.heartbeat = setInterval(() => {
@@ -212,7 +216,7 @@ export class ChromecastSession {
     if (!cast) return { connected: false }
     try {
       await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'GET_STATUS' })
-      if (cast.status.playerState === 'IDLE' && cast.status.idleReason !== 'FINISHED') this.cleanup(cast)
+      if (cast.status.playerState === 'IDLE' && cast.status.idleReason !== 'FINISHED' && !isLoading(cast.status)) this.cleanup(cast)
       if (this.active !== cast) return { ...mediaState(cast.status), connected: false }
       return mediaState(cast.status)
     } catch {

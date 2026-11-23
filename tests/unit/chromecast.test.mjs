@@ -69,7 +69,8 @@ lines.on('line', async line=>{
    if(!fetched.ok) throw new Error('media endpoint failed')
    await fetched.text()
    media={mediaSessionId:7,currentTime:p.currentTime,playbackRate:p.playbackRate??1,playerState:p.autoplay?'PLAYING':'PAUSED',volume:{level:1,muted:false},activeTrackIds:p.activeTrackIds,media:{...p.media,tracks:undefined,duration:120}}
-  }
+   if(p.media.metadata.title==='Loading media') Object.assign(media,{playerState:'IDLE',extendedStatus:{playerState:'LOADING'},loadingPolls:1})
+  } else if(p.type==='GET_STATUS'&&media?.extendedStatus&&media.loadingPolls--<=0) {delete media.extendedStatus;media.playerState='PLAYING'}
   if(p.type==='PLAY') media.playerState='PLAYING'
   if(p.type==='PAUSE') media.playerState='PAUSED'
   if(p.type==='SEEK') {media.currentTime=p.currentTime;media.playerState=p.resumeState==='PLAYBACK_PAUSE'?'PAUSED':'PLAYING';if(p.currentTime>=119){media.playerState='IDLE';media.idleReason=p.currentTime===120?'FINISHED':'CANCELLED'}}
@@ -224,6 +225,21 @@ test('Cast owns a suspension blocker only during receiver playback and buffering
   assert.deepEqual(stops, [0, 1])
   await manager.stop(42, result.castId)
   assert.deepEqual(stops, [0, 1])
+})
+
+test('Cast keeps a session that Google TV receivers report as loading after LOAD', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const result = await manager.start(42, { ...payload, title: 'Loading media' })
+  assert.ok(result.castId, result.error)
+  assert.deepEqual([result.status.buffering, result.status.paused], [true, false])
+  assert.equal((await manager.status(42, result.castId)).buffering, true)
+  const playing = await manager.status(42, result.castId)
+  assert.deepEqual([playing.connected, playing.buffering, playing.paused], [true, false, false])
+  // A load error after the extended state ends still stops the session.
+  manager.active.sender.emit('message', CAST_MEDIA, { type: 'MEDIA_STATUS', status: [{ mediaSessionId: 7, playerState: 'IDLE', idleReason: 'ERROR' }] })
+  manager.active.sender.send = async () => ({})
+  assert.equal((await manager.status(42, result.castId)).connected, false)
 })
 
 test('Cast exposes buffering separately from the receiver pause state', async t => {
