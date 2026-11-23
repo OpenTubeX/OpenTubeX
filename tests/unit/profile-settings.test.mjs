@@ -184,6 +184,20 @@ test('a profile\'s own settings sync to the same profile on another device, apar
   assert.deepEqual(json(client.entries.find(entry => entry.key === unknown.key)), unknown)
 })
 
+test('a profile that arrives after a sync gets the settings waiting for it on the server', async () => {
+  const car = profileSettingsId('car')
+  const entry = { key: car, value: { hideComments: true }, updatedAt: 1 }
+  const client = createClient([entry])
+  // This device syncs before it has the car profile, which arrives later.
+  const device = createDevice({})
+  const carProfile = device.state.profiles.profileList.pop()
+  const snapshot = await context.syncSettings(client, device)
+  device.state.profiles.profileList.push(carProfile)
+  await context.syncSettings(client, device, snapshot)
+  assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(item => item.key === car))), entry)
+  assert.deepEqual(JSON.parse(JSON.stringify(device.state.settings.profileSettingsState.overrides)), { car: { hideComments: true } })
+})
+
 test('an upload keeps the profile settings that only other devices sync', async () => {
   const car = profileSettingsId('car')
   const client = createClient([{ key: car, value: { hideComments: false, uiScale: 150 }, updatedAt: 1 }])

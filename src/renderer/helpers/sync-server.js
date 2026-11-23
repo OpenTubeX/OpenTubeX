@@ -30,7 +30,7 @@ import {
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
-import { canHaveOwnSettings, isPlainObject, ownSettingsOf, profileSettingsId } from '../../profileSettings.js'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingsId } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -2055,8 +2055,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   })))
   await client.putSettings(Object.values(merged))
   const snapshot = { ...merged }
-  for (const key of profileSettingsProfiles.keys()) {
-    if (snapshot[key]) snapshot[key] = baselineOf(key, snapshot[key])
+  for (const key of Object.keys(snapshot)) {
+    if (!isProfileSettingsId(key)) continue
+    // Settings waiting for a profile this device lacks have no baseline, so
+    // when the profile arrives, they apply instead of looking turned off here.
+    if (profileSettingsProfiles.has(key)) snapshot[key] = baselineOf(key, snapshot[key])
+    else delete snapshot[key]
   }
   // Items from the server that this device never applied must not count as removed here next time.
   for (const key of skippedSettings) {
