@@ -561,11 +561,22 @@ function handleSharedSettingsPrompt(response) {
   if (response === 'shared') saveProfile(true)
 }
 
+let previousSave = Promise.resolve()
+
 /**
+ * Saves run one after another, so each compares the settings mode with the
+ * one the previous save wrote.
  * @param {boolean} [confirmedSharedSettings] whether the user agreed to delete
  *   the profile's own settings
  */
-async function saveProfile(confirmedSharedSettings = false) {
+function saveProfile(confirmedSharedSettings = false) {
+  const save = previousSave.then(() => saveProfileNow(confirmedSharedSettings))
+  previousSave = save.catch(() => {})
+  return save
+}
+
+/** @param {boolean} confirmedSharedSettings */
+async function saveProfileNow(confirmedSharedSettings) {
   if (profileName.value === '') {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
     return
