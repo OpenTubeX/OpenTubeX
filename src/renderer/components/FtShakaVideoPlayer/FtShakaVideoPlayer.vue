@@ -183,6 +183,7 @@
         @emptied="handleMediaFrameLoaded(false)"
         @canplay="handleCanPlay"
         @resize="handleVideoResize"
+        @transitionend="settleVideoRotation"
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
         @ratechange="handleRateChange"
@@ -4926,6 +4927,7 @@ const {
   handleVideoZoomPointerLeave,
   moveVideoZoomPan,
   moveVideoZoomPinch,
+  settleVideoRotation,
   startVideoZoomGesture,
   suppressVideoZoomClick,
   updateVideoZoom,
