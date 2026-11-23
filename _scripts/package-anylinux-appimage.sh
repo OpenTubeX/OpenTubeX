@@ -56,7 +56,7 @@ pacman_retry -Syu --noconfirm \
 	zsync
 
 mkdir -p /usr/local/bin
-TOOLS_SOURCE=https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/cb443209ea867d8ef9a58974232b90a6033e8b72/useful-tools
+TOOLS_SOURCE=https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/63759aceda3a0cb9446a4e3c2aebe3af5e5c697d/useful-tools
 wget --retry-connrefused --tries=30 \
 	"$TOOLS_SOURCE"/quick-sharun.sh -O /usr/local/bin/quick-sharun
 wget --retry-connrefused --tries=30 \
