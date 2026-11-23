@@ -74,7 +74,7 @@
               :show-action-button="false"
               :maxlength="100"
               @input="profileName = $event"
-              @keydown.enter="saveProfile"
+              @keydown.enter="saveProfile()"
             />
             <div
               v-if="!isMainProfile"
@@ -211,7 +211,7 @@
                     theme="primary"
                     :label="$t('Profile.Create Profile')"
                     :icon="['fas', 'user-plus']"
-                    @click="saveProfile"
+                    @click="saveProfile()"
                   />
                   <FtButton
                     :label="$t('Cancel')"
@@ -228,7 +228,7 @@
                     theme="primary"
                     :label="$t('Profile.Update Profile')"
                     :icon="['fas', 'user-check']"
-                    @click="saveProfile"
+                    @click="saveProfile()"
                   />
                   <FtButton
                     :label="$t('Profile.Make Default Profile')"
@@ -562,6 +562,7 @@ function handleSharedSettingsPrompt(response) {
 }
 
 let previousSave = Promise.resolve()
+let profileCreated = false
 
 /**
  * Saves run one after another, so each compares the settings mode with the
@@ -598,14 +599,17 @@ async function saveProfileNow(confirmedSharedSettings) {
 
   const showSaveError = () => showToast({ message: t('Profile.Profile Could Not Be Saved'), icon: ['fas', 'circle-exclamation'] })
   if (props.isNew) {
-    const created = store.dispatch('createProfile', {
+    // Saves queued behind the one that created it must not create it again.
+    if (profileCreated) return
+    profileCreated = await store.dispatch('createProfile', {
       ...details,
       ...(keepDataSeparate.value ? { separate: true, subscriptions: [] } : { subscriptions: deepCopy(props.profile.subscriptions) }),
       ownSettings: keepSettingsSeparate.value,
     })
-    emit('new-profile-created')
-    if (await created) {
+    if (profileCreated) {
       showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
+      // The editor closes only then, so a failed save keeps the form.
+      emit('new-profile-created')
     } else {
       showSaveError()
     }

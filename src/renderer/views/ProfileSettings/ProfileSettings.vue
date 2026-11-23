@@ -216,6 +216,9 @@ const profileList = computed(() => {
 })
 
 watch(profileList, () => {
+  // A new profile's form has no saved profile to follow, and stays open until
+  // the profile is created.
+  if (isNewProfileOpen.value) return
   openSettingsProfile.value = getProfileById(openSettingsProfileId.value)
 }, { deep: 1 })
 
