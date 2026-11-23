@@ -61,7 +61,8 @@
     padding-block-end: 20px;
   }
 
-  .searchRadio :deep(input + label) {
+  /* Outranks the controls' own label rules, whose CSS other lazy chunks can load again later. */
+  .searchRadio :deep(:is(input[type='radio'], input[type='checkbox']) + label) {
     min-block-size: 0;
     padding-block: 0;
     margin-block-start: 10px;
