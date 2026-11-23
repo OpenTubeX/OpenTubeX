@@ -35,7 +35,16 @@
       z-index: 4;
       // Hide the page scrolling behind the margins and the ambient glow
       overflow: clip;
+      // Cover it with the window's field. FtFixedBackground keeps that field
+      // fixed, so it lines up with the page and does not repaint on scroll.
       background-color: var(--bg-color);
+      background-image: var(--bg-image);
+      background-clip: var(--fixed-background-host-clip, border-box);
+      background-attachment: var(--fixed-background-host-attachment, scroll);
+
+      > .fixedBackgroundLayer {
+        display: var(--fixed-background-display, none);
+      }
     }
   }
 }
@@ -49,6 +58,11 @@
 
   .videoArea {
     grid-area: video;
+
+    // Only the pinned area paints a background, see pinned-player-column.
+    > .fixedBackgroundLayer {
+      display: none;
+    }
 
     .videoAreaMargin {
       margin-block: 0 16px;

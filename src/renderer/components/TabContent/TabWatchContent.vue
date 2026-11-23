@@ -239,6 +239,8 @@ function beginRestorePreview() {
   const targetBounds = tabContent?.getBoundingClientRect() ?? parentBounds
   let targetLeft = targetBounds.left
   let targetWidth = targetBounds.width
+  // Padding that extends the preview's background past its content.
+  const cover = { left: 0, right: 0, top: 0 }
   if (window.innerWidth > 680 && store.getters.getHideSideBarOnWatchPages &&
     !document.querySelector('.app.watchSideNavOverlay')) {
     // Returning to Watch removes the sidebar from the content layout. Give the
@@ -247,21 +249,28 @@ function beginRestorePreview() {
     if (sidebar) {
       targetWidth += sidebar.width
       if (sidebar.left < targetBounds.left) targetLeft -= sidebar.width
+      // The page's margins leave strips of the sidebar beside and above the
+      // content. Watch shows the window's field there, so cover them too.
+      cover.left = Math.max(0, targetLeft - sidebar.left)
+      cover.right = Math.max(0, sidebar.right - targetLeft - targetWidth)
+      cover.top = Math.max(0, targetBounds.top - sidebar.top)
     }
   }
   previewOrigin = {
-    left: window.scrollX + targetLeft - parentBounds.left,
-    top: window.scrollY + targetBounds.top - parentBounds.top
+    left: window.scrollX + targetLeft - cover.left - parentBounds.left,
+    top: window.scrollY + targetBounds.top - cover.top - parentBounds.top
   }
   previewViewport = {
-    left: window.scrollX + targetLeft,
-    top: window.scrollY + targetBounds.top
+    left: window.scrollX + targetLeft - cover.left,
+    top: window.scrollY + targetBounds.top - cover.top
   }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
-    width: `${targetWidth}px`,
-    height: `${window.innerHeight - targetBounds.top - window.scrollY}px`
+    width: `${targetWidth + cover.left + cover.right}px`,
+    height: `${window.innerHeight - targetBounds.top - window.scrollY + cover.top}px`,
+    boxSizing: 'border-box',
+    padding: `${cover.top}px ${cover.right}px 0 ${cover.left}px`
   }
   watchRoot.value.style.opacity = '0'
   watchRoot.value.firstElementChild.style.opacity = '0'
@@ -534,7 +543,12 @@ onBeforeUnmount(() => {
   will-change: opacity;
 }
 
+/* Paint the window's field like body::before, so the returning page does not
+   flash a flat color until the Watch route takes over. A fixed attachment keeps
+   the field aligned with the viewport while the preview covers it. */
 .watchRestorePreview {
-  background: var(--bg-color);
+  background-color: var(--bg-color);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
 }
 </style>
