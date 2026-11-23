@@ -87,6 +87,10 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 - Verify Android-targeted work (native code, Capacitor behavior, mobile-only components affecting Android, bugs seen on Android) on an emulator with a current debug APK, and report the API level, WebView version, and result. Electron tests and mobile-sized viewports do not replace this.
 - iOS-only changes do not need an emulator, nor do shared renderer or CSS changes merely because the component also appears on phones; cover responsive effects with Electron tests. Use the emulator if an Android-specific failure emerges.
 
+### iOS
+
+- `_scripts/setupIosYtDlp.sh` downloads the Python runtime with `gh`, which the shared macOS VM lacks. Run it on the host and copy the Git-ignored `ios/App/Python.xcframework` and `ios/App/python-packages` into the guest checkout before the iOS sync.
+
 ## UI
 
 - After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears.
