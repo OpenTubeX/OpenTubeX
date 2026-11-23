@@ -113,16 +113,6 @@
         :icon="['fas', 'images']"
         @change="store.dispatch('updateThumbnailDataSaverMode', $event)"
       />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.General Settings.Link Underlines.Link Underlines')"
-        :value="linkUnderline"
-        setting-key="linkUnderline"
-        :select-names="linkUnderlineNames"
-        :select-values="LINK_UNDERLINE_VALUES"
-        :icon="['fas', 'underline']"
-        @change="store.dispatch('updateLinkUnderline', $event)"
-      />
     </div>
     <FtSliderGrid>
       <FtSlider
@@ -285,17 +275,6 @@ const titleLineLimit = computed(() => store.getters.getTitleLineLimit)
 function updateShowThumbnailPreviews(value) {
   store.dispatch('updateShowThumbnailPreviews', value)
 }
-
-const LINK_UNDERLINE_VALUES = ['hover', 'never', 'always']
-
-const linkUnderlineNames = computed(() => [
-  t('Settings.General Settings.Link Underlines.On Hover'),
-  t('Settings.General Settings.Link Underlines.Never'),
-  t('Settings.General Settings.Link Underlines.Always')
-])
-
-/** @type {import('vue').ComputedRef<'hover' | 'never' | 'always'>} */
-const linkUnderline = computed(() => store.getters.getLinkUnderline)
 
 const THUMBNAIL_TYPE_VALUES = ['', 'start', 'middle', 'end', 'hidden', 'blur']
 

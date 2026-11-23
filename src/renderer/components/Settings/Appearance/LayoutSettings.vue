@@ -40,6 +40,16 @@
         :icon="['fas', 'density']"
         @change="store.dispatch('updateUiDensity', $event)"
       />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.General Settings.Link Underlines.Link Underlines')"
+        :value="linkUnderline"
+        setting-key="linkUnderline"
+        :select-names="linkUnderlineNames"
+        :select-values="LINK_UNDERLINE_VALUES"
+        :icon="['fas', 'underline']"
+        @change="store.dispatch('updateLinkUnderline', $event)"
+      />
     </FtFlexBox>
     <div
       v-if="usingElectron"
@@ -534,6 +544,17 @@ const uiDensityNames = computed(() => [
 ])
 /** @type {import('vue').ComputedRef<'compact' | 'default' | 'comfortable'>} */
 const uiDensity = computed(() => store.getters.getUiDensity)
+
+const LINK_UNDERLINE_VALUES = ['hover', 'never', 'always']
+
+const linkUnderlineNames = computed(() => [
+  t('Settings.General Settings.Link Underlines.On Hover'),
+  t('Settings.General Settings.Link Underlines.Never'),
+  t('Settings.General Settings.Link Underlines.Always')
+])
+
+/** @type {import('vue').ComputedRef<'hover' | 'never' | 'always'>} */
+const linkUnderline = computed(() => store.getters.getLinkUnderline)
 
 const toastPositionNames = computed(() => [
   t('Settings.Theme Settings.Toast Position.Bottom Left'),
