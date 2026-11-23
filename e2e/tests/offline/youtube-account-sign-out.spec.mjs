@@ -68,6 +68,24 @@ test.describe('with the shared playlists', () => {
     expect(playlist.videos).toEqual([expect.objectContaining({ videoId: 'video000001', playlistItemId: 'item-1' })])
     expect(playlist.videos[0]).not.toHaveProperty('youTubeSetVideoId')
   })
+
+  test('keeping the synced playlists retries when another window saves one meanwhile', async ({ page }) => {
+    await page.evaluate(id => {
+      const store = window.$store
+      const dispatch = store.dispatch
+      window.e2eKeepAttempts = 0
+      store.dispatch = async (type, payload) => {
+        // Another window's edit lands between the snapshot and the first save.
+        if (type === 'updatePlaylistFromSync' && window.e2eKeepAttempts++ === 0) {
+          await dispatch('updatePlaylistSortOrder', { _id: id, sortOrder: 'title_ascending' })
+        }
+        return dispatch(type, payload)
+      }
+    }, PLAYLIST_ID)
+    await signOut(page, 'Keep playlists')
+    expect(await page.evaluate(() => window.e2eKeepAttempts)).toBe(2)
+    expect(await findPlaylist(page)).toMatchObject({ youTube: null, sortOrder: 'title_ascending', sourcePlaylistId: 'PLexample' })
+  })
 })
 
 test.describe('in a separate profile', () => {

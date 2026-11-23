@@ -199,15 +199,34 @@ export async function keepYouTubePlaylists(end) {
     const failed = []
     for (const playlist of await findYouTubePlaylists(shared)) {
       if (key && playlist.youTube.accountKey === key) continue
-      const previous = deepCopy(toRaw(playlist))
-      const kept = unlinkYouTubePlaylist(previous)
-      const saved = shared
-        ? await store.dispatch('updatePlaylistFromSync', { playlist: kept, previous })
-        : await withDataScope(null, () => DBPlaylistHandlers.upsertIfUnchanged({ ...kept, lastUpdatedAt: Date.now() }, previous))
-      if (!saved) failed.push(playlist.playlistName)
+      if (!await unlinkLatestYouTubePlaylist(playlist._id, shared)) failed.push(playlist.playlistName)
     }
     if (failed.length > 0) throw new Error(`Could not keep the playlists ${failed.join(', ')}`)
   })
+}
+
+/**
+ * Turns a synced playlist into a regular one. Another window can save it in
+ * between, which fails the save, so each attempt starts from the latest
+ * version, waiting for it to reach this window's store.
+ * @param {string} id
+ * @param {boolean} shared whether the store holds the shared playlists
+ * @returns {Promise<boolean>} whether the playlist is no longer linked
+ */
+async function unlinkLatestYouTubePlaylist(id, shared) {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    if (attempt > 0) await new Promise(resolve => setTimeout(resolve, 100))
+    const playlist = (await findYouTubePlaylists(shared)).find(item => item._id === id)
+    // Removed or unlinked meanwhile.
+    if (!playlist) return true
+    const previous = deepCopy(toRaw(playlist))
+    const kept = unlinkYouTubePlaylist(previous)
+    const saved = shared
+      ? await store.dispatch('updatePlaylistFromSync', { playlist: kept, previous })
+      : await withDataScope(null, () => DBPlaylistHandlers.upsertIfUnchanged({ ...kept, lastUpdatedAt: Date.now() }, previous))
+    if (saved) return true
+  }
+  return false
 }
 
 /**
