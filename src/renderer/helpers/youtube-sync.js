@@ -768,10 +768,18 @@ export async function createYouTubePlaylistWithVideos(playlist) {
 
 /**
  * Starts syncing once settings, profiles, and playlists have loaded, and again
- * whenever the sync settings, the sign-in, or the channel change.
+ * whenever the sync settings, the sign-in, or the channel change, or the
+ * shared playlists show again after a separate profile.
  */
 export function startYouTubeSync() {
   setYouTubePlaylistChangeListener(handlePlaylistChange)
+  // Sync skips the shared playlists while a separate profile shows its own,
+  // also removing those of a sign-in or playlist sync that ended meanwhile.
+  store.subscribeAction({
+    after: action => {
+      if (action.type === 'loadDataScope' && showsSharedPlaylists()) syncWithYouTube({ ifOlderThan: MIN_SYNC_INTERVAL_MS })
+    }
+  })
   store.watch(
     () => [
       getYouTubeSyncKey(store.getters.getYouTubeAccount),
