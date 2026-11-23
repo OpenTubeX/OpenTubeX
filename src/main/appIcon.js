@@ -134,6 +134,11 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   /** @param {Buffer | null} data */
   async function applyToShortcuts(data) {
     if (process.platform !== 'win32') return
+    if (data === null) {
+      // Without generated icons, no shortcut can need its icon restored.
+      const names = await asyncFs.readdir(userDataPath).catch(() => [])
+      if (!names.some(name => ICO_NAME.test(name))) return
+    }
     const icoPath = data === null ? null : getIcoPath(data)
     if (data !== null && icoPath !== null) {
       // A new name for each icon makes Explorer load it instead of its cached copy.
@@ -162,7 +167,8 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
         clearTimeout(timer)
         timer = setTimeout(() => {
           const data = png
-          if (data !== null) enqueue(() => applyToShortcuts(data))
+          // The queue logs failures.
+          if (data !== null) enqueue(() => applyToShortcuts(data)).catch(() => {})
         }, 1000)
       })
       watcher.on('error', () => watcher.close())
@@ -179,7 +185,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   function restore() {
     if (png !== null) applyToDock()
     const data = png
-    enqueue(() => applyToShortcuts(data))
+    enqueue(() => applyToShortcuts(data)).catch(() => {})
     if (process.platform === 'win32') watchPinnedShortcuts()
   }
 
