@@ -285,7 +285,6 @@ test('mobile header keeps focused controls visible and hides the taller New feed
   await expect(videosTab).toBeInViewport()
 
   await page.locator('[data-subscription-feed-tab="all"]').click()
-  await page.getByRole('button', { name: 'Show tabbed view' }).click()
   await expect(page.locator('[data-new-feed-tab="videos"]')).toBeInViewport()
   await page.evaluate(() => document.activeElement.blur())
   await scrollFeedTo(page, 600)

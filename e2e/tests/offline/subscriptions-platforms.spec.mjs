@@ -115,7 +115,7 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, { description } = {}) {
 
 // The main process checks for live streams while notifications are on. Tests turn
 // them on once they answer its requests.
-const SETTINGS = { fetchSubscriptionsAutomatically: false, hideSideBarOnWatchPages: false, twitchLiveNotifications: false }
+const SETTINGS = { fetchSubscriptionsAutomatically: false, hideSideBarOnWatchPages: false, twitchLiveNotifications: false, newSubscriptionFeedView: 'combined', platformFeedView: 'combined' }
 
 test.describe('Channels on other platforms', () => {
   test.use({ seed: { settings: SETTINGS } })

@@ -900,7 +900,8 @@ test.describe('with new items', () => {
         fetchSubscriptionsAutomatically: false,
         enableRssFeeds: true,
         followedRssFeeds: [RSS_FEED],
-        showNewSubscriptionFeedIndicators: true
+        showNewSubscriptionFeedIndicators: true,
+        newSubscriptionFeedView: 'combined'
       }
     }
   })

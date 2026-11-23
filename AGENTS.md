@@ -93,7 +93,7 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 
 ## UI
 
-- After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears.
+- After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears. Follow the settling rules in `.github/PULL_REQUEST_AGENT_INSTRUCTIONS.md` for these too: capture Electron with `captureAppFramebuffer`, which waits for running animations and transitions, never after a fixed delay, and inspect each image for half-applied themes, fades, or other transition artifacts before showing it.
 - UI Scale changes Electron's zoom factor, so fractional CSS-pixel geometry is legitimate. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must work at non-100% scales; do not treat subpixel differences from integer layout properties as stale or invalid state.
 - Before adding or changing Shaka player controls or how they are enabled, shown, or hidden, read `src/renderer/components/FtShakaVideoPlayer/README.md`.
 - Labeled action buttons, such as Enable, Load more, Refresh, and Reset, need a relevant icon from the registry beside their visible label; hide decorative icons from assistive technology.

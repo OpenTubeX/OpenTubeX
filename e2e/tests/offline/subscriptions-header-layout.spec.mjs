@@ -26,6 +26,7 @@ test.use({
       hideSubscriptionsVideos: false,
       hideSubscriptionsShorts: false,
       showNewSubscriptionFeedIndicators: true,
+      newSubscriptionFeedView: 'combined',
       uiScale: 95
     },
     profiles: [
