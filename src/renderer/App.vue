@@ -1951,6 +1951,7 @@ onMounted(async () => {
 
   try {
     store.commit('setCustomThemes', themes)
+    customThemesLoaded = true
     if (baseTheme.value === 'custom' && themes.length > 0) {
       await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
     }
@@ -2362,6 +2363,7 @@ onBeforeUnmount(() => capacitorUiScale?.dispose())
 
 const appFont = computed(() => store.getters.getAppFont)
 let removeCustomThemeListener = () => {}
+let customThemesLoaded = false
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
@@ -2430,6 +2432,12 @@ const mainColor = computed(() => store.getters.getMainColor)
 watch(mainColor, updateTheme)
 watch(() => store.getters.getHideStartupSplash, cacheNextStartupAppearance)
 watch(() => store.getters.getCustomThemes, cacheNextStartupAppearance)
+// The own settings of the profile switched to can name a custom theme deleted
+// while another profile was active, which only the shown settings repair.
+watch(() => store.state.settings.profileSettingsState.applied, () => {
+  if (!customThemesLoaded) return
+  sanitizeAppearanceSettings(store.getters.getCustomThemes).catch(error => console.error(error))
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)

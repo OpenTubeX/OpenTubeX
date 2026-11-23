@@ -491,6 +491,16 @@ test.describe('profile with its own settings', () => {
     await expect.poll(effective).toEqual([false, true])
     await expect(hideComments.locator('.profileSettingIndicator')).toHaveCount(0)
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // A custom theme of its own that is gone, such as one deleted while
+    // another profile was active, is replaced when the profile shows again.
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
+      profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
+    }))
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getBaseTheme)).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
   })
 })
 
