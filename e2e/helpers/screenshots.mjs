@@ -4,8 +4,34 @@ import path from 'node:path'
 import { expect, goTo, goToSettingsSection, sel } from './app.mjs'
 import { expectImagesLoaded } from './visual-fixtures.mjs'
 
-/** Capture the complete Electron framebuffer after pending layout has rendered. */
+/**
+ * Wait for fonts and every running finite animation and transition, such as the
+ * color transition after a theme or color scheme change, to finish.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function waitForUiSettled(page) {
+  // Finishing one animation can start another, so repeat until none are left.
+  await expect.poll(() => page.evaluate(async () => {
+    await document.fonts.ready
+    // Scroll-driven animations follow the scroll position and never finish.
+    const running = document.getAnimations().filter(animation => animation.timeline === document.timeline &&
+      animation.playState === 'running' && animation.effect?.getComputedTiming().endTime !== Infinity)
+    await Promise.race([
+      Promise.all(running.map(animation => animation.finished.catch(() => {}))),
+      new Promise(resolve => setTimeout(resolve, 1000)),
+    ])
+    // Name what is still running, so a timeout reports the stuck animation.
+    return running.filter(animation => animation.playState === 'running').map(animation => {
+      const target = animation.effect?.target
+      const name = animation.animationName ?? animation.transitionProperty ?? animation.id
+      return `${name} on ${target?.tagName?.toLowerCase()}.${[...target?.classList ?? []].join('.')}`
+    })
+  }), { message: 'animations and transitions must finish before the capture' }).toEqual([])
+}
+
+/** Capture the complete Electron framebuffer once the UI has settled and its layout has rendered. */
 export async function captureAppFramebuffer(app, testInfo, name) {
+  await waitForUiSettled(app.page)
   await app.page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const framebuffer = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
     (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
