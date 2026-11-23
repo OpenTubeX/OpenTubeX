@@ -161,14 +161,24 @@ function makeInert(element) {
  * @type {{ entry: import('../../../notificationHistory').NotificationHistoryEntry, id: number, x: number, y: number, time: number, offset: number, velocity: number, locked: boolean } | null}
  */
 let swipe = null
+/**
+ * The row whose swipe just ended. The released finger can still click the
+ * entry or button under it, so the row drops its next click, until the next press.
+ * @type {HTMLElement | null}
+ */
+let swipedRow = null
 
 /**
  * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
  * @param {PointerEvent} event
  */
 function startSwipe(entry, event) {
-  if (swipe || event.pointerType !== 'touch' || !event.isPrimary) return
-  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, time: 0, offset: 0, velocity: 0, locked: false }
+  swipedRow?.removeEventListener('click', suppressSwipeClick, true)
+  swipedRow = null
+  // A new primary pointer replaces a swipe that lost its row, as when the
+  // entry was removed elsewhere during it.
+  if (event.pointerType !== 'touch' || !event.isPrimary) return
+  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, time: event.timeStamp, offset: 0, velocity: 0, locked: false }
 }
 
 /** @param {PointerEvent} event */
@@ -184,7 +194,6 @@ function moveSwipe(event) {
     }
     if (Math.abs(offset) < 10) return
     swipe.locked = true
-    swipe.time = event.timeStamp
     row.setPointerCapture(event.pointerId)
     row.dataset.swipe = 'dragging'
   }
@@ -203,7 +212,8 @@ function finishSwipe(event) {
   swipe = null
   if (!locked) return
   const row = /** @type {HTMLElement} */ (event.currentTarget)
-  suppressClick()
+  swipedRow = row
+  row.addEventListener('click', suppressSwipeClick, true)
   // A finger held still before release is no longer flicking.
   const flicked = event.timeStamp - time < 100 && Math.abs(offset) > 24 &&
     Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(offset)
@@ -233,15 +243,12 @@ function settle(row) {
   row.addEventListener('transitionend', () => { if (row.dataset.swipe === 'settling') delete row.dataset.swipe }, { once: true })
 }
 
-/** The released finger still clicks the entry or button under it. */
-function suppressClick() {
-  const suppress = (/** @type {MouseEvent} */ event) => {
-    event.preventDefault()
-    event.stopPropagation()
-  }
-  window.addEventListener('click', suppress, { capture: true, once: true })
-  // Taps after this one open entries again.
-  setTimeout(() => window.removeEventListener('click', suppress, true), 300)
+/** @param {MouseEvent} event */
+function suppressSwipeClick(event) {
+  event.currentTarget.removeEventListener('click', suppressSwipeClick, true)
+  swipedRow = null
+  event.preventDefault()
+  event.stopPropagation()
 }
 
 /**
