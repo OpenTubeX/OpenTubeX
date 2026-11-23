@@ -57,9 +57,9 @@ pacman_retry -Syu --noconfirm \
 
 mkdir -p /usr/local/bin
 TOOLS_SOURCE=https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/63759aceda3a0cb9446a4e3c2aebe3af5e5c697d/useful-tools
-wget --retry-connrefused --tries=30 \
+wget --retry-connrefused --retry-on-http-error=429,500,502,503,504 --tries=30 \
 	"$TOOLS_SOURCE"/quick-sharun.sh -O /usr/local/bin/quick-sharun
-wget --retry-connrefused --tries=30 \
+wget --retry-connrefused --retry-on-http-error=429,500,502,503,504 --tries=30 \
 	"$TOOLS_SOURCE"/get-debloated-pkgs.sh -O /usr/local/bin/get-debloated-pkgs
 chmod +x /usr/local/bin/quick-sharun /usr/local/bin/get-debloated-pkgs
 GITHUB_TOKEN=$github_token get-debloated-pkgs --add-common --prefer-nano
