@@ -54,8 +54,7 @@
               :data-engine-name-input="engine.id"
               data-settings-escape-scope
               @blur="finishRename(engine.id)"
-              @keydown.enter.prevent="finishRename(engine.id, true)"
-              @keydown.escape.stop.prevent="cancelRename(engine.id)"
+              @keydown="handleRenameKeydown($event, engine.id)"
             >
             <button
               v-else
@@ -261,6 +260,19 @@ function cancelRename(id) {
   editingNameId.value = null
   editingName.value = ''
   focusEngineElement('data-engine-name-button', id)
+}
+
+function handleRenameKeydown(event, id) {
+  // An IME confirms or cancels its composition with Enter and Escape.
+  if (event.isComposing) return
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    finishRename(id, true)
+  } else if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    cancelRename(id)
+  }
 }
 
 function updateCustomEngineUrl(id, value) {
