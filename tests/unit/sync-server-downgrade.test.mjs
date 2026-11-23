@@ -39,6 +39,7 @@ import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSetti
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
+import * as recoveryPhrase from '../../src/renderer/helpers/sync-server-recovery-phrase.js'
 import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
@@ -133,6 +134,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     }),
     i18n: { global: { t: key => key } },
     ...privacy,
+    ...recoveryPhrase,
     syncSubscriptionSeenVideos,
     syncSubscriptionSeenPosts,
     syncRssFeedSeenItems,
@@ -976,6 +978,18 @@ test('a supplied privacy passphrase cannot silently select plaintext login', asy
     ...credentials, privacyPassphrase: 'privacy-passphrase',
   }), /encrypted sync/)
   assert.ok(!f.requests.some(request => request.url.endsWith('/account/login')))
+})
+
+test('a mistyped recovery phrase is rejected before the account is registered', async () => {
+  const f = fixture({}, { encrypted: true })
+  const words = recoveryPhrase.generateRecoveryPhrase().split(' ')
+  await assert.rejects(f.actions.authenticateSyncServer(f.context, {
+    ...credentials,
+    mode: 'register',
+    username: 'carol',
+    privacyPassphrase: words.with(5, `${words[5]}x`).join(' '),
+  }), { message: recoveryPhrase.RECOVERY_PHRASE_TYPO_MESSAGE })
+  assert.ok(!f.requests.some(request => request.url.endsWith('/account/register')))
 })
 
 test('connecting a different legacy account does not inherit the previous account encryption requirement', async () => {

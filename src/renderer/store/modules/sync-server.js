@@ -40,7 +40,11 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   readSyncCollection,
 } from '../../helpers/sync-server-privacy'
-import { preparePrivacyKeyFromPassphrase } from '../../helpers/sync-server-recovery-phrase'
+import {
+  RECOVERY_PHRASE_TYPO_MESSAGE,
+  isMistypedRecoveryPhrase,
+  preparePrivacyKeyFromPassphrase,
+} from '../../helpers/sync-server-recovery-phrase'
 import {
   encryptSyncServerDeviceInfo,
   loadSyncServerDevices,
@@ -2003,6 +2007,11 @@ const actions = {
       assertEncryptionSupported(privacySupported, Boolean(privacyPassphrase) ||
         (sameAccount && requiresEncryptedSync(rootState.settings)))
       assertPrivacyPassphrase(privacySupported, privacyPassphrase, password)
+      // A new account has no data to try the passphrase on, and registering
+      // first would leave the account behind when the phrase is rejected.
+      if (mode === 'register' && privacySupported && isMistypedRecoveryPhrase(privacyPassphrase)) {
+        throw new Error(RECOVERY_PHRASE_TYPO_MESSAGE)
+      }
       let token
       if (oidc) {
         token = oidcToken
