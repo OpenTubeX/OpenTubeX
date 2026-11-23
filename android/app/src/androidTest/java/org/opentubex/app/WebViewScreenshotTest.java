@@ -98,56 +98,35 @@ public class WebViewScreenshotTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('.app')");
-            evaluate(webView, """
-                (() => {
-                    const app = document.querySelector('#app').__vue_app__.config.globalProperties;
-                    const store = app.$store;
-                    const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa';
-                    store.commit('setFetchSubscriptionsAutomatically', false);
-                    store.commit('setShowNewSubscriptionFeed', true);
-                    store.commit('setNewSubscriptionFeedView', 'tabbed');
-                    store.commit('setProfileList', [{
-                        _id: 'allChannels', name: 'All Channels',
-                        subscriptions: [{ id: channelId, name: 'Test channel', thumbnail: '' }]
-                    }]);
-                    store.commit('updateVideoCacheByChannel', {
-                        channelId,
-                        entries: Array.from({ length: 50 }, (_, index) => ({
-                            videoId: 'video' + String(index).padStart(6, '0'),
-                            title: 'Preview test ' + index, author: 'Test channel', authorId: channelId,
-                            published: Date.now() - index * 3600000, viewCount: 1000,
-                            lengthSeconds: 120, liveNow: false, isUpcoming: false,
-                            type: 'video', isNewInSubscriptionFeed: true
-                        }))
-                    });
-                    localStorage.setItem('Subscriptions/currentTab', 'new');
-                    app.$router.push('/subscriptions');
-                })()
-                """);
-            awaitCondition(webView, "!!document.querySelector('[data-subscription-feed-tab=\"all\"]')");
-            evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
-            awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
-            // A fresh WebView profile can show the first-run tutorial over the feed.
-            TutorialTestHelper.dismissIfPending(webView);
+            seedSubscriptionFeed(webView);
+            try {
+                awaitCondition(webView, "!!document.querySelector('[data-subscription-feed-tab=\"all\"]')");
+                evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
+                awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
+                // A fresh WebView profile can show the first-run tutorial over the feed.
+                TutorialTestHelper.dismissIfPending(webView);
 
-            evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
-            awaitCondition(webView, "!window.__firstCard.isConnected && document.querySelectorAll('.ft-list-video').length > 0 && document.querySelectorAll('.ft-list-video').length < 20");
-            assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'list')");
-            assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'grid')");
-            assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = '73.25%'");
-            assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = ''");
-            evaluate(webView, """
-                (() => {
-                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
-                    store.commit('updateVideoCacheByChannel', {
-                        channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
-                        entries: [{videoId:'shortened01',title:'Shortened feed',author:'Test channel',authorId:'UCaaaaaaaaaaaaaaaaaaaaaa',
-                            published:Date.now(),viewCount:1,lengthSeconds:120,type:'video',isNewInSubscriptionFeed:true}]
-                    });
-                })()
-                """);
-            awaitCondition(webView, "document.querySelectorAll('.ft-list-video').length === 1 && document.body.textContent.includes('Shortened feed')");
-            awaitCondition(webView, "window.scrollY <= Math.max(0, document.documentElement.scrollHeight - window.innerHeight) + 1");
+                evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
+                awaitCondition(webView, "!window.__firstCard.isConnected && document.querySelectorAll('.ft-list-video').length > 0 && document.querySelectorAll('.ft-list-video').length < 20");
+                assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'list')");
+                assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'grid')");
+                assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = '73.25%'");
+                assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = ''");
+                evaluate(webView, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        store.dispatch('updateSubscriptionVideosCacheByChannel', {
+                            channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+                            videos: [{videoId:'shortened01',title:'Shortened feed',author:'Test channel',authorId:'UCaaaaaaaaaaaaaaaaaaaaaa',
+                                published:Date.now(),viewCount:1,lengthSeconds:120,type:'video',isNewInSubscriptionFeed:true}]
+                        });
+                    })()
+                    """);
+                awaitCondition(webView, "document.querySelectorAll('.ft-list-video').length === 1 && document.body.textContent.includes('Shortened feed')");
+                awaitCondition(webView, "window.scrollY <= Math.max(0, document.documentElement.scrollHeight - window.innerHeight) + 1");
+            } finally {
+                removeSubscriptionFeedSeed(webView);
+            }
         }
     }
 
@@ -428,94 +407,132 @@ public class WebViewScreenshotTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('.app')");
-            evaluate(webView, """
-                (() => {
-                    const app = document.querySelector('#app').__vue_app__.config.globalProperties;
-                    const store = app.$store;
-                    const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa';
-                    store.commit('setFetchSubscriptionsAutomatically', false);
-                    store.commit('setShowNewSubscriptionFeed', true);
-                    store.commit('setNewSubscriptionFeedView', 'tabbed');
-                    store.commit('setProfileList', [{
-                        _id: 'allChannels', name: 'All Channels',
-                        subscriptions: [{ id: channelId, name: 'Test channel', thumbnail: '' }]
-                    }]);
-                    store.commit('updateVideoCacheByChannel', {
-                        channelId,
-                        entries: Array.from({ length: 50 }, (_, index) => ({
-                            videoId: 'video' + String(index).padStart(6, '0'),
-                            title: 'Preview test ' + index, author: 'Test channel', authorId: channelId,
-                            published: Date.now() - index * 3600000, viewCount: 1000,
-                            lengthSeconds: 120, liveNow: false, isUpcoming: false,
-                            type: 'video', isNewInSubscriptionFeed: true
-                        }))
-                    });
-                    localStorage.setItem('Subscriptions/currentTab', 'new');
-                    app.$router.push('/subscriptions');
-                })()
-                """);
-            awaitCondition(webView, "!!document.querySelector('[data-subscription-feed-tab=\"all\"]')");
-            evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
-            awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
-            // A fresh WebView profile can show the first-run tutorial over the feed.
-            TutorialTestHelper.dismissIfPending(webView);
-            evaluate(webView, """
-                (() => {
-                    const marker = document.createElement('span');
-                    marker.style.cssText = 'display:block;width:20px;height:20px;flex:none;background:#ff00ff';
-                    document.querySelector('.newFeedTab').append(marker);
-                })()
-                """);
-            CountDownLatch rendered = new CountDownLatch(1);
-            scenario.onActivity(activity -> webView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
-                @Override public void onComplete(long requestId) {
-                    webView.postOnAnimation(() -> webView.postOnAnimation(rendered::countDown));
-                }
-            }));
-            assertTrue("The populated feed has rendered", rendered.await(10, TimeUnit.SECONDS));
-
-            evaluate(webView, """
-                window.__screenshotTest = null;
-                Capacitor.Plugins.Screenshot.take().then(
-                    result => { window.__screenshotTest = result; },
-                    error => { window.__screenshotTest = { error: String(error) }; }
-                );
-                """);
-            awaitCondition(webView, "window.__screenshotTest !== null");
-            JSONObject result = new JSONObject((String) new JSONTokener(
-                evaluate(webView, "JSON.stringify(window.__screenshotTest)")).nextValue());
-            assertTrue("The screenshot plugin succeeds: " + result, !result.has("error"));
-            File screenshot = new File(result.getString("uri"));
-            Bitmap bitmap = null;
+            seedSubscriptionFeed(webView);
             try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                bitmap = BitmapFactory.decodeFile(screenshot.getAbsolutePath(), options);
-                assertNotNull("The plugin returns a readable image", bitmap);
-                assertEquals("The screenshot is a JPEG", "image/jpeg", options.outMimeType);
-                assertEquals(webView.getWidth(), bitmap.getWidth());
-                assertEquals(webView.getHeight(), bitmap.getHeight());
-                int left = bitmap.getWidth(), top = bitmap.getHeight(), right = -1, bottom = -1;
-                int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
-                bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-                for (int index = 0; index < pixels.length; index++) {
-                    int color = pixels[index];
-                    if (android.graphics.Color.red(color) > 220 && android.graphics.Color.green(color) < 50 &&
-                        android.graphics.Color.blue(color) > 220) {
-                        int x = index % bitmap.getWidth(), y = index / bitmap.getWidth();
-                        left = Math.min(left, x);
-                        right = Math.max(right, x);
-                        top = Math.min(top, y);
-                        bottom = Math.max(bottom, y);
+                awaitCondition(webView, "!!document.querySelector('[data-subscription-feed-tab=\"all\"]')");
+                evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
+                awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
+                // A fresh WebView profile can show the first-run tutorial over the feed.
+                TutorialTestHelper.dismissIfPending(webView);
+                evaluate(webView, """
+                    (() => {
+                        const marker = document.createElement('span');
+                        marker.style.cssText = 'display:block;width:20px;height:20px;flex:none;background:#ff00ff';
+                        document.querySelector('.newFeedTab').append(marker);
+                    })()
+                    """);
+                CountDownLatch rendered = new CountDownLatch(1);
+                scenario.onActivity(activity -> webView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
+                    @Override public void onComplete(long requestId) {
+                        webView.postOnAnimation(() -> webView.postOnAnimation(rendered::countDown));
                     }
+                }));
+                assertTrue("The populated feed has rendered", rendered.await(10, TimeUnit.SECONDS));
+
+                evaluate(webView, """
+                    window.__screenshotTest = null;
+                    Capacitor.Plugins.Screenshot.take().then(
+                        result => { window.__screenshotTest = result; },
+                        error => { window.__screenshotTest = { error: String(error) }; }
+                    );
+                    """);
+                awaitCondition(webView, "window.__screenshotTest !== null");
+                JSONObject result = new JSONObject((String) new JSONTokener(
+                    evaluate(webView, "JSON.stringify(window.__screenshotTest)")).nextValue());
+                assertTrue("The screenshot plugin succeeds: " + result, !result.has("error"));
+                File screenshot = new File(result.getString("uri"));
+                Bitmap bitmap = null;
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    bitmap = BitmapFactory.decodeFile(screenshot.getAbsolutePath(), options);
+                    assertNotNull("The plugin returns a readable image", bitmap);
+                    assertEquals("The screenshot is a JPEG", "image/jpeg", options.outMimeType);
+                    assertEquals(webView.getWidth(), bitmap.getWidth());
+                    assertEquals(webView.getHeight(), bitmap.getHeight());
+                    int left = bitmap.getWidth(), top = bitmap.getHeight(), right = -1, bottom = -1;
+                    int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
+                    bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+                    for (int index = 0; index < pixels.length; index++) {
+                        int color = pixels[index];
+                        if (android.graphics.Color.red(color) > 220 && android.graphics.Color.green(color) < 50 &&
+                            android.graphics.Color.blue(color) > 220) {
+                            int x = index % bitmap.getWidth(), y = index / bitmap.getWidth();
+                            left = Math.min(left, x);
+                            right = Math.max(right, x);
+                            top = Math.min(top, y);
+                            bottom = Math.max(bottom, y);
+                        }
+                    }
+                    assertTrue("The marker is visible in the capture", right > left && bottom > top);
+                    assertEquals("A square inside a feed tab must remain square in the screenshot",
+                        right - left, bottom - top, 2);
+                } finally {
+                    if (bitmap != null) bitmap.recycle();
+                    assertTrue("The temporary screenshot can be deleted", screenshot.delete());
                 }
-                assertTrue("The marker is visible in the capture", right > left && bottom > top);
-                assertEquals("A square inside a feed tab must remain square in the screenshot",
-                    right - left, bottom - top, 2);
             } finally {
-                if (bitmap != null) bitmap.recycle();
-                assertTrue("The temporary screenshot can be deleted", screenshot.delete());
+                removeSubscriptionFeedSeed(webView);
             }
         }
+    }
+
+    private static final String SEED_CHANNEL_ID = "UCaaaaaaaaaaaaaaaaaaaaaa";
+
+    /**
+     * Subscribes to a channel with a long feed and opens the subscriptions page.
+     * The profile and feed are saved, not only set in the store: on Android the
+     * app reloads the feed cache from the database after startup and whenever
+     * it becomes visible, which drops channels that only exist in memory.
+     */
+    private static void seedSubscriptionFeed(WebView webView) throws Exception {
+        awaitCondition(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSubscriptionCacheReady");
+        evaluate(webView, """
+            window.__feedSeeded = false;
+            (async () => {
+                const app = document.querySelector('#app').__vue_app__.config.globalProperties;
+                const store = app.$store;
+                const channelId = '%s';
+                store.commit('setFetchSubscriptionsAutomatically', false);
+                store.commit('setShowNewSubscriptionFeed', true);
+                store.commit('setNewSubscriptionFeedView', 'tabbed');
+                const stored = store.getters.profileById('allChannels');
+                window.__feedSeedProfile = stored ? JSON.parse(JSON.stringify(stored)) : null;
+                const profile = {
+                    ...(window.__feedSeedProfile ?? { _id: 'allChannels', name: 'All Channels' }),
+                    subscriptions: [{ id: channelId, name: 'Test channel', thumbnail: '' }]
+                };
+                store.commit('setProfileList', [profile]);
+                await store.dispatch('updateProfile', profile);
+                await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+                    channelId,
+                    videos: Array.from({ length: 50 }, (_, index) => ({
+                        videoId: 'video' + String(index).padStart(6, '0'),
+                        title: 'Preview test ' + index, author: 'Test channel', authorId: channelId,
+                        published: Date.now() - index * 3600000, viewCount: 1000,
+                        lengthSeconds: 120, liveNow: false, isUpcoming: false,
+                        type: 'video', isNewInSubscriptionFeed: true
+                    }))
+                });
+                localStorage.setItem('Subscriptions/currentTab', 'new');
+                await app.$router.push('/subscriptions');
+                window.__feedSeeded = true;
+            })();
+            """.replace("%s", SEED_CHANNEL_ID));
+        awaitCondition(webView, "window.__feedSeeded");
+    }
+
+    /** Restores the saved profile and removes the seeded feed for the tests that follow. */
+    private static void removeSubscriptionFeedSeed(WebView webView) throws Exception {
+        evaluate(webView, """
+            window.__feedSeedRemoved = false;
+            (async () => {
+                const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                if (window.__feedSeedProfile) await store.dispatch('updateProfile', window.__feedSeedProfile);
+                await store.dispatch('clearSubscriptionsCacheForManyChannels', ['%s']);
+                window.__feedSeedRemoved = true;
+            })();
+            """.replace("%s", SEED_CHANNEL_ID));
+        awaitCondition(webView, "window.__feedSeedRemoved");
     }
 
     private static void assertFeedLayoutChange(WebView webView, String change) throws Exception {
