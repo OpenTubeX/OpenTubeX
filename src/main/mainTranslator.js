@@ -130,3 +130,34 @@ export async function createMainTranslator() {
     return key
   }
 }
+
+/** @param {string} key */
+const untranslated = key => key
+/** @type {Promise<Awaited<ReturnType<typeof createMainTranslator>>> | null} */
+let mainTranslatorPromise = null
+
+/**
+ * The translator for the app's current language, loaded once instead of for
+ * every dialog. A language change while it loads replaces it, so callers wait
+ * for the newest one.
+ * @returns {Promise<Awaited<ReturnType<typeof createMainTranslator>>>}
+ */
+export async function getMainTranslator() {
+  while (true) {
+    mainTranslatorPromise ??= createMainTranslator().catch(error => {
+      console.warn('Could not load the translations for the native menus', error)
+      return untranslated
+    })
+    const promise = mainTranslatorPromise
+    const t = await promise
+    if (promise !== mainTranslatorPromise) continue
+    // Try loading the translations again the next time one is needed.
+    if (t === untranslated) mainTranslatorPromise = null
+    return t
+  }
+}
+
+/** Loads the translations again, after the language or AI completions changed. */
+export function resetMainTranslator() {
+  mainTranslatorPromise = null
+}

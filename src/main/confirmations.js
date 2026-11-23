@@ -2,7 +2,7 @@ import { dialog, ipcMain } from 'electron'
 
 import { IpcChannels, MULTIPLE_TABS_CONFIRM_THRESHOLD } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
-import { createMainTranslator } from './mainTranslator'
+import { getMainTranslator } from './mainTranslator'
 
 const DEFAULT_CONFIRM_CLOSE_APP = true
 const DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS = true
@@ -84,7 +84,7 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
     }
 
     quitPromptInProgress = (async () => {
-      const t = await createMainTranslator()
+      const t = await getMainTranslator()
       const buttons = allowHideWindow
         ? [
             t('Close Confirmation.Quit'),
@@ -156,7 +156,7 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
     if (existingPrompt) return existingPrompt
 
     const prompt = (async () => {
-      const t = await createMainTranslator()
+      const t = await getMainTranslator()
       const { response } = await dialog.showMessageBox(browserWindow, {
         type: 'question',
         title: t('Close Window Confirmation.Title'),

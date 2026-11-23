@@ -30,7 +30,7 @@ const [{ handleOpenInExternalPlayer }] = await importWithStubs(
       }
     },
     [sourceUrl('src/main/mainTranslator.js')]: {
-      createMainTranslator: async () => (key, parameters) => parameters ? `${key} ${JSON.stringify(parameters)}` : key,
+      getMainTranslator: async () => (key, parameters) => parameters ? `${key} ${JSON.stringify(parameters)}` : key,
     },
     [sourceUrl('src/main/ipc.js')]: { isTrustedSender: () => true },
   }
