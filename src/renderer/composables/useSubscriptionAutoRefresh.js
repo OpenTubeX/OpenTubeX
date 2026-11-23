@@ -475,18 +475,21 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         applySubscriptionAutoRefreshState(state)
         if (subscriptionCacheReady.value && !isAppHidden()) {
           await reconcileAndroidSubscriptionRefreshResults()
+          // A newer read (visibility change, poll, storage event) takes over.
+          if (version !== androidSubscriptionRefreshStateVersion) return
           // A retained renderer writes directly to the shared cache rather than
           // the scheduled worker's result queue. Limit full cache/feed rebuilds
           // while progress moves, then flush the remaining writes on completion.
-          // The first native read also catches writes after the startup cache load.
+          // The first read of an active refresh also catches writes after the
+          // startup cache load; without one, that load is current.
           const progress = state.rendererActive ? `${state.tab}:${state.percentage}` : null
-          if (androidExternalRefreshReloadTime === null ||
-            (progress !== androidExternalRefreshProgress &&
-              (progress === null || androidExternalRefreshProgress === null ||
-                performance.now() - androidExternalRefreshReloadTime >= 5000))) {
-            await store.dispatch('grabAllSubscriptions')
+          if (progress !== androidExternalRefreshProgress &&
+            (progress === null || androidExternalRefreshProgress === null ||
+              performance.now() - androidExternalRefreshReloadTime >= 5000)) {
+            // Claimed before reloading, so overlapping reads don't reload again.
             androidExternalRefreshProgress = progress
             androidExternalRefreshReloadTime = performance.now()
+            await store.dispatch('grabAllSubscriptions')
             for (const tab of subscriptionAutoRefreshTabs) notifySubscriptionChannelRefreshed(tab)
           }
         }
