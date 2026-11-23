@@ -52,6 +52,7 @@ const seed = {
     hideSubscriptionsLive: false,
     hideSubscriptionsCommunity: false,
     showNewSubscriptionFeed: true,
+    newSubscriptionFeedView: 'combined',
     useRssFeeds: false,
     thumbnailSize: 180
   },

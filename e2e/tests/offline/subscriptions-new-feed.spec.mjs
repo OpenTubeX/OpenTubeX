@@ -91,6 +91,7 @@ const commonSettings = {
   hideSubscriptionsLive: false,
   hideSubscriptionsCommunity: false,
   showNewSubscriptionFeed: true,
+  newSubscriptionFeedView: 'combined',
   useRssFeeds: false
 }
 

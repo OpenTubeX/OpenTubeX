@@ -392,11 +392,6 @@ test.describe('subscription feed refresh controls', () => {
         const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
         await expect(markAllAsSeen).toBeDisabled()
 
-        await page.getByRole('button', { name: 'Show tabbed view' }).click()
-        await expect(markAllAsSeen).toBeDisabled()
-        // Combined sections remain mounted during their leave animation.
-        // Wait for removal before the tabbed list can render the same entry.
-        await expect(page.locator('.newFeed .mediaSection, .newFeed .postsSection')).toHaveCount(0)
         await page.locator(`[data-new-feed-tab="${feed}"]`).click()
         const entry = page.getByText(feed === 'shorts' ? 'Cached short' : 'Cached live', { exact: true })
         await expect(entry).toHaveCount(1)
