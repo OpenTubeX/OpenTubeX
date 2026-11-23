@@ -129,6 +129,8 @@ test('a route whose code failed to preload still opens on click', async ({ page 
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
   await link.hover()
   await failedRequest
+  await page.waitForTimeout(3100)
+  await test.info().attach('diag', { body: JSON.stringify(await page.evaluate(() => window.__e2eEvents), null, 1), contentType: 'application/json' })
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
 
   await page.unroute(/^app:\/\/bundle\/.*\.js$/)
