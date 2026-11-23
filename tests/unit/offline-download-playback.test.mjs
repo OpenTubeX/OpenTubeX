@@ -15,7 +15,6 @@ const { preferredDownload } = runInNewContext(`({ ${method('preferredDownload', 
 for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invidious', 'audio']]) {
   test(`${android ? 'Android' : 'Electron'} ${backend} plays downloaded ${mode} without waiting for metadata`, async () => {
     let requests = 0
-    const removedNotifications = []
     const pendingMetadata = () => { requests++; return new Promise(() => {}) }
     const methods = runInNewContext(`({
       ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
@@ -30,7 +29,6 @@ for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invid
       initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
       getLocalVideoInfo: pendingMetadata,
       invidiousGetVideoInformation: pendingMetadata,
-      removeDownloadNotifications: ids => removedNotifications.push(...ids),
     })
     const watch = {
       ...methods,
@@ -70,8 +68,6 @@ for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invid
     const url = mode === 'audio' ? watch.manifestSrc : watch.legacyFormats[0].url
     assert.equal(url, android ? 'https://localhost/_capacitor_content_/downloads/document/1' : 'downloadmedia://file/1/downloaded1')
     assert.equal(requests, 0)
-    // Playing the download ends the news that it finished.
-    assert.deepEqual(removedNotifications, [1])
   })
 }
 
@@ -291,7 +287,6 @@ for (const android of [false]) {
       process: { env: { IS_CAPACITOR: android } },
       Capacitor: { convertFileSrc: path => `native:${path}` },
       DOWNLOADED_MEDIA_MIME_TYPES: { webm: 'video/webm' },
-      removeDownloadNotifications: () => {},
     })
     const files = [
       { videoId: 'dupevideo01', path: '/downloads/First.webm', available: true, title: 'First local take', author: 'First Channel', authorId: 'first-channel' },

@@ -667,6 +667,7 @@ export default defineComponent({
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
       notificationsReadVideoId: null,
+      notificationsRemovedDownloadId: null,
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
@@ -3102,8 +3103,6 @@ export default defineComponent({
       this.localPlaybackDownloadId = downloadId
       this.localPlaybackFilePath = filePath
       this.playbackSourceKey++
-      // The download was announced so it could be played.
-      removeDownloadNotifications([downloadId])
       return file
     },
 
@@ -5571,6 +5570,11 @@ export default defineComponent({
       if (this.notificationsReadVideoId !== this.videoId && !this.isIncognitoTab) {
         this.notificationsReadVideoId = this.videoId
         markVideoNotificationsRead(this.videoId)
+      }
+      // The download was announced so it could be played.
+      if (this.localFilePlayback && this.notificationsRemovedDownloadId !== this.localPlaybackDownloadId) {
+        this.notificationsRemovedDownloadId = this.localPlaybackDownloadId
+        removeDownloadNotifications([this.localPlaybackDownloadId])
       }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
