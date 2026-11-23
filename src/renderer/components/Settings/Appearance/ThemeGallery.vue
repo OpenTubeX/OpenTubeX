@@ -71,7 +71,9 @@
       <div class="themeHeader">
         <div class="themeModeRow">
           <ThemeModePicker data-setting-key="baseTheme" />
-          <FtSyncedSettingIndicator setting-key="baseTheme" />
+          <span class="themeModeIndicators">
+            <FtSyncedSettingIndicator setting-key="baseTheme" />
+          </span>
         </div>
 
         <!-- Every color control stays rendered in one cell and only the edited
@@ -621,6 +623,20 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   min-inline-size: 0;
 }
 
+/* Like the color controls, the indicators center on the mode previews. The
+   start margin keeps them and their hover circles clear of the selected
+   preview's outline. */
+.themeModeIndicators {
+  display: flex;
+  align-items: center;
+  margin-block-end: calc(1lh + 8px);
+  margin-inline-start: 6px;
+}
+
+.themeModeIndicators:empty {
+  display: none;
+}
+
 .themeHeader {
   display: grid;
   grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
@@ -629,11 +645,13 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 /* The color controls share one cell, so it is as tall as the tallest of them
-   whichever is shown. */
+   whichever is shown. The bottom margin matches a mode name and its gap, so
+   the controls center on the mode previews rather than on the names too. */
 .themeColors {
   display: grid;
   place-items: center;
   min-inline-size: 0;
+  margin-block-end: calc(1lh + 8px);
 }
 
 .themeColors > * {
@@ -654,6 +672,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 @container (width < 760px) {
   .themeHeader {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .themeColors {
+    margin-block-end: 0;
   }
 }
 
