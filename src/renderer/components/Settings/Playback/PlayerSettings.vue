@@ -1281,13 +1281,17 @@ function updateShowPlaybackRateAdjustedTimestamp(value) {
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)
 
+// Android starts these in its rotation fullscreen, which needs no user gesture.
+const fullscreenViewingModesSupported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
+
 const defaultViewingMode = computed(() => {
   /** @type {'default' | 'theatre' | 'fullwindow' | 'fullscreen' | 'pip' | 'external_player'} */
   const defaultViewingMode = store.getters.getDefaultViewingMode
 
   if ((process.env.IS_CAPACITOR && ['fullwindow', 'fullwindow_always_on'].includes(defaultViewingMode)) ||
     (defaultViewingMode === 'external_player' && (!process.env.IS_ELECTRON || externalPlayer.value === '')) ||
-    (!process.env.IS_ELECTRON && (defaultViewingMode === 'fullscreen' || defaultViewingMode === 'pip'))) {
+    (!process.env.IS_ELECTRON && defaultViewingMode === 'pip') ||
+    (!fullscreenViewingModesSupported && ['fullscreen', 'fullscreen_always_on'].includes(defaultViewingMode))) {
     return 'default'
   }
 
@@ -1305,13 +1309,13 @@ const viewingModeNames = computed(() => {
         ]
       : []),
 
-    ...process.env.IS_ELECTRON
+    ...fullscreenViewingModesSupported
       ? [
           t('Settings.Player Settings.Default Viewing Mode.Full Screen'),
           t('Settings.Player Settings.Default Viewing Mode.Full Screen (Always On)'),
-          t('Settings.Player Settings.Default Viewing Mode.Picture in Picture')
         ]
-      : []
+      : [],
+    ...process.env.IS_ELECTRON ? [t('Settings.Player Settings.Default Viewing Mode.Picture in Picture')] : []
   ]
 
   if (process.env.IS_ELECTRON && externalPlayer.value !== '') {
@@ -1329,13 +1333,8 @@ const viewingModeValues = computed(() => {
     'theatre',
     ...(!process.env.IS_CAPACITOR ? ['fullwindow', 'fullwindow_always_on'] : []),
 
-    ...process.env.IS_ELECTRON
-      ? [
-          'fullscreen',
-          'fullscreen_always_on',
-          'pip',
-        ]
-      : []
+    ...fullscreenViewingModesSupported ? ['fullscreen', 'fullscreen_always_on'] : [],
+    ...process.env.IS_ELECTRON ? ['pip'] : []
   ]
 
   if (process.env.IS_ELECTRON && externalPlayer.value !== '') {

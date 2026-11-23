@@ -663,9 +663,13 @@ const seekCount = ref(0)
 const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
-// Like on the watch page, Android and iOS start players inline. Each media
-// starts in the default viewing mode, as it does not play on into the next.
-const defaultViewingMode = computed(() => process.env.IS_CAPACITOR ? 'default' : store.getters.getDefaultViewingMode)
+// Like on the watch page, Android and iOS start players inline, except that
+// Android supports the fullscreen modes. Each media starts in the default
+// viewing mode, as it does not play on into the next.
+const defaultViewingMode = computed(() => {
+  const mode = store.getters.getDefaultViewingMode
+  return process.env.IS_CAPACITOR && (process.env.IS_IOS || !mode.startsWith('fullscreen')) ? 'default' : mode
+})
 let theatreModeToggledManually = false
 const theatreModeAnimator = createTheatreModeAnimator()
 const theatreLayoutAvailable = ref(isTheatreLayoutAvailable())
