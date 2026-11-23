@@ -783,8 +783,11 @@ function updateProfileSetting(commit, profileId, settingId, value, optimistic = 
   // tracker shows those another window saved meanwhile.
   return settingWrites.track(id, async () => {
     try {
-      await runProfileSettingUpdate(key, () => saveProfileSettingValue(commit, profileId, settingId, value))
-      if (pending) pending.confirmed = value
+      // A newer queued edit skips this one, which then confirms no value.
+      await runProfileSettingUpdate(key, async () => {
+        await saveProfileSettingValue(commit, profileId, settingId, value)
+        if (pending) pending.confirmed = value
+      })
     } finally {
       settle()
     }

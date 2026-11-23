@@ -289,6 +289,7 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   const releases = []
   const overrides = { car: {} }
   let unreadable = false
+  let unwritable = false
   // Objects from the other context have another prototype.
   const isPlainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   const mutations = vm.runInNewContext(`({${between('  setProfileOwnSettings: (state', '  // Takes a plan from')}})`, {
@@ -314,10 +315,13 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
         return structuredClone(saved.get(key))
       },
       // Each save waits until the test lets it finish.
-      upsert: (key, value) => new Promise(resolve => releases.push(() => {
-        saved.set(key, structuredClone(value))
-        resolve()
-      })),
+      upsert: async (key, value) => {
+        if (unwritable) throw new Error('The settings cannot be saved')
+        await new Promise(resolve => releases.push(() => {
+          saved.set(key, structuredClone(value))
+          resolve()
+        }))
+      },
     },
     console,
   })
@@ -364,6 +368,15 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   releases.shift()()
   saved.set(id, { quickSettings: ['e'] })
   assert.equal(await fourth, true)
+  assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), { quickSettings: ['e'] })
+
+  // An edit the next one replaced before it saved confirms no value, so when
+  // the next one fails, the last saved value shows again.
+  unwritable = true
+  unreadable = true
+  const skipped = region.updateProfileSetting(commit, 'car', 'quickSettings', ['f'], true)
+  const failed = region.updateProfileSetting(commit, 'car', 'quickSettings', ['g'], true)
+  assert.deepEqual(await Promise.all([skipped, failed]), [true, false])
   assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), { quickSettings: ['e'] })
 })
 

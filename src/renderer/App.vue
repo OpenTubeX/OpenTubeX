@@ -693,6 +693,7 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import { withSharedSettings } from './store/modules/settings'
 import { isSyncServerOidcCallbackUrl } from './helpers/sync-server-oidc'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
 import { SIGNAL_THEME_VALUES } from '../signalTheme.js'
@@ -1955,7 +1956,7 @@ onMounted(async () => {
       store.commit('setCustomThemes', themes)
       customThemesLoaded = true
       if (baseTheme.value === 'custom' && themes.length > 0) {
-        await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+        await updateShownSetting('BaseTheme', `custom:${themes[0].id}`)
       }
       await sanitizeAppearanceSettings(themes)
     } catch (error) {
@@ -2558,6 +2559,18 @@ function updateAppFont() {
 }
 
 /**
+ * Saves a repaired value of a shown setting where it comes from: the own
+ * settings of the active profile, or the shared ones it inherits.
+ * @param {string} name the setting's name in its updater, such as `BaseTheme`
+ * @param {unknown} value
+ */
+function updateShownSetting(name, value) {
+  const update = () => store.dispatch(`update${name}`, value)
+  const settingId = name.charAt(0).toLowerCase() + name.slice(1)
+  return Object.hasOwn(store.state.settings.profileSettingsState.shared, settingId) ? update() : withSharedSettings(update)
+}
+
+/**
  * Replaces theme settings that name missing custom themes and invalid colors.
  * @param {object[]} customThemes
  * @param {boolean} [profileOnly] only those the active profile replaces with
@@ -2579,7 +2592,7 @@ async function sanitizeAppearanceSettings(customThemes, profileOnly = false) {
 
   await Promise.all(settings.map(([name, value]) => {
     if (profileOnly && !Object.hasOwn(replaced, name.charAt(0).toLowerCase() + name.slice(1))) return null
-    return store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)
+    return store.getters[`get${name}`] === value ? null : updateShownSetting(name, value)
   }))
 }
 

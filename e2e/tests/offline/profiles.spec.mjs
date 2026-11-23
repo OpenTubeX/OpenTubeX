@@ -505,9 +505,9 @@ test.describe('profile with its own settings', () => {
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
 
     // The same goes for one restored while the profile shows,
-    await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
+    expect(await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
       profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
-    }))
+    }))).toBe(true)
     await expect.poll(baseTheme).toBe('system')
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
 
@@ -534,7 +534,10 @@ test.describe('profile with its own settings', () => {
     // Its own settings are only deleted once the user confirms it.
     await keepSettingsSeparate.click()
     await page.getByRole('button', { name: 'Update Profile' }).click()
-    await page.getByRole('dialog', { name: 'Use shared settings' }).getByRole('button', { name: 'Use shared settings' }).click()
+    const prompt = page.getByRole('dialog', { name: 'Use shared settings' })
+    await expect(prompt).toBeVisible()
+    expect(ownSettings()).toEqual({ hideComments: true, landingPage: 'history' })
+    await prompt.getByRole('button', { name: 'Use shared settings' }).click()
     await expect.poll(ownSettings).toBeNull()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getHideComments)).toBe(false)
 
@@ -542,6 +545,24 @@ test.describe('profile with its own settings', () => {
     await keepSettingsSeparate.click()
     await page.getByRole('button', { name: 'Update Profile' }).click()
     await expect.poll(ownSettings).toEqual({})
+  })
+})
+
+test.describe('default profile with its own settings that inherits a missing custom theme', () => {
+  const ownSettingsId = 'profileSettings-65326570726f66696c65'
+  test.use({
+    seed: {
+      settings: { defaultProfile: 'e2eprofile', baseTheme: 'custom:missing', [ownSettingsId]: { hideComments: true } },
+      profiles: [mainProfile, { ...secondProfile, name: 'Car' }],
+    }
+  })
+
+  test('repairs the shared theme instead of giving the profile its own', async ({ app, page }) => {
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getBaseTheme)).toBe('system')
+    await expect.poll(() => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return [settings.baseTheme, settings[ownSettingsId]]
+    }).toEqual(['system', { hideComments: true }])
   })
 })
 
