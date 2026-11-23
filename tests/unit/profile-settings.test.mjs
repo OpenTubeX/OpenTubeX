@@ -207,6 +207,7 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   const isPlainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   const mutations = vm.runInNewContext(`({${between('  setProfileOwnSettings: (state', '  // Takes a plan from')}})`, {
     isPlainObject,
+    ownSettingsOf: profileSettings.ownSettingsOf,
     withPendingProfileEdits: (...args) => region.withPendingProfileEdits(...args),
   })
   const state = { quickSettings: ['shared'], profileSettingsState: { overrides } }

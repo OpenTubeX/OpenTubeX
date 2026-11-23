@@ -30,7 +30,7 @@ import {
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
-import { canHaveOwnSettings, isPlainObject, profileSettingsId } from '../../profileSettings.js'
+import { canHaveOwnSettings, isPlainObject, ownSettingsOf, profileSettingsId } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -1895,12 +1895,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // The own settings of each profile, by their settings key. Those of a
   // profile this device lacks wait on the server until it syncs the profile.
   const isSynced = key => isSettingSyncEnabled(store.state.settings, key)
-  const ownSettingsOf = profileId => syncedProfileSettings(store.state.settings.profileSettingsState?.overrides[profileId], isSynced)
+  const syncedOwnSettingsOf = profileId => syncedProfileSettings(ownSettingsOf(store.state.settings.profileSettingsState?.overrides, profileId), isSynced)
   const profileSettingsProfiles = new Map()
   for (const profile of store.state.profiles.profileList) {
     if (!canHaveOwnSettings(profile._id)) continue
     const key = profileSettingsId(profile._id)
-    const value = ownSettingsOf(profile._id)
+    const value = syncedOwnSettingsOf(profile._id)
     // Entries that aren't settings, which other versions may write, stay as they are.
     if (remote[key] && remote[key].value !== null && !isPlainObject(remote[key].value)) continue
     if (value === null && !previous[key] && !remote[key]) continue
@@ -1978,7 +1978,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
         ? value
         : profileSettingsProfiles.has(key)
-          ? ownSettingsOf(profileSettingsProfiles.get(key))
+          ? syncedOwnSettingsOf(profileSettingsProfiles.get(key))
           : sharedSettingValue(store.state.settings, key)
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)

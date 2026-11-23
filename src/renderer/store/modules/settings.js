@@ -53,6 +53,7 @@ import {
   collectProfileSettings,
   isPlainObject,
   isProfileSettingsId,
+  ownSettingsOf,
   planProfileSettingsOf,
   profileIdFromSettingsId,
   profileSettingsId,
@@ -798,7 +799,7 @@ function applyActiveProfileSettings(store) {
   const current = settings.profileSettingsState
   const target = !profilesLoaded
     ? current.applied
-    : canHaveOwnSettings(activeProfile) && isPlainObject(current.overrides[activeProfile]) ? activeProfile : null
+    : canHaveOwnSettings(activeProfile) && isPlainObject(ownSettingsOf(current.overrides, activeProfile)) ? activeProfile : null
   const plan = planProfileSettings(settings, target)
   // The replaced settings can change while every value stays the same.
   const replaced = shared => Object.keys(shared).sort().join('\0')
@@ -806,6 +807,11 @@ function applyActiveProfileSettings(store) {
   store.commit('applyProfileSettings', plan)
   for (const settingId of plan.changed) {
     applySettingSideEffects(store, settingId, settings[settingId])
+  }
+  // An icon pack still loading for the previous profile must not show, also
+  // when this one uses the same pack.
+  if (plan.applied !== current.applied && !plan.changed.includes('iconPack')) {
+    applySettingSideEffects(store, 'iconPack', settings.iconPack)
   }
 }
 
@@ -965,7 +971,7 @@ const customGetters = {
 
   /** The own settings of a profile, or null if it uses the shared settings */
   getProfileOwnSettings: (state) => (profileId) => {
-    const settings = state.profileSettingsState.overrides[profileId]
+    const settings = ownSettingsOf(state.profileSettingsState.overrides, profileId)
     return isPlainObject(settings) ? settings : null
   },
 
@@ -1003,7 +1009,7 @@ const customMutations = {
 
   /** Shows an edit of a profile's own setting before it is saved */
   setProfileSettingValue: (state, { profileId, settingId, value }) => {
-    const settings = state.profileSettingsState.overrides[profileId]
+    const settings = ownSettingsOf(state.profileSettingsState.overrides, profileId)
     if (!isPlainObject(settings)) return
     if (value === undefined) delete settings[settingId]
     else settings[settingId] = value

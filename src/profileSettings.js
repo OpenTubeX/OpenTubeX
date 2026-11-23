@@ -151,6 +151,16 @@ export function isPlainObject(value) {
 }
 
 /**
+ * The own settings of a profile in a map of them by profile ID, which keys
+ * like `__proto__` can't reach through the prototype.
+ * @param {Record<string, unknown> | undefined} overrides
+ * @param {string} profileId
+ */
+export function ownSettingsOf(overrides, profileId) {
+  return overrides && Object.hasOwn(overrides, profileId) ? overrides[profileId] : undefined
+}
+
+/**
  * The own settings of each profile in saved settings, by profile ID.
  * @param {Iterable<{ _id: string, value: unknown }>} records
  * @returns {Record<string, Record<string, unknown>>}
@@ -232,7 +242,7 @@ export function sharedSettingValue(settings, settingId) {
  */
 export function planProfileSettingsOf(settings, target, isProfileSpecific, normalize = (_, value) => value) {
   const current = settings.profileSettingsState
-  const own = Object.fromEntries(Object.entries(profileSettingsOf(target === null ? null : current.overrides[target], isProfileSpecific))
+  const own = Object.fromEntries(Object.entries(profileSettingsOf(target === null ? null : ownSettingsOf(current.overrides, target), isProfileSpecific))
     .map(([key, value]) => [key, normalize(key, value)]))
   /** @type {Record<string, unknown>} */
   const shared = {}
