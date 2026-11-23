@@ -132,7 +132,8 @@
       </FtFlexBox>
       <FtPrompt
         v-if="importPromptOpen"
-        :label="t('Settings.YouTube Account Settings.Import Watch History Confirmation')"
+        :label="t('Settings.YouTube Account Settings.Import Watch History')"
+        :extra-labels="[t('Settings.YouTube Account Settings.Import Watch History Confirmation')]"
         :option-names="[t('Settings.YouTube Account Settings.Import Watch History'), t('Cancel')]"
         :option-values="['import', 'cancel']"
         :option-icons="[['fas', 'history'], ['fas', 'xmark']]"
@@ -142,6 +143,7 @@
       <FtPrompt
         v-if="keepPlaylistsPrompt"
         :label="t('Settings.YouTube Account Settings.Keep Playlists Confirmation')"
+        :extra-labels="[t('Settings.YouTube Account Settings.Keep Playlists Details')]"
         :option-names="[t('Settings.YouTube Account Settings.Keep Playlists'), t('Settings.YouTube Account Settings.Remove Playlists'), t('Cancel')]"
         :option-values="['keep', 'remove', 'cancel']"
         :option-icons="[['fas', 'floppy-disk'], ['fas', 'trash'], ['fas', 'xmark']]"
