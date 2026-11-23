@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash, pbkdf2Sync, randomBytes } from 'node:crypto'
 
 import {
   test,
@@ -86,6 +86,77 @@ test.describe('settings', () => {
     await syncSection.getByLabel('Password', { exact: true }).fill('test-password')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeEnabled()
     await expect(syncSection.locator('.error')).toHaveCount(0)
+  })
+
+  test('registers with the recovery phrase it shows when no passphrase is entered', async ({ app, page }) => {
+    const serverUrl = 'https://phrase.example'
+    let registrations = 0
+    await page.route(`${serverUrl}/**`, async (route) => {
+      const request = route.request()
+      const pathname = new URL(request.url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+      } else if (pathname === '/v1/account/register') {
+        registrations++
+        await route.fulfill({ json: { jwt: 'registered-token' } })
+      } else if (pathname === '/v1/encrypted_sync') {
+        await route.fulfill({ json: { collections: [] } })
+      } else if (pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
+      } else if (request.method() === 'PUT') {
+        await route.fulfill({ json: {} })
+      } else {
+        await route.fulfill({ json: { revision: 0 } })
+      }
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
+    await syncSection.getByLabel('Sync server URL').fill(serverUrl)
+    await syncSection.getByLabel('Sync server URL').press('Tab')
+    await syncSection.getByLabel('Username').fill('phrase-user')
+    await syncSection.getByLabel('Password', { exact: true }).fill('phrase-password')
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+
+    const words = (await page.getByRole('dialog', { name: 'Save your recovery phrase' })
+      .getByRole('listitem').allTextContents()).map(word => word.trim())
+    expect(words).toHaveLength(12)
+    await page.getByRole('button', { name: 'Next' }).click()
+
+    // Registering waits until the user enters the requested words correctly.
+    const dialog = page.getByRole('dialog', { name: 'Confirm your recovery phrase' })
+    await expect(dialog.getByRole('textbox')).toHaveCount(3)
+    await expect(dialog.getByRole('textbox').first()).toBeFocused()
+    const positions = []
+    for (let number = 1; number <= words.length; number++) {
+      if (await dialog.getByLabel(`Word ${number}`, { exact: true }).count() > 0) positions.push(number)
+    }
+    expect(positions).toHaveLength(3)
+    for (const number of positions) {
+      await dialog.getByLabel(`Word ${number}`, { exact: true }).fill(words[number - 1])
+    }
+    const lastWord = dialog.getByLabel(`Word ${positions[2]}`, { exact: true })
+    await lastWord.fill('x')
+    await dialog.getByRole('button', { name: 'Register' }).click()
+    await expect(dialog.getByRole('alert')).toHaveText(/don't match your recovery phrase/)
+    expect(registrations).toBe(0)
+
+    await lastWord.fill(` ${words[positions[2] - 1].toUpperCase()} `)
+    await dialog.getByRole('button', { name: 'Register' }).click()
+
+    await expect(syncSection.getByText('Connected as phrase-user')).toBeVisible()
+    expect(registrations).toBe(1)
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+    const key = pbkdf2Sync(
+      words.join(' '),
+      Buffer.from(settings.syncServerPrivacySalt, 'base64'),
+      600_000,
+      32,
+      'sha256'
+    )
+    expect(settings.syncServerPrivacyKey).toBe(key.toString('base64'))
   })
 
   test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {

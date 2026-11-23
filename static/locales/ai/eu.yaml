@@ -1518,6 +1518,16 @@ Settings:
     Enable Sync: Gaitu sinkronizazioa
     Privacy Passphrase: Pribatutasun-pasaesaldia
     Privacy Passphrase Hint: Erabili kontuaren pasahitzaz bestelako pasaesaldi bat. Ez da inoiz gailu honetatik ateratzen eta gailu guztietan behar da; galtzen baduzu, ezin izango dituzu berreskuratu sinkronizatutako datu zifratuak.
+    Generate Recovery Phrase: Sortu berreskuratze-esaldia
+    Save Your Recovery Phrase: Gorde zure berreskuratze-esaldia
+    Recovery Phrase Warning: Idatzi 12 hitz hauek ordenan eta gorde leku seguru batean. Zure pribatutasun-pasaesaldia dira. Sartu itzazu parekatu ezin dituzun gailuetan; haiek gabe, inork ezin ditu berreskuratu zure sinkronizazio-datu zifratuak.
+    Confirm Your Recovery Phrase: Berretsi zure berreskuratze-esaldia
+    Confirm Recovery Phrase Description: Idatzi zure berreskuratze-esaldiko hitz hauek gorde duzula berresteko.
+    Recovery Phrase Word: '{number}. hitza'
+    Recovery Phrase Mismatch: Hitz hauek ez datoz bat zure berreskuratze-esaldiarekin. Egiaztatu idatzi duzuna.
+    Copy Recovery Phrase: Kopiatu esaldia
+    Recovery Phrase Copied: Berreskuratze-esaldia kopiatu da
+    Use Recovery Phrase: Erabili esaldia
     Privacy Policy: Zerbitzari honen pribatutasun-politika
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.

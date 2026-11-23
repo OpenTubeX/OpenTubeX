@@ -1517,6 +1517,16 @@ Settings:
     Enable Sync: Luba sünkroonimine
     Privacy Passphrase: Privaatsuse salafraas
     Privacy Passphrase Hint: Kasutage konto paroolist erinevat salafraasi. Seda ei edastata sellest seadmest välja ja seda on vaja igas seadmes. Selle kaotamisel ei saa krüptitud sünkroonimisandmeid taastada.
+    Generate Recovery Phrase: Loo taastefraas
+    Save Your Recovery Phrase: Salvesta oma taastefraas
+    Recovery Phrase Warning: Kirjuta need 12 sõna õiges järjekorras üles ja hoia neid turvalises kohas. Need on sinu privaatsuse salafraas. Sisesta need seadmetes, mida sa ei saa siduda; ilma nendeta ei saa keegi sinu krüpteeritud sünkroonimisandmeid taastada.
+    Confirm Your Recovery Phrase: Kinnita oma taastefraas
+    Confirm Recovery Phrase Description: Sisesta need sõnad oma taastefraasist, et kinnitada, et salvestasid selle.
+    Recovery Phrase Word: Sõna {number}
+    Recovery Phrase Mismatch: Need sõnad ei vasta sinu taastefraasile. Kontrolli, mida üles kirjutasid.
+    Copy Recovery Phrase: Kopeeri fraas
+    Recovery Phrase Copied: Taastefraas kopeeriti
+    Use Recovery Phrase: Kasuta fraasi
     Privacy Policy: Selle serveri privaatsuspoliitika
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.

@@ -1562,6 +1562,16 @@ Settings:
     Enable Sync: Slå synkronisering til
     Privacy Passphrase: Adgangssætning til beskyttelse af personlige oplysninger
     Privacy Passphrase Hint: Brug en anden adgangssætning end adgangskoden til din konto. Den forlader aldrig denne enhed og skal bruges på alle enheder. Hvis du mister den, kan krypterede synkroniseringsdata ikke gendannes.
+    Generate Recovery Phrase: Generér gendannelsessætning
+    Save Your Recovery Phrase: Gem din gendannelsessætning
+    Recovery Phrase Warning: Skriv disse 12 ord ned i rækkefølge, og opbevar dem et sikkert sted. De er din adgangssætning til beskyttelse af personlige oplysninger. Indtast dem på enheder, du ikke kan parre; uden dem kan ingen gendanne dine krypterede synkroniseringsdata.
+    Confirm Your Recovery Phrase: Bekræft din gendannelsessætning
+    Confirm Recovery Phrase Description: Indtast disse ord fra din gendannelsessætning for at bekræfte, at du har gemt den.
+    Recovery Phrase Word: Ord {number}
+    Recovery Phrase Mismatch: Disse ord passer ikke med din gendannelsessætning. Tjek, hvad du skrev ned.
+    Copy Recovery Phrase: Kopiér sætning
+    Recovery Phrase Copied: Gendannelsessætning kopieret
+    Use Recovery Phrase: Brug sætning
     Privacy Policy: Privatlivspolitik for denne server
     Enhanced Privacy Enabled: Udvidet beskyttelse af personlige oplysninger er slået til. Serveren gemmer kun krypterede synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne server understøtter ikke udvidet beskyttelse af personlige oplysninger. De synkroniserede data er synlige for serverens operatør.

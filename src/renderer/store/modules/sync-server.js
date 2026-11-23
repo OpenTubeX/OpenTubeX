@@ -38,9 +38,9 @@ import {
   encryptSyncDocument,
   loadLegacySyncDocument,
   migrateLegacyPlaybackSpeedsToSettings,
-  preparePrivacyKey,
   readSyncCollection,
 } from '../../helpers/sync-server-privacy'
+import { preparePrivacyKeyFromPassphrase } from '../../helpers/sync-server-recovery-phrase'
 import {
   encryptSyncServerDeviceInfo,
   loadSyncServerDevices,
@@ -2030,7 +2030,7 @@ const actions = {
           : manifest.legacy_encrypted_data
             ? await client.getLegacyEncryptedSync()
             : null
-        const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
+        const privacy = await preparePrivacyKeyFromPassphrase(remote?.payload, privacyPassphrase)
         privacyKey = privacy.key
         privacySalt = privacy.salt
       }

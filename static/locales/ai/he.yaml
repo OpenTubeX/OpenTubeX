@@ -1545,6 +1545,16 @@ Settings:
     Enable Sync: הפעלת סנכרון
     Privacy Passphrase: ביטוי סיסמה לפרטיות
     Privacy Passphrase Hint: השתמשו בביטוי סיסמה שונה מסיסמת החשבון. הוא לעולם אינו יוצא מהמכשיר הזה ונדרש בכל מכשיר. אם תאבדו אותו, לא יהיה ניתן לשחזר את נתוני הסנכרון המוצפנים.
+    Generate Recovery Phrase: יצירת ביטוי שחזור
+    Save Your Recovery Phrase: שמרו את ביטוי השחזור
+    Recovery Phrase Warning: רשמו את 12 המילים האלה לפי הסדר ושמרו אותן במקום בטוח. הן ביטוי הסיסמה לפרטיות שלכם. הזינו אותן במכשירים שאי אפשר לצמד; בלעדיהן אף אחד לא יוכל לשחזר את נתוני הסנכרון המוצפנים שלכם.
+    Confirm Your Recovery Phrase: אישור ביטוי השחזור
+    Confirm Recovery Phrase Description: הזינו את המילים האלה מביטוי השחזור כדי לאשר ששמרתם אותו.
+    Recovery Phrase Word: מילה {number}
+    Recovery Phrase Mismatch: המילים האלה לא תואמות את ביטוי השחזור. בדקו את מה שרשמתם.
+    Copy Recovery Phrase: העתקת הביטוי
+    Recovery Phrase Copied: ביטוי השחזור הועתק
+    Use Recovery Phrase: שימוש בביטוי
     Privacy Policy: מדיניות הפרטיות של השרת
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
     Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.

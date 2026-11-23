@@ -64,6 +64,7 @@ updates:
       - dependency-name: "@rspack/cli"
       - dependency-name: "@rspack/core"
       - dependency-name: "@rspack/dev-server"
+      - dependency-name: "@scure/bip39"
       - dependency-name: "@sqlite.org/sqlite-wasm"
       - dependency-name: "@vot.js/core"
       - dependency-name: "dbus-native"

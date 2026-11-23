@@ -1566,6 +1566,16 @@ Settings:
     Enable Sync: سنک فعال کریں
     Privacy Passphrase: رازداری کا پاس فریز
     Privacy Passphrase Hint: اپنے اکاؤنٹ کے پاس ورڈ سے الگ پاس فریز استعمال کریں۔ یہ کبھی اس ڈیوائس سے باہر نہیں جاتا اور ہر ڈیوائس پر ضروری ہے؛ اسے کھو دینے سے انکرپٹڈ سنک ڈیٹا ناقابل بازیافت ہو جاتا ہے۔
+    Generate Recovery Phrase: بحالی فقرہ بنائیں
+    Save Your Recovery Phrase: اپنا بحالی فقرہ محفوظ کریں
+    Recovery Phrase Warning: یہ 12 الفاظ ترتیب سے لکھ لیں اور کسی محفوظ جگہ رکھیں۔ یہی آپ کا رازداری کا پاس فریز ہے۔ جن ڈیوائسز کو آپ جوڑ نہیں سکتے، ان پر یہ درج کریں؛ ان کے بغیر کوئی بھی آپ کا خفیہ کردہ سنک ڈیٹا بحال نہیں کر سکتا۔
+    Confirm Your Recovery Phrase: اپنے بحالی فقرے کی تصدیق کریں
+    Confirm Recovery Phrase Description: یہ تصدیق کرنے کے لیے کہ آپ نے اسے محفوظ کیا ہے، اپنے بحالی فقرے سے یہ الفاظ درج کریں۔
+    Recovery Phrase Word: لفظ {number}
+    Recovery Phrase Mismatch: یہ الفاظ آپ کے بحالی فقرے سے میل نہیں کھاتے۔ جو آپ نے لکھا تھا اسے چیک کریں۔
+    Copy Recovery Phrase: فقرہ کاپی کریں
+    Recovery Phrase Copied: بحالی فقرہ کاپی ہو گیا
+    Use Recovery Phrase: فقرہ استعمال کریں
     Privacy Policy: اس سرور کی رازداری کی پالیسی
     Enhanced Privacy Enabled: بہتر رازداری فعال ہے۔ سرور صرف انکرپٹڈ سنک ڈیٹا محفوظ کرتا ہے۔
     Enhanced Privacy Unsupported: انتباہ — یہ سرور بہتر رازداری کو سپورٹ نہیں کرتا۔ سنک شدہ ڈیٹا اس کے آپریٹر کو نظر آتا ہے۔

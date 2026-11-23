@@ -155,8 +155,32 @@
   inline-size: min(100%, 32rem);
 }
 
-.actions {
+.actions,
+.recoveryPhraseActions {
   justify-content: center;
+}
+
+.recoveryPhraseWords {
+  display: grid;
+  font-family: monospace;
+  font-size: 1.1rem;
+  gap: 0.5rem 1.5rem;
+  grid-template-columns: repeat(4, 1fr); /* Full rows of the 12 words */
+  margin-block: 1rem;
+  padding-inline-start: 4ch; /* Room for the widest marker, "12." */
+}
+
+@media (width <= 600px) {
+  .recoveryPhraseWords {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.recoveryPhraseConfirmation {
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  margin-block: 1rem;
 }
 
 .autoSyncPaused {

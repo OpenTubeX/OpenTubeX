@@ -1518,6 +1518,16 @@ Settings:
     Enable Sync: 啟用同步
     Privacy Passphrase: 隱私通關密語
     Privacy Passphrase Hint: 請使用與帳戶密碼不同的通關密語。它不會離開此裝置，而且每台裝置都需要輸入；若遺失，將無法復原加密的同步資料。
+    Generate Recovery Phrase: 產生復原短語
+    Save Your Recovery Phrase: 請儲存復原短語
+    Recovery Phrase Warning: 請依序記下這 12 個單字，並妥善保管。它們就是你的隱私通關密語。在無法配對的裝置上輸入它們；沒有它們，任何人都無法復原你的加密同步資料。
+    Confirm Your Recovery Phrase: 確認復原短語
+    Confirm Recovery Phrase Description: 請輸入復原短語中的這些單字，以確認你已儲存它。
+    Recovery Phrase Word: 第 {number} 個單字
+    Recovery Phrase Mismatch: 這些單字與你的復原短語不符。請檢查你記下的內容。
+    Copy Recovery Phrase: 複製短語
+    Recovery Phrase Copied: 已複製復原短語
+    Use Recovery Phrase: 使用短語
     Privacy Policy: 此伺服器的隱私權政策
     Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
     Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。

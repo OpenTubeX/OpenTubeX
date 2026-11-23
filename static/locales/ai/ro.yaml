@@ -1531,6 +1531,16 @@ Settings:
     Enable Sync: Activează sincronizarea
     Privacy Passphrase: Frază secretă pentru confidențialitate
     Privacy Passphrase Hint: Folosiți o frază secretă diferită de parola contului. Aceasta nu părăsește niciodată dispozitivul și este necesară pe fiecare dispozitiv; dacă o pierdeți, datele de sincronizare criptate nu mai pot fi recuperate.
+    Generate Recovery Phrase: Generează o frază de recuperare
+    Save Your Recovery Phrase: Salvează fraza de recuperare
+    Recovery Phrase Warning: Notează aceste 12 cuvinte în ordine și păstrează-le într-un loc sigur. Ele sunt fraza ta secretă pentru confidențialitate. Introdu-le pe dispozitivele pe care nu le poți asocia; fără ele, nimeni nu îți poate recupera datele de sincronizare criptate.
+    Confirm Your Recovery Phrase: Confirmă fraza de recuperare
+    Confirm Recovery Phrase Description: Introdu aceste cuvinte din fraza de recuperare pentru a confirma că ai salvat-o.
+    Recovery Phrase Word: Cuvântul {number}
+    Recovery Phrase Mismatch: Aceste cuvinte nu se potrivesc cu fraza de recuperare. Verifică ce ai notat.
+    Copy Recovery Phrase: Copiază fraza
+    Recovery Phrase Copied: Fraza de recuperare a fost copiată
+    Use Recovery Phrase: Folosește fraza
     Privacy Policy: Politica de confidențialitate a acestui server
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.

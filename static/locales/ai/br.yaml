@@ -1518,6 +1518,16 @@ Settings:
     Enable Sync: "Gweredekaat ar goubredañ"
     Privacy Passphrase: "Lavarenn-dremen brevezded"
     Privacy Passphrase Hint: "Implijit ul lavarenn-dremen disheñvel diouzh ger-tremen ho kont. Ne guita morse an trevnad-mañ ha rekis eo war bep trevnad; ma kollit anezhi ne c'hallo ket ar roadennoù goubredañ sifret bezañ adtapet."
+    Generate Recovery Phrase: Krouiñ ul lavarenn-adtapout
+    Save Your Recovery Phrase: Enrollit ho lavarenn-adtapout
+    Recovery Phrase Warning: Skrivit an 12 ger-mañ en urzh ha mirit anezho en ul lec'h diogel. Ho lavarenn-dremen brevezded int. Enankit anezho war an trevnadoù na c'hallit ket parañ; hepto ne c'hall den ebet adtapout ho roadennoù goubredañ enrineget.
+    Confirm Your Recovery Phrase: Kadarnaat ho lavarenn-adtapout
+    Confirm Recovery Phrase Description: Enankit ar gerioù-mañ eus ho lavarenn-adtapout evit kadarnaat ho peus he enrollet.
+    Recovery Phrase Word: Ger {number}
+    Recovery Phrase Mismatch: Ne glot ket ar gerioù-mañ gant ho lavarenn-adtapout. Gwiriit ar pezh ho peus skrivet.
+    Copy Recovery Phrase: Eilañ al lavarenn
+    Recovery Phrase Copied: Lavarenn-adtapout eilet
+    Use Recovery Phrase: Implijout al lavarenn
     Privacy Policy: "Reolenn brevezded ar servijer-mañ"
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."

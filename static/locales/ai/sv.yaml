@@ -1518,6 +1518,16 @@ Settings:
     Enable Sync: Aktivera synkronisering
     Privacy Passphrase: Integritetslösenfras
     Privacy Passphrase Hint: Använd en annan lösenfras än kontolösenordet. Den lämnar aldrig enheten och krävs på alla enheter. Om du förlorar den går krypterade synkroniseringsdata inte att återställa.
+    Generate Recovery Phrase: Generera återställningsfras
+    Save Your Recovery Phrase: Spara din återställningsfras
+    Recovery Phrase Warning: Skriv ner de här 12 orden i ordning och förvara dem på ett säkert ställe. De är din integritetslösenfras. Ange dem på enheter som du inte kan parkoppla; utan dem kan ingen återställa dina krypterade synkroniseringsdata.
+    Confirm Your Recovery Phrase: Bekräfta din återställningsfras
+    Confirm Recovery Phrase Description: Ange de här orden från din återställningsfras för att bekräfta att du har sparat den.
+    Recovery Phrase Word: Ord {number}
+    Recovery Phrase Mismatch: De här orden stämmer inte med din återställningsfras. Kontrollera vad du skrev ner.
+    Copy Recovery Phrase: Kopiera fras
+    Recovery Phrase Copied: Återställningsfrasen har kopierats
+    Use Recovery Phrase: Använd fras
     Privacy Policy: Integritetspolicy för den här servern
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.

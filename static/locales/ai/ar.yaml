@@ -1541,6 +1541,16 @@ Settings:
     Enable Sync: تمكين المزامنة
     Privacy Passphrase: عبارة مرور الخصوصية
     Privacy Passphrase Hint: استخدم عبارة مرور منفصلة عن كلمة مرور حسابك. لا يغادر هذا الجهاز أبدًا وهو مطلوب في كل جهاز؛ وفقدانها يجعل بيانات المزامنة المشفرة غير قابلة للاسترداد.
+    Generate Recovery Phrase: إنشاء عبارة استرداد
+    Save Your Recovery Phrase: احفظ عبارة الاسترداد
+    Recovery Phrase Warning: اكتب هذه الكلمات الـ12 بالترتيب واحتفظ بها في مكان آمن. إنها عبارة مرور الخصوصية الخاصة بك. أدخلها على الأجهزة التي لا يمكنك إقرانها؛ وبدونها لا يمكن لأحد استرداد بيانات المزامنة المشفرة.
+    Confirm Your Recovery Phrase: تأكيد عبارة الاسترداد
+    Confirm Recovery Phrase Description: أدخل هذه الكلمات من عبارة الاسترداد لتأكيد أنك حفظتها.
+    Recovery Phrase Word: الكلمة {number}
+    Recovery Phrase Mismatch: هذه الكلمات لا تطابق عبارة الاسترداد. تحقق مما كتبته.
+    Copy Recovery Phrase: نسخ العبارة
+    Recovery Phrase Copied: تم نسخ عبارة الاسترداد
+    Use Recovery Phrase: استخدام العبارة
     Privacy Policy: سياسة الخصوصية لهذا الخادم
     Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
     Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.

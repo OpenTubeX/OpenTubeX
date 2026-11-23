@@ -1759,6 +1759,16 @@ Settings:
     Enable Sync: 동기화 활성화
     Privacy Passphrase: 개인 정보 암호문
     Privacy Passphrase Hint: 계정 비밀번호와 다른 암호문을 사용하세요. 암호문은 이 기기를 벗어나지 않으며 모든 기기에 필요합니다. 잃어버리면 암호화된 동기화 데이터를 복구할 수 없습니다.
+    Generate Recovery Phrase: 복구 문구 생성
+    Save Your Recovery Phrase: 복구 문구를 저장하세요
+    Recovery Phrase Warning: 이 12개의 단어를 순서대로 적어 안전한 곳에 보관하세요. 이 단어들이 개인 정보 암호문입니다. 페어링할 수 없는 기기에서 이 단어들을 입력하세요. 이 단어들이 없으면 누구도 암호화된 동기화 데이터를 복구할 수 없습니다.
+    Confirm Your Recovery Phrase: 복구 문구 확인
+    Confirm Recovery Phrase Description: 복구 문구를 저장했는지 확인하려면 다음 단어를 입력하세요.
+    Recovery Phrase Word: '{number}번째 단어'
+    Recovery Phrase Mismatch: 입력한 단어가 복구 문구와 일치하지 않습니다. 적어 둔 내용을 확인하세요.
+    Copy Recovery Phrase: 문구 복사
+    Recovery Phrase Copied: 복구 문구를 복사했습니다
+    Use Recovery Phrase: 문구 사용
     Privacy Policy: 이 서버의 개인 정보 처리 방침
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
     Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.

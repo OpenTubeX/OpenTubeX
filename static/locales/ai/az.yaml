@@ -1490,6 +1490,16 @@ Settings:
     Enable Sync: Sinxronizasiyanı aktivləşdir
     Privacy Passphrase: Məxfilik parol ifadəsi
     Privacy Passphrase Hint: Hesab parolunuzdan fərqli parol ifadəsi istifadə edin. O, bu cihazdan kənara çıxmır və hər cihazda tələb olunur; onu itirsəniz, şifrələnmiş sinxronizasiya məlumatlarını bərpa etmək mümkün olmayacaq.
+    Generate Recovery Phrase: Bərpa ifadəsi yarat
+    Save Your Recovery Phrase: Bərpa ifadənizi saxlayın
+    Recovery Phrase Warning: Bu 12 sözü ardıcıllıqla yazın və təhlükəsiz yerdə saxlayın. Onlar sizin məxfilik parol ifadənizdir. Qoşalaşdıra bilmədiyiniz cihazlarda onları daxil edin; onlarsız heç kim şifrələnmiş sinxronizasiya məlumatlarınızı bərpa edə bilməz.
+    Confirm Your Recovery Phrase: Bərpa ifadənizi təsdiqləyin
+    Confirm Recovery Phrase Description: Saxladığınızı təsdiqləmək üçün bərpa ifadənizdən bu sözləri daxil edin.
+    Recovery Phrase Word: Söz {number}
+    Recovery Phrase Mismatch: Bu sözlər bərpa ifadənizə uyğun gəlmir. Yazdıqlarınızı yoxlayın.
+    Copy Recovery Phrase: İfadəni kopyala
+    Recovery Phrase Copied: Bərpa ifadəsi kopyalandı
+    Use Recovery Phrase: İfadəni istifadə et
     Privacy Policy: Bu serverin məxfilik siyasəti
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
     Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.

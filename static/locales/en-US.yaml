@@ -2158,6 +2158,16 @@ Settings:
     Enable Sync: Enable Sync
     Privacy Passphrase: Privacy passphrase
     Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
+    Generate Recovery Phrase: Generate recovery phrase
+    Save Your Recovery Phrase: Save your recovery phrase
+    Recovery Phrase Warning: Write down these 12 words in order and keep them somewhere safe. They are your privacy passphrase. Enter them on devices you can't pair; without them, nobody can recover your encrypted sync data.
+    Confirm Your Recovery Phrase: Confirm your recovery phrase
+    Confirm Recovery Phrase Description: Enter these words from your recovery phrase to confirm that you saved it.
+    Recovery Phrase Word: Word {number}
+    Recovery Phrase Mismatch: These words don't match your recovery phrase. Check what you wrote down.
+    Copy Recovery Phrase: Copy phrase
+    Recovery Phrase Copied: Recovery phrase copied
+    Use Recovery Phrase: Use phrase
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
