@@ -765,8 +765,9 @@ function applyActiveProfileSettings(store) {
     ? current.applied
     : canHaveOwnSettings(activeProfile) && isPlainObject(current.overrides[activeProfile]) ? activeProfile : null
   const plan = planProfileSettings(settings, target)
-  if (plan.applied === current.applied && plan.changed.length === 0 &&
-    Object.keys(plan.shared).length === Object.keys(current.shared).length) return
+  // The replaced settings can change while every value stays the same.
+  const replaced = shared => Object.keys(shared).sort().join('\0')
+  if (plan.applied === current.applied && plan.changed.length === 0 && replaced(plan.shared) === replaced(current.shared)) return
   store.commit('applyProfileSettings', plan)
   for (const settingId of plan.changed) {
     applySettingSideEffects(store, settingId, settings[settingId])

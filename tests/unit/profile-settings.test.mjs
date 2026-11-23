@@ -245,3 +245,27 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   await second
   assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{ quickSettings: ['a', 'b'] }, { quickSettings: ['a', 'b'] }])
 })
+
+test('replacing the active profile\'s own settings with others of the same value tracks the new shared values', () => {
+  const { applyActiveProfileSettings } = vm.runInNewContext(`${between('function applyActiveProfileSettings(', '/**\n * Runs what a setting does')}
+({ applyActiveProfileSettings })`, {
+    ...profileSettings,
+    canHaveOwnSettings: () => true,
+    planProfileSettings: (settings, target) => planProfileSettingsOf(settings, target, () => true),
+  })
+  const settings = { hideComments: false, hideLiveChat: false, profileSettingsState: { applied: null, shared: {}, overrides: { car: { hideComments: false } } } }
+  const store = {
+    state: { settings, profiles: { activeProfile: 'car', profilesLoaded: true } },
+    commit(type, { applied, shared, values }) {
+      assert.equal(type, 'applyProfileSettings')
+      Object.assign(settings.profileSettingsState, { applied, shared })
+      Object.assign(settings, values)
+    },
+  }
+  applyActiveProfileSettings(store)
+  assert.deepEqual(Object.keys(settings.profileSettingsState.shared), ['hideComments'])
+  // Sync replaces them with another setting that already shows its value.
+  settings.profileSettingsState.overrides.car = { hideLiveChat: false }
+  applyActiveProfileSettings(store)
+  assert.deepEqual(Object.keys(settings.profileSettingsState.shared), ['hideLiveChat'])
+})
