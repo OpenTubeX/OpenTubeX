@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Gweredekaat an notennoù gant merk-amzer"
       Obsidian Vault: Kell Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Daou-stokañ gant daou viz evit tremen ar chabistroù"
+    Player Controls:
+      Audio: Son
+      Video: Video
+      Seek Bar and Overlay: Barrenn glask ha gwiskad
+      Casting: Skignañ
+      Volume Boost Description: Kreñvaat a ra son ar videoioù sioul
+      Mono Audio Description: Seniñ a ra an div ganol son e pep skouarn
+      Music Mode Description: Lenn a ra da 1× ha loc’hañ a ra ar videoioù adalek ar penn-kentañ
+      Skip Silence Description: Lammat a ra dreist al lodennoù sioul
+      On by Default: Gweredekaet dre ziouer
+      On by Default Description: Evit an ivinelloù nevez
+      Lights Off Description: Teñvalaat a ra ar bajenn tro-dro d’ar video
+      Mirror Video Description: Treiñ a ra ar video a-gleiz da zehou
+      Rotate Video Description: Treiñ a ra ar videoioù enrollet a-gostez pe war o fenn
+      Seek Bar Filmstrip: Stribed skeudennoù ar varrenn glask
+      Seek Bar Filmstrip Description: Diskouez a ra skeudennoù tro-dro d’ar bouton pa riklit anezhañ
+      Center Play Button: Bouton lenn e-kreiz
+      Center Play Button Description: Diskouez a ra boutonoù lenn bras war ar video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast ha skinweleoù gant Google Cast enframmet
+      FCast: FCast
+      FCast Description: Arloadoù resever FCast war ho rouedad
+      DLNA: DLNA
+      DLNA Description: Skinweleoù speredek ha lennerioù media war ho rouedad
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1914,7 +1938,6 @@ Video:
     Precise seeking, drag down to exit: "Klask resis · Tennit war-draoñ evit kuitaat"
     Cast: "Skignañ"
     Music Mode: "Mod sonerezh"
-    Music Mode Description: "Lennit ar videoioù gant un tizh 1× ha krogit ar videoioù nevez adalek an deroù en ivinell-mañ. Ho arventennoù lenn dre ziouer enrollet a chom digemm."
     DLNA:
       Cast: "Skignañ war un trevnad DLNA"
       Stop: "Paouez da skignañ"
@@ -2456,13 +2479,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: "Pa vez gweredekaet ha disheñvel an tizh lenn diouzh 1x, diskouez a ra al lenner mareoù reizhet diouzh an tizh lenn goude ar mare reizh."
     Use YouTube-style Shorts: "Diskouez ar videoioù berr (Shorts) en ur gael a-serzh war pajennoù ar c'houmanantoù hag ar chadennoù hag implijout al lenner videoioù berr doare YouTube."
     Loop Shorts: "Pa vez gweredekaet e adkrog ar videoioù berr (Shorts) ent emgefreek. Pa vez diweredekaet e paouezont en dibenn hag e tiskouezont ur bouton adlenn."
-    Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
-    Show Mirror Video Toggle: "Diskouez un afell enaouiñ pe lazhañ e lañser arventennoù al lenner a dro ar video a-blaen, evit heuliañ aesoc'h ar c'hentelioù dañs, sport ha binvioù-seniñ."
-    Show Rotate Video Menu: "Ouzhpennañ a ra Treiñ ar video da lañser arventennoù al lenner, evit treiñ ar videoioù enrollet a-gostez pe war o fenn."
-    Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
-    Show Seek Bar Filmstrip: "Riklañ bouton ar varrenn glask a ziskouez ur stribed skeudennoù tro-dro d'al lec'h ma tizhot, ha tennañ war-laez warnañ a glask resis. Pa vez diweredekaet, riklañ a ziskouez ur skeudennig hepken, evel pa dremenit a-us dezhi."
     Voice-over Translation: "Kas naoudi ar video, e badelezh hag ar yezh diuzet da wazerezh troidigezh ar vouezh dieub Yandex pa c'houlennit un droidigezh. Diweredekaet eo dre ziouer."
     Hold to Speed Up: Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit liesaat an tizh lenn bremanel gant an talvoud dibabet evit ur pennad.
     Ambient Mode: "Meskañ livioù ar video gant an takad tro-dro d'al lenner."

@@ -254,3 +254,36 @@
     justify-self: start;
   }
 }
+
+/* Player control groups start where the switch tracks below them start,
+   also when the stacked columns center their switches. */
+.controlGroupTitle {
+  align-self: stretch;
+  margin-block: 16px 4px;
+  text-align: start;
+  padding-inline: calc(6px + var(--settings-marker-gutter, 0px));
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Side by side, both columns start with a group. Stacked, the second
+   column's first group follows the first column's last switch. */
+.switchColumn:first-child > .controlGroupTitle:first-child {
+  margin-block-start: 0;
+}
+
+@container settings-content (width > 680px) {
+  .controlGroupTitle:first-child {
+    margin-block-start: 0;
+  }
+}
+
+/* A setting that only applies while the one above it is on starts where
+   that one's label starts. */
+.switchColumn > .nestedSwitch {
+  --nested-switch-indent: calc(var(--switch-track-width) + 12px);
+
+  margin-inline-start: var(--nested-switch-indent);
+  max-inline-size: calc(100% - var(--nested-switch-indent));
+}

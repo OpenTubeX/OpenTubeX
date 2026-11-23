@@ -1087,6 +1087,30 @@ Settings:
       Enable: "تفعيل ملاحظات الطوابع الزمنية"
       Obsidian Vault: خزنة Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "انقر مرتين بإصبعين لتخطي الفصول"
+    Player Controls:
+      Audio: الصوت
+      Video: الفيديو
+      Seek Bar and Overlay: شريط التقدم والتراكب
+      Casting: البث
+      Volume Boost Description: يرفع صوت مقاطع الفيديو الهادئة
+      Mono Audio Description: يشغّل قناتي الصوت في كل أذن
+      Music Mode Description: يشغّل بسرعة 1× ويبدأ مقاطع الفيديو من البداية
+      Skip Silence Description: يتخطى الأجزاء الصامتة
+      On by Default: مفعّل افتراضيًا
+      On by Default Description: ينطبق على علامات التبويب الجديدة
+      Lights Off Description: يعتّم الصفحة حول الفيديو
+      Mirror Video Description: يقلب الفيديو أفقيًا
+      Rotate Video Description: يدير مقاطع الفيديو المسجّلة بشكل جانبي أو مقلوب
+      Seek Bar Filmstrip: شريط إطارات شريط التقدم
+      Seek Bar Filmstrip Description: يعرض الإطارات حول المقبض أثناء سحبه
+      Center Play Button: زر التشغيل في المنتصف
+      Center Play Button Description: يعرض أزرار تشغيل كبيرة فوق الفيديو
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast وأجهزة التلفاز المزوّدة بـ Google Cast
+      FCast: FCast
+      FCast Description: تطبيقات استقبال FCast على شبكتك
+      DLNA: DLNA
+      DLNA Description: أجهزة التلفاز الذكية ومشغلات الوسائط على شبكتك
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1950,7 +1974,6 @@ Video:
     Precise seeking, drag down to exit: "التنقل الدقيق · اسحب لأسفل للخروج"
     Cast: "بث"
     Music Mode: "وضع الموسيقى"
-    Music Mode Description: "شغّل الفيديوهات بسرعة 1× وابدأ الفيديوهات الجديدة من البداية في علامة التبويب هذه. تبقى إعدادات التشغيل الافتراضية المحفوظة دون تغيير."
     DLNA:
       Cast: "البث إلى جهاز DLNA"
       Stop: "إيقاف البث"
@@ -2487,13 +2510,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: عند التمكين وتختلف سرعة التشغيل عن 1x، يعرض المشغل الطوابع الزمنية المعدلة حسب معدل التشغيل بين قوسين بعد عرض الطابع الزمني العادي.
     Use YouTube-style Shorts: يعرض فيديوهات Shorts في شبكة عمودية على صفحات الاشتراك والقناة ويستخدم مشغّل Shorts على غرار YouTube.
     Loop Shorts: عند التفعيل، تتم إعادة تشغيل Shorts تلقائيًا. عند إيقاف ميزة Shorts، تتوقف عند النهاية وتعرض زر إعادة التشغيل.
-    Show Skip Silence Toggle: يعرض مفتاح تشغيل/إيقاف لتخطي الصمت في قائمة إعدادات المشغل.
-    Show Mirror Video Toggle: "يعرض مفتاح تشغيل/إيقاف في قائمة إعدادات المشغل يعكس الفيديو أفقيًا، لتسهيل متابعة دروس الرقص والتمارين الرياضية والعزف على الآلات."
-    Show Rotate Video Menu: "يضيف «تدوير الفيديو» إلى قائمة إعدادات المشغل، لتدوير مقاطع الفيديو التي سُجّلت بشكل جانبي أو مقلوب."
-    Enable Skip Silence by Default: تمكن الصمت تخطي علامات التبويب الجديدة. ولا يؤثر تغييره في علامة تبويب واحدة على علامات التبويب الأخرى.
     Enable Video Zoom: يعرض عنصر التحكم في التكبير/التصغير في قائمة إعدادات المشغل ويمكّن اختصارات لوحة المفاتيح وعناصر التحكم في التحريك.
     Enable Seek History: يتذكر المواضع التي انتقلت منها في كل فيديو حتى إغلاق التطبيق. يعرض قائمة سجل التنقل في قائمة إعدادات المشغل ويفعّل اختصارات لوحة المفاتيح الخاصة بها.
-    Show Seek Bar Filmstrip: "يؤدي سحب مقبض شريط التقدم إلى إظهار شريط من الإطارات حول الموضع الذي ستنتقل إليه، ويتيح السحب لأعلى فوقه التنقل بدقة. عند التعطيل، يُظهر السحب صورة مصغرة واحدة كما عند التمرير فوقه."
     Voice-over Translation: يرسل معرف الفيديو ومدته واللغة المحددة إلى خدمة الترجمة الصوتية غير الرسمية لـ Yandex عندما تطلب ترجمة. معطل افتراضيا.
     Hold to Speed Up: اضغط باستمرار على مفتاح المسافة أو زر الماوس الأيسر فوق المشغل لضرب سرعة التشغيل الحالية مؤقتًا في القيمة المحددة.
     Ambient Mode: يمزج ألوان الفيديو في المنطقة المحيطة بالمشغل.

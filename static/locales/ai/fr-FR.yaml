@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Activer les notes horodatées"
       Obsidian Vault: Coffre Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Toucher deux fois avec deux doigts pour changer de chapitre"
+    Player Controls:
+      Audio: Audio
+      Video: Vidéo
+      Seek Bar and Overlay: Barre de progression et superposition
+      Casting: Diffusion
+      Volume Boost Description: Rend les vidéos trop basses plus fortes
+      Mono Audio Description: Diffuse les deux canaux audio dans chaque oreille
+      Music Mode Description: Lit à 1× et démarre les vidéos depuis le début
+      Skip Silence Description: Saute les passages silencieux
+      On by Default: Activé par défaut
+      On by Default Description: S’applique aux nouveaux onglets
+      Lights Off Description: Assombrit la page autour de la vidéo
+      Mirror Video Description: Retourne la vidéo horizontalement
+      Rotate Video Description: Pivote les vidéos filmées de côté ou à l’envers
+      Seek Bar Filmstrip: Bande d’images de la barre de progression
+      Seek Bar Filmstrip Description: Affiche des images autour du curseur pendant que vous le faites glisser
+      Center Play Button: Bouton de lecture central
+      Center Play Button Description: Affiche de grands boutons de lecture sur la vidéo
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast et téléviseurs avec Google Cast intégré
+      FCast: FCast
+      FCast Description: Applications réceptrices FCast sur votre réseau
+      DLNA: DLNA
+      DLNA Description: Téléviseurs connectés et lecteurs multimédias sur votre réseau
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -1902,7 +1926,6 @@ Video:
     Precise seeking, drag down to exit: "Recherche précise · Faites glisser vers le bas pour quitter"
     Cast: "Diffuser"
     Music Mode: "Mode musique"
-    Music Mode Description: "Lisez les vidéos à 1× et démarrez les nouvelles vidéos depuis le début dans cet onglet. Vos réglages de lecture par défaut enregistrés restent inchangés."
     DLNA:
       Cast: "Diffuser sur un appareil DLNA"
       Stop: "Arrêter la diffusion"
@@ -2444,13 +2467,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Lorsque cette option est activée et que la vitesse de lecture diffère de 1x, le lecteur affiche entre parenthèses des horodatages ajustés à cette vitesse après les horodatages normaux.
     Use YouTube-style Shorts: Affiche les Shorts dans une grille verticale sur les pages d’abonnements et de chaînes, et utilise le lecteur de Shorts de style YouTube.
     Loop Shorts: Lorsque cette option est activée, les Shorts redémarrent automatiquement. Lorsqu’elle est désactivée, ils s’arrêtent à la fin et affichent un bouton de relecture.
-    Show Skip Silence Toggle: Affiche un bouton pour activer ou désactiver les silences ignorés dans le menu des paramètres du lecteur.
-    Show Mirror Video Toggle: "Affiche dans le menu des paramètres du lecteur un bouton qui retourne la vidéo horizontalement, pour suivre plus facilement les tutoriels de danse, de sport et d'instruments."
-    Show Rotate Video Menu: "Ajoute Rotation de la vidéo au menu des paramètres du lecteur, pour faire pivoter les vidéos filmées de côté ou à l’envers."
-    Enable Skip Silence by Default: Active les silences ignorés pour les nouveaux onglets. Toute modification dans un onglet reste sans effet sur les autres.
     Enable Video Zoom: Affiche la commande Zoom dans le menu des paramètres du lecteur et active ses raccourcis clavier ainsi que ses commandes de déplacement.
     Enable Seek History: Mémorise les endroits d'où vous avez sauté dans chaque vidéo jusqu'à la fermeture de l'application. Affiche la liste de l'historique des sauts dans le menu des paramètres du lecteur et active ses raccourcis clavier.
-    Show Seek Bar Filmstrip: "Faire glisser le curseur de la barre de progression affiche une bande d’images autour de l’endroit où vous arriverez, et glisser vers le haut dessus permet une recherche précise. Lorsque cette option est désactivée, le glissement affiche une seule miniature, comme lors du survol."
     Voice-over Translation: Envoie l’identifiant de la vidéo, sa durée et la langue sélectionnée au service non officiel de traduction vocale Yandex lorsque vous demandez une traduction. Cette option est désactivée par défaut.
     Hold to Speed Up: Maintenez la barre d’espace ou le bouton gauche de la souris sur le lecteur pour multiplier temporairement la vitesse de lecture actuelle par la valeur choisie.
     Ambient Mode: Diffuse les couleurs de la vidéo dans la zone qui entoure le lecteur.

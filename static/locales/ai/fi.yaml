@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Ota aikaleimamuistiinpanot käyttöön"
       Obsidian Vault: Obsidian-holvi
     Double-Tap With Two Fingers to Skip Chapters: "Siirry lukuihin kaksoisnapauttamalla kahdella sormella"
+    Player Controls:
+      Audio: Ääni
+      Video: Video
+      Seek Bar and Overlay: Hakupalkki ja peittokuva
+      Casting: Suoratoisto
+      Volume Boost Description: Voimistaa hiljaisten videoiden ääntä
+      Mono Audio Description: Toistaa molemmat äänikanavat kumpaankin korvaan
+      Music Mode Description: Toistaa nopeudella 1× ja aloittaa videot alusta
+      Skip Silence Description: Hyppää hiljaisten kohtien yli
+      On by Default: Oletuksena päällä
+      On by Default Description: Koskee uusia välilehtiä
+      Lights Off Description: Himmentää sivun videon ympäriltä
+      Mirror Video Description: Kääntää videon vaakasuunnassa
+      Rotate Video Description: Kääntää sivuttain tai ylösalaisin kuvatut videot
+      Seek Bar Filmstrip: Hakupalkin filminauha
+      Seek Bar Filmstrip Description: Näyttää ruutuja liukusäätimen ympäriltä vetäessäsi sitä
+      Center Play Button: Keskitetty toistopainike
+      Center Play Button Description: Näyttää suuret toistopainikkeet videon päällä
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast ja televisiot, joissa on sisäänrakennettu Google Cast
+      FCast: FCast
+      FCast Description: FCast-vastaanotinsovellukset verkossasi
+      DLNA: DLNA
+      DLNA Description: Älytelevisiot ja mediasoittimet verkossasi
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1911,7 +1935,6 @@ Video:
     Precise seeking, drag down to exit: "Tarkka siirtyminen · Poistu vetämällä alas"
     Cast: "Suoratoista"
     Music Mode: "Musiikkitila"
-    Music Mode Description: "Toista videot nopeudella 1× ja aloita uudet videot alusta tässä välilehdessä. Tallennetut toiston oletusasetukset pysyvät ennallaan."
     DLNA:
       Cast: "Lähetä DLNA-laitteeseen"
       Stop: "Lopeta lähetys"
@@ -2454,13 +2477,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Kun asetus on käytössä ja toistonopeus poikkeaa nopeudesta 1x, soitin näyttää tavallisen aikaleiman jälkeen sulkeissa toistonopeuteen suhteutetun aikaleiman.
     Use YouTube-style Shorts: Näyttää Shorts-videot pystysuuntaisessa ruudukossa tilausten ja kanavien sivuilla sekä käyttää YouTube-tyylistä Shorts-soitinta.
     Loop Shorts: Kun asetus on käytössä, Shorts-videot alkavat automaattisesti alusta. Muussa tapauksessa ne pysähtyvät lopussa ja näyttävät uudelleentoistopainikkeen.
-    Show Skip Silence Toggle: Näyttää hiljaisuuden ohittamisen käyttöönottokytkimen soittimen asetusvalikossa.
-    Show Mirror Video Toggle: "Näyttää soittimen asetusvalikossa kytkimen, joka peilaa videon vaakasuunnassa, jotta tanssi-, treeni- ja soitinopetusten seuraaminen on helpompaa."
-    Show Rotate Video Menu: "Lisää soittimen asetusvalikkoon Kierrä videota -kohdan, jolla voit kiertää sivuttain tai ylösalaisin kuvattuja videoita."
-    Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
     Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
     Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.
-    Show Seek Bar Filmstrip: "Hakupalkin liukusäätimen vetäminen näyttää kuvanauhan kohdasta, johon olet siirtymässä, ja vetämällä ylös sen päälle voit siirtyä tarkasti. Kun asetus on pois käytöstä, vetäminen näyttää yhden pikkukuvan kuten osoittimen viennissä palkin päälle."
     Voice-over Translation: Lähettää videon tunnuksen, keston ja valitun kielen epäviralliseen Yandexin selostuskäännöspalveluun, kun pyydät käännöstä. Oletusarvoisesti pois käytöstä.
     Hold to Speed Up: Voit kertoa nykyisen toistonopeuden tilapäisesti valitulla arvolla pitämällä välilyöntiä tai hiiren ykköspainiketta painettuna soittimen päällä.
     Ambient Mode: Sulauttaa videon värit soitinta ympäröivään alueeseen.

@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Gaitu denbora-zigiludun oharrak"
       Obsidian Vault: Obsidian biltegia
     Double-Tap With Two Fingers to Skip Chapters: "Sakatu birritan bi hatzekin kapituluak saltatzeko"
+    Player Controls:
+      Audio: Audioa
+      Video: Bideoa
+      Seek Bar and Overlay: Bilaketa-barra eta gainjartzea
+      Casting: Igorpena
+      Volume Boost Description: Bideo isilen bolumena igotzen du
+      Mono Audio Description: Bi audio-kanalak belarri bakoitzean erreproduzitzen ditu
+      Music Mode Description: 1×-en erreproduzitzen du eta bideoak hasieratik hasten ditu
+      Skip Silence Description: Isiluneak saltatzen ditu
+      On by Default: Aktibatuta lehenespenez
+      On by Default Description: Fitxa berriei aplikatzen zaie
+      Lights Off Description: Bideoaren inguruko orria iluntzen du
+      Mirror Video Description: Bideoa horizontalki iraultzen du
+      Rotate Video Description: Alboz edo buruz behera grabatutako bideoak biratzen ditu
+      Seek Bar Filmstrip: Bilaketa-barraren fotograma-zerrenda
+      Seek Bar Filmstrip Description: Kontrolaren inguruko fotogramak erakusten ditu arrastatzean
+      Center Play Button: Erdiko erreproduzitzeko botoia
+      Center Play Button Description: Erreprodukzio-botoi handiak erakusten ditu bideoaren gainean
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast eta Google Cast integratua duten telebistak
+      FCast: FCast
+      FCast Description: Zure sareko FCast hartzaile-aplikazioak
+      DLNA: DLNA
+      DLNA Description: Zure sareko telebista adimendunak eta multimedia-erreproduzitzaileak
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1914,7 +1938,6 @@ Video:
     Precise seeking, drag down to exit: "Bilaketa zehatza · Arrastatu behera irteteko"
     Cast: "Igorri"
     Music Mode: "Musika modua"
-    Music Mode Description: "Erreproduzitu bideoak 1× abiaduran eta hasi bideo berriak hasieratik fitxa honetan. Gordetako erreprodukzio-ezarpen lehenetsiak ez dira aldatzen."
     DLNA:
       Cast: "Igorri DLNA gailu batera"
       Stop: "Gelditu igorpena"
@@ -2456,13 +2479,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Gaituta dagoenean eta erreprodukzio-abiadura 1x ez denean, erreproduzigailuak abiadurara doitutako denbora-markak erakusten ditu parentesi artean denbora-marka arruntaren ondoren.
     Use YouTube-style Shorts: Shorts bideoak sareta bertikalean erakusten ditu harpidetzen eta kanalen orrietan, eta YouTube estiloko Shorts erreproduzigailua erabiltzen du.
     Loop Shorts: Gaituta dagoenean, Shorts bideoak automatikoki hasten dira berriro. Desgaituta dagoenean, amaieran gelditzen dira eta berriro erreproduzitzeko botoia erakusten dute.
-    Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
-    Show Mirror Video Toggle: "Bideoa horizontalki ispilatzen duen etengailua erakusten du erreproduzigailuaren ezarpen-menuan, dantza, ariketa fisiko eta musika-tresnen tutorialak errazago jarraitzeko."
-    Show Rotate Video Menu: "Biratu bideoa gehitzen dio erreproduzigailuaren ezarpen-menuari, alboz edo buruz behera grabatutako bideoak biratzeko."
-    Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
-    Show Seek Bar Filmstrip: "Bilaketa-barraren kontrola arrastatzean, iritsiko zaren lekuaren inguruko fotograma-zerrenda bat erakusten da, eta haren gainera gora arrastatuz gero zehatz bilatzen da. Desgaituta dagoenean, arrastatzean irudi txiki bakarra erakusten da, gainetik pasatzean bezala."
     Voice-over Translation: Itzulpena eskatzean bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio Yandexen ahots bidezko itzulpen-zerbitzu ez-ofizialari. Modu lehenetsian desgaituta dago.
     Hold to Speed Up: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako hautatutako balioarekin biderkatzeko.
     Ambient Mode: Bideoaren koloreak erreproduzigailuaren inguruan hedatzen ditu.

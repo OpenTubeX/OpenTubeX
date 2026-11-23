@@ -2,7 +2,7 @@
 category: feature
 ---
 
-The player menu can now mirror the video, which makes dance, workout, and instrument tutorials easier to follow. Turn on Show Mirror Video Toggle in the Player Settings to add it.
+The player menu can now mirror the video, which makes dance, workout, and instrument tutorials easier to follow. Turn on Mirror Video under Player Controls in the Player Settings to add it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/20261122T110514Z-mirror-video-dark-dark-3c9557fc05.png">

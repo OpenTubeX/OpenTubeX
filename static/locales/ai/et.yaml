@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Luba ajatempliga märkmed"
       Obsidian Vault: Obsidiani hoidla
     Double-Tap With Two Fingers to Skip Chapters: "Peatükkide vahetamiseks topeltpuuduta kahe sõrmega"
+    Player Controls:
+      Audio: Heli
+      Video: Video
+      Seek Bar and Overlay: Kerimisriba ja ülekate
+      Casting: Edastamine
+      Volume Boost Description: Muudab vaiksed videod valjemaks
+      Mono Audio Description: Esitab mõlemat helikanalit kummaski kõrvas
+      Music Mode Description: Esitab kiirusel 1× ja alustab videoid algusest
+      Skip Silence Description: Hüppab vaiksetest kohtadest üle
+      On by Default: Vaikimisi sees
+      On by Default Description: Kehtib uutele vahekaartidele
+      Lights Off Description: Tumendab lehte video ümber
+      Mirror Video Description: Peegeldab videot horisontaalselt
+      Rotate Video Description: Pöörab külili või tagurpidi salvestatud videoid
+      Seek Bar Filmstrip: Kerimisriba kaadririba
+      Seek Bar Filmstrip Description: Näitab nupu lohistamisel selle ümber kaadreid
+      Center Play Button: Keskmine esitusnupp
+      Center Play Button Description: Näitab video peal suuri esitusnuppe
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast ja sisseehitatud Google Castiga telerid
+      FCast: FCast
+      FCast Description: FCasti vastuvõtjarakendused sinu võrgus
+      DLNA: DLNA
+      DLNA Description: Nutitelerid ja meediamängijad sinu võrgus
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1905,7 +1929,6 @@ Video:
     Precise seeking, drag down to exit: "Täpne kerimine · Väljumiseks lohista alla"
     Cast: "Edasta"
     Music Mode: "Muusikarežiim"
-    Music Mode Description: "Esita videoid kiirusel 1× ja alusta sellel vahelehel uusi videoid algusest. Sinu salvestatud taasesituse vaikeseaded jäävad muutmata."
     DLNA:
       Cast: "Edasta DLNA-seadmesse"
       Stop: "Lõpeta edastamine"
@@ -2448,13 +2471,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Kui see on lubatud ja esituskiirus erineb 1x kiirusest, kuvab pleier tavapärase ajamärgi järel sulgudes esituskiirusele kohandatud ajamärgi.
     Use YouTube-style Shorts: Kuvab Shortsid tellimuste ja kanalite lehtedel püstpaigutusega ruudustikus ning kasutab YouTube'i laadis Shortsi pleierit.
     Loop Shorts: Kui see on lubatud, käivituvad Shortsid automaatselt uuesti. Kui see on välja lülitatud, peatuvad Shortsid lõpus ja kuvatakse uuesti esitamise nupp.
-    Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
-    Show Mirror Video Toggle: "Kuvab pleieri seadete menüüs lüliti, mis peegeldab videot horisontaalselt, et tantsu-, treening- ja pillimänguõpetustega oleks lihtsam kaasa teha."
-    Show Rotate Video Menu: "Lisab mängija seadete menüüsse valiku Pööra videot, et pöörata külili või tagurpidi salvestatud videoid."
-    Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
-    Show Seek Bar Filmstrip: "Kerimisriba nupu lohistamine näitab kaadririba selle koha ümber, kuhu jõuad, ja selle peale üles tõmmates saad täpselt kerida. Kui see on keelatud, näitab lohistamine üht pisipilti nagu kursoriga üle liikudes."
     Voice-over Translation: Tõlkepäringu tegemisel saadab video ID, kestuse ja valitud keele mitteametlikule Yandexi pealelugemise tõlketeenusele. Vaikimisi välja lülitatud.
     Hold to Speed Up: Praeguse esituskiiruse ajutiseks korrutamiseks valitud väärtusega hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
     Ambient Mode: Sulandab video värvid pleieri ümbrusega.

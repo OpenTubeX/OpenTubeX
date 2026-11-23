@@ -208,21 +208,10 @@ test.describe('music mode visibility setting', () => {
     await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
     await page.locator('.profileTrigger').click()
     const playback = await goToSettingsSection(page, 'playback')
-    const visibility = playback.getByRole('checkbox', { name: /^Show Music Mode Toggle/ })
+    const visibility = playback.locator('[data-setting-key="showMusicModeToggle"]').getByRole('checkbox')
+    await expect(visibility).toHaveAccessibleName('Music Mode')
     await expect(visibility).not.toBeChecked()
-    const help = visibility.locator('..').locator('.selectTooltip button')
-    await help.focus()
-    const explanation = page.getByRole('tooltip').filter({ hasText: 'Play videos at 1×' })
-    await expect(explanation).toBeVisible()
-    await expect(explanation).toContainText('Your saved playback defaults stay unchanged.')
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveClass(/dark/)
-    await testInfo.attach('music-mode-explanation-dark', {
-      body: await explanation.screenshot(),
-      contentType: 'image/png',
-    })
-    await visibility.focus()
-    await expect(explanation).toBeHidden()
+    await expect(visibility).toHaveAccessibleDescription('Plays at 1× and starts videos from the beginning')
     await testInfo.attach('music-mode-visibility-setting', {
       body: await visibility.locator('..').screenshot(),
       contentType: 'image/png',

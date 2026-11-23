@@ -1076,6 +1076,30 @@ Settings:
       Enable: "启用时间戳笔记"
       Obsidian Vault: Obsidian 仓库
     Double-Tap With Two Fingers to Skip Chapters: "双指双击以跳转章节"
+    Player Controls:
+      Audio: 音频
+      Video: 视频
+      Seek Bar and Overlay: 进度条与叠加层
+      Casting: 投屏
+      Volume Boost Description: 让音量小的视频更响亮
+      Mono Audio Description: 在每只耳朵中播放两个声道
+      Music Mode Description: 以 1× 播放并从头开始播放视频
+      Skip Silence Description: 跳过无声部分
+      On by Default: 默认开启
+      On by Default Description: 适用于新标签页
+      Lights Off Description: 调暗视频周围的页面
+      Mirror Video Description: 水平翻转视频
+      Rotate Video Description: 旋转侧拍或倒置录制的视频
+      Seek Bar Filmstrip: 进度条帧画面条
+      Seek Bar Filmstrip Description: 拖动滑块时显示其附近的帧画面
+      Center Play Button: 居中播放按钮
+      Center Play Button Description: 在视频上方显示大号播放按钮
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast 和内置 Google Cast 的电视
+      FCast: FCast
+      FCast Description: 网络中的 FCast 接收器应用
+      DLNA: DLNA
+      DLNA Description: 网络中的智能电视和媒体播放器
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1903,7 +1927,6 @@ Video:
     Precise seeking, drag down to exit: "精确定位 · 向下拖动以退出"
     Cast: "投屏"
     Music Mode: "音乐模式"
-    Music Mode Description: "在此标签页中以1倍速播放视频，并从头开始播放新视频。已保存的默认播放设置保持不变。"
     DLNA:
       Cast: "投放到 DLNA 设备"
       Stop: "停止投放"
@@ -2445,13 +2468,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: 启用后，如果播放速度不是 1x，播放器会在正常时间戳后用括号显示按播放速度调整后的时间戳。
     Use YouTube-style Shorts: 在订阅和频道页面上以纵向网格显示 Shorts，并使用 YouTube 风格的 Shorts 播放器。
     Loop Shorts: 启用后，Shorts 会自动重新播放。禁用后，Shorts 会在播放结束时停止，并显示重播按钮。
-    Show Skip Silence Toggle: 在播放器的设置菜单中显示跳过静音的开关。
-    Show Mirror Video Toggle: "在播放器的设置菜单中显示一个开关，可将视频水平翻转，方便跟着舞蹈、健身和乐器教程练习。"
-    Show Rotate Video Menu: "在播放器的设置菜单中添加“旋转视频”，用于旋转侧拍或倒拍的视频。"
-    Enable Skip Silence by Default: 为新标签页启用跳过静音。在一个标签页中更改此设置不会影响其他标签页。
     Enable Video Zoom: 在播放器的设置菜单中显示缩放控件，并启用其键盘快捷键和平移控件。
     Enable Seek History: 在应用关闭前记住你在每个视频中从哪里跳转。在播放器设置菜单中显示跳转历史列表，并启用其键盘快捷键。
-    Show Seek Bar Filmstrip: "拖动进度条滑块时，会显示目标位置附近的一排帧画面，向上拖到其上即可精确定位。停用后，拖动时只显示一张缩略图，与悬停时相同。"
     Voice-over Translation: 请求翻译时，将视频 ID、时长和所选语言发送到非官方 Yandex 配音翻译服务。默认禁用。
     Hold to Speed Up: 将鼠标指针置于播放器上并按住空格键或鼠标左键，可暂时将当前播放速度乘以所选倍数。
     Ambient Mode: 将视频色彩融合到播放器周围区域。

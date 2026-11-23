@@ -1091,6 +1091,30 @@ Settings:
       Enable: "הפעלת הערות עם חותמת זמן"
       Obsidian Vault: כספת Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "הקשה כפולה בשתי אצבעות לדילוג בין פרקים"
+    Player Controls:
+      Audio: שמע
+      Video: וידאו
+      Seek Bar and Overlay: סרגל התקדמות ושכבת־על
+      Casting: שידור
+      Volume Boost Description: מגביר סרטונים שקטים
+      Mono Audio Description: מנגן את שני ערוצי השמע בכל אוזן
+      Music Mode Description: מנגן במהירות 1× ומתחיל סרטונים מההתחלה
+      Skip Silence Description: מדלג על קטעים שקטים
+      On by Default: מופעל כברירת מחדל
+      On by Default Description: חל על כרטיסיות חדשות
+      Lights Off Description: מעמעם את הדף סביב הסרטון
+      Mirror Video Description: הופך את הסרטון אופקית
+      Rotate Video Description: מסובב סרטונים שצולמו על הצד או הפוכים
+      Seek Bar Filmstrip: רצועת פריימים בסרגל ההתקדמות
+      Seek Bar Filmstrip Description: מציג פריימים סביב הידית בזמן הגרירה
+      Center Play Button: כפתור ניגון במרכז
+      Center Play Button Description: מציג כפתורי ניגון גדולים מעל הסרטון
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast וטלוויזיות עם Google Cast מובנה
+      FCast: FCast
+      FCast Description: אפליקציות מקלט FCast ברשת שלך
+      DLNA: DLNA
+      DLNA Description: טלוויזיות חכמות ונגני מדיה ברשת שלך
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1956,7 +1980,6 @@ Video:
     Precise seeking, drag down to exit: "דילוג מדויק · יש למשוך למטה כדי לצאת"
     Cast: "שידור"
     Music Mode: "מצב מוזיקה"
-    Music Mode Description: "נגן סרטונים במהירות 1× והתחל סרטונים חדשים מההתחלה בלשונית זו. הגדרות ברירת המחדל השמורות להפעלה נשארות ללא שינוי."
     DLNA:
       Cast: "שידור למכשיר DLNA"
       Stop: "הפסקת השידור"
@@ -2504,13 +2527,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: כשהאפשרות מופעלת ומהירות ההפעלה שונה מ-1x, הנגן מציג בסוגריים חותמות זמן המותאמות למהירות ההפעלה, אחרי חותמת הזמן הרגילה.
     Use YouTube-style Shorts: הצגת Shorts ברשת אנכית בדפי המינויים והערוצים ושימוש בנגן Shorts בסגנון YouTube.
     Loop Shorts: כשהאפשרות מופעלת, סרטוני Shorts מתחילים מחדש אוטומטית. כשהיא מושבתת, הם נעצרים בסוף ומציגים כפתור להפעלה חוזרת.
-    Show Skip Silence Toggle: הצגת מתג להפעלה ולכיבוי של דילוג על שקט בתפריט ההגדרות של הנגן.
-    Show Mirror Video Toggle: "הצגת מתג בתפריט ההגדרות של הנגן שהופך את הסרטון אופקית, כדי שיהיה קל יותר לעקוב אחר מדריכי ריקוד, אימון וכלי נגינה."
-    Show Rotate Video Menu: "מוסיף את סיבוב הסרטון לתפריט ההגדרות של הנגן, כדי לסובב סרטונים שצולמו על הצד או הפוך."
-    Enable Skip Silence by Default: הפעלת דילוג על שקט בכרטיסיות חדשות. שינוי האפשרות בכרטיסייה אחת אינו משפיע על האחרות.
     Enable Video Zoom: הצגת פקד התקריב בתפריט ההגדרות של הנגן והפעלת קיצורי המקלדת ופקדי ההזזה שלו.
     Enable Seek History: זוכר מאיפה קפצת בכל סרטון עד לסגירת האפליקציה. מציג את רשימת היסטוריית הקפיצות בתפריט ההגדרות של הנגן ומפעיל את קיצורי המקלדת שלה.
-    Show Seek Bar Filmstrip: "גרירת הידית של סרגל ההתקדמות מציגה רצועת פריימים סביב המקום שאליו תגיעו, ומשיכה למעלה אל הרצועה מאפשרת דילוג מדויק. כשהאפשרות מושבתת, הגרירה מציגה תמונה ממוזערת אחת, כמו בריחוף."
     Voice-over Translation: שליחת מזהה הסרטון, משך הסרטון והשפה שנבחרה לשירות התרגום הקולי הלא רשמי של Yandex בעת בקשת תרגום. האפשרות מושבתת כברירת מחדל.
     Hold to Speed Up: יש להחזיק את מקש הרווח או את לחצן העכבר השמאלי מעל הנגן כדי להכפיל זמנית את מהירות ההפעלה הנוכחית בערך שנבחר.
     Ambient Mode: מיזוג צבעי הסרטון באזור שסביב הנגן.

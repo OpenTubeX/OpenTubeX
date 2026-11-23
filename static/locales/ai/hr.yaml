@@ -1081,6 +1081,30 @@ Settings:
       Enable: "Omogući bilješke s vremenskim oznakama"
       Obsidian Vault: Obsidian trezor
     Double-Tap With Two Fingers to Skip Chapters: "Dvostruki dodir s dva prsta za preskakanje poglavlja"
+    Player Controls:
+      Audio: Zvuk
+      Video: Videozapis
+      Seek Bar and Overlay: Traka za premotavanje i preklapanje
+      Casting: Emitiranje
+      Volume Boost Description: Pojačava tihe videozapise
+      Mono Audio Description: Reproducira oba audiokanala u svakom uhu
+      Music Mode Description: Reproducira brzinom 1× i pokreće videozapise od početka
+      Skip Silence Description: Preskače tihe dijelove
+      On by Default: Uključeno prema zadanim postavkama
+      On by Default Description: Primjenjuje se na nove kartice
+      Lights Off Description: Zatamnjuje stranicu oko videozapisa
+      Mirror Video Description: Zrcali videozapis vodoravno
+      Rotate Video Description: Okreće videozapise snimljene bočno ili naopako
+      Seek Bar Filmstrip: Filmska traka trake za premotavanje
+      Seek Bar Filmstrip Description: Prikazuje sličice oko klizača dok ga povlačite
+      Center Play Button: Središnji gumb za reprodukciju
+      Center Play Button Description: Prikazuje velike gumbe za reprodukciju preko videozapisa
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast i televizori s ugrađenim Google Castom
+      FCast: FCast
+      FCast Description: Aplikacije prijamnika FCast na vašoj mreži
+      DLNA: DLNA
+      DLNA Description: Pametni televizori i medijski reproduktori na vašoj mreži
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1935,7 +1959,6 @@ Video:
     Precise seeking, drag down to exit: "Precizno premotavanje · Povucite prema dolje za izlaz"
     Cast: "Emitiraj"
     Music Mode: "Glazbeni način"
-    Music Mode Description: "Reproducirajte videozapise brzinom 1× i pokrenite nove videozapise od početka u ovoj kartici. Vaše spremljene zadane postavke reprodukcije ostaju nepromijenjene."
     DLNA:
       Cast: "Prijenos na DLNA uređaj"
       Stop: "Zaustavi prijenos"
@@ -2483,13 +2506,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Kada je omogućeno i brzina reprodukcije nije 1x, reproduktor iza uobičajenog prikaza vremena u zagradama prikazuje vremenske oznake prilagođene brzini reprodukcije.
     Use YouTube-style Shorts: Prikazuje Shorts videozapise u okomitoj mreži na stranicama pretplata i kanala te upotrebljava reproduktor za Shorts videozapise u stilu YouTubea.
     Loop Shorts: Kada je omogućeno, Shorts videozapisi automatski se ponovno pokreću. Kada je isključeno, zaustavljaju se na kraju i prikazuju gumb za ponovnu reprodukciju.
-    Show Skip Silence Toggle: Prikazuje prekidač za preskakanje tišine u izborniku postavki reproduktora.
-    Show Mirror Video Toggle: "Prikazuje prekidač u izborniku postavki reproduktora koji vodoravno zrcali videozapis kako biste lakše pratili upute za ples, vježbanje i sviranje instrumenata."
-    Show Rotate Video Menu: "Dodaje Zakreni videozapis u izbornik postavki playera kako biste zakrenuli videozapise snimljene bočno ili naopako."
-    Enable Skip Silence by Default: Omogućuje preskakanje tišine za nove kartice. Promjena na jednoj kartici ne utječe na ostale.
     Enable Video Zoom: Prikazuje kontrolu Zumiranje u izborniku postavki reproduktora te omogućuje njezine tipkovne prečace i kontrole pomicanja.
     Enable Seek History: Pamti odakle ste premotali u svakom videozapisu dok se aplikacija ne zatvori. Prikazuje popis povijesti premotavanja u izborniku postavki reproduktora i omogućuje njegove tipkovničke prečace.
-    Show Seek Bar Filmstrip: "Povlačenje klizača trake za premotavanje prikazuje traku sličica oko mjesta na koje ćete stići, a povlačenje prema gore na nju omogućuje precizno premotavanje. Kada je onemogućeno, povlačenje prikazuje jednu minijaturu, kao pri prelasku pokazivačem."
     Voice-over Translation: Pri zahtjevu za prijevod šalje ID videozapisa, trajanje i odabrani jezik neslužbenoj Yandexovoj usluzi glasovnog prijevoda. Prema zadanim je postavkama isključena.
     Hold to Speed Up: Držite razmaknicu ili lijevu tipku miša iznad reproduktora kako biste privremeno pomnožili trenutačnu brzinu reprodukcije odabranom vrijednošću.
     Ambient Mode: Stapa boje videozapisa s područjem oko reproduktora.

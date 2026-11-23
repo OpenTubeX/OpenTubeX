@@ -352,114 +352,147 @@
     </h4>
     <div class="switchColumnGrid">
       <div class="switchColumn">
+        <h5 class="controlGroupTitle">
+          {{ t('Settings.Player Settings.Player Controls.Audio') }}
+        </h5>
         <FtToggleSwitch
           v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Show Volume Boost Toggle')"
+          :label="t('Video.Player.Volume Boost.Volume Boost')"
+          :description="t('Settings.Player Settings.Player Controls.Volume Boost Description')"
+          :icon="['fas', 'volume-high']"
           :compact="true"
           :default-value="store.getters.getShowVolumeBoostToggle"
           setting-key="showVolumeBoostToggle"
           @change="store.dispatch('updateShowVolumeBoostToggle', $event)"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Music Mode Toggle')"
-          :compact="true"
-          :default-value="store.getters.getShowMusicModeToggle"
-          setting-key="showMusicModeToggle"
-          :tooltip="t('Video.Player.Music Mode Description')"
-          @change="store.dispatch('updateShowMusicModeToggle', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Seek Bar Filmstrip')"
-          :compact="true"
-          :default-value="store.getters.getShowSeekBarFilmstrip"
-          setting-key="showSeekBarFilmstrip"
-          :tooltip="t('Tooltips.Player Settings.Show Seek Bar Filmstrip')"
-          @change="store.dispatch('updateShowSeekBarFilmstrip', $event)"
-        />
-        <FtToggleSwitch
           v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
-          :compact="true"
-          :default-value="showSkipSilenceButton"
-          setting-key="showSkipSilenceButton"
-          :tooltip="t('Tooltips.Player Settings.Show Skip Silence Toggle')"
-          @change="updateShowSkipSilenceButton"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON || IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Enable DLNA Casting')"
-          :compact="true"
-          :default-value="showDlnaCastButton"
-          setting-key="showDlnaCastButton"
-          @change="store.dispatch('updateShowDlnaCastButton', $event)"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON || (IS_CAPACITOR && !IS_IOS)"
-          :label="t('Settings.Player Settings.Enable FCast')"
-          :compact="true"
-          :default-value="store.getters.getShowFcastButton"
-          setting-key="showFcastButton"
-          @change="store.dispatch('updateShowFcastButton', $event)"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Show Mono Audio Toggle')"
+          :label="t('Settings.Player Settings.Mono Audio')"
+          :description="t('Settings.Player Settings.Player Controls.Mono Audio Description')"
+          :icon="['fas', 'speaker']"
           :compact="true"
           :default-value="store.getters.getShowMonoAudioToggle"
           setting-key="showMonoAudioToggle"
           @change="store.dispatch('updateShowMonoAudioToggle', $event)"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Lights Off Toggle')"
+          :label="t('Video.Player.Music Mode')"
+          :description="t('Settings.Player Settings.Player Controls.Music Mode Description')"
+          :icon="['fas', 'headphones']"
+          :compact="true"
+          :default-value="store.getters.getShowMusicModeToggle"
+          setting-key="showMusicModeToggle"
+          @change="store.dispatch('updateShowMusicModeToggle', $event)"
+        />
+        <FtToggleSwitch
+          v-if="!IS_IOS"
+          :label="t('Settings.Player Settings.Skip Silence')"
+          :description="t('Settings.Player Settings.Player Controls.Skip Silence Description')"
+          :icon="['fas', 'step-forward']"
+          :compact="true"
+          :default-value="showSkipSilenceButton"
+          setting-key="showSkipSilenceButton"
+          @change="updateShowSkipSilenceButton"
+        />
+        <FtToggleSwitch
+          v-if="!IS_IOS"
+          class="nestedSwitch"
+          :label="t('Settings.Player Settings.Player Controls.On by Default')"
+          :description="t('Settings.Player Settings.Player Controls.On by Default Description')"
+          :compact="true"
+          :disabled="!showSkipSilenceButton"
+          :default-value="enableSkipSilenceByDefault"
+          setting-key="enableSkipSilenceByDefault"
+          @change="updateEnableSkipSilenceByDefault"
+        />
+        <h5 class="controlGroupTitle">
+          {{ t('Settings.Player Settings.Player Controls.Seek Bar and Overlay') }}
+        </h5>
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip')"
+          :description="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip Description')"
+          :icon="['fas', 'film']"
+          :compact="true"
+          :default-value="store.getters.getShowSeekBarFilmstrip"
+          setting-key="showSeekBarFilmstrip"
+          @change="store.dispatch('updateShowSeekBarFilmstrip', $event)"
+        />
+        <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Player Controls.Center Play Button')"
+          :description="t('Settings.Player Settings.Player Controls.Center Play Button Description')"
+          :icon="['fas', 'circle-play']"
+          :compact="true"
+          :default-value="displayVideoPlayButton"
+          setting-key="displayVideoPlayButton"
+          @change="updateDisplayVideoPlayButton"
+        />
+      </div>
+      <div class="switchColumn">
+        <h5 class="controlGroupTitle">
+          {{ t('Settings.Player Settings.Player Controls.Video') }}
+        </h5>
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Lights Off')"
+          :description="t('Settings.Player Settings.Player Controls.Lights Off Description')"
+          :icon="['fas', 'moon']"
           :compact="true"
           :default-value="showLightsOffToggle"
           setting-key="showLightsOffToggle"
           @change="store.dispatch('updateShowLightsOffToggle', $event)"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Mirror Video Toggle')"
+          :label="t('Settings.Player Settings.Mirror Video')"
+          :description="t('Settings.Player Settings.Player Controls.Mirror Video Description')"
+          :icon="['fas', 'flip-horizontal']"
           :compact="true"
           :default-value="store.getters.getShowMirrorVideoToggle"
           setting-key="showMirrorVideoToggle"
-          :tooltip="t('Tooltips.Player Settings.Show Mirror Video Toggle')"
           @change="store.dispatch('updateShowMirrorVideoToggle', $event)"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Rotate Video Menu')"
+          :label="t('Video.Player.Rotate Video.Rotate Video')"
+          :description="t('Settings.Player Settings.Player Controls.Rotate Video Description')"
+          :icon="['fas', 'rotate-right']"
           :compact="true"
           :default-value="store.getters.getShowRotateVideoMenu"
           setting-key="showRotateVideoMenu"
-          :tooltip="t('Tooltips.Player Settings.Show Rotate Video Menu')"
           @change="store.dispatch('updateShowRotateVideoMenu', $event)"
         />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Display Play Button In Video Player')"
-          :compact="true"
-          :default-value="displayVideoPlayButton"
-          setting-key="displayVideoPlayButton"
-          @change="updateDisplayVideoPlayButton"
-        />
-        <FtToggleSwitch
-          v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Enable Skip Silence by Default')"
-          :compact="true"
-          :disabled="!showSkipSilenceButton"
-          :default-value="enableSkipSilenceByDefault"
-          setting-key="enableSkipSilenceByDefault"
-          :tooltip="t('Tooltips.Player Settings.Enable Skip Silence by Default')"
-          @change="updateEnableSkipSilenceByDefault"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON || (IS_CAPACITOR && !IS_IOS)"
-          :label="t('Settings.Player Settings.Enable Google Cast')"
-          :compact="true"
-          :default-value="store.getters.getShowChromecastButton"
-          setting-key="showChromecastButton"
-          @change="store.dispatch('updateShowChromecastButton', $event)"
-        />
+        <template v-if="USING_ELECTRON || IS_CAPACITOR">
+          <h5 class="controlGroupTitle">
+            {{ t('Settings.Player Settings.Player Controls.Casting') }}
+          </h5>
+          <FtToggleSwitch
+            v-if="USING_ELECTRON || !IS_IOS"
+            :label="t('Settings.Player Settings.Player Controls.Google Cast')"
+            :description="t('Settings.Player Settings.Player Controls.Google Cast Description')"
+            :icon="['fas', 'cast']"
+            :compact="true"
+            :default-value="store.getters.getShowChromecastButton"
+            setting-key="showChromecastButton"
+            @change="store.dispatch('updateShowChromecastButton', $event)"
+          />
+          <FtToggleSwitch
+            v-if="USING_ELECTRON || !IS_IOS"
+            :label="t('Settings.Player Settings.Player Controls.FCast')"
+            :description="t('Settings.Player Settings.Player Controls.FCast Description')"
+            :icon="['fas', 'devices']"
+            :compact="true"
+            :default-value="store.getters.getShowFcastButton"
+            setting-key="showFcastButton"
+            @change="store.dispatch('updateShowFcastButton', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('Settings.Player Settings.Player Controls.DLNA')"
+            :description="t('Settings.Player Settings.Player Controls.DLNA Description')"
+            :icon="['fas', 'tv']"
+            :compact="true"
+            :default-value="showDlnaCastButton"
+            setting-key="showDlnaCastButton"
+            @change="store.dispatch('updateShowDlnaCastButton', $event)"
+          />
+        </template>
       </div>
     </div>
     <h4 class="groupTitle">

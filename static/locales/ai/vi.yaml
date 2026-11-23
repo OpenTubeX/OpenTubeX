@@ -1076,6 +1076,30 @@ Settings:
       Enable: "Bật ghi chú theo mốc thời gian"
       Obsidian Vault: Kho Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Nhấn đúp bằng hai ngón tay để chuyển chương"
+    Player Controls:
+      Audio: Âm thanh
+      Video: Video
+      Seek Bar and Overlay: Thanh tua và lớp phủ
+      Casting: Truyền phát
+      Volume Boost Description: Làm video nhỏ tiếng to hơn
+      Mono Audio Description: Phát cả hai kênh âm thanh ở mỗi tai
+      Music Mode Description: Phát ở tốc độ 1× và phát video từ đầu
+      Skip Silence Description: Bỏ qua các đoạn im lặng
+      On by Default: Bật theo mặc định
+      On by Default Description: Áp dụng cho thẻ mới
+      Lights Off Description: Làm tối trang xung quanh video
+      Mirror Video Description: Lật video theo chiều ngang
+      Rotate Video Description: Xoay video quay nghiêng hoặc lộn ngược
+      Seek Bar Filmstrip: Dải khung hình của thanh tua
+      Seek Bar Filmstrip Description: Hiện khung hình quanh núm khi bạn kéo
+      Center Play Button: Nút phát ở giữa
+      Center Play Button Description: Hiện các nút phát lớn trên video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast và TV tích hợp Google Cast
+      FCast: FCast
+      FCast Description: Ứng dụng nhận FCast trong mạng của bạn
+      DLNA: DLNA
+      DLNA Description: TV thông minh và trình phát đa phương tiện trong mạng của bạn
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1915,7 +1939,6 @@ Video:
     Precise seeking, drag down to exit: "Tua chính xác · Kéo xuống để thoát"
     Cast: "Truyền phát"
     Music Mode: "Chế độ âm nhạc"
-    Music Mode Description: "Phát video ở tốc độ 1× và bắt đầu video mới từ đầu trong thẻ này. Các thiết lập phát mặc định đã lưu của bạn không thay đổi."
     DLNA:
       Cast: "Truyền tới thiết bị DLNA"
       Stop: "Dừng truyền"
@@ -2462,13 +2485,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Khi bật và tốc độ phát khác 1x, trình phát hiện mốc thời gian đã điều chỉnh theo tốc độ phát trong ngoặc đơn sau mốc thời gian thông thường.
     Use YouTube-style Shorts: Hiện video ngắn trong lưới dọc trên trang đăng ký và trang kênh, đồng thời dùng trình phát video ngắn kiểu YouTube.
     Loop Shorts: Khi bật, video ngắn sẽ tự động phát lại. Khi tắt, video ngắn sẽ dừng ở cuối và hiện nút phát lại.
-    Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
-    Show Mirror Video Toggle: "Hiện nút bật/tắt trong menu cài đặt của trình phát để lật ngang video, giúp bạn dễ tập theo các video hướng dẫn nhảy, tập luyện và chơi nhạc cụ hơn."
-    Show Rotate Video Menu: "Thêm Xoay video vào menu cài đặt của trình phát, để xoay các video được quay nghiêng hoặc lộn ngược."
-    Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
     Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
     Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.
-    Show Seek Bar Filmstrip: "Kéo núm của thanh tua sẽ hiển thị một dải khung hình quanh vị trí bạn sẽ đến, và kéo lên trên dải đó để tua chính xác. Khi tắt, việc kéo chỉ hiển thị một hình thu nhỏ, giống như khi di chuột qua."
     Voice-over Translation: Gửi ID video, thời lượng và ngôn ngữ đã chọn đến dịch vụ dịch lồng tiếng Yandex không chính thức khi bạn yêu cầu dịch. Tính năng này mặc định tắt.
     Hold to Speed Up: Giữ phím cách hoặc nút chuột trái trên trình phát để tạm thời nhân tốc độ phát hiện tại với giá trị đã chọn.
     Ambient Mode: Hòa màu của video vào khu vực quanh trình phát.

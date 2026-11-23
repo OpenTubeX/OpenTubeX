@@ -1259,6 +1259,30 @@ Settings:
       Enable: "Aktiveer tydstempelnotas"
       Obsidian Vault: Obsidian-kluis
     Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers om hoofstukke oor te slaan"
+    Player Controls:
+      Audio: Oudio
+      Video: Video
+      Seek Bar and Overlay: Soekbalk en oorleg
+      Casting: Uitsaai
+      Volume Boost Description: Maak sagte video’s harder
+      Mono Audio Description: Speel albei oudiokanale in elke oor
+      Music Mode Description: Speel teen 1× en begin video’s van voor af
+      Skip Silence Description: Spring oor stil dele
+      On by Default: By verstek aan
+      On by Default Description: Geld vir nuwe oortjies
+      Lights Off Description: Verdof die bladsy rondom die video
+      Mirror Video Description: Spieël die video horisontaal
+      Rotate Video Description: Draai video’s wat sywaarts of onderstebo opgeneem is
+      Seek Bar Filmstrip: Soekbalk-filmstrook
+      Seek Bar Filmstrip Description: Wys rame rondom die knop terwyl u dit sleep
+      Center Play Button: Middelste speelknoppie
+      Center Play Button Description: Wys groot afspeelknoppies oor die video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast en TV’s met ingeboude Google Cast
+      FCast: FCast
+      FCast Description: FCast-ontvangerprogramme op u netwerk
+      DLNA: DLNA
+      DLNA Description: Slim-TV’s en mediaspelers op u netwerk
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -2185,7 +2209,6 @@ Video:
     Precise seeking, drag down to exit: Presiese spoel · Sleep af om te verlaat
     Playing in Picture-in-Picture: Speel in beeld-in-beeld
     Music Mode: Musiekmodus
-    Music Mode Description: Speel video’s teen 1× en begin nuwe video’s van voor af in hierdie oortjie. U gestoorde afspeelverstekke bly onveranderd.
     DLNA:
       Cast: Saai uit na ’n DLNA-toestel
       Stop: Stop uitsaai
@@ -2701,13 +2724,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Wanneer geaktiveer en die afspeelspoed van 1x verskil, wys die speler tydstempels aangepas vir afspeelspoed tussen hakies ná die normale tydstempel.
     Use YouTube-style Shorts: Vertoon kortvideo’s in ’n portretrooster op intekening- en kanaalblaaie en gebruik die kortvideospeler in YouTube-styl.
     Loop Shorts: Wanneer geaktiveer, begin kortvideo’s outomaties weer. Wanneer gedeaktiveer, stop kortvideo’s aan die einde en wys ’n herspeelknoppie.
-    Show Skip Silence Toggle: Wys ’n aan/af-wisselaar vir die oorslaan van stilte in die speler se instellingskieslys.
-    Show Mirror Video Toggle: "Wys ’n aan/af-wisselaar in die speler se instellingskieslys wat die video horisontaal spieël, sodat dit makliker is om dans-, oefen- en instrumenttutoriale te volg."
-    Show Rotate Video Menu: "Voeg Draai video by die speler se instellingskieslys, wat video’s draai wat sywaarts of onderstebo opgeneem is."
-    Enable Skip Silence by Default: Aktiveer die oorslaan van stilte vir nuwe oortjies. As u dit in een oortjie verander, raak dit nie ander oortjies nie.
     Enable Video Zoom: Wys die zoemkontrole in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie en panneerkontroles daarvan.
     Enable Seek History: Onthou waarvandaan u in elke video gespring het totdat die toep sluit. Wys die spoelgeskiedenislys in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie daarvan.
-    Show Seek Bar Filmstrip: "As jy die soekbalk se knop sleep, wys dit 'n strook rame rondom waar jy gaan land, en as jy daarop optrek, spoel jy presies. Wanneer gedeaktiveer, wys sleep 'n enkele duimnael, soos wanneer jy daaroor beweeg."
     Pause on Stream Recovery: Wanneer die videostroom misluk en die speler dit herlaai of na ’n ander formaat of enjin oorskakel, pouseer afspeel en hou die fout bo-aan die speler totdat u dit toemaak. Wanneer gedeaktiveer, gaan afspeel voort en verskyn die fout kortliks as ’n kennisgewing.
     Continue Playback When Screen Is Locked: Hou oudio in die agtergrond aan die speel en verskaf Android-mediakontroles. Skakel dit af om te pouseer wanneer die toep nie meer sigbaar is nie.
     Switch to Audio in Background: 'Speel klankformate terwyl die app in die agtergrond loop of die skerm af is, wat data en battery spaar. Prent-in-prent behou die video. Die video keer terug wanneer jy die app weer oopmaak. Vereis dat afspeel voortgaan wanneer die skerm gesluit is.'

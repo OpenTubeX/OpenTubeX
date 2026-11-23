@@ -1078,6 +1078,30 @@ Settings:
       Enable: "Activează notele cu marcaj temporal"
       Obsidian Vault: Seif Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Atingeți de două ori cu două degete pentru a sări între capitole"
+    Player Controls:
+      Audio: Audio
+      Video: Video
+      Seek Bar and Overlay: Bara de derulare și suprapunere
+      Casting: Transmitere
+      Volume Boost Description: Amplifică sunetul videoclipurilor încete
+      Mono Audio Description: Redă ambele canale audio în fiecare ureche
+      Music Mode Description: Redă la 1× și pornește videoclipurile de la început
+      Skip Silence Description: Sare peste porțiunile de liniște
+      On by Default: Activat implicit
+      On by Default Description: Se aplică filelor noi
+      Lights Off Description: Întunecă pagina din jurul videoclipului
+      Mirror Video Description: Oglindește videoclipul pe orizontală
+      Rotate Video Description: Rotește videoclipurile filmate lateral sau invers
+      Seek Bar Filmstrip: Banda de cadre a barei de derulare
+      Seek Bar Filmstrip Description: Afișează cadre în jurul cursorului în timp ce îl trageți
+      Center Play Button: Buton de redare central
+      Center Play Button Description: Afișează butoane mari de redare peste videoclip
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast și televizoare cu Google Cast integrat
+      FCast: FCast
+      FCast Description: Aplicații receptor FCast din rețeaua locală
+      DLNA: DLNA
+      DLNA Description: Televizoare inteligente și playere media din rețeaua locală
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1945,7 +1969,6 @@ Video:
     Precise seeking, drag down to exit: "Derulare precisă · Trageți în jos pentru a ieși"
     Cast: "Transmite"
     Music Mode: "Mod muzică"
-    Music Mode Description: "Redă videoclipurile la viteza 1× și pornește videoclipurile noi de la început în această filă. Setările implicite de redare salvate rămân neschimbate."
     DLNA:
       Cast: "Transmite pe un dispozitiv DLNA"
       Stop: "Oprește transmiterea"
@@ -2500,13 +2523,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Când opțiunea este activată și viteza de redare diferă de 1x, playerul afișează între paranteze marcajele temporale ajustate la viteza de redare, după afișajul temporal normal.
     Use YouTube-style Shorts: Afișează videoclipurile Shorts într-o grilă portret pe paginile de abonamente și canale și folosește playerul Shorts în stil YouTube.
     Loop Shorts: Când opțiunea este activată, videoclipurile Shorts repornesc automat. Când este dezactivată, acestea se opresc la sfârșit și afișează un buton de reluare.
-    Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
-    Show Mirror Video Toggle: "Afișează în meniul de setări al playerului un comutator care oglindește videoclipul pe orizontală, ca să urmărești mai ușor tutorialele de dans, antrenament și instrumente muzicale."
-    Show Rotate Video Menu: "Adaugă Rotește videoclipul în meniul de setări al playerului, pentru a roti videoclipurile filmate lateral sau cu susul în jos."
-    Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
     Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
     Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.
-    Show Seek Bar Filmstrip: "Tragerea cursorului barei de derulare afișează o bandă de cadre în jurul locului în care veți ajunge, iar tragerea în sus pe ea permite derularea precisă. Când este dezactivat, tragerea afișează o singură miniatură, ca la trecerea cursorului."
     Voice-over Translation: Trimite ID-ul videoclipului, durata și limba selectată serviciului neoficial Yandex de traducere vocală atunci când solicitați o traducere. Opțiunea este dezactivată implicit.
     Hold to Speed Up: Țineți apăsată bara de spațiu sau butonul stâng al mouse-ului deasupra playerului pentru a înmulți temporar viteza de redare curentă cu valoarea selectată.
     Ambient Mode: Îmbină culorile videoclipului cu zona din jurul playerului.

@@ -18,6 +18,7 @@
       :checked="currentValue"
       :indeterminate="indeterminate"
       :aria-checked="indeterminate ? 'mixed' : undefined"
+      :aria-describedby="description ? descriptionId : undefined"
       :disabled="disabled"
       @change="change"
     >
@@ -31,7 +32,14 @@
         <span
           ref="labelText"
           class="switch-label-text"
+          :class="{ hasLeadingIcon: icon !== null }"
         >
+          <FtIcon
+            v-if="icon !== null"
+            class="switch-label-leading-icon"
+            :icon="icon"
+            aria-hidden="true"
+          />
           <span class="switch-label-name">{{ labelParts.start }}</span>
           <span class="switch-label-end">
             <span class="switch-label-name">{{ labelParts.end }}</span>
@@ -48,6 +56,16 @@
                 :setting-keys="syncSettingKeys"
               />
             </span>
+          </span>
+          <!-- Hidden from the label's name, which stays short, and read as
+               the switch's description instead. -->
+          <span
+            v-if="description"
+            :id="descriptionId"
+            class="switch-label-description"
+            aria-hidden="true"
+          >
+            {{ description }}
           </span>
           <span
             class="switch-thumb"
@@ -114,6 +132,16 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  // A short line under the label that explains the setting
+  description: {
+    type: String,
+    default: ''
+  },
+  // Icon before the label, such as the icon of the control the setting shows
+  icon: {
+    type: Array,
+    default: null
+  },
   tooltipPosition: {
     type: String,
     default: 'bottom-left'
@@ -148,6 +176,7 @@ const emit = defineEmits(['change'])
 const { t } = useI18n()
 
 const id = useId()
+const descriptionId = `${id}-description`
 
 const currentValue = ref(props.defaultValue)
 
