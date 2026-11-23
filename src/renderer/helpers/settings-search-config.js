@@ -194,13 +194,19 @@ export const SETTINGS_SEARCH_SOURCES = {
       'Proxy Videos Through Invidious',
       'Sections',
       // Short labels, descriptions, and group titles that read well only in
-      // their group. Search lists the full labels below instead.
+      // their group. Search lists the full labels below instead, which
+      // contain the short ones, except for the Center Play Button.
       'Player Controls',
+      'Display Play Button In Video Player',
       'Voice-over Translation',
       'Buffering',
       ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS,
       ...YT_DLP_STREAMING_KEYS
     ])
+  }, {
+    type: 'player',
+    key: 'Settings.Player Settings.Player Controls',
+    include: new Set(['Center Play Button'])
   }, {
     type: 'player',
     key: 'Settings.Player Settings',
@@ -380,7 +386,7 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
     'Settings.Player Settings.Show Mirror Video Toggle': 'showMirrorVideoToggle',
     'Settings.Player Settings.Show Rotate Video Menu': 'showRotateVideoMenu',
     'Settings.Player Settings.Show Seek Bar Filmstrip': 'showSeekBarFilmstrip',
-    'Settings.Player Settings.Display Play Button In Video Player': 'displayVideoPlayButton'
+    'Settings.Player Settings.Player Controls.Center Play Button': 'displayVideoPlayButton'
   },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',

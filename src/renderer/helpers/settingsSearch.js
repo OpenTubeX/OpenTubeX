@@ -430,8 +430,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'player' && isCapacitor && [
+    'Center Play Button',
     'Default Volume',
-    'Display Play Button In Video Player',
     'Remember Volume',
     'Scroll Volume Over Video Player',
   ].includes(group)) {

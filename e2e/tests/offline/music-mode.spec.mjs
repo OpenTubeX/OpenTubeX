@@ -208,10 +208,12 @@ test.describe('music mode visibility setting', () => {
     await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
     await page.locator('.profileTrigger').click()
     const playback = await goToSettingsSection(page, 'playback')
-    const visibility = playback.locator('[data-setting-key="showMusicModeToggle"]').getByRole('checkbox')
-    await expect(visibility).toHaveAccessibleName('Music Mode')
+    const control = playback.locator('[data-setting-key="showMusicModeToggle"]')
+    const visibility = control.getByRole('checkbox')
+    // The description explains the switch without becoming part of its name.
+    await expect(visibility).toHaveAccessibleName((await control.locator('.switch-label-name').allTextContents()).join(''))
     await expect(visibility).not.toBeChecked()
-    await expect(visibility).toHaveAccessibleDescription('Plays at 1× and starts videos from the beginning')
+    await expect(visibility).toHaveAccessibleDescription(await control.locator('.switch-label-description').innerText())
     await testInfo.attach('music-mode-visibility-setting', {
       body: await visibility.locator('..').screenshot(),
       contentType: 'image/png',

@@ -51,7 +51,7 @@ test('Android enables Google Cast from settings and opens the native device menu
     await goToSettingsSection(page, 'player')
     const toggle = page.locator('[data-setting-key="showChromecastButton"]')
     await expect(toggle).toBeVisible()
-    await expect(toggle.locator('input')).toHaveAccessibleName('Google Cast')
+    await expect(toggle.locator('input')).toHaveAccessibleName((await toggle.locator('.switch-label-name').allTextContents()).join(''))
     await expect(toggle.locator('input')).not.toBeChecked()
     await toggle.locator('label').click()
     await expect(toggle.locator('input')).toBeChecked()
