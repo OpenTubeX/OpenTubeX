@@ -135,6 +135,9 @@ test.describe('settings', () => {
     await expect(page.locator('.shortcutColumns')).toBeVisible()
 
     const settingsWindow = page.locator('.settingsWindow')
+    // The short leave animation can end before a loaded machine sees it, so
+    // lengthen it to press the shortcut while the window closes.
+    await page.addStyleTag({ content: '.settingsWindow.settings-window-leave-active { animation-duration: 60s !important; }' })
     await page.locator('.settingsCloseButton').click()
     await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
     await page.keyboard.press('Shift+?')
