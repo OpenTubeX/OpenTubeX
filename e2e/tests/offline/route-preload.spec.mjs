@@ -106,11 +106,21 @@ test('a route whose code failed to preload still opens on click', async ({ page 
   // The worker's Xvfb pointer rests on the page. Its first pointer event can
   // arrive just after a hover right at startup and move the intent off the
   // link, so hover again until the preload is requested.
-  await expect(async () => {
-    await page.mouse.move(0, 0)
-    await link.hover()
-    await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
-  }).toPass()
+  try {
+    await expect(async () => {
+      await page.mouse.move(0, 0)
+      await link.hover()
+      await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
+    }).toPass({ timeout: 20_000 })
+  } catch (error) {
+    // On CI, no hover in a whole run requested the code. Record whether it
+    // had already loaded, which a request started before the route would do.
+    await test.info().attach('route preload state', {
+      body: JSON.stringify({ channelLoaded: await isRouteLoaded(page, '/channel/UCroutePreload0') }),
+      contentType: 'application/json',
+    })
+    throw error
+  }
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
 
   await page.unroute(/^app:\/\/bundle\/.*\.js$/)
