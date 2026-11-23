@@ -52,6 +52,11 @@ const CACHE_KEY_HASH_REGEX = /^[a-f\d]{64}$/
 const records = new Map()
 let loadPromise = null
 const enqueueWrite = createSerialQueue()
+/**
+ * Entry files still being written, which reads wait for.
+ * @type {Map<string, Promise<void>>}
+ */
+const pendingEntryWrites = new Map()
 let pendingIndexWrite = null
 let cacheEnabled = true
 let maxEntryLength = DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB * BYTES_PER_MEGABYTE
@@ -262,6 +267,10 @@ export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
     return null
   }
 
+  // The index lists a new entry before its file is written.
+  await pendingEntryWrites.get(videoId)?.catch(() => {})
+  if (records.get(videoId) !== record) return null
+
   let text
   try {
     text = await readFile(entryPath(videoId), 'utf8')
@@ -357,16 +366,20 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
   const record = { videoId, cacheKeyHash: entry.cacheKeyHash, expiryTime: entry.expiryTime, size }
   records.set(videoId, record)
 
+  const write = enqueueWrite(async () => {
+    await mkdir(cacheDirectory(), { recursive: true })
+    await writeFileAtomic(entryPath(videoId), json)
+  })
+  pendingEntryWrites.set(videoId, write)
   try {
-    await enqueueWrite(async () => {
-      await mkdir(cacheDirectory(), { recursive: true })
-      await writeFileAtomic(entryPath(videoId), json)
-    })
+    await write
   } catch (error) {
     // Without its file, the entry must not stay in the index.
     if (records.get(videoId) === record) records.delete(videoId)
     await Promise.all([removeEntryFiles(evicted), saveIndex()])
     throw error
+  } finally {
+    if (pendingEntryWrites.get(videoId) === write) pendingEntryWrites.delete(videoId)
   }
   await Promise.all([removeEntryFiles(evicted), saveIndex()])
   return true

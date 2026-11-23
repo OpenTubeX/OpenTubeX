@@ -296,6 +296,24 @@ test('a persistent cache entry stored again while it is evicted keeps its file',
   assert.equal((await cache.handleYtDlpPlaybackCacheGet(event, videoId(0), 'key'))?.source.manifestSrc, playbackSource.manifestSrc)
 })
 
+test('reading a persistent cache entry while it is first written keeps it', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-ytdlp-cache-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const event = { senderFrame: { url: 'app://bundle/index.html' } }
+  const playbackSource = { manifestSrc: 'data:application/dash+xml;base64,PE1QRD4=', manifestMimeType: 'application/dash+xml', legacyFormats: [], title: null, isLive: false }
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const cache = await loadPersistentCache(directory, [])
+  await cache.applyYtDlpPlaybackCacheSettings()
+  const [stored, read] = await Promise.all([
+    cache.handleYtDlpPlaybackCacheSet(event, 'aaaaaaaaaaa', 'key', expiryTime, playbackSource),
+    // Waits for the settings like the write, so it runs while the file is written.
+    new Promise(resolve => setImmediate(resolve)).then(() => cache.handleYtDlpPlaybackCacheGet(event, 'aaaaaaaaaaa', 'key')),
+  ])
+  assert.equal(stored, true)
+  assert.equal(read?.source.manifestSrc, playbackSource.manifestSrc)
+  assert.equal((await cache.handleYtDlpPlaybackCacheGet(event, 'aaaaaaaaaaa', 'key'))?.source.manifestSrc, playbackSource.manifestSrc)
+})
+
 test('playback does not wait for the persistent cache write and still reports failures', async () => {
   const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
   const start = code.indexOf('async function cacheYtDlpPlaybackSource(')
