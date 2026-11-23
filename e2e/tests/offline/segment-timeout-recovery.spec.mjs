@@ -150,3 +150,55 @@ test.describe('caption request failures', () => {
     }
   })
 })
+
+// googlevideo can answer a segment request with the URL to load it from instead.
+// Leaving the video waited for that redirected download, which froze the watch
+// page on a slow connection (#3530)
+test.describe('redirected segments', () => {
+  test.use({ seed: { settings: { keepPlayingOnNavigation: false } } })
+
+  test('leaves the video while a redirected segment is still downloading', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+
+    const redirectUrl = 'https://media.test/redirected-segment.webm'
+    let redirectRequested
+    const redirected = new Promise(resolve => { redirectRequested = resolve })
+    await page.route(redirectUrl, () => redirectRequested())
+    await page.route(SEGMENT_URL, (route) => {
+      const [start, end] = requestedRange(route)
+      if (start < FIRST_CLUSTER) return fulfillRange(route, start, end)
+      return route.fulfill({ contentType: 'text/plain', body: redirectUrl })
+    })
+    let releaseManifest
+    const manifestReady = new Promise(resolve => { releaseManifest = resolve })
+    let manifestRequested
+    const requested = new Promise(resolve => { manifestRequested = resolve })
+    await page.route(MANIFEST_URL, async route => {
+      manifestRequested()
+      await manifestReady
+      await route.fulfill({ contentType: 'application/dash+xml', body: MANIFEST })
+    })
+
+    try {
+      await switchToDash(page)
+      await requested
+      // The redirected download must not end with a timeout before the video is left
+      await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
+        element.ui.getControls().getPlayer().configure('streaming.retryParameters', {
+          timeout: 0,
+          stallTimeout: 0,
+          connectionTimeout: 0,
+        })
+      })
+      releaseManifest()
+      await redirected
+    } finally {
+      releaseManifest()
+    }
+
+    await page.locator('.topNav .logo').click()
+    await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  })
+})

@@ -8666,7 +8666,7 @@ function requestFilter(type, request, _context) {
 }
 
 /** @type {shaka.extern.ResponseFilter} */
-async function responseFilter(type, response, context) {
+function responseFilter(type, response, context) {
   if (type === RequestType.SEGMENT) {
     const url = new URL(response.uri)
 
@@ -8684,14 +8684,17 @@ async function responseFilter(type, response, context) {
       // Make another request for the redirect URL.
       const uris = [responseAsString]
       const redirectRequest = shaka.net.NetworkingEngine.makeRequest(uris, retryParameters)
-      const requestOperation = player.getNetworkingEngine().request(type, redirectRequest, context)
-      const redirectResponse = await requestOperation.promise
-
-      // Modify the original response to contain the results of the redirect
-      // response.
-      response.data = redirectResponse.data
-      response.headers = redirectResponse.headers
-      response.uri = redirectResponse.uri
+      // Return the redirect request instead of awaiting it. Aborting a request
+      // (on seeks, quality switches and unload) waits for a pending filter,
+      // but aborts an operation the filter returns. Otherwise, leaving a
+      // video on a slow connection waits for the whole redirected segment.
+      return player.getNetworkingEngine().request(type, redirectRequest, context).chain((redirectResponse) => {
+        // Modify the original response to contain the results of the redirect
+        // response.
+        response.data = redirectResponse.data
+        response.headers = redirectResponse.headers
+        response.uri = redirectResponse.uri
+      })
     } else {
       // Fix positioning for auto-generated subtitles
       if (url.hostname.endsWith('.youtube.com') && url.pathname === '/api/timedtext' &&
