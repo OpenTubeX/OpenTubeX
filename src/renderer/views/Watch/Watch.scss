@@ -63,9 +63,10 @@
 }
 
 // Waits along with a paused shimmer, for the sweeps it still has left.
+// The Shorts skeleton's own sweep keeps running out of view, and some of its
+// shimmering controls are never shown, so it only pauses with the window.
 :root[data-shimmer-hidden] .videoPlayerPlaceholderLoader,
-.ft-shimmer:not([data-shimmer-visible]) > .videoPlayerPlaceholderLoader,
-.shortsPlayerPlaceholder:has(.ft-shimmer:not([data-shimmer-visible])) > .videoPlayerPlaceholderLoader {
+.ft-shimmer:not([data-shimmer-visible]) > .videoPlayerPlaceholderLoader {
   animation-play-state: paused;
 }
 
