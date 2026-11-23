@@ -8,7 +8,7 @@ import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import * as profileSettings from '../../src/profileSettings.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const { collectProfileSettings, planProfileSettingsOf, profileIdFromSettingsId, profileSettingsId } = profileSettings
 
@@ -96,6 +96,7 @@ const context = vm.createContext({
   mergeSettingItemsEntry,
   isListSetting,
   mergeSettingListEntry,
+  mergeProfileSettingsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
   CUSTOM_THEMES_SYNC_KEY: 'customThemes',
@@ -205,6 +206,7 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   const saved = new Map([[id, {}]])
   const releases = []
   const overrides = { car: {} }
+  let unreadable = false
   // Objects from the other context have another prototype.
   const isPlainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   const mutations = vm.runInNewContext(`({${between('  setProfileOwnSettings: (state', '  // Takes a plan from')}})`, {
@@ -224,7 +226,10 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
     runLocked: (_name, run) => run(),
     saveSettingEdit: (_commit, _id, save) => save(),
     DBSettingHandlers: {
-      findValue: async key => structuredClone(saved.get(key)),
+      findValue: async key => {
+        if (unreadable) throw new Error('The settings cannot be read')
+        return structuredClone(saved.get(key))
+      },
       // Each save waits until the test lets it finish.
       upsert: (key, value) => new Promise(resolve => releases.push(() => {
         saved.set(key, structuredClone(value))
@@ -261,6 +266,11 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   releases.shift()()
   assert.equal(await third, true)
   assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{}, {}])
+
+  // A failed edit shows the saved value again, also when the settings can't be read to restore it.
+  unreadable = true
+  assert.equal(await region.updateProfileSetting(commit, 'car', 'quickSettings', ['c'], true), false)
+  assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), {})
 })
 
 test('a failed shared write of a setting the active profile replaces keeps the previous shared value', async () => {

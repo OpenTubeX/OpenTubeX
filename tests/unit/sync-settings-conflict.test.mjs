@@ -6,6 +6,7 @@ import { commitCustomThemesEdit } from '../../src/renderer/helpers/customThemeSy
 import {
   mergeSettingEntry,
   mergeSettingListEntry,
+  mergeProfileSettingsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from '../../src/renderer/helpers/sync-settings-conflict.js'
@@ -311,6 +312,26 @@ test('devices read the Title Lines select from the Limit Titles to Two Lines swi
   assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: { ...legacy, value: true } }).titleLineLimit.value, 2)
   const current = { key: 'titleLineLimit', value: 3, updatedAt: 5 }
   assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy, titleLineLimit: current }).titleLineLimit, current)
+})
+
+test('settings of one profile edited on two devices before they sync are all kept', () => {
+  const key = 'profileSettings-636172'
+  const old = { key, value: { hideComments: false, hideLiveChat: false, iconPack: 'remix' }, updatedAt: 10 }
+  // The other device hid live chat and went back to the shared icon pack;
+  // this device hid comments and changed live chat later.
+  const remoteEntry = { key, value: { hideComments: false, hideLiveChat: true }, updatedAt: 30 }
+  const value = { hideComments: true, hideLiveChat: 'later', iconPack: 'remix' }
+  const entry = mergeProfileSettingsEntry({ key, value, old, remoteEntry, localUpdatedAt: 40, now: 50 })
+  assert.deepEqual(entry.value, { hideComments: true, hideLiveChat: 'later' })
+  assert.equal(entry.updatedAt, 40)
+
+  // An earlier edit of a setting the other device changed too loses it.
+  const earlier = mergeProfileSettingsEntry({ key, value, old, remoteEntry, localUpdatedAt: 20, now: 50 })
+  assert.deepEqual(earlier.value, { hideComments: true, hideLiveChat: true })
+  assert.ok(earlier.updatedAt >= remoteEntry.updatedAt, 'The merged settings must replace the server ones on other devices')
+
+  const unchanged = mergeProfileSettingsEntry({ key, value: old.value, old, remoteEntry, now: 50 })
+  assert.equal(unchanged, remoteEntry, 'Unedited settings must take the server ones')
 })
 
 test('hidden channels added and removed on two devices before they sync are all kept', () => {

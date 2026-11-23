@@ -52,6 +52,7 @@ import {
   mergeSettingEntry,
   mergeSettingItemsEntry,
   mergeSettingListEntry,
+  mergeProfileSettingsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
@@ -1945,10 +1946,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         else delete merged[key]
         continue
       }
+      const profileSettingsKey = profileSettingsProfiles.has(key)
       const mergeEntry = itemKeys.has(key)
         ? mergeSettingItemsEntry
-        : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
-      const profileSettingsKey = profileSettingsProfiles.has(key)
+        : isListSetting(key)
+          ? mergeSettingListEntry
+          : profileSettingsKey ? mergeProfileSettingsEntry : mergeSettingEntry
       // A profile's own settings merge as this device syncs them, and keep the
       // settings that only other devices sync.
       const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
