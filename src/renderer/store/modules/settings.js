@@ -827,7 +827,7 @@ function reportProfileSettings(settings) {
   if (!process.env.IS_ELECTRON) return
   const shown = Object.fromEntries(Object.keys(settings.profileSettingsState.shared).map(key => [key, settings[key]]))
   // The store's proxies can't be sent.
-  window.ftElectron.applyProfileSettings(JSON.parse(JSON.stringify({ settings: shown, baseTheme: settings.baseTheme })))
+  window.ftElectron.applyProfileSettings(JSON.parse(JSON.stringify(shown)))
 }
 
 /**

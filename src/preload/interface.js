@@ -307,8 +307,8 @@ export default {
    * @param {string} baseTheme
    */
   /**
-   * @param {{ settings: Record<string, unknown>, baseTheme: unknown }} profileSettings the own
-   *   settings the window's active profile shows, and the base theme it shows
+   * @param {Record<string, unknown>} profileSettings the own settings the
+   *   window's active profile shows
    */
   applyProfileSettings: (profileSettings) => {
     ipcRenderer.send(IpcChannels.APPLY_PROFILE_SETTINGS, profileSettings)

@@ -2905,26 +2905,48 @@ function runApp() {
 
   let baseThemeRequest = 0
 
-  /** @param {unknown} baseTheme */
-  async function applyBaseTheme(baseTheme) {
-    if (typeof baseTheme !== 'string') return
+  /**
+   * @param {unknown} baseTheme
+   * @returns {Promise<'light' | 'dark' | 'system'>}
+   */
+  async function themeSourceOf(baseTheme) {
+    if (typeof baseTheme !== 'string') return 'system'
+    if (isCustomThemeValue(baseTheme)) return (await getSelectedCustomTheme(baseTheme))?.isDark ? 'dark' : 'light'
+    return LIGHT_BASE_THEMES.includes(baseTheme) ? 'light' : DARK_BASE_THEMES.includes(baseTheme) ? 'dark' : 'system'
+  }
+
+  /**
+   * Sets the native theme source, which native controls and the system color
+   * scheme of every window follow, from the base theme each window shows: the
+   * own one of its active profile, or the saved one. Windows that show
+   * different ones keep following the system, so the System theme still
+   * detects it.
+   * @param {unknown} savedBaseTheme
+   */
+  async function applyBaseTheme(savedBaseTheme) {
+    if (typeof savedBaseTheme !== 'string') return
     const request = ++baseThemeRequest
-    if (isCustomThemeValue(baseTheme)) {
-      const customTheme = await getSelectedCustomTheme(baseTheme)
-      // A newer theme can have been applied while the custom one loaded.
-      if (request === baseThemeRequest) nativeTheme.themeSource = customTheme?.isDark ? 'dark' : 'light'
-    } else {
-      updateThemeSource(baseTheme)
-    }
+    const shown = [...TabManager.getAll()]
+      .filter(manager => !manager.browserWindow.isDestroyed())
+      .map(({ profileSettings }) => profileSettings && Object.hasOwn(profileSettings, 'baseTheme') ? profileSettings.baseTheme : savedBaseTheme)
+    const sources = new Set(await Promise.all((shown.length > 0 ? shown : [savedBaseTheme]).map(themeSourceOf)))
+    // A newer theme can have been applied while a custom one loaded.
+    if (request === baseThemeRequest) nativeTheme.themeSource = sources.size === 1 ? [...sources][0] : 'system'
+  }
+
+  async function applyShownBaseThemes() {
+    // Without a saved one, the native theme follows the system.
+    await applyBaseTheme((await baseHandlers.settings._findOne('baseTheme'))?.value ?? 'system')
   }
 
   // A window's active profile can show its own settings instead of the saved
-  // ones: its tabs open its landing page, and native controls and the system
-  // color scheme follow its base theme.
+  // ones: its tabs open its landing page, and the native theme follows its
+  // base theme.
   onTrusted(IpcChannels.APPLY_PROFILE_SETTINGS, (event, profileSettings) => {
     const tabManager = TabManager.getFromWebContents(event.sender)
-    if (tabManager) tabManager.profileSettings = profileSettingsOf(profileSettings?.settings, settingId => !SHARED_ONLY_SETTINGS.has(settingId))
-    applyBaseTheme(profileSettings?.baseTheme).catch(error => console.error('Failed to apply the profile base theme', error))
+    if (!tabManager) return
+    tabManager.profileSettings = profileSettingsOf(profileSettings, settingId => !SHARED_ONLY_SETTINGS.has(settingId))
+    applyShownBaseThemes().catch(error => console.error('Failed to apply the profile base theme', error))
   })
 
   /** @param {{ _id: string, value: any }} data */
