@@ -234,12 +234,17 @@ function errorMessage(error) {
 const historyPaused = ref(/** @type {boolean | null} */ (null))
 const pausingHistory = ref(false)
 
+// Counts the reads and changes of the pause state, so a slower, older one
+// can't replace a newer result, also across account switches.
+let historyPauseUpdate = 0
+
 watch(() => getYouTubeSyncKey(account.value), async (key) => {
+  const update = ++historyPauseUpdate
   historyPaused.value = null
   if (!key) return
   try {
     const paused = await isYouTubeWatchHistoryPaused()
-    if (getYouTubeSyncKey(account.value) === key) historyPaused.value = paused
+    if (update === historyPauseUpdate) historyPaused.value = paused
   } catch (error) {
     console.warn('Could not read whether the YouTube watch history is paused', error)
   }
@@ -247,11 +252,11 @@ watch(() => getYouTubeSyncKey(account.value), async (key) => {
 
 /** @param {boolean} paused */
 async function setHistoryPaused(paused) {
-  const key = getYouTubeSyncKey(account.value)
+  const update = ++historyPauseUpdate
   pausingHistory.value = true
   try {
     await setYouTubeWatchHistoryPaused(paused)
-    if (getYouTubeSyncKey(account.value) === key) historyPaused.value = paused
+    if (update === historyPauseUpdate) historyPaused.value = paused
   } catch (error) {
     console.error(error)
     showToast({
