@@ -81,6 +81,8 @@ export class TabPreviewController {
     this._memoryCachedTabIds = new Set()
     /** Tabs whose newest preview is not on disk yet, so it must stay in memory. */
     this._writingPreviewTabIds = new Set()
+    /** @type {WeakMap<TabInfo, number>} Counts each tab's captures, so reads can tell theirs is stale. */
+    this._captureRevisions = new WeakMap()
   }
 
   /**
@@ -149,21 +151,22 @@ export class TabPreviewController {
    * @returns {Promise<string | null>}
    */
   async _getCachedDataUrl(tab) {
-    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
-      this._rememberDataUrl(tab, tab.previewDataUrl)
-      return tab.previewDataUrl
-    }
+    while (true) {
+      if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
+        this._rememberDataUrl(tab, tab.previewDataUrl)
+        return tab.previewDataUrl
+      }
 
-    const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
-    // A capture during the read stored a newer preview than the file had.
-    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
-      this._rememberDataUrl(tab, tab.previewDataUrl)
-      return tab.previewDataUrl
+      const revision = this._captureRevisions.get(tab) ?? 0
+      const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
+      // A capture during the read made the file's previous contents stale,
+      // even if its preview has left memory again since.
+      if (revision !== (this._captureRevisions.get(tab) ?? 0)) continue
+      if (dataUrl != null) {
+        this._rememberDataUrl(tab, dataUrl)
+      }
+      return dataUrl
     }
-    if (dataUrl != null) {
-      this._rememberDataUrl(tab, dataUrl)
-    }
-    return dataUrl
   }
 
   /**
@@ -388,6 +391,7 @@ export class TabPreviewController {
         }
 
         const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
+        this._captureRevisions.set(tab, (this._captureRevisions.get(tab) ?? 0) + 1)
         this._rememberDataUrl(tab, dataUrl)
         tab.previewCapturedAt = Date.now()
         // Incognito tabs keep their previews in memory only
