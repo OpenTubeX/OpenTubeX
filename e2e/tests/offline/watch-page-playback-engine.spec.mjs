@@ -1051,10 +1051,9 @@ test.describe('watch page', () => {
   for (const scenario of ['preferred clients', 'default clients', 'authenticated default clients', 'anonymous extraction fails']) {
     test(`retries a limited authenticated live manifest without cookies: ${scenario}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
-      await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
-        contentType: 'application/x-mpegURL',
-        body: '#EXTM3U\n'
-      }))
+      // A playable manifest keeps the yt-dlp player, so the seek bar check
+      // below sees its final state instead of one before a fallback.
+      await routeLiveHls(page, /^https:\/\/example\.invalid\/.*\.m3u8$/)
       await openMockedVideo(page)
       await page.evaluate(async () => {
         const store = window.$store
