@@ -19,26 +19,33 @@ const removeForward = () => {
 }
 const systemNotifications = () => adb('shell', 'dumpsys', 'notification', '--noredact')
 
-/** Swipes a notification out of the shade like the user does. */
-async function swipeAway(text) {
+/**
+ * Dismisses a notification from the shade with Clear all, like the user does.
+ * A software-rendered shade can lag by seconds and then let a swipe snap the
+ * notification back, while taps reach it.
+ */
+async function clearShade(text) {
   adb('shell', 'cmd', 'statusbar', 'expand-notifications')
-  // Swipes again until the opening shade lets one through.
-  await expect.poll(() => {
-    let window
-    try {
-      window = adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml') && adb('shell', 'cat', '/sdcard/window.xml')
-    } catch {
-      // Dumping fails while the shade is still moving.
-      return true
-    }
-    const [left, top, right, bottom] = window
-      .match(new RegExp(`text="${text}"[^>]*bounds="\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]"`))?.slice(1).map(Number) ?? []
-    if (left === undefined) return true
-    const y = String(Math.round((top + bottom) / 2))
-    adb('shell', 'input', 'swipe', String(left + 60), y, String(right), y, '150')
-    return systemNotifications().includes(text)
-  }, { timeout: 15_000 }).toBe(false)
-  adb('shell', 'cmd', 'statusbar', 'collapse')
+  try {
+    let clearAll
+    await expect.poll(() => {
+      let window
+      try {
+        window = adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml') && adb('shell', 'cat', '/sdcard/window.xml')
+      } catch {
+        // Dumping fails while the shade is still moving.
+        return false
+      }
+      clearAll = window.match(/resource-id="com\.android\.systemui:id\/dismiss_text"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/)?.slice(1).map(Number)
+      return window.includes(`text="${text}"`) && Boolean(clearAll)
+    }, { timeout: 15_000 }).toBe(true)
+    const [left, top, right, bottom] = clearAll
+    adb('shell', 'input', 'tap', String(Math.round((left + right) / 2)), String(Math.round((top + bottom) / 2)))
+    await expect.poll(() => systemNotifications().includes(text), { timeout: 15_000 }).toBe(false)
+  } finally {
+    // An open shade would cover the app for the following tests.
+    adb('shell', 'cmd', 'statusbar', 'collapse')
+  }
 }
 
 async function connect() {
@@ -261,7 +268,7 @@ test('reminders that fire while the app is visible appear in the app, and turnin
     await expect(page.getByRole('button', { name: 'Notifications (3 unread)', exact: true })).toBeVisible()
     await expect(page.locator('.toast', { hasText: 'Background stream' })).toHaveCount(0)
 
-    // Swiping the system notification away while the app is not running marks its entry read once it starts,
+    // Dismissing the system notification while the app is not running marks its entry read once it starts,
     // and records the dismissal that syncs to other devices.
     adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
     await browser.close()
@@ -271,7 +278,7 @@ test('reminders that fire while the app is visible appear in the app, and turnin
       adb('shell', 'am', 'kill', APP_ID)
       return adb('shell', 'pidof', APP_ID, '||', 'true').trim()
     }, { timeout: 15_000 }).toBe('')
-    await swipeAway('Background stream')
+    await clearShade('Background stream')
     launch();
     ({ browser, page } = await connect())
     const readState = () => page.evaluate(path => ({
