@@ -264,7 +264,13 @@ test('a retry after a rejected upload keeps the profile settings edits the serve
 })
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-const between = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end, settingsSource.indexOf(start)))
+/** The source of settings.js from `start` up to `end`, which must both be in it */
+const between = (start, end) => {
+  const from = settingsSource.indexOf(start)
+  const to = settingsSource.indexOf(end, from)
+  assert.ok(from !== -1 && to !== -1, `settings.js no longer contains ${from === -1 ? start : end}`)
+  return settingsSource.slice(from, to)
+}
 
 test('a saved edit of a profile setting keeps the optimistic edits still saving', async () => {
   const { createSettingUpdateQueue, createSettingWriteTracker } = await import('../../src/renderer/helpers/settingUpdateQueue.js')
