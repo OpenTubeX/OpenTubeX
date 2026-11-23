@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
-import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
+import { goToSettingsSection, openThemeGallery } from '../../e2e/helpers/app.mjs'
 import { appPage } from '../helpers/android-app-page.mjs'
 
 test('Android fixed Material variants use the selectable accent with readable text', {
@@ -24,10 +24,13 @@ test('Android fixed Material variants use the selectable accent with readable te
     if (await page.locator('.settingsWindow').isVisible()) {
       while (!await page.locator('.settingsMenu').isVisible()) await page.locator('.settingsBackButton').click()
     }
-    const section = await goToSettingsSection(page, 'theme')
+    await goToSettingsSection(page, 'theme')
+    const gallery = page.locator('.themeGallery')
+    const section = gallery.getByRole('group', { name: 'Material accent color' })
     for (const [theme, label] of [['materialLight', 'Material Light'], ['materialDark', 'Material Dark'], ['materialBlack', 'Material Black']]) {
+      await openThemeGallery(page)
       await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
-      await expect(section.getByRole('combobox', { name: /^Base theme/i })).toHaveText(label)
+      await expect(gallery.getByRole('radio', { name: label, exact: true })).toBeChecked()
       await expect(section.getByRole('button', { name: 'Material accent color' })).toBeVisible()
       await expect(page.locator('body')).toHaveClass(/dynamicColors/)
       const primaryFor = seed => page.evaluate(async seed => {
@@ -67,6 +70,9 @@ test('Android fixed Material variants use the selectable accent with readable te
       }
       assert.ok(contrast(roles['text-with-main-color'], roles['primary-color']) >= 4.5)
       if (theme === 'materialBlack') assert.deepEqual(roles['bg-color'], [0, 0, 0])
+      // The search field is hidden while the gallery subpage is open.
+      await page.locator('.settingsBackButton').click()
+      await expect(gallery).toBeHidden()
       const search = await page.locator('.settingsSearch input').evaluate(el => {
         const rgba = color => color.match(/[\d.]+/g).map(Number)
           .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
@@ -85,6 +91,7 @@ test('Android fixed Material variants use the selectable accent with readable te
         await expect(page.locator('body')).toHaveCSS('background-color', background)
       }
     }
+    await openThemeGallery(page)
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
     await expect(section.getByRole('button', { name: 'Material accent color' })).toHaveCount(0)
   } finally {
@@ -93,6 +100,8 @@ test('Android fixed Material variants use the selectable accent with readable te
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(saved)) await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
     }, saved)
+    // Settings reopens on the last subpage, so leave the gallery.
+    if (await page.locator('.themeGallery').isVisible()) await page.locator('.settingsBackButton').click()
     if (!settingsWereOpen && await page.locator('.settingsWindow').isVisible()) {
       await page.locator('.settingsCloseButton').click()
       await expect(page.locator('.settingsWindow')).toBeHidden()

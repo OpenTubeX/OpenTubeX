@@ -107,14 +107,14 @@ try {
       store.dispatch('hideSettingsWindow')
       document.querySelector('.sideNav .inner > a[href="#/userplaylists"]').click()
     })
-    await expect(page.locator('.newPlaylistButton')).toBeVisible()
+    await expect(page.getByTitle('Create New Playlist')).toBeVisible()
     const searchResult = destination.startsWith('search-')
     if (destination !== 'home') {
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow'))
       await page.locator('.settingsSearch input').fill('')
       if (!await page.locator('.settingsMenu [data-section="playback"]').isVisible()) await page.locator('.settingsBackButton').click()
       await expect(page.locator('.settingsMenu [data-section="playback"]')).toBeVisible()
-      if (searchResult) await page.locator('.settingsSearch input').fill('Preload Upcoming Videos')
+      if (searchResult) await page.locator('.settingsSearch input').fill('Autoplay Interruption Timer')
     }
     const target = destination === 'home'
       ? '.sideNav .inner > a[href="#/home"]'
@@ -151,7 +151,7 @@ try {
     store.dispatch('hideSettingsWindow')
     document.querySelector('.sideNav .inner > a[href="#/userplaylists"]').click()
   })
-  await measureTap(page.locator('.newPlaylistButton'), 'shared-button')
+  await measureTap(page.getByTitle('Create New Playlist'), 'shared-button')
   const prompt = page.locator('.prompt:visible')
   await expect(prompt).toBeVisible()
   await measureTap(prompt, 'prompt-backdrop', null, { x: 8, y: 8 })
