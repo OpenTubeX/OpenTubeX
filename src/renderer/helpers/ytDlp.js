@@ -14,6 +14,7 @@ import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
 import { isLiteBuild } from './ytDlpCapabilities'
+import { removeDownloadNotifications } from './notificationHistory'
 
 const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
 
@@ -123,7 +124,11 @@ const capacitor = {
   },
   ytDlpClearDownloads: ids => native.clear({ ids }).then(result => result.ok),
   ytDlpOpenDownload: id => native.open({ id }).then(result => result.ok),
-  ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => result.ok),
+  // iOS plays downloads in its own player instead of the watch page.
+  ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => {
+    if (result.ok) removeDownloadNotifications([id])
+    return result.ok
+  }),
   ytDlpRemoveDownload: id => native.remove({ id }).then(result => result.ok),
   handleYtDlpDownloadStatus: callback => listen('downloadStatus', callback),
   handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),

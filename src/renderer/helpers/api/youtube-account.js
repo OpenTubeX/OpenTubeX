@@ -3,7 +3,7 @@ import { ClientType, Innertube } from 'youtubei.js'
 import store from '../../store/index'
 import i18n from '../../i18n/index'
 import { ERROR_TOAST_ICON, showToast } from '../utils'
-import { getSettingsNotificationTarget, recordNotification } from '../notificationHistory'
+import { getSettingsNotificationTarget, recordNotification, removeOverNotifications } from '../notificationHistory'
 import { getLocalSignatureTimestamp, localApiFetch } from './local'
 import { YOUTUBE_USER_AGENT_HEADER, YOUTUBE_USER_AGENTS } from '../../../youTubeUserAgent.js'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from '../youtube-account-state.js'
@@ -462,6 +462,8 @@ export async function completeYouTubeSignIn(code, signal) {
       signal.throwIfAborted()
       throw new Error('Could not save the YouTube account on this device')
     }
+    // Signed in again, so the request to do so is over.
+    removeOverNotifications(entry => entry.kind === 'youtube-signed-out')
     // Cancelled while the account saved, so undo the sign-in.
     if (signal.aborted && store.getters.getYouTubeAccount?.credentials?.refresh_token === credentials.refresh_token) {
       await signOutOfYouTubeAccount().catch(error => console.error(error))

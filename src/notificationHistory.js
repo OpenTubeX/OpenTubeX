@@ -201,10 +201,12 @@ export function getNotificationOpenUrl(url) {
  * @returns {NotificationHistoryTarget}
  */
 export function getDownloadTarget(phase, videoId, downloadId, mode = 'video') {
-  if (phase === 'completed' && (mode === 'video' || mode === 'audio') && typeof videoId === 'string' && ID_PATTERN.test(videoId) && Number.isInteger(downloadId)) {
-    return { kind: 'download-completed', path: `/watch/${videoId}`, query: { downloadId: String(downloadId) } }
+  // The download's ID also lets the app remove the entry once it was played or removed.
+  const query = Number.isInteger(downloadId) ? { downloadId: String(downloadId) } : null
+  if (phase === 'completed' && (mode === 'video' || mode === 'audio') && typeof videoId === 'string' && ID_PATTERN.test(videoId) && query) {
+    return { kind: 'download-completed', path: `/watch/${videoId}`, query }
   }
-  return { kind: /** @type {const} */ (`download-${phase}`), path: '/downloads' }
+  return { kind: /** @type {const} */ (`download-${phase}`), path: '/downloads', ...(query ? { query } : {}) }
 }
 
 /**

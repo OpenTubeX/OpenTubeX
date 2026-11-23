@@ -1660,6 +1660,10 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
       }
     }))
     const failures = results.filter(({ result }) => result === null || 'error' in result)
+    // An earlier failure is over once each of its tools updated fine.
+    const succeeded = results.filter(({ result }) => result !== null && !('error' in result)).map(({ binary }) => binary)
+    removeOverNotifications(entry => entry.kind === 'tool-update-failed' &&
+      !!entry.query?.tools && entry.query.tools.split(',').every(tool => succeeded.includes(tool)))
     const updatedBinaries = results
       .filter(({ result }) => result !== null && 'version' in result && result.updated)
       .map(({ binary }) => binary)
@@ -1679,9 +1683,12 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
         const message = t('Settings.Download Settings.Managed Tools Download Error Template', { errors })
         showToast({ message, icon: ['fas', 'circle-exclamation'] })
+        const target = getSettingsNotificationTarget('external-software')
         recordNotification({
           kind: 'tool-update-failed',
-          ...getSettingsNotificationTarget('external-software'),
+          ...target,
+          // Lets a later update remove the entry once these tools work again.
+          query: { ...target.query, tools: failures.map(({ binary }) => binary).join(',') },
           title: t('Settings.External Software Settings.External Software Settings'),
           body: message
         })

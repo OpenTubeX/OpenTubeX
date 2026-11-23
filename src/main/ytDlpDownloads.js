@@ -823,7 +823,7 @@ async function startYtDlpDownload(
   /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[], showProgress: () => void }} */
   const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [], showProgress: () => {} }
   activeDownloads.set(id, entry)
-  showAutomaticDownloadNotification(payload, 'started')
+  showAutomaticDownloadNotification(payload, 'started', id)
   sendStatus(true)
 
   /** @type {string[]} */
@@ -1164,7 +1164,7 @@ async function startYtDlpDownload(
     if (status.status === 'completed') {
       showAutomaticDownloadNotification(payload, 'completed', id)
     } else if (status.status === 'failed') {
-      showAutomaticDownloadNotification(payload, 'failed')
+      showAutomaticDownloadNotification(payload, 'failed', id)
     }
 
     sendStatus(true)

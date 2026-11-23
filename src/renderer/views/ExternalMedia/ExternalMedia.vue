@@ -550,6 +550,8 @@ import TwitchChat from './TwitchChat.vue'
 import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import WatchChannelSettingsButton from '../../components/WatchChannelSettingsButton/WatchChannelSettingsButton.vue'
 import { getTwitchChatTarget } from './twitchChat'
+import { markTwitchLiveNotificationsRead } from '../../helpers/notificationHistory'
+import { parseTwitchChannelLogin } from '../../../twitchFollows'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { useRootClass } from '../../helpers/rootClasses'
@@ -1303,6 +1305,9 @@ function handleCompanionAudioEnded() {
   }
 }
 
+/** The stream whose notifications playback marked read already. */
+let notificationsReadSource = null
+
 function handlePlay() {
   const wellbeingBlock = store.getters.getWellbeingPlaybackBlock(false)
   if (wellbeingBlock) {
@@ -1311,6 +1316,12 @@ function handlePlay() {
     return
   }
   store.commit('markWellbeingPlay', Date.now())
+  // The stream's notification was seen, except in incognito tabs, which leave no trace.
+  const login = source.value?.isLive ? parseTwitchChannelLogin(mediaUrl.value) : null
+  if (login && source.value !== notificationsReadSource && !isIncognitoTab.value) {
+    notificationsReadSource = source.value
+    markTwitchLiveNotificationsRead(login)
+  }
   playCompanionAudio()
 }
 

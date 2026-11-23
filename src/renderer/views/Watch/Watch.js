@@ -60,7 +60,7 @@ import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScr
 import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched, withoutWatchedDiscoveryVideos } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
-import { withThumbnail } from '../../helpers/notificationHistory'
+import { markVideoNotificationsRead, removeDownloadNotifications, withThumbnail } from '../../helpers/notificationHistory'
 import { markWatchedThreadOpened } from '../../helpers/commentReplyNotifications'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
@@ -666,6 +666,7 @@ export default defineComponent({
       formatBeforeBackground: null,
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
+      notificationsReadVideoId: null,
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
@@ -3101,6 +3102,8 @@ export default defineComponent({
       this.localPlaybackDownloadId = downloadId
       this.localPlaybackFilePath = filePath
       this.playbackSourceKey++
+      // The download was announced so it could be played.
+      removeDownloadNotifications([downloadId])
       return file
     },
 
@@ -5564,6 +5567,11 @@ export default defineComponent({
       this.$store.commit('markWellbeingPlay', Date.now())
       this.dropQueuedCopyOfCurrentVideo()
       this.addToYouTubeWatchHistory()
+      // Its upload or reminder was seen, except in incognito tabs, which leave no trace.
+      if (this.notificationsReadVideoId !== this.videoId && !this.isIncognitoTab) {
+        this.notificationsReadVideoId = this.videoId
+        markVideoNotificationsRead(this.videoId)
+      }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
       // Resuming consumes the recovery pause, so later format switches or
