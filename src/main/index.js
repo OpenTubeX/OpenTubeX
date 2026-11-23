@@ -297,6 +297,8 @@ function runApp() {
     }
   }
 
+  let dockMenuSignature = null
+
   function updateDockMenu() {
     createTrayContextMenu()
     updateThumbarButtons()
@@ -304,8 +306,14 @@ function runApp() {
       return
     }
 
+    const mediaItems = createMediaMenuItems()
+    // Media sessions update with every state change of the player and window
+    // focus, which mostly leave the menu unchanged.
+    const signature = JSON.stringify([dockMediaLabels.newWindow, mediaItems.map(({ label, enabled }) => [label, enabled])])
+    if (signature === dockMenuSignature) return
+    dockMenuSignature = signature
     const dockMenu = Menu.buildFromTemplate([
-      ...createMediaMenuItems(),
+      ...mediaItems,
       { type: 'separator' },
       {
         label: dockMediaLabels.newWindow,
