@@ -9,6 +9,11 @@ import { useVisibleSubscriptionTabs } from './useVisibleSubscriptionTabs'
 
 const TAB_FEEDS = { videos: 'videos', shorts: 'shorts', live: 'live', community: 'posts' }
 
+/** @param {unknown} error */
+function logRefreshError(error) {
+  console.error('Failed to refresh the subscriptions', error)
+}
+
 /**
  * Refreshes the feed that the subscriptions page opens to, like its Refresh
  * button, without opening the page. Its feeds pick up the results from the
@@ -27,17 +32,15 @@ export function useSubscriptionsHoldRefresh() {
     } else if (tab === 'feeds') {
       // Starting another refresh would abort the running one
       const feeds = store.getters.getFollowedRssFeeds
-      if (feeds.length > 0 && !rssFeedsRefreshing.value) refreshRssFeeds(feeds)
+      if (feeds.length > 0 && !rssFeedsRefreshing.value) refreshRssFeeds(feeds).catch(logRefreshError)
     } else if (tab === 'platforms') {
-      if (getFollowedChannels().length > 0 && !platformFeedRefreshing.value) refreshPlatformFeed()
+      if (getFollowedChannels().length > 0 && !platformFeedRefreshing.value) refreshPlatformFeed().catch(logRefreshError)
     } else if (
       tab in TAB_FEEDS &&
       !store.getters.getSubscriptionFeedRefreshInProgress &&
       store.getters.getActiveProfile.subscriptions.length > 0
     ) {
-      refreshSubscriptionFeed(TAB_FEEDS[tab], { t: i18n.global.t }).catch(error => {
-        console.error('Failed to refresh the subscriptions', error)
-      })
+      refreshSubscriptionFeed(TAB_FEEDS[tab], { t: i18n.global.t }).catch(logRefreshError)
     }
   }
 

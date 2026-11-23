@@ -9,7 +9,7 @@ const HOLD_SLOP = 10
  * Runs an action instead of the click when a pointer holds an element still.
  * A touch hold also replaces the long-press link menu, which it fires earlier
  * when the system's long-press delay is shorter. Bind `onPointerDown` on the
- * element.
+ * element, and call `cancel` when the element goes away without unmounting.
  * @param {() => void} onHold
  */
 export function usePointerHold(onHold) {
@@ -80,6 +80,11 @@ export function usePointerHold(onHold) {
     }
   }
 
+  /** Ends a hold that has not fired yet. */
+  function cancel() {
+    if (hold?.timer != null) stop()
+  }
+
   function stop() {
     if (hold?.timer != null) clearTimeout(hold.timer)
     hold = null
@@ -92,5 +97,5 @@ export function usePointerHold(onHold) {
   }
 
   onBeforeUnmount(stop)
-  return { onPointerDown }
+  return { cancel, onPointerDown }
 }

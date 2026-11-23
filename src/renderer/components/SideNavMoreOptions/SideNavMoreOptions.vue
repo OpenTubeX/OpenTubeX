@@ -210,7 +210,7 @@ watch(mobileLayout, (isMobile) => {
 const route = useRoute()
 
 // Like in the bottom bar, holding Subscriptions refreshes it in the background.
-const { onPointerDown: startSubscriptionsHold } = usePointerHold(() => {
+const { cancel: cancelSubscriptionsHold, onPointerDown: startSubscriptionsHold } = usePointerHold(() => {
   closeMenu()
   emit('refresh-subscriptions')
 })
@@ -308,6 +308,7 @@ function moveFocus(event) {
 }
 
 function closeMenu() {
+  cancelSubscriptionsHold()
   openMoreOptions.value = false
 }
 
