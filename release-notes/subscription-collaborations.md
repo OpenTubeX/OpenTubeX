@@ -2,4 +2,4 @@
 category: feature
 ---
 
-A new subscription setting also shows videos that your channels made together with another channel that uploaded them.
+Subscriptions now also show videos that your channels made together with another channel that uploaded them. You can turn this off in the subscription settings.
