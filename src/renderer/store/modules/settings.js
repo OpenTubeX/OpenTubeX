@@ -804,13 +804,15 @@ function applyActiveProfileSettings(store) {
   // The replaced settings can change while every value stays the same.
   const replaced = shared => Object.keys(shared).sort().join('\0')
   if (plan.applied === current.applied && plan.changed.length === 0 && replaced(plan.shared) === replaced(current.shared)) return
+  // The commit updates `current`.
+  const previous = current.applied
   store.commit('applyProfileSettings', plan)
   for (const settingId of plan.changed) {
     applySettingSideEffects(store, settingId, settings[settingId])
   }
   // An icon pack still loading for the previous profile must not show, also
   // when this one uses the same pack.
-  if (plan.applied !== current.applied && !plan.changed.includes('iconPack')) {
+  if (plan.applied !== previous && !plan.changed.includes('iconPack')) {
     applySettingSideEffects(store, 'iconPack', settings.iconPack)
   }
   reportProfileSettings(settings)

@@ -285,9 +285,11 @@ test('a failed shared write of a setting the active profile replaces keeps the p
 })
 
 test('replacing the active profile\'s own settings with others of the same value tracks the new shared values', () => {
+  const sideEffects = []
   const { applyActiveProfileSettings } = vm.runInNewContext(`${between('function applyActiveProfileSettings(', '/**\n * Runs what a setting does')}
 ({ applyActiveProfileSettings })`, {
     ...profileSettings,
+    applySettingSideEffects: (_store, settingId) => sideEffects.push(settingId),
     canHaveOwnSettings: () => true,
     process: { env: {} },
     planProfileSettings: (settings, target) => planProfileSettingsOf(settings, target, () => true),
@@ -303,8 +305,11 @@ test('replacing the active profile\'s own settings with others of the same value
   }
   applyActiveProfileSettings(store)
   assert.deepEqual(Object.keys(settings.profileSettingsState.shared), ['hideComments'])
+  // The switch selects the icon pack again, so one still loading for the previous profile doesn't show.
+  assert.deepEqual(sideEffects.splice(0), ['iconPack'])
   // Sync replaces them with another setting that already shows its value.
   settings.profileSettingsState.overrides.car = { hideLiveChat: false }
   applyActiveProfileSettings(store)
   assert.deepEqual(Object.keys(settings.profileSettingsState.shared), ['hideLiveChat'])
+  assert.deepEqual(sideEffects, [])
 })
