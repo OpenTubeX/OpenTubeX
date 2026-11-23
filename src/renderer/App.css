@@ -89,6 +89,10 @@
   --top-nav-height: 60px;
   --mobile-nav-content-height: 60px;
   --progress-bar-height: 10px;
+
+  /* The page's scrollbars, children of the body, stay between the header and a
+     bottom tab bar. Android and iOS draw them natively. */
+  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
 }
 
 .app {
@@ -1191,17 +1195,13 @@
   --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
-/* The page's scrollbars, children of the body, stay between the header and a
-   bottom tab bar. Android and iOS draw them natively. */
-:global(body:has(.app)) {
-  --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
-}
-
-:global(body:has(.app.topTabs)) {
+/* The tab bar positions are mirrored on <html> by mirrorAppState(), because
+   body:has(.app.topTabs) rechecked the body for every DOM change. */
+:global(:root.appTopTabs body) {
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
-:global(body:has(.app.bottomTabs)) {
+:global(:root.appBottomTabs body) {
   --page-footer-block-size: var(--bottom-tab-bar-height);
 }
 
