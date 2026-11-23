@@ -7,6 +7,8 @@ const FALLBACK_MAX_AGE = 7200
 // Thumbnails are mostly 10-40 KB, so this keeps several thousand of the most
 // recently used ones while bounding the memory of long sessions.
 const MAX_CACHE_BYTES = 64 * 1024 * 1024
+// Requests that have not finished by then fail, so the image shows its placeholder.
+const REQUEST_TIMEOUT_MS = 60_000
 
 export class ImageCache {
   constructor(maxBytes = MAX_CACHE_BYTES) {
@@ -155,6 +157,27 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
         url,
         headers
       })
+      let settled = false
+      const fail = (error) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        protocolRequest.signal?.removeEventListener('abort', cancel)
+        newRequest.abort()
+        reject(error)
+      }
+      // An image the page no longer shows, or a server that stops responding,
+      // would otherwise keep the request and its received data until the app quits.
+      const cancel = () => fail(new Error(`Image request cancelled: ${url}`))
+      const timeout = setTimeout(() => fail(new Error(`Image request timed out: ${url}`)), REQUEST_TIMEOUT_MS)
+      protocolRequest.signal?.addEventListener('abort', cancel, { once: true })
+      const succeed = (response) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        protocolRequest.signal?.removeEventListener('abort', cancel)
+        resolve(response)
+      }
 
       newRequest.on('response', (response) => {
         const chunks = []
@@ -166,15 +189,14 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
           if (receivedBytes > maxBytes) {
             tooLarge = true
             chunks.length = 0
-            newRequest.abort()
-            reject(new Error(`Image is too large: ${url}`))
+            fail(new Error(`Image is too large: ${url}`))
             return
           }
           chunks.push(chunk)
         })
 
         response.on('end', () => {
-          if (tooLarge) return
+          if (tooLarge || settled) return
           const data = Buffer.concat(chunks)
           const mimeType = response.headers['content-type']
 
@@ -191,7 +213,7 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
             ? response.statusCode
             : 502
           const bodyAllowed = ![204, 205, 304].includes(status)
-          resolve(new Response(bodyAllowed ? data : null, {
+          succeed(new Response(bodyAllowed ? data : null, {
             status,
             headers: { 'content-type': mimeType }
           }))
@@ -199,15 +221,16 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
 
         response.on('error', (error) => {
           console.error('image cache error', error)
-          reject(error)
+          fail(error)
         })
+        response.on('aborted', () => fail(new Error(`Image response aborted: ${url}`)))
       })
 
       newRequest.on('error', (err) => {
         // Settle the request so the <img> fires its error event and the
         // renderer can show a placeholder instead of waiting forever.
         console.error(err)
-        reject(err)
+        fail(err)
       })
 
       newRequest.end()
