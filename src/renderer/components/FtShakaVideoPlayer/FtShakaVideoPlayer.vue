@@ -7401,7 +7401,7 @@ function handlePlay() {
   tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
   updateAutoPip()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (scrollMiniPlayerActive.value) {
     showScrollMiniPlayPause(true)
@@ -7473,7 +7473,7 @@ function handlePause() {
   }
 
   updateAutoPip()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (scrollMiniPlayerActive.value) {
     showScrollMiniPlayPause(false)
@@ -7666,7 +7666,7 @@ function handleVideoResize() {
   updateVideoIntrinsicSize()
   updateAnnotationVideoAspectRatio()
   updateScrollMiniVideoAspectRatio()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (isActiveTab.value && isNativeFullscreenActive()) {
     requestFullscreenOrientation(true)
@@ -7945,6 +7945,7 @@ const {
   isNativeFullscreenActive,
   rememberDockOrigin,
   rememberInlinePlayerLayoutHeight,
+  scheduleScrollMiniPlayerUpdate,
   repairScrollMiniPlaceholderHeight,
   scrollMiniAnchor,
   scrollMiniDragHandleOnLightBg,
@@ -13051,9 +13052,8 @@ async function handleLoaded() {
     height: mediaElement.videoHeight
   })
 
-  nextTick(() => {
-    rememberInlinePlayerLayoutHeight()
-  })
+  // The container's resize observer remembers the inline height once loading
+  // resizes the player, without forcing a layout of the rendering page.
 
   // getAudioTracks() returns an empty array when no variant is active, so we can't do this in the `streaming` event
   hasMultipleAudioTracks.value = deduplicateAudioTracks(player.getAudioTracks()).size > 1

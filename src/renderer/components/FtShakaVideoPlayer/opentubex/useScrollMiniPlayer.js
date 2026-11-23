@@ -1160,8 +1160,26 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  let scheduledUpdateFrame = null
+
+  /**
+   * Updates the mini player in the next frame. Media events arrive while the
+   * Watch page is still rendering, where each synchronous update forced a
+   * layout of the page, and several of them arrive in the same frame.
+   */
+  function scheduleScrollMiniPlayerUpdate() {
+    scheduledUpdateFrame ??= requestAnimationFrame(() => {
+      scheduledUpdateFrame = null
+      updateScrollMiniPlayer()
+    })
+  }
+
   /** @param {{ animateActivation?: boolean, animateDeactivation?: boolean }} [options] */
   function updateScrollMiniPlayer({ animateActivation = true, animateDeactivation = true } = {}) {
+    if (scheduledUpdateFrame !== null) {
+      cancelAnimationFrame(scheduledUpdateFrame)
+      scheduledUpdateFrame = null
+    }
     // The native PiP viewport makes the inline anchor appear offscreen. Keep
     // its existing layout so returning cannot start a dock/restore animation.
     if (isAndroidPipLayoutActive()) return
@@ -1876,6 +1894,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     })
   })
   onBeforeUnmount(() => {
+    if (scheduledUpdateFrame !== null) cancelAnimationFrame(scheduledUpdateFrame)
     unregisterAndroidBackPlayer?.()
     window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
     window.removeEventListener('opentubex:android-pip-restored', handleAndroidPictureInPictureRestored)
@@ -2044,6 +2063,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     isNativeFullscreenActive,
     rememberDockOrigin,
     rememberInlinePlayerLayoutHeight,
+    scheduleScrollMiniPlayerUpdate,
     repairScrollMiniPlaceholderHeight,
     scrollMiniAnchor,
     scrollMiniDragHandleOnLightBg,
