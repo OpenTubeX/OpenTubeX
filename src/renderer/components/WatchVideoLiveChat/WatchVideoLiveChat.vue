@@ -611,6 +611,13 @@ const liveChatActionsRef = useTemplateRef('liveChatActionsRef')
 useScrollClamp(useTemplateRef('openedSuperChatRef'), useTemplateRef('openedSuperChatContentRef'))
 const comments = shallowReactive([])
 const superChatComments = shallowReactive([])
+/** Expiry timers of the shown Super Chats, cleared with them. */
+const superChatTimers = new Set()
+
+function clearSuperChatTimers() {
+  for (const timer of superChatTimers) clearTimeout(timer)
+  superChatTimers.clear()
+}
 const superChat = ref({
   id: '',
   author: {
@@ -671,6 +678,7 @@ onBeforeUnmount(() => {
     clearTimeout(finishLoadingTimer)
     finishLoadingTimer = null
   }
+  clearSuperChatTimers()
   handleEnd()
 })
 
@@ -979,6 +987,7 @@ function clearChat() {
   pendingReadbackTrimRestore = null
   comments.splice(0, comments.length)
   superChatComments.splice(0, superChatComments.length)
+  clearSuperChatTimers()
   showSuperChat.value = false
   pendingReplayComments = []
   replayFetchedUntilMs = 0
@@ -1165,9 +1174,11 @@ function deliverComment(comment) {
   if (comment.superChat) {
     superChatComments.unshift(comment)
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      superChatTimers.delete(timer)
       removeFromSuperChat(comment)
     }, 120000)
+    superChatTimers.add(timer)
   }
 
   pushComment(comment)

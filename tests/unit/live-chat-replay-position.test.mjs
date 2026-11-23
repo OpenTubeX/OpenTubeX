@@ -28,6 +28,7 @@ function setup(t, isReplay = true, ready = true) {
     pendingReadbackTrimRestore: null,
     isUnmounted: false,
     superChatComments: [],
+    clearSuperChatTimers: () => {},
     showSuperChat: { value: false },
     pendingReplayComments: [{ offsetMs: 12_000, comment: 'next message' }],
     replayFetchedUntilMs: 30_000,
