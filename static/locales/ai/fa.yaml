@@ -407,6 +407,7 @@ History:
   Custom: سفارشی
   History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
+  Restart Required: 'راه‌اندازی مجدد لازم است'
   Experimental Badge: آزمایشی
   YouTube Account Settings:
     Watch Posted Comments: "پیگیری پاسخ‌ها به نظرهایی که ارسال می‌کنم"

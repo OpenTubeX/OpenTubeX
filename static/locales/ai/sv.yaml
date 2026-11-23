@@ -383,6 +383,7 @@ History:
   Custom: Anpassad
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
+  Restart Required: 'Omstart krävs'
   Experimental Badge: Experimentell
   YouTube Account Settings:
     Watch Posted Comments: "Bevaka svar på kommentarer jag skriver"

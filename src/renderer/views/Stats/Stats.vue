@@ -277,7 +277,8 @@
       <FtPrompt
         v-if="showResetPrompt"
         autosize
-        :label="t('Stats.Reset confirmation')"
+        :label="t('Stats.Reset statistics')"
+        :extra-labels="[t('Stats.Reset confirmation')]"
         :option-names="resetPromptNames"
         :option-values="RESET_PROMPT_VALUES"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"

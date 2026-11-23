@@ -383,6 +383,7 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Restart Required: '需要重启'
   Experimental Badge: 实验性
   YouTube Account Settings:
     Watch Posted Comments: "关注我发布的评论的回复"

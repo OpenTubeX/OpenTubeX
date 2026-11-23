@@ -383,6 +383,7 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Restart Required: 'Vajalik on taaskäivitus'
   Experimental Badge: Eksperimentaalne
   YouTube Account Settings:
     Watch Posted Comments: "Jälgi minu postitatud kommentaaride vastuseid"

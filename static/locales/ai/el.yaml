@@ -383,6 +383,7 @@ History:
   Custom: Προσαρμοσμένο
   History Older Than Days Removed: Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από 1 ημέρα | Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από {days} ημέρες
 Settings:
+  Restart Required: 'Απαιτείται επανεκκίνηση'
   Experimental Badge: Πειραματική
   YouTube Account Settings:
     Watch Posted Comments: "Παρακολούθηση απαντήσεων στα σχόλια που δημοσιεύω"

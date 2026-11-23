@@ -129,7 +129,8 @@
       </div>
       <FtPrompt
         v-if="showDeletePrompt"
-        :label="t('Settings.Theme Settings.Custom Theme.Delete Theme Confirmation', { name: draft.name })"
+        :label="t('Settings.Theme Settings.Custom Theme.Delete Theme')"
+        :extra-labels="[t('Settings.Theme Settings.Custom Theme.Delete Theme Confirmation', { name: draft.name })]"
         :option-names="[t('Settings.Theme Settings.Custom Theme.Delete Theme'), t('Cancel')]"
         :option-values="['delete', 'cancel']"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"

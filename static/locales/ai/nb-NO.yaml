@@ -383,6 +383,7 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
+  Restart Required: 'Omstart kreves'
   Experimental Badge: Eksperimentell
   YouTube Account Settings:
     Watch Posted Comments: "Overvåk kommentarer jeg legger ut, for svar"

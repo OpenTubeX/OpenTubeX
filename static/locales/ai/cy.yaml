@@ -384,6 +384,7 @@ History:
   Custom: Personol
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
+  Restart Required: 'Angen ailgychwyn'
   Experimental Badge: Arbrofol
   YouTube Account Settings:
     Watch Posted Comments: "Dilyn atebion i sylwadau rwy'n eu postio"

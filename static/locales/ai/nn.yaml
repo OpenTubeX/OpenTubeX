@@ -527,6 +527,7 @@ Settings:
       Disk: disk
     Label: Yting
   Return to Settings Menu: Tilbake til innstillingsmenyen
+  Restart Required: 'Omstart krevst'
   General Settings:
     Invidious Instance Username: 'Brukarnamn for instansen'
     Invidious Instance Password: 'Passord for instansen'

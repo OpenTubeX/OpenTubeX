@@ -394,6 +394,7 @@ History:
   Custom: Brugerdefineret
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
+  Restart Required: 'Genstart påkrævet'
   Experimental Badge: Eksperimentel
   YouTube Account Settings:
     Watch Posted Comments: "Overvåg mine kommentarer for svar"

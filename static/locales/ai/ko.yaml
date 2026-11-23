@@ -608,6 +608,7 @@ Settings:
       Disk: 디스크
     Label: 성능
   Return to Settings Menu: 설정 메뉴로 돌아가기
+  Restart Required: '다시 시작 필요'
   General Settings:
     Invidious Instance Username: '인스턴스 사용자 이름'
     Invidious Instance Password: '인스턴스 비밀번호'

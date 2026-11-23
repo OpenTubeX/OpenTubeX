@@ -393,6 +393,7 @@ History:
   Custom: Прилагођено
   History Older Than Days Removed: Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана
 Settings:
+  Restart Required: 'Потребно је поновно покретање'
   Experimental Badge: Експериментално
   YouTube Account Settings:
     Watch Posted Comments: "Прати одговоре на коментаре које објавим"

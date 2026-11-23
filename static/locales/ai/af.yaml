@@ -680,6 +680,7 @@ Settings:
       Disk: skyf
     Label: Werkverrigting
   Return to Settings Menu: Keer terug na instellingskieslys
+  Restart Required: 'Herbegin vereis'
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
     Invidious Instance Username: 'Gebruikersnaam van instansie'
