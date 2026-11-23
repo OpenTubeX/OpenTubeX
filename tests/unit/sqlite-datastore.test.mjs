@@ -628,6 +628,8 @@ test('indexed lookups find string and numeric IDs exactly like NeDB', async (t) 
   assert.deepEqual(await store.findAsync({ _id: 5 }), [{ _id: 5, videoId: 'y' }])
   assert.deepEqual(await store.findAsync({ _id: { $in: ['5'] } }), [{ _id: '5', videoId: 'x' }])
   assert.deepEqual((await store.findAsync({ _id: { $nin: ['5', 'missing'] } })).map(doc => doc._id).sort(), [5, 'z'])
+  // JSON turns Infinity into null, which would exclude every document.
+  assert.equal(await store.countAsync({ _id: { $nin: [Infinity] } }), 3)
   // An array field is not an indexed scalar, but NeDB matches its members.
   assert.deepEqual((await store.findAsync({ videoId: 'x' })).map(doc => doc._id).sort(), ['5', 'z'])
 })
@@ -678,6 +680,13 @@ test('a prefetched full read is used once, and never after a write', async (t) =
   await store.updateAsync({ _id: 'a' }, { $set: { n: 3 } })
   assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [{ _id: 'a', n: 3 }, { _id: 'b', n: 2 }])
   assert.equal(reads.length, 4, 'a write discards them')
+
+  // A read queued before the prefetch runs before it, so it reads on its own.
+  const earlier = store.findAsync({ n: 2 }).execAsync()
+  store.prefetchAll()
+  assert.deepEqual(await earlier, [{ _id: 'b', n: 2 }])
+  assert.equal((await store.findAsync({})).length, 2)
+  assert.equal(reads.length, 6, 'the prefetch is left for the read after it')
 })
 
 test('updateManyAsync applies updates in order in one transaction', async (t) => {

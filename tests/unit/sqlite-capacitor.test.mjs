@@ -43,9 +43,9 @@ const modules = {
       query: async ({ name, sql, params, documentColumn }) => {
         const path = `/cache/library-results/${nextResult++}.json`
         const rows = (await driver(name).execute([[sql, JSON.parse(JSON.stringify(params))]]))[0]
-        // Like the plugin, documents without NeDB dates are written as their JSON.
+        // Like the plugin, objects and arrays without NeDB dates are written as their JSON.
         resultFiles.set(path, `[${rows.map(row => `[${row.map((value, column) => (
-          column === documentColumn && typeof value === 'string' && !value.includes('"$$date"') ? value : JSON.stringify(value)
+          column === documentColumn && typeof value === 'string' && /^[[{]/.test(value) && !value.includes('"$$date"') ? value : JSON.stringify(value)
         )).join(',')}]`).join(',')}]`)
         return { path }
       },
@@ -80,6 +80,9 @@ test('Capacitor loads whole datastores through result files and releases them', 
     { _id: 'c', at: new Date(5) },
   ])
   assert.equal(nextResult, before + 1)
+  const members = createBrowserDatastore('members-results', { childField: 'videos' })
+  await members.insertAsync({ _id: 'm', videos: ['text', '123', 4, { videoId: 'a' }] })
+  assert.deepEqual(await members.findAsync({}), [{ _id: 'm', videos: ['text', '123', 4, { videoId: 'a' }] }])
   // Released asynchronously after reading.
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(resultFiles.size, 0)

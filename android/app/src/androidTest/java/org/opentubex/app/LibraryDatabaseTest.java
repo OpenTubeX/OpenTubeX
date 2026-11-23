@@ -81,7 +81,8 @@ public class LibraryDatabaseTest {
             database.execute(list(
                 statement("CREATE TABLE docs (id PRIMARY KEY NOT NULL, data TEXT NOT NULL) WITHOUT ROWID"),
                 statement("INSERT INTO docs VALUES (?, ?)", "a\n\"\u0001\u2028", document),
-                statement("INSERT INTO docs VALUES (?, ?)", "b", dated)
+                statement("INSERT INTO docs VALUES (?, ?)", "b", dated),
+                statement("INSERT INTO docs VALUES (?, ?)", "c", "\"member\"")
             ), true);
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -98,6 +99,8 @@ public class LibraryDatabaseTest {
             assertEquals(7L, first.getLong(4));
             // Only parsing the text restores NeDB dates, so those documents stay strings.
             assertEquals(dated, rows.getJSONArray(1).getString(1));
+            // A string member stays its JSON, which a copy would turn into the bare string.
+            assertEquals("\"member\"", rows.getJSONArray(2).getString(1));
 
             output.reset();
             database.query("SELECT data FROM docs WHERE id = ?", new JSONArray().put("b"), -1, output);

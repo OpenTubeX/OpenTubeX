@@ -492,13 +492,14 @@ function markDataLossNotificationsRead() {
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
-  const settings = rootState.settings
-  const encrypted = requiresEncryptedSync(settings)
   // A sync merges the history, playlists, watch statistics, and subscriptions
   // of the data the store shows: a separate profile's, or else the shared ones.
   // A profile switch first loads the other profile's data.
   for (let loading = dataScopeLoading(); loading; loading = dataScopeLoading()) await loading.catch(() => {})
   await whenSyncServerSnapshotLoaded()
+  // Read after waiting, so a sign-in or privacy-mode change made meanwhile applies.
+  const settings = rootState.settings
+  const encrypted = requiresEncryptedSync(settings)
   const dataScope = rootGetters.getActiveDataScope ?? null
   const scopeKey = syncScopeKey(dataScope)
   // The server keeps a separate profile's collections under their own names.
@@ -2299,6 +2300,8 @@ const actions = {
     const settings = rootState.settings
     if (!settings.syncServerEnabled || !settings.syncServerToken) return
     await whenSyncServerSnapshotLoaded()
+    // Sync may have been turned off while the snapshot loaded.
+    if (!settings.syncServerEnabled || !settings.syncServerToken) return
     commit('setSyncedWatchStats', syncedWatchStatsOf(parseSnapshot(settings.syncServerSnapshot), rootGetters))
     return dispatch('scheduleSyncServer', 'data')
   },
@@ -2374,7 +2377,16 @@ const actions = {
 
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
-    await whenSyncServerSnapshotLoaded()
+    try {
+      await whenSyncServerSnapshotLoaded()
+    } catch (error) {
+      // Automatic sync does not start without the snapshot.
+      commit('setSyncServerError', error.message)
+      commit('setSyncServerStatus', 'error')
+      return
+    }
+    // Sync may have been turned off while the snapshot loaded.
+    if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
     const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
     commit('setSyncedWatchStats', syncedWatchStatsOf(snapshot, rootGetters))
     commit(

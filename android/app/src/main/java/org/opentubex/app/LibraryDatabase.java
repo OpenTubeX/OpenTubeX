@@ -116,8 +116,9 @@ final class LibraryDatabase implements AutoCloseable {
      * Streams one statement's rows as a JSON array of row arrays. Text in
      * {@code documentColumn} is a stored document's JSON and is copied as that
      * JSON rather than as a string, so neither side escapes or parses it twice.
-     * Documents with NeDB dates stay strings, because only parsing their text
-     * restores the dates.
+     * Only objects and arrays are copied: a member that is a string would arrive
+     * as that string instead of its JSON. Documents with NeDB dates stay strings,
+     * because only parsing their text restores the dates.
      */
     synchronized void query(String sql, JSONArray params, int documentColumn, OutputStream output) throws JSONException, IOException {
         open();
@@ -138,7 +139,7 @@ final class LibraryDatabase implements AutoCloseable {
                         case TYPE_TEXT: {
                             // The stored UTF-8 bytes, without decoding them into a Java string.
                             byte[] text = statement.getBlob(column);
-                            if (column == documentColumn && !hasDate(text)) {
+                            if (column == documentColumn && isContainer(text) && !hasDate(text)) {
                                 output.write(text);
                             } else {
                                 writeString(output, new String(text, StandardCharsets.UTF_8));
@@ -156,6 +157,11 @@ final class LibraryDatabase implements AutoCloseable {
             statement.reset();
             statement.clearBindings();
         }
+    }
+
+    /** Whether stored JSON is an object or an array, which never starts with whitespace. */
+    private static boolean isContainer(byte[] text) {
+        return text.length > 0 && (text[0] == '{' || text[0] == '[');
     }
 
     /**

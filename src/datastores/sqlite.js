@@ -61,8 +61,9 @@ function keyOf(id) {
   return typeof id === 'string' || typeof id === 'number' ? id : `\u0001${model.serialize({ id })}`
 }
 
+/** Keys that lookups pass to SQLite as they are, which JSON keeps only for finite numbers. */
 function isPrimitiveKey(value) {
-  return typeof value === 'string' || typeof value === 'number'
+  return typeof value === 'string' || Number.isFinite(value)
 }
 
 // NeDB's reviver costs more than the parse itself. Only dates need it.
@@ -251,7 +252,7 @@ export class SqliteDatastore {
     this.executor = { pushAsync: operation => this._exclusive(operation, 'read') }
     // Counts queued writes, so a prefetched read is only used while none came after it.
     this.writes = 0
-    /** @type {{ writes: number, rows: Promise<unknown[][]> } | null} */
+    /** @type {{ writes: number, started: boolean, rows: Promise<unknown[][]> } | null} */
     this.prefetched = null
   }
 
@@ -262,12 +263,16 @@ export class SqliteDatastore {
    */
   prefetchAll() {
     if (this.prefetched) return
-    const prefetched = { writes: this.writes, rows: this._exclusive(async () => this.dropped ? [] : this._query(SQL.all, [], true, 1), 'read') }
+    const prefetched = { writes: this.writes, started: false, rows: null }
+    prefetched.rows = this._exclusive(async () => {
+      prefetched.started = true
+      return this.dropped ? [] : this._query(SQL.all, [], true, 1)
+    }, 'read')
     prefetched.rows.catch(() => {})
     this.prefetched = prefetched
     setTimeout(() => {
       if (this.prefetched === prefetched) this.prefetched = null
-    }, PREFETCH_LIFETIME_MS)
+    }, PREFETCH_LIFETIME_MS).unref?.()
   }
 
   get autoloadPromise() {
@@ -533,9 +538,13 @@ export class SqliteDatastore {
   _candidateRows(query) {
     const lookup = this._indexedLookup(query)
     if (lookup) return this._query(...lookup.statement, lookup.large, 1)
+    // Operations run one at a time, so one queued before the prefetch runs
+    // before it, and waiting for it there would never end.
     const prefetched = this.prefetched
-    this.prefetched = null
-    if (prefetched?.writes === this.writes) return prefetched.rows
+    if (prefetched?.started) {
+      this.prefetched = null
+      if (prefetched.writes === this.writes) return prefetched.rows
+    }
     return this._query(SQL.all, [], true, 1)
   }
 
