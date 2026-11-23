@@ -32,6 +32,7 @@
       @lostpointercapture="shortsNavigation.handlePointerCancel"
       @click.capture="shortsNavigation.handleClick"
     >
+      <FtFixedBackground />
       <div class="videoAreaMargin">
         <div
           ref="shortsSwipeViewport"

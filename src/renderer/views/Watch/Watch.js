@@ -1,5 +1,6 @@
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
 import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
@@ -222,6 +223,7 @@ let nextSabrSchemeId = 0
 export default defineComponent({
   name: 'Watch',
   components: {
+    FtFixedBackground,
     FtRetryImage,
     FtPhonePanel,
     PhoneCommentsButton,

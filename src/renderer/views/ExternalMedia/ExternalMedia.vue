@@ -78,6 +78,7 @@
         :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar && !sidebarPanelLeaving }"
       >
         <div class="videoArea">
+          <FtFixedBackground />
           <div class="videoAreaMargin">
             <template v-if="source">
               <FtShakaVideoPlayer
@@ -528,6 +529,7 @@ import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
