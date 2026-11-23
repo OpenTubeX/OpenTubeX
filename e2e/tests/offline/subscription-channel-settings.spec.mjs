@@ -16,7 +16,7 @@ const subscriptions = Array.from({ length: 18 }, (_, index) => ({
   name: index === 0 ? 'Alpha Channel' : `Channel ${String(index).padStart(2, '0')}`,
   thumbnail: '',
   ...(index === 0 ? { feedTypes: ['videos'] } : {}),
-  ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
+  ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true, showRefreshErrors: false } : {})
 }))
 
 const baseSettings = {
@@ -461,6 +461,17 @@ test('reports subscription setting write failures from the settings manager', as
     hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
+test('shows refresh errors again for channels whose errors are hidden', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await expect(page.getByRole('group', { name: 'Alpha Channel' }).getByRole('button', { name: 'Show refresh errors' })).toHaveCount(0)
+
+  const showErrors = page.getByRole('group', { name: 'Channel 01' }).getByRole('button', { name: 'Show refresh errors' })
+  await showErrors.click()
+  await expect(showErrors).toHaveCount(0)
+  await expect.poll(() => page.evaluate(id => window.$store.getters.getSubscribedChannelsById.get(id).showRefreshErrors, subscriptions[1].id)).toBe(true)
 })
 
 for (const future of [false, true]) {

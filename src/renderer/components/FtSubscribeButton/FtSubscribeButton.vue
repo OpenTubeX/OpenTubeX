@@ -108,11 +108,9 @@
                   :notifications-off="!notificationsEnabled"
                   :daily-video-limit="activeChannelSettings.dailyVideoLimit"
                   :show-members-only="restrictedPlaybackConfigured ? activeChannelSettings.showMembersOnly : null"
-                  :show-refresh-errors="activeChannelSettings.showRefreshErrors"
                   @toggle-feed-type="(feedType, key) => updateFeedType(feedType, !isFeedTypeChecked(feedType, key), key)"
                   @update-daily-video-limit="updateDailyVideoLimit"
                   @update-show-members-only="updateShowMembersOnly"
-                  @update-show-refresh-errors="updateShowRefreshErrors"
                 />
               </div>
             </div>
@@ -903,14 +901,7 @@ function updateShowMembersOnly(value) {
 }
 
 /**
- * @param {boolean} value
- */
-function updateShowRefreshErrors(value) {
-  persistChannelSettings({ showRefreshErrors: value })
-}
-
-/**
- * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean, showRefreshErrors?: boolean}} patch
+ * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
  * @returns {Promise<boolean>} whether the settings were saved
  */
 function persistChannelSettings(patch) {

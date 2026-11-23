@@ -152,11 +152,11 @@
               :notification-feed-type-states="uploadNotificationsAvailable ? channelFeedTypeStates(channel, 'notificationFeedTypes') : null"
               :daily-video-limit="channelSettings(channel).dailyVideoLimit"
               :show-members-only="restrictedPlaybackConfigured ? channelSettings(channel).showMembersOnly : null"
-              :show-refresh-errors="channelSettings(channel).showRefreshErrors"
+              :refresh-errors-hidden="!channelSettings(channel).showRefreshErrors"
               @toggle-feed-type="(feedType, key) => updateFeedType(channel, feedType, !isFeedTypeEnabled(channel, feedType, key), key)"
               @update-daily-video-limit="value => updateChannelLimit(channel, value)"
               @update-show-members-only="value => updateShowMembersOnly(channel, value)"
-              @update-show-refresh-errors="value => updateShowRefreshErrors(channel, value)"
+              @show-refresh-errors="persistChannelSettings(channel, { showRefreshErrors: true })"
             />
           </li>
         </ul>
@@ -510,14 +510,6 @@ function updateChannelLimit(channel, value) {
  */
 function updateShowMembersOnly(channel, value) {
   persistChannelSettings(channel, { showMembersOnly: value })
-}
-
-/**
- * @param {SubscriptionChannel} channel
- * @param {boolean} value
- */
-function updateShowRefreshErrors(channel, value) {
-  persistChannelSettings(channel, { showRefreshErrors: value })
 }
 
 /**
