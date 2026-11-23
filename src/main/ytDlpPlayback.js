@@ -234,19 +234,22 @@ export async function handleYtDlpGetPlaybackInfo(
   // Preloading a video while it is opened, or tabs restoring the same video,
   // request it at once. They share one extraction instead of running several.
   const key = JSON.stringify([event.sender.id, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart])
-  let request = playbackInfoRequests.get(key)
-  if (!request) {
-    request = getPlaybackInfo(event, signal, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart)
-    playbackInfoRequests.set(key, request)
+  let entry = playbackInfoRequests.get(key)
+  // A reloaded renderer gets a new signal and must not share an aborted run.
+  if (!entry || entry.signal !== signal) {
+    const request = getPlaybackInfo(event, signal, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart)
+    const current = { signal, request }
+    entry = current
+    playbackInfoRequests.set(key, current)
     const forget = () => {
-      if (playbackInfoRequests.get(key) === request) playbackInfoRequests.delete(key)
+      if (playbackInfoRequests.get(key) === current) playbackInfoRequests.delete(key)
     }
     request.then(forget, forget)
   }
-  return await request
+  return await entry.request
 }
 
-/** @type {Map<string, Promise<YtDlpPlaybackInfo | { error: string } | null>>} */
+/** @type {Map<string, { signal: AbortSignal | undefined, request: Promise<YtDlpPlaybackInfo | { error: string } | null> }>} */
 const playbackInfoRequests = new Map()
 
 /**
