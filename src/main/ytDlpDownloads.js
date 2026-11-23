@@ -286,8 +286,20 @@ export function setFinishedDownloadListener(listener) {
   finishedDownloadListener = listener
 }
 
+/** @type {((id: number) => void) | null} */
+let endedDownloadListener = null
+
+/**
+ * @param {typeof endedDownloadListener} listener called when a download
+ * completes, fails, is cancelled or skipped, also while no window is open
+ */
+export function setEndedDownloadListener(listener) {
+  endedDownloadListener = listener
+}
+
 function broadcastDownloadStatus(record) {
   broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...record })
+  if (['completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) endedDownloadListener?.(record.id)
   // Automatic downloads have notifications of their own.
   if (record.automatic !== true && (record.status === 'completed' || record.status === 'failed')) {
     finishedDownloadListener?.({ ...record })

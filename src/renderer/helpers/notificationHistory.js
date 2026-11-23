@@ -133,17 +133,13 @@ export function markTwitchLiveNotificationsRead(login) {
     parseTwitchChannelLogin(entry.query?.url) === login)
 }
 
-const DOWNLOAD_KINDS = ['download-started', 'download-completed', 'download-failed']
-
 /**
- * Removes the entries about downloads that were played or removed, or only
- * the given kinds, like the start of a download that has ended.
+ * Removes the entries about downloads that were played or removed.
  * @param {number[]} downloadIds
- * @param {string[]} [kinds]
  */
-export function removeDownloadNotifications(downloadIds, kinds = DOWNLOAD_KINDS) {
+export function removeDownloadNotifications(downloadIds) {
   const ids = new Set(downloadIds.map(String))
-  return removeOverNotifications(entry => kinds.includes(entry.kind) && ids.has(entry.query?.downloadId ?? ''))
+  return removeOverNotifications(entry => entry.kind.startsWith('download-') && ids.has(entry.query?.downloadId ?? ''))
 }
 
 /**

@@ -182,10 +182,6 @@ if (supportsYtDlp && !isAndroidBackgroundRenderer) {
   ytDlp.handleYtDlpDownloadStatus((download) => {
     store.commit('upsertYtDlpDownload', download)
     releaseAutomaticDownloadSchedule(download)
-    // The entry that announced the start is over once the download ended.
-    if (['completed', 'failed', 'cancelled', 'skipped'].includes(download.status)) {
-      removeDownloadNotifications([download.id], ['download-started'])
-    }
 
     if ((download.status === 'completed' || download.status === 'failed') && download.automatic !== true) {
       const completed = download.status === 'completed'

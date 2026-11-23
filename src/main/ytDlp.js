@@ -41,6 +41,7 @@ export {
   handleYtDlpRemoveDownload,
   refreshYtDlpDownloadQueue,
   restoreYtDlpDownloadQueue,
+  setEndedDownloadListener,
   setFinishedDownloadListener,
   shutdownYtDlpDownloads,
 } from './ytDlpDownloads'
