@@ -300,7 +300,8 @@
     <FtPrompt
       v-if="showSharedSettingsPrompt"
       autosize
-      :label="$t('Profile.Use Shared Settings Warning', { profile: translatedProfileName })"
+      :label="$t('Profile.Use Shared Settings')"
+      :extra-labels="[$t('Profile.Use Shared Settings Warning', { profile: translatedProfileName })]"
       :option-names="[$t('Profile.Use Shared Settings'), $t('Cancel')]"
       :option-values="['shared', 'cancel']"
       :option-icons="[['fas', 'users'], ['fas', 'xmark']]"
