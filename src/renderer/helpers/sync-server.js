@@ -1856,10 +1856,11 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 
 // `playlistSnapshot` holds the baselines of this sync's playlist merge, which
 // map local playlist IDs to the server's. Without it, playlist preferences stay
-// as the server has them. Lists merge against `options.listSnapshot`, and
-// `options.onRetryBaseline` receives a getter for the one a retry after a
-// rejected upload merges them against: the lists this sync applied. The
-// rejected result would drop this device's items the server never received.
+// as the server has them. Lists and profiles' own settings merge against
+// `options.listSnapshot`, and `options.onRetryBaseline` receives a getter for
+// the one a retry after a rejected upload merges them against: those this sync
+// applied. The rejected result would drop this device's edits the server never
+// received.
 // `store.persistSettingsSyncBaseline` receives the server entries this sync
 // merged and applied, so a failed upload cannot make them look like local edits.
 // `options.dataScope` is the separate profile whose data the store shows, whose
@@ -1933,13 +1934,15 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
   let themesDeferred = false
+  // Settings that merge their items or settings against `listSnapshot`
+  const mergesAgainstLists = key => isListSetting(key) || profileSettingsProfiles.has(key)
   // Lists and failed saves this sync didn't apply, which keep their previous baseline
   const skippedSettings = new Set()
   // Server entries of the settings this sync merged and applied
   const applied = {}
   try {
     for (const [key, value] of Object.entries(local)) {
-      const old = isListSetting(key) ? previousLists[key] : previous[key]
+      const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
       const remoteEntry = remote[key]
       if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
         if (remoteEntry) merged[key] = remoteEntry
@@ -1991,7 +1994,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
-        if (isListSetting(key) || profileSettingsKey) skippedSettings.add(key)
+        if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
         skip()
@@ -2042,7 +2045,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     await store.persistSettingsSyncBaseline?.(applied)
   }
 
-  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(isListSetting).flatMap(key => {
+  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(mergesAgainstLists).flatMap(key => {
     const entry = skippedSettings.has(key) ? previousLists[key] : remote[key]
     return entry ? [[key, entry]] : []
   })))
@@ -2051,7 +2054,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Items from the server that this device never applied must not count as removed here next time.
   const snapshot = { ...merged }
   for (const key of skippedSettings) {
-    const old = isListSetting(key) ? previousLists[key] : previous[key]
+    const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
     if (old) snapshot[key] = old
     else delete snapshot[key]
   }

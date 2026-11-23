@@ -227,6 +227,26 @@ test('profile settings edited while a sync saves keep their last synced baseline
   })
 })
 
+test('a retry after a rejected upload keeps the profile settings edits the server never received', async () => {
+  const car = profileSettingsId('car')
+  const json = value => JSON.parse(JSON.stringify(value))
+  const client = createClient([{ key: car, value: { hideComments: false }, updatedAt: 1 }])
+  const previous = { [car]: { key: car, value: { hideComments: false }, updatedAt: 1 } }
+  // This device hid comments for the car profile, and the upload of that is rejected.
+  const device = createDevice({ car: { hideComments: true } })
+  device.state.settings.syncServerSettingUpdatedAt[car] = 2
+  let retryBaseline
+  const rejected = await context.syncSettings(createClient(client.entries), device, previous, null, {
+    onRetryBaseline: getBaseline => { retryBaseline = getBaseline },
+  })
+
+  // Meanwhile, another device hid live chat for it.
+  client.entries = [{ key: car, value: { hideComments: false, hideLiveChat: true }, updatedAt: 3 }]
+  await context.syncSettings(client, device, rejected, null, { listSnapshot: retryBaseline() })
+  assert.deepEqual(json(client.entries.find(entry => entry.key === car).value), { hideComments: true, hideLiveChat: true })
+  assert.deepEqual(json(device.state.settings.profileSettingsState.overrides.car), { hideComments: true, hideLiveChat: true })
+})
+
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 const between = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end, settingsSource.indexOf(start)))
 
