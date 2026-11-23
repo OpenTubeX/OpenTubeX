@@ -1,4 +1,4 @@
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmod, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
@@ -17,6 +17,16 @@ async function dispatchStoreAction(page, action, payload) {
 async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
   const sources = await playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)').evaluateAll(images => images.map(image => image.src))
   return sources.length > 0 && sources.every(source => source.includes(expectedUrlPart))
+}
+
+/**
+ * The persistent yt-dlp playback cache keeps one file per video next to its index.
+ * @param {string} userDataDir
+ */
+async function readPlaybackCacheEntries(userDataDir) {
+  const directory = path.join(userDataDir, 'yt-dlp-playback-cache')
+  const names = (await readdir(directory)).filter(name => name.endsWith('.json') && name !== 'index.json')
+  return Promise.all(names.map(async name => JSON.parse(await readFile(path.join(directory, name), 'utf8'))))
 }
 
 /**
@@ -344,9 +354,11 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
     await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
     expect(Number(await readFile(callsFile, 'utf8'))).toBe(7)
-    const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
-    expect(entries).toHaveLength(2)
-    expect(entries.every(entry => entry.source.manifestSrc.includes('/1080.m3u8'))).toBe(true)
+    await expect(async () => {
+      const entries = await readPlaybackCacheEntries(app.userDataDir)
+      expect(entries).toHaveLength(2)
+      expect(entries.every(entry => entry.source.manifestSrc.includes('/1080.m3u8'))).toBe(true)
+    }).toPass({ timeout: 15_000 })
   })
 
   test('retries timed-out stream format probes before completing a playlist preload', async ({ app, page, attachScreenshot }) => {
@@ -413,7 +425,7 @@ test.describe('seeded playlists', () => {
       'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ddddddddddd', 'ccccccccccc',
     ])
     await expect(async () => {
-      const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
+      const entries = await readPlaybackCacheEntries(app.userDataDir)
       expect(entries).toHaveLength(2)
       expect(entries.every(entry => !entry.source.incomplete && decodeURIComponent(entry.source.manifestSrc).includes('height="1080"'))).toBe(true)
     }).toPass({ timeout: 15_000 })
