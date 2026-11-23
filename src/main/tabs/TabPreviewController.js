@@ -361,7 +361,9 @@ export class TabPreviewController {
         const targetSize = getTabPreviewTargetSize(contentImage.getSize(), contentBounds)
         const preview = targetSize == null
           ? contentImage
-          : contentImage.resize({ ...targetSize, quality: 'best' })
+          // Resizing runs on the main thread. 'best' took twice as long without
+          // a visible difference at the preview's size.
+          : contentImage.resize({ ...targetSize, quality: 'better' })
         const previewBuffer = preview.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
         if (previewBuffer.length === 0) {
           return await this._getCachedDataUrl(tab)
