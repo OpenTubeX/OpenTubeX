@@ -155,10 +155,13 @@ function makeInert(element) {
   element.inert = true
 }
 
+/** Flicks dismiss by the speed over this many milliseconds before release. */
+const FLICK_WINDOW = 100
+
 /**
- * Touch swipes dismiss a notification sideways, like the system's do. Vertical
+ * Touch and pen swipes dismiss a notification sideways, like the system's do. Vertical
  * movement keeps scrolling the list.
- * @type {{ entry: import('../../../notificationHistory').NotificationHistoryEntry, id: number, x: number, y: number, time: number, offset: number, velocity: number, locked: boolean } | null}
+ * @type {{ entry: import('../../../notificationHistory').NotificationHistoryEntry, id: number, x: number, y: number, samples: { time: number, offset: number }[], locked: boolean } | null}
  */
 let swipe = null
 /**
@@ -177,8 +180,9 @@ function startSwipe(entry, event) {
   swipedRow = null
   // A new primary pointer replaces a swipe that lost its row, as when the
   // entry was removed elsewhere during it.
-  if (event.pointerType !== 'touch' || !event.isPrimary) return
-  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, time: event.timeStamp, offset: 0, velocity: 0, locked: false }
+  // Some Android input reports no pointer type, so only the mouse is left out.
+  if (event.pointerType === 'mouse' || !event.isPrimary) return
+  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, samples: [{ time: event.timeStamp, offset: 0 }], locked: false }
 }
 
 /** @param {PointerEvent} event */
@@ -197,10 +201,8 @@ function moveSwipe(event) {
     row.setPointerCapture(event.pointerId)
     row.dataset.swipe = 'dragging'
   }
-  // Flicks dismiss by the speed of the last movement.
-  swipe.velocity = (offset - swipe.offset) / Math.max(1, event.timeStamp - swipe.time)
-  swipe.time = event.timeStamp
-  swipe.offset = offset
+  swipe.samples = swipe.samples.filter(sample => event.timeStamp - sample.time <= FLICK_WINDOW)
+  swipe.samples.push({ time: event.timeStamp, offset })
   row.style.translate = `${offset}px 0`
   row.style.opacity = String(Math.max(0.2, 1 - Math.abs(offset) / row.offsetWidth))
 }
@@ -208,15 +210,17 @@ function moveSwipe(event) {
 /** @param {PointerEvent} event */
 function finishSwipe(event) {
   if (swipe?.id !== event.pointerId) return
-  const { entry, locked, offset, velocity, time } = swipe
+  const { entry, locked, samples } = swipe
+  const offset = event.clientX - swipe.x
   swipe = null
   if (!locked) return
   const row = /** @type {HTMLElement} */ (event.currentTarget)
   swipedRow = row
   row.addEventListener('click', suppressSwipeClick, true)
   // A finger held still before release is no longer flicking.
-  const flicked = event.timeStamp - time < 100 && Math.abs(offset) > 24 &&
-    Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(offset)
+  const start = samples.find(sample => event.timeStamp - sample.time <= FLICK_WINDOW)
+  const velocity = start ? (offset - start.offset) / Math.max(1, event.timeStamp - start.time) : 0
+  const flicked = Math.abs(offset) > 24 && Math.abs(velocity) > 0.3 && Math.sign(velocity) === Math.sign(offset)
   if (Math.abs(offset) > row.offsetWidth * 0.35 || flicked) {
     // The row leaves from where the finger released it, in the swiped direction.
     row.style.setProperty('--dismiss-direction', String(Math.sign(offset)))
