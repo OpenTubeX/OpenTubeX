@@ -132,8 +132,9 @@ function ensureEmulatorWifi() {
   for (let attempt = 0; attempt < 30 && !(adb('shell', 'cmd', 'wifi', 'status').stdout ?? '').includes('Wifi is enabled'); attempt++) {
     spawnSync('sleep', ['1'])
   }
-  // Re-enabling Wi-Fi alone does not rejoin a network that Android no longer
-  // auto-joins, so connect to the emulator's access point like a user would.
+  // Re-enabling Wi-Fi alone does not rejoin a network that Android disabled
+  // after a failed internet check, so connect to the emulator's access point
+  // like a user would.
   adb('shell', 'cmd', 'wifi', 'connect-network', 'AndroidWifi', 'open')
   for (let attempt = 0; attempt < 120 && !hasRoute(); attempt++) {
     spawnSync('sleep', ['1'])
