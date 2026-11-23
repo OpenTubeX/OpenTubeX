@@ -15,8 +15,8 @@
       verticalTabs: useVerticalTabBar,
       verticalTabsLeft: tabBarPosition === 'left',
       verticalTabsRight: tabBarPosition === 'right',
-      bottomTabs: isElectron && tabBarPosition === 'bottom',
-      topTabs: (isElectron && tabBarPosition === 'top') || showTabletTabStrip,
+      bottomTabs,
+      topTabs,
       customTitleBar: hasCustomTitleBar,
       watchSideNavOverlay: useWatchSideNavOverlay,
       watchSideNavTransitionDisabled
@@ -1058,6 +1058,8 @@ const capacitorTabletLayout = computed(() => isCapacitor && (
   usesCapacitorTabletLayout(capacitorLayoutMode.value, automaticTabletTabStrip.value)
 ))
 const showTabletTabStrip = computed(() => capacitorTabletLayout.value && store.getters.getTabsEnabled)
+const bottomTabs = computed(() => isElectron && tabBarPosition.value === 'bottom')
+const topTabs = computed(() => (isElectron && tabBarPosition.value === 'top') || showTabletTabStrip.value)
 tabletTabStripQuery.addEventListener('change', handleTabletTabStripChange)
 
 const appStyle = computed(() => {
@@ -2154,6 +2156,7 @@ onBeforeUnmount(() => {
   document.documentElement.classList.remove('hideOutlines', 'limitTitleLines')
   document.documentElement.style.removeProperty('--title-line-limit')
   delete document.documentElement.dataset.linkUnderline
+  delete document.body.dataset.pageChrome
   delete document.documentElement.dataset.modalBackdrop
   document.documentElement.style.removeProperty('--ui-density')
   removeGamepadNavigation()
@@ -2836,6 +2839,16 @@ watch(() => store.getters.getTitleLineLimit, lines => {
   const root = document.documentElement
   root.classList.toggle('limitTitleLines', lines > 0)
   root.style.setProperty('--title-line-limit', String(lines))
+}, { flush: 'sync', immediate: true })
+
+// Selects the page scrollbar insets in App.css.
+watch(() => {
+  if (!dataReady.value) return undefined
+  if (bottomTabs.value) return 'bottomTabs'
+  return topTabs.value ? 'topTabs' : 'default'
+}, value => {
+  if (value) document.body.dataset.pageChrome = value
+  else delete document.body.dataset.pageChrome
 }, { flush: 'sync', immediate: true })
 
 watch(() => store.getters.getLinkUnderline, value => {

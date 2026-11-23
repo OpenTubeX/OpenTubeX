@@ -1192,16 +1192,18 @@
 }
 
 /* The page's scrollbars, children of the body, stay between the header and a
-   bottom tab bar. Android and iOS draw them natively. */
-:global(body:has(.app)) {
+   bottom tab bar. Android and iOS draw them natively. App.vue sets the
+   attribute, since `body:has(.app)` would restyle the body on every `:has()`
+   state change in the app. */
+:global(body[data-page-chrome]) {
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
 }
 
-:global(body:has(.app.topTabs)) {
+:global(body[data-page-chrome='topTabs']) {
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
-:global(body:has(.app.bottomTabs)) {
+:global(body[data-page-chrome='bottomTabs']) {
   --page-footer-block-size: var(--bottom-tab-bar-height);
 }
 
