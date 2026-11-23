@@ -287,10 +287,10 @@ async function handleImportPrompt(choice) {
 
 // Signing out and turning playlist sync off remove the synced playlists from
 // this device, unless the user keeps them.
-const keepPlaylistsPrompt = ref(/** @type {(() => Promise<unknown>) | null} */ (null))
+const keepPlaylistsPrompt = ref(/** @type {(() => Promise<boolean>) | null} */ (null))
 
 /**
- * @param {() => Promise<unknown>} end signs out or turns playlist sync off
+ * @param {() => Promise<boolean>} end signs out or turns playlist sync off, and resolves to whether it succeeded
  */
 async function endPlaylistSync(end) {
   // Asks when unsure, as ending the sync without asking removes the playlists.
@@ -337,6 +337,7 @@ function signOut() {
   endPlaylistSync(finishSignOut)
 }
 
+/** @returns {Promise<boolean>} whether the account was removed from this device */
 async function finishSignOut() {
   try {
     const revoked = await signOutOfYouTubeAccount()
@@ -344,12 +345,14 @@ async function finishSignOut() {
       message: revoked ? t('Settings.YouTube Account Settings.Signed Out') : t('Settings.YouTube Account Settings.Revoke Failed'),
       icon: ['fas', 'right-from-bracket']
     })
+    return true
   } catch (error) {
     console.error(error)
     showToast({
       message: t('Settings.YouTube Account Settings.Sign Out Failed', { error: error?.message ?? String(error) }),
       icon: ERROR_TOAST_ICON
     })
+    return false
   }
 }
 

@@ -187,11 +187,13 @@ export async function hasYouTubePlaylists() {
  * Runs `end`, which signs out or turns playlist sync off, then turns the
  * playlists it stopped syncing into regular playlists. No sync can remove
  * them in between.
- * @param {() => Promise<unknown>} end
+ * @param {() => Promise<boolean>} end resolves to whether it succeeded
  */
 export async function keepYouTubePlaylists(end) {
   await withSyncLock(async () => {
-    await end()
+    // A failed sign-out can still hide the account from the sync until the
+    // app restarts, when it would bring kept playlists back as copies.
+    if (!await end()) return
     // Playlists the sync still covers stay linked, as it would bring kept
     // ones back as copies. This also leaves them all linked when `end` failed.
     const key = store.getters.getYouTubeAccountSyncPlaylists ? getYouTubeSyncKey(getSyncAccount()) : null
