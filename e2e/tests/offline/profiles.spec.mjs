@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 
 import { test, expect, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
 // until the window reaches the requested CSS width. Narrow widths at 95% fall
@@ -503,11 +504,21 @@ test.describe('profile with its own settings', () => {
     await expect.poll(baseTheme).toBe('system')
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
 
-    // The same goes for one another window deletes while the profile shows.
+    // The same goes for one restored while the profile shows,
     await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
       profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
     }))
-    await expect.poll(baseTheme).toBe('custom:deleted')
+    await expect.poll(baseTheme).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // and for one another window deletes while the profile shows.
+    await page.evaluate(async theme => {
+      window.$store.commit('setCustomThemes', [theme])
+      await window.$store.dispatch('restoreProfileSettings', {
+        profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:kept' },
+      })
+    }, { ...structuredClone(DEFAULT_CUSTOM_THEME), id: 'kept' })
+    await expect.poll(baseTheme).toBe('custom:kept')
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.send('custom-theme-updated', []))
     await expect.poll(baseTheme).toBe('system')
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])

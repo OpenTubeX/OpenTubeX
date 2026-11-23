@@ -2439,9 +2439,17 @@ const mainColor = computed(() => store.getters.getMainColor)
 watch(mainColor, updateTheme)
 watch(() => store.getters.getHideStartupSplash, cacheNextStartupAppearance)
 watch(() => store.getters.getCustomThemes, cacheNextStartupAppearance)
-// The own settings of the profile switched to can name a custom theme deleted
-// while another profile was active, which only the shown settings repair.
-watch(() => store.state.settings.profileSettingsState.applied, () => {
+// The own settings of the profile switched to, or those sync or a restore
+// gave the active profile, can name a deleted custom theme. Only the shown
+// settings repair them.
+watch(() => [
+  store.state.settings.profileSettingsState.applied,
+  store.getters.getBaseTheme,
+  store.getters.getSystemLightTheme,
+  store.getters.getSystemDarkTheme,
+  store.getters.getMainColor,
+  store.getters.getSecColor,
+], () => {
   if (!customThemesLoaded) return
   sanitizeAppearanceSettings(store.getters.getCustomThemes, true).catch(error => console.error(error))
 })
