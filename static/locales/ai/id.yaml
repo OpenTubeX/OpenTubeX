@@ -2775,6 +2775,8 @@ App Icon:
   Saved Message: "Ikon disimpan. Peluncur mungkin memerlukan waktu untuk memperbarui."
   Title: "Ikon aplikasi"
   Error: "Tidak dapat memuat atau mengubah ikon aplikasi"
+  Running Only Hint: "Berlaku untuk jendela yang terbuka. Dock, panel, atau peluncur Anda mungkin tetap menampilkan ikon asli."
+  Windows Hint: "Juga mengubah pintasan OpenTubeX. Ikon yang disematkan di bilah tugas diperbarui setelah Anda keluar atau memulai ulang Windows."
 
 App Lock:
   Title: "Kunci aplikasi"

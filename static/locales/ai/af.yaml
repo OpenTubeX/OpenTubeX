@@ -3021,6 +3021,8 @@ App Icon:
   Saved Message: Ikoon gestoor. U lanseerder kan ’n oomblik neem om by te werk.
   Title: Toepikoon
   Error: Kan nie die toepikoon laai of verander nie
+  Running Only Hint: "Geld vir oop vensters. Jou dok, paneel of lanseerder kan steeds die oorspronklike ikoon wys."
+  Windows Hint: "Verander ook OpenTubeX-kortpaaie. Vasgespelde taakbalkikone word opgedateer nadat jy afmeld of Windows herbegin."
 App Lock:
   Title: "Toepslot"
   Enable: "Vereis skermslot"

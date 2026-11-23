@@ -2759,6 +2759,8 @@ App Icon:
   Saved Message: "Ikonoa gorde da. Abiarazleak une bat behar izan dezake eguneratzeko."
   Title: "Aplikazioaren ikonoa"
   Error: "Ezin izan da aplikazioaren ikonoa kargatu edo aldatu"
+  Running Only Hint: "Leiho irekiei aplikatzen zaie. Zure atrakeak, panelak edo abiarazleak jatorrizko ikonoa erakusten jarrai dezake."
+  Windows Hint: "OpenTubeX-en lasterbideak ere aldatzen ditu. Ataza-barran ainguratutako ikonoak saioa amaitu edo Windows berrabiarazi ondoren eguneratzen dira."
 
 App Lock:
   Title: "Aplikazioaren blokeoa"

@@ -2747,6 +2747,8 @@ App Icon:
   Saved Message: "Icône enregistrée. Votre lanceur peut mettre un moment à se mettre à jour."
   Title: "Icône de l'application"
   Error: "Impossible de charger ou de modifier l'icône de l'application"
+  Running Only Hint: "S'applique aux fenêtres ouvertes. Votre dock, panneau ou lanceur peut continuer d'afficher l'icône d'origine."
+  Windows Hint: "Modifie aussi les raccourcis d'OpenTubeX. Les icônes épinglées à la barre des tâches se mettent à jour après une déconnexion ou un redémarrage de Windows."
 
 App Lock:
   Title: "Verrouillage de l'application"

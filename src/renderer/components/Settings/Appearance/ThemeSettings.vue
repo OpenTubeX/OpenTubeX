@@ -45,7 +45,14 @@
       class="appIconActions"
     >
       <AppIconSettings v-if="IS_CAPACITOR && !IS_IOS" />
-      <TrayIconSettings v-if="usingElectron" />
+      <DesktopIconSettings
+        v-if="usingElectron && !isLinuxWayland"
+        kind="app"
+      />
+      <DesktopIconSettings
+        v-if="usingElectron"
+        kind="tray"
+      />
     </FtFlexBox>
   </FtSettingsSection>
 </template>
@@ -58,7 +65,7 @@ import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import AppIconSettings from './AppIconSettings.vue'
-import TrayIconSettings from './TrayIconSettings.vue'
+import DesktopIconSettings from './DesktopIconSettings.vue'
 import ThemeGallery from './ThemeGallery.vue'
 import IconPackSelect from './IconPackSelect.vue'
 
@@ -66,6 +73,7 @@ import store from '../../../store/index'
 
 import { showToast } from '../../../helpers/utils'
 import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../../../helpers/appFont'
+import { isLinuxWayland } from '../../../helpers/platform'
 
 const { locale, t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS

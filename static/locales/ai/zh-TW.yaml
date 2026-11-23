@@ -2751,6 +2751,8 @@ App Icon:
   Saved Message: "圖示已儲存。啟動器可能需要一點時間更新。"
   Title: "應用程式圖示"
   Error: "無法載入或變更應用程式圖示"
+  Running Only Hint: "套用至開啟的視窗。Dock、面板或啟動器可能仍會顯示原始圖示。"
+  Windows Hint: "也會變更 OpenTubeX 捷徑。釘選到工作列的圖示會在你登出或重新啟動 Windows 後更新。"
 
 App Lock:
   Title: "應用程式鎖定"

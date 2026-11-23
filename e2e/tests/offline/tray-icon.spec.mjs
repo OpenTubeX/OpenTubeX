@@ -129,3 +129,22 @@ test('starting another renderer preserves the saved tray icon while settings loa
   await expect.poll(() => page.evaluate(() => window.$store.getters.getTrayIconPreset)).toBe('dracula')
   expect(await app.electronApp.evaluate(() => globalThis.trayDefaultResets)).toBe(0)
 })
+
+test('app icon choices persist and follow the active app palette', async ({ app, page }) => {
+  await goToSettingsSection(page, 'appearance')
+  await page.getByRole('button', { name: 'App icon', exact: true }).click()
+  const choices = page.getByRole('group', { name: 'App icon', exact: true })
+  await expect(choices.locator('input[value="monochrome"]')).toHaveCount(0)
+  await choices.locator('input[value="theme"]').check()
+  await expect.poll(() => cachedIcon(app, 'app-icon.png')).not.toBeNull()
+  const lightIcon = await cachedIcon(app, 'app-icon.png')
+  await setSetting(page, 'BaseTheme', 'dark')
+  await expect.poll(async () => [null, lightIcon].includes(await cachedIcon(app, 'app-icon.png'))).toBe(false)
+  const darkIcon = await cachedIcon(app, 'app-icon.png')
+  // Theme changes during startup must not reset the saved icon.
+  ;({ page } = await app.relaunch())
+  await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).appIconPreset).toBe('theme')
+  expect(await cachedIcon(app, 'app-icon.png')).toBe(darkIcon)
+  await setSetting(page, 'AppIconPreset', 'default')
+  await expect.poll(() => cachedIcon(app, 'app-icon.png')).toBeNull()
+})

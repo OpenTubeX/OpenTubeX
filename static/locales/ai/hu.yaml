@@ -2749,6 +2749,8 @@ App Icon:
   Saved Message: "Ikon mentve. A kezdőképernyő frissítése eltarthat egy ideig."
   Title: "Alkalmazásikon"
   Error: "Nem sikerült betölteni vagy módosítani az alkalmazás ikonját"
+  Running Only Hint: "A megnyitott ablakokra vonatkozik. A dokk, a panel vagy az indító továbbra is az eredeti ikont mutathatja."
+  Windows Hint: "Az OpenTubeX parancsikonjait is módosítja. A tálcára rögzített ikonok kijelentkezés vagy a Windows újraindítása után frissülnek."
 
 App Lock:
   Title: "Alkalmazászár"

@@ -1,21 +1,27 @@
 <template>
   <FtButton
-    class="trayIconSettingsButton"
-    :label="t('Tray Icon.Title')"
+    :class="`${kind}IconSettingsButton`"
+    :label="title"
     :icon="['fas', 'icons']"
     @click="open = true"
   />
   <FtSettingsSubpage
     :open="open"
-    :title="t('Tray Icon.Title')"
+    :title="title"
     :icon="['fas', 'icons']"
     grow-with-content
     @close="open = false"
   >
     <div ref="contentRef">
+      <p
+        v-if="kind === 'app'"
+        class="desktopIconHint"
+      >
+        {{ IS_WINDOWS ? t('App Icon.Windows Hint') : t('App Icon.Running Only Hint') }}
+      </p>
       <fieldset
         class="appIconPresets"
-        :aria-label="t('Tray Icon.Title')"
+        :aria-label="title"
       >
         <label
           v-for="preset in presets"
@@ -31,7 +37,7 @@
           >
           <span
             v-else
-            class="trayIconPreview"
+            class="desktopIconPreview"
             :class="{ monochrome: preset.id === MONOCHROME_TRAY_ICON_PRESET }"
             :style="{ color: preset.foreground, backgroundColor: preset.background }"
             aria-hidden="true"
@@ -42,9 +48,9 @@
           <input
             :checked="selected === preset.id"
             type="radio"
-            name="trayIconPreset"
+            :name="`${kind}IconPreset`"
             :value="preset.id"
-            @change="store.dispatch('updateTrayIconPreset', preset.id)"
+            @change="select(preset.id)"
           >
         </label>
       </fieldset>
@@ -62,13 +68,26 @@ import maskUrl from '../../../assets/img/tray-icon-mask.svg'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../helpers/overlayScrollbars'
-import { MONOCHROME_TRAY_ICON_PRESET } from '../../../helpers/trayIcon'
+import { MONOCHROME_TRAY_ICON_PRESET } from '../../../helpers/desktopIcons'
 
+const props = defineProps({
+  /** @type {import('vue').PropType<'tray' | 'app'>} */
+  kind: {
+    type: String,
+    required: true,
+  },
+})
+
+const IS_WINDOWS = process.platform === 'win32'
 const store = useStore()
 const { t, tm } = useI18n()
 const themeNames = computed(() => tm('Settings.Theme Settings.Base Theme'))
 const [defaultPreset, ...themePresets] = APP_ICON_PRESETS
-const presets = [{ id: 'theme' }, defaultPreset, { id: MONOCHROME_TRAY_ICON_PRESET }, ...themePresets]
+// A monochrome glyph without a tile suits panels, but disappears on matching taskbars.
+const presets = props.kind === 'tray'
+  ? [{ id: 'theme' }, defaultPreset, { id: MONOCHROME_TRAY_ICON_PRESET }, ...themePresets]
+  : [{ id: 'theme' }, defaultPreset, ...themePresets]
+const title = computed(() => props.kind === 'tray' ? t('Tray Icon.Title') : t('App Icon.Title'))
 
 function presetLabel(preset) {
   switch (preset.id) {
@@ -78,7 +97,12 @@ function presetLabel(preset) {
     default: return themeNames.value[preset.translationKey] ?? preset.translationKey
   }
 }
-const selected = computed(() => store.getters.getTrayIconPreset)
+const selected = computed(() => props.kind === 'tray' ? store.getters.getTrayIconPreset : store.getters.getAppIconPreset)
+
+function select(presetId) {
+  store.dispatch(props.kind === 'tray' ? 'updateTrayIconPreset' : 'updateAppIconPreset', presetId)
+}
+
 const open = ref(false)
 const contentRef = useTemplateRef('contentRef')
 let resizeObserver
@@ -98,4 +122,4 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <style scoped src="./AppIconSettings.css" />
-<style scoped src="./TrayIconSettings.css" />
+<style scoped src="./DesktopIconSettings.css" />

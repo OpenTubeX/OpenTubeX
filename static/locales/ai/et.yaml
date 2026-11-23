@@ -2751,6 +2751,8 @@ App Icon:
   Saved Message: "Ikoon on salvestatud. Käivitaja värskendamine võib võtta hetke."
   Title: "Rakenduse ikoon"
   Error: "Rakenduse ikooni ei saanud laadida ega muuta"
+  Running Only Hint: "Kehtib avatud akende kohta. Dokk, paneel või käivitaja võivad jätkuvalt näidata algset ikooni."
+  Windows Hint: "Muudab ka OpenTubeX-i otseteid. Tegumiribale kinnitatud ikoonid uuenevad pärast väljalogimist või Windowsi taaskäivitamist."
 
 App Lock:
   Title: "Rakenduse lukk"

@@ -1941,6 +1941,8 @@ App Icon:
   Saved Message: "Ikona została zapisana. Aktualizacja programu uruchamiającego może chwilę potrwać."
   Title: "Ikona aplikacji"
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
+  Running Only Hint: "Dotyczy otwartych okien. Dok, panel lub program uruchamiający mogą nadal pokazywać oryginalną ikonę."
+  Windows Hint: "Zmienia też skróty OpenTubeX. Ikony przypięte do paska zadań zaktualizują się po wylogowaniu lub ponownym uruchomieniu systemu Windows."
 
 App Lock:
   Title: "Blokada aplikacji"

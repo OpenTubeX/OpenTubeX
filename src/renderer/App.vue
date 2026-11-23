@@ -718,7 +718,7 @@ import { repairSystemThemeSettings } from './helpers/customThemeSync'
 import packageDetails from '../../package.json'
 import { MAIN_PROFILE_ID, MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
 import { setDataScope } from '../datastores/handlers/index'
-import { updateTrayIcon } from './helpers/trayIcon'
+import { updateAppIcon, updateTrayIcon } from './helpers/desktopIcons'
 import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
@@ -1957,6 +1957,7 @@ onMounted(async () => {
   appearanceSettingsReady = true
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
+  if (store.getters.getAppIconPreset !== 'theme') refreshAppIcon()
 
   if (defaultInvidiousInstance.value === '' || process.env.SELF_HOSTED_INVIDIOUS) {
     await store.dispatch('setRandomCurrentInvidiousInstance')
@@ -2458,10 +2459,17 @@ watch(thumbnailSize, updateThumbnailListSize)
 
 let appearanceSettingsReady = false
 watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
+watch(() => store.getters.getAppIconPreset, refreshAppIcon)
 
 function refreshTrayIcon() {
   if (isElectron && appearanceSettingsReady) {
     updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
+  }
+}
+
+function refreshAppIcon() {
+  if (isElectron && appearanceSettingsReady) {
+    updateAppIcon(store.getters.getAppIconPreset).catch(error => console.error('Unable to update app icon', error))
   }
 }
 
@@ -2478,6 +2486,7 @@ function updateTheme() {
   )
   cacheNextStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
+  if (store.getters.getAppIconPreset === 'theme') refreshAppIcon()
   updateSystemBarsStyle()
 }
 

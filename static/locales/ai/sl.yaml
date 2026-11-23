@@ -3360,6 +3360,8 @@ App Icon:
   Saved Message: "Ikona je shranjena. Posodobitev zaganjalnika lahko traja nekaj časa."
   Title: "Ikona aplikacije"
   Error: "Ikone aplikacije ni bilo mogoče naložiti ali spremeniti"
+  Running Only Hint: "Velja za odprta okna. Zasidrana vrstica, pult ali zaganjalnik lahko še naprej prikazujejo izvirno ikono."
+  Windows Hint: "Spremeni tudi bližnjice do OpenTubeX. Ikone, pripete v opravilno vrstico, se posodobijo po odjavi ali ponovnem zagonu sistema Windows."
 
 App Lock:
   Title: "Zaklep aplikacije"

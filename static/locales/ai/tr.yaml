@@ -2749,6 +2749,8 @@ App Icon:
   Saved Message: "Simge kaydedildi. Başlatıcınızın güncellenmesi biraz zaman alabilir."
   Title: "Uygulama simgesi"
   Error: "Uygulama simgesi yüklenemedi veya değiştirilemedi"
+  Running Only Hint: "Açık pencerelere uygulanır. Dock, panel veya başlatıcınız orijinal simgeyi göstermeye devam edebilir."
+  Windows Hint: "OpenTubeX kısayollarını da değiştirir. Görev çubuğuna sabitlenmiş simgeler oturumu kapattıktan veya Windows'u yeniden başlattıktan sonra güncellenir."
 
 App Lock:
   Title: "Uygulama kilidi"

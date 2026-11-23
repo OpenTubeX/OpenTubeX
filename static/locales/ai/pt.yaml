@@ -2753,6 +2753,8 @@ App Icon:
   Saved Message: "Ícone guardado. O lançador pode demorar um momento a atualizar."
   Title: "Ícone da aplicação"
   Error: "Não foi possível carregar ou alterar o ícone da aplicação"
+  Running Only Hint: "Aplica-se às janelas abertas. A sua dock, painel ou lançador pode continuar a mostrar o ícone original."
+  Windows Hint: "Também altera os atalhos do OpenTubeX. Os ícones afixados na barra de tarefas são atualizados depois de terminar sessão ou reiniciar o Windows."
 
 App Lock:
   Title: "Bloqueio da app"

@@ -3145,6 +3145,8 @@ App Icon:
   Saved Message: "Ikonet er lagra. Det kan ta litt tid før startskjermen vert oppdatert."
   Title: "Appikon"
   Error: "Kunne ikkje laste inn eller endre appikonet"
+  Running Only Hint: "Gjeld opne vindauge. Dokken, panelet eller oppstartaren kan framleis vise det opphavlege ikonet."
+  Windows Hint: "Endrar også snarvegar til OpenTubeX. Festa ikon på oppgåvelinja vert oppdaterte etter at du loggar av eller startar Windows på nytt."
 
 App Lock:
   Title: "Applås"

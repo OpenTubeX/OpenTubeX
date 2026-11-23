@@ -2771,6 +2771,8 @@ App Icon:
   Saved Message: "Đã lưu biểu tượng. Trình khởi chạy có thể mất một lúc để cập nhật."
   Title: "Biểu tượng ứng dụng"
   Error: "Không thể tải hoặc thay đổi biểu tượng ứng dụng"
+  Running Only Hint: "Áp dụng cho các cửa sổ đang mở. Dock, bảng điều khiển hoặc trình khởi chạy có thể vẫn hiển thị biểu tượng gốc."
+  Windows Hint: "Cũng thay đổi các lối tắt của OpenTubeX. Biểu tượng đã ghim trên thanh tác vụ sẽ cập nhật sau khi bạn đăng xuất hoặc khởi động lại Windows."
 
 App Lock:
   Title: "Khóa ứng dụng"

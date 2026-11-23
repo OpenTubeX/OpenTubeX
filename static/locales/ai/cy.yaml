@@ -2792,6 +2792,8 @@ App Icon:
   Saved Message: "Eicon wedi'i gadw. Gall gymryd eiliad i'ch lansiwr ddiweddaru."
   Title: "Eicon yr ap"
   Error: "Methu llwytho neu newid eicon yr ap"
+  Running Only Hint: "Yn berthnasol i ffenestri agored. Gall eich doc, panel neu lansiwr barhau i ddangos yr eicon gwreiddiol."
+  Windows Hint: "Mae hefyd yn newid llwybrau byr OpenTubeX. Mae eiconau wedi'u pinio ar y bar tasgau yn diweddaru ar ôl i chi allgofnodi neu ailgychwyn Windows."
 
 App Lock:
   Title: "Clo ap"

@@ -2747,6 +2747,8 @@ App Icon:
   Saved Message: "Icon saved. Your launcher may take a moment to update."
   Title: "App icon"
   Error: "Unable to load or change the app icon"
+  Running Only Hint: "Applies to open windows. Your dock, panel, or launcher may keep showing the original icon."
+  Windows Hint: "Also changes OpenTubeX shortcuts. Pinned taskbar icons update after you sign out or restart Windows."
 
 App Lock:
   Title: "App lock"

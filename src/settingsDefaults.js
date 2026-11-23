@@ -558,6 +558,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hapticFeedbackIgnoresSystemSetting: false,
     useTrayIcon: true,
     trayIconPreset: 'default',
+    appIconPreset: 'default',
     hideToTrayOnClose: false,
     hideToTrayOnMinimize: false,
     dateFormat: 'locale',
