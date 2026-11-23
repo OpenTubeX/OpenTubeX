@@ -18,6 +18,15 @@ function isUploadNotificationState(value) {
 }
 
 /**
+ * @param {string[] | undefined} a
+ * @param {string[] | undefined} b
+ */
+function sameIds(a, b) {
+  if (a === undefined || b === undefined) return a === b
+  return a.length === b.length && a.every((id, index) => id === b[index])
+}
+
+/**
  * Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one.
  * @param {typeof fetch} fetchUrl
  * @param {string} videoId
@@ -100,8 +109,17 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch, isWa
         const channel = configuredChannel()
         if (!channel) return []
 
-        const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
-        await save()
+        const current = await load()
+        const key = `${channelId}:${feedType}`
+        const knownBefore = current.known[key]
+        const withheldBefore = current.withheld?.[channelId]
+        const uploads = takeVisibleUploads(current, channelId, feedType, entries, channel.membersOnly === true)
+        // Most refreshes find every feed unchanged. Rewriting the whole state
+        // for each of them made a refresh write it once per channel feed.
+        if (uploads.length > 0 || !sameIds(knownBefore, current.known[key]) ||
+          !sameIds(withheldBefore, current.withheld?.[channelId])) {
+          await save()
+        }
         return uploads
       }).then(async found => {
         if (found.length === 0) return
