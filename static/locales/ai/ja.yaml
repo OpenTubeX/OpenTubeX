@@ -383,6 +383,7 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Restart Required: '再起動が必要です'
   Experimental Badge: 試験的
   YouTube Account Settings:
     Watch Posted Comments: "投稿したコメントへの返信を監視"

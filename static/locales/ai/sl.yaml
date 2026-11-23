@@ -641,6 +641,7 @@ Settings:
       Disk: disk
     Label: Zmogljivost
   Return to Settings Menu: Nazaj v meni z nastavitvami
+  Restart Required: 'Potreben je ponovni zagon'
   General Settings:
     Invidious Instance Username: 'Uporabniško ime primerka'
     Invidious Instance Password: 'Geslo primerka'

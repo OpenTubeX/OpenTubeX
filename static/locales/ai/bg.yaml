@@ -386,6 +386,7 @@ History:
   Custom: По избор
   History Older Than Days Removed: Историята на гледане отпреди повече от 1 ден е премахната | Историята на гледане отпреди повече от {days} дни е премахната
 Settings:
+  Restart Required: 'Необходимо е рестартиране'
   Experimental Badge: Експериментална
   YouTube Account Settings:
     Watch Posted Comments: "Следене за отговори на коментарите, които публикувам"

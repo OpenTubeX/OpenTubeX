@@ -649,6 +649,7 @@ Settings:
       Disk: disc
     Label: Rendiment
   Return to Settings Menu: Torna al menú de configuració
+  Restart Required: 'Cal reiniciar'
   General Settings:
     Invidious Instance Username: 'Nom d''usuari de la instància'
     Invidious Instance Password: 'Contrasenya de la instància'

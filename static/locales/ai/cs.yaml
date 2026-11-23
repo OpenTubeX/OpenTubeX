@@ -383,6 +383,7 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Restart Required: 'Vyžadován restart'
   Experimental Badge: Experimentální
   YouTube Account Settings:
     Watch Posted Comments: "Sledovat odpovědi na mé komentáře"

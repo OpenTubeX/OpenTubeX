@@ -383,6 +383,7 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
+  Restart Required: 'Uudelleenkäynnistys vaaditaan'
   Experimental Badge: Kokeellinen
   YouTube Account Settings:
     Watch Posted Comments: "Seuraa julkaisemieni kommenttien vastauksia"

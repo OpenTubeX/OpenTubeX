@@ -297,7 +297,8 @@ test.describe('subscribed channels', () => {
     await sheet.getByRole('group', { name: 'Profiles' }).getByRole('checkbox', { name: 'Profile 0', exact: true }).click()
 
     // The modal sheet would cover the confirmation, so it closes first.
-    const confirmation = page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })
+    const confirmation = page.getByRole('dialog', { name: 'Unsubscribe', exact: true })
+    await expect(confirmation).toContainText('Alpha Channel')
     await expect(sheet).toHaveCount(0)
     await page.getByRole('button', { name: 'Yes', exact: true }).click()
     await expect(confirmation).toHaveCount(0)
@@ -311,7 +312,7 @@ test.describe('subscribed channels', () => {
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await alpha.getByRole('button', { name: 'Unsubscribe' }).click()
 
-    await expect(page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Unsubscribe', exact: true })).toContainText('Alpha Channel')
     await page.getByRole('button', { name: 'Yes', exact: true }).click()
 
     await expect(alpha).toHaveCount(0)

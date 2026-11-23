@@ -876,7 +876,7 @@ test.describe('custom theme editor', () => {
     await goToSettingsSection(page, 'theme')
     await openCustomThemeEditor(page, 'Midnight')
     await page.getByRole('button', { name: 'Delete theme' }).click()
-    const deletePrompt = page.getByRole('dialog', { name: /Delete “Midnight”/ })
+    const deletePrompt = page.getByRole('dialog', { name: 'Delete theme', exact: true })
     await expect(deletePrompt).toHaveClass(/autosize/)
     await expect(deletePrompt).toContainText('Delete “Midnight”?')
     await deletePrompt.getByRole('button', { name: 'Delete theme' }).click()

@@ -629,6 +629,7 @@ Settings:
       Disk: disko
     Label: Našumas
   Return to Settings Menu: Grįžti į nustatymų meniu
+  Restart Required: 'Reikia paleisti iš naujo'
   General Settings:
     Invidious Instance Username: 'Egzemplioriaus naudotojo vardas'
     Invidious Instance Password: 'Egzemplioriaus slaptažodis'

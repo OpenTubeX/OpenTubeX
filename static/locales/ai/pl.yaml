@@ -206,6 +206,7 @@ User Playlists:
     Adding missing videos to {playlistName}: 'Dodawanie brakujących filmów do {playlistName}'
     Checking {playlistName} for unavailable videos: 'Sprawdzanie niedostępnych filmów w {playlistName} ({checked}/{total})'
 Settings:
+  Restart Required: 'Wymagane ponowne uruchomienie'
   Experimental Badge: Eksperymentalne
   YouTube Account Settings:
     Watch Posted Comments: "Obserwuj odpowiedzi na moje komentarze"

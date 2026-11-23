@@ -383,6 +383,7 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Restart Required: 'Este necesară repornirea'
   Experimental Badge: Experimental
   YouTube Account Settings:
     Watch Posted Comments: "Urmărește răspunsurile la comentariile pe care le postez"

@@ -820,6 +820,7 @@ Settings:
       Network: network
       Disk: disk
   Return to Settings Menu: Return to Settings Menu
+  Restart Required: Restart Required
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:

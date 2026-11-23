@@ -233,7 +233,8 @@
     <FtPrompt
       v-if="channelUnsubscribeConfirmation"
       autosize
-      :label="t('Channels.Unsubscribe Prompt', { channelName: channelUnsubscribeConfirmation.channelName })"
+      :label="t('Channel.Unsubscribe')"
+      :extra-labels="[t('Channels.Unsubscribe Prompt', { channelName: channelUnsubscribeConfirmation.channelName })]"
       :option-names="[t('Yes'), t('No')]"
       :option-values="['yes', 'no']"
       :option-icons="[['fas', 'check'], ['fas', 'xmark']]"

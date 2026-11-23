@@ -388,6 +388,7 @@ History:
   Custom: مخصص
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
+  Restart Required: 'إعادة التشغيل مطلوبة'
   Experimental Badge: تجريبي
   YouTube Account Settings:
     Watch Posted Comments: "متابعة الردود على التعليقات التي أنشرها"

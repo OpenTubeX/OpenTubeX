@@ -340,6 +340,7 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Restart Required: 'Reinício necessário'
   Experimental Badge: Experimental
   YouTube Account Settings:
     Watch Posted Comments: "Acompanhar respostas aos comentários que publico"

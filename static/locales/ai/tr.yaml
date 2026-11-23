@@ -383,6 +383,7 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Restart Required: 'Yeniden başlatma gerekli'
   Experimental Badge: Deneysel
   YouTube Account Settings:
     Watch Posted Comments: "Paylaştığım yorumlara gelen yanıtları izle"

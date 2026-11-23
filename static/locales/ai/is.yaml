@@ -383,6 +383,7 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en {days} dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Restart Required: 'Endurræsingar krafist'
   Experimental Badge: Tilraun
   YouTube Account Settings:
     Watch Posted Comments: "Vakta svör við athugasemdum sem ég birti"

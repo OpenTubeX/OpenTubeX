@@ -355,7 +355,8 @@
       <FtPrompt
         v-if="showMarkAllPrompt"
         autosize
-        :label="t('History.Mark All As Watched Confirmation')"
+        :label="t('History.Mark All As Watched')"
+        :extra-labels="[t('History.Mark All As Watched Confirmation')]"
         :option-names="markAllPromptNames"
         :option-values="MARK_ALL_PROMPT_VALUES"
         :option-icons="[['fas', 'eye'], ['fas', 'xmark']]"

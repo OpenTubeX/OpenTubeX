@@ -383,6 +383,7 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Restart Required: 'Redémarrage requis'
   Experimental Badge: Expérimental
   YouTube Account Settings:
     Watch Posted Comments: "Suivre les réponses aux commentaires que je publie"

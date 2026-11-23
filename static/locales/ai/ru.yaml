@@ -342,6 +342,7 @@ History:
   Custom: Другое
   History Older Than Days Removed: История просмотра старше {days} дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
 Settings:
+  Restart Required: 'Требуется перезапуск'
   Experimental Badge: Экспериментальная
   YouTube Account Settings:
     Watch Posted Comments: "Отслеживать ответы на мои комментарии"
