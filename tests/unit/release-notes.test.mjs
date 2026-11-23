@@ -6,6 +6,8 @@ import { join } from 'node:path'
 import test from 'node:test'
 
 import {
+  formatReferences,
+  listChangedReleaseNotes,
   listReleaseNoteHistory,
   parseReleaseNoteFile,
   renderReleaseNotes,
@@ -152,6 +154,7 @@ test('a note\'s history lists only the target branch commits that changed it', (
   git('merge', '--no-ff', '-m', 'Merge unrelated', 'unrelated')
 
   assert.deepEqual(listReleaseNoteHistory('release-notes/feature.md', { cwd }).commits, [featureMerge])
+  assert.deepEqual([...listChangedReleaseNotes({ cwd })].map(([oid, notes]) => [oid, [...notes]]), [[featureMerge, ['release-notes/feature.md']]])
 })
 
 test('a note restored after an unpublished release keeps its history until the release is published', (t) => {
@@ -221,6 +224,18 @@ test('a pull request merged with a merge commit is credited only for that commit
     ['commit0', [2649]],
     ['commit2', [2620]],
   ])
+})
+
+test('a pull request that changed several notes links its issues only through notes it changed alone', () => {
+  const pullRequest = (number, mergedAt, issues) => ({ closingIssuesReferences: { nodes: issues.map((issue) => ({ number: issue })) }, mergedAt, number })
+  const batch = pullRequest(3317, '2026-11-18T05:07:09Z', [3289, 3296])
+  const followUp = pullRequest(3356, '2026-11-19T00:00:00Z', [3347])
+  const notesByPullRequest = new Map([
+    [3317, new Set(['release-notes/a.md', 'release-notes/b.md'])],
+    [3356, new Set(['release-notes/a.md'])],
+  ])
+
+  assert.deepEqual(formatReferences([batch, followUp], notesByPullRequest), [3347, 3317, 3356])
 })
 
 test('a release without release notes is rejected', async () => {

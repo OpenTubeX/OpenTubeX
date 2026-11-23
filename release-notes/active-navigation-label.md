@@ -1,5 +1,6 @@
 ---
 category: feature
+references: [3296, 3317]
 ---
 
 The bottom navigation bar can now show only the current page's label, besides showing all labels or none.

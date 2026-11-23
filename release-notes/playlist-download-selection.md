@@ -1,6 +1,7 @@
 ---
 category: feature
 platforms: [android, desktop, ios]
+references: [3345, 3486]
 ---
 
 Playlist downloads can skip videos: uncheck them under Videos in the download dialog.

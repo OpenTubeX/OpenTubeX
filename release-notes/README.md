@@ -44,13 +44,13 @@ Name the file after the change in kebab-case, for example `queue-video-details.m
 
 - `category`: `highlight`, `feature`, `improvement`, or `fix`. Highlights lead the release, so keep them to two or three changes most users will care about. Use `feature` for new features, settings, and options, and `improvement` for changes to existing ones.
 - `platforms` (optional): any of `android`, `ios`, `linux`, `macos`, `windows`, `web`, and `desktop`. Leave it out when the change affects every platform. The update prompt in the app and the store listings skip notes for other platforms.
-- `references` (optional): issue and pull request numbers, for example `[2509]`. They replace the references from the pull requests that changed the file, for notes added after their change merged.
+- `references` (optional): issue and pull request numbers, for example `[2509]`. They replace the references from the pull requests that changed the file. Use them for notes added after their change merged, and when a pull request adds or changes several notes and closes issues: the release notes then can't tell which issue belongs to which note and list only the pull request.
 
 ## Note
 
 - Write one or two sentences of at most 300 characters, ending with a period. Shorter is better.
 - Describe what users notice, not how it works. Leave out minor details and lists of every affected place.
-- Leave out issue and pull request numbers. The release notes add them from the pull requests that changed the file.
+- Leave out issue and pull request numbers from the text. The release notes add them from the pull requests that changed the file.
 - Don't name the platform at the start ("On Android, …"). Set `platforms` instead.
 
 ## Images

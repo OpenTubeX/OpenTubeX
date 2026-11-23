@@ -610,11 +610,43 @@ export function listPullRequestsByCommit(repository, target, commits) {
   return byCommit
 }
 
-/** The issues closed by a note's pull requests followed by the pull requests themselves. */
-export function formatReferences(pullRequests) {
+/** Lists the release notes each target branch commit added or changed. */
+export function listChangedReleaseNotes({ cwd } = {}) {
+  const output = execFileSync('git', ['log', '--format=commit %H', '--name-status', '--first-parent', 'HEAD', '--', RELEASE_NOTES_DIRECTORY], {
+    cwd,
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024,
+  })
+  const notesByCommit = new Map()
+  let notes
+
+  for (const line of output.split('\n')) {
+    const commit = line.match(/^commit ([0-9a-f]+)$/)
+
+    if (commit) {
+      notes = new Set()
+      notesByCommit.set(commit[1], notes)
+    } else if (/^[AMR]/.test(line)) {
+      const file = line.split('\t').at(-1)
+
+      if (isReleaseNoteFile(file)) { notes.add(file) }
+    }
+  }
+
+  return notesByCommit
+}
+
+/**
+ * The issues closed by a note's pull requests followed by the pull requests
+ * themselves. A pull request that changed several notes doesn't say which of
+ * its issues belongs to which note, so only its own number is listed.
+ */
+export function formatReferences(pullRequests, notesByPullRequest = new Map()) {
   const sorted = [...new Map(pullRequests.map((pullRequest) => [pullRequest.number, pullRequest])).values()]
     .sort((left, right) => left.mergedAt.localeCompare(right.mergedAt))
-  const issues = sorted.flatMap((pullRequest) => (pullRequest.closingIssuesReferences?.nodes ?? []).map((issue) => issue.number))
+  const issues = sorted
+    .filter((pullRequest) => (notesByPullRequest.get(pullRequest.number)?.size ?? 1) <= 1)
+    .flatMap((pullRequest) => (pullRequest.closingIssuesReferences?.nodes ?? []).map((issue) => issue.number))
 
   return [...new Set([...issues, ...sorted.map((pullRequest) => pullRequest.number)])]
 }
@@ -624,12 +656,26 @@ export function resolveReleaseNoteHistory(notes, { repository, target }) {
   const histories = notes.map((note) => listReleaseNoteHistory(note.file))
   const commits = [...new Set(histories.flatMap((history) => history.commits))]
   const pullRequests = listPullRequestsByCommit(repository, target, commits)
+  const notesByCommit = listChangedReleaseNotes()
+  const notesByPullRequest = new Map()
+
+  for (const [commit, commitPullRequests] of pullRequests) {
+    for (const pullRequest of commitPullRequests) {
+      const pullRequestNotes = notesByPullRequest.get(pullRequest.number) ?? new Set()
+
+      for (const file of notesByCommit.get(commit) ?? []) { pullRequestNotes.add(file) }
+      notesByPullRequest.set(pullRequest.number, pullRequestNotes)
+    }
+  }
 
   return notes.map((note, index) => ({
     ...note,
     createdAt: histories[index].createdAt,
     // Notes added after their change merged list its references themselves.
-    references: note.references ?? formatReferences(histories[index].commits.flatMap((commit) => pullRequests.get(commit) ?? [])),
+    references: note.references ?? formatReferences(
+      histories[index].commits.flatMap((commit) => pullRequests.get(commit) ?? []),
+      notesByPullRequest,
+    ),
   }))
 }
 
