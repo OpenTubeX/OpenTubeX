@@ -499,7 +499,17 @@ test.describe('profile with its own settings', () => {
       profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
     }))
     await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
-    await expect.poll(() => page.evaluate(() => window.$store.getters.getBaseTheme)).toBe('system')
+    const baseTheme = () => page.evaluate(() => window.$store.getters.getBaseTheme)
+    await expect.poll(baseTheme).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // The same goes for one another window deletes while the profile shows.
+    await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
+      profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
+    }))
+    await expect.poll(baseTheme).toBe('custom:deleted')
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.send('custom-theme-updated', []))
+    await expect.poll(baseTheme).toBe('system')
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
   })
 })

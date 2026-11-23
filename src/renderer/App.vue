@@ -1962,6 +1962,8 @@ onMounted(async () => {
   removeCustomThemeListener = handleCustomThemeUpdated(async (themes) => {
     store.commit('setCustomThemes', themes)
     await repairSystemThemeSettings(store, themes)
+    // Another window can have deleted a custom theme of the active profile's own settings.
+    await sanitizeAppearanceSettings(themes, true)
     updateTheme()
   })
   appearanceSettingsReady = true
@@ -2436,7 +2438,7 @@ watch(() => store.getters.getCustomThemes, cacheNextStartupAppearance)
 // while another profile was active, which only the shown settings repair.
 watch(() => store.state.settings.profileSettingsState.applied, () => {
   if (!customThemesLoaded) return
-  sanitizeAppearanceSettings(store.getters.getCustomThemes).catch(error => console.error(error))
+  sanitizeAppearanceSettings(store.getters.getCustomThemes, true).catch(error => console.error(error))
 })
 
 /** @type {import('vue').ComputedRef<string>} */
@@ -2542,7 +2544,14 @@ function updateAppFont() {
   )
 }
 
-async function sanitizeAppearanceSettings(customThemes) {
+/**
+ * Replaces theme settings that name missing custom themes and invalid colors.
+ * @param {object[]} customThemes
+ * @param {boolean} [profileOnly] only those the active profile replaces with
+ *   its own values. The main process repairs the shared ones.
+ */
+async function sanitizeAppearanceSettings(customThemes, profileOnly = false) {
+  const replaced = store.state.settings.profileSettingsState.shared
   const systemThemes = resolveSystemThemeSettings({
     systemLightTheme: store.getters.getSystemLightTheme,
     systemDarkTheme: store.getters.getSystemDarkTheme,
@@ -2555,8 +2564,10 @@ async function sanitizeAppearanceSettings(customThemes) {
     ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
   ]
 
-  await Promise.all(settings.map(([name, value]) =>
-    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
+  await Promise.all(settings.map(([name, value]) => {
+    if (profileOnly && !Object.hasOwn(replaced, name.charAt(0).toLowerCase() + name.slice(1))) return null
+    return store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)
+  }))
 }
 
 function handleSystemColorSchemeChange(event) {
