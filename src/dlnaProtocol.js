@@ -26,19 +26,75 @@ export function formatDlnaTime(seconds) {
     .map(part => String(part).padStart(2, '0')).join(':')
 }
 
-export function parseDlnaPosition(description) {
-  const parser = sax.parser(true, { trim: true })
-  let reading = false
-  let time = ''
-  parser.onopentag = tag => { reading = tag.name.split(':').at(-1) === 'RelTime' }
-  parser.onclosetag = () => { reading = false }
-  parser.ontext = text => { if (reading) time += text }
-  parser.oncdata = parser.ontext
-  try { parser.write(description).close() } catch { return null }
+function parseDlnaTime(time) {
   const parts = /^(\d+):([0-5]\d):([0-5]\d(?:\.\d+)?)$/.exec(time)
   if (!parts) return null
   const seconds = Number(parts[1]) * 3600 + Number(parts[2]) * 60 + Number(parts[3])
   return Number.isFinite(seconds) ? seconds : null
+}
+
+/** @returns {{ position: number | null, duration: number | null } | null} null when the response is invalid */
+export function parseDlnaPositionInfo(description) {
+  const parser = sax.parser(true, { trim: true })
+  let reading = null
+  const values = { RelTime: '', TrackDuration: '' }
+  parser.onopentag = tag => {
+    const name = tag.name.split(':').at(-1)
+    reading = Object.hasOwn(values, name) ? name : null
+  }
+  parser.onclosetag = () => { reading = null }
+  parser.ontext = text => { if (reading) values[reading] += text }
+  parser.oncdata = parser.ontext
+  try { parser.write(description).close() } catch { return null }
+  return { position: parseDlnaTime(values.RelTime), duration: parseDlnaTime(values.TrackDuration) }
+}
+
+export function parseDlnaPosition(description) {
+  return parseDlnaPositionInfo(description)?.position ?? null
+}
+
+// A renderer that reached the start position may report it slightly rounded.
+const START_TOLERANCE_SECONDS = 5
+const MAX_START_SEEKS = 3
+
+/**
+ * Seeks to where local playback was after Play. GStreamer renderers, such as
+ * gmrender-resurrect, accept a Seek while the media is still loading and then
+ * ignore it, so this keeps checking in the background and seeks again once the
+ * renderer plays the media from an earlier position.
+ * @param {(action: string, fields: object) => Promise<string | undefined>} send
+ * @param {number} seconds
+ * @param {() => boolean} isActive false once the cast stops or is replaced
+ * @returns {Promise<void>} resolves after the first Seek
+ */
+export async function seekDlnaStart(send, seconds, isActive, { timeoutMs = 20_000, intervalMs = 1000 } = {}) {
+  const seek = async () => {
+    try {
+      await send('Seek', { InstanceID: 0, Unit: 'REL_TIME', Target: formatDlnaTime(seconds) })
+    } catch { /* Some renderers do not support seeking. */ }
+  }
+  await seek()
+  const deadline = Date.now() + timeoutMs
+  const verify = async () => {
+    let seeks = 1
+    let checksSinceSeek = 0
+    while (seeks < MAX_START_SEEKS && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, intervalMs))
+      if (!isActive()) return
+      checksSinceSeek++
+      let info
+      try { info = parseDlnaPositionInfo(await send('GetPositionInfo', { InstanceID: 0 })) } catch { continue }
+      if (info?.position === null || info?.position === undefined) continue
+      if (info.position >= seconds - START_TOLERANCE_SECONDS) return
+      // Only a renderer that has loaded the media and plays it can show that it ignored the Seek.
+      if (info.duration > 0 && info.position > 0 && checksSinceSeek >= 2 && isActive()) {
+        await seek()
+        seeks++
+        checksSinceSeek = 0
+      }
+    }
+  }
+  verify().catch(() => {})
 }
 
 /**

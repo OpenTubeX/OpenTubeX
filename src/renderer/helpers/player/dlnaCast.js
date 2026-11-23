@@ -3,7 +3,7 @@ import { onBeforeUnmount, watch } from 'vue'
 import { isDlnaSourceUrl } from './dlnaSource.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
-import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
+import { createAvTransportBody, createDlnaMetadata, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation, seekDlnaStart } from '../../../dlnaProtocol.js'
 
 function scopedAuthorization(payload) {
   const authorization = payload.authorization
@@ -22,7 +22,7 @@ function scopedAuthorization(payload) {
 }
 
 /** Native networking keeps multicast and streaming bytes outside the WebView. */
-export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
+export function createMobileDlnaCast(native, screenWake = playbackScreenWake, seekOptions) {
   const devices = new Map()
   let activeCast = null
   let starting = false
@@ -102,12 +102,12 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
         })
         didSetUri = true
         await send(device, 'Play', { InstanceID: 0, Speed: 1 })
-        if (!source.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
-          try {
-            await send(device, 'Seek', { InstanceID: 0, Unit: 'REL_TIME', Target: formatDlnaTime(payload.startSeconds) })
-          } catch { /* Seeking is optional on DLNA renderers. */ }
-        }
         activeCast = { device, castId: relay.castId, releaseWake: screenWake?.acquire() }
+        if (!source.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
+          const castId = relay.castId
+          await seekDlnaStart((action, fields) => send(device, action, fields), payload.startSeconds,
+            () => activeCast?.castId === castId, seekOptions)
+        }
         return { castId: relay.castId, deviceName: device.name, ...(usedFallback ? { usedFallback: true } : {}) }
       } catch (error) {
         if (didSetUri) {
