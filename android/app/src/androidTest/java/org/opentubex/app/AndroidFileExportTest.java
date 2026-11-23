@@ -202,13 +202,19 @@ public class AndroidFileExportTest {
         String appPackage = instrumentation.getTargetContext().getPackageName();
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         do {
-            try (var output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
-                    instrumentation.getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK"))) {
-                while (output.read() != -1) { }
-            }
-            Thread.sleep(200);
             var root = instrumentation.getUiAutomation().getRootInActiveWindow();
             if (root != null && appPackage.contentEquals(root.getPackageName())) return;
+            // Only the picker may receive Back: once it has closed, another
+            // Back would send the app to the background.
+            if (root != null && root.getPackageName() != null && root.getPackageName().toString().contains("documentsui")) {
+                try (var output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+                        instrumentation.getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK"))) {
+                    while (output.read() != -1) { }
+                }
+                Thread.sleep(1000);
+            } else {
+                Thread.sleep(100);
+            }
         } while (System.nanoTime() < deadline);
         fail("Document picker returns to the app");
     }
