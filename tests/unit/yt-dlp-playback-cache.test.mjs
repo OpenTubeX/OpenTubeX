@@ -276,6 +276,26 @@ test('persistent cache entries missing from the index or their file are dropped'
   assert.deepEqual(JSON.parse(await readFile(join(cacheDirectory, 'index.json'), 'utf8')).map(record => record.videoId), ['aaaaaaaaaaa'])
 })
 
+test('a persistent cache entry stored again while it is evicted keeps its file', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-ytdlp-cache-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const event = { senderFrame: { url: 'app://bundle/index.html' } }
+  const playbackSource = { manifestSrc: 'data:application/dash+xml;base64,PE1QRD4=', manifestMimeType: 'application/dash+xml', legacyFormats: [], title: null, isLive: false }
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const cache = await loadPersistentCache(directory, [])
+  await cache.applyYtDlpPlaybackCacheSettings()
+  const videoId = index => `v${String(index).padStart(10, '0')}`
+  for (let index = 0; index < 50; index++) {
+    assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, videoId(index), 'key', expiryTime, playbackSource), true)
+  }
+  // The new entry evicts the oldest one, which a second write stores again.
+  assert.deepEqual(await Promise.all([
+    cache.handleYtDlpPlaybackCacheSet(event, videoId(50), 'key', expiryTime, playbackSource),
+    cache.handleYtDlpPlaybackCacheSet(event, videoId(0), 'key', expiryTime, playbackSource),
+  ]), [true, true])
+  assert.equal((await cache.handleYtDlpPlaybackCacheGet(event, videoId(0), 'key'))?.source.manifestSrc, playbackSource.manifestSrc)
+})
+
 test('playback does not wait for the persistent cache write and still reports failures', async () => {
   const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
   const start = code.indexOf('async function cacheYtDlpPlaybackSource(')

@@ -228,7 +228,10 @@ function saveIndex() {
  */
 function removeEntryFiles(videoIds) {
   if (videoIds.length === 0) return Promise.resolve()
-  return enqueueWrite(() => Promise.all(videoIds.map(videoId => rm(entryPath(videoId), { force: true }))))
+  // A write queued meanwhile can store the video again, and its file must stay.
+  return enqueueWrite(() => Promise.all(videoIds
+    .filter(videoId => !records.has(videoId))
+    .map(videoId => rm(entryPath(videoId), { force: true }))))
 }
 
 /**
