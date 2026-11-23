@@ -567,36 +567,23 @@ test('migrates the Compact Tab Labels switch to the Navigation Bar Labels select
   assert.equal(migrateLegacySyncedSettings({ compactNavigationLabels: legacy, navigationBarLabels: current }).navigationBarLabels, current)
 })
 
-test('migrates the mini player switches to the scroll player select', async () => {
-  for (const [initial, expected] of [
-    [
-      [
-        { _id: 'scrollMiniPlayerEnabled', value: false },
-        { _id: 'scrollMiniPlayerOnAllTabs', value: true },
-        { _id: 'quickSettings', value: ['scrollMiniPlayerEnabled', 'hideComments'] },
-      ],
-      { scrollPlayerMode: 'off', quickSettings: ['scrollPlayerMode', 'hideComments'] },
-    ],
-    // Startup maps the older Picture-in-Picture mode only while neither setting is saved.
-    [[{ _id: 'scrollMiniPlayerEnabled', value: true }], { scrollPlayerMode: 'mini' }],
-    [
-      [{ _id: 'scrollMiniPlayerEnabled', value: false }, { _id: 'scrollPlayerMode', value: 'pin' }],
-      { scrollPlayerMode: 'pin' },
-    ],
-  ]) {
-    const settings = new Datastore()
-    await settings.insertAsync(initial)
+test('removes the former scroll player settings', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'scrollMiniPlayerEnabled', value: false },
+    { _id: 'scrollMiniPlayerOnAllTabs', value: true },
+    { _id: 'scrollPlayerMode', value: 'off' },
+    { _id: 'keepPlayingOnNavigation', value: false },
+  ])
 
-    await migrateStoredSettings(settings)
-    await migrateStoredSettings(settings)
+  await migrateStoredSettings(settings)
 
-    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
-    assert.deepEqual(stored, expected)
-  }
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, { keepPlayingOnNavigation: false })
 
   assert.deepEqual(
-    migrateLegacySettings({ scrollMiniPlayerEnabled: false, scrollMiniPlayerOnAllTabs: true }),
-    { scrollPlayerMode: 'off' }
+    migrateLegacySettings({ scrollMiniPlayerEnabled: false, scrollMiniPlayerOnAllTabs: true, scrollPlayerMode: 'off' }),
+    {}
   )
 })
 

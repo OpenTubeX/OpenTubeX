@@ -247,10 +247,6 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
 })
 
 test('paints the toolbar\'s Save to dropdown above the cards below it with blurred cards', { tag: '@scale' }, async ({ app, page }) => {
-  // Scrolling the toolbar to the top docks the scroll mini player, and
-  // scrolling back before the click undocks it. Either animation can pass
-  // over the dropdown while its hit test runs.
-  await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   // Custom theme blurs give the cards and the toolbar backdrop filters,
@@ -287,7 +283,6 @@ test('paints the toolbar\'s Save to dropdown above the cards below it with blurr
 })
 
 test('opens the toolbar\'s Save to dropdown above the button without scrolling when only the space above fits it', { tag: '@scale' }, async ({ app, page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
 
@@ -325,7 +320,6 @@ test.describe('with many playlists', () => {
   })
 
   test('keeps the toolbar\'s Save to dropdown in place with nothing left to scroll while searching', { tag: '@scale' }, async ({ app, page }) => {
-    await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 

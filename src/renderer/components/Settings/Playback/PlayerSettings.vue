@@ -630,9 +630,16 @@
         />
       </div>
       <div
-        v-if="IS_CAPACITOR"
+        v-if="USING_ELECTRON || IS_CAPACITOR"
         class="switchColumn"
       >
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Keep Playing After Leaving Video')"
+          :compact="true"
+          :default-value="store.getters.getKeepPlayingOnNavigation"
+          setting-key="keepPlayingOnNavigation"
+          @change="store.dispatch('updateKeepPlayingOnNavigation', $event)"
+        />
         <FtToggleSwitch
           v-if="IS_CAPACITOR && !IS_IOS"
           :label="t('Settings.Player Settings.Ignore System Rotation Lock for Fullscreen')"
@@ -690,28 +697,6 @@
         :tooltip="t('Settings.Player Settings.Default Viewing Mode.Tooltip')"
         :icon="['fas', 'expand']"
         @change="updateDefaultViewingMode"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Player Settings.Scroll Mini Player.Scroll Player Mode')"
-        :value="store.getters.getScrollPlayerMode"
-        setting-key="scrollPlayerMode"
-        :select-names="scrollPlayerModeNames"
-        :select-values="SCROLL_PLAYER_MODE_VALUES"
-        :tooltip="t('Settings.Player Settings.Scroll Mini Player.Scroll Player Mode Tooltip')"
-        :icon="['fas', 'compress']"
-        @change="store.dispatch('updateScrollPlayerMode', $event)"
-      />
-      <FtSelect
-        v-if="USING_ELECTRON || IS_CAPACITOR"
-        size-to-content
-        :placeholder="t('Settings.Player Settings.Scroll Mini Player.Leaving Video')"
-        :value="store.getters.getKeepPlayingOnNavigation ? 'keep' : 'stop'"
-        setting-key="keepPlayingOnNavigation"
-        :select-names="leavingVideoNames"
-        :select-values="LEAVING_VIDEO_VALUES"
-        :icon="['fas', 'play']"
-        @change="store.dispatch('updateKeepPlayingOnNavigation', $event === 'keep')"
       />
     </FtFlexBox>
     <h4 class="groupTitle">
@@ -1421,21 +1406,6 @@ const mobileAutoPictureInPicture = computed(() => store.getters.getMobileAutoPic
 function updateMobileAutoPictureInPicture(value) {
   store.dispatch('updateMobileAutoPictureInPicture', value)
 }
-
-const SCROLL_PLAYER_MODE_VALUES = ['mini', 'pin', 'off']
-
-const scrollPlayerModeNames = computed(() => [
-  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Mini'),
-  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Pin'),
-  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Off')
-])
-
-const LEAVING_VIDEO_VALUES = ['keep', 'stop']
-
-const leavingVideoNames = computed(() => [
-  t('Settings.Player Settings.Scroll Mini Player.Leaving Video Modes.Keep Playing'),
-  t('Settings.Player Settings.Scroll Mini Player.Leaving Video Modes.Stop')
-])
 
 const FORMAT_VALUES = ['dash', 'legacy', 'audio']
 

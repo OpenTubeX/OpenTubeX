@@ -43,7 +43,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     clearTimeout,
     process: { env: { IS_CAPACITOR: android } },
     document: { querySelector: () => null, body: { classList: { remove() {}, contains: name => classes.has(name) } } },
-    store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollPlayerMode: inlineVisible ? 'mini' : 'off' }) },
+    store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
     getDefaultScrollMiniPlayerRect: () => ({ ...rect }),
     scrollMiniPlayerRectToStyle,

@@ -314,14 +314,6 @@ test('devices read the Data Saver Thumbnails mode from the switch of older versi
   assert.equal(migrateLegacySyncedSettings({ thumbnailDataSaver: legacy, thumbnailDataSaverMode: current }).thumbnailDataSaverMode, current)
 })
 
-test('devices read the scroll player select from the mini player switch of older versions', () => {
-  const legacy = { key: 'scrollMiniPlayerEnabled', value: false, updatedAt: 10 }
-  assert.deepEqual(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy }).scrollPlayerMode,
-    { key: 'scrollPlayerMode', value: 'off', updatedAt: 10 })
-  const current = { key: 'scrollPlayerMode', value: 'pin', updatedAt: 5 }
-  assert.equal(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy, scrollPlayerMode: current }).scrollPlayerMode, current)
-})
-
 test('devices read the Title Lines select from the Limit Titles to Two Lines switch of older versions', () => {
   const legacy = { key: 'limitTitlesToTwoLines', value: false, updatedAt: 10 }
   assert.deepEqual(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy }).titleLineLimit,

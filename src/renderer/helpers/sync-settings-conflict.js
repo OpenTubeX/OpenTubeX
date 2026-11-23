@@ -6,7 +6,6 @@ import {
   holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
   navigationBarLabelsFromCompactSwitch,
-  scrollPlayerModeFromMiniPlayerSwitch,
   thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
 } from '../../datastores/settingsMigrations.js'
@@ -46,12 +45,6 @@ export function migrateLegacySyncedSettings(remote) {
   if (legacy && !remote.videoDescriptionMode) {
     migrated.videoDescriptionMode = {
       ...legacy, key: 'videoDescriptionMode', value: legacy.value === true ? 'hide' : 'collapsed',
-    }
-  }
-  const scrollMiniPlayer = remote.scrollMiniPlayerEnabled
-  if (scrollMiniPlayer && !remote.scrollPlayerMode) {
-    migrated.scrollPlayerMode = {
-      ...scrollMiniPlayer, key: 'scrollPlayerMode', value: scrollPlayerModeFromMiniPlayerSwitch(scrollMiniPlayer.value),
     }
   }
   const limitTitles = remote.limitTitlesToTwoLines

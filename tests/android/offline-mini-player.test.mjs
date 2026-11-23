@@ -8,7 +8,7 @@ import { appPage } from '../helpers/android-app-page.mjs'
 // Run against a current debug APK on a locked emulator, with its WebView
 // socket forwarded to ANDROID_CDP_URL. ANDROID_OFFLINE_MEDIA_PATH must select
 // an MP3 accessible to the app so the real downloaded-file loader is exercised.
-test('downloaded audio docks on scroll, navigation and swipe without an online countdown', {
+test('downloaded audio stays pinned on scroll and docks on navigation and swipe without an online countdown', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async t => {
   assert.ok(process.env.ANDROID_OFFLINE_MEDIA_PATH, 'Set ANDROID_OFFLINE_MEDIA_PATH to an app-local MP3')
@@ -48,7 +48,6 @@ test('downloaded audio docks on scroll, navigation and swipe without an online c
         UseSponsorBlock: false,
         UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true,
-        ScrollPlayerMode: 'mini',
         CapacitorLayoutMode: 'phone',
         UiScale: 100,
         ReducedMotion: 'off',
@@ -134,16 +133,16 @@ test('downloaded audio docks on scroll, navigation and swipe without an online c
         document.querySelector('.app > .routerView').append(spacer)
         window.scrollTo(0, 0)
       }, scale)
-      await t.test(`scroll docks and restores downloaded audio at ${scale}%`, async () => {
+      // Portrait phones have room to pin the player, so scrolling keeps it inline.
+      await t.test(`scroll keeps downloaded audio pinned at ${scale}%`, async () => {
         await page.evaluate(() => window.scrollTo(0, 1200))
-        await expect(player).toHaveClass(/mobileMiniBar/)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
         await settle()
-        await expect(player.locator('.countdownPoster img')).toBeVisible()
-        const artwork = await player.locator('.countdownPoster').boundingBox()
-        assert.ok(artwork.width > 0 && artwork.height > 0)
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        const bounds = await player.boundingBox()
+        assert.ok(bounds.y >= 0 && bounds.height > 0, 'the pinned player stays in view')
         await assertPlaying()
         await page.evaluate(() => window.scrollTo(0, 0))
-        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
         await settle()
       })
       await t.test(`navigation retains downloaded audio with a visible bar at ${scale}%`, async () => {

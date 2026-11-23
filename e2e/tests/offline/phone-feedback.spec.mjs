@@ -85,51 +85,23 @@ test('keeps landscape player options within the player in list and grid modes', 
   }).toBe(true)
 })
 
-for (const landscape of [false, true]) {
-  test(`opens a panel at the inline video position from the mini player in ${landscape ? 'landscape' : 'portrait'}`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await openMockedVideo(page)
-    await setWindowSize(app, page, landscape ? { width: 1000, height: 480 } : { width: 480, height: 800 })
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateScrollPlayerMode', 'mini')
-      window.scrollTo(0, document.body.scrollHeight)
-    })
-    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    const watch = await watchViewHandle(page)
-    expect(await watch.evaluate(vm => vm.$refs.player.scrollMiniPlayerActive)).toBe(true)
-    await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).evaluate(button => button.click())
-    const sheet = page.locator('.mobileSheet[open]')
-    await expect(sheet).toBeVisible()
-    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await expect.poll(async () => {
-      const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
-      const panel = await sheet.boundingBox()
-      return landscape
-        ? panel.y < 5 && panel.height >= 475
-        : Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height)) < 2
-    }).toBe(true)
-  })
-}
-
-test('opens comments from a mini player at the inline video position', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
+// Portrait phones pin the player, so only landscape docks it while scrolling.
+test('opens a panel at full height from the mini player in landscape', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
   await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(async () => {
-    await window.$store.dispatch('updateScrollPlayerMode', 'mini')
-    window.scrollTo(0, document.body.scrollHeight)
-  })
-  const player = page.locator('.ftVideoPlayer')
-  await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-  await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
-  const sheet = page.locator('.dockedSheet[open]')
+  await setWindowSize(app, page, { width: 1000, height: 480 })
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+  const watch = await watchViewHandle(page)
+  expect(await watch.evaluate(vm => vm.$refs.player.scrollMiniPlayerActive)).toBe(true)
+  await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).evaluate(button => button.click())
+  const sheet = page.locator('.mobileSheet[open]')
   await expect(sheet).toBeVisible()
-  await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
   await expect.poll(async () => {
-    const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
     const panel = await sheet.boundingBox()
-    return Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height))
-  }).toBeLessThan(2)
+    return panel.y < 5 && panel.height >= 475
+  }).toBe(true)
 })
 
 test('phone options keep the page scrollable and omit the extra header', async ({ app, page }) => {

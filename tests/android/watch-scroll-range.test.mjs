@@ -26,7 +26,6 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
         UseReturnYouTubeDislikes: false,
         HideRecommendedVideos: true,
         KeepPlayingOnNavigation: true,
-        ScrollPlayerMode: 'mini',
         CapacitorLayoutMode: 'phone',
         UiScale: 100,
         AiVideoSummaryMode: 'expanded',

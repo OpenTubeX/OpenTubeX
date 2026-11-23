@@ -101,7 +101,6 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         UseSponsorBlock: false,
         UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true,
-        ScrollPlayerMode: 'mini',
         CapacitorLayoutMode: 'phone',
         UiScale: 100,
         ReducedMotion: 'off',
@@ -237,6 +236,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       }
       await page.evaluate(() => document.exitFullscreen())
       await page.evaluate(() => {
+        // Downward swipes dock the player instead of leaving fullscreen.
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileFullscreenSwipe', false)
         window.musicMorphPaints = { inline: 0, morph: 0 }
         const fill = CanvasRenderingContext2D.prototype.fill
         CanvasRenderingContext2D.prototype.fill = function (...args) {
@@ -265,11 +266,20 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
         for (let cycle = 0; cycle < 2; cycle++) {
           const starts = await page.evaluate(() => window.musicMorphStarts)
-          await page.evaluate(() => window.scrollTo(0, 1000))
+          // Portrait phones pin the player while scrolling, so swipe it into the mini player.
+          const full = await player.boundingBox()
+          const down = { x: full.x + 12, y: full.y + 12 }
+          await touch('touchStart', down)
+          for (const distance of [30, 80, 140]) await touch('touchMove', { ...down, y: down.y + distance })
+          await touch('touchEnd')
           await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 1)
           await expect(player).toHaveClass(/scrollMiniPlayer/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-          await page.evaluate(() => window.scrollTo(0, 0))
+          const bar = await player.locator('.mobileMiniBarReturn').boundingBox()
+          const up = { x: bar.x + bar.width / 2, y: bar.y + 15 }
+          await touch('touchStart', up)
+          for (const distance of [30, 80, Math.abs(bar.y - full.y)]) await touch('touchMove', { ...up, y: up.y - distance })
+          await touch('touchEnd')
           await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 2)
           await expect(player).not.toHaveClass(/scrollMiniPlayer/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
@@ -489,7 +499,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
           await store.dispatch('updateIconPack', scale === 100 ? 'material' : 'remix')
           await store.dispatch('updateReducedMotion', scale === 100 ? 'off' : 'on')
         }, scale)
-        await page.evaluate(() => window.scrollTo(0, 1200))
+        // Portrait phones pin the player while scrolling, so leave the video to dock it.
+        await page.evaluate(() => { location.hash = '#/subscriptions' })
         await expect(player).toHaveClass(/scrollMiniPlayer/)
         await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
         const frames = await player.evaluate(async element => {
@@ -522,7 +533,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
       const full = await player.boundingBox()
-      const down = { x: full.x + full.width / 2, y: full.y + full.height / 2 }
+      // The seek bar's touch area reaches the middle of the small player at 125%.
+      const down = { x: full.x + 12, y: full.y + 12 }
       await touch('touchStart', down)
       for (const distance of [30, 80, 150]) await touch('touchMove', { ...down, y: down.y + distance })
       await touch('touchEnd')

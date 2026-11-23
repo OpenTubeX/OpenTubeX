@@ -37,7 +37,7 @@ before(async () => {
     return {
       scale: app.$store.getters.getUiScale,
       auto: app.$store.getters.getMobileAutoPictureInPicture,
-      mini: app.$store.getters.getScrollPlayerMode,
+      keepPlaying: app.$store.getters.getKeepPlayingOnNavigation,
       animation: app.$store.getters.getAnimationSpeed,
       motion: app.$store.getters.getReducedMotion,
       route: app.$router.currentRoute.value.fullPath
@@ -79,7 +79,8 @@ before(async () => {
       localFile: true,
       localFileLabel: 'test'
     }]
-    app.config.globalProperties.$store.commit('setScrollPlayerMode', 'mini')
+    // The mini-player morph test docks the player by leaving the video.
+    app.config.globalProperties.$store.commit('setKeepPlayingOnNavigation', true)
   }, media.toString('base64'))
   await page.waitForFunction(() => document.querySelector('video')?.readyState >= 2)
   const skip = page.getByRole('button', { name: 'Skip', exact: true })
@@ -96,7 +97,7 @@ after(async () => {
           const app = document.querySelector('#app').__vue_app__.config.globalProperties
           app.$store.commit('setUiScale', settings.scale)
           app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
-          app.$store.commit('setScrollPlayerMode', settings.mini)
+          app.$store.commit('setKeepPlayingOnNavigation', settings.keepPlaying)
           app.$store.commit('setAnimationSpeed', settings.animation)
           app.$store.commit('setReducedMotion', settings.motion)
           await app.$router.push(settings.route)
@@ -194,7 +195,7 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
   }
 }
 
-for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'home', 'offscreen'], [125, 'home', 'partial']]) {
+for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'home', 'pinned']]) {
   const label = scroll ? `${trigger}-${scroll}` : trigger
   test(`native PiP preserves the real inline player at ${scale}% UI scale through ${label}`, { skip: !enabled }, async () => {
     await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
@@ -205,29 +206,21 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       video.currentTime = 2
       await video.play()
     }, trigger)
-    await page.evaluate(scroll => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setScrollPlayerMode', scroll ? 'off' : 'mini')
-      if (scroll) {
+    if (scroll) {
+      await page.evaluate(() => {
         // Stand in for a long description/comments section while retaining
         // the real Watch layout and its scroll viewport.
         const content = document.createElement('div')
         content.id = 'pip-offscreen-content'
         content.style.height = '2000px'
         document.querySelector('.videoLayout').append(content)
-        const video = document.querySelector('video').getBoundingClientRect()
-        window.scrollTo(0, scroll === 'partial' ? window.scrollY + video.bottom - 40 : 1000)
-      }
-    }, scroll)
+        window.scrollTo(0, 1000)
+      })
+    }
     await page.waitForTimeout(400)
-    if (scroll === 'partial') {
-      assert.ok(await page.evaluate(() => {
-        const rect = document.querySelector('video').getBoundingClientRect()
-        return rect.top < 0 && rect.bottom > 0 && rect.bottom <= 41
-      }), 'only a narrow strip of the inline video remains inside the viewport')
-    } else if (scroll) {
-      assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
-        'the real inline video has scrolled entirely above the viewport')
+    if (scroll) {
+      assert.ok(await page.evaluate(() => window.scrollY > 0 && document.querySelector('video').getBoundingClientRect().top >= 0),
+        'the scrolled page keeps the inline video pinned in view')
     }
     const start = await page.evaluate(() => {
       const video = document.querySelector('video')
@@ -407,7 +400,6 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       assert.ok(frames.every(frame => !frame.mini), 'native PiP must not activate the scroll mini-player')
       for (const frame of frames.filter(frame => frame.active && !frame.returning)) {
         const expected = [...start.rect]
-        if (scroll) expected[1] = 0
         assert.ok(frame.rect.every((value, axis) => Math.abs(value - expected[axis]) <= 1),
           `PiP must preserve the live video element's geometry: ${JSON.stringify(frame)}`)
         assert.deepEqual(frame.inner, start.inner, 'Chromium must keep the original viewport during PiP')
@@ -434,10 +426,9 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
 }
 
 for (const scale of [100, 125]) {
-  test(`native PiP uses its accepted crop when leaving during the scroll mini-player morph at ${scale}%`, { skip: !enabled }, async () => {
+  test(`native PiP uses its accepted crop when leaving during the mini-player morph at ${scale}%`, { skip: !enabled }, async () => {
     await page.evaluate(async scale => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setScrollPlayerMode', 'off')
       store.commit('setUiScale', scale)
       store.commit('setMobileAutoPictureInPicture', true)
       // Widen the race so native entry consistently overlaps the morph.
@@ -452,17 +443,13 @@ for (const scale of [100, 125]) {
       !document.querySelector('[data-mobile-mini-morph]'))
     try {
       await page.evaluate(() => {
-        const content = document.createElement('div')
-        content.id = 'pip-offscreen-content'
-        content.style.height = '2000px'
-        document.querySelector('.videoLayout').append(content)
         window.__pipAcceptedLayout = null
         window.__pipCaptureLayout = event => {
           if (event.active && event.transitioning) window.__pipAcceptedLayout = event.layout
         }
         window.addEventListener('opentubex:android-pip', window.__pipCaptureLayout)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollPlayerMode', 'mini')
-        window.scrollTo(0, 1000)
+        // Portrait phones pin the player while scrolling, so leave the video to dock it.
+        document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/subscriptions')
       })
       await page.waitForSelector('[data-mobile-mini-morph]')
       adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
@@ -511,10 +498,11 @@ for (const scale of [100, 125]) {
         delete window.__pipCaptureLayout
         delete window.__pipAcceptedLayout
         document.querySelector('video')?.pause()
-        document.querySelector('#pip-offscreen-content')?.remove()
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollPlayerMode', 'off')
-        window.scrollTo(0, 0)
+        document.querySelector('.mobileMiniBarReturn')?.click()
       })
+      await page.waitForSelector('.videoLayout')
+      await page.waitForFunction(() => !document.querySelector('.ftVideoPlayer').classList.contains('scrollMiniPlayer') &&
+        !document.querySelector('[data-mobile-mini-morph]'))
     }
   })
 }
