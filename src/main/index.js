@@ -2892,7 +2892,7 @@ function runApp() {
 
   handleTrusted(IpcChannels.READ_CLIPBOARD, () => clipboard.readText())
 
-  const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
+  const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, refreshThemeSource: () => applyShownBaseThemes() })
   setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl })
 
   setupDatastoreIpc({

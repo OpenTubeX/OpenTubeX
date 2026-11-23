@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import asyncFs from 'fs/promises'
 import { randomUUID } from 'crypto'
@@ -8,7 +8,6 @@ import {
   CUSTOM_THEMES_DIRECTORY,
   customThemeIdFromValue,
   customThemeValue,
-  isCustomThemeValue,
   normalizeCustomTheme,
   normalizeCustomThemes,
 } from '../customTheme'
@@ -24,9 +23,10 @@ import { writeFileAtomic } from './writeFileAtomic'
  * the IPC handlers that edit them.
  * @param {object} options
  * @param {(settingKey: string, value: unknown, expectedValue?: unknown) => Promise<void>} options.updateSettingFromMain
- * @param {(baseTheme: string) => void} options.updateThemeSource
+ * @param {() => Promise<void>} options.refreshThemeSource sets the native theme
+ *   source from the base themes the windows show, which can be custom ones
  */
-export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) {
+export function setupCustomThemes({ updateSettingFromMain, refreshThemeSource }) {
   const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
   // A replacement deletes the files it does not list, so it must not interleave with saves.
   const runThemeChange = createSerialQueue()
@@ -105,13 +105,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   }
 
   async function publishCustomThemes(themes) {
-    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
-    const selectedCustomTheme = isCustomThemeValue(selectedTheme)
-      ? themes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? themes[0]
-      : null
-    if (selectedCustomTheme) {
-      nativeTheme.themeSource = selectedCustomTheme.isDark ? 'dark' : 'light'
-    }
+    await refreshThemeSource().catch(error => console.error('Failed to apply the custom theme source', error))
     BrowserWindow.getAllWindows().forEach((window) => {
       if (isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
@@ -200,7 +194,6 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
           await updateSettingFromMain('mainColor', deletedTheme.mainColor)
           await updateSettingFromMain('secColor', deletedTheme.secondaryColor)
           await updateSettingFromMain('baseTheme', deletedTheme.basedOn)
-          updateThemeSource(deletedTheme.basedOn)
         }
       }
       await repairSystemThemeSettingsFromMain(themes)
