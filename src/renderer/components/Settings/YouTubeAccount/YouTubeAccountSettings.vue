@@ -292,7 +292,8 @@ const keepPlaylistsPrompt = ref(/** @type {(() => Promise<unknown>) | null} */ (
  * @param {() => Promise<unknown>} end signs out or turns playlist sync off
  */
 async function endPlaylistSync(end) {
-  let hasPlaylists = false
+  // Asks when unsure, as ending the sync without asking removes the playlists.
+  let hasPlaylists = true
   try {
     hasPlaylists = await hasYouTubePlaylists()
   } catch (error) {
