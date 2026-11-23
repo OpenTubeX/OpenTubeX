@@ -1,4 +1,4 @@
-import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { chmod, copyFile, mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
@@ -206,7 +206,7 @@ test('a zero size limit disables and clears the persistent yt-dlp playback cache
     window.ftElectron.ytDlpPlaybackCacheGet('eeeeeeeeeee', 'settings'),
     window.ftElectron.ytDlpPlaybackCacheSet('fffffffffff', 'settings', expiryTime, source)
   ]), { expiryTime, source })).toEqual([null, false])
-  await expect(readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json')))
+  await expect(readdir(path.join(app.userDataDir, 'yt-dlp-playback-cache')))
     .rejects.toMatchObject({ code: 'ENOENT' })
 })
 

@@ -205,7 +205,7 @@
           :title="t('Settings.Storage Settings.Playback Caches')"
           :size="playbackCachesText"
           :description="t('Settings.Storage Settings.Playback Caches Description')"
-          location="yt-dlp-playback-cache.json, player_cache/"
+          location="yt-dlp-playback-cache/, player_cache/"
         >
           <template #setting>
             <FtSlider

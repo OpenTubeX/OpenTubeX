@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -202,6 +202,8 @@ async function loadPersistentCache (directory, stringified) {
     Buffer,
     createHash,
     createSerialQueue,
+    mkdir,
+    readdir,
     readFile,
     rm,
     writeFileAtomic,
@@ -211,15 +213,18 @@ async function loadPersistentCache (directory, stringified) {
     normalizeYtDlpPlaybackCacheMaxEntrySize,
     TabManager: { getOpenVideoIds: () => new Set() },
     isTrustedSender: () => true,
-    // Counts serialized entries; the whole-file write passes an array.
+    // Counts serialized entries; the index write passes an array.
     JSON: { parse: JSON.parse, stringify: value => { if (!Array.isArray(value)) stringified.push(value.videoId); return JSON.stringify(value) } },
   }
-  return compileFunction(`${source}\nreturn { handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet, applyYtDlpPlaybackCacheSettings }`, Object.keys(dependencies))(...Object.values(dependencies))
+  return compileFunction(`${source}\nreturn { handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet, handleYtDlpPlaybackCacheDelete, applyYtDlpPlaybackCacheSettings }`, Object.keys(dependencies))(...Object.values(dependencies))
 }
 
-test('persistent cache entries are measured once and stored in the same file format', async t => {
+test('persistent cache entries are serialized once and stored in their own files', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-ytdlp-cache-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
+  const cacheDirectory = join(directory, 'yt-dlp-playback-cache')
+  // The single file of earlier versions is replaced, not read.
+  await writeFile(join(directory, 'yt-dlp-playback-cache.json'), '[]')
   const event = { senderFrame: { url: 'app://bundle/index.html' } }
   const playbackSource = { manifestSrc: 'data:application/dash+xml;base64,PE1QRD4=', manifestMimeType: 'application/dash+xml', legacyFormats: [], title: null, isLive: false }
   const expiryTime = Date.now() + 60 * 60 * 1000
@@ -227,20 +232,48 @@ test('persistent cache entries are measured once and stored in the same file for
   const cache = await loadPersistentCache(directory, stringified)
   await cache.applyYtDlpPlaybackCacheSettings()
   assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'aaaaaaaaaaa', 'key', expiryTime, playbackSource), true)
+  const firstEntry = await readFile(join(cacheDirectory, 'aaaaaaaaaaa.json'), 'utf8')
   assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'bbbbbbbbbbb', 'key', expiryTime, playbackSource), true)
-  assert.deepEqual(stringified, ['aaaaaaaaaaa', 'bbbbbbbbbbb'], 'each new entry is serialized once to measure it')
+  assert.deepEqual(stringified, ['aaaaaaaaaaa', 'bbbbbbbbbbb'], 'each new entry is serialized once')
+  assert.equal(await readFile(join(cacheDirectory, 'aaaaaaaaaaa.json'), 'utf8'), firstEntry)
+  assert.deepEqual(Object.keys(JSON.parse(firstEntry)), ['videoId', 'cacheKeyHash', 'expiryTime', 'source'])
   await cache.applyYtDlpPlaybackCacheSettings()
   assert.equal(stringified.length, 2, 'revalidating stored entries reuses their sizes')
-
-  const stored = JSON.parse(await readFile(join(directory, 'yt-dlp-playback-cache.json'), 'utf8'))
-  assert.deepEqual(stored.map(entry => Object.keys(entry)), [['videoId', 'cacheKeyHash', 'expiryTime', 'source'], ['videoId', 'cacheKeyHash', 'expiryTime', 'source']])
 
   const reloaded = []
   const restarted = await loadPersistentCache(directory, reloaded)
   await restarted.applyYtDlpPlaybackCacheSettings()
-  assert.deepEqual(reloaded, ['aaaaaaaaaaa', 'bbbbbbbbbbb'], 'loading measures each stored entry once')
   assert.equal((await restarted.handleYtDlpPlaybackCacheGet(event, 'aaaaaaaaaaa', 'key')).source.manifestSrc, playbackSource.manifestSrc)
-  assert.equal(reloaded.length, 2)
+  assert.equal(await restarted.handleYtDlpPlaybackCacheGet(event, 'bbbbbbbbbbb', 'other key'), null, 'other settings invalidate the entry')
+  assert.equal(await restarted.handleYtDlpPlaybackCacheDelete(event, 'aaaaaaaaaaa'), true)
+  assert.deepEqual(reloaded, [], 'loading and reading entries does not serialize them')
+  assert.deepEqual(await readdir(cacheDirectory), ['index.json'])
+  assert.deepEqual(JSON.parse(await readFile(join(cacheDirectory, 'index.json'), 'utf8')), [])
+  await assert.rejects(readFile(join(directory, 'yt-dlp-playback-cache.json')), { code: 'ENOENT' })
+})
+
+test('persistent cache entries missing from the index or their file are dropped', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-ytdlp-cache-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const cacheDirectory = join(directory, 'yt-dlp-playback-cache')
+  const event = { senderFrame: { url: 'app://bundle/index.html' } }
+  const playbackSource = { manifestSrc: 'data:application/dash+xml;base64,PE1QRD4=', manifestMimeType: 'application/dash+xml', legacyFormats: [], title: null, isLive: false }
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const cache = await loadPersistentCache(directory, [])
+  await cache.applyYtDlpPlaybackCacheSettings()
+  assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'aaaaaaaaaaa', 'key', expiryTime, playbackSource), true)
+  assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'bbbbbbbbbbb', 'key', expiryTime, playbackSource), true)
+  // A crash between writing an entry and the index leaves an unindexed file.
+  await mkdir(cacheDirectory, { recursive: true })
+  await writeFile(join(cacheDirectory, 'ccccccccccc.json'), '{}')
+  await rm(join(cacheDirectory, 'bbbbbbbbbbb.json'))
+
+  const restarted = await loadPersistentCache(directory, [])
+  await restarted.applyYtDlpPlaybackCacheSettings()
+  assert.equal(await restarted.handleYtDlpPlaybackCacheGet(event, 'bbbbbbbbbbb', 'key'), null)
+  assert.equal((await restarted.handleYtDlpPlaybackCacheGet(event, 'aaaaaaaaaaa', 'key')).source.manifestSrc, playbackSource.manifestSrc)
+  assert.deepEqual((await readdir(cacheDirectory)).sort(), ['aaaaaaaaaaa.json', 'index.json'])
+  assert.deepEqual(JSON.parse(await readFile(join(cacheDirectory, 'index.json'), 'utf8')).map(record => record.videoId), ['aaaaaaaaaaa'])
 })
 
 test('playback does not wait for the persistent cache write and still reports failures', async () => {
