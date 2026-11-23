@@ -66,9 +66,12 @@ export const SHARED_ONLY_SETTINGS = new Set([
   'ytDlpAutomaticDownloadRules',
   'ytDlpAutomaticDownloadsRequireUnmetered',
   'ytDlpAutomaticDownloadsRequireCharging',
-  // Retention deletes the history and searches that other profiles may share.
+  // Retention deletes the history and searches that other profiles may share,
+  // and the video metadata history, which the main process also records, is
+  // one for all profiles.
   'historyRetentionDays',
   'searchHistoryRetentionDays',
+  'enableVideoMetadataCache',
   // Identities and drafts
   'sponsorBlockUserId',
   'sponsorBlockGeneratedUserId',
