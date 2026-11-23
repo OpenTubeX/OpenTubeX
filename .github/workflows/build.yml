@@ -118,7 +118,7 @@ jobs:
       uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
 
     - name: Set up Go for the Cast sender
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
       with:
         go-version-file: _scripts/cast-sender/go.mod
         cache-dependency-path: _scripts/cast-sender/go.sum
@@ -469,7 +469,7 @@ jobs:
         package-manager-cache: false
 
     - name: Set up Go for the Cast sender
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
       with:
         go-version-file: _scripts/cast-sender/go.mod
         # Gradle cross-compiles both Go modules for every Android ABI.
