@@ -39,7 +39,8 @@ function setup(t, online, checkInternet) {
     showToast: toast => toasts.push(toast),
     recordNotification: notification => recorded.push(notification),
     removeOverNotifications: isOver => removals.push(isOver),
-    managedToolUpdatedAt: new Map(),
+    MANAGED_TOOL_UPDATES_KEY: 'managedToolUpdatedAt',
+    localStorage: { items: new Map(), getItem(key) { return this.items.get(key) ?? null }, setItem(key, value) { this.items.set(key, value) } },
     getSettingsNotificationTarget: section => ({ path: '/settings', query: { section } }),
     startProgressBarOperation: () => ({ update() {}, finish() {} }),
   })
@@ -99,7 +100,8 @@ test('managed tool failures while connected remain visible', async t => {
   assert.deepEqual(app.recorded.map(notification => notification.kind), ['tool-update-failed'])
   const entry = { ...app.recorded[0], id: '1', createdAt: 1, read: false }
   assert.equal(app.removals.at(-1)(entry), false)
-  // until later updates installed each tool that failed, also separately.
+  // until later updates installed each tool that failed, also separately and
+  // across restarts, which keep only what is in storage.
   const bothFailed = { ...entry, query: { ...entry.query, tools: 'yt-dlp,ffmpeg' } }
   app.context.ytDlp.ytDlpDownloadBinary = async () => ({ version: '1', updated: true })
   await app.context.initializeManagedExternalSoftware()
