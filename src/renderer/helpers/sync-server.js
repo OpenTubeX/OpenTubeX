@@ -1717,10 +1717,15 @@ async function repairCustomThemeReferences(store, previousThemes, themes) {
     if (id === null || themeIds.has(id)) continue
 
     const deletedTheme = previousById.get(id)
+    // Each repair saves where the shown value comes from. Another profile can
+    // show meanwhile, whose settings only need it if they name the theme too.
+    const stillNamed = () => customThemeIdFromValue(store.state.settings[key]) === id
     if (key === 'baseTheme' && deletedTheme) {
       await store.dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      if (!stillNamed()) continue
       await store.dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
     }
+    if (!stillNamed()) continue
     await store.dispatch('repairShownSetting', { settingId: key, value: deletedTheme?.basedOn ?? defaultTheme })
   }
 

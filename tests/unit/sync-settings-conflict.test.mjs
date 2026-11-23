@@ -224,6 +224,23 @@ test('resets a system theme slot when a custom theme changes classification', as
   ])
 })
 
+test('stops repairing a deleted theme once another profile without it shows', async () => {
+  const deleted = { id: 'theme-1', mainColor: 'Green', secondaryColor: 'Pink', basedOn: 'dark' }
+  const getters = { getBaseTheme: 'custom:theme-1', getCustomThemes: [deleted], getSystemLightTheme: 'light', getSystemDarkTheme: 'dark' }
+  const repairs = []
+  await commitCustomThemesEdit({
+    dispatch: async (action, payload) => {
+      if (action === 'saveSyncSettingEdit') return payload.save()
+      repairs.push(payload.settingId)
+      // A profile with its own valid theme shows while the first repair saves.
+      getters.getBaseTheme = 'dark'
+    },
+    commit: () => {},
+    rootGetters: getters,
+  }, async () => [])
+  assert.deepEqual(repairs, ['mainColor'])
+})
+
 test('uses the custom-theme edit timestamp when resolving a conflict', () => {
   const localThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Local' }]
   const remoteThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Remote' }]
