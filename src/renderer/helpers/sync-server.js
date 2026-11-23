@@ -1718,10 +1718,10 @@ async function repairCustomThemeReferences(store, previousThemes, themes) {
 
     const deletedTheme = previousById.get(id)
     if (key === 'baseTheme' && deletedTheme) {
-      await store.dispatch('updateMainColor', deletedTheme.mainColor)
-      await store.dispatch('updateSecColor', deletedTheme.secondaryColor)
+      await store.dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      await store.dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
     }
-    await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
+    await store.dispatch('repairShownSetting', { settingId: key, value: deletedTheme?.basedOn ?? defaultTheme })
   }
 
   await repairSystemThemeSettings(store, themes)

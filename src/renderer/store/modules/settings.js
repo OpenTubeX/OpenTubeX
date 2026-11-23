@@ -1602,6 +1602,17 @@ const customActions = {
   },
 
   /**
+   * Saves a repaired value of a shown setting, such as a theme that names a
+   * deleted custom theme, where its value comes from: the own settings of the
+   * active profile, or the shared ones it inherits.
+   * @param {{ settingId: string, value: unknown }} payload
+   */
+  repairShownSetting: ({ dispatch, state }, { settingId, value }) => {
+    const update = () => dispatch(defaultUpdaterId(settingId), value)
+    return Object.hasOwn(state.profileSettingsState.shared, settingId) ? update() : withSharedSettings(update)
+  },
+
+  /**
    * Replaces the own settings of a profile with restored ones, such as those
    * of a backup. They count as a new edit, so sync keeps them.
    * @param {{ profileId: string, settings: unknown }} payload

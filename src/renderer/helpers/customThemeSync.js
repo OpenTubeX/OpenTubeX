@@ -11,8 +11,7 @@ export async function repairSystemThemeSettings({ dispatch, getters, rootGetters
 
   await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => {
     const currentValue = currentSettings[key]
-    const action = `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
-    return value === currentValue ? null : dispatch(action, value)
+    return value === currentValue ? null : dispatch('repairShownSetting', { settingId: key, value })
   }))
 }
 
@@ -30,10 +29,10 @@ export async function commitCustomThemesEdit(context, save) {
   if (isCustomThemeValue(baseTheme) && !themes.some(theme => customThemeValue(theme.id) === baseTheme)) {
     const deletedTheme = getters.getCustomThemes?.find(theme => customThemeValue(theme.id) === baseTheme)
     if (deletedTheme) {
-      await dispatch('updateMainColor', deletedTheme.mainColor)
-      await dispatch('updateSecColor', deletedTheme.secondaryColor)
+      await dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      await dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
     }
-    await dispatch('updateBaseTheme', deletedTheme?.basedOn ?? 'system')
+    await dispatch('repairShownSetting', { settingId: 'baseTheme', value: deletedTheme?.basedOn ?? 'system' })
   }
   commit('setCustomThemes', themes)
   await repairSystemThemeSettings(context, themes)

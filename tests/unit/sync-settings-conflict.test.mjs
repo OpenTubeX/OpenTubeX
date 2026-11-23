@@ -220,7 +220,7 @@ test('resets a system theme slot when a custom theme changes classification', as
   assert.deepEqual(calls, [
     ['dispatch', 'saveSyncSettingEdit', 'customThemes'],
     ['commit', 'setCustomThemes', themes],
-    ['dispatch', 'updateSystemLightTheme', 'openTubeXLight'],
+    ['dispatch', 'repairShownSetting', { settingId: 'systemLightTheme', value: 'openTubeXLight' }],
   ])
 })
 
