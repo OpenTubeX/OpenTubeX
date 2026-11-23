@@ -549,6 +549,9 @@ const ownSettings = computed(() => props.isNew ? null : store.getters.getProfile
 
 /** Whether the profile uses its own settings instead of the shared ones */
 const keepSettingsSeparate = ref(ownSettings.value !== null)
+// Saved by this editor, so a save changes the settings mode only when the
+// user toggled it, not when sync changed it while the editor was open
+let savedKeepSettingsSeparate = keepSettingsSeparate.value
 
 const showSharedSettingsPrompt = ref(false)
 
@@ -568,8 +571,9 @@ async function saveProfile(confirmedSharedSettings = false) {
     return
   }
 
-  const ownSettingsChanged = !props.isNew && !props.isMainProfile && keepSettingsSeparate.value !== (ownSettings.value !== null)
-  if (ownSettingsChanged && !keepSettingsSeparate.value && Object.keys(ownSettings.value).length > 0 && confirmedSharedSettings !== true) {
+  const keepOwnSettings = keepSettingsSeparate.value
+  const ownSettingsChanged = !props.isNew && !props.isMainProfile && keepOwnSettings !== savedKeepSettingsSeparate
+  if (ownSettingsChanged && !keepOwnSettings && Object.keys(ownSettings.value ?? {}).length > 0 && confirmedSharedSettings !== true) {
     showSharedSettingsPrompt.value = true
     return
   }
@@ -596,12 +600,12 @@ async function saveProfile(confirmedSharedSettings = false) {
     }
   } else {
     const id = profileId.value
-    // Leave subscriptions out so channels added elsewhere since this page loaded stay
-    const [detailsSaved, settingsSaved] = await Promise.all([
-      store.dispatch('updateProfileDetails', { profileId: id, details }),
-      ownSettingsChanged ? store.dispatch('setProfileOwnSettingsEnabled', { profileId: id, enabled: keepSettingsSeparate.value }) : true,
-    ])
-    if (detailsSaved && settingsSaved) {
+    // Leave subscriptions out so channels added elsewhere since this page loaded stay.
+    // Own settings are deleted only once the rest of the profile saved.
+    const saved = await store.dispatch('updateProfileDetails', { profileId: id, details }) &&
+      (!ownSettingsChanged || await store.dispatch('setProfileOwnSettingsEnabled', { profileId: id, enabled: keepOwnSettings }))
+    if (saved && ownSettingsChanged) savedKeepSettingsSeparate = keepOwnSettings
+    if (saved) {
       showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     } else {
       showSaveError()

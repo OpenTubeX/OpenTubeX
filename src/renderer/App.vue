@@ -1886,9 +1886,10 @@ onMounted(async () => {
     removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
     removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
+  // A failed load is no empty catalog, so it repairs no theme selections.
   const customThemesReady = loadCustomThemes().catch((error) => {
     console.error('Failed to load custom theme:', error)
-    return []
+    return null
   })
   const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
   const profilesReady = settingsReady.then(() => (
@@ -1949,21 +1950,25 @@ onMounted(async () => {
     await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
   }
 
-  try {
-    store.commit('setCustomThemes', themes)
-    customThemesLoaded = true
-    if (baseTheme.value === 'custom' && themes.length > 0) {
-      await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+  if (themes !== null) {
+    try {
+      store.commit('setCustomThemes', themes)
+      customThemesLoaded = true
+      if (baseTheme.value === 'custom' && themes.length > 0) {
+        await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+      }
+      await sanitizeAppearanceSettings(themes)
+    } catch (error) {
+      console.error('Failed to load custom theme:', error)
     }
-    await sanitizeAppearanceSettings(themes)
-  } catch (error) {
-    console.error('Failed to load custom theme:', error)
   }
   removeCustomThemeListener = handleCustomThemeUpdated(async (themes) => {
     store.commit('setCustomThemes', themes)
-    await repairSystemThemeSettings(store, themes)
+    customThemesLoaded = true
+    // A later update can commit newer themes while this one repairs settings.
+    await repairSystemThemeSettings(store, store.getters.getCustomThemes)
     // Another window can have deleted a custom theme of the active profile's own settings.
-    await sanitizeAppearanceSettings(themes, true)
+    await sanitizeAppearanceSettings(store.getters.getCustomThemes, true)
     updateTheme()
   })
   appearanceSettingsReady = true

@@ -512,6 +512,26 @@ test.describe('profile with its own settings', () => {
     await expect.poll(baseTheme).toBe('system')
     await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
   })
+
+  test('switches between its own and the shared settings in the profile editor', async ({ app, page }) => {
+    const ownSettings = () => latestSettings(readDatastore(app.userDataDir, 'settings'))[ownSettingsId]
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+    await page.locator('.card .profileList').getByText('Car').click()
+    const keepSettingsSeparate = page.getByText('Keep settings separate')
+
+    // Its own settings are only deleted once the user confirms it.
+    await keepSettingsSeparate.click()
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    await page.getByRole('dialog', { name: 'Use shared settings' }).getByRole('button', { name: 'Use shared settings' }).click()
+    await expect.poll(ownSettings).toBeNull()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getHideComments)).toBe(false)
+
+    // Turning them back on in the same editor saves again.
+    await keepSettingsSeparate.click()
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    await expect.poll(ownSettings).toEqual({})
+  })
 })
 
 test.describe('default profile setting', () => {

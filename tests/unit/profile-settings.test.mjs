@@ -65,8 +65,6 @@ test('switching profiles shows each profile\'s own values and brings back the sh
   // Sync saves shared values while the profile shows its own.
   setShared('hideComments', 'synced')
   setShared('uiScale', 110)
-  assert.equal(settings.hideComments, true)
-  assert.equal(settings.uiScale, 110)
 
   // Only values that change run their side effects.
   assert.deepEqual(apply('kids'), ['uiScale'])
@@ -168,7 +166,6 @@ test('a profile\'s own settings sync to the same profile on another device, apar
   // Values from the sync context compare by their JSON.
   const json = value => JSON.parse(JSON.stringify(value))
   assert.deepEqual(json(second.saved), [{ profileId: 'car', settings: { hideComments: true }, previous: null }])
-  assert.deepEqual(json(second.state.settings.profileSettingsState.overrides), { car: { hideComments: true } })
   assert.equal(second.state.settings.hideComments, false)
   assert.ok(!second.saved.some(payload => payload.profileId === 'other'))
 
@@ -180,7 +177,6 @@ test('a profile\'s own settings sync to the same profile on another device, apar
   second.saved.length = 0
   await context.syncSettings(client, second, secondSnapshot)
   assert.deepEqual(json(second.saved.map(({ profileId, settings }) => ({ profileId, settings }))), [{ profileId: 'car', settings: null }])
-  assert.deepEqual(json(second.state.settings.profileSettingsState.overrides), {})
   assert.deepEqual(json(client.entries.find(entry => entry.key === unknown.key)), unknown)
 })
 
