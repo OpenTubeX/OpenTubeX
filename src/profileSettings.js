@@ -2,6 +2,7 @@
 import { MAIN_PROFILE_ID } from './constants.js'
 import { isValidSeparateProfileId, profileDatastorePrefix } from './datastores/profileDatastoreNames.js'
 import { NON_TRANSFERABLE_SETTINGS } from './nonTransferableSettings.js'
+import { areJsonValuesEqual } from './renderer/helpers/jsonValues.js'
 
 /*
  * A profile can use its own settings instead of the shared ones. It saves only
@@ -185,12 +186,13 @@ export function collectProfileSettings(records) {
 }
 
 /**
+ * Whether two setting values are equal, whatever the order of their keys,
+ * which can differ between devices.
  * @param {unknown} a
  * @param {unknown} b
  */
 export function sameSettingValue(a, b) {
-  return Object.is(a, b) || (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null &&
-    JSON.stringify(a) === JSON.stringify(b))
+  return areJsonValuesEqual(a, b)
 }
 
 /**

@@ -20,6 +20,8 @@ test('profile settings IDs name exactly one profile, also when the server sends 
   for (const key of [car.toUpperCase(), `${car}0`, `${car}zz`, 'profileSettings-', `profileSettings-${Buffer.from(MAIN_PROFILE_ID).toString('hex')}`, 'uiScale']) {
     assert.equal(profileIdFromSettingsId(key), null, key)
   }
+  // Another device can save the keys of nested values in another order.
+  assert.ok(profileSettings.sameSettingValue({ a: { x: 1, y: [{ p: 1, q: 2 }] } }, { a: { y: [{ q: 2, p: 1 }], x: 1 } }))
   // Datastore records with other values hold no own settings.
   assert.deepEqual(collectProfileSettings([
     { _id: car, value: { hideComments: true } },
