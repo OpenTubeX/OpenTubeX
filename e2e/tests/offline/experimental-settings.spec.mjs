@@ -11,7 +11,7 @@ test('canceling experimental restart prompts restores both running settings', as
     await settings.locator('label.switch-label').filter({ hasText: new RegExp(label, 'i') }).click()
 
     const prompt = page.getByRole('dialog', { name: 'Restart Required', exact: true })
-    await expect(prompt).toContainText('The app needs to restart')
+    await expect(prompt).toHaveAccessibleDescription(/restart/i)
     for (const name of ['Yes, restart', 'Cancel']) {
       await expect(prompt.getByRole('button', { name, exact: true }).locator('.ft-icon')).toHaveCount(1)
     }

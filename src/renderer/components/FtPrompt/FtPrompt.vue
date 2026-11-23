@@ -32,6 +32,9 @@
           role="dialog"
           aria-modal="true"
           :aria-labelledby="id"
+          :aria-describedby="!fixedLayout && !$slots.default && extraLabels.length > 0
+            ? extraLabels.map((_, index) => `${id}-description-${index}`).join(' ')
+            : undefined"
         >
           <slot
             name="label"
@@ -61,7 +64,8 @@
           </template>
           <slot v-else>
             <p
-              v-for="extraLabel in extraLabels"
+              v-for="(extraLabel, index) in extraLabels"
+              :id="`${id}-description-${index}`"
               :key="extraLabel"
               class="center"
             >

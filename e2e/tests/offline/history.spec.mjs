@@ -221,7 +221,7 @@ test.describe('watch history', () => {
     await markAllButton.click()
 
     const prompt = page.getByRole('dialog', { name: 'Mark All As Watched', exact: true })
-    await expect(prompt).toContainText('Are you sure you want to mark all videos in your history as watched?')
+    await expect(prompt).toHaveAccessibleDescription(/mark all videos/i)
     await prompt.getByRole('button', { name: 'Mark All As Watched' }).click()
 
     await expect(markAllButton).toBeDisabled()
