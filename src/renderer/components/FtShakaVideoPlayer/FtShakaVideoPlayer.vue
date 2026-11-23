@@ -7094,7 +7094,8 @@ function resized(entries) {
   // Mini-player controls are separate from Shaka's hidden inline controls.
   // Changing their layout here rebuilds every Shaka control at both ends of
   // the animation, even though the inline layout often has not changed.
-  if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
+  // Mobile players always use the overflow menu.
+  if (!ui?.isMobile() && !scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
     onlyUseOverFlowMenu.value = inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
   }
   rememberInlinePlayerLayoutHeight()
@@ -7401,7 +7402,7 @@ function handlePlay() {
   tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
   updateAutoPip()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (scrollMiniPlayerActive.value) {
     showScrollMiniPlayPause(true)
@@ -7473,7 +7474,7 @@ function handlePause() {
   }
 
   updateAutoPip()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (scrollMiniPlayerActive.value) {
     showScrollMiniPlayPause(false)
@@ -7666,7 +7667,7 @@ function handleVideoResize() {
   updateVideoIntrinsicSize()
   updateAnnotationVideoAspectRatio()
   updateScrollMiniVideoAspectRatio()
-  updateScrollMiniPlayer()
+  scheduleScrollMiniPlayerUpdate()
 
   if (isActiveTab.value && isNativeFullscreenActive()) {
     requestFullscreenOrientation(true)
@@ -7945,6 +7946,7 @@ const {
   isNativeFullscreenActive,
   rememberDockOrigin,
   rememberInlinePlayerLayoutHeight,
+  scheduleScrollMiniPlayerUpdate,
   repairScrollMiniPlaceholderHeight,
   scrollMiniAnchor,
   scrollMiniDragHandleOnLightBg,
@@ -12731,10 +12733,11 @@ onMounted(async () => {
     // Default to the full control bar; the resize/presentation remeasure
     // decides the real layout once the tab is visible.
     onlyUseOverFlowMenu.value = initialWidth > 0 && initialWidth <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
-
-    containerResizeObserver = new ResizeObserver(resized)
-    containerResizeObserver.observe(container.value)
   }
+  // Also remembers the inline height, which a mini player docking from a
+  // hidden Watch view needs on phones too.
+  containerResizeObserver = new ResizeObserver(resized)
+  containerResizeObserver.observe(container.value)
 
   controls.addEventListener('uiupdated', addUICustomizations)
   controls.addEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
@@ -13065,9 +13068,8 @@ async function handleLoaded() {
     height: mediaElement.videoHeight
   })
 
-  nextTick(() => {
-    rememberInlinePlayerLayoutHeight()
-  })
+  // The container's resize observer remembers the inline height once loading
+  // resizes the player, without forcing a layout of the rendering page.
 
   // getAudioTracks() returns an empty array when no variant is active, so we can't do this in the `streaming` event
   hasMultipleAudioTracks.value = deduplicateAudioTracks(player.getAudioTracks()).size > 1

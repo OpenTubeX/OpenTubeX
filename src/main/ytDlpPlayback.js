@@ -20,6 +20,35 @@ import { withYtDlpCookies } from './ytDlpCookieFile'
 
 const execFileAsync = promisify(execFile)
 
+/** @type {WeakMap<import('electron').WebContents, AbortController>} */
+const senderControllers = new WeakMap()
+
+/**
+ * Aborts the yt-dlp runs a renderer started once it is closed or crashes, which
+ * otherwise kept extracting for up to a minute each, holding their output.
+ * @param {import('electron').WebContents} sender
+ * @returns {AbortSignal | undefined}
+ */
+function senderSignal(sender) {
+  if (typeof sender?.once !== 'function') return undefined
+  // Its listeners would never fire.
+  if (sender.isDestroyed?.() || sender.isCrashed?.()) return AbortSignal.abort()
+  let controller = senderControllers.get(sender)
+  if (controller) return controller.signal
+  controller = new AbortController()
+  senderControllers.set(sender, controller)
+  const abort = () => {
+    sender.removeListener('destroyed', abort)
+    sender.removeListener('render-process-gone', abort)
+    // A reloaded renderer reuses the web contents and starts new runs.
+    if (senderControllers.get(sender) === controller) senderControllers.delete(sender)
+    controller.abort()
+  }
+  sender.once('destroyed', abort)
+  sender.once('render-process-gone', abort)
+  return controller.signal
+}
+
 /**
  * @typedef YtDlpPlaybackFormat
  * @property {string} formatId
@@ -199,7 +228,41 @@ export async function handleYtDlpGetPlaybackInfo(
   if (!isTrustedSender(event)) {
     return null
   }
+  // Taken before any setup awaits, which the renderer can exit during.
+  const signal = senderSignal(event.sender)
 
+  // Preloading a video while it is opened, or tabs restoring the same video,
+  // request it at once. They share one extraction instead of running several.
+  const key = JSON.stringify([event.sender.id, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart])
+  let entry = playbackInfoRequests.get(key)
+  // A reloaded renderer gets a new signal and must not share an aborted run.
+  if (!entry || entry.signal !== signal) {
+    const request = getPlaybackInfo(event, signal, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart)
+    const current = { signal, request }
+    entry = current
+    playbackInfoRequests.set(key, current)
+    const forget = () => {
+      if (playbackInfoRequests.get(key) === current) playbackInfoRequests.delete(key)
+    }
+    request.then(forget, forget)
+  }
+  return await entry.request
+}
+
+/** @type {Map<string, { signal: AbortSignal | undefined, request: Promise<YtDlpPlaybackInfo | { error: string } | null> }>} */
+const playbackInfoRequests = new Map()
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {AbortSignal | undefined} signal aborted once the renderer exits
+ * @param {string} videoId
+ * @param {boolean} useDefaultClients
+ * @param {boolean} useAuthentication
+ * @param {boolean} includeSubtitles
+ * @param {boolean} liveFromStart
+ * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
+ */
+async function getPlaybackInfo(event, signal, videoId, useDefaultClients, useAuthentication, includeSubtitles, liveFromStart) {
   if (typeof videoId !== 'string') {
     return null
   }
@@ -305,6 +368,7 @@ export async function handleYtDlpGetPlaybackInfo(
   let extractedCookies = ''
   try {
     const playbackInfo = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
+      signal,
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true,
@@ -392,6 +456,7 @@ export function handleYtDlpCancelHistoryRepair(event) {
 
 export async function handleYtDlpGetHistoryMetadata(event, videoId) {
   if (!isTrustedSender(event) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
+  const closed = senderSignal(event.sender)
   const senderId = event.sender.id
   const controller = new AbortController()
   const requests = historyMetadataRequests.get(senderId) ?? new Set()
@@ -410,7 +475,7 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
     args.push(`https://www.youtube.com/watch?v=${videoId}`)
     controller.signal.throwIfAborted()
     const { stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
-      signal: controller.signal,
+      signal: closed ? AbortSignal.any([controller.signal, closed]) : controller.signal,
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
@@ -426,6 +491,7 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
 
 export async function handleYtDlpSearch(event, query, params, page) {
   if (!isTrustedSender(event)) return null
+  const closed = senderSignal(event.sender)
   try {
     const args = buildYtDlpSearchArguments(query, params, page)
     const target = args.splice(-2)
@@ -439,6 +505,7 @@ export async function handleYtDlpSearch(event, query, params, page) {
     await pushProxyArgument(args)
     args.push(...target)
     const { stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
+      signal: closed,
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
@@ -455,7 +522,7 @@ export async function handleYtDlpSearch(event, query, params, page) {
         timeout: PLAYBACK_INFO_TIMEOUT,
         maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
         windowsHide: true,
-        signal
+        signal: closed ? AbortSignal.any([signal, closed]) : signal
       }))
       return JSON.parse(stdout)
     })
@@ -481,6 +548,7 @@ export async function handleYtDlpGetRecommendations(event, currentVideoId) {
   if (typeof currentVideoId !== 'string' || !ID_REGEX.test(currentVideoId)) {
     return null
   }
+  const closed = senderSignal(event.sender)
 
   const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
 
@@ -510,6 +578,7 @@ export async function handleYtDlpGetRecommendations(event, currentVideoId) {
   let stdout
   try {
     ({ stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
+      signal: closed,
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true

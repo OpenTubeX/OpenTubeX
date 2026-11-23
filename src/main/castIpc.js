@@ -8,7 +8,7 @@ import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition, isActiveDlnaCast } from './dlnaCast'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
-import { createMainTranslator } from './mainTranslator'
+import { getMainTranslator } from './mainTranslator'
 import { isTrustedSender } from './ipc'
 import { getDlnaFfmpegExecutable, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders } from './ytDlp'
 
@@ -41,7 +41,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
       // Settings can be written by the renderer. Only a native dialog grants
       // access, for this session and this instance's origin and path.
       privateApproval ??= (async () => {
-        const t = await createMainTranslator()
+        const t = await getMainTranslator()
         if (sender.isDestroyed()) return false
         const titles = { dlna: t('Video.Player.DLNA.Cast'), google: t('Video.Player.Google Cast.Cast'), fcast: t('Video.Player.FCast.Cast') }
         const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(sender), {

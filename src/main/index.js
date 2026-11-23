@@ -101,7 +101,7 @@ import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButt
 import { watchTrayColorScheme } from './trayColorScheme'
 import { readStartupColorScheme, systemPrefersDark } from './startupColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
-import { createMainTranslator } from './mainTranslator'
+import { getMainTranslator, resetMainTranslator } from './mainTranslator'
 import { pointsToLocalNetwork } from './localNetworkLink'
 import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
@@ -297,6 +297,8 @@ function runApp() {
     }
   }
 
+  let dockMenuSignature = null
+
   function updateDockMenu() {
     createTrayContextMenu()
     updateThumbarButtons()
@@ -304,8 +306,14 @@ function runApp() {
       return
     }
 
+    const mediaItems = createMediaMenuItems()
+    // Media sessions update with every state change of the player and window
+    // focus, which mostly leave the menu unchanged.
+    const signature = JSON.stringify([dockMediaLabels.newWindow, mediaItems.map(({ label, enabled }) => [label, enabled])])
+    if (signature === dockMenuSignature) return
+    dockMenuSignature = signature
     const dockMenu = Menu.buildFromTemplate([
-      ...createMediaMenuItems(),
+      ...mediaItems,
       { type: 'separator' },
       {
         label: dockMediaLabels.newWindow,
@@ -698,10 +706,6 @@ function runApp() {
   let trayOnClose = false
   let trayOnMinimize = false
   let trayTranslate = key => key
-  /** @type {Promise<Awaited<ReturnType<typeof createMainTranslator>>> | null} */
-  let mainTranslatorPromise = null
-  /** @param {string} key */
-  const untranslated = key => key
   let trayMenuIconPack = 'material'
   const trayClosingWindowIds = new Set()
   let trayWindows = []
@@ -2927,7 +2931,7 @@ function runApp() {
         break
       case 'currentLocale':
       case 'useAITranslationCompletions':
-        mainTranslatorPromise = null
+        resetMainTranslator()
         await Promise.all([setMenu(), translateTrayAndDock()])
         break
       case 'tabCloseFocus':
@@ -3287,25 +3291,6 @@ function runApp() {
   function showSettingsWindow(browserWindow, view, toggle = false) {
     if (browserWindow != null && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       browserWindow.webContents.send(IpcChannels.SHOW_SETTINGS_WINDOW, { view, toggle })
-    }
-  }
-
-  /**
-   * The translator for the app's current language. A language change while it
-   * loads replaces it, so callers wait for the newest one.
-   */
-  async function getMainTranslator() {
-    while (true) {
-      mainTranslatorPromise ??= createMainTranslator().catch(error => {
-        console.warn('Could not load the translations for the native menus', error)
-        return untranslated
-      })
-      const promise = mainTranslatorPromise
-      const t = await promise
-      if (promise !== mainTranslatorPromise) continue
-      // Try loading the translations again the next time a menu is built.
-      if (t === untranslated) mainTranslatorPromise = null
-      return t
     }
   }
 

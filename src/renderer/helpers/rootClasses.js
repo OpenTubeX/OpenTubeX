@@ -50,6 +50,8 @@ const APP_CLASSES = {
   capacitorPhoneLayout: 'appPhoneLayout',
   capacitorTabletLayout: 'appTabletLayout',
   compactNavigation: 'appCompactNavigation',
+  topTabs: 'appTopTabs',
+  bottomTabs: 'appBottomTabs',
 }
 
 /**

@@ -1,4 +1,4 @@
-import { markRaw } from 'vue'
+import { markRaw, toRaw } from 'vue'
 
 import i18n from '../../i18n/index'
 
@@ -27,6 +27,9 @@ import {
 const checkYoutubeChannelId = id => /^UC[\w-]{22}$/.test(id)
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
+// Every rendered video card adds an entry. Far more than the cards any feed or
+// list keeps mounted, so evicting the oldest never blanks a visible card.
+const DE_ARROW_CACHE_LIMIT = 5000
 
 let settingsWindowMorph = Promise.resolve()
 
@@ -899,6 +902,23 @@ const actions = {
   },
 }
 
+/**
+ * Adds a new entry, evicting the oldest one at the limit. Object keys keep
+ * insertion order, so the first key is the oldest.
+ * @param {Record<string, object>} cache
+ * @param {{ videoId: string }} entry
+ */
+function addDeArrowCacheEntry(cache, entry) {
+  let excess = Object.keys(toRaw(cache)).length - DE_ARROW_CACHE_LIMIT + 1
+  if (excess > 0) {
+    for (const key in cache) {
+      delete cache[key]
+      if (--excess === 0) break
+    }
+  }
+  cache[entry.videoId] = entry
+}
+
 const mutations = {
   toggleSideNav (state) {
     state.isSideNavOpen = !state.isSideNavOpen
@@ -927,20 +947,18 @@ const mutations = {
     state.sessionSearchHistory = history
   },
 
-  setDeArrowCache (state, cache) {
-    state.deArrowCache = cache
-  },
-
   addVideoToDeArrowCache (state, payload) {
-    const sameVideo = state.deArrowCache[payload.videoId]
-
-    if (!sameVideo) {
-      state.deArrowCache[payload.videoId] = payload
+    if (!(payload.videoId in state.deArrowCache)) {
+      addDeArrowCacheEntry(state.deArrowCache, payload)
     }
   },
 
   addThumbnailToDeArrowCache (state, payload) {
-    state.deArrowCache[payload.videoId] = payload
+    if (payload.videoId in state.deArrowCache) {
+      state.deArrowCache[payload.videoId] = payload
+    } else {
+      addDeArrowCacheEntry(state.deArrowCache, payload)
+    }
   },
 
   setChannelThumbnail (state, { channelId, thumbnail }) {

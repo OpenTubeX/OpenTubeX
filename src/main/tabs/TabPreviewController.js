@@ -19,6 +19,9 @@ const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
 const MAX_TAB_AVATAR_SOURCE_PIXELS = 4096 * 4096
 const TAB_AVATAR_SIZE = 64
+// Previews saved to disk are kept in memory only for the recently shown tabs.
+// Each is a base64 JPEG of up to about a megapixel, and every tab had one.
+const MEMORY_CACHED_PREVIEW_LIMIT = 16
 
 /**
  * Read the dimensions of the formats nativeImage decodes from buffers (PNG and
@@ -74,6 +77,38 @@ export class TabPreviewController {
     this.previewsEnabled = true
     this._transitionId = 0
     this.avatarsEnabled = true
+    /** Tabs whose saved preview stays in memory, least recently used first. */
+    this._memoryCachedTabIds = new Set()
+    /** Tabs whose newest preview is not on disk yet, so it must stay in memory. */
+    this._writingPreviewTabIds = new Set()
+    /** @type {WeakMap<TabInfo, number>} Counts each tab's captures, so reads can tell theirs is stale. */
+    this._captureRevisions = new WeakMap()
+  }
+
+  /**
+   * Keeps a preview in memory, and releases the least recently used ones that
+   * can be read from disk again.
+   * @param {TabInfo} tab
+   * @param {string} dataUrl
+   */
+  _rememberDataUrl(tab, dataUrl) {
+    tab.previewDataUrl = dataUrl
+    this._memoryCachedTabIds.delete(tab.id)
+    this._memoryCachedTabIds.add(tab.id)
+    for (const tabId of this._memoryCachedTabIds) {
+      if (this._memoryCachedTabIds.size <= MEMORY_CACHED_PREVIEW_LIMIT) break
+      this._memoryCachedTabIds.delete(tabId)
+      const cached = this.manager.tabs.get(tabId)
+      // Incognito previews are never written to disk.
+      if (cached && !cached.isIncognito && cached.previewFileName != null && !this._writingPreviewTabIds.has(tabId)) {
+        cached.previewDataUrl = null
+      }
+    }
+  }
+
+  /** @param {string} tabId */
+  forget(tabId) {
+    this._memoryCachedTabIds.delete(tabId)
   }
 
   /**
@@ -116,15 +151,22 @@ export class TabPreviewController {
    * @returns {Promise<string | null>}
    */
   async _getCachedDataUrl(tab) {
-    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
-      return tab.previewDataUrl
-    }
+    while (true) {
+      if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
+        this._rememberDataUrl(tab, tab.previewDataUrl)
+        return tab.previewDataUrl
+      }
 
-    const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
-    if (dataUrl != null) {
-      tab.previewDataUrl = dataUrl
+      const revision = this._captureRevisions.get(tab) ?? 0
+      const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
+      // A capture during the read made the file's previous contents stale,
+      // even if its preview has left memory again since.
+      if (revision !== (this._captureRevisions.get(tab) ?? 0)) continue
+      if (dataUrl != null) {
+        this._rememberDataUrl(tab, dataUrl)
+      }
+      return dataUrl
     }
-    return dataUrl
   }
 
   /**
@@ -336,7 +378,9 @@ export class TabPreviewController {
         const targetSize = getTabPreviewTargetSize(contentImage.getSize(), contentBounds)
         const preview = targetSize == null
           ? contentImage
-          : contentImage.resize({ ...targetSize, quality: 'best' })
+          // Resizing runs on the main thread. 'best' took twice as long without
+          // a visible difference at the preview's size.
+          : contentImage.resize({ ...targetSize, quality: 'better' })
         const previewBuffer = preview.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
         if (previewBuffer.length === 0) {
           return await this._getCachedDataUrl(tab)
@@ -347,11 +391,22 @@ export class TabPreviewController {
         }
 
         const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
-        tab.previewDataUrl = dataUrl
+        this._captureRevisions.set(tab, (this._captureRevisions.get(tab) ?? 0) + 1)
+        this._rememberDataUrl(tab, dataUrl)
         tab.previewCapturedAt = Date.now()
         // Incognito tabs keep their previews in memory only
         if (!tab.isIncognito) {
-          tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
+          // Other tabs' previews can evict this one during the write. It stays
+          // in memory until the file has it, and counts toward the limit again.
+          this._writingPreviewTabIds.add(tab.id)
+          try {
+            tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
+          } finally {
+            this._writingPreviewTabIds.delete(tab.id)
+          }
+          if (tab.previewDataUrl === dataUrl && this.manager.tabs.get(tab.id) === tab) {
+            this._rememberDataUrl(tab, dataUrl)
+          }
           this.manager._scheduleSessionSave()
         }
         return dataUrl

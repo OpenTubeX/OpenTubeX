@@ -3,7 +3,10 @@ const externalStreamCookies = new WeakMap()
 const externalStreamHeaders = new WeakMap()
 const externalStoryboardHeaders = new WeakMap()
 const externalManifestHeaders = new WeakMap()
-const MAX_STORYBOARD_HEADER_URLS = 50_000
+// Storyboard fragments are whole sprite sheets, so even a long video has a few
+// thousand at most across its formats. The registry is shared by every tab
+// of a window for the whole session, so it keeps the most recent ones.
+const MAX_STORYBOARD_HEADER_URLS = 10_000
 const EXTERNAL_STREAM_HEADER_NAMES = new Set([
   'accept', 'accept-language', 'origin', 'referer', 'sec-fetch-mode', 'user-agent'
 ])

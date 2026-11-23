@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -102,7 +102,7 @@ import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import store from '../../store/index'
 
 import { useListPagination } from '../../composables/useListPagination'
-import { deepCopy, showToast } from '../../helpers/utils'
+import { showToast } from '../../helpers/utils'
 import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
@@ -160,7 +160,9 @@ const showUnsubscribeButton = computed(() => {
 const subscriptions = shallowRef([])
 
 function loadSubscriptions() {
-  const subscriptions_ = deepCopy(props.profile.subscriptions)
+  // Every feed refresh replaces the subscriptions. Only the thumbnails are
+  // rewritten, so copying each channel is enough, without serializing them all.
+  const subscriptions_ = toRaw(props.profile.subscriptions).map(channel => ({ ...channel }))
 
   const collator = intlCollator.value
 

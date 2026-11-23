@@ -37,7 +37,8 @@ const USER_DATA_FILES = {
   settings: sqliteFiles('settings'),
   tabSessions: sqliteFiles('tab-session'),
   liveReminders: sqliteFiles('live-reminders'),
-  ytDlpPlayback: 'yt-dlp-playback-cache.json'
+  // The earlier single file is removed once the cache loads.
+  ytDlpPlayback: ['yt-dlp-playback-cache', 'yt-dlp-playback-cache.json']
 }
 
 const BROWSER_CACHE_ENTRIES = [

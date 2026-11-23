@@ -757,26 +757,58 @@ const manageButtonLabel = computed(() => {
   return t('Settings.Channel Settings.Manage Saved Channels', { channelCount: channelEntries.value.length })
 })
 
+let fetchingMissingChannels = false
+let missingChannelsChanged = false
+let channelSettingsUnmounted = false
+/** Lookups that failed while the manager is open, retried when it opens again. */
+const failedChannelIds = new Set()
+
 /** Resolves the channels that aren't subscribed to, the rest is already known locally */
 async function fetchMissingChannels() {
-  const missingIds = channelEntries.value
-    .map(({ id }) => id)
-    .filter(id => getKnownChannelInfo(id) === null)
+  // Every fetched channel changes the entries, which calls this again. One
+  // loop picks up the channels added meanwhile instead of starting another
+  // that requests the remaining and failed channels a second time.
+  if (fetchingMissingChannels) {
+    missingChannelsChanged = true
+    return
+  }
+  fetchingMissingChannels = true
+  try {
+    do {
+      missingChannelsChanged = false
+      const missingIds = channelEntries.value
+        .map(({ id }) => id)
+        .filter(id => getKnownChannelInfo(id) === null && !fetchedChannels.value.has(id) && !failedChannelIds.has(id))
 
-  for (const channelId of missingIds) {
-    const channel = await fetchChannelInfo(channelId, backendOptions.value)
+      for (const channelId of missingIds) {
+        if (!showManager.value || channelSettingsUnmounted) return
+        const channel = await fetchChannelInfo(channelId, backendOptions.value)
 
-    if (channel !== null) {
-      // replace the map so that the computed entries pick the channel up
-      fetchedChannels.value = new Map(fetchedChannels.value).set(channelId, channel)
-    }
+        if (channel !== null) {
+          // replace the map so that the computed entries pick the channel up
+          fetchedChannels.value = new Map(fetchedChannels.value).set(channelId, channel)
+        } else {
+          failedChannelIds.add(channelId)
+        }
+      }
+    } while (missingChannelsChanged && showManager.value)
+  } finally {
+    fetchingMissingChannels = false
   }
 }
+
+watch(showManager, isManagerOpen => {
+  if (isManagerOpen) failedChannelIds.clear()
+})
 
 watch([showManager, channelEntries], ([isManagerOpen]) => {
   if (isManagerOpen) {
     fetchMissingChannels()
   }
+})
+
+onBeforeUnmount(() => {
+  channelSettingsUnmounted = true
 })
 
 /**

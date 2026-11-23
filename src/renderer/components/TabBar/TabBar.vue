@@ -1580,8 +1580,10 @@ watch([activeTabId, activeStripItemId], () => {
   revealActiveTab()
 }, { flush: 'post' })
 
+// Strip items change with every title, loading and playback update. The row's
+// resize observer clamps a reduced scroll range after layout, where clamping
+// here forced a layout of the tab bar for each of those updates.
 watch(stripItems, () => {
-  clampTabsScroll()
   revealActiveTab()
 }, { flush: 'post' })
 

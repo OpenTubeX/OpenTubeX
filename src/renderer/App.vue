@@ -2255,11 +2255,20 @@ watch(presentedTabId, async (tabId, previousTabId) => {
   }
 
   if (previousTabId) {
-    findbarStateByTabId.set(previousTabId, {
-      visible: findbarVisible.value,
-      query: findbarQuery.value,
-      matchIndex: Math.max(0, findbarMatchIndex.value - 1)
-    })
+    if (findbarVisible.value || findbarQuery.value !== '') {
+      findbarStateByTabId.set(previousTabId, {
+        visible: findbarVisible.value,
+        query: findbarQuery.value,
+        matchIndex: Math.max(0, findbarMatchIndex.value - 1)
+      })
+    } else {
+      findbarStateByTabId.delete(previousTabId)
+    }
+  }
+  // Closed tabs never show their find bar again.
+  const openTabIds = new Set(tabSwitcherTabs.value.map(tab => tab.id))
+  for (const id of findbarStateByTabId.keys()) {
+    if (!openTabIds.has(id)) findbarStateByTabId.delete(id)
   }
 
   clearFindbarHighlights()

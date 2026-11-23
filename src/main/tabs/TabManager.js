@@ -388,6 +388,8 @@ export class TabManager {
     this._sessionSavePromise = Promise.resolve()
     this._sessionPersistenceDisabled = false
     this.sessionUpdatedAt = 0
+    /** When the latest change not yet compared with the saved session was made. */
+    this._sessionChangedAt = null
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
     this._deferredUnloadTabIds = new Set()
@@ -1232,6 +1234,7 @@ export class TabManager {
       : null
 
     this.tabs.delete(tabId)
+    this.previews.forget(tabId)
     this.selectedTabIds = this.selectedTabIds.filter(selectedTabId => selectedTabId !== tabId)
     this._deferredCloseTabIds.delete(tabId)
     this._deferredUnloadTabIds.delete(tabId)
@@ -1965,6 +1968,7 @@ export class TabManager {
       : null
 
     this.tabs.delete(tabId)
+    this.previews.forget(tabId)
     this._deferredCloseTabIds.delete(tabId)
     this._deferredUnloadTabIds.delete(tabId)
     this._deferredStartupTabIds.delete(tabId)
@@ -2075,6 +2079,7 @@ export class TabManager {
 
     this.previews.clearRefresh(tab)
     this.tabs.delete(tabId)
+    this.previews.forget(tabId)
     this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
     if (this.contextMenuTabId === tabId) {
       this.contextMenuTabId = null
@@ -2378,11 +2383,18 @@ export class TabManager {
 
   // Local previews and window metadata must not make unchanged synced tabs newer.
   _updateSessionTimestamp(preserveUpdatedAt = false) {
-    const content = JSON.stringify({ ...this.getSyncSession(), updatedAt: undefined })
+    const changedAt = this._sessionChangedAt
+    this._sessionChangedAt = null
+    const content = JSON.stringify(this._buildSyncSession())
     if (content !== this._lastSyncSessionContent) {
-      if (!preserveUpdatedAt) this.sessionUpdatedAt = Date.now()
+      if (!preserveUpdatedAt) this.sessionUpdatedAt = changedAt ?? Date.now()
       this._lastSyncSessionContent = content
     }
+  }
+
+  /** Compares the session a change was scheduled for, once it is read or saved. */
+  _resolveSessionTimestamp() {
+    if (this._sessionChangedAt != null) this._updateSessionTimestamp()
   }
 
   _scheduleSessionSave() {
@@ -2391,7 +2403,9 @@ export class TabManager {
       this._batchedSessionSavePending = true
       return
     }
-    this._updateSessionTimestamp()
+    // Serializing every tab for each change stalled the main process with many
+    // tabs. The change time is kept, and compared once the session is read.
+    this._sessionChangedAt = Date.now()
     // Do not restart the timer: even continuous updates must reach disk.
     if (this._sessionSaveTimer != null) return
     this._sessionSaveTimer = setTimeout(() => {
@@ -2430,6 +2444,7 @@ export class TabManager {
   }
 
   getSessionData() {
+    this._resolveSessionTimestamp()
     const tabs = Array.from(this.tabs.values())
       // A presented tab stays mounted until its replacement is ready, but a
       // shutdown during that handoff must not resurrect the already-closed tab.
@@ -2492,6 +2507,12 @@ export class TabManager {
    * @returns {object}
    */
   getSyncSession() {
+    this._resolveSessionTimestamp()
+    return { ...this._buildSyncSession(), updatedAt: this.sessionUpdatedAt }
+  }
+
+  /** The synced session without its timestamp. */
+  _buildSyncSession() {
     const tabs = Array.from(this.tabs.values())
       .filter(tab => !tab.isIncognito && !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({
@@ -2520,8 +2541,7 @@ export class TabManager {
       sessionId: this.sessionId,
       tabs,
       groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
-      activeTabId,
-      updatedAt: this.sessionUpdatedAt
+      activeTabId
     }
   }
 

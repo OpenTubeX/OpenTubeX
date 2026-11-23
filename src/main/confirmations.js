@@ -2,7 +2,8 @@ import { dialog, ipcMain } from 'electron'
 
 import { IpcChannels, MULTIPLE_TABS_CONFIRM_THRESHOLD } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
-import { createMainTranslator } from './mainTranslator'
+import { getMainTranslator } from './mainTranslator'
+import { isOpenTubeXUrl } from './utils'
 
 const DEFAULT_CONFIRM_CLOSE_APP = true
 const DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS = true
@@ -84,7 +85,7 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
     }
 
     quitPromptInProgress = (async () => {
-      const t = await createMainTranslator()
+      const t = await getMainTranslator()
       const buttons = allowHideWindow
         ? [
             t('Close Confirmation.Quit'),
@@ -156,7 +157,7 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
     if (existingPrompt) return existingPrompt
 
     const prompt = (async () => {
-      const t = await createMainTranslator()
+      const t = await getMainTranslator()
       const { response } = await dialog.showMessageBox(browserWindow, {
         type: 'question',
         title: t('Close Window Confirmation.Title'),
@@ -221,6 +222,14 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
       }
 
       const handleWindowClosed = () => finish(false)
+      const webContents = browserWindow.webContents
+      // A crashed or reloaded renderer loses the prompt and never answers.
+      const handleRendererGone = () => finish(false)
+      /** @type {(event: unknown, url: string, isInPlace: boolean, isMainFrame: boolean) => void} */
+      const handleNavigation = (_event, url, isInPlace, isMainFrame) => {
+        // Other documents are blocked and keep the current renderer.
+        if (isMainFrame && !isInPlace && isOpenTubeXUrl(url)) finish(false)
+      }
 
       /**
        * @param {boolean} confirmed
@@ -228,11 +237,15 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
       function finish(confirmed) {
         ipcMain.removeListener(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
         browserWindow.removeListener('closed', handleWindowClosed)
+        webContents.removeListener('render-process-gone', handleRendererGone)
+        webContents.removeListener('did-start-navigation', handleNavigation)
         resolve(confirmed)
       }
 
       ipcMain.on(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
       browserWindow.once('closed', handleWindowClosed)
+      webContents.once('render-process-gone', handleRendererGone)
+      webContents.on('did-start-navigation', handleNavigation)
       manager.bridge.send(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, { requestId, count, action })
     })
   }

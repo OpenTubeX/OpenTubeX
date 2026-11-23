@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { BrowserWindow, dialog } from 'electron'
 import { settings } from '../datastores/handlers/base'
-import { createMainTranslator } from './mainTranslator'
+import { getMainTranslator } from './mainTranslator'
 import { EXTERNAL_PLAYER_APPROVED_ARGS_SETTING } from './settingWriteGuard'
 import { isTrustedSender } from './ipc'
 import { UnsupportedPlayerActions } from '../constants'
@@ -258,7 +258,7 @@ async function confirmCustomArguments(webContents, externalPlayer, executable, c
   const approvalKey = customArgumentsApprovalKey(externalPlayer, executable, customArgs)
   if ((await settings._findOne(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING))?.value === approvalKey) return true
 
-  const t = await createMainTranslator()
+  const t = await getMainTranslator()
   const window = webContents.isDestroyed() ? null : BrowserWindow.fromWebContents(webContents)
   /** @type {import('electron').MessageBoxOptions} */
   const options = {

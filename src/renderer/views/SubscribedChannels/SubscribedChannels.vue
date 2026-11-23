@@ -133,7 +133,7 @@
               :data-tab-title="entry.name"
             >
               <FtRetryImage
-                v-if="entry.thumbnail !== null"
+                v-if="entry.thumbnail !== null && !failedThumbnailUrls.has(entry.thumbnail)"
                 :fallback-icon="['fas', 'circle-user']"
                 class="channelThumbnail"
                 :src="entry.thumbnail"
@@ -275,6 +275,12 @@ const pendingThumbnailChannelIds = new Set()
 
 const query = ref('')
 const failedThumbnailUrls = ref(new Set())
+/** Failures collected until the next frame, which publishes them together. */
+const newFailedThumbnailUrls = new Set()
+let failedThumbnailFrame = null
+/** Refreshed channel details, saved together instead of once per channel. */
+let refreshedChannels = []
+let refreshedChannelsTimer = null
 
 const searchBarChannels = useTemplateRef('searchBarChannels')
 
@@ -381,6 +387,15 @@ const currentInvidiousInstanceUrl = computed(() => {
   return store.getters.getCurrentInvidiousInstanceUrl
 })
 
+// Rewritten URLs depend only on the backend and instance, so each original is
+// rewritten once per configuration rather than on every list update.
+const thumbnailURLCache = computed(() => ({
+  backend: backendPreference.value,
+  instance: currentInvidiousInstanceUrl.value,
+  /** @type {Map<string, string | null>} */
+  urls: new Map()
+}))
+
 /**
  * @typedef {object} ChannelEntry
  * @property {string} key
@@ -403,7 +418,9 @@ function youtubeEntry(channel) {
     channel,
     name: channel.name,
     handle: typeof channel.handle === 'string' ? channel.handle : null,
-    thumbnail: hasUsableThumbnail(channel.thumbnail) ? thumbnailURL(channel.thumbnail) : null,
+    // Failed thumbnails are checked while rendering, so a broken image does not
+    // sort and rebuild every entry again.
+    thumbnail: thumbnailURL(channel.thumbnail),
     route: `/channel/${channel.id}`
   }
 }
@@ -652,6 +669,16 @@ const hideUnsubscribeButton = computed(() => {
 function thumbnailURL(originalURL) {
   // Imported subscriptions can carry anything here, including non-strings.
   if (typeof originalURL !== 'string' || originalURL === '') { return null }
+  const cache = thumbnailURLCache.value.urls
+  let url = cache.get(originalURL)
+  if (url === undefined) {
+    url = rewriteThumbnailURL(originalURL)
+    cache.set(originalURL, url)
+  }
+  return url
+}
+
+function rewriteThumbnailURL(originalURL) {
   let newURL = originalURL
   // Sometimes relative protocol URLs are passed in
   if (originalURL.startsWith('//')) {
@@ -680,18 +707,28 @@ function thumbnailURL(originalURL) {
   return newURL.replace(re.url, `$1${thumbnailSize}$2`)
 }
 
-function hasUsableThumbnail(originalURL) {
-  const url = thumbnailURL(originalURL)
-  return url !== null && !failedThumbnailUrls.value.has(url)
-}
-
 function handleThumbnailError(channel) {
   const url = thumbnailURL(channel.thumbnail)
   if (url !== null) {
-    failedThumbnailUrls.value = new Set(failedThumbnailUrls.value).add(url)
+    newFailedThumbnailUrls.add(url)
+    failedThumbnailFrame ??= requestAnimationFrame(publishFailedThumbnails)
   }
 
   updateThumbnail(channel)
+}
+
+function publishFailedThumbnails() {
+  failedThumbnailFrame = null
+  failedThumbnailUrls.value = new Set([...failedThumbnailUrls.value, ...newFailedThumbnailUrls])
+  newFailedThumbnailUrls.clear()
+}
+
+function saveRefreshedChannels() {
+  clearTimeout(refreshedChannelsTimer)
+  refreshedChannelsTimer = null
+  if (refreshedChannels.length === 0) return
+  store.dispatch('batchUpdateSubscriptionDetails', refreshedChannels)
+  refreshedChannels = []
 }
 
 function updateThumbnail(channel) {
@@ -719,12 +756,15 @@ function updateThumbnail(channel) {
         if (response.authorThumbnails.length === 0) return
         channelThumbnailUrl = thumbnailURL(response.authorThumbnails[0].url)
       }
-      store.dispatch('updateSubscriptionDetails', {
+      // Refreshes are spaced 500 ms apart, so each would otherwise rewrite
+      // every profile holding the channel and update all of their getters.
+      refreshedChannels.push({
         channelThumbnailUrl,
         channelName: channel.name,
         channelId: channel.id,
         channelHandle
       })
+      refreshedChannelsTimer ??= setTimeout(saveRefreshedChannels, 2000)
     } catch (error) {
       console.error('Failed to refresh the channel thumbnail', channel.id, error)
     } finally {
@@ -848,6 +888,8 @@ onBeforeUnmount(() => {
   for (const timer of thumbnailRetryTimers) clearTimeout(timer)
   thumbnailRetryTimers.clear()
   pendingThumbnailChannelIds.clear()
+  cancelAnimationFrame(failedThumbnailFrame)
+  saveRefreshedChannels()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

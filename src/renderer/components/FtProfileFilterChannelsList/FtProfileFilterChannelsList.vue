@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -169,7 +169,8 @@ function loadChannels() {
   const subscribedIds = new Set(props.profile.subscriptions.map(channel => channel.id))
 
   /** @type {Profile['subscriptions']} */
-  const channels_ = deepCopy(profile.subscriptions.filter(channel => !subscribedIds.has(channel.id)))
+  // Only the thumbnails are rewritten, so copying each channel is enough.
+  const channels_ = toRaw(profile.subscriptions).filter(channel => !subscribedIds.has(channel.id)).map(channel => ({ ...channel }))
 
   const collator = intlCollator.value
 

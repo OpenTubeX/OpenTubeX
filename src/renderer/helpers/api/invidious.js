@@ -44,6 +44,7 @@ function isYatteeBackend() {
 
 /** Yattee channel tabs leave out the channel name, so it comes from a loaded channel page or the subscriptions. */
 const yatteeChannelNames = new Map()
+const MAX_YATTEE_CHANNEL_NAMES = 1000
 
 /**
  * @param {string} channelId
@@ -267,7 +268,10 @@ export async function invidiousGetChannelInfo(channelId, signal) {
 
   if (isYatteeBackend()) {
     const channel = normalizeYatteeChannel(channelInfo, getCurrentInstanceUrl())
+    yatteeChannelNames.delete(channel.authorId)
     yatteeChannelNames.set(channel.authorId, channel.author)
+    // Channels are added as they are visited; subscriptions still name the others.
+    if (yatteeChannelNames.size > MAX_YATTEE_CHANNEL_NAMES) yatteeChannelNames.delete(yatteeChannelNames.keys().next().value)
     return channel
   }
 

@@ -49,7 +49,7 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
     applyTwitchPlaylistOrigin,
     isInvidiousInstanceUrl,
     BrowserWindow: { fromWebContents: () => ({}) },
-    createMainTranslator: async () => (key, values) => values?.instance ?? key,
+    getMainTranslator: async () => (key, values) => values?.instance ?? key,
     dialog: { showMessageBox: async (_window, options) => { prompts.push(options); return pendingConsent ? await pendingConsent : { response: allowPrivate ? 1 : 0 } } },
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,

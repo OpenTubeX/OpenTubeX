@@ -635,7 +635,16 @@ export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
 
     const videoElement = video.value
     const currentTime = videoElement.currentTime
-    const range = silenceRanges.find(({ start, end }) => start <= currentTime && end > currentTime)
+    // The ranges are sorted and merged, and long videos collect many of them,
+    // so each frame looks up the last one starting before the position.
+    let low = 0
+    let high = silenceRanges.length - 1
+    while (low <= high) {
+      const middle = (low + high) >> 1
+      if (silenceRanges[middle].start <= currentTime) low = middle + 1
+      else high = middle - 1
+    }
+    const range = high >= 0 && silenceRanges[high].end > currentTime ? silenceRanges[high] : null
     if (range) {
       const target = range.end - SILENCE_END_PADDING_SECONDS
       if (target - currentTime >= MIN_SKIP_SECONDS) {
