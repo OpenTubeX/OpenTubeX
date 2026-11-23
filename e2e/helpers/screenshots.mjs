@@ -10,18 +10,18 @@ import { expectImagesLoaded } from './visual-fixtures.mjs'
  * @param {import('@playwright/test').Page} page
  */
 export async function waitForUiSettled(page) {
-  // Finishing one animation can start another, so repeat until none are left.
   await expect.poll(() => page.evaluate(async () => {
     await document.fonts.ready
     // Scroll-driven animations follow the scroll position and never finish.
-    const running = document.getAnimations().filter(animation => animation.timeline === document.timeline &&
+    const running = () => document.getAnimations().filter(animation => animation.timeline === document.timeline &&
       animation.playState === 'running' && animation.effect?.getComputedTiming().endTime !== Infinity)
     await Promise.race([
-      Promise.all(running.map(animation => animation.finished.catch(() => {}))),
+      Promise.all(running().map(animation => animation.finished.catch(() => {}))),
       new Promise(resolve => setTimeout(resolve, 1000)),
     ])
-    // Name what is still running, so a timeout reports the stuck animation.
-    return running.filter(animation => animation.playState === 'running').map(animation => {
+    // Query again, since finishing one animation can start another. Naming
+    // what still runs lets a timeout report the stuck animation.
+    return running().map(animation => {
       const target = animation.effect?.target
       const name = animation.animationName ?? animation.transitionProperty ?? animation.id
       return `${name} on ${target?.tagName?.toLowerCase()}.${[...target?.classList ?? []].join('.')}`
