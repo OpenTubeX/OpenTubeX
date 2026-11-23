@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Install the current debug APK on a locked emulator, forward its WebView
 // socket, and set ANDROID_CDP_URL to run these real touch regressions.
@@ -10,7 +11,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   // CDP may have no referenced handles while Android processes touch input.
   const keepAlive = setTimeout(() => {}, 240_000)
@@ -372,7 +373,7 @@ test('Android header preserves native upward panning alongside organizer gesture
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const session = await browser.contexts()[0].newCDPSession(page)
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
   const originalScroll = await page.evaluate(() => window.scrollY)
@@ -434,7 +435,7 @@ test('Android organizer unmount releases its modal lock during committed settlem
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const session = await browser.contexts()[0].newCDPSession(page)
   const keepAlive = setTimeout(() => {}, 60_000)
   const saved = await page.evaluate(async () => {
@@ -486,7 +487,7 @@ test('Android pointer cancellation cannot reopen an organizer waiting for captur
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const session = await browser.contexts()[0].newCDPSession(page)
   const keepAlive = setTimeout(() => {}, 60_000)
   const saved = await page.evaluate(async () => {

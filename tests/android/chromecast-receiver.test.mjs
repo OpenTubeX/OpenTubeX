@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { execFile, execFileSync } from 'node:child_process'
 import { promisify } from 'node:util'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Requires an isolated debug sender trusting the emulator's temporary test CA,
 // unmodified openchromecast + mpv, ffmpeg-generated demo MP4/DASH/HLS fixtures,
@@ -40,7 +41,7 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
   const upstream = `http://8.8.8.8:${server.address().port}`
   const forwarded = new Set()
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   page.setDefaultTimeout(15000)
 
   let watch, original

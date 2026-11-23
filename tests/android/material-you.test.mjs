@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 test('Android fixed Material variants use the selectable accent with readable text', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   await page.locator('.profileTrigger').waitFor()
   const settingsWereOpen = await page.locator('.settingsWindow').isVisible()
   const saved = await page.evaluate(() => {

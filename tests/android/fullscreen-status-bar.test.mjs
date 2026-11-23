@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> and ANDROID_SERIAL.
@@ -13,7 +14,7 @@ test('fullscreen hides the status bar again after closing the notification shade
   assert.match(process.env.ANDROID_SERIAL, /^emulator-\d+$/)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch

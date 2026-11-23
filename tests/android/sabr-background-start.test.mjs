@@ -10,6 +10,7 @@ import { CompositeBuffer, UmpWriter } from 'googlevideo/ump'
 import { MediaHeader, NextRequestPolicy, UMPPartId, VideoPlaybackAbrRequest } from 'googlevideo/protos'
 import { concatenateChunks } from 'googlevideo/utils'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Requires a locked emulator, a current debug APK and ffmpeg. SABR receives
 // UMP fixtures through native HTTP; the Android media service and lifecycle
@@ -104,7 +105,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       }, { timeout: 15000 }).toBe(true)
       adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:${socket}`)
       browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       server = createServer(async (request, response) => {
         const chunks = []
         for await (const chunk of request) chunks.push(chunk)
@@ -297,7 +298,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
         }
       }
       browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       const state = await page.locator('.ftVideoPlayer video').evaluate(video => ({ paused: video.paused, time: video.currentTime }))
       assert.equal(state.paused, !continuePlayback, 'respect the background playback preference')
       if (continuePlayback) assert.ok(state.time > 0, 'background playback must advance')
@@ -307,7 +308,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       launch()
       if (!browser && page) {
         browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = browser.contexts()[0].pages()[0]
+        page = appPage(browser)
       }
       if (page && settings) {
         await page.evaluate(({ settings, route }) => {

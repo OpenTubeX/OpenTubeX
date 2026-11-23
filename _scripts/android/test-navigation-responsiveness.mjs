@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect } from '@playwright/test'
 import { largeSubscriptionsSeed } from '../../e2e/performance/subscriptions.mjs'
+import { appPage } from '../../tests/helpers/android-app-page.mjs'
 
 // Acquire the Android lab lock and install the current debug APK first.
 const serial = process.argv[2]
@@ -24,7 +25,7 @@ try {
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       if (page) break
       await browser.close()
     } catch { /* The WebView may still be starting. */ }

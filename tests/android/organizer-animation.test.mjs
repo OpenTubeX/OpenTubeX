@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on an exclusively locked emulator.
 test('Android organizer button morphs into the active card and remains interactive during settlement', {
@@ -11,7 +12,7 @@ test('Android organizer button morphs into the active card and remains interacti
   t.after(() => clearTimeout(keepAlive))
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   t.after(() => browser.close())
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const session = await browser.contexts()[0].newCDPSession(page)
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
   const tap = async selector => {

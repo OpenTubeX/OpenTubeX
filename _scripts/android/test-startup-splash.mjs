@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect } from '@playwright/test'
 import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
+import { appPage } from '../../tests/helpers/android-app-page.mjs'
 
 // Acquire the Android lab device lock and install the current debug APK first.
 const serial = process.argv[2]
@@ -24,7 +25,7 @@ try {
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       if (page) break
       await browser.close()
     } catch { /* The WebView may still be starting. */ }

@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { verifySyncDeviceRemoval } from '../../e2e/helpers/sync-device-removal.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { current: true, reconnectDuringCleanup: true }]) {
   let behavior = 'cleans up synced tabs and orphaned sets can be deleted'
@@ -12,7 +13,7 @@ for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { curre
     const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
     const keepAlive = setTimeout(() => {}, 120_000)
     try {
-      const page = browser.contexts()[0].pages()[0]
+      const page = appPage(browser)
       await page.reload()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
@@ -32,7 +33,7 @@ for (const { conflict, intentionalDeletion, olderLogin, pendingRevocation, aband
     const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
     const keepAlive = setTimeout(() => {}, 120_000)
     try {
-      const page = browser.contexts()[0].pages()[0]
+      const page = appPage(browser)
       await page.reload()
       await verifySyncDeviceReconnection(page, { conflict, intentionalDeletion, olderLogin, pendingRevocation, abandonRevocation, phone: true })
     } finally {

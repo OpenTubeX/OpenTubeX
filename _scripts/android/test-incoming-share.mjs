@@ -5,6 +5,7 @@ import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../../tests/helpers/android-app-page.mjs'
 
 const serial = process.argv[2]
 assert.ok(serial, 'Pass the exclusively owned emulator serial')
@@ -38,7 +39,7 @@ async function connect() {
       const pid = adb('shell', 'pidof', app)
       if (!port) port = adb('forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       if (page) {
         await page.waitForFunction(() => !!document.querySelector('#app')?.__vue_app__ && !!document.querySelector('.topNav'))
         return

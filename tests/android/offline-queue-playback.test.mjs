@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Requires an owned emulator, current debug APK, app-local demo-audio.mp3
 // and an app-local MP3 at least 20 seconds long for the initial track.
@@ -36,7 +37,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       }, { timeout: 15000 }).toBe(true)
       adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:webview_devtools_remote_${pid}`)
       browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       await page.locator('.profileTrigger').waitFor()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
@@ -146,7 +147,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       adb('shell', 'wm', 'dismiss-keyguard')
       launch()
       browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       assert.deepEqual(await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return {
@@ -163,7 +164,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
     // without letting debugger activity make a failing queue advance.
       if (saved && !browser) {
         browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = browser.contexts()[0].pages()[0]
+        page = appPage(browser)
         console.error('Offline queue failure state:', await page.evaluate(() => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
           const video = document.querySelector('video')
@@ -185,7 +186,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       launch()
       if (!browser && page) {
         browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = browser.contexts()[0].pages()[0]
+        page = appPage(browser)
       }
       if (saved) {
         await page.evaluate(({ saved, ids }) => {

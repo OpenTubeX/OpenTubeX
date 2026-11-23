@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Requires an owned emulator and a current debug APK.
 const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIAL?.startsWith('emulator-'))
@@ -48,7 +49,7 @@ async function connect() {
   }, { timeout: 15000 }).toBe(true)
   adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:webview_devtools_remote_${pid}`)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   // Cold starts take over 30 seconds on Android 8 emulators.
   await page.locator('.profileTrigger').waitFor({ timeout: 90_000 })
   const skip = page.getByRole('button', { name: 'Skip', exact: true })

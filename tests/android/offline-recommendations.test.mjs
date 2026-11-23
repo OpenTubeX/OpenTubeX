@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView
 // socket forwarded to ANDROID_CDP_URL.
@@ -16,7 +17,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
   let watch
   try {
     browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-    page = browser.contexts()[0].pages()[0]
+    page = appPage(browser)
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) await tutorial.locator('.tutorialSkip button').click()

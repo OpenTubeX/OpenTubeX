@@ -4,6 +4,7 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run on a locked emulator with a current debug APK, ANDROID_SERIAL, and
 // ANDROID_CDP_URL pointing to its forwarded WebView socket.
@@ -12,7 +13,7 @@ const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 
 
 async function withMobileVideo(run, { fromChannel = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const session = await page.context().newCDPSession(page)
   const tap = async (locator, position = null) => {
     const box = await locator.boundingBox()

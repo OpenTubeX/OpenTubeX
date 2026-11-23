@@ -4,6 +4,7 @@ import { after, before, test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { compileStyle } from 'vue/compiler-sfc'
 import { readScopedStyles } from '../helpers/component-styles.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 let browser
 let host
@@ -13,7 +14,7 @@ before(async () => {
   browser = process.env.ANDROID_CDP_URL
     ? await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
     : await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
-  host = process.env.ANDROID_CDP_URL ? browser.contexts()[0].pages()[0] : await browser.newPage()
+  host = process.env.ANDROID_CDP_URL ? appPage(browser) : await browser.newPage()
   const css = await readScopedStyles(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url))
   const shakaCss = await readFile(new URL('../../node_modules/shaka-player/dist/controls.css', import.meta.url), 'utf8')
   styles = shakaCss + compileStyle({ source: css, filename: 'player.css', id: 'data-v-controls-test', scoped: true }).code

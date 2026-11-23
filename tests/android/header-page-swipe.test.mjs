@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Install the current debug APK on a locked emulator, forward its WebView
 // socket, and set ANDROID_CDP_URL to run these real touch regressions.
@@ -10,7 +11,7 @@ test('Android header swipes include controls and preserve taps and long presses'
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   // CDP may have no referenced handles while Android processes touch input.
   const keepAlive = setTimeout(() => {}, 120_000)

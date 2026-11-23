@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium } from '@playwright/test'
+import { appPage } from '../../tests/helpers/android-app-page.mjs'
 
 // Run outside instrumentation: restarting the app also kills its test runner.
 // Acquire the Android lab device lock before invoking this test with its serial.
@@ -22,7 +23,7 @@ async function connect(processId) {
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
-      const page = browser.contexts()[0].pages()[0]
+      const page = appPage(browser)
       if (page) {
         await page.waitForFunction(() => !!document.querySelector('#app')?.__vue_app__)
         return page

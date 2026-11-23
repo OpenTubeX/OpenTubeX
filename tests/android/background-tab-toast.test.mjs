@@ -4,6 +4,7 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { SWIPE_VIDEO } from '../../e2e/helpers/thumbnail-swipe.mjs'
 import { fulfillVisualFixture } from '../../e2e/helpers/visual-fixtures.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Install the current debug APK on a locked emulator and forward its WebView
 // socket before setting ANDROID_CDP_URL.
@@ -12,7 +13,7 @@ test('Android confirms opening a background tab while keeping the current page',
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   const keepAlive = setTimeout(() => {}, 120_000)
   const thumbnailRoute = '**/vi/jNQXAC9IVRw/*'

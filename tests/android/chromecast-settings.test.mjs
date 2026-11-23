@@ -4,13 +4,14 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator, with its WebView forwarded.
 test('Android enables Google Cast from settings and opens the native device menu', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   let watch

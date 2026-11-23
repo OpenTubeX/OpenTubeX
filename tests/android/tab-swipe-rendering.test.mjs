@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { after, before, test } from 'node:test'
 import { chromium } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // For Android, acquire the lab device lock and forward its WebView debug socket,
 // then set ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> when running this test.
@@ -15,7 +16,7 @@ before(async () => {
   context = process.env.ANDROID_CDP_URL
     ? browser.contexts()[0]
     : await browser.newContext({ viewport: { width: 400, height: 700 } })
-  host = process.env.ANDROID_CDP_URL ? context.pages()[0] : await context.newPage()
+  host = process.env.ANDROID_CDP_URL ? appPage(browser) : await context.newPage()
 })
 after(async () => { await browser?.close() })
 

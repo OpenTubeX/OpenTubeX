@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../../tests/helpers/android-app-page.mjs'
 
 // Acquire the Android lab lock and install the current debug APK first.
 const serial = process.argv[2]
@@ -20,7 +21,7 @@ try {
       const forwardedPort = adb('forward', port ? `tcp:${port}` : 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
       port ||= forwardedPort
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
-      page = browser.contexts()[0].pages()[0]
+      page = appPage(browser)
       if (page) break
       throw new Error('Android WebView has no page yet')
     } catch (error) {

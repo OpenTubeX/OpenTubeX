@@ -3,6 +3,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import test from 'node:test'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against an already installed debug APK on a locked device. Unlike CDP
 // touch injection, Android's native input reproduces the Pixel's missing click.
@@ -17,7 +18,7 @@ test('the first native Android tap after pulling the organizer selects its card'
   const host = process.env.ANDROID_ADB_HOST
   if (host) assert.match(host, /^[\w.-]+$/)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const keepAlive = setTimeout(() => {}, 120_000)
   const dialog = page.locator('#capacitor-phone-tab-dialog')
   const close = dialog.getByRole('button', { name: 'Close', exact: true })

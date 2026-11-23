@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run with a current debug APK on a locked emulator and its WebView socket
 // forwarded to ANDROID_CDP_URL. The Pixel also exposed this on WebView 155.
@@ -9,7 +10,7 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   let saved
   let watch
   try {

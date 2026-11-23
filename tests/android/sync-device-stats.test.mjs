@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView forwarded.
 // Only the native HTTP transport is replaced; pairing, encryption and the UI are real.
@@ -10,7 +11,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const currentId = Buffer.alloc(16, 3).toString('base64url')

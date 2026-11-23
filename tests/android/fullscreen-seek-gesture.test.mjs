@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_SERIAL and ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -18,7 +19,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch

@@ -5,6 +5,7 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
 import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability, verifyReverseSwipes } from '../../e2e/helpers/thumbnail-swipe.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 const evidenceDir = process.env.SWIPE_EVIDENCE_DIR || path.join(tmpdir(), 'opentubex-swipe-evidence')
 
@@ -15,7 +16,7 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let saved
   let clipboard

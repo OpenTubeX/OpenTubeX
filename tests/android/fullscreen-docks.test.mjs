@@ -4,13 +4,14 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { measureFullscreenDockToggle } from '../../e2e/helpers/fullscreen-docks.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run on a locked emulator with a current debug APK and a forwarded WebView.
 test('Android fullscreen docks animate without reflowing the player every frame', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   let watch

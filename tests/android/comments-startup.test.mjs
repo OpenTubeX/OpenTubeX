@@ -3,6 +3,7 @@ import test from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { mockWatchPage } from '../../e2e/helpers/watch.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run with a current debug APK on an exclusively locked emulator, forwarding
 // its WebView socket to ANDROID_CDP_URL.
@@ -11,7 +12,7 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
   timeout: 180_000,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const errors = []
   const recordError = message => {
     if (message.type() === 'error' && message.text().includes('failed to render')) errors.push(message.text())

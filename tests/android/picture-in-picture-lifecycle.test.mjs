@@ -5,6 +5,7 @@ import { after, before, test } from 'node:test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on an exclusively locked emulator, with its
 // WebView socket forwarded to ANDROID_CDP_URL. Exercise the mounted Watch and
@@ -28,7 +29,7 @@ before(async () => {
   assert.ok(socket, 'the app WebView debugger is ready')
   adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:${socket}`)
   browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  page = browser.contexts()[0].pages()[0]
+  page = appPage(browser)
   await page.waitForFunction(() => document.querySelector('#app')?.__vue_app__ && !document.body.classList.contains('androidPictureInPicture'))
   await page.waitForSelector('#app .app')
   originalSettings = await page.evaluate(() => {

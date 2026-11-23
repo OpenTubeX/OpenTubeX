@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 function findWatchComponent() {
   const find = vnode => {
@@ -27,7 +28,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   page.setDefaultTimeout(15000)
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')

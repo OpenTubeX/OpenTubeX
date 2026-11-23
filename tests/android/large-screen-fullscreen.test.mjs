@@ -5,6 +5,7 @@ import { promisify } from 'node:util'
 import test from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 const run = promisify(execFile)
 
@@ -21,7 +22,7 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
   const originalDensity = (await adb('shell', 'wm', 'density')).match(/Override density: (\d+)/)?.[1]
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let saved
   let watch

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
+import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run with a current debug APK on a locked emulator and its WebView forwarded
 // to ANDROID_CDP_URL. Native HTTP responses use a deterministic transport fixture.
@@ -9,7 +10,7 @@ test('Android stalled avatars use native recovery before the bounded browser ret
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  const page = appPage(browser)
   const avatarPattern = 'https://yt3.ggpht.com/opentubex-timeout-avatar*'
   const data = (await readFile(new URL('../../e2e/fixtures/images/opentubex-playlist.jpg', import.meta.url))).toString('base64')
   const pending = []
