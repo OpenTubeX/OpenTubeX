@@ -50,6 +50,18 @@
   animation: ft-buffer-spinner-dash 1.4s ease-in-out infinite;
 }
 
+/*
+  The center play button sits above the spinner and would hide it, so a
+  player that is still loading looked paused and ready. Like YouTube, the
+  spinner takes the button's place once it fades in. The class survives the
+  control rebuilds that often happen while a video starts.
+*/
+.ftVideoPlayer.bufferingSpinnerShown :deep(.shaka-big-buttons-container > .shaka-play-button) {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms ease-out, visibility 0s 150ms;
+}
+
 @keyframes ft-buffer-spinner-appear {
   from {
     opacity: 0;
