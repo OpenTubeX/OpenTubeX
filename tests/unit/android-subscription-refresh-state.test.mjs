@@ -69,15 +69,28 @@ function setup(t, state, hidden = false) {
   }
 }
 
-test('the first idle native read reloads the cache once after the startup load', async t => {
+test('idle native reads keep the startup cache load', async t => {
   const app = setup(t, { inProgress: false, ownedByRenderer: false, rendererActive: false })
   await app.synchronize()
-  assert.deepEqual(app.calls, ['import', 'grabAllSubscriptions'])
-  assert.deepEqual(app.notifications, ['videos', 'shorts', 'live', 'posts'])
+  assert.deepEqual(app.calls, ['import'])
+  assert.deepEqual(app.notifications, [])
   assert.equal(app.timers.size, 0)
   app.advance(10000)
   await app.synchronize()
-  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 1, 'unchanged idle reads do not repeat the reload')
+  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 0)
+})
+
+test('overlapping native reads of a retained renderer refresh reload the cache once', async t => {
+  const state = { inProgress: false, ownedByRenderer: false, rendererActive: false }
+  const app = setup(t, state)
+  await app.synchronize()
+  Object.assign(state, { inProgress: true, percentage: 0, tab: 'videos', rendererActive: true })
+  // A visibility change and a storage event read the state at the same time.
+  document.dispatchEvent(new Event('visibilitychange'))
+  window.dispatchEvent(Object.assign(new Event('storage'), { key: PROGRESS_STORAGE_KEY, newValue: '{}' }))
+  await settle()
+  await settle()
+  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 1)
 })
 
 test('reopening Android follows native progress and imports videos before the worker finishes', async t => {
@@ -87,7 +100,7 @@ test('reopening Android follows native progress and imports videos before the wo
   assert.equal(app.shown[0].inProgress, true, 'a moving native refresh must be visible in the reopened app')
   assert.equal(app.shown[0].percentage, 42)
   assert.equal(app.shown[0].tab, 'shorts')
-  assert.deepEqual(app.calls, ['import', 'grabAllSubscriptions'])
+  assert.deepEqual(app.calls, ['import'], 'the scheduled worker hands over its results as imports')
   assert.equal(app.timers.size, 1)
 
   state.percentage = 73
@@ -100,7 +113,7 @@ test('reopening Android follows native progress and imports videos before the wo
   await [...app.timers.values()][0]()
   assert.equal(app.shown.at(-1).inProgress, false)
   assert.equal(app.timers.size, 0)
-  assert.deepEqual(app.calls, ['import', 'grabAllSubscriptions', 'import', 'import'])
+  assert.deepEqual(app.calls, ['import', 'import', 'import'])
 })
 
 test('retained renderer cache writes become visible during refresh and after completion', async t => {

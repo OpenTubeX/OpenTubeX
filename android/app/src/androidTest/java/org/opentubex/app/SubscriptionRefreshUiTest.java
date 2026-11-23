@@ -141,7 +141,7 @@ public class SubscriptionRefreshUiTest {
                     SubscriptionRefreshCoordinator.setProgress(token, progress);
                     await(view, STORE + ".getters.getSubscriptionFeedRefreshProgress === " + progress);
                 }
-                assertEquals("cache reloads are spaced five seconds apart", "true", evaluate(view,
+                assertEquals("cache reloads are spaced five seconds apart: " + evaluate(view, "JSON.stringify(window.__refreshReloadTimes)"), "true", evaluate(view,
                     "window.__refreshReloadTimes.slice(1).every((time, index) => time - window.__refreshReloadTimes[index] >= 5000)"));
                 int reloads = Integer.parseInt(evaluate(view, "window.__refreshReloadTimes.length"));
                 assertTrue("long refresh still imports intermediate cache writes", reloads >= 2);
