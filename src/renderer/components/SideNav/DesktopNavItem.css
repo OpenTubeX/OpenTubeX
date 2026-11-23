@@ -11,7 +11,12 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding-block: calc(6px * var(--ui-density));
+
+    /* The indicator below is placed from this, so it stays centered on the
+       icon at every UI Density. */
+    --nav-item-padding-block: calc(6px * var(--ui-density));
+
+    padding-block: var(--nav-item-padding-block);
     padding-inline: 4px calc(4px + var(--side-nav-tab-gap, 0px));
     border-radius: var(--shape-corner-extra-large);
     color: var(--primary-text-color);
@@ -38,7 +43,7 @@
     content: '';
     position: absolute;
     z-index: -1;
-    inset-block-start: 6px;
+    inset-block-start: var(--nav-item-padding-block);
     inline-size: 64px;
     block-size: 32px;
     border-radius: var(--nav-indicator-radius);
@@ -62,8 +67,9 @@
       background-color var(--motion-default-effects);
   }
 
+  /* 4px taller than the 35px avatar on each side. */
   .navChannel::before {
-    inset-block-start: 2px;
+    inset-block-start: calc(var(--nav-item-padding-block) - 4px);
     block-size: 43px;
   }
 
@@ -137,14 +143,14 @@
     --nav-indicator-radius: calc(21px * var(--ui-roundness));
 
     inline-size: 50px;
-    block-size: 50px;
+    block-size: calc(42px + 8px * var(--ui-density));
     justify-content: center;
   }
 
   .hiddenLabels :is(.navOption, .navChannel)::before {
     inline-size: 42px;
     block-size: 42px;
-    inset-block-start: 4px;
+    inset-block-start: calc(4px * var(--ui-density));
   }
 
   .expanded,
