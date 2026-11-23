@@ -2893,6 +2893,8 @@ Form Inputs:
   Browse: "Прегледај"
   Use Default Path: "Користи подразумевано"
   Enter Password Hint: "Унесите своју лозинку"
+  Enter Username Hint: "Унесите своје корисничко име"
+  Vault Name Hint: "Унесите назив свог трезора"
   Choose Password Hint: "Изаберите лозинку"
   Confirm Password Hint: "Поновите нову лозинку"
   Encryption Passphrase Hint: "Унесите своју фразу за шифровање"

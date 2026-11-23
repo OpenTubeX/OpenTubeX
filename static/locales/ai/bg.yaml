@@ -2841,6 +2841,8 @@ Form Inputs:
   Browse: "Преглед"
   Use Default Path: "Използване по подразбиране"
   Enter Password Hint: "Въведете паролата си"
+  Enter Username Hint: "Въведете потребителското си име"
+  Vault Name Hint: "Въведете името на хранилището си"
   Choose Password Hint: "Изберете парола"
   Confirm Password Hint: "Повторете новата си парола"
   Encryption Passphrase Hint: "Въведете фразата си за шифроване"

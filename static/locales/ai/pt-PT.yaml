@@ -2808,6 +2808,8 @@ Form Inputs:
   Browse: "Procurar"
   Use Default Path: "Utilizar predefinição"
   Enter Password Hint: "Introduza a sua palavra-passe"
+  Enter Username Hint: "Introduza o seu nome de utilizador"
+  Vault Name Hint: "Introduza o nome do seu cofre"
   Choose Password Hint: "Escolha uma palavra-passe"
   Confirm Password Hint: "Repita a sua nova palavra-passe"
   Encryption Passphrase Hint: "Introduza a sua frase de encriptação"

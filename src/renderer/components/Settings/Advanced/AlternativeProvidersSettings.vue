@@ -134,6 +134,7 @@
         <FtInput
           :icon="['fas', 'circle-user']"
           :label="t('Settings.General Settings.Invidious Instance Username')"
+          :placeholder="t('Form Inputs.Enter Username Hint')"
           :show-action-button="false"
           :show-label="true"
           :value="invidiousUsername"
@@ -207,6 +208,7 @@
         <FtInput
           :icon="['fas', 'circle-user']"
           :label="t('Settings.General Settings.Yattee Server.Username')"
+          :placeholder="t('Form Inputs.Enter Username Hint')"
           :show-action-button="false"
           :show-label="true"
           :value="yatteeUsername"

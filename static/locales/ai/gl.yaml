@@ -2869,6 +2869,8 @@ Form Inputs:
   Browse: "Examinar"
   Use Default Path: "Usar o predeterminado"
   Enter Password Hint: "Introduce o teu contrasinal"
+  Enter Username Hint: "Introduce o teu nome de usuario"
+  Vault Name Hint: "Introduce o nome da túa caixa forte"
   Choose Password Hint: "Escolle un contrasinal"
   Confirm Password Hint: "Repite o teu novo contrasinal"
   Encryption Passphrase Hint: "Introduce a túa frase de cifrado"

@@ -2800,6 +2800,8 @@ Form Inputs:
   Browse: "Tallózás"
   Use Default Path: "Alapértelmezett használata"
   Enter Password Hint: "Add meg a jelszavad"
+  Enter Username Hint: "Add meg a felhasználóneved"
+  Vault Name Hint: "Add meg a széfed nevét"
   Choose Password Hint: "Válassz jelszót"
   Confirm Password Hint: "Ismételd meg az új jelszavad"
   Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"

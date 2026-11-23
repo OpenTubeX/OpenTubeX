@@ -2822,6 +2822,8 @@ Form Inputs:
   Browse: "Duyệt"
   Use Default Path: "Dùng mặc định"
   Enter Password Hint: "Nhập mật khẩu của bạn"
+  Enter Username Hint: "Nhập tên người dùng của bạn"
+  Vault Name Hint: "Nhập tên kho của bạn"
   Choose Password Hint: "Chọn mật khẩu"
   Confirm Password Hint: "Nhập lại mật khẩu mới"
   Encryption Passphrase Hint: "Nhập cụm mật khẩu mã hóa của bạn"

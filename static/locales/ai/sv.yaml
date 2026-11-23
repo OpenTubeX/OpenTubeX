@@ -2804,6 +2804,8 @@ Form Inputs:
   Browse: "Bläddra"
   Use Default Path: "Använd standard"
   Enter Password Hint: "Ange ditt lösenord"
+  Enter Username Hint: "Ange ditt användarnamn"
+  Vault Name Hint: "Ange namnet på ditt valv"
   Choose Password Hint: "Välj ett lösenord"
   Confirm Password Hint: "Upprepa ditt nya lösenord"
   Encryption Passphrase Hint: "Ange din krypteringslösenfras"

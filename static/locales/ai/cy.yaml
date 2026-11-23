@@ -2843,6 +2843,8 @@ Form Inputs:
   Browse: "Pori"
   Use Default Path: "Defnyddio’r rhagosodiad"
   Enter Password Hint: "Rhowch eich cyfrinair"
+  Enter Username Hint: "Rhowch eich enw defnyddiwr"
+  Vault Name Hint: "Rhowch enw eich cell"
   Choose Password Hint: "Dewiswch gyfrinair"
   Confirm Password Hint: "Ailadroddwch eich cyfrinair newydd"
   Encryption Passphrase Hint: "Rhowch eich ymadrodd cyfrinachol amgryptio"

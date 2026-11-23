@@ -3271,6 +3271,8 @@ Form Inputs:
   Browse: "찾아보기"
   Use Default Path: "기본값 사용"
   Enter Password Hint: "비밀번호를 입력하세요"
+  Enter Username Hint: "사용자 이름을 입력하세요"
+  Vault Name Hint: "보관소 이름을 입력하세요"
   Choose Password Hint: "비밀번호를 설정하세요"
   Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
   Encryption Passphrase Hint: "암호화 암호문을 입력하세요"

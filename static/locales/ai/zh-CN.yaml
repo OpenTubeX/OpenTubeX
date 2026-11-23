@@ -2799,6 +2799,8 @@ Form Inputs:
   Browse: "浏览"
   Use Default Path: "使用默认值"
   Enter Password Hint: "输入你的密码"
+  Enter Username Hint: "输入你的用户名"
+  Vault Name Hint: "输入你的仓库名称"
   Choose Password Hint: "设置密码"
   Confirm Password Hint: "再次输入新密码"
   Encryption Passphrase Hint: "输入你的加密口令"

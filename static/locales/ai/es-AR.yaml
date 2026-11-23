@@ -3380,6 +3380,8 @@ Form Inputs:
   Browse: "Examinar"
   Use Default Path: "Usar el predeterminado"
   Enter Password Hint: "Ingresá tu contraseña"
+  Enter Username Hint: "Ingresá tu nombre de usuario"
+  Vault Name Hint: "Ingresá el nombre de tu bóveda"
   Choose Password Hint: "Elegí una contraseña"
   Confirm Password Hint: "Repetí tu nueva contraseña"
   Encryption Passphrase Hint: "Ingresá tu frase de cifrado"

@@ -2878,6 +2878,8 @@ Form Inputs:
   Browse: "உலாவு"
   Use Default Path: "இயல்புநிலையைப் பயன்படுத்து"
   Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
+  Enter Username Hint: "உங்கள் பயனர்பெயரை உள்ளிடவும்"
+  Vault Name Hint: "உங்கள் பெட்டகத்தின் பெயரை உள்ளிடவும்"
   Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
   Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
   Encryption Passphrase Hint: "உங்கள் குறியாக்கக் கடவுச்சொற்றொடரை உள்ளிடவும்"

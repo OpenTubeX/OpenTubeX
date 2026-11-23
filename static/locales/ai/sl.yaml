@@ -3411,6 +3411,8 @@ Form Inputs:
   Browse: "Prebrskaj"
   Use Default Path: "Uporabi privzeto"
   Enter Password Hint: "Vnesite svoje geslo"
+  Enter Username Hint: "Vnesite svoje uporabniško ime"
+  Vault Name Hint: "Vnesite ime svojega trezorja"
   Choose Password Hint: "Izberite geslo"
   Confirm Password Hint: "Ponovite novo geslo"
   Encryption Passphrase Hint: "Vnesite svoje šifrirno geslo"

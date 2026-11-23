@@ -51,7 +51,7 @@
         <FtInputTags
           :label="$t('Settings.External Player Settings.Custom External Player Arguments')"
           :entry-label="t('Form Inputs.Add Argument')"
-          tag-name-placeholder=""
+          :tag-name-placeholder="t('Form Inputs.Example', { example: '--fullscreen' })"
           :tag-list="externalPlayerCustomArgs"
           :tooltip="externalPlayerCustomArgsTooltip"
           :show-tags="showAddedExternalPlayerCustomArgs"

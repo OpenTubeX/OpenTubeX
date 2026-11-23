@@ -2799,6 +2799,8 @@ Form Inputs:
   Browse: "Sfoglia"
   Use Default Path: "Usa predefinito"
   Enter Password Hint: "Inserisci la tua password"
+  Enter Username Hint: "Inserisci il tuo nome utente"
+  Vault Name Hint: "Inserisci il nome della tua cassaforte"
   Choose Password Hint: "Scegli una password"
   Confirm Password Hint: "Ripeti la nuova password"
   Encryption Passphrase Hint: "Inserisci la tua passphrase di cifratura"

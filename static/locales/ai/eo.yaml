@@ -2858,6 +2858,8 @@ Form Inputs:
   Browse: "Foliumi"
   Use Default Path: "Uzi la defaŭlton"
   Enter Password Hint: Enigu vian pasvorton
+  Enter Username Hint: "Enigu vian uzantnomon"
+  Vault Name Hint: "Enigu la nomon de via deponejo"
   Choose Password Hint: Elektu pasvorton
   Confirm Password Hint: Ripetu vian novan pasvorton
   Encryption Passphrase Hint: Enigu vian ĉifran pasfrazon

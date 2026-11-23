@@ -2815,6 +2815,8 @@ Form Inputs:
   Browse: "Fletta"
   Use Default Path: "Nota sjálfgefið"
   Enter Password Hint: "Sláðu inn lykilorðið þitt"
+  Enter Username Hint: "Sláðu inn notandanafnið þitt"
+  Vault Name Hint: "Sláðu inn heiti hvelfingarinnar þinnar"
   Choose Password Hint: "Veldu lykilorð"
   Confirm Password Hint: "Endurtaktu nýja lykilorðið þitt"
   Encryption Passphrase Hint: "Sláðu inn dulkóðunarlykilsetninguna þína"

@@ -2826,6 +2826,8 @@ Form Inputs:
   Browse: "Telusuri"
   Use Default Path: "Gunakan bawaan"
   Enter Password Hint: "Masukkan kata sandi Anda"
+  Enter Username Hint: "Masukkan nama pengguna Anda"
+  Vault Name Hint: "Masukkan nama vault Anda"
   Choose Password Hint: "Pilih kata sandi"
   Confirm Password Hint: "Ulangi kata sandi baru Anda"
   Encryption Passphrase Hint: "Masukkan frasa sandi enkripsi Anda"

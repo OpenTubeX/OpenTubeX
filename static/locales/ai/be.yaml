@@ -2916,6 +2916,8 @@ Form Inputs:
   Browse: "Агляд"
   Use Default Path: "Выкарыстоўваць прадвызначанае"
   Enter Password Hint: "Увядзіце свой пароль"
+  Enter Username Hint: "Увядзіце сваё імя карыстальніка"
+  Vault Name Hint: "Увядзіце назву свайго сховішча"
   Choose Password Hint: "Выберыце пароль"
   Confirm Password Hint: "Паўтарыце новы пароль"
   Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"

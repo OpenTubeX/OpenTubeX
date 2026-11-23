@@ -49,6 +49,7 @@
         <FtInput
           ref="input"
           :label="editComment ? t('YouTube Account.Edit Comment') : parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
+          :placeholder="t('Form Inputs.Enter Text')"
           :icon="['fas', editComment ? 'edit' : parentId ? 'reply' : 'comment']"
           :value="text"
           :maxlength="10000"

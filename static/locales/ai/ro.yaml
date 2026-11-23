@@ -2862,6 +2862,8 @@ Form Inputs:
   Browse: "Răsfoiește"
   Use Default Path: "Folosește implicit"
   Enter Password Hint: "Introdu parola ta"
+  Enter Username Hint: "Introdu numele tău de utilizator"
+  Vault Name Hint: "Introdu numele seifului tău"
   Choose Password Hint: "Alege o parolă"
   Confirm Password Hint: "Repetă noua parolă"
   Encryption Passphrase Hint: "Introdu fraza ta de criptare"

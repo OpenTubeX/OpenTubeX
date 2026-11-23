@@ -2802,6 +2802,8 @@ Form Inputs:
   Browse: "Sirvi"
   Use Default Path: "Kasuta vaikimisi"
   Enter Password Hint: "Sisesta oma parool"
+  Enter Username Hint: "Sisesta oma kasutajanimi"
+  Vault Name Hint: "Sisesta oma hoidla nimi"
   Choose Password Hint: "Vali parool"
   Confirm Password Hint: "Korda oma uut parooli"
   Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"

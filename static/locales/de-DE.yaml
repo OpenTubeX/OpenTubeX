@@ -4069,6 +4069,8 @@ Form Inputs:
   Browse: "Durchsuchen"
   Use Default Path: "Standard verwenden"
   Enter Password Hint: "Gib dein Passwort ein"
+  Enter Username Hint: Gib deinen Benutzernamen ein
+  Vault Name Hint: Gib den Namen deines Vaults ein
   Choose Password Hint: "Wähle ein Passwort"
   Confirm Password Hint: "Wiederhole dein neues Passwort"
   Encryption Passphrase Hint: "Gib deine Verschlüsselungspassphrase ein"

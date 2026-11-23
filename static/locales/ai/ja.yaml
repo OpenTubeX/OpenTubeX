@@ -2799,6 +2799,8 @@ Form Inputs:
   Browse: "参照"
   Use Default Path: "デフォルトを使用"
   Enter Password Hint: "パスワードを入力"
+  Enter Username Hint: "ユーザー名を入力"
+  Vault Name Hint: "保管庫の名前を入力"
   Choose Password Hint: "パスワードを設定"
   Confirm Password Hint: "新しいパスワードをもう一度入力"
   Encryption Passphrase Hint: "暗号化パスフレーズを入力"

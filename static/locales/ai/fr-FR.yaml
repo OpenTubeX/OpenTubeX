@@ -2798,6 +2798,8 @@ Form Inputs:
   Browse: "Parcourir"
   Use Default Path: "Utiliser la valeur par défaut"
   Enter Password Hint: "Saisissez votre mot de passe"
+  Enter Username Hint: "Saisissez votre nom d’utilisateur"
+  Vault Name Hint: "Saisissez le nom de votre coffre"
   Choose Password Hint: "Choisissez un mot de passe"
   Confirm Password Hint: "Répétez votre nouveau mot de passe"
   Encryption Passphrase Hint: "Saisissez votre phrase de chiffrement"

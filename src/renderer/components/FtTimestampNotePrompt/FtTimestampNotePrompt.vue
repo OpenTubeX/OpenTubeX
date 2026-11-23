@@ -11,7 +11,7 @@
         ref="noteInput"
         class="noteInput"
         :label="t('Video.Player.Timestamp Notes.Note')"
-        placeholder=""
+        :placeholder="t('Form Inputs.Enter Text')"
         :icon="['fas', 'note-sticky']"
         :value="note"
         :maxlength="5000"

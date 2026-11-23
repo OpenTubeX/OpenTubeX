@@ -3461,6 +3461,8 @@ Form Inputs:
   Browse: "Navega"
   Use Default Path: "Utilitza el valor per defecte"
   Enter Password Hint: "Introduïu la vostra contrasenya"
+  Enter Username Hint: "Introduïu el vostre nom d’usuari"
+  Vault Name Hint: "Introduïu el nom de la vostra caixa forta"
   Choose Password Hint: "Trieu una contrasenya"
   Confirm Password Hint: "Repetiu la vostra contrasenya nova"
   Encryption Passphrase Hint: "Introduïu la vostra frase de pas de xifratge"

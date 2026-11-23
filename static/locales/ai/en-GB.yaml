@@ -2798,6 +2798,8 @@ Form Inputs:
   Browse: "Browse"
   Use Default Path: "Use default"
   Enter Password Hint: "Enter your password"
+  Enter Username Hint: "Enter your username"
+  Vault Name Hint: "Enter your vault name"
   Choose Password Hint: "Choose a password"
   Confirm Password Hint: "Repeat your new password"
   Encryption Passphrase Hint: "Enter your encryption passphrase"

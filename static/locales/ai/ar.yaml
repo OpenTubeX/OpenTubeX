@@ -2845,6 +2845,8 @@ Form Inputs:
   Browse: "استعراض"
   Use Default Path: "استخدام الافتراضي"
   Enter Password Hint: "أدخل كلمة مرورك"
+  Enter Username Hint: "أدخل اسم المستخدم"
+  Vault Name Hint: "أدخل اسم الخزنة"
   Choose Password Hint: "اختر كلمة مرور"
   Confirm Password Hint: "كرر كلمة مرورك الجديدة"
   Encryption Passphrase Hint: "أدخل عبارة مرور التشفير"

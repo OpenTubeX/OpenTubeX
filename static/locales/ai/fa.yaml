@@ -2911,6 +2911,8 @@ Form Inputs:
   Browse: "مرور"
   Use Default Path: "استفاده از پیش‌فرض"
   Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Enter Username Hint: "نام کاربری خود را وارد کنید"
+  Vault Name Hint: "نام گاوصندوق خود را وارد کنید"
   Choose Password Hint: "یک گذرواژه انتخاب کنید"
   Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
   Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"

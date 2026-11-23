@@ -2810,6 +2810,8 @@ Form Inputs:
   Browse: "Arakatu"
   Use Default Path: "Erabili lehenetsia"
   Enter Password Hint: "Sartu zure pasahitza"
+  Enter Username Hint: "Sartu zure erabiltzaile-izena"
+  Vault Name Hint: "Sartu zure biltegiaren izena"
   Choose Password Hint: "Aukeratu pasahitz bat"
   Confirm Password Hint: "Errepikatu zure pasahitz berria"
   Encryption Passphrase Hint: "Sartu zure zifratze-pasaesaldia"

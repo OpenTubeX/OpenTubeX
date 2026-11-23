@@ -2753,6 +2753,8 @@ Form Inputs:
   Browse: "Procurar"
   Use Default Path: "Usar padrão"
   Enter Password Hint: "Digite sua senha"
+  Enter Username Hint: "Digite seu nome de usuário"
+  Vault Name Hint: "Digite o nome do seu cofre"
   Choose Password Hint: "Escolha uma senha"
   Confirm Password Hint: "Repita sua nova senha"
   Encryption Passphrase Hint: "Digite sua frase secreta de criptografia"

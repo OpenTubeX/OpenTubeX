@@ -2868,6 +2868,8 @@ Form Inputs:
   Browse: "עיון"
   Use Default Path: "שימוש בברירת המחדל"
   Enter Password Hint: "הזן את הסיסמה שלך"
+  Enter Username Hint: "הזן את שם המשתמש שלך"
+  Vault Name Hint: "הזן את שם הכספת שלך"
   Choose Password Hint: "בחר סיסמה"
   Confirm Password Hint: "הזן שוב את הסיסמה החדשה שלך"
   Encryption Passphrase Hint: "הזן את ביטוי הסיסמה להצפנה שלך"

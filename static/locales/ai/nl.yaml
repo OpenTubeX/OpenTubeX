@@ -2877,6 +2877,8 @@ Form Inputs:
   Browse: "Bladeren"
   Use Default Path: "Standaard gebruiken"
   Enter Password Hint: "Voer je wachtwoord in"
+  Enter Username Hint: "Voer je gebruikersnaam in"
+  Vault Name Hint: "Voer de naam van je kluis in"
   Choose Password Hint: "Kies een wachtwoord"
   Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
   Encryption Passphrase Hint: "Voer je versleutelingswachtzin in"

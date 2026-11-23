@@ -2037,6 +2037,8 @@ Form Inputs:
   Browse: "Przeglądaj"
   Use Default Path: "Użyj domyślnej"
   Enter Password Hint: "Wpisz swoje hasło"
+  Enter Username Hint: "Wpisz swoją nazwę użytkownika"
+  Vault Name Hint: "Wpisz nazwę swojego sejfu"
   Choose Password Hint: "Wybierz hasło"
   Confirm Password Hint: "Powtórz nowe hasło"
   Encryption Passphrase Hint: "Wpisz swoją frazę szyfrującą"

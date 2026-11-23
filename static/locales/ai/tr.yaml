@@ -2800,6 +2800,8 @@ Form Inputs:
   Browse: "Göz at"
   Use Default Path: "Varsayılanı kullan"
   Enter Password Hint: "Parolanızı girin"
+  Enter Username Hint: "Kullanıcı adınızı girin"
+  Vault Name Hint: "Kasanızın adını girin"
   Choose Password Hint: "Bir parola seçin"
   Confirm Password Hint: "Yeni parolanızı tekrarlayın"
   Encryption Passphrase Hint: "Şifreleme parola ifadenizi girin"

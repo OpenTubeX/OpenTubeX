@@ -2813,6 +2813,8 @@ Form Inputs:
   Browse: "Selaa"
   Use Default Path: "Käytä oletusta"
   Enter Password Hint: "Anna salasanasi"
+  Enter Username Hint: "Anna käyttäjänimesi"
+  Vault Name Hint: "Anna holvisi nimi"
   Choose Password Hint: "Valitse salasana"
   Confirm Password Hint: "Toista uusi salasanasi"
   Encryption Passphrase Hint: "Anna salauksen tunnuslauseesi"

@@ -3069,6 +3069,8 @@ Form Inputs:
   Browse: "Blaai"
   Use Default Path: "Gebruik verstek"
   Enter Password Hint: Voer u wagwoord in
+  Enter Username Hint: "Voer u gebruikersnaam in"
+  Vault Name Hint: "Voer u kluisnaam in"
   Choose Password Hint: Kies ’n wagwoord
   Confirm Password Hint: Herhaal u nuwe wagwoord
   Encryption Passphrase Hint: Voer u enkripsiewagfrase in

@@ -2799,6 +2799,8 @@ Form Inputs:
   Browse: "Prehľadávať"
   Use Default Path: "Použiť predvolené"
   Enter Password Hint: "Zadajte svoje heslo"
+  Enter Username Hint: "Zadajte svoje používateľské meno"
+  Vault Name Hint: "Zadajte názov svojho trezoru"
   Choose Password Hint: "Zvoľte heslo"
   Confirm Password Hint: "Zopakujte nové heslo"
   Encryption Passphrase Hint: "Zadajte svoju šifrovaciu prístupovú frázu"

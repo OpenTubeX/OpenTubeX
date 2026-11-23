@@ -2809,6 +2809,8 @@ Form Inputs:
   Browse: "Gözdən keçir"
   Use Default Path: "Defoltdan istifadə et"
   Enter Password Hint: "Şifrənizi daxil edin"
+  Enter Username Hint: "İstifadəçi adınızı daxil edin"
+  Vault Name Hint: "Anbarınızın adını daxil edin"
   Choose Password Hint: "Şifrə seçin"
   Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
   Encryption Passphrase Hint: "Şifrələmə parol ifadənizi daxil edin"

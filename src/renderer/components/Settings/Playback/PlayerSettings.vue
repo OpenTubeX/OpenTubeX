@@ -825,6 +825,7 @@
         <FtInput
           class="obsidianVaultInput"
           :label="t('Settings.Player Settings.Timestamp Notes.Obsidian Vault')"
+          :placeholder="t('Form Inputs.Vault Name Hint')"
           :tooltip="t('Tooltips.Player Settings.Obsidian Vault')"
           setting-key="obsidianVault"
           :icon="['fas', 'file-export']"

@@ -2802,6 +2802,8 @@ Form Inputs:
   Browse: "瀏覽"
   Use Default Path: "使用預設值"
   Enter Password Hint: "輸入你的密碼"
+  Enter Username Hint: "輸入你的使用者名稱"
+  Vault Name Hint: "輸入你的儲存庫名稱"
   Choose Password Hint: "設定密碼"
   Confirm Password Hint: "再次輸入新密碼"
   Encryption Passphrase Hint: "輸入你的加密通關密語"

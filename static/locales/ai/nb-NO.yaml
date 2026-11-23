@@ -2808,6 +2808,8 @@ Form Inputs:
   Browse: "Bla gjennom"
   Use Default Path: "Bruk standard"
   Enter Password Hint: "Skriv inn passordet ditt"
+  Enter Username Hint: "Skriv inn brukernavnet ditt"
+  Vault Name Hint: "Skriv inn navnet på hvelvet ditt"
   Choose Password Hint: "Velg et passord"
   Confirm Password Hint: "Gjenta det nye passordet ditt"
   Encryption Passphrase Hint: "Skriv inn krypteringspassfrasen din"

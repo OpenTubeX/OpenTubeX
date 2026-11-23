@@ -2860,6 +2860,8 @@ Form Inputs:
   Browse: "Огляд"
   Use Default Path: "Використати типове"
   Enter Password Hint: "Введіть свій пароль"
+  Enter Username Hint: "Введіть своє ім’я користувача"
+  Vault Name Hint: "Введіть назву свого сховища"
   Choose Password Hint: "Виберіть пароль"
   Confirm Password Hint: "Повторіть новий пароль"
   Encryption Passphrase Hint: "Введіть свою парольну фразу шифрування"

@@ -2902,6 +2902,8 @@ Form Inputs:
   Browse: "Gennemse"
   Use Default Path: "Brug standard"
   Enter Password Hint: "Indtast din adgangskode"
+  Enter Username Hint: "Indtast dit brugernavn"
+  Vault Name Hint: "Indtast navnet på din boks"
   Choose Password Hint: "Vælg en adgangskode"
   Confirm Password Hint: "Gentag din nye adgangskode"
   Encryption Passphrase Hint: "Indtast din krypteringsadgangssætning"

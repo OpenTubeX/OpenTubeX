@@ -2810,6 +2810,8 @@ Form Inputs:
   Browse: "Furchal"
   Use Default Path: "Implijout an hini dre ziouer"
   Enter Password Hint: "Enlakait ho ker-tremen"
+  Enter Username Hint: "Enlakait hoc’h anv-implijer"
+  Vault Name Hint: "Enlakait anv ho kambr-gladoù"
   Choose Password Hint: "Dibabit ur ger-tremen"
   Confirm Password Hint: "Adskrivit ho ker-tremen nevez"
   Encryption Passphrase Hint: "Enlakait ho frazenn-tremen sifrañ"

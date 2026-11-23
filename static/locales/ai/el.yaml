@@ -2819,6 +2819,8 @@ Form Inputs:
   Browse: "Περιήγηση"
   Use Default Path: "Χρήση προεπιλογής"
   Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
+  Enter Username Hint: "Εισαγάγετε το όνομα χρήστη σας"
+  Vault Name Hint: "Εισαγάγετε το όνομα του θησαυροφυλακίου σας"
   Choose Password Hint: "Επιλέξτε έναν κωδικό"
   Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
   Encryption Passphrase Hint: "Εισαγάγετε τη φράση κρυπτογράφησής σας"

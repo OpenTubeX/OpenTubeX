@@ -3317,6 +3317,8 @@ Form Inputs:
   Browse: "Naršyti"
   Use Default Path: "Naudoti numatytąjį"
   Enter Password Hint: "Įveskite savo slaptažodį"
+  Enter Username Hint: "Įveskite savo naudotojo vardą"
+  Vault Name Hint: "Įveskite savo saugyklos pavadinimą"
   Choose Password Hint: "Pasirinkite slaptažodį"
   Confirm Password Hint: "Pakartokite naują slaptažodį"
   Encryption Passphrase Hint: "Įveskite savo šifravimo slaptafrazę"

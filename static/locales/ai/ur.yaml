@@ -2928,6 +2928,8 @@ Form Inputs:
   Browse: "براؤز کریں"
   Use Default Path: "طے شدہ استعمال کریں"
   Enter Password Hint: اپنا پاس ورڈ درج کریں
+  Enter Username Hint: "اپنا صارف نام درج کریں"
+  Vault Name Hint: "اپنے والٹ کا نام درج کریں"
   Choose Password Hint: پاس ورڈ منتخب کریں
   Confirm Password Hint: اپنا نیا پاس ورڈ دوبارہ درج کریں
   Encryption Passphrase Hint: اپنا انکرپشن پاس فریز درج کریں
