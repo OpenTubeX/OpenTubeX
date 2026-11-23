@@ -19,7 +19,6 @@
   color: var(--primary-text-color);
   background: var(--settings-window-bg-color);
   background-image: var(--card-bg-image);
-  background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border: 1px solid var(--border-color);
   border-radius: calc(10px * var(--ui-roundness));
@@ -38,6 +37,12 @@
   max-block-size: calc(100dvh - var(--app-safe-area-inset-top, 0px) - var(--connection-status-space, 0px));
   border-width: 0;
   border-radius: 0;
+
+  /* Line the field up with the page's, which is fixed to the viewport. A fixed
+     attachment would do that too, but Chromium then repaints the whole window
+     on every frame its content scrolls. */
+  background-position: 0 calc(-1 * var(--app-safe-area-inset-top, 0px));
+  background-size: 100vw 100dvh;
 }
 
 /* The app page keeps its own scrollbar behind the modal. Do not let it show

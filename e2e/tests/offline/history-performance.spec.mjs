@@ -144,3 +144,13 @@ test('windows receive history as stored text instead of record objects', async (
   expect(await page.evaluate(() => window.$store.getters.getHistoryCacheSorted.slice(0, 3).map(record => record.videoId)))
     .toEqual(history.slice(0, 3).map(record => record.videoId))
 })
+
+test('the loader waiting below the list does not animate while offscreen', { tag: '@performance' }, async ({ page }) => {
+  await goTo(page, 'history')
+  const loader = page.locator('.ft-auto-load-next-page-wrapper .loadingIndicator')
+  await expect(loader).toHaveCount(1)
+  await expect(loader).not.toBeInViewport()
+  // Its shape morph can't run on the compositor, so while it animates, the
+  // page restyles on every display refresh.
+  await expect.poll(() => loader.evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0)
+})

@@ -52,6 +52,11 @@
   margin-block: 100px;
   border-radius: 50%;
   background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+
+  /* The morph can't run on the compositor, so it needs a main-thread frame on
+     every refresh. Lists keep a loader below the fold while they wait to load
+     more, so skip it while it is offscreen. */
+  content-visibility: auto;
 }
 
 .compact .indicatorContainer {
