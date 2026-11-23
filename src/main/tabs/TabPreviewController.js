@@ -100,6 +100,11 @@ export class TabPreviewController {
     }
   }
 
+  /** @param {string} tabId */
+  forget(tabId) {
+    this._memoryCachedTabIds.delete(tabId)
+  }
+
   /**
    * @param {TabInfo} tab
    * @param {number} [delay]
@@ -379,6 +384,11 @@ export class TabPreviewController {
         // Incognito tabs keep their previews in memory only
         if (!tab.isIncognito) {
           tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
+          // Other tabs' previews can evict this one while its first file is
+          // written, which keeps it in memory without a file to read it from.
+          if (tab.previewDataUrl === dataUrl && this.manager.tabs.get(tab.id) === tab) {
+            this._rememberDataUrl(tab, dataUrl)
+          }
           this.manager._scheduleSessionSave()
         }
         return dataUrl
