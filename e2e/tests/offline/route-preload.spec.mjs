@@ -98,30 +98,19 @@ test('a route whose code failed to preload still opens on click', async ({ page 
   await page.route(/^app:\/\/bundle\/.*\.js$/, route => route.abort())
 
   const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.channelName').first()
-  const failedRequest = page.waitForEvent('requestfailed', request => request.url().startsWith('app://bundle/'))
-  // On CI, the hover once never requested the route's code. Record the
-  // events that start or cancel the preload intent for the failure report.
-  await page.evaluate(() => {
-    const events = window.__e2eEvents ??= []
-    const describe = (target) => {
-      if (!(target instanceof Element)) return target === document ? 'document' : String(target)
-      const link = target.closest('a[href^="#/"]')?.getAttribute('href')
-      return [target.tagName.toLowerCase(), ...target.classList].join('.') + (link ? ` in ${link}` : '')
-    }
-    for (const type of ['pointermove', 'pointerout', 'pointerdown', 'focusin', 'focusout', 'scroll']) {
-      document.addEventListener(type, (event) => {
-        events.push({
-          t: Math.round(performance.now()),
-          type,
-          target: describe(event.target),
-          ...(event instanceof PointerEvent ? { pointerType: event.pointerType, relatedTarget: event.relatedTarget && describe(event.relatedTarget) } : {}),
-        })
-      }, { capture: true, passive: true })
-    }
+  let preloadFailed = false
+  page.on('requestfailed', (request) => {
+    if (request.url().startsWith('app://bundle/')) preloadFailed = true
   })
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
-  await link.hover()
-  await failedRequest
+  // The worker's Xvfb pointer rests on the page. Its first pointer event can
+  // arrive just after a hover right at startup and move the intent off the
+  // link, so hover again until the preload is requested.
+  await expect(async () => {
+    await page.mouse.move(0, 0)
+    await link.hover()
+    await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
+  }).toPass()
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
 
   await page.unroute(/^app:\/\/bundle\/.*\.js$/)

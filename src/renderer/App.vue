@@ -1818,6 +1818,15 @@ watch(() => store.getters.getActiveDataScope, () => {
 
 onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
+  // Listen before startup finishes: views render links as soon as their
+  // data loads. YouTube links have to be caught in both builds, otherwise
+  // the browser navigates away from the app instead of opening the linked
+  // video, channel, playlist or hashtag in it.
+  document.addEventListener('click', handleClick)
+  document.addEventListener('auxclick', handleAuxClick)
+  removeRoutePreloadIntent = installRoutePreloadIntent({
+    preload: path => preloadResolvedRoute(router.resolve(path))
+  })
   let tabsReady = Promise.resolve()
   if (supportsYtDlp) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(() => {
@@ -1999,15 +2008,6 @@ onMounted(async () => {
     }
 
     const searchHistoryReady = dataScopeReady.then(() => store.dispatch('grabSearchHistoryEntries'))
-
-    // YouTube links have to be caught in both builds, otherwise the browser
-    // navigates away from the app instead of opening the linked video,
-    // channel, playlist or hashtag in it
-    document.addEventListener('click', handleClick)
-    document.addEventListener('auxclick', handleAuxClick)
-    removeRoutePreloadIntent = installRoutePreloadIntent({
-      preload: path => preloadResolvedRoute(router.resolve(path))
-    })
 
     if (process.env.IS_ELECTRON) {
       removeOpenUrlListener = enableOpenUrl()
