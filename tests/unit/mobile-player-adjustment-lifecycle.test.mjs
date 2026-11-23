@@ -54,6 +54,7 @@ test('fullscreen brightness follows Android visibility when Chromium remains vis
     mobileAdjustments,
     resetMobileAdjustments: preserve => { resets.push(preserve); mobileAdjustments.reset() },
     cancelMobileFullscreenGesture() {},
+    applyPendingPresentationModes() {},
     onMounted: callback => callback(),
     onBeforeUnmount: callback => unmount.push(callback),
   }))

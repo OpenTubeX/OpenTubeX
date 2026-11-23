@@ -7610,12 +7610,13 @@ function applyPendingPresentationModes() {
     }
 
     if (startInFullscreen && hasLoaded.value && process.env.IS_CAPACITOR) {
-      if (androidFullscreenHostActive.value || androidRotationFullscreen) {
+      // A manual entry in progress also fulfills the request.
+      if (androidFullscreenHostActive.value || androidRotationFullscreen || androidFullscreenEntering) {
         startInFullscreen = false
-      } else if (!process.env.IS_IOS && fullWindowListenerReady && video.value?.readyState) {
+      } else if (!process.env.IS_IOS && fullWindowListenerReady && video.value?.readyState && mobileAdjustmentsVisible.value) {
         // Native fullscreen would need a user gesture, which has expired by now.
         startInFullscreen = false
-        if (mobileAdjustmentsVisible.value && !touchControlsLocked.value) {
+        if (!touchControlsLocked.value) {
           enterAndroidRotationFullscreen(shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value))
         }
       }
@@ -8230,6 +8231,8 @@ watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRigh
 })
 function handleMobileAdjustmentsVisibility() {
   mobileAdjustmentsVisible.value = !isAppHidden()
+  // A Full Screen start that arrived while hidden waits for the app to return.
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS && mobileAdjustmentsVisible.value) applyPendingPresentationModes()
   if (process.env.IS_IOS && !mobileAdjustmentsVisible.value && !store.getters.getContinuePlaybackWhenScreenIsLocked) {
     video.value?.pause()
   }
