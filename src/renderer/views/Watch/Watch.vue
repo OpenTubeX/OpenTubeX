@@ -9,7 +9,7 @@
       useTheatreMode: isLoading
         ? (loadingTheatreMode ?? (defaultViewingMode === 'theatre'))
         : useTheatreMode,
-      noSidebar: !theatrePossible && !sidebarPanelLeaving
+      noSidebar
     }"
   >
     <!-- Suppress the compatibility click after dragging; keyboard navigation is handled on the document. -->
