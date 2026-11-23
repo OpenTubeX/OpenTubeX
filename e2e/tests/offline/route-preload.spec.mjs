@@ -94,6 +94,7 @@ test('resting the pointer on a video loads Watch without fetching it, and the cl
   await expect.poll(() => videoRequests.length).toBeGreaterThan(0)
 })
 
+// diag: temporary change so the repeat shard runs this spec
 test('a route whose code failed to preload still opens on click', async ({ page }) => {
   await page.route(/^app:\/\/bundle\/.*\.js$/, route => route.abort())
 

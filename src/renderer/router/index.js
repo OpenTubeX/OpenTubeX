@@ -22,6 +22,7 @@ function createAsyncRoute(loader) {
   // next attempt loads again.
   let request = null
   const load = () => {
+    if (!request) console.warn('[diag] route load start', Math.round(performance.now()), new Error('stack').stack)
     request ??= loader().catch((error) => {
       request = null
       throw error

@@ -30,7 +30,9 @@ export function installRoutePreloadIntent({
   }
 
   /** @param {Element | null} link */
-  const startIntent = (link) => {
+  let lastIntentSource = ''
+  const startIntent = (link, source = '') => {
+    lastIntentSource = source
     if (link === intentLink) return
     cancel()
     if (link === null) return
@@ -38,6 +40,7 @@ export function installRoutePreloadIntent({
     timer = setTimeout(() => {
       timer = null
       const path = link.getAttribute('href').slice(1)
+      console.warn('[diag] preload intent fired', Math.round(performance.now()), path, lastIntentSource)
       // A failed preload leaves the click to load and report the route itself.
       new Promise(resolve => resolve(preload(path))).catch(() => {})
     }, delay)
@@ -47,14 +50,14 @@ export function installRoutePreloadIntent({
   const handlePointerMove = (event) => {
     // Touch and stylus taps have no hover phase before their click.
     if (event.pointerType !== 'mouse') return
-    startIntent(findInternalLink(event.target))
+    startIntent(findInternalLink(event.target), `pointermove ${event.clientX},${event.clientY} trusted=${event.isTrusted}`)
   }
 
   /** @param {FocusEvent} event */
   const handleFocusIn = (event) => {
     // Pointer clicks also focus links; only keyboard focus shows intent.
     const link = findInternalLink(event.target)
-    if (link?.matches(':focus-visible')) startIntent(link)
+    if (link?.matches(':focus-visible')) startIntent(link, 'focus')
   }
 
   /** @param {PointerEvent} event */
