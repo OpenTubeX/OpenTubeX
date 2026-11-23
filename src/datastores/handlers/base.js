@@ -142,9 +142,13 @@ class Settings {
     return value
   }
 
+  /**
+   * Every setting except the window bounds and the sync server snapshot. The
+   * snapshot can take megabytes, and only the sync reads it, with `_findOne`.
+   */
   static async find() {
     await this.migrate()
-    return decodeSettings(await db.settings.findAsync({ _id: { $ne: 'bounds' } }), db.settings, this.cipher())
+    return decodeSettings(await db.settings.findAsync({ _id: { $nin: ['bounds', 'syncServerSnapshot'] } }), db.settings, this.cipher())
   }
 
   /** Where secret settings are encrypted, the system's cipher for them. */
@@ -321,14 +325,16 @@ class History {
    * out their upload notifications. Each history gives its newest `limit`.
    * @param {number} since
    * @param {number} limit
+   * @param {string | null} [skippedScope] a data scope whose history the caller
+   *   already has, which then is not read: reading a whole history takes seconds
    * @returns {Promise<{ videoId: string, timeWatched: number }[]>}
    */
-  static async findRecentlyWatchedInEveryScope(since, limit) {
+  static async findRecentlyWatchedInEveryScope(since, limit, skippedScope = undefined) {
     return (await everyScopeHistory(datastore => datastore
       .findAsync({ timeWatched: { $gte: since } }, { _id: 0, videoId: 1, timeWatched: 1 })
       .sort({ timeWatched: -1 })
-      .limit(limit)
-    )).flat()
+      .limit(limit),
+    skippedScope)).flat()
   }
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
@@ -1903,13 +1909,15 @@ function scopedHandlers(scope) {
  * no read opens the datastore of a deleted profile again.
  * @template T
  * @param {(datastore: any) => Promise<T>} read
+ * @param {string | null} [skippedScope] a scope not to read
  * @returns {Promise<T[]>}
  */
-function everyScopeHistory(read) {
+function everyScopeHistory(read, skippedScope = undefined) {
   return Settings.runSeenStateUpdate(async () => {
     await loadProfilesDatastore()
     const separate = await db.profiles.findAsync({ separate: true }, { _id: 1 })
     const scopes = [null, ...separate.map(profile => profile._id).filter(isValidSeparateProfileId)]
+      .filter(scope => scope !== skippedScope)
     return Promise.all(scopes.map(scope => read(scopedHandlers(scope).history.db.history)))
   })
 }

@@ -53,7 +53,7 @@ import {
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
 import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
-import { isSettingSyncEnabled } from './settings'
+import { isSettingSyncEnabled, whenSyncServerSnapshotLoaded } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, savedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
@@ -498,6 +498,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   // of the data the store shows: a separate profile's, or else the shared ones.
   // A profile switch first loads the other profile's data.
   for (let loading = dataScopeLoading(); loading; loading = dataScopeLoading()) await loading.catch(() => {})
+  await whenSyncServerSnapshotLoaded()
   const dataScope = rootGetters.getActiveDataScope ?? null
   const scopeKey = syncScopeKey(dataScope)
   // The server keeps a separate profile's collections under their own names.
@@ -1759,6 +1760,7 @@ const actions = {
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
       throw new Error('Connect to the sync server first')
     }
+    await whenSyncServerSnapshotLoaded()
 
     const deleteSession = async () => {
       const client = trackSyncClient(new SyncServerClient(
@@ -1866,6 +1868,7 @@ const actions = {
           shownDataScope(rootGetters) !== dataScope) throw new SyncServerCancelledError()
     }
     return withSyncLock(async () => {
+      await whenSyncServerSnapshotLoaded()
       const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
       try {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
@@ -2292,9 +2295,10 @@ const actions = {
   },
 
   /** Shows the synced data of the profile switched to and syncs it */
-  applySyncServerDataScope({ commit, dispatch, rootGetters, rootState }) {
+  async applySyncServerDataScope({ commit, dispatch, rootGetters, rootState }) {
     const settings = rootState.settings
     if (!settings.syncServerEnabled || !settings.syncServerToken) return
+    await whenSyncServerSnapshotLoaded()
     commit('setSyncedWatchStats', syncedWatchStatsOf(parseSnapshot(settings.syncServerSnapshot), rootGetters))
     return dispatch('scheduleSyncServer', 'data')
   },
@@ -2370,6 +2374,7 @@ const actions = {
 
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
+    await whenSyncServerSnapshotLoaded()
     const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
     commit('setSyncedWatchStats', syncedWatchStatsOf(snapshot, rootGetters))
     commit(

@@ -101,8 +101,10 @@ function nativeDrivers() {
   // Android returns small reads inline and writes large ones to a file:
   // fetching a multi-megabyte result from the local server is an order of
   // magnitude faster than one huge bridge message.
-  const read = name => async (sql, params = []) => {
-    const result = await plugin.query({ name, sql, params })
+  // Documents come back parsed: Android writes their stored JSON into the
+  // result as it is, so it is neither escaped there nor parsed twice here.
+  const read = name => async (sql, params = [], documentColumn = undefined) => {
+    const result = await plugin.query({ name, sql, params, documentColumn })
     if (typeof result.rows === 'string') return JSON.parse(result.rows)
     const { path } = result
     try {

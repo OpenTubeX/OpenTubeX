@@ -103,7 +103,13 @@ function startApp() {
   // On Android, start opening the native SQLite datastores right away in parallel
   // with router, dynamic colors, and network state instead of waiting for them.
   const androidDatastoresReady = process.env.IS_CAPACITOR && !process.env.IS_IOS
-    ? import('../datastores/index').then(({ waitForDatastores }) => waitForDatastores())
+    ? import('../datastores/index').then(({ history, waitForDatastores }) => {
+        // The whole history is the largest read before the app shows. Start it
+        // with the settings rather than after them, which tell whose history
+        // to show. Without a separate default profile, it is this one.
+        history.prefetchAll()
+        return waitForDatastores()
+      })
     : null
   // Prevent an unhandled rejection if the earlier Promise.all takes another turn.
   androidDatastoresReady?.catch(() => {})

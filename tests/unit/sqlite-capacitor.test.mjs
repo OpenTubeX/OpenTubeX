@@ -40,9 +40,13 @@ const modules = {
   '@capacitor/core': {
     Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },
     registerPlugin: () => ({
-      query: async ({ name, sql, params }) => {
+      query: async ({ name, sql, params, documentColumn }) => {
         const path = `/cache/library-results/${nextResult++}.json`
-        resultFiles.set(path, JSON.stringify((await driver(name).execute([[sql, JSON.parse(JSON.stringify(params))]]))[0]))
+        const rows = (await driver(name).execute([[sql, JSON.parse(JSON.stringify(params))]]))[0]
+        // Like the plugin, documents without NeDB dates are written as their JSON.
+        resultFiles.set(path, `[${rows.map(row => `[${row.map((value, column) => (
+          column === documentColumn && typeof value === 'string' && !value.includes('"$$date"') ? value : JSON.stringify(value)
+        )).join(',')}]`).join(',')}]`)
         return { path }
       },
       release: async ({ path }) => { resultFiles.delete(path) },
@@ -68,11 +72,12 @@ test('Capacitor builds import the legacy datastore from the shipped record stora
 
 test('Capacitor loads whole datastores through result files and releases them', async () => {
   const history = createBrowserDatastore('history-results')
-  await history.insertAsync([{ _id: 'a', title: 'Line\nbreak "quoted"' }, { _id: 'b', watched: 3 }])
+  await history.insertAsync([{ _id: 'a', title: 'Line\nbreak "quoted"' }, { _id: 'b', watched: 3 }, { _id: 'c', at: new Date(5) }])
   const before = nextResult
   assert.deepEqual(await history.findAsync({}).sort({ _id: 1 }), [
     { _id: 'a', title: 'Line\nbreak "quoted"' },
     { _id: 'b', watched: 3 },
+    { _id: 'c', at: new Date(5) },
   ])
   assert.equal(nextResult, before + 1)
   // Released asynchronously after reading.
@@ -86,4 +91,7 @@ test('Capacitor builds remove secrets from the record storage and the WebView co
   await settings.removeOlderCopiesAsync("json_extract(data, '$._id') IN (SELECT value FROM json_each(?))", [JSON.stringify(['proxyPassword', 'syncServerToken'])])
   assert.deepEqual(removals, [{ filename: 'settings.db', ids: ['proxyPassword', 'syncServerToken'] }])
   assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret', 'the library keeps it')
+  // Android refuses to install an older version over this one, so nothing writes the record storage again.
+  await settings.removeOlderCopiesAsync("json_extract(data, '$._id') IN (SELECT value FROM json_each(?))", [JSON.stringify(['proxyPassword', 'syncServerToken'])])
+  assert.equal(removals.length, 1, 'later starts do not read it again')
 })
