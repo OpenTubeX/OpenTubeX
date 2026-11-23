@@ -199,7 +199,7 @@ export async function keepYouTubePlaylists(end) {
     const failed = []
     for (const playlist of await findYouTubePlaylists(shared)) {
       if (key && playlist.youTube.accountKey === key) continue
-      if (!await unlinkLatestYouTubePlaylist(playlist._id, shared)) failed.push(playlist.playlistName)
+      if (!await unlinkLatestYouTubePlaylist(playlist._id)) failed.push(playlist.playlistName)
     }
     if (failed.length > 0) throw new Error(`Could not keep the playlists ${failed.join(', ')}`)
   })
@@ -210,12 +210,13 @@ export async function keepYouTubePlaylists(end) {
  * between, which fails the save, so each attempt starts from the latest
  * version, waiting for it to reach this window's store.
  * @param {string} id
- * @param {boolean} shared whether the store holds the shared playlists
  * @returns {Promise<boolean>} whether the playlist is no longer linked
  */
-async function unlinkLatestYouTubePlaylist(id, shared) {
+async function unlinkLatestYouTubePlaylist(id) {
   for (let attempt = 0; attempt < 20; attempt++) {
     if (attempt > 0) await new Promise(resolve => setTimeout(resolve, 100))
+    // The profile can switch between attempts.
+    const shared = showsSharedPlaylists()
     const playlist = (await findYouTubePlaylists(shared)).find(item => item._id === id)
     // Removed or unlinked meanwhile.
     if (!playlist) return true
