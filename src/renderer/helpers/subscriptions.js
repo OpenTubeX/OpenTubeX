@@ -854,6 +854,17 @@ export {
  * @type {Set<string>}
  */
 const rssNonPremiereVideoIds = new Set()
+// Far more than the entries every subscribed RSS feed lists at once, which are
+// the only ones looked up again.
+const MAX_RSS_NON_PREMIERE_VIDEO_IDS = 50_000
+
+/** @param {string} videoId */
+function rememberRssNonPremiere(videoId) {
+  rssNonPremiereVideoIds.add(videoId)
+  if (rssNonPremiereVideoIds.size > MAX_RSS_NON_PREMIERE_VIDEO_IDS) {
+    rssNonPremiereVideoIds.delete(rssNonPremiereVideoIds.values().next().value)
+  }
+}
 /** @type {Map<string, Promise<{ isUpcoming: boolean, failed?: boolean, isPremiere?: boolean, premiereDate?: Date }>>} */
 const rssUpcomingInfoRequests = new Map()
 
@@ -882,7 +893,7 @@ function seedRssNonPremiereVideoIds() {
   ])
 
   for (const videoId of resolved) {
-    rssNonPremiereVideoIds.add(videoId)
+    rememberRssNonPremiere(videoId)
   }
 }
 
@@ -904,7 +915,7 @@ function fetchRssVideoUpcomingInfo(videoId) {
   const request = fetchRssVideoUpcomingInfoUncached(videoId).then((info) => {
     // A failed lookup says nothing about the video, so let the next refresh retry.
     if (!info.isUpcoming && !info.failed) {
-      rssNonPremiereVideoIds.add(videoId)
+      rememberRssNonPremiere(videoId)
     }
     return info
   }).finally(() => {
