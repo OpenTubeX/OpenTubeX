@@ -6587,6 +6587,7 @@ function addUICustomizations() {
     fullscreenButton.removeEventListener('click', handleFullscreenButtonClick, true)
     fullscreenButton.addEventListener('click', handleFullscreenButtonClick, true)
   }
+  syncFullscreenButtonState()
 
   if (useSponsorBlock.value && (sponsorBlockSegments.length > 0 || sponsorBlockCompleteDraftSegments.value.length > 0)) {
     refreshSponsorBlockMarkers()
@@ -7182,6 +7183,7 @@ async function setLocale(locale) {
   })
 
   localization.insert(shakaLocale, shakaControlKeysToShortcutLocalizations)
+  syncFullscreenButtonState()
 
   events.dispatchEvent(new CustomEvent('localeChanged'))
 }
@@ -8084,6 +8086,7 @@ function exitAndroidRotationFullscreen() {
   androidRotationLockAttempt++
   if (!androidRotationFullscreen) return
   androidRotationFullscreen = false
+  syncFullscreenButtonState()
   if (androidRotationOrientationLocked) {
     androidRotationOrientationLocked = false
     setLandscapeOrientation(false).catch(() => {})
@@ -8130,6 +8133,7 @@ function enterAndroidRotationFullscreen(lockLandscape) {
     exitAndroidRotationFullscreen()
     return
   }
+  syncFullscreenButtonState()
   if (lockLandscape) {
     androidRotationOrientationLocked = true
     const attempt = ++androidRotationLockAttempt
@@ -8182,6 +8186,7 @@ function adoptAndroidRotationFullscreen() {
   handoff.stopRotation()
   androidRotationFullscreen = true
   androidRotationOrientationLocked = handoff.orientationLocked
+  syncFullscreenButtonState()
   syncAndroidStatusBarVisibility()
 }
 
@@ -8199,6 +8204,22 @@ onBeforeUnmount(() => {
   exitAndroidRotationFullscreen()
   androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
 })
+
+// Shaka's fullscreen button only knows native fullscreen and updates on
+// fullscreenchange. Rotation fullscreen also exits through it, so show that.
+// Overriding isFullScreenEnabled instead would make Shaka exit native
+// fullscreen on unload and Picture-in-Picture while none is active.
+function syncFullscreenButtonState() {
+  const controls = ui?.getControls()
+  const button = controls?.getControlsContainer().querySelector('.shaka-fullscreen-button')
+  if (!(button instanceof HTMLElement)) return
+  const enabled = androidRotationFullscreen || controls.isFullScreenEnabled()
+  button.querySelector(':scope > .shaka-ui-icon > path')?.setAttribute('d', enabled
+    ? shaka.ui.Enums.MaterialDesignSVGIcons.EXIT_FULLSCREEN
+    : shaka.ui.Enums.MaterialDesignSVGIcons.FULLSCREEN)
+  button.ariaLabel = controls.getLocalization().resolve(enabled ? 'EXIT_FULL_SCREEN' : 'FULL_SCREEN')
+  button.ariaPressed = String(enabled)
+}
 
 function handleFullscreenButtonClick(event) {
   finishAndroidFullscreenExit(true)

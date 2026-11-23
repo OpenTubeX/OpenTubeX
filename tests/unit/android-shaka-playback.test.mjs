@@ -56,6 +56,7 @@ function androidRotationHarness(overrides = {}) {
     setLandscapeOrientation: async landscape => { calls.push(`orientation:${landscape}`) },
     setAndroidNavigationBarVisible: async visible => { calls.push(`navigation:${visible}`) },
     syncAndroidStatusBarVisibility: () => {},
+    syncFullscreenButtonState: () => {},
     isNativeFullscreenActive: () => false,
     pictureInPictureActive: { value: false },
     androidFullscreenEntering: false,
