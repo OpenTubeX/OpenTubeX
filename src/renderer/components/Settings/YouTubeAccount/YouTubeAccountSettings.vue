@@ -182,6 +182,7 @@ import { getSelectedYouTubeProfile, getYouTubeSyncKey } from '../../../helpers/y
 import { supportsNotificationHistory } from '../../../helpers/notificationHistory'
 import { isCommentWatchingEnabled } from '../../../helpers/commentReplyNotifications'
 import {
+  enableYouTubePlaylistSync,
   hasYouTubePlaylists,
   importYouTubeWatchHistory,
   keepYouTubePlaylists,
@@ -328,9 +329,8 @@ async function handleKeepPlaylistsPrompt(choice) {
 
 /** @param {boolean} value */
 function changeSyncPlaylists(value) {
-  const update = () => store.dispatch('updateYouTubeAccountSyncPlaylists', value)
-  if (value) update()
-  else endPlaylistSync(update)
+  if (value) enableYouTubePlaylistSync()
+  else endPlaylistSync(() => store.dispatch('updateYouTubeAccountSyncPlaylists', false))
 }
 
 function signOut() {

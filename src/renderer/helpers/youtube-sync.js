@@ -206,6 +206,14 @@ export async function keepYouTubePlaylists(end) {
 }
 
 /**
+ * Turns playlist sync on once no sync work runs, so it can't start covering
+ * playlists that `keepYouTubePlaylists` is turning into regular ones.
+ */
+export async function enableYouTubePlaylistSync() {
+  await withSyncLock(() => store.dispatch('updateYouTubeAccountSyncPlaylists', true))
+}
+
+/**
  * Turns a synced playlist into a regular one. Another window can save it in
  * between, which fails the save, so each attempt starts from the latest
  * version, waiting for it to reach this window's store.
