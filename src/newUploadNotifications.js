@@ -147,9 +147,13 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
   const known = state.known[key]
   // Shorts and streams can move between feeds, so IDs another feed of the channel
   // already recorded are not new, even when this feed's baseline is younger.
-  const knownElsewhere = new Set(Object.entries(state.known)
-    .filter(([otherKey]) => otherKey !== key && otherKey.startsWith(`${channelId}:`))
-    .flatMap(([, ids]) => ids))
+  // Each refresh observes every feed, so this scans the keys without copying them.
+  const knownElsewhere = new Set()
+  const channelPrefix = `${channelId}:`
+  for (const otherKey in state.known) {
+    if (otherKey === key || !otherKey.startsWith(channelPrefix)) continue
+    for (const id of state.known[otherKey]) knownElsewhere.add(id)
+  }
   state.known[key] = [...new Set([...available.map(entry => entry.id), ...(known ?? [])])].slice(0, KNOWN_ID_LIMIT)
   if (!Array.isArray(known)) return []
 
