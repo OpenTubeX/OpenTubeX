@@ -488,6 +488,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
+      const openerTabId = getTabNavigationService().getPresentedTabId()
       const creation = window.ftElectron.tabs.create({
         route,
         query,
@@ -496,9 +497,23 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         lazyLoad,
         ...(incognito && { isIncognito: true }),
         inheritColorFromOpener: true,
-        openerTabId: getTabNavigationService().getPresentedTabId(),
+        openerTabId,
         preloadInBackground: !makeActive && !lazyLoad && path.startsWith('/watch/')
       })
+      const videoId = /^\/watch\/([^/]+)/.exec(path)?.[1]
+      if (lazyLoad && !makeActive && videoId) {
+        // Its Watch page, which marks the video as seen, loads only once the
+        // tab is opened. Tabs opened from incognito tabs are incognito too.
+        creation
+          .then(async tab => {
+            if (!tab) return
+            const { default: store } = await import('../store/index')
+            if (!incognito && !store.getters.getTabIncognito(openerTabId)) {
+              await store.dispatch('markSubscriptionVideoAsSeen', videoId)
+            }
+          })
+          .catch(error => console.error('Failed to mark an unloaded video tab as seen', error))
+      }
       if (lazyLoad && !makeActive && !title) {
         creation
           .then(async tab => {

@@ -15,9 +15,10 @@ import { probeHlsManifest, probeVrHlsManifest } from '../../helpers/player/hlsMa
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, inject, markRaw, shallowRef } from 'vue'
+import { defineComponent, inject, markRaw, shallowRef, watch } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
+import store from '../../store/index'
 import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
@@ -285,6 +286,12 @@ export default defineComponent({
     const showTabToast = useTabToast()
     const relativeTimeNow = useRelativeTimeClock()
     const liveChat = shallowRef(null)
+    // Opening a video marks it as seen in the New feed however it was opened
+    watch([() => tabRoute.params.id, () => store.getters.getSubscriptionCacheReady], ([videoId, cacheReady]) => {
+      if (cacheReady && !isIncognitoTab.value) {
+        store.dispatch('markSubscriptionVideoAsSeen', videoId)
+      }
+    }, { immediate: true })
 
     return {
       t,

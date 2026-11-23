@@ -189,7 +189,7 @@
           :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
           :size="appearance === 'watchPlaylistItem' ? 12 : 16"
           draggable="true"
-          @click="handleExternalPlayer"
+          @click="openInExternalPlayer"
           @dragstart="onDragStart"
         />
         <span
@@ -1896,7 +1896,6 @@ function handleOptionsClick(option) {
       hideSubscriptionFeedType()
       break
     case 'playInBackground':
-      markSubscriptionVideoAsOpened()
       playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
       break
     case 'playNext':
@@ -2253,13 +2252,11 @@ const shouldShowChannelResolverButton = computed(() => !disableChannelLinks.valu
 
 async function handleWatchPageLinkClick(event) {
   // `auxclick` also fires for the right mouse button after `contextmenu`.
-  // Treat only middle clicks as opening the video so a new-feed entry is not
-  // marked as seen (and removed) while its context menu is open.
+  // Treat only middle clicks as opening the video.
   if (event?.type === 'auxclick' && event.button !== 1) {
     return
   }
 
-  markSubscriptionVideoAsOpened()
   // Lists such as the queue consume a video that a plain click plays here.
   const plainLeftClick = event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey
 
@@ -2282,6 +2279,7 @@ async function handleWatchPageLinkClick(event) {
         showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
       }
     })
+    if (played) markSubscriptionVideoAsOpened()
     // A file that could not play stays wherever it was listed, such as the queue.
     if (played && plainLeftClick) emit('open-video', { opensWatchPage: false })
     return
@@ -2421,18 +2419,16 @@ function markSubscriptionVideoAsSeen() {
   }
 }
 
-/** Opening a video from an incognito tab leaves it new */
+/**
+ * For playback outside a Watch page, which marks its video as seen itself.
+ * Opening a video from an incognito tab leaves it new.
+ */
 function markSubscriptionVideoAsOpened() {
   if (!isIncognitoTab.value) markSubscriptionVideoAsSeen()
 }
 
-function handleExternalPlayer() {
-  markSubscriptionVideoAsOpened()
-  openInExternalPlayer()
-}
-
 /**
- * Marks the video as watched only once the player has started.
+ * Marks the video as seen and watched only once the player has started.
  * @returns {Promise<boolean>} whether the player started
  */
 async function openInExternalPlayer() {
@@ -2463,6 +2459,7 @@ async function openInExternalPlayer() {
     return false
   }
 
+  markSubscriptionVideoAsOpened()
   if (rememberHistory.value && canMarkAsWatched.value) {
     markAsWatched()
   }
