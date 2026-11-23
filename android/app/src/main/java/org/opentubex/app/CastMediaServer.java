@@ -244,6 +244,8 @@ final class CastMediaServer implements AutoCloseable {
         boolean head = request[0].equals("HEAD");
         boolean responseStarted = false;
         var candidates = resource.getJSONArray("candidates");
+        // HLS resources keep their file extension, which receivers use to detect the segment format.
+        String mediaPath = candidates.getJSONObject(0).optString("suffix", "media");
         for (int attempt = 0; attempt < candidates.length(); attempt++) {
             try {
                 var candidate = candidates.getJSONObject(attempt);
@@ -269,7 +271,7 @@ final class CastMediaServer implements AutoCloseable {
                     target = original.resolve(resourcePath);
                     if (target == null || !target.scheme().equals(original.scheme()) || !target.host().equals(original.host()) || target.port() != original.port() ||
                         !target.encodedPath().startsWith(original.encodedPath()) || target.encodedPath().matches("(?i).*%(2e|2f|5c|25).*")) throw new IllegalArgumentException("Invalid Cast template path");
-                } else if (!resourcePath.equals("media")) throw new IllegalArgumentException("Invalid Cast resource path");
+                } else if (!resourcePath.equals(mediaPath) || !mediaPath.matches("media(\\.[A-Za-z0-9]{1,8})?")) throw new IllegalArgumentException("Invalid Cast resource path");
                 if (reloadQuery != null) target = applyHlsReloadQuery(target, reloadQuery);
                 Request.Builder upstream = new Request.Builder().url(target).tag(HttpUrl.class, original).method(request[0], null)
                     .header("Accept-Encoding", "identity");

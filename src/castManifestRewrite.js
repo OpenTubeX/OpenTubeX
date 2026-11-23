@@ -15,8 +15,32 @@ function httpUrl(value, base) {
   return url
 }
 
-/** Rewrites resource URLs while retaining DASH ranges and segment templates. */
-export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
+const localName = node => typeof node === 'string' ? null : node.name.split(':').at(-1)
+
+/**
+ * HLS players such as Shaka, which Google Cast receivers use, infer the segment
+ * format from the file extension. Without it, they treat the packed AAC audio of
+ * YouTube live streams, named `seg.ts`, as MP4 and never play.
+ */
+export function hlsExtension(url, hlsVariables) {
+  if (hlsVariables === undefined || /^data:/i.test(url)) return ''
+  return /\.[a-z0-9]{1,8}$/i.exec(new URL(url).pathname)?.[0] ?? ''
+}
+
+/** The MIME type of a video AdaptationSet, which its Representations may state instead. */
+function adaptationSetVideoType(node) {
+  if (localName(node) !== 'AdaptationSet') return null
+  const mimeType = node.attributes.mimeType ?? node.children.find(child => localName(child) === 'Representation')?.attributes.mimeType
+  return /^video\//i.test(mimeType ?? '') ? mimeType.toLowerCase() : null
+}
+
+/**
+ * Rewrites resource URLs while retaining DASH ranges and segment templates.
+ * `singleVideoContainer` drops WebM video when a period also has MP4 video: the
+ * GStreamer FCast desktop receiver then downloads two video streams and no audio,
+ * and never starts playback.
+ */
+export function rewriteCastDash(xml, base, register, dashContext, onRoot, { singleVideoContainer = false } = {}) {
   if (xml.length > MAX_MANIFEST_SIZE) throw new Error('Cast manifest is too large')
   const parser = sax.parser(true)
   const root = { children: [] }
@@ -91,7 +115,9 @@ export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
       Object.hasOwn(child.attributes, 'xml:base') ? [elementXmlBase(child, xmlBase)] : localBases)]))
     const effectiveBases = bases.length ? resolveUrls([...baseUrls.values()].flat(), [undefined]) : localBases
     const attributes = renderAttributes(node, effectiveBases, localBases, xmlBase)
-    const children = node.children.map(child => {
+    const webm = child => adaptationSetVideoType(child)?.startsWith('video/webm')
+    const dropWebm = singleVideoContainer && name === 'Period' && node.children.some(child => adaptationSetVideoType(child) && !webm(child))
+    const children = node.children.filter(child => !dropWebm || !webm(child)).map(child => {
       if (bases.includes(child)) {
         return `<${child.name}${renderAttributes(child, baseUrls.get(child), localBases, elementXmlBase(child, xmlBase))}>${escapeXml(registerUrls(baseUrls.get(child)))}</${child.name}>`
       }

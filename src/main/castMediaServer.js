@@ -3,7 +3,7 @@ import { isIP } from 'node:net'
 import { networkInterfaces } from 'node:os'
 import { Readable, pipeline } from 'node:stream'
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
-import { rewriteCastDash, rewriteCastHls, MAX_MANIFEST_SIZE, MAX_CAST_SUBTITLE_BYTES, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../castManifestRewrite.js'
+import { rewriteCastDash, rewriteCastHls, hlsExtension, MAX_MANIFEST_SIZE, MAX_CAST_SUBTITLE_BYTES, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../castManifestRewrite.js'
 import { isNonPublicNetworkAddress } from './utils.js'
 import { getInlineCastManifestType } from '../castManifest.js'
 export { rewriteCastDash, rewriteCastHls, MAX_CAST_SUBTITLE_BYTES } from '../castManifestRewrite.js'
@@ -116,7 +116,7 @@ function applyHlsReloadQuery(url, query) {
 }
 
 /** A session-scoped endpoint; only registered resources are fetchable, and only by the receiver. */
-export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch) {
+export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch, rewriteOptions = {}) {
   // A receiver on this computer, such as the FCast desktop receiver, can fetch
   // from any local address, for example its LAN address after we dialed Docker's.
   const localAddresses = Object.values(networkInterfaces()).flat().map(({ address }) => address)
@@ -171,7 +171,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
       return {
         url: template ? new URL(url.pathname.slice(0, directoryEnd), url).href : value,
-        suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : 'media'
+        suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : `media${hlsExtension(value, hlsVariables)}`
       }
     })
     // Keep variable contexts in resource identity rather than a session-long
@@ -189,6 +189,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         contentType,
         hlsVariables,
         dashContext,
+        suffix: candidates[0].suffix,
         references: new Set(),
         graceMs: MIN_RESOURCE_GRACE_MS,
         active: 0,
@@ -248,7 +249,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
               const next = httpUrl(path, url)
               if (next.origin !== url.origin || !next.pathname.startsWith(url.pathname) || /%2e|%2f|%5c|%25/i.test(next.pathname)) throw new Error('Invalid Cast resource path')
               url = next
-            } else if (path !== 'media') throw new Error('Invalid Cast resource path')
+            } else if (path !== resource.suffix) throw new Error('Invalid Cast resource path')
             if (reloadQuery !== undefined) applyHlsReloadQuery(url, reloadQuery)
             const blockingReload = hls && /^\d{1,20}$/.test(url.searchParams.get('_HLS_msn') ?? '') &&
               (!url.searchParams.has('_HLS_part') || /^\d{1,20}$/.test(url.searchParams.get('_HLS_part')))
@@ -312,7 +313,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         const rewritten = contentType === 'text/vtt'
           ? data
           : dash
-            ? rewriteCastDash(data, url?.href, registerResource, resource.dashContext, attributes => { dashAttributes = attributes })
+            ? rewriteCastDash(data, url?.href, registerResource, resource.dashContext, attributes => { dashAttributes = attributes }, rewriteOptions)
             : rewriteCastHls(data, url?.href ?? resource.urls[0], registerResource, resource.hlsVariables)
         if (isManifest) {
           const graceMs = dash
