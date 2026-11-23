@@ -692,6 +692,16 @@ export function withProfileSettingsLock(profileId, run) {
 }
 
 /**
+ * Whether a profile still exists. Writes that can create its settings record
+ * check this inside its lock, so they can't recreate the record of a profile
+ * deleted meanwhile, see `withProfileSettingsLock`.
+ * @param {string} profileId
+ */
+async function profileExists(profileId) {
+  return (await DBProfileHandlers.find()).some(profile => profile._id === profileId)
+}
+
+/**
  * Saves the value of `settingId` in the own settings of a profile, or with
  * `undefined` goes back to the shared value. Edits read the saved settings
  * inside a lock all windows share, so they build on each other.
@@ -753,10 +763,14 @@ function updateProfileSetting(commit, profileId, settingId, value, optimistic = 
   if (value !== undefined && sameSettingValue(value, sharedSettingValue(state, settingId))) value = undefined
   const id = profileSettingsId(profileId)
   const key = `${id}/${settingId}`
-  /** @type {{ profileId: string, settingId: string, value: unknown, count: number } | undefined} */
+  /** @type {{ profileId: string, settingId: string, value: unknown, count: number, confirmed: unknown } | undefined} */
   let pending
   if (optimistic) {
-    pending = pendingProfileEdits.get(key) ?? { profileId, settingId, value, count: 0 }
+    // The value saved before these edits, which a failed edit shows again if
+    // the saved settings can't be read either
+    pending = pendingProfileEdits.get(key) ?? {
+      profileId, settingId, value, count: 0, confirmed: ownSettingsOf(state.profileSettingsState.overrides, profileId)?.[settingId],
+    }
     pending.value = value
     pending.count++
     pendingProfileEdits.set(key, pending)
@@ -768,6 +782,7 @@ function updateProfileSetting(commit, profileId, settingId, value, optimistic = 
   return settingWrites.track(id, () => runProfileSettingUpdate(key, () => (
     saveProfileSettingValue(commit, profileId, settingId, value)
   ))).then(() => {
+    if (pending) pending.confirmed = value
     settle()
     return true
   }, async error => {
@@ -775,7 +790,11 @@ function updateProfileSetting(commit, profileId, settingId, value, optimistic = 
     settle()
     if (optimistic) {
       const saved = await DBSettingHandlers.findValue(id).catch(() => undefined)
-      if (saved !== undefined) commit('setProfileOwnSettings', { profileId, settings: isPlainObject(saved) ? saved : null })
+      if (saved !== undefined) {
+        commit('setProfileOwnSettings', { profileId, settings: isPlainObject(saved) ? saved : null })
+      } else if (!pendingProfileEdits.has(key)) {
+        commit('setProfileSettingValue', { profileId, settingId, value: pending.confirmed })
+      }
     }
     return false
   })
@@ -1554,6 +1573,7 @@ const customActions = {
         commit('setProfileOwnSettings', { profileId, settings: enabled ? saved : null })
         return
       }
+      if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
       // Turning them off saves null rather than deleting them, so other
       // windows and devices learn about it.
       const settings = enabled ? {} : null
@@ -1588,6 +1608,7 @@ const customActions = {
     const restored = sanitizeProfileSettings(settings)
     return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
       const saved = await DBSettingHandlers.findValue(id)
+      if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
       if (!isPlainObject(saved) || !sameSettingValue(sanitizeProfileSettings(saved), restored)) {
         await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored))
       }
@@ -1609,6 +1630,7 @@ const customActions = {
     return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
       const current = await DBSettingHandlers.findValue(id)
       if (!sameSettingValue(syncedProfileSettings(current, isSynced), previous)) return
+      if (!isPlainObject(current) && !await profileExists(profileId)) return
       const next = isPlainObject(settings)
         ? {
             ...Object.fromEntries(Object.entries(sanitizeProfileSettings(current)).filter(([key]) => !isSynced(key))),
@@ -1909,10 +1931,10 @@ const customActions = {
       }
 
       commit('setProfileSettingsList', profileSettings)
-      if (startupProfile !== null) {
-        commit('applyProfileSettings', planProfileSettings(state, startupProfile))
-        reportProfileSettings(state)
-      }
+      if (startupProfile !== null) commit('applyProfileSettings', planProfileSettings(state, startupProfile))
+      // Also without own settings, so the main process forgets those a
+      // reloaded window showed before.
+      reportProfileSettings(state)
 
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
