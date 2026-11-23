@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Sünkrooni tellimused YouTube'iga"
     Sync Playlists: "Sünkrooni esitusloendid YouTube'iga"
     Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"
+    YouTube Watch History: "Salvesta vaatamiste ajalugu YouTube'is"
+    Watch History Change Failed: "YouTube'i vaatamiste ajaloo seade muutmine nurjus: {error}"
+    Import Watch History: "Impordi vaatamiste ajalugu"
+    Import Watch History Confirmation: "Kas importida sinu YouTube'i vaatamiste ajalugu selle profiili ajalukku? YouTube ei ütle, millal sa iga videot vaatasid, seega säilitavad uued kirjed YouTube'i järjekorra ja saavad praeguse kuupäeva. Juba sinu ajaloos olevad videod säilitavad oma kuupäevad."
+    Importing Watch History: "YouTube'i vaatamiste ajaloo importimine: 1 video loetud | YouTube'i vaatamiste ajaloo importimine: {count} videot loetud"
+    Watch History Imported: "Sinu YouTube'i vaatamiste ajaloost imporditi 1 video | Sinu YouTube'i vaatamiste ajaloost imporditi {count} videot"
+    Import Watch History Failed: "YouTube'i vaatamiste ajaloo importimine nurjus: {error}"
+    Keep Playlists Confirmation: "Kas jätta YouTube'ist sünkroonitud esitusloendid sellesse seadmesse alles? Allesjäetud esitusloendid muutuvad tavalisteks esitusloenditeks, mida enam YouTube'iga ei sünkroonita. Igal juhul jäävad need YouTube'i alles."
+    Keep Playlists: "Jäta esitusloendid alles"
+    Remove Playlists: "Eemalda sellest seadmest"
+    Keep Playlists Failed: "Esitusloendite allesjätmine nurjus: {error}"
     Rate Videos: "Videote ja postituste meeldimine ja mittemeeldimine"
     Sync Now: "Sünkrooni kohe"
     Synced: "YouTube'iga sünkroonitud"
@@ -2375,8 +2386,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Kommentaare, mille siin postitad, jälgitakse automaatselt uute vastuste suhtes, kui vastuste teavitused on kommentaaride seadetes sisse lülitatud."
     Sync Subscriptions: "Kanalid, mille YouTube'is tellid, lisatakse jaotisesse „Kõik kanalid“ ja kanalid, mille tellimuse seal tühistad, eemaldatakse kõigist profiilidest. Kui tellid siin jaotises „Kõik kanalid“ kanali või tühistad tellimuse, juhtub sama ka YouTube'is."
-    Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
+    Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Kui lülitad selle välja või logid välja, saad need sellesse seadmesse tavaliste esitusloenditena alles jätta. Igal juhul jäävad need YouTube'i alles."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
+    YouTube Watch History: "Kas YouTube salvestab videod, mida sa selle kanaliga vaatad, kõigis seadmetes. Selle väljalülitamine peatab YouTube'is vaatamiste ajaloo."
     Rate Videos: "Näitab videotel ja postitustel meeldimise ja mittemeeldimise nuppe. Sinu hinnangu näitamiseks otsitakse iga avatud video sinu kontoga YouTube'ist üles, nii et YouTube saab teada, milliseid videoid sa avad, isegi kui neid sinu vaatamisajalukku ei lisata. Postituste hinnanguid ei otsita, seega näidatakse ainult neid, mille sa siin annad."
   General Settings:
     Invidious Instance Credentials: 'Vajalik ainult siis, kui instants küsib kasutajanime ja parooli. Need salvestatakse ainult selles seadmes ja saadetakse ainult sellele instantsile.'

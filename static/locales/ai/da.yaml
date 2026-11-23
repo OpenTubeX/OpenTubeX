@@ -424,6 +424,17 @@ Settings:
     Sync Subscriptions: "Synkroniser abonnementer med YouTube"
     Sync Playlists: "Synkroniser playlister med YouTube"
     Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"
+    YouTube Watch History: "Gem visningshistorik på YouTube"
+    Watch History Change Failed: "Kunne ikke ændre indstillingen for YouTube-visningshistorik: {error}"
+    Import Watch History: "Importér visningshistorik"
+    Import Watch History Confirmation: "Vil du importere din YouTube-visningshistorik til denne profils historik? YouTube oplyser ikke, hvornår du så hver video, så nye poster bevarer YouTubes rækkefølge og får dags dato. Videoer, der allerede er i din historik, beholder deres datoer."
+    Importing Watch History: "Importerer YouTube-visningshistorik: 1 video læst | Importerer YouTube-visningshistorik: {count} videoer læst"
+    Watch History Imported: "Importerede 1 video fra din YouTube-visningshistorik | Importerede {count} videoer fra din YouTube-visningshistorik"
+    Import Watch History Failed: "Kunne ikke importere YouTube-visningshistorikken: {error}"
+    Keep Playlists Confirmation: "Vil du beholde de playlister, der er synkroniseret fra YouTube, på denne enhed? Beholdte playlister bliver almindelige playlister, der ikke længere synkroniseres med YouTube. Uanset hvad forbliver de på YouTube."
+    Keep Playlists: "Behold playlister"
+    Remove Playlists: "Fjern fra denne enhed"
+    Keep Playlists Failed: "Kunne ikke beholde playlisterne: {error}"
     Rate Videos: "Synes godt om og synes ikke om videoer og opslag"
     Sync Now: "Synkroniser nu"
     Synced: "Synkroniseret med YouTube"
@@ -2462,8 +2473,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Kommentarer, du skriver her, overvåges automatisk for svar, så længe svarnotifikationer er slået til i kommentarindstillingerne."
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, føjes den til “Alle kanaler”, og når du afmelder abonnementet på en kanal der, fjernes den fra alle profiler. Når du abonnerer eller afmelder abonnementer i “Alle kanaler” her, sker det samme på YouTube."
-    Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
+    Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Når du slår dette fra eller logger ud, kan du beholde dem på denne enhed som almindelige playlister. De forbliver på YouTube uanset hvad."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
+    YouTube Watch History: "Om YouTube gemmer de videoer, du ser med denne kanal, på alle enheder. Hvis du slår dette fra, sættes visningshistorikken på YouTube på pause."
     Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer og opslag. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik. Bedømmelser af opslag slås ikke op, så kun dem, du giver her, vises."
   General Settings:
     Invidious Instance Credentials: 'Kun nødvendigt, hvis instansen beder om et brugernavn og en adgangskode. De gemmes kun på denne enhed og sendes kun til denne instans.'

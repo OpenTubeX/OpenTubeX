@@ -456,6 +456,17 @@ Settings:
     Sync Subscriptions: "Sinkronigi abonojn kun YouTube"
     Sync Playlists: "Sinkronigi ludlistojn kun YouTube"
     Add to YouTube Watch History: "Aldoni spektitajn videaĵojn al la YouTube-historio"
+    YouTube Watch History: "Konservi spekthistorion ĉe YouTube"
+    Watch History Change Failed: "Ne eblis ŝanĝi la agordon de la YouTube-spekthistorio: {error}"
+    Import Watch History: "Importi spekthistorion"
+    Import Watch History Confirmation: "Ĉu importi vian YouTube-spekthistorion en la historion de ĉi tiu profilo? YouTube ne diras, kiam vi spektis ĉiun videaĵon, do novaj eroj konservas la ordon de YouTube kaj ricevas la nunan daton. Videaĵoj jam en via historio konservas siajn datojn."
+    Importing Watch History: "Importado de YouTube-spekthistorio: 1 videaĵo legita | Importado de YouTube-spekthistorio: {count} videaĵoj legitaj"
+    Watch History Imported: "1 videaĵo importita el via YouTube-spekthistorio | {count} videaĵoj importitaj el via YouTube-spekthistorio"
+    Import Watch History Failed: "Ne eblis importi la YouTube-spekthistorion: {error}"
+    Keep Playlists Confirmation: "Ĉu teni la ludlistojn sinkronigitajn de YouTube en ĉi tiu aparato? Tenitaj ludlistoj fariĝas ordinaraj ludlistoj, kiuj ne plu sinkroniĝas kun YouTube. Ĉiuokaze ili restas ĉe YouTube."
+    Keep Playlists: "Teni ludlistojn"
+    Remove Playlists: "Forigi el ĉi tiu aparato"
+    Keep Playlists Failed: "Ne eblis teni la ludlistojn: {error}"
     Rate Videos: "Ŝati kaj malŝati videojn kaj afiŝojn"
     Sync Now: "Sinkronigi nun"
     Synced: "Sinkronigita kun YouTube"
@@ -2427,8 +2438,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Komentoj, kiujn vi afiŝas ĉi tie, estas aŭtomate observataj por respondoj, kondiĉe ke sciigoj pri respondoj estas ŝaltitaj en la komentaj agordoj."
     Sync Subscriptions: "Kanaloj, kiujn vi abonas ĉe YouTube, aldoniĝas al “Ĉiuj kanaloj”, kaj kanaloj, kies abonon vi tie nuligas, foriĝas el ĉiuj profiloj. Aboni aŭ malaboni en “Ĉiuj kanaloj” ĉi tie faras la samon ĉe YouTube."
-    Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
+    Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Kiam vi malŝaltas ĉi tion aŭ elsalutas, vi povas teni ilin en ĉi tiu aparato kiel ordinarajn ludlistojn. Ĉiuokaze ili restas ĉe YouTube."
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
+    YouTube Watch History: "Ĉu YouTube konservas la videaĵojn, kiujn vi spektas per ĉi tiu kanalo, en ĉiuj aparatoj. Malŝalto de ĉi tio paŭzigas la spekthistorion ĉe YouTube."
     Rate Videos: "Montras butonojn por ŝati kaj malŝati videojn kaj afiŝojn. Por montri vian takson, ĉiu video, kiun vi malfermas, estas serĉata ĉe YouTube per via konto, do YouTube ekscias, kiujn videojn vi malfermas, eĉ se ili ne estas aldonitaj al via spekta historio. Taksoj de afiŝoj ne estas serĉataj, do montriĝas nur tiuj, kiujn vi faras ĉi tie."
   General Settings:
     Invidious Instance Credentials: 'Necesa nur se la nodo petas uzantnomon kaj pasvorton. Ili estas konservataj nur en ĉi tiu aparato kaj sendataj nur al ĉi tiu nodo.'

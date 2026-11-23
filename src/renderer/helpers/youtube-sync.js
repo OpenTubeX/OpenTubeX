@@ -8,7 +8,8 @@ import { recordNotification } from './notificationHistory'
 import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
 import { getYouTubeChannelKey, getYouTubeSyncKey } from './youtube-account-state'
 import { setYouTubePlaylistChangeListener } from './youtube-playlist-changes'
-import { getDataScope } from '../../datastores/handlers/dataScope.js'
+import { DBPlaylistHandlers, getDataScope, withDataScope } from '../../datastores/handlers/index'
+import { startProgressBarOperation } from './progressBar'
 import { dataScopeLoading } from './sync-data-scope.js'
 import {
   completeYouTubePlaylistVideos,
@@ -17,7 +18,9 @@ import {
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
   resolveYouTubeSetVideoIds,
-  restoreAfterRefusedEdit
+  restoreAfterRefusedEdit,
+  unlinkYouTubePlaylist,
+  youTubeHistoryRecords
 } from './youtube-sync-merge'
 import {
   createYouTubePlaylist,
@@ -27,6 +30,7 @@ import {
   getYouTubeAccountPlaylists,
   getYouTubeAccountSubscriptions,
   getYouTubePlaylistVideos,
+  getYouTubeWatchHistory,
   rateYouTubeVideo,
   subscribeOnYouTube,
   unsubscribeOnYouTube
@@ -161,6 +165,66 @@ function errorMessage(error) {
  */
 function getLinkedPlaylists(key) {
   return store.getters.getAllPlaylists.filter(playlist => playlist.youTube && playlist.youTube.accountKey === key)
+}
+
+/**
+ * The shared playlists synced from YouTube, which the store holds unless a
+ * separate profile is in use.
+ * @param {boolean} shared whether the store holds the shared playlists
+ * @returns {Promise<any[]>}
+ */
+async function findYouTubePlaylists(shared) {
+  const playlists = shared ? store.getters.getAllPlaylists : await withDataScope(null, () => DBPlaylistHandlers.find())
+  return playlists.filter(playlist => playlist.youTube)
+}
+
+/** Whether signing out or turning playlist sync off would remove playlists from this device. */
+export async function hasYouTubePlaylists() {
+  return (await findYouTubePlaylists(showsSharedPlaylists())).length > 0
+}
+
+/**
+ * Turns the playlists synced from YouTube into regular playlists, then runs
+ * `end`, which signs out or turns playlist sync off. No sync can bring the
+ * playlists back as new copies in between.
+ * @param {() => Promise<unknown>} end
+ */
+export async function keepYouTubePlaylists(end) {
+  await withSyncLock(async () => {
+    const shared = showsSharedPlaylists()
+    for (const playlist of await findYouTubePlaylists(shared)) {
+      const previous = deepCopy(toRaw(playlist))
+      const kept = unlinkYouTubePlaylist(previous)
+      const saved = shared
+        ? await store.dispatch('updatePlaylistFromSync', { playlist: kept, previous })
+        : await withDataScope(null, () => DBPlaylistHandlers.upsertIfUnchanged({ ...kept, lastUpdatedAt: Date.now() }, previous))
+      if (!saved) throw new Error(`Could not keep the playlist ${playlist.playlistName}`)
+    }
+    await end()
+  })
+}
+
+/**
+ * Adds the account's watch history to the active profile's history. Videos
+ * already there keep their watch time and progress.
+ * @returns {Promise<number>} how many videos the history has
+ */
+export async function importYouTubeWatchHistory() {
+  const message = count => i18n.global.t('Settings.YouTube Account Settings.Importing Watch History', { count })
+  const progress = startProgressBarOperation(store, { icon: ['fas', 'history'], message: message(0), percentage: 0 })
+  // The import goes to the profile active when it started.
+  const scope = getDataScope()
+  try {
+    const videos = await getYouTubeWatchHistory(count => progress.update({ message: message(count) }))
+    const records = youTubeHistoryRecords(videos, Date.now())
+    if (getDataScope() !== scope || dataScopeLoading()) throw new Error('The profile changed during the import')
+    if (records.length > 0 && await store.dispatch('importHistory', { records, rule: 'undated' }) !== true) {
+      throw new Error('Could not save the watch history')
+    }
+    return records.length
+  } finally {
+    progress.finish()
+  }
 }
 
 /**

@@ -70,13 +70,24 @@
           :default-value="syncPlaylists"
           setting-key="youTubeAccountSyncPlaylists"
           :tooltip="t('Tooltips.YouTube Account Settings.Sync Playlists')"
+          controlled
           compact
-          @change="store.dispatch('updateYouTubeAccountSyncPlaylists', $event)"
+          @change="changeSyncPlaylists"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.YouTube Account Settings.YouTube Watch History')"
+          :default-value="historyPaused === false"
+          :disabled="historyPaused === null || pausingHistory"
+          :tooltip="t('Tooltips.YouTube Account Settings.YouTube Watch History')"
+          controlled
+          compact
+          @change="setHistoryPaused(!$event)"
         />
         <FtToggleSwitch
           :label="t('Settings.YouTube Account Settings.Add to YouTube Watch History')"
           :default-value="watchHistory"
           setting-key="youTubeAccountWatchHistory"
+          :disabled="historyPaused === true"
           :tooltip="t('Tooltips.YouTube Account Settings.Add to YouTube Watch History')"
           compact
           @change="store.dispatch('updateYouTubeAccountWatchHistory', $event)"
@@ -108,11 +119,35 @@
           @click="syncNow"
         />
         <FtButton
+          :label="t('Settings.YouTube Account Settings.Import Watch History')"
+          :icon="['fas', 'history']"
+          :disabled="importingHistory"
+          @click="importPromptOpen = true"
+        />
+        <FtButton
           :label="t('Settings.YouTube Account Settings.Sign Out')"
           :icon="['fas', 'right-from-bracket']"
           @click="signOut"
         />
       </FtFlexBox>
+      <FtPrompt
+        v-if="importPromptOpen"
+        :label="t('Settings.YouTube Account Settings.Import Watch History Confirmation')"
+        :option-names="[t('Settings.YouTube Account Settings.Import Watch History'), t('Cancel')]"
+        :option-values="['import', 'cancel']"
+        :option-icons="[['fas', 'history'], ['fas', 'xmark']]"
+        autosize
+        @click="handleImportPrompt"
+      />
+      <FtPrompt
+        v-if="keepPlaylistsPrompt"
+        :label="t('Settings.YouTube Account Settings.Keep Playlists Confirmation')"
+        :option-names="[t('Settings.YouTube Account Settings.Keep Playlists'), t('Settings.YouTube Account Settings.Remove Playlists'), t('Cancel')]"
+        :option-values="['keep', 'remove', 'cancel']"
+        :option-icons="[['fas', 'floppy-disk'], ['fas', 'trash'], ['fas', 'xmark']]"
+        autosize
+        @click="handleKeepPlaylistsPrompt"
+      />
     </template>
     <FtFlexBox v-else>
       <FtButton
@@ -129,12 +164,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, useId } from 'vue'
+import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../../FtButton/FtButton.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -142,12 +178,19 @@ import YouTubeSignInPrompt from './YouTubeSignInPrompt.vue'
 
 import store from '../../../store/index'
 import { ERROR_TOAST_ICON, showToast } from '../../../helpers/utils'
-import { getSelectedYouTubeProfile } from '../../../helpers/youtube-account-state'
+import { getSelectedYouTubeProfile, getYouTubeSyncKey } from '../../../helpers/youtube-account-state'
 import { supportsNotificationHistory } from '../../../helpers/notificationHistory'
 import { isCommentWatchingEnabled } from '../../../helpers/commentReplyNotifications'
-import { syncWithYouTube } from '../../../helpers/youtube-sync'
 import {
+  hasYouTubePlaylists,
+  importYouTubeWatchHistory,
+  keepYouTubePlaylists,
+  syncWithYouTube
+} from '../../../helpers/youtube-sync'
+import {
+  isYouTubeWatchHistoryPaused,
   refreshYouTubeProfiles,
+  setYouTubeWatchHistoryPaused,
   signOutOfYouTubeAccount
 } from '../../../helpers/api/youtube-account'
 import { useYouTubeProfileSwitch } from '../../../composables/useYouTubeProfileSwitch'
@@ -180,7 +223,120 @@ onMounted(() => {
   if (account.value) refreshYouTubeProfiles().catch(error => console.warn('Could not refresh the YouTube channels', error))
 })
 
-async function signOut() {
+/** @param {unknown} error */
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error)
+}
+
+// Whether the channel in use has its YouTube watch history paused, on every
+// device. Null until known.
+const historyPaused = ref(/** @type {boolean | null} */ (null))
+const pausingHistory = ref(false)
+
+watch(() => getYouTubeSyncKey(account.value), async (key) => {
+  historyPaused.value = null
+  if (!key) return
+  try {
+    const paused = await isYouTubeWatchHistoryPaused()
+    if (getYouTubeSyncKey(account.value) === key) historyPaused.value = paused
+  } catch (error) {
+    console.warn('Could not read whether the YouTube watch history is paused', error)
+  }
+}, { immediate: true })
+
+/** @param {boolean} paused */
+async function setHistoryPaused(paused) {
+  const key = getYouTubeSyncKey(account.value)
+  pausingHistory.value = true
+  try {
+    await setYouTubeWatchHistoryPaused(paused)
+    if (getYouTubeSyncKey(account.value) === key) historyPaused.value = paused
+  } catch (error) {
+    console.error(error)
+    showToast({
+      message: t('Settings.YouTube Account Settings.Watch History Change Failed', { error: errorMessage(error) }),
+      icon: ERROR_TOAST_ICON
+    })
+  } finally {
+    pausingHistory.value = false
+  }
+}
+
+const importPromptOpen = ref(false)
+const importingHistory = ref(false)
+
+/** @param {string | null} choice */
+async function handleImportPrompt(choice) {
+  importPromptOpen.value = false
+  if (choice !== 'import' || importingHistory.value) return
+  importingHistory.value = true
+  try {
+    const count = await importYouTubeWatchHistory()
+    showToast({ message: t('Settings.YouTube Account Settings.Watch History Imported', { count }, count), icon: ['fas', 'history'] })
+  } catch (error) {
+    console.error(error)
+    showToast({
+      message: t('Settings.YouTube Account Settings.Import Watch History Failed', { error: errorMessage(error) }),
+      icon: ERROR_TOAST_ICON
+    })
+  } finally {
+    importingHistory.value = false
+  }
+}
+
+// Signing out and turning playlist sync off remove the synced playlists from
+// this device, unless the user keeps them.
+const keepPlaylistsPrompt = ref(/** @type {(() => Promise<unknown>) | null} */ (null))
+
+/**
+ * @param {() => Promise<unknown>} end signs out or turns playlist sync off
+ */
+async function endPlaylistSync(end) {
+  let hasPlaylists = false
+  try {
+    hasPlaylists = await hasYouTubePlaylists()
+  } catch (error) {
+    console.error(error)
+  }
+  if (hasPlaylists) {
+    keepPlaylistsPrompt.value = end
+  } else {
+    await end()
+  }
+}
+
+/** @param {string | null} choice */
+async function handleKeepPlaylistsPrompt(choice) {
+  const end = keepPlaylistsPrompt.value
+  keepPlaylistsPrompt.value = null
+  if (!end) return
+  if (choice === 'remove') {
+    await end()
+  } else if (choice === 'keep') {
+    try {
+      await keepYouTubePlaylists(end)
+    } catch (error) {
+      console.error(error)
+      showToast({
+        message: t('Settings.YouTube Account Settings.Keep Playlists Failed', { error: errorMessage(error) }),
+        icon: ERROR_TOAST_ICON
+      })
+    }
+  }
+}
+
+/** @param {boolean} value */
+function changeSyncPlaylists(value) {
+  const update = () => store.dispatch('updateYouTubeAccountSyncPlaylists', value)
+  if (value) update()
+  else endPlaylistSync(update)
+}
+
+function signOut() {
+  endPlaylistSync(finishSignOut)
+}
+
+async function finishSignOut() {
   try {
     const revoked = await signOutOfYouTubeAccount()
     showToast({

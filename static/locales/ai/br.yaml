@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Goubredañ ar c'houmanantoù gant YouTube"
     Sync Playlists: "Goubredañ ar rolloù-videoioù gant YouTube"
     Add to YouTube Watch History: "Ouzhpennañ ar videoioù sellet ouzh roll istor YouTube"
+    YouTube Watch History: "Enrollañ ar roll istor sellet war YouTube"
+    Watch History Change Failed: "N'eus ket bet gallet kemmañ arventenn roll istor sellet YouTube: {error}"
+    Import Watch History: "Enporzhiañ ar roll istor sellet"
+    Import Watch History Confirmation: "Enporzhiañ ho roll istor sellet YouTube e roll istor ar profil-mañ? Ne lavar ket YouTube pegoulz ho peus sellet ouzh pep video, setu e chom an enmontoù nevez en urzh YouTube hag e vezont deiziadet d'an deiz a hiziv. Ar videoioù a zo dija en ho roll istor a vir o deiziadoù."
+    Importing Watch History: "Oc'h enporzhiañ roll istor sellet YouTube: {count} video lennet | Oc'h enporzhiañ roll istor sellet YouTube: {count} video lennet | Oc'h enporzhiañ roll istor sellet YouTube: {count} video lennet | Oc'h enporzhiañ roll istor sellet YouTube: {count} video lennet | Oc'h enporzhiañ roll istor sellet YouTube: {count} video lennet"
+    Watch History Imported: "{count} video enporzhiet eus ho roll istor sellet YouTube | {count} video enporzhiet eus ho roll istor sellet YouTube | {count} video enporzhiet eus ho roll istor sellet YouTube | {count} video enporzhiet eus ho roll istor sellet YouTube | {count} video enporzhiet eus ho roll istor sellet YouTube"
+    Import Watch History Failed: "N'eus ket bet gallet enporzhiañ roll istor sellet YouTube: {error}"
+    Keep Playlists Confirmation: "Mirout war ar benveg-mañ ar rolloù-videoioù goubredet eus YouTube? Ar rolloù-videoioù miret a zeu da vezañ rolloù-videoioù boutin ha ne vezont ket goubredet gant YouTube ken. E pep doare e chomont war YouTube."
+    Keep Playlists: "Mirout ar rolloù-videoioù"
+    Remove Playlists: "Lemel eus ar benveg-mañ"
+    Keep Playlists Failed: "N'eus ket bet gallet mirout ar rolloù-videoioù: {error}"
     Rate Videos: "Plijout ha displijout d'ar videoioù hag d'an embannadurioù"
     Sync Now: "Goubredañ bremañ"
     Synced: "Goubredet gant YouTube"
@@ -2383,8 +2394,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "An evezhiadennoù a embannit amañ a vez heuliet ent emgefreek evit ar respontoù, keit ha ma vez gweredekaet ar c'hemennoù respont e arventennoù an evezhiadennoù."
     Sync Subscriptions: "Ar chadennoù a goumanantit dezho war YouTube a vez ouzhpennet en « An holl chadennoù », hag ar chadennoù a zigoumanantit diouto eno a vez lamet eus an holl brofiloù. Koumanantiñ pe digoumanantiñ en « An holl chadennoù » amañ a ra kement all war YouTube."
-    Sync Playlists: "Ho rolloù-videoioù YouTube, « Da sellet diwezhatoc'h » ha « Videoioù a blij din » a zeu war wel en « Ho rolloù videoioù », hag ar c'hemmoù a rit dezho amañ a vez graet war YouTube ivez. N'int ket goubredet gant ho penvegoù all, ha n'int ket lakaet e-barzh pa ezporzhiit an holl rolloù-videoioù pe pa warezit ho roadennoù. Diweredekaat an dibarzh-mañ a lam anezho eus ar benveg-mañ, met n'eo ket eus YouTube."
+    Sync Playlists: "Ho rolloù-videoioù YouTube, « Da sellet diwezhatoc'h » ha « Videoioù a blij din » a zeu war wel en « Ho rolloù videoioù », hag ar c'hemmoù a rit dezho amañ a vez graet war YouTube ivez. N'int ket goubredet gant ho penvegoù all, ha n'int ket lakaet e-barzh pa ezporzhiit an holl rolloù-videoioù pe pa warezit ho roadennoù. Pa ziweredekait an dibarzh-mañ pe pa zigennaskit, e c'hallit o mirout war ar benveg-mañ evel rolloù-videoioù boutin. E pep doare e chomont war YouTube."
     Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
+    YouTube Watch History: "Ma enroll YouTube ar videoioù a sellit outo gant ar chadenn-mañ, war an holl benvegoù. Diweredekaat an dibarzh-mañ a ehan ar roll istor sellet war YouTube."
     Rate Videos: "Diskouez a ra an nozelennoù plijout ha displijout war ar videoioù hag an embannadurioù. Evit diskouez ho priziadenn e vez klasket pep video a zigorit war YouTube gant ho kont, neuze e oar YouTube peseurt videoioù a zigorit, ha pa ne vezont ket ouzhpennet d'ho roll-istor sellet zoken. Ne vez ket klasket priziadennoù an embannadurioù, neuze ne vez diskouezet nemet ar re a roit amañ."
   General Settings:
     Invidious Instance Credentials: 'Ret eo hepken ma c''houlenn an istañs un anv implijer hag ur ger-tremen. Enrollet int war an trevnad-mañ hepken ha kaset d''an istañs-mañ hepken.'

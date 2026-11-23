@@ -414,6 +414,17 @@ Settings:
     Sync Subscriptions: "Cysoni tanysgrifiadau â YouTube"
     Sync Playlists: "Cysoni rhestrau chwarae â YouTube"
     Add to YouTube Watch History: "Ychwanegu fideos a wyliwyd at hanes YouTube"
+    YouTube Watch History: "Cadw hanes gwylio ar YouTube"
+    Watch History Change Failed: "Methu newid gosodiad hanes gwylio YouTube: {error}"
+    Import Watch History: "Mewnforio hanes gwylio"
+    Import Watch History Confirmation: "Mewnforio eich hanes gwylio YouTube i hanes y proffil hwn? Dydy YouTube ddim yn dweud pryd gwnaethoch chi wylio pob fideo, felly mae cofnodion newydd yn cadw trefn YouTube ac yn cael dyddiad heddiw. Mae fideos sydd eisoes yn eich hanes yn cadw eu dyddiadau."
+    Importing Watch History: "Yn mewnforio hanes gwylio YouTube: {count} o fideos wedi'u darllen | Yn mewnforio hanes gwylio YouTube: 1 fideo wedi'i ddarllen | Yn mewnforio hanes gwylio YouTube: {count} o fideos wedi'u darllen | Yn mewnforio hanes gwylio YouTube: {count} o fideos wedi'u darllen | Yn mewnforio hanes gwylio YouTube: {count} o fideos wedi'u darllen | Yn mewnforio hanes gwylio YouTube: {count} o fideos wedi'u darllen"
+    Watch History Imported: "Mewnforiwyd {count} o fideos o'ch hanes gwylio YouTube | Mewnforiwyd 1 fideo o'ch hanes gwylio YouTube | Mewnforiwyd {count} o fideos o'ch hanes gwylio YouTube | Mewnforiwyd {count} o fideos o'ch hanes gwylio YouTube | Mewnforiwyd {count} o fideos o'ch hanes gwylio YouTube | Mewnforiwyd {count} o fideos o'ch hanes gwylio YouTube"
+    Import Watch History Failed: "Methu mewnforio hanes gwylio YouTube: {error}"
+    Keep Playlists Confirmation: "Cadw'r rhestrau chwarae a gysonwyd o YouTube ar y ddyfais hon? Mae rhestrau chwarae sy'n cael eu cadw yn troi'n rhestrau chwarae arferol nad ydyn nhw'n cysoni â YouTube mwyach. Y naill ffordd neu'r llall, maen nhw'n aros ar YouTube."
+    Keep Playlists: "Cadw rhestrau chwarae"
+    Remove Playlists: "Tynnu o'r ddyfais hon"
+    Keep Playlists Failed: "Methu cadw'r rhestrau chwarae: {error}"
     Rate Videos: "Hoffi a pheidio â hoffi fideos a phostiadau"
     Sync Now: "Cysoni nawr"
     Synced: "Wedi cysoni â YouTube"
@@ -2410,8 +2421,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Caiff sylwadau rydych chi'n eu postio yma eu dilyn yn awtomatig am atebion, cyn belled â bod hysbysiadau atebion wedi'u troi ymlaen yng ngosodiadau'r sylwadau."
     Sync Subscriptions: "Mae sianeli rydych chi'n tanysgrifio iddyn nhw ar YouTube yn cael eu hychwanegu at “Pob Sianel”, ac mae sianeli rydych chi'n dad-danysgrifio ohonyn nhw yno yn cael eu tynnu o bob proffil. Mae tanysgrifio neu ddad-danysgrifio yn “Pob Sianel” yma yn gwneud yr un peth ar YouTube."
-    Sync Playlists: "Mae eich rhestrau chwarae YouTube, “Gwylio Nes Ymlaen” a “Fideos a hoffwyd” yn ymddangos yn “Eich Rhestrau Chwarae”, ac mae newidiadau rydych chi'n eu gwneud iddyn nhw yma yn cael eu gwneud ar YouTube hefyd. Dydyn nhw ddim yn cael eu cysoni â'ch dyfeisiau eraill na'u cynnwys pan fyddwch chi'n allforio pob rhestr chwarae neu'n gwneud copi wrth gefn o'ch data. Mae diffodd hyn yn eu tynnu o'r ddyfais hon ond nid o YouTube."
+    Sync Playlists: "Mae eich rhestrau chwarae YouTube, “Gwylio Nes Ymlaen” a “Fideos a hoffwyd” yn ymddangos yn “Eich Rhestrau Chwarae”, ac mae newidiadau rydych chi'n eu gwneud iddyn nhw yma yn cael eu gwneud ar YouTube hefyd. Dydyn nhw ddim yn cael eu cysoni â'ch dyfeisiau eraill na'u cynnwys pan fyddwch chi'n allforio pob rhestr chwarae neu'n gwneud copi wrth gefn o'ch data. Pan fyddwch chi'n diffodd hyn neu'n allgofnodi, gallwch chi eu cadw ar y ddyfais hon fel rhestrau chwarae arferol. Maen nhw'n aros ar YouTube y naill ffordd neu'r llall."
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
+    YouTube Watch History: "A yw YouTube yn cadw'r fideos rydych chi'n eu gwylio gyda'r sianel hon, ar bob dyfais. Mae diffodd hyn yn oedi'r hanes gwylio ar YouTube."
     Rate Videos: "Yn dangos botymau hoffi a pheidio â hoffi ar fideos a phostiadau. I ddangos eich sgôr, mae pob fideo rydych chi'n ei agor yn cael ei chwilio ar YouTube gyda'ch cyfrif, felly mae YouTube yn dysgu pa fideos rydych chi'n eu hagor, hyd yn oed pan nad ydyn nhw'n cael eu hychwanegu at eich hanes gwylio. Nid yw sgoriau postiadau'n cael eu chwilio, felly dim ond y rhai rydych chi'n eu rhoi yma sy'n cael eu dangos."
   General Settings:
     Invidious Instance Credentials: 'Dim ond ei angen os yw''r enghraifft yn gofyn am enw defnyddiwr a chyfrinair. Maen nhw''n cael eu cadw ar y ddyfais hon yn unig a''u hanfon at yr enghraifft hon yn unig.'

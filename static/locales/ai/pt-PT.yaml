@@ -370,6 +370,17 @@ Settings:
     Sync Subscriptions: "Sincronizar subscrições com o YouTube"
     Sync Playlists: "Sincronizar listas de reprodução com o YouTube"
     Add to YouTube Watch History: "Adicionar vídeos vistos ao histórico do YouTube"
+    YouTube Watch History: "Guardar o histórico de visualizações no YouTube"
+    Watch History Change Failed: "Não foi possível alterar a definição do histórico de visualizações do YouTube: {error}"
+    Import Watch History: "Importar histórico de visualizações"
+    Import Watch History Confirmation: "Importar o seu histórico de visualizações do YouTube para o histórico deste perfil? O YouTube não indica quando viu cada vídeo, por isso as novas entradas mantêm a ordem do YouTube e ficam com a data atual. Os vídeos que já estão no seu histórico mantêm as suas datas."
+    Importing Watch History: "A importar o histórico de visualizações do YouTube: 1 vídeo lido | A importar o histórico de visualizações do YouTube: {count} de vídeos lidos | A importar o histórico de visualizações do YouTube: {count} vídeos lidos"
+    Watch History Imported: "1 vídeo importado do seu histórico de visualizações do YouTube | {count} de vídeos importados do seu histórico de visualizações do YouTube | {count} vídeos importados do seu histórico de visualizações do YouTube"
+    Import Watch History Failed: "Não foi possível importar o histórico de visualizações do YouTube: {error}"
+    Keep Playlists Confirmation: "Manter neste dispositivo as listas de reprodução sincronizadas a partir do YouTube? As listas mantidas passam a ser listas de reprodução normais que deixam de ser sincronizadas com o YouTube. Em qualquer caso, continuam no YouTube."
+    Keep Playlists: "Manter listas de reprodução"
+    Remove Playlists: "Remover deste dispositivo"
+    Keep Playlists Failed: "Não foi possível manter as listas de reprodução: {error}"
     Rate Videos: "Gostar e não gostar de vídeos e publicações"
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado com o YouTube"
@@ -2373,8 +2384,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Os comentários que publica aqui são acompanhados automaticamente para detetar novas respostas, desde que os avisos de respostas estejam ativados nas definições de comentários."
     Sync Subscriptions: "Os canais que subscreve no YouTube são adicionados a Todos os canais, e os canais cuja subscrição cancela lá são removidos de todos os perfis. Subscrever ou cancelar a subscrição em Todos os canais aqui faz o mesmo no YouTube."
-    Sync Playlists: "As suas listas de reprodução do YouTube, Ver mais tarde e Vídeos de que gostei aparecem em As suas listas de reprodução, e as alterações que lhes fizer aqui também são feitas no YouTube. Não são sincronizadas com os seus outros dispositivos nem incluídas quando exporta todas as listas de reprodução ou faz uma cópia de segurança dos seus dados. Desativar esta opção remove-as deste dispositivo, mas não do YouTube."
+    Sync Playlists: "As suas listas de reprodução do YouTube, Ver mais tarde e Vídeos de que gostei aparecem em As suas listas de reprodução, e as alterações que lhes fizer aqui também são feitas no YouTube. Não são sincronizadas com os seus outros dispositivos nem incluídas quando exporta todas as listas de reprodução ou faz uma cópia de segurança dos seus dados. Quando desativa esta opção ou termina sessão, pode mantê-las neste dispositivo como listas de reprodução normais. Em qualquer caso, continuam no YouTube."
     Add to YouTube Watch History: "Os vídeos que reproduz são adicionados ao seu histórico de visualizações do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver em pausa no YouTube."
+    YouTube Watch History: "Se o YouTube guarda os vídeos que vê com este canal, em todos os dispositivos. Desativar esta opção coloca em pausa o histórico de visualizações no YouTube."
     Rate Videos: "Mostra os botões gosto e não gosto nos vídeos e nas publicações. Para mostrar a sua classificação, cada vídeo que abre é consultado no YouTube com a sua conta, por isso o YouTube fica a saber que vídeos abre, mesmo quando não são adicionados ao seu histórico de visualizações. As classificações das publicações não são consultadas, por isso só aparecem as que fizer aqui."
   General Settings:
     Invidious Instance Credentials: 'Só é necessário se a instância pedir um nome de utilizador e uma palavra-passe. São guardados apenas neste dispositivo e enviados apenas para esta instância.'

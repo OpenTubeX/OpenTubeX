@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Abonelikleri YouTube ile eşitle"
     Sync Playlists: "Oynatma listelerini YouTube ile eşitle"
     Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
+    YouTube Watch History: "İzleme geçmişini YouTube'a kaydet"
+    Watch History Change Failed: "YouTube izleme geçmişi ayarı değiştirilemedi: {error}"
+    Import Watch History: "İzleme geçmişini içe aktar"
+    Import Watch History Confirmation: "YouTube izleme geçmişiniz bu profilin geçmişine aktarılsın mı? YouTube her videoyu ne zaman izlediğinizi bildirmez, bu nedenle yeni kayıtlar YouTube'daki sırayı korur ve bugünün tarihini alır. Geçmişinizde zaten bulunan videolar tarihlerini korur."
+    Importing Watch History: "YouTube izleme geçmişi içe aktarılıyor: 1 video okundu | YouTube izleme geçmişi içe aktarılıyor: {count} video okundu"
+    Watch History Imported: "YouTube izleme geçmişinizden 1 video içe aktarıldı | YouTube izleme geçmişinizden {count} video içe aktarıldı"
+    Import Watch History Failed: "YouTube izleme geçmişi içe aktarılamadı: {error}"
+    Keep Playlists Confirmation: "YouTube'dan eşitlenen oynatma listeleri bu cihazda tutulsun mu? Tutulan oynatma listeleri, artık YouTube ile eşitlenmeyen normal oynatma listelerine dönüşür. Her iki durumda da YouTube'da kalırlar."
+    Keep Playlists: "Oynatma listelerini tut"
+    Remove Playlists: "Bu cihazdan kaldır"
+    Keep Playlists Failed: "Oynatma listeleri tutulamadı: {error}"
     Rate Videos: "Videoları ve gönderileri beğen ve beğenme"
     Sync Now: "Şimdi eşitle"
     Synced: "YouTube ile eşitlendi"
@@ -2373,8 +2384,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Yorum ayarlarında yanıt bildirimleri açık olduğu sürece, burada paylaştığınız yorumlar yanıtlar için otomatik olarak izlenir."
     Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
-    Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
+    Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapattığınızda veya oturumu kapattığınızda onları bu cihazda normal oynatma listeleri olarak tutabilirsiniz. Her iki durumda da YouTube'da kalırlar."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
+    YouTube Watch History: "YouTube'un bu kanalla izlediğiniz videoları tüm cihazlarda kaydedip kaydetmeyeceği. Bunu kapatmak YouTube'daki izleme geçmişini duraklatır."
     Rate Videos: "Videolarda ve gönderilerde beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir. Gönderi puanları sorgulanmaz, bu yüzden yalnızca burada verdikleriniz gösterilir."
   General Settings:
     Invidious Instance Credentials: 'Yalnızca örnek bir kullanıcı adı ve parola isterse gerekir. Yalnızca bu cihazda saklanır ve yalnızca bu örneğe gönderilir.'

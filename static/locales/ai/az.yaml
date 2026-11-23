@@ -415,6 +415,17 @@ Settings:
     Sync Subscriptions: "Abunəlikləri YouTube ilə sinxronlaşdır"
     Sync Playlists: "Pleylistləri YouTube ilə sinxronlaşdır"
     Add to YouTube Watch History: "Baxılan videoları YouTube tarixçəsinə əlavə et"
+    YouTube Watch History: "Baxış tarixçəsini YouTube-da saxla"
+    Watch History Change Failed: "YouTube baxış tarixçəsi ayarını dəyişmək mümkün olmadı: {error}"
+    Import Watch History: "Baxış tarixçəsini idxal et"
+    Import Watch History Confirmation: "YouTube baxış tarixçəniz bu profilin tarixçəsinə idxal edilsin? YouTube hər videoya nə vaxt baxdığınızı bildirmir, buna görə yeni qeydlər YouTube-dakı sıranı saxlayır və bugünkü tarixi alır. Artıq tarixçənizdə olan videolar öz tarixlərini saxlayır."
+    Importing Watch History: "YouTube baxış tarixçəsi idxal edilir: 1 video oxundu | YouTube baxış tarixçəsi idxal edilir: {count} video oxundu"
+    Watch History Imported: "YouTube baxış tarixçənizdən 1 video idxal edildi | YouTube baxış tarixçənizdən {count} video idxal edildi"
+    Import Watch History Failed: "YouTube baxış tarixçəsini idxal etmək mümkün olmadı: {error}"
+    Keep Playlists Confirmation: "YouTube-dan sinxronlaşdırılan pleylistlər bu cihazda saxlanılsın? Saxlanılan pleylistlər artıq YouTube ilə sinxronlaşmayan adi pleylistlərə çevrilir. Hər iki halda onlar YouTube-da qalır."
+    Keep Playlists: "Pleylistləri saxla"
+    Remove Playlists: "Bu cihazdan sil"
+    Keep Playlists Failed: "Pleylistləri saxlamaq mümkün olmadı: {error}"
     Rate Videos: "Videoları və paylaşımları bəyənmək və bəyənməmək"
     Sync Now: "İndi sinxronlaşdır"
     Synced: "YouTube ilə sinxronlaşdırıldı"
@@ -2385,8 +2396,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Şərh ayarlarında cavab bildirişləri aktiv olduqca, burada yazdığınız şərhlər cavablar üçün avtomatik izlənir."
     Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
-    Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
+    Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürdükdə və ya çıxış etdikdə onları bu cihazda adi pleylistlər kimi saxlaya bilərsiniz. Hər iki halda onlar YouTube-da qalır."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
+    YouTube Watch History: "YouTube-un bu kanalla baxdığınız videoları bütün cihazlarda yadda saxlayıb-saxlamaması. Bunu söndürmək YouTube-da baxış tarixçəsini dayandırır."
     Rate Videos: "Videolarda və paylaşımlarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə. Paylaşımların qiymətləndirmələri yoxlanılmır, ona görə yalnız burada verdikləriniz göstərilir."
   General Settings:
     Invidious Instance Credentials: 'Yalnız nümunə istifadəçi adı və parol tələb etdikdə lazımdır. Onlar yalnız bu cihazda saxlanılır və yalnız bu nümunəyə göndərilir.'

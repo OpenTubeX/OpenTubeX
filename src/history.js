@@ -201,11 +201,12 @@ export function mergeTakeoutHistoryRecord(current, imported) {
 }
 
 /**
- * LibreTube backups have no watch times, and without a saved position the
- * import counts a video as watched. A saved record keeps its watch time and
- * progress, and the import only fills what it lacks.
+ * LibreTube backups and the YouTube account's watch history have no watch
+ * times, and without a saved position the import counts a video as watched.
+ * A saved record keeps its watch time and progress, and the import only fills
+ * what it lacks.
  */
-export function mergeLibreTubeHistoryRecord(current, imported) {
+export function mergeUndatedHistoryRecord(current, imported) {
   if (!current) return imported
   const merged = mergeTakeoutHistoryRecord(current, imported)
   const watchProgress = current.watchProgress ?? imported.watchProgress

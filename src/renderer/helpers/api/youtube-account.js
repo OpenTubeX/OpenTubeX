@@ -21,6 +21,7 @@ import {
   parsePlaylistPage,
   parseSubscribedChannels,
   parseVideoRating,
+  parseWatchHistoryPage,
   parseWatchHistoryUrl,
   pollVoteParams,
   postRatingParams
@@ -789,6 +790,43 @@ export async function voteInYouTubePoll(postId, channelId, choiceIndex, vote, ac
  */
 export async function rateYouTubePost(postId, channelId, action, account) {
   await withAccount(innertube => performPostAction(innertube, postRatingParams(action, postId, channelId), `${action} the post`), { account })
+}
+
+/**
+ * Reads the account's whole watch history, newest first.
+ * @param {(count: number) => void} onProgress gets the number of entries read so far
+ * @returns {Promise<import('./youtube-account-parsers.js').YouTubeHistoryVideo[]>}
+ */
+export async function getYouTubeWatchHistory(onProgress) {
+  const account = getAccount()
+  return await withAccount(async innertube => {
+    let page = parseWatchHistoryPage((await innertube.actions.execute('/browse', { browseId: 'FEhistory' })).data)
+    const videos = [...page.videos]
+    // A repeated page would only lead to itself again.
+    const read = new Set()
+    while (page.continuation && !read.has(page.continuation)) {
+      read.add(page.continuation)
+      onProgress(videos.length)
+      throwIfSignedOut(account)
+      page = parseWatchHistoryPage((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
+      videos.push(...page.videos)
+    }
+    return videos
+  }, { account })
+}
+
+/** @returns {Promise<boolean>} whether the account's watch history is paused, on every device */
+export async function isYouTubeWatchHistoryPaused() {
+  return await withAccount(async innertube => {
+    const { paused } = parseWatchHistoryPage((await innertube.actions.execute('/browse', { browseId: 'FEhistory' })).data)
+    if (paused === null) throw new Error('YouTube did not say whether the watch history is paused')
+    return paused
+  })
+}
+
+/** @param {boolean} paused pauses the account's watch history on every device, or turns it on */
+export async function setYouTubeWatchHistoryPaused(paused) {
+  await withAccount(innertube => innertube.actions.execute(paused ? '/history/pause_watch_history' : '/history/resume_watch_history', {}))
 }
 
 /** @type {Promise<number | undefined> | null} */

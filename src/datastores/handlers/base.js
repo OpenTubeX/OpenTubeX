@@ -8,7 +8,7 @@ import { migrateStoredSettings } from '../settingsMigrations'
 import { getSecretCipher } from '../secretCipher'
 import { decodeSettings, encodeSetting, migrateSecretSettings } from '../secretSettings'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
-import { hasReachedWatchedThreshold, mergeLibreTubeHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
+import { hasReachedWatchedThreshold, mergeUndatedHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
@@ -426,11 +426,11 @@ class History {
    * Merges imported records with the saved ones when they are written, so a
    * watch another window records during the import is kept.
    * @param {object[]} records
-   * @param {'replace' | 'takeout' | 'libretube'} rule whether imported records replace saved ones or only fill what they lack
+   * @param {'replace' | 'takeout' | 'undated'} rule whether imported records replace saved ones or only fill what they lack
    * @returns {Promise<object[]>} the saved records
    */
   static importRecords(records, rule) {
-    const merge = { takeout: mergeTakeoutHistoryRecord, libretube: mergeLibreTubeHistoryRecord }[rule] ?? ((_current, imported) => imported)
+    const merge = { takeout: mergeTakeoutHistoryRecord, undated: mergeUndatedHistoryRecord }[rule] ?? ((_current, imported) => imported)
     return this._mergeRecords(records, merge)
   }
 

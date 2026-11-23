@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Synkronisera prenumerationer med YouTube"
     Sync Playlists: "Synkronisera spellistor med YouTube"
     Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"
+    YouTube Watch History: "Spara visningshistorik på YouTube"
+    Watch History Change Failed: "Det gick inte att ändra inställningen för visningshistorik på YouTube: {error}"
+    Import Watch History: "Importera visningshistorik"
+    Import Watch History Confirmation: "Vill du importera din visningshistorik från YouTube till den här profilens historik? YouTube anger inte när du tittade på varje video, så nya poster behåller YouTubes ordning och får dagens datum. Videor som redan finns i din historik behåller sina datum."
+    Importing Watch History: "Importerar visningshistorik från YouTube: 1 video läst | Importerar visningshistorik från YouTube: {count} videor lästa"
+    Watch History Imported: "Importerade 1 video från din visningshistorik på YouTube | Importerade {count} videor från din visningshistorik på YouTube"
+    Import Watch History Failed: "Det gick inte att importera visningshistoriken från YouTube: {error}"
+    Keep Playlists Confirmation: "Vill du behålla spellistorna som synkroniserats från YouTube på den här enheten? Spellistor som behålls blir vanliga spellistor som inte längre synkroniseras med YouTube. Oavsett vilket finns de kvar på YouTube."
+    Keep Playlists: "Behåll spellistor"
+    Remove Playlists: "Ta bort från den här enheten"
+    Keep Playlists Failed: "Det gick inte att behålla spellistorna: {error}"
     Rate Videos: "Gilla och ogilla videor och inlägg"
     Sync Now: "Synkronisera nu"
     Synced: "Synkroniserat med YouTube"
@@ -2373,8 +2384,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Kommentarer du skriver här bevakas automatiskt efter svar, så länge svarsaviseringar är aktiverade i kommentarsinställningarna."
     Sync Subscriptions: "Kanaler som du prenumererar på via YouTube läggs till i Alla kanaler, och kanaler som du slutar prenumerera på där tas bort från alla profiler. Att prenumerera eller avsluta en prenumeration i Alla kanaler här gör samma sak på YouTube."
-    Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. Om du stänger av detta tas de bort från den här enheten men inte från YouTube."
+    Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. När du stänger av detta eller loggar ut kan du behålla dem på den här enheten som vanliga spellistor. De finns kvar på YouTube oavsett."
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
+    YouTube Watch History: "Om YouTube sparar videorna du tittar på med den här kanalen, på alla enheter. Om du stänger av detta pausas visningshistoriken på YouTube."
     Rate Videos: "Visar knappar för att gilla och ogilla videor och inlägg. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik. Betyg på inlägg slås inte upp, så bara de du ger här visas."
   General Settings:
     Invidious Instance Credentials: 'Behövs bara om instansen ber om ett användarnamn och lösenord. De sparas bara på den här enheten och skickas bara till den här instansen.'

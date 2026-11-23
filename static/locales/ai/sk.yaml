@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Synchronizovať odbery s YouTube"
     Sync Playlists: "Synchronizovať playlisty s YouTube"
     Add to YouTube Watch History: "Pridávať pozreté videá do histórie YouTube"
+    YouTube Watch History: "Ukladať históriu pozerania na YouTube"
+    Watch History Change Failed: "Nastavenie histórie pozerania na YouTube sa nepodarilo zmeniť: {error}"
+    Import Watch History: "Importovať históriu pozerania"
+    Import Watch History Confirmation: "Importovať históriu pozerania z YouTube do histórie tohto profilu? YouTube neuvádza, kedy ste jednotlivé videá pozerali, preto nové záznamy zachovajú poradie z YouTube a dostanú aktuálny dátum. Videá, ktoré už v histórii máte, si zachovajú svoje dátumy."
+    Importing Watch History: "Importuje sa história pozerania z YouTube: načítané 1 video | Importuje sa história pozerania z YouTube: načítané {count} videá | Importuje sa história pozerania z YouTube: načítaných {count} videí"
+    Watch History Imported: "Z vašej histórie pozerania na YouTube bolo importované 1 video | Z vašej histórie pozerania na YouTube boli importované {count} videá | Z vašej histórie pozerania na YouTube bolo importovaných {count} videí"
+    Import Watch History Failed: "Históriu pozerania z YouTube sa nepodarilo importovať: {error}"
+    Keep Playlists Confirmation: "Ponechať playlisty synchronizované z YouTube v tomto zariadení? Ponechané playlisty sa stanú bežnými playlistami, ktoré sa už s YouTube nesynchronizujú. Na YouTube zostanú v každom prípade."
+    Keep Playlists: "Ponechať playlisty"
+    Remove Playlists: "Odstrániť z tohto zariadenia"
+    Keep Playlists Failed: "Playlisty sa nepodarilo ponechať: {error}"
     Rate Videos: "Označovať videá a príspevky ako páči a nepáči"
     Sync Now: "Synchronizovať teraz"
     Synced: "Synchronizované s YouTube"
@@ -2372,8 +2383,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Komentáre, ktoré tu uverejníte, sa automaticky sledujú kvôli odpovediam, pokiaľ máte v nastaveniach komentárov zapnuté upozornenia na odpovede."
     Sync Subscriptions: "Kanály, ktoré začnete odoberať na YouTube, sa pridajú do profilu Všetky kanály a kanály, ktorých odber tam zrušíte, sa odstránia zo všetkých profilov. Začatie alebo zrušenie odberu tu v profile Všetky kanály urobí to isté na YouTube."
-    Sync Playlists: "Vaše playlisty z YouTube, Pozrieť neskôr a Videá, ktoré sa mi páčia, sa zobrazia v sekcii Vaše playlisty a zmeny, ktoré v nich tu urobíte, sa urobia aj na YouTube. Nesynchronizujú sa s vašimi ďalšími zariadeniami a nie sú zahrnuté, keď exportujete všetky playlisty alebo zálohujete svoje údaje. Vypnutím tejto možnosti sa odstránia z tohto zariadenia, ale nie z YouTube."
+    Sync Playlists: "Vaše playlisty z YouTube, Pozrieť neskôr a Videá, ktoré sa mi páčia, sa zobrazia v sekcii Vaše playlisty a zmeny, ktoré v nich tu urobíte, sa urobia aj na YouTube. Nesynchronizujú sa s vašimi ďalšími zariadeniami a nie sú zahrnuté, keď exportujete všetky playlisty alebo zálohujete svoje údaje. Keď túto možnosť vypnete alebo sa odhlásite, môžete si ich v tomto zariadení ponechať ako bežné playlisty. Na YouTube zostanú v každom prípade."
     Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
+    YouTube Watch History: "Či YouTube ukladá videá, ktoré pozeráte s týmto kanálom, na všetkých zariadeniach. Vypnutím tejto možnosti sa história pozerania na YouTube pozastaví."
     Rate Videos: "Zobrazuje pri videách a príspevkoch tlačidlá Páči sa mi a Nepáči sa mi. Aby sa zobrazilo vaše hodnotenie, každé otvorené video sa vyhľadá na YouTube s vaším účtom, takže YouTube zistí, ktoré videá otvárate, aj keď sa nepridajú do histórie pozerania. Hodnotenia príspevkov sa nevyhľadávajú, takže sa zobrazia len tie, ktoré zadáte tu."
   General Settings:
     Invidious Instance Credentials: 'Potrebné len vtedy, keď inštancia vyžaduje používateľské meno a heslo. Ukladajú sa len v tomto zariadení a odosielajú sa len tejto inštancii.'

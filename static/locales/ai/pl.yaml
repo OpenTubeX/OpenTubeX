@@ -236,6 +236,17 @@ Settings:
     Sync Subscriptions: "Synchronizuj subskrypcje z YouTube"
     Sync Playlists: "Synchronizuj playlisty z YouTube"
     Add to YouTube Watch History: "Dodawaj obejrzane filmy do historii YouTube"
+    YouTube Watch History: "Zapisuj historię oglądania na YouTube"
+    Watch History Change Failed: "Nie udało się zmienić ustawienia historii oglądania na YouTube: {error}"
+    Import Watch History: "Importuj historię oglądania"
+    Import Watch History Confirmation: "Zaimportować historię oglądania z YouTube do historii tego profilu? YouTube nie podaje, kiedy obejrzano poszczególne filmy, więc nowe wpisy zachowują kolejność z YouTube i otrzymują bieżącą datę. Filmy, które już są w twojej historii, zachowują swoje daty."
+    Importing Watch History: "Importowanie historii oglądania z YouTube: odczytano 1 film | Importowanie historii oglądania z YouTube: odczytano {count} filmy | Importowanie historii oglądania z YouTube: odczytano {count} filmów"
+    Watch History Imported: "Zaimportowano 1 film z twojej historii oglądania na YouTube | Zaimportowano {count} filmy z twojej historii oglądania na YouTube | Zaimportowano {count} filmów z twojej historii oglądania na YouTube"
+    Import Watch History Failed: "Nie udało się zaimportować historii oglądania z YouTube: {error}"
+    Keep Playlists Confirmation: "Zachować na tym urządzeniu playlisty zsynchronizowane z YouTube? Zachowane playlisty staną się zwykłymi playlistami, które nie są już synchronizowane z YouTube. W obu przypadkach pozostaną na YouTube."
+    Keep Playlists: "Zachowaj playlisty"
+    Remove Playlists: "Usuń z tego urządzenia"
+    Keep Playlists Failed: "Nie udało się zachować playlist: {error}"
     Rate Videos: "Oceniaj filmy i posty łapką w górę i w dół"
     Sync Now: "Zsynchronizuj teraz"
     Synced: "Zsynchronizowano z YouTube"
@@ -1626,8 +1637,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Komentarze publikowane tutaj są automatycznie obserwowane pod kątem odpowiedzi, o ile w ustawieniach komentarzy włączone są powiadomienia o odpowiedziach."
     Sync Subscriptions: "Kanały, które subskrybujesz na YouTube, są dodawane do profilu „Wszystkie kanały”, a kanały, których subskrypcję tam anulujesz, są usuwane ze wszystkich profili. Zasubskrybowanie kanału lub anulowanie jego subskrypcji tutaj w profilu „Wszystkie kanały” robi to samo na YouTube."
-    Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
+    Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Gdy wyłączysz tę opcję lub się wylogujesz, możesz zachować je na tym urządzeniu jako zwykłe playlisty. W obu przypadkach pozostaną na YouTube."
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
+    YouTube Watch History: "Czy YouTube zapisuje filmy, które oglądasz, korzystając z tego kanału, na wszystkich urządzeniach. Wyłączenie tej opcji wstrzymuje historię oglądania na YouTube."
     Rate Videos: "Pokazuje przy filmach i postach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania. Oceny postów nie są sprawdzane, więc widać tylko te, które wystawisz tutaj."
   General Settings:
     Invidious Instance Credentials: 'Potrzebne tylko wtedy, gdy instancja wymaga nazwy użytkownika i hasła. Są przechowywane tylko na tym urządzeniu i wysyłane tylko do tej instancji.'

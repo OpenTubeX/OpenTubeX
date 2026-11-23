@@ -8,7 +8,9 @@ import {
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
   resolveYouTubeSetVideoIds,
-  restoreAfterRefusedEdit
+  restoreAfterRefusedEdit,
+  unlinkYouTubePlaylist,
+  youTubeHistoryRecords
 } from '../../src/renderer/helpers/youtube-sync-merge.js'
 
 const channel = id => ({ id, name: `Channel ${id}`, thumbnail: null })
@@ -151,4 +153,32 @@ test('entries added here get the YouTube entries of their videos before moving',
     [remoteVideo('a', 'SET1'), remoteVideo('b', 'SET2'), remoteVideo('a', 'SET3')]
   )
   assert.deepEqual(resolved.map(video => video.youTubeSetVideoId), ['SET1', 'SET2', 'SET3'])
+})
+
+test('the YouTube watch history imports each video once, in its order, as watched', () => {
+  const watched = (videoId, lengthSeconds = 60) => ({ videoId, title: `Video ${videoId}`, author: 'Example Channel', authorId: 'UCcccccccccccccccccccccc', lengthSeconds, liveNow: false })
+  // The history lists a video again for each time it was watched, the latest first.
+  const records = youTubeHistoryRecords([watched('a'), watched('b', ''), watched('a')], 1000)
+  assert.deepEqual(records.map(({ videoId, timeWatched, lengthSeconds, isWatched }) => ({ videoId, timeWatched, lengthSeconds, isWatched })), [
+    { videoId: 'a', timeWatched: 1000, lengthSeconds: 60, isWatched: true },
+    { videoId: 'b', timeWatched: 999, lengthSeconds: null, isWatched: true }
+  ])
+})
+
+test('a playlist kept after the YouTube sync ends keeps its videos without their YouTube entries', () => {
+  const synced = playlistId => ({
+    _id: `ft-playlist--${playlistId}`,
+    playlistName: 'Example',
+    videos: [savedVideo('a', 'SET1'), savedVideo('b', null)],
+    youTube: { playlistId, accountKey: 'key', title: 'Example', signature: null }
+  })
+  const kept = unlinkYouTubePlaylist(synced('PLexample'))
+  // Null, not missing, so other windows drop the link when they merge the saved fields.
+  assert.equal(kept.youTube, null)
+  assert.equal(kept.sourcePlaylistId, 'PLexample')
+  assert.deepEqual(kept.videos, [savedVideo('a', 'SET1'), savedVideo('b', null)].map(({ youTubeSetVideoId: _id, ...video }) => video))
+
+  // Only the account can open Watch later and Liked videos.
+  assert.equal(unlinkYouTubePlaylist(synced('WL')).sourcePlaylistId, undefined)
+  assert.equal(unlinkYouTubePlaylist(synced('LL')).sourcePlaylistId, undefined)
 })

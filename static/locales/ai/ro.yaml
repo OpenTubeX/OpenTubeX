@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Sincronizați abonamentele cu YouTube"
     Sync Playlists: "Sincronizați listele de redare cu YouTube"
     Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
+    YouTube Watch History: "Salvați istoricul vizionărilor pe YouTube"
+    Watch History Change Failed: "Setarea istoricului vizionărilor YouTube nu a putut fi schimbată: {error}"
+    Import Watch History: "Importați istoricul vizionărilor"
+    Import Watch History Confirmation: "Importați istoricul vizionărilor YouTube în istoricul acestui profil? YouTube nu indică momentul în care ați vizionat fiecare videoclip, așa că intrările noi păstrează ordinea de pe YouTube și primesc data curentă. Videoclipurile care sunt deja în istoric își păstrează datele."
+    Importing Watch History: "Se importă istoricul vizionărilor YouTube: 1 videoclip citit | Se importă istoricul vizionărilor YouTube: {count} videoclipuri citite | Se importă istoricul vizionărilor YouTube: {count} de videoclipuri citite"
+    Watch History Imported: "A fost importat 1 videoclip din istoricul vizionărilor YouTube | Au fost importate {count} videoclipuri din istoricul vizionărilor YouTube | Au fost importate {count} de videoclipuri din istoricul vizionărilor YouTube"
+    Import Watch History Failed: "Istoricul vizionărilor YouTube nu a putut fi importat: {error}"
+    Keep Playlists Confirmation: "Păstrați pe acest dispozitiv listele de redare sincronizate de pe YouTube? Listele păstrate devin liste de redare obișnuite, care nu se mai sincronizează cu YouTube. În orice caz, ele rămân pe YouTube."
+    Keep Playlists: "Păstrați listele de redare"
+    Remove Playlists: "Eliminați de pe acest dispozitiv"
+    Keep Playlists Failed: "Listele de redare nu au putut fi păstrate: {error}"
     Rate Videos: "Apreciază și nu aprecia videoclipuri și postări"
     Sync Now: "Sincronizați acum"
     Synced: "Sincronizat cu YouTube"
@@ -2427,8 +2438,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Comentariile pe care le postezi aici sunt urmărite automat pentru răspunsuri, cât timp notificările despre răspunsuri sunt activate în setările comentariilor."
     Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
-    Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
+    Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Când dezactivați această opțiune sau vă deconectați, le puteți păstra pe acest dispozitiv ca liste de redare obișnuite. În orice caz, ele rămân pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
+    YouTube Watch History: "Dacă YouTube salvează videoclipurile pe care le vizionați cu acest canal, pe toate dispozitivele. Dezactivarea acestei opțiuni întrerupe istoricul vizionărilor pe YouTube."
     Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri și postări. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare. Evaluările postărilor nu sunt căutate, așa că apar doar cele pe care le dai aici."
   General Settings:
     Invidious Instance Credentials: 'Necesar doar dacă instanța cere un nume de utilizator și o parolă. Sunt salvate doar pe acest dispozitiv și trimise doar acestei instanțe.'
