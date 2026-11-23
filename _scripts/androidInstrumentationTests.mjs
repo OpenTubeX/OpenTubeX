@@ -112,15 +112,33 @@ function saveExitDiagnostics() {
 function ensureEmulatorWifi() {
   const hasRoute = () => /default via .* dev wlan0 table/.test(adb('shell', 'ip', 'route', 'show', 'table', 'all').stdout ?? '')
   if (hasRoute()) return
-  console.log('Emulator Wi-Fi lost its wlan0 default route; re-enabling Wi-Fi before retry')
+  console.log('Emulator Wi-Fi lost its wlan0 default route; reconnecting before retry')
+  // The Wi-Fi state machine's history records why the network disconnected.
+  const wifi = join(FIRST_ATTEMPT, 'wifi')
+  mkdirSync(wifi, { recursive: true })
+  for (const [name, ...command] of [
+    ['wifi.txt', 'dumpsys', 'wifi'],
+    ['connectivity.txt', 'dumpsys', 'connectivity'],
+    ['addresses.txt', 'ip', 'address'],
+    ['routes.txt', 'ip', 'route', 'show', 'table', 'all']
+  ]) {
+    writeFileSync(join(wifi, name), adb('shell', ...command).stdout ?? '')
+  }
   adb('shell', 'cmd', 'wifi', 'set-wifi-enabled', 'disabled')
   for (let attempt = 0; attempt < 30 && !(adb('shell', 'cmd', 'wifi', 'status').stdout ?? '').includes('Wifi is disabled'); attempt++) {
     spawnSync('sleep', ['1'])
   }
   adb('shell', 'cmd', 'wifi', 'set-wifi-enabled', 'enabled')
+  for (let attempt = 0; attempt < 30 && !(adb('shell', 'cmd', 'wifi', 'status').stdout ?? '').includes('Wifi is enabled'); attempt++) {
+    spawnSync('sleep', ['1'])
+  }
+  // Re-enabling Wi-Fi alone does not rejoin a network that Android no longer
+  // auto-joins, so connect to the emulator's access point like a user would.
+  adb('shell', 'cmd', 'wifi', 'connect-network', 'AndroidWifi', 'open')
   for (let attempt = 0; attempt < 120 && !hasRoute(); attempt++) {
     spawnSync('sleep', ['1'])
   }
+  console.log(hasRoute() ? 'Emulator Wi-Fi is back' : 'Emulator Wi-Fi is still missing its wlan0 default route')
 }
 
 // Gradle can report success after the emulator has crashed and skipped the
