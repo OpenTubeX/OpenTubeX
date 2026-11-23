@@ -583,10 +583,11 @@ async function saveProfile(confirmedSharedSettings = false) {
 
   const showSaveError = () => showToast({ message: t('Profile.Profile Could Not Be Saved'), icon: ['fas', 'circle-exclamation'] })
   if (props.isNew) {
-    const ownSettings = keepSettingsSeparate.value
-    const created = store.dispatch('createProfile', keepDataSeparate.value
-      ? { ...details, separate: true, subscriptions: [], ownSettings }
-      : { ...details, subscriptions: deepCopy(props.profile.subscriptions), ownSettings })
+    const created = store.dispatch('createProfile', {
+      ...details,
+      ...(keepDataSeparate.value ? { separate: true, subscriptions: [] } : { subscriptions: deepCopy(props.profile.subscriptions) }),
+      ownSettings: keepSettingsSeparate.value,
+    })
     emit('new-profile-created')
     if (await created) {
       showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
