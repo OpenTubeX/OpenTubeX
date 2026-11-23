@@ -19,6 +19,9 @@ const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
 const MAX_TAB_AVATAR_SOURCE_PIXELS = 4096 * 4096
 const TAB_AVATAR_SIZE = 64
+// Previews saved to disk are kept in memory only for the recently shown tabs.
+// Each is a base64 JPEG of up to about a megapixel, and every tab had one.
+const MEMORY_CACHED_PREVIEW_LIMIT = 16
 
 /**
  * Read the dimensions of the formats nativeImage decodes from buffers (PNG and
@@ -74,6 +77,27 @@ export class TabPreviewController {
     this.previewsEnabled = true
     this._transitionId = 0
     this.avatarsEnabled = true
+    /** Tabs whose saved preview stays in memory, least recently used first. */
+    this._memoryCachedTabIds = new Set()
+  }
+
+  /**
+   * Keeps a preview in memory, and releases the least recently used ones that
+   * can be read from disk again.
+   * @param {TabInfo} tab
+   * @param {string} dataUrl
+   */
+  _rememberDataUrl(tab, dataUrl) {
+    tab.previewDataUrl = dataUrl
+    this._memoryCachedTabIds.delete(tab.id)
+    this._memoryCachedTabIds.add(tab.id)
+    for (const tabId of this._memoryCachedTabIds) {
+      if (this._memoryCachedTabIds.size <= MEMORY_CACHED_PREVIEW_LIMIT) break
+      this._memoryCachedTabIds.delete(tabId)
+      const cached = this.manager.tabs.get(tabId)
+      // Incognito previews are never written to disk.
+      if (cached && !cached.isIncognito && cached.previewFileName != null) cached.previewDataUrl = null
+    }
   }
 
   /**
@@ -117,12 +141,13 @@ export class TabPreviewController {
    */
   async _getCachedDataUrl(tab) {
     if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
+      this._rememberDataUrl(tab, tab.previewDataUrl)
       return tab.previewDataUrl
     }
 
     const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
     if (dataUrl != null) {
-      tab.previewDataUrl = dataUrl
+      this._rememberDataUrl(tab, dataUrl)
     }
     return dataUrl
   }
@@ -347,7 +372,7 @@ export class TabPreviewController {
         }
 
         const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
-        tab.previewDataUrl = dataUrl
+        this._rememberDataUrl(tab, dataUrl)
         tab.previewCapturedAt = Date.now()
         // Incognito tabs keep their previews in memory only
         if (!tab.isIncognito) {
