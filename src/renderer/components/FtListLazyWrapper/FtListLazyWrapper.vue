@@ -388,7 +388,10 @@ watch(heightKey, key => {
 onBeforeUnmount(() => {
   // Skip rows that never rendered, whose shell only has its minimum height.
   if (heightKey.value === null || (!visible.value && !shellHeight.value)) return
-  const height = shell.value?.getBoundingClientRect().height
+  // Prefer a height measured earlier. A filter removing many rows unmounts them
+  // one by one, and reading each box after the previous removal forces a layout.
+  const height = windowItem?.measuredHeight() ||
+    (visible.value ? shell.value?.getBoundingClientRect().height : shellHeight.value)
   if (height > 0) rememberListItemHeight(heightKey.value, height)
 })
 const windowItemObserved = ref(false)

@@ -173,6 +173,8 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
           if (!item.near && !item.isMounted() && item.height > 0) scheduleRemeasure(item)
         },
         dispose: () => item.dispose(),
+        // The last height the resize observer or an eviction measured, or 0.
+        measuredHeight: () => item.height,
       }
     },
     disconnect() {
