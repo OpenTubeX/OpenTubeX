@@ -98,39 +98,19 @@ test('a route whose code failed to preload still opens on click', async ({ page 
   await page.route(/^app:\/\/bundle\/.*\.js$/, route => route.abort())
 
   const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.channelName').first()
-  const failedRequest = page.waitForEvent('requestfailed', request => request.url().startsWith('app://bundle/'))
-  // TEMP diagnostics
-  await page.evaluate(() => {
-    const events = window.__e2eEvents ??= []
-    const describe = (target) => {
-      if (!(target instanceof Element)) return target === document ? 'document' : target === window ? 'window' : String(target)
-      const link = target.closest('a[href^="#/"]')?.getAttribute('href')
-      return [target.tagName.toLowerCase(), ...target.classList].join('.') + (link ? ` in ${link}` : '')
-    }
-    const bundles = () => performance.getEntriesByType('resource').filter(e => e.name.startsWith('app://bundle/')).map(e => e.name.slice(13) + '@' + Math.round(e.startTime))
-    events.push({ t: Math.round(performance.now()), bundles: bundles() })
-    for (const type of ['pointermove', 'pointerout', 'pointerover', 'pointerdown', 'focusin', 'focusout', 'scroll', 'wheel']) {
-      document.addEventListener(type, (event) => {
-        events.push({ t: Math.round(performance.now()), type, target: describe(event.target), ...(event instanceof PointerEvent ? { pointerType: event.pointerType, relatedTarget: event.relatedTarget && describe(event.relatedTarget) } : {}) })
-      }, { capture: true, passive: true })
-    }
-    const realSetTimeout = window.setTimeout
-    window.__diagTimers = []
-    window.setTimeout = function (fn, delay, ...rest) {
-      if (delay === 80) {
-        const entry = { t: Math.round(performance.now()), fired: null }
-        events.push({ timer80: entry })
-        return realSetTimeout.call(this, (...a) => { entry.fired = Math.round(performance.now()); return fn(...a) }, delay, ...rest)
-      }
-      return realSetTimeout.call(this, fn, delay, ...rest)
-    }
-    realSetTimeout(() => events.push({ t: Math.round(performance.now()), bundlesLater: bundles(), hit: describe(document.elementFromPoint(229, 480)) }), 3000)
+  let preloadFailed = false
+  page.on('requestfailed', (request) => {
+    if (request.url().startsWith('app://bundle/')) preloadFailed = true
   })
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
-  await link.hover()
-  await failedRequest
-  await page.waitForTimeout(3100)
-  await test.info().attach('diag', { body: JSON.stringify(await page.evaluate(() => window.__e2eEvents), null, 1), contentType: 'application/json' })
+  // The worker's Xvfb pointer rests on the page. Its first pointer event can
+  // arrive just after a hover right at startup and move the intent off the
+  // link, so hover again until the preload is requested.
+  await expect(async () => {
+    await page.mouse.move(0, 0)
+    await link.hover()
+    await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
+  }).toPass()
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
 
   await page.unroute(/^app:\/\/bundle\/.*\.js$/)
