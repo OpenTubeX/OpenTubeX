@@ -67,11 +67,14 @@ export async function createMainTranslator() {
   const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
   const humanMessages = new Map()
   const aiMessages = new Map()
+  // Missing base locales are expected, but these two files should load.
+  let requiredLocaleFailed = false
 
   for (const locale of candidateLocales) {
     try {
       humanMessages.set(locale, await loadLocaleMessages(locale))
     } catch (error) {
+      if (locale === currentLocale || locale === fallbackLocale) requiredLocaleFailed = true
       if (locale === fallbackLocale) {
         console.error('Failed to load fallback locale for close confirmation dialog:', error)
       }
@@ -110,7 +113,7 @@ export async function createMainTranslator() {
     })
   }
 
-  return (key, parameters = {}, pluralChoice) => {
+  const translate = (key, parameters = {}, pluralChoice) => {
     for (const { locale, messages } of messagesByLocale) {
       const message = getLocaleMessage(key, messages)
       if (message) {
@@ -129,10 +132,14 @@ export async function createMainTranslator() {
 
     return key
   }
+  if (requiredLocaleFailed) incompleteTranslators.add(translate)
+  return translate
 }
 
 /** @param {string} key */
 const untranslated = key => key
+/** Translators missing a locale that should load, tried again when next needed. */
+const incompleteTranslators = new WeakSet([untranslated])
 /** @type {Promise<Awaited<ReturnType<typeof createMainTranslator>>> | null} */
 let mainTranslatorPromise = null
 
@@ -152,7 +159,7 @@ export async function getMainTranslator() {
     const t = await promise
     if (promise !== mainTranslatorPromise) continue
     // Try loading the translations again the next time one is needed.
-    if (t === untranslated) mainTranslatorPromise = null
+    if (incompleteTranslators.has(t)) mainTranslatorPromise = null
     return t
   }
 }
