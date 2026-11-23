@@ -42,10 +42,16 @@ export const SHARED_ONLY_SETTINGS = new Set([
   // active, and its zoom commands change the shared scale.
   'hideStartupSplash',
   'uiScale',
-  // The main process applies these to every window.
+  // The main process applies these to every window, or reads them for its
+  // own menus, tabs and downloads.
   'contextMenuSearchEngines',
   'keyboardShortcuts',
   'tabCloseFocus',
+  'newTabPosition',
+  'rememberTabNavigationHistory',
+  'currentLocale',
+  'useAITranslationCompletions',
+  'enableDownloads',
   'showSkipSilenceButton',
   'enableSkipSilenceByDefault',
   // Notifications, background refreshes and downloads run for every profile.

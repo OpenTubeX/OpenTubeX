@@ -813,6 +813,19 @@ function applyActiveProfileSettings(store) {
   if (plan.applied !== current.applied && !plan.changed.includes('iconPack')) {
     applySettingSideEffects(store, 'iconPack', settings.iconPack)
   }
+  reportProfileSettings(settings)
+}
+
+/**
+ * Tells the main process which own settings this window's active profile
+ * shows, as it opens tabs on its landing page and follows its base theme.
+ * @param {Record<string, any>} settings the settings state
+ */
+function reportProfileSettings(settings) {
+  if (!process.env.IS_ELECTRON) return
+  const shown = Object.fromEntries(Object.keys(settings.profileSettingsState.shared).map(key => [key, settings[key]]))
+  // The store's proxies can't be sent.
+  window.ftElectron.applyProfileSettings(JSON.parse(JSON.stringify({ settings: shown, baseTheme: settings.baseTheme })))
 }
 
 /**
@@ -827,9 +840,6 @@ function applySettingSideEffects({ dispatch }, settingId, value) {
     dispatch('redirectHomeTabsToLandingPage').catch(error => {
       console.error('Failed to redirect Home tabs after the navigation items changed', error)
     })
-  }
-  if (settingId === 'baseTheme' && process.env.IS_ELECTRON) {
-    window.ftElectron.applyProfileBaseTheme(value)
   }
 }
 
@@ -1899,9 +1909,7 @@ const customActions = {
       commit('setProfileSettingsList', profileSettings)
       if (startupProfile !== null) {
         commit('applyProfileSettings', planProfileSettings(state, startupProfile))
-        if (Object.hasOwn(startupProfileSettings, 'baseTheme') && process.env.IS_ELECTRON) {
-          window.ftElectron.applyProfileBaseTheme(state.baseTheme)
-        }
+        reportProfileSettings(state)
       }
 
       for (const _id of settingsWithSideEffects) {

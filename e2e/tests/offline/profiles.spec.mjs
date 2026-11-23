@@ -442,7 +442,7 @@ test.describe('profile with its own settings', () => {
   const ownSettingsId = 'profileSettings-65326570726f66696c65'
   test.use({
     seed: {
-      settings: { defaultProfile: 'e2eprofile', hideComments: false, hideLiveChat: false, [ownSettingsId]: { hideComments: true } },
+      settings: { defaultProfile: 'e2eprofile', hideComments: false, hideLiveChat: false, [ownSettingsId]: { hideComments: true, landingPage: 'history' } },
       profiles: [mainProfile, { ...secondProfile, name: 'Car' }],
     }
   })
@@ -451,10 +451,20 @@ test.describe('profile with its own settings', () => {
     const effective = () => page.evaluate(() => [window.$store.getters.getHideComments, window.$store.getters.getHideLiveChat])
     const saved = () => {
       const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
-      return [settings.hideComments, settings.hideLiveChat, settings[ownSettingsId]]
+      const { landingPage: _, ...own } = settings[ownSettingsId]
+      return [settings.hideComments, settings.hideLiveChat, own]
     }
-    // As the default profile, it starts with its own values.
+    const route = () => page.evaluate(() => window.$router.currentRoute.value.path)
+    // As the default profile, it starts with its own values, also on the
+    // landing page of the tabs the main process opens.
     await expect.poll(effective).toEqual([true, false])
+    await expect.poll(route).toBe('/history')
+    await page.getByRole('button', { name: 'New Tab' }).click()
+    await expect.poll(route).toBe('/history')
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await page.getByRole('button', { name: 'New Tab' }).click()
+    await expect.poll(route).toBe('/subscriptions')
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
 
     const distraction = await goToSettingsSection(page, 'distraction')
     await expect(page.locator('.profileSettingsNotice')).toBeVisible()

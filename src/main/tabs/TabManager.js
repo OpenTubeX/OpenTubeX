@@ -28,6 +28,7 @@ import {
   getStoredCloseWindowWithLastTab,
   getStoredLandingRoute,
   getStoredNewTabPosition,
+  getStoredStartupProfileSettings,
   getStoredRememberTabNavigationHistory,
   getTabCloseFocus,
   normalizeNewTabPosition,
@@ -354,6 +355,12 @@ export class TabManager {
     this._setWindowTitle = title => setTitle(formatWindowTitle(title))
     this.rootAppUrl = rootAppUrl
     this.sessionId = sessionId || randomUUID()
+    /**
+     * The own settings of the window's active profile, which its renderer
+     * reports, or null until it does.
+     * @type {Record<string, unknown> | null}
+     */
+    this.profileSettings = null
     /** @type {Map<string, TabInfo>} */
     this.tabs = new Map()
     /** @type {string|null} */
@@ -726,13 +733,18 @@ export class TabManager {
    * @param {object} [options]
    * @returns {Promise<TabInfo>}
    */
+  /** The landing page of the window's active profile */
+  async getLandingRoute() {
+    return TabManager.getStoredLandingRoute(this.profileSettings ?? await getStoredStartupProfileSettings())
+  }
+
   async createTabWithPreference(options = {}) {
     const openPosition = options.openPosition == null
       ? await getStoredNewTabPosition()
       : normalizeNewTabPosition(options.openPosition)
     const tabOptions = options.url || options.route
       ? options
-      : { ...options, route: await TabManager.getStoredLandingRoute() }
+      : { ...options, route: await this.getLandingRoute() }
 
     const canBatchRapidCreation = this.activeTabId != null && tabOptions.makeActive === false
     const deferUpdates = canBatchRapidCreation && this._rapidTabCreationBatch != null
@@ -1296,7 +1308,7 @@ export class TabManager {
       closingTabIds.includes(tabId) || this._deferredCloseTabIds.has(tabId)
     ))
     if (closesEveryTab() && !await getStoredCloseWindowWithLastTab()) {
-      const route = await TabManager.getStoredLandingRoute()
+      const route = await this.getLandingRoute()
       // Keep the window open with a new tab in place of the closed ones, unless
       // a concurrent close already added one while this one waited.
       if (closesEveryTab()) this.createTab({ route, makeActive: true })
@@ -2747,7 +2759,7 @@ export class TabManager {
     try {
       const restoreNavigationHistory = await getStoredRememberTabNavigationHistory()
       this._restoreTabGroups(sessionData.groups)
-      const landingRoute = loadLandingPage ? await TabManager.getStoredLandingRoute() : null
+      const landingRoute = loadLandingPage ? await this.getLandingRoute() : null
       const activeTabData = loadLandingPage
         ? sessionData.tabs.find(tab => getRouteFromUrl(tab.url).path === landingRoute)
         : sessionData.tabs.find(tab => tab.id === sessionData.activeTabId)

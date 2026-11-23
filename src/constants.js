@@ -25,7 +25,7 @@ const IpcChannels = {
   APP_READY: 'app-ready',
   RELAUNCH_REQUEST: 'relaunch-request',
   SET_TITLE_BAR_OVERLAY: 'set-title-bar-overlay',
-  APPLY_PROFILE_BASE_THEME: 'apply-profile-base-theme',
+  APPLY_PROFILE_SETTINGS: 'apply-profile-settings',
   TITLE_BAR_MIDDLE_CLICK: 'title-bar-middle-click',
   WINDOW_CONTROLS_GET: 'window-controls-get',
   WINDOW_CONTROLS_STATE: 'window-controls-state',

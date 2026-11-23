@@ -30,6 +30,7 @@ import {
 import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
 import { resolveSystemTheme } from '../appearanceSettings'
+import { SHARED_ONLY_SETTINGS, profileSettingsOf } from '../profileSettings.js'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import { applyYouTubeUserAgent } from '../youTubeUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -2917,10 +2918,13 @@ function runApp() {
     }
   }
 
-  // A profile with its own settings can show another base theme than the
-  // saved one, which native controls and the system color scheme follow.
-  onTrusted(IpcChannels.APPLY_PROFILE_BASE_THEME, (_, baseTheme) => {
-    applyBaseTheme(baseTheme).catch(error => console.error('Failed to apply the profile base theme', error))
+  // A window's active profile can show its own settings instead of the saved
+  // ones: its tabs open its landing page, and native controls and the system
+  // color scheme follow its base theme.
+  onTrusted(IpcChannels.APPLY_PROFILE_SETTINGS, (event, profileSettings) => {
+    const tabManager = TabManager.getFromWebContents(event.sender)
+    if (tabManager) tabManager.profileSettings = profileSettingsOf(profileSettings?.settings, settingId => !SHARED_ONLY_SETTINGS.has(settingId))
+    applyBaseTheme(profileSettings?.baseTheme).catch(error => console.error('Failed to apply the profile base theme', error))
   })
 
   /** @param {{ _id: string, value: any }} data */

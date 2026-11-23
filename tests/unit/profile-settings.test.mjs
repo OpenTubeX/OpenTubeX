@@ -289,6 +289,7 @@ test('replacing the active profile\'s own settings with others of the same value
 ({ applyActiveProfileSettings })`, {
     ...profileSettings,
     canHaveOwnSettings: () => true,
+    process: { env: {} },
     planProfileSettings: (settings, target) => planProfileSettingsOf(settings, target, () => true),
   })
   const settings = { hideComments: false, hideLiveChat: false, profileSettingsState: { applied: null, shared: {}, overrides: { car: { hideComments: false } } } }
