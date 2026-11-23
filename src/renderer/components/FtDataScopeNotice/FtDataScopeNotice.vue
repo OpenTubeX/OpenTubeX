@@ -1,11 +1,11 @@
 <template>
   <p
-    v-if="separateProfile"
+    v-if="profile"
     class="dataScopeNotice"
   >
     <FtIcon
       class="dataScopeNoticeIcon"
-      :icon="['fas', 'user-lock']"
+      :icon="settings ? ['fas', 'circle-user'] : ['fas', 'user-lock']"
       aria-hidden="true"
     />
     <span>{{ message }}</span>
@@ -24,21 +24,28 @@ const props = defineProps({
   storage: {
     type: Boolean,
     default: false
+  },
+  /** Whether it explains that settings changes only apply to the active profile, which has its own settings */
+  settings: {
+    type: Boolean,
+    default: false
   }
 })
 
 const { t } = useI18n()
 
-/** The active profile while it keeps its data separate */
-const separateProfile = computed(() => {
+/** The active profile while it keeps its data, or its settings, separate */
+const profile = computed(() => {
+  if (props.settings) return store.getters.getProfileSettingsTarget === null ? null : store.getters.getActiveProfile
   return store.getters.getActiveDataScope === null ? null : store.getters.getActiveProfile
 })
 
 const message = computed(() => {
-  const profile = separateProfile.value?.name ?? ''
+  const name = profile.value?.name ?? ''
+  if (props.settings) return t('Profile.Own Settings Notice', { profile: name })
   return props.storage
-    ? t('Profile.Separate Data Storage Notice', { profile })
-    : t('Profile.Separate Data Notice', { profile })
+    ? t('Profile.Separate Data Storage Notice', { profile: name })
+    : t('Profile.Separate Data Notice', { profile: name })
 })
 </script>
 

@@ -4,11 +4,28 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 const settingsSection = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end))
 const generatedSettingActions = settingsSection('const getters = {}', '// Add all custom data')
+// Names the settings module defines for profiles with their own settings,
+// which these tests leave out: every write saves the shared settings.
+const profileSettingsContext = {
+  settingTarget: () => null,
+  isSettingReplaced: () => false,
+  assignSharedSetting: (state, settingId, value) => { state[settingId] = value },
+  DEFAULT_SETTINGS: {},
+  customActions: {},
+  SHARED_ONLY_SETTINGS: new Set(),
+  PROFILE_ROUTED_CUSTOM_SETTINGS: new Set(),
+  PROFILE_SPECIFIC_SETTINGS: new Set(),
+  isProfileSettingsId: () => false,
+  withSharedSettings: operation => operation(),
+  sharedSettingValue: (settings, settingId) => settings[settingId],
+  syncedProfileSettings: () => null,
+  canHaveOwnSettings: () => false,
+}
 
 function deferred () {
   let resolvePromise
@@ -171,6 +188,7 @@ test('generated setting updaters report whether the write was saved and save eve
   let editTimeSaved = Promise.resolve()
   const writes = []
   const actions = vm.runInNewContext(`${generatedSettingActions}\nactions`, {
+    ...profileSettingsContext,
     state: { uiScale: 100, theme: 'dark' },
     settingsWithSideEffects: ['theme'],
     sideEffectHandlers: { theme: () => {} },
@@ -224,6 +242,7 @@ test('a setting saved by another window during this window\'s write shows the la
   const started = deferred()
   const release = deferred()
   const actions = vm.runInNewContext(`${generatedSettingActions}\nactions`, {
+    ...profileSettingsContext,
     state: { theme: 'dark' },
     settingsWithSideEffects: [],
     defaultGetterId: id => `get${id}`,
@@ -267,6 +286,7 @@ test('the last locale change wins when an earlier locale finishes loading later'
   const i18n = { global: { locale: { value: 'en-US' } } }
   const remembered = []
   const handlers = vm.runInNewContext(`({${settingsSection('  currentLocale:', '  defaultInvidiousInstance:')}})`, {
+    ...profileSettingsContext,
     runLocaleChange: createSettingUpdateQueue(),
     i18n,
     rememberStartupLocale: locale => remembered.push(locale),
@@ -303,6 +323,7 @@ test('an ordered setting saved by another window before this window\'s write sho
   const started = deferred()
   const release = deferred()
   const updateOrderedSetting = vm.runInNewContext(`${settingsSection('const updateOptimisticSetting', 'const editSavedSetting')}\nupdateOrderedSetting`, {
+    ...profileSettingsContext,
     createOptimisticSettingUpdater,
     settingWrites,
     defaultMutationId: id => `set${id}`,
@@ -338,6 +359,7 @@ test('list edits keep the entries other windows saved meanwhile', async () => {
   const started = deferred()
   const release = deferred()
   const updateSharedSetting = vm.runInNewContext(`${settingsSection('const editSavedSetting', 'let androidProxyUpdate')}\nupdateSharedSetting`, {
+    ...profileSettingsContext,
     createSavedSettingEditor,
     settingWrites,
     defaultMutationId: id => `set${id}`,
@@ -432,6 +454,7 @@ test('edit times stay with their values when windows edit settings at once or a 
   const createWindow = () => {
     const settings = { syncServerSettingUpdatedAt: {} }
     const saveSettingEdit = vm.runInNewContext(`${timestampSection}\nsaveSettingEdit`, {
+      ...profileSettingsContext,
       isSettingSyncable: id => ['baseTheme', 'listType'].includes(id),
       CUSTOM_THEMES_SYNC_KEY: 'customThemes',
       // Every window shares the database and its locks.
@@ -488,11 +511,13 @@ test('settings sync waits for an optimistic edit to save its edit time', async (
   const key = 'pinnedPlaylistIds'
   const settingWrites = createSettingWriteTracker(async () => undefined)
   const context = vm.createContext({
+    ...profileSettingsContext,
     areSyncSettingValuesEqual,
     mergeSettingEntry,
     mergeSettingItemsEntry,
     isListSetting,
     mergeSettingListEntry,
+    mergeProfileSettingsEntry,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',

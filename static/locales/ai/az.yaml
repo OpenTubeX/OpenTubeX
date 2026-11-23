@@ -1687,6 +1687,7 @@ Settings:
     Title: "Abunəlik vərəqləri"
     Hint: "Abunəliklər səhifəsindəki vərəqlərin sırasını dəyişin. Gizlədilmiş vərəqlər yenidən göstərildikdə öz yerlərini saxlayır."
     Hidden: "(gizli)"
+  Profile Setting: "Yalnız {profile} istifadə edir. Əvəzində ortaq dəyərdən istifadə etmək üçün seçin."
 Tutorial:
   Skip: Ötür
   Next: Növbəti
@@ -1761,6 +1762,13 @@ Profile:
   Use Initial: Baş hərfdən istifadə et
   The selected image could not be loaded: Seçilmiş şəkli yükləmək mümkün olmadı
   Theme Color: Mövzu rəngi
+  Keep Settings Separate: "Ayarları ayrı saxla"
+  Keep Settings Separate Tooltip: "Bu profilə öz ayarlarını verir; onlar əvvəlcə ortaq ayarlarınızla eyni olur. Bu profil aktiv olduqda Ayarlarda edilən dəyişikliklər yalnız ona aid olur. Sinxronizasiya, proksi, ehtiyat nüsxələr və endirmə qovluqları kimi bu cihazın ayarları ortaq qalır."
+  Own Settings: "Öz ayarları"
+  Own Settings Notice: "{profile} ayarlarını ayrı saxlayır, ona görə də buradakı dəyişikliklər yalnız ona aid olur. Sinxronizasiya, proksi və ehtiyat nüsxələr kimi cihaz ayarları ortaq qalır."
+  Use Shared Settings: "Ortaq ayarlardan istifadə et"
+  Use Shared Settings Warning: "{profile} yenidən ortaq ayarlarınızdan istifadə edəcək və onun üçün dəyişdiyiniz ayarlar silinəcək."
+  Profile Could Not Be Saved: "Profil yadda saxlanıla bilmədi"
 Channel:
   Hide Watched: Baxılanları gizlət
   All Videos Watched: "Bu videoların hamısına baxmısınız. Onları göstərmək üçün “Baxılanları gizlət” seçimini söndürün."

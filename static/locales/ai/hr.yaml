@@ -1699,6 +1699,7 @@ Settings:
     Title: "Kartice pretplata"
     Hint: "Promijenite redoslijed kartica na stranici Pretplate. Skrivene kartice zadržavaju svoje mjesto za kada ih ponovno prikažete."
     Hidden: "(skriveno)"
+  Profile Setting: "Koristi ga samo {profile}. Odaberi za korištenje zajedničke vrijednosti."
 Tutorial:
   Skip: Preskoči
   Next: Dalje
@@ -1774,6 +1775,13 @@ Profile:
   The selected image could not be loaded: Odabranu sliku nije moguće učitati
   Theme Color: Boja teme
   Go To Profile Manager: Otvori upravitelja profila
+  Keep Settings Separate: "Zadrži postavke odvojeno"
+  Keep Settings Separate Tooltip: "Daje ovom profilu vlastite postavke, koje su na početku iste kao tvoje zajedničke postavke. Dok je ovaj profil aktivan, promjene u Postavkama vrijede samo za njega. Postavke ovog uređaja, poput sinkronizacije, proxyja, sigurnosnih kopija i mapa za preuzimanje, ostaju zajedničke."
+  Own Settings: "Vlastite postavke"
+  Own Settings Notice: "{profile} drži svoje postavke odvojeno, pa promjene ovdje vrijede samo za njega. Postavke uređaja, poput sinkronizacije, proxyja i sigurnosnih kopija, ostaju zajedničke."
+  Use Shared Settings: "Koristi zajedničke postavke"
+  Use Shared Settings Warning: "{profile} će ponovno koristiti tvoje zajedničke postavke, a postavke koje si promijenio/la za njega bit će izbrisane."
+  Profile Could Not Be Saved: "Profil nije moguće spremiti"
 Channel:
   Hide Watched: Sakrij pogledane
   All Videos Watched: "Pogledali ste sve ove videozapise. Isključite „Sakrij pogledane” da biste ih prikazali."

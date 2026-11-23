@@ -6,6 +6,7 @@ import { SqliteDatastore } from '../datastores/sqlite.js'
 import { desktopDatastorePaths } from '../datastores/sqliteNode.js'
 import { migrateLegacyHistoryRecord } from '../history.js'
 import { getTransferableSettings } from '../nonTransferableSettings.js'
+import { collectProfileSettings } from '../profileSettings.js'
 import { createDefaultSettings, resolveDefaultLandingPage } from '../settingsDefaults.js'
 import { BACKUP_SECTIONS, PROFILE_DATA_SECTIONS, createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
 import { migrateLegacySettings } from '../renderer/helpers/settings-migrations.js'
@@ -81,7 +82,13 @@ async function prepareArchive() {
         landingPage: resolveDefaultLandingPage(isFreshInstallation),
         ...migrateLegacySettings(Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value]))),
       }
-      return getTransferableSettings(resolvedSettings)
+      // The own settings of each profile, which the app checks when it restores them
+      const profileIds = new Set(savedProfiles.map(profile => profile._id))
+      const profileSettings = Object.entries(collectProfileSettings(savedSettings)).filter(([id]) => profileIds.has(id))
+      return {
+        ...getTransferableSettings(resolvedSettings),
+        ...(profileSettings.length > 0 ? { profileSettings: Object.fromEntries(profileSettings) } : {}),
+      }
     },
     profiles: () => open('profiles').findAsync({}),
   }

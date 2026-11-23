@@ -1686,6 +1686,7 @@ Settings:
     Title: "Ivinelloù ar c'houmanantoù"
     Hint: "Kemmañ urzh an ivinelloù war ar bajenn Koumanantoù. An ivinelloù kuzhet a vir o lec'h evit pa vint diskouezet en-dro."
     Hidden: "(kuzhet)"
+  Profile Setting: "Implijet gant {profile} hepken. Dibabit evit implijout an talvoud rannet kentoc'h."
 Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"
@@ -1760,6 +1761,13 @@ Profile:
   Use Initial: "Implijout al lizherenn gentañ"
   The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
   Theme Color: "Liv an neuz"
+  Keep Settings Separate: "Mirout an arventennoù a-ziforc'h"
+  Keep Settings Separate Tooltip: "Reiñ a ra d'ar profil-mañ e arventennoù dezhañ e-unan, heñvel ouzh ho arventennoù rannet da gentañ. E-pad m'eo oberiant ar profil-mañ, ne dalvez ar c'hemmoù en Arventennoù nemet evitañ. Arventennoù an trevnad-mañ, evel ar goubredañ, ar proksi, an enrolladennoù-gwareziñ hag an teuliadoù pellgargañ, a chom rannet."
+  Own Settings: "Arventennoù dezhañ"
+  Own Settings Notice: "{profile} a vir e arventennoù a-ziforc'h, neuze ne dalvez ar c'hemmoù amañ nemet evitañ. Arventennoù an trevnad, evel ar goubredañ, ar proksi hag an enrolladennoù-gwareziñ, a chom rannet."
+  Use Shared Settings: "Implijout an arventennoù rannet"
+  Use Shared Settings Warning: "{profile} a implijo en-dro hoc'h arventennoù rannet, hag an arventennoù kemmet ganeoc'h evitañ a vo dilamet."
+  Profile Could Not Be Saved: "N'eus ket bet gallet enrollañ ar profil"
 Channel:
   Hide Watched: Kuzhat ar re sellet
   All Videos Watched: "Sellet ho peus ouzh an holl videoioù-mañ. Diweredekait « Kuzhat ar re sellet » evit o diskouez."

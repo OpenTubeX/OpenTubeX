@@ -1684,6 +1684,7 @@ Settings:
     Title: "登録チャンネルのタブ"
     Hint: "登録チャンネル ページのタブの順序を変更します。非表示のタブは、再表示したときのために位置が保持されます。"
     Hidden: "（非表示）"
+  Profile Setting: "{profile} のみで使用されます。選択すると共有の値を使用します。"
 Tutorial:
   Skip: スキップ
   Next: 次へ
@@ -1758,6 +1759,13 @@ Profile:
   Use Initial: イニシャルを使用
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
+  Keep Settings Separate: "設定を分ける"
+  Keep Settings Separate Tooltip: "このプロフィールに独自の設定を持たせます。最初は共有設定と同じ内容です。このプロフィールが有効な間、設定の変更はこのプロフィールにのみ適用されます。同期、プロキシ、バックアップ、ダウンロードフォルダーなど、このデバイスの設定は共有のままです。"
+  Own Settings: "独自の設定"
+  Own Settings Notice: "{profile} は設定を分けているため、ここでの変更はこのプロフィールにのみ適用されます。同期、プロキシ、バックアップなどのデバイス設定は共有のままです。"
+  Use Shared Settings: "共有設定を使用"
+  Use Shared Settings Warning: "{profile} は再び共有設定を使用し、このプロフィール用に変更した設定は削除されます。"
+  Profile Could Not Be Saved: "プロフィールを保存できませんでした"
 Channel:
   Hide Watched: 視聴済みを非表示
   All Videos Watched: "これらの動画はすべて視聴済みです。表示するには「視聴済みを非表示」をオフにしてください。"

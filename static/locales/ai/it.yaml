@@ -1684,6 +1684,7 @@ Settings:
     Title: "Schede iscrizioni"
     Hint: "Cambia l'ordine delle schede nella pagina Iscrizioni. Le schede nascoste mantengono la loro posizione per quando le mostrerai di nuovo."
     Hidden: "(nascosta)"
+  Profile Setting: "Usato solo da {profile}. Seleziona per usare invece il valore condiviso."
 Tutorial:
   Skip: Salta
   Next: Avanti
@@ -1758,6 +1759,13 @@ Profile:
   Use Initial: Usa iniziale
   The selected image could not be loaded: Impossibile caricare l'immagine selezionata
   Theme Color: Colore del tema
+  Keep Settings Separate: "Mantieni le impostazioni separate"
+  Keep Settings Separate Tooltip: "Dà a questo profilo le sue impostazioni, che all’inizio sono uguali a quelle condivise. Finché questo profilo è attivo, le modifiche in Impostazioni si applicano solo a lui. Le impostazioni di questo dispositivo, come sincronizzazione, proxy, backup e cartelle di download, restano condivise."
+  Own Settings: "Impostazioni proprie"
+  Own Settings Notice: "{profile} mantiene le sue impostazioni separate, quindi le modifiche qui si applicano solo a lui. Le impostazioni del dispositivo, come sincronizzazione, proxy e backup, restano condivise."
+  Use Shared Settings: "Usa le impostazioni condivise"
+  Use Shared Settings Warning: "{profile} userà di nuovo le impostazioni condivise e le impostazioni che hai modificato per lui verranno eliminate."
+  Profile Could Not Be Saved: "Impossibile salvare il profilo"
 Channel:
   Hide Watched: Nascondi già visti
   All Videos Watched: "Hai guardato tutti questi video. Disattiva «Nascondi già visti» per mostrarli."

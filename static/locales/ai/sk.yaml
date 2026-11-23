@@ -1684,6 +1684,7 @@ Settings:
     Title: "Karty odberov"
     Hint: "Zmeňte poradie kariet na stránke Odbery. Skryté karty si ponechajú svoje miesto pre prípad, že ich znova zobrazíte."
     Hidden: "(skryté)"
+  Profile Setting: "Používa len {profile}. Vyberte na použitie zdieľanej hodnoty."
 Tutorial:
   Skip: Preskočiť
   Next: Ďalej
@@ -1758,6 +1759,13 @@ Profile:
   Use Initial: Použiť iniciálu
   The selected image could not be loaded: Vybraný obrázok sa nepodarilo načítať
   Theme Color: Farba motívu
+  Keep Settings Separate: "Oddeliť nastavenia"
+  Keep Settings Separate Tooltip: "Dá tomuto profilu vlastné nastavenia, ktoré sú na začiatku rovnaké ako zdieľané nastavenia. Kým je tento profil aktívny, zmeny v Nastaveniach platia len preň. Nastavenia tohto zariadenia, ako synchronizácia, proxy, zálohy a priečinky na sťahovanie, zostávajú zdieľané."
+  Own Settings: "Vlastné nastavenia"
+  Own Settings Notice: "{profile} má oddelené nastavenia, takže zmeny tu platia len preň. Nastavenia zariadenia, ako synchronizácia, proxy a zálohy, zostávajú zdieľané."
+  Use Shared Settings: "Použiť zdieľané nastavenia"
+  Use Shared Settings Warning: "{profile} bude znova používať zdieľané nastavenia a nastavenia, ktoré ste preň zmenili, budú odstránené."
+  Profile Could Not Be Saved: "Profil sa nepodarilo uložiť"
 Channel:
   Hide Watched: Skryť pozreté
   All Videos Watched: "Pozreli ste si všetky tieto videá. Ak ich chcete zobraziť, vypnite „Skryť pozreté“."

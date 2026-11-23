@@ -26,6 +26,14 @@
         :title="t('Profile.Separate Profile')"
         :aria-label="t('Profile.Separate Profile')"
       />
+      <FtIcon
+        v-if="hasOwnSettings"
+        class="separateProfileIcon"
+        :icon="['fas', 'circle-user']"
+        role="img"
+        :title="t('Profile.Own Settings')"
+        :aria-label="t('Profile.Own Settings')"
+      />
     </div>
   </div>
 </template>
@@ -49,6 +57,11 @@ const props = defineProps({
   },
   /** Whether the profile keeps its own data */
   isSeparate: {
+    type: Boolean,
+    default: false
+  },
+  /** Whether the profile uses its own settings */
+  hasOwnSettings: {
     type: Boolean,
     default: false
   },

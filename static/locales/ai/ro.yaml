@@ -1707,6 +1707,7 @@ Settings:
     Title: "File abonamente"
     Hint: "Schimbați ordinea filelor de pe pagina Abonamente. Filele ascunse își păstrează locul pentru când le afișați din nou."
     Hidden: "(ascunsă)"
+  Profile Setting: "Folosit doar de {profile}. Selectează pentru a folosi valoarea comună."
 Tutorial:
   Skip: Omite
   Next: Înainte
@@ -1785,6 +1786,13 @@ Profile:
   The selected image could not be loaded: Imaginea selectată nu a putut fi încărcată
   Theme Color: Culoarea temei
   Go To Profile Manager: Deschide gestionarea profilurilor
+  Keep Settings Separate: "Păstrează setările separat"
+  Keep Settings Separate Tooltip: "Oferă acestui profil propriile setări, care la început sunt aceleași cu setările comune. Cât timp acest profil este activ, modificările din Setări se aplică doar lui. Setările acestui dispozitiv, cum ar fi sincronizarea, proxy-ul, copiile de rezervă și folderele de descărcare, rămân comune."
+  Own Settings: "Setări proprii"
+  Own Settings Notice: "{profile} își păstrează setările separat, așa că modificările de aici se aplică doar lui. Setările dispozitivului, cum ar fi sincronizarea, proxy-ul și copiile de rezervă, rămân comune."
+  Use Shared Settings: "Folosește setările comune"
+  Use Shared Settings Warning: "{profile} va folosi din nou setările comune, iar setările pe care le-ai modificat pentru el vor fi șterse."
+  Profile Could Not Be Saved: "Profilul nu a putut fi salvat"
 Channel:
   Hide Watched: Ascunde vizionatele
   All Videos Watched: "Ai vizionat toate aceste videoclipuri. Dezactivează „Ascunde vizionatele” pentru a le afișa."

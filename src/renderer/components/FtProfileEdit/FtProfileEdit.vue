@@ -74,27 +74,39 @@
               :show-action-button="false"
               :maxlength="100"
               @input="profileName = $event"
-              @keydown.enter="saveProfile"
+              @keydown.enter="saveProfile()"
             />
-            <FtToggleSwitch
-              v-if="isNew"
-              class="separateDataToggle"
-              :label="$t('Profile.Keep Data Separate')"
-              :tooltip="$t('Profile.Keep Data Separate Tooltip')"
-              compact
-              :default-value="keepDataSeparate"
-              @change="keepDataSeparate = $event"
-            />
-            <p
-              v-else-if="profile.separate === true"
-              class="separateDataNote"
+            <div
+              v-if="!isMainProfile"
+              class="sharingChoices"
             >
-              <FtIcon
-                :icon="['fas', 'user-lock']"
-                aria-hidden="true"
+              <FtToggleSwitch
+                v-if="isNew"
+                :label="$t('Profile.Keep Data Separate')"
+                :tooltip="$t('Profile.Keep Data Separate Tooltip')"
+                compact
+                :default-value="keepDataSeparate"
+                @change="keepDataSeparate = $event"
               />
-              {{ $t('Profile.Separate Profile Note') }}
-            </p>
+              <p
+                v-else-if="profile.separate === true"
+                class="separateDataNote"
+              >
+                <FtIcon
+                  :icon="['fas', 'user-lock']"
+                  aria-hidden="true"
+                />
+                {{ $t('Profile.Separate Profile Note') }}
+              </p>
+              <FtToggleSwitch
+                v-if="isNew || canHaveOwnSettings(profileId)"
+                :label="$t('Profile.Keep Settings Separate')"
+                :tooltip="$t('Profile.Keep Settings Separate Tooltip')"
+                compact
+                :default-value="keepSettingsSeparate"
+                @change="keepSettingsSeparate = $event"
+              />
+            </div>
             <h3 class="profileIconHeading">
               {{ $t("Profile.Profile Icon") }}
             </h3>
@@ -199,7 +211,7 @@
                     theme="primary"
                     :label="$t('Profile.Create Profile')"
                     :icon="['fas', 'user-plus']"
-                    @click="saveProfile"
+                    @click="saveProfile()"
                   />
                   <FtButton
                     :label="$t('Cancel')"
@@ -216,7 +228,7 @@
                     theme="primary"
                     :label="$t('Profile.Update Profile')"
                     :icon="['fas', 'user-check']"
-                    @click="saveProfile"
+                    @click="saveProfile()"
                   />
                   <FtButton
                     :label="$t('Profile.Make Default Profile')"
@@ -286,6 +298,17 @@
       </div>
     </FtPrompt>
     <FtPrompt
+      v-if="showSharedSettingsPrompt"
+      autosize
+      :label="$t('Profile.Use Shared Settings')"
+      :extra-labels="[$t('Profile.Use Shared Settings Warning', { profile: translatedProfileName })]"
+      :option-names="[$t('Profile.Use Shared Settings'), $t('Cancel')]"
+      :option-values="['shared', 'cancel']"
+      :option-icons="[['fas', 'users'], ['fas', 'xmark']]"
+      :is-first-option-destructive="true"
+      @click="handleSharedSettingsPrompt"
+    />
+    <FtPrompt
       v-if="showDeletePrompt"
       autosize
       :label="$t('Profile.Delete Profile')"
@@ -321,6 +344,7 @@ import { calculateColorLuminance, colors, resolveThemeColor } from '../../helper
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
+import { canHaveOwnSettings } from '../../../profileSettings'
 
 /**
  * @typedef {object} Profile
@@ -520,9 +544,49 @@ const editOrCreateProfileNameLabel = computed(() => {
 /** Whether a new profile gets its own data, which can't change later */
 const keepDataSeparate = ref(false)
 
-function saveProfile() {
+/** @type {import('vue').ComputedRef<Record<string, unknown> | null>} */
+const ownSettings = computed(() => props.isNew ? null : store.getters.getProfileOwnSettings(props.profile._id))
+
+/** Whether the profile uses its own settings instead of the shared ones */
+const keepSettingsSeparate = ref(ownSettings.value !== null)
+// Saved by this editor, so a save changes the settings mode only when the
+// user toggled it, not when sync changed it while the editor was open
+let savedKeepSettingsSeparate = keepSettingsSeparate.value
+
+const showSharedSettingsPrompt = ref(false)
+
+/** @param {'shared' | 'cancel' | null} response */
+function handleSharedSettingsPrompt(response) {
+  showSharedSettingsPrompt.value = false
+  if (response === 'shared') saveProfile(true)
+}
+
+let previousSave = Promise.resolve()
+let profileCreated = false
+
+/**
+ * Saves run one after another, so each compares the settings mode with the
+ * one the previous save wrote.
+ * @param {boolean} [confirmedSharedSettings] whether the user agreed to delete
+ *   the profile's own settings
+ */
+function saveProfile(confirmedSharedSettings = false) {
+  const save = previousSave.then(() => saveProfileNow(confirmedSharedSettings))
+  previousSave = save.catch(() => {})
+  return save
+}
+
+/** @param {boolean} confirmedSharedSettings */
+async function saveProfileNow(confirmedSharedSettings) {
   if (profileName.value === '') {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  const keepOwnSettings = keepSettingsSeparate.value
+  const ownSettingsChanged = !props.isNew && !props.isMainProfile && keepOwnSettings !== savedKeepSettingsSeparate
+  if (ownSettingsChanged && !keepOwnSettings && Object.keys(ownSettings.value ?? {}).length > 0 && confirmedSharedSettings !== true) {
+    showSharedSettingsPrompt.value = true
     return
   }
 
@@ -533,16 +597,34 @@ function saveProfile() {
     icon: deepCopy(profileIcon.value)
   }
 
+  const showSaveError = () => showToast({ message: t('Profile.Profile Could Not Be Saved'), icon: ['fas', 'circle-exclamation'] })
   if (props.isNew) {
-    store.dispatch('createProfile', keepDataSeparate.value
-      ? { ...details, separate: true, subscriptions: [] }
-      : { ...details, subscriptions: deepCopy(props.profile.subscriptions) })
-    showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
-    emit('new-profile-created')
+    // Saves queued behind the one that created it must not create it again.
+    if (profileCreated) return
+    profileCreated = await store.dispatch('createProfile', {
+      ...details,
+      ...(keepDataSeparate.value ? { separate: true, subscriptions: [] } : { subscriptions: deepCopy(props.profile.subscriptions) }),
+      ownSettings: keepSettingsSeparate.value,
+    })
+    if (profileCreated) {
+      showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
+      // The editor closes only then, so a failed save keeps the form.
+      emit('new-profile-created')
+    } else {
+      showSaveError()
+    }
   } else {
-    // Leave subscriptions out so channels added elsewhere since this page loaded stay
-    store.dispatch('updateProfileDetails', { profileId: profileId.value, details })
-    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    const id = profileId.value
+    // Leave subscriptions out so channels added elsewhere since this page loaded stay.
+    // Own settings are deleted only once the rest of the profile saved.
+    const saved = await store.dispatch('updateProfileDetails', { profileId: id, details }) &&
+      (!ownSettingsChanged || await store.dispatch('setProfileOwnSettingsEnabled', { profileId: id, enabled: keepOwnSettings }))
+    if (saved && ownSettingsChanged) savedKeepSettingsSeparate = keepOwnSettings
+    if (saved) {
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    } else {
+      showSaveError()
+    }
   }
 }
 

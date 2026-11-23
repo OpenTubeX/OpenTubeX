@@ -27,11 +27,13 @@ export const currentIconPack = computed(() => iconPack.value)
 
 /**
  * @param {IconPackId} pack
- * @returns {Promise<boolean>} whether the pack became the active selection
+ * @returns {Promise<'applied' | 'superseded' | 'failed'>} whether the pack
+ * became the active selection, a newer selection started meanwhile, or it
+ * could not load
  */
-export async function setIconPack(pack) {
+export async function loadIconPack(pack) {
   if (!isIconPack(pack)) {
-    return false
+    return 'failed'
   }
   const sequence = ++selectionSequence
   try {
@@ -39,10 +41,19 @@ export async function setIconPack(pack) {
   } catch (error) {
     if (sequence === selectionSequence) {
       console.error(`[icon-pack] failed to load ${pack}; keeping ${iconPack.value}`, error)
+      return 'failed'
     }
-    return false
+    return 'superseded'
   }
-  if (sequence !== selectionSequence) return false
+  if (sequence !== selectionSequence) return 'superseded'
   iconPack.value = pack
-  return true
+  return 'applied'
+}
+
+/**
+ * @param {IconPackId} pack
+ * @returns {Promise<boolean>} whether the pack became the active selection
+ */
+export async function setIconPack(pack) {
+  return await loadIconPack(pack) === 'applied'
 }

@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
 // until the window reaches the requested CSS width. Narrow widths at 95% fall
@@ -434,6 +435,134 @@ test.describe('separate profile following a shared channel', () => {
       const latest = id => records.findLast(record => record._id === id)
       return [latest('allChannels').subscriptions.length, latest('e2eprofile').subscriptions.map(channel => channel.id)]
     }).toEqual([0, ['UCboth']])
+  })
+})
+
+test.describe('profile with its own settings', () => {
+  // The own settings of `e2eprofile`, by its ID's UTF-8 bytes as hex
+  const ownSettingsId = 'profileSettings-65326570726f66696c65'
+  test.use({
+    seed: {
+      settings: { defaultProfile: 'e2eprofile', hideComments: false, hideLiveChat: false, [ownSettingsId]: { hideComments: true, landingPage: 'history' } },
+      profiles: [mainProfile, { ...secondProfile, name: 'Car' }],
+    }
+  })
+
+  test('keeps its settings apart from the shared ones across profile switches', async ({ app, page }) => {
+    const effective = () => page.evaluate(() => [window.$store.getters.getHideComments, window.$store.getters.getHideLiveChat])
+    const saved = () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      const { landingPage: _, ...own } = settings[ownSettingsId]
+      return [settings.hideComments, settings.hideLiveChat, own]
+    }
+    const route = () => page.evaluate(() => window.$router.currentRoute.value.path)
+    // As the default profile, it starts with its own values, also on the
+    // landing page of the tabs the main process opens.
+    await expect.poll(effective).toEqual([true, false])
+    await expect.poll(route).toBe('/history')
+    await page.getByRole('button', { name: 'New Tab' }).click()
+    await expect.poll(route).toBe('/history')
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await page.getByRole('button', { name: 'New Tab' }).click()
+    await expect.poll(route).toBe('/subscriptions')
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
+
+    const distraction = await goToSettingsSection(page, 'distraction')
+    await expect(page.locator('.profileSettingsNotice')).toBeVisible()
+    const hideComments = distraction.locator('[data-setting-key="hideComments"]')
+    const hideLiveChat = distraction.locator('[data-setting-key="hideLiveChat"]')
+    await expect(hideComments.getByRole('checkbox')).toBeChecked()
+    await expect(hideComments.locator('.profileSettingIndicator')).toBeVisible()
+    await expect(hideLiveChat.locator('.profileSettingIndicator')).toHaveCount(0)
+
+    // Changes while it is active only apply to it.
+    await hideLiveChat.locator('label.switch-label').click()
+    await expect(hideLiveChat.locator('.profileSettingIndicator')).toBeVisible()
+    await expect.poll(saved).toEqual([false, false, { hideComments: true, hideLiveChat: true }])
+
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await expect.poll(effective).toEqual([false, false])
+    await expect(page.locator('.profileSettingsNotice')).toHaveCount(0)
+    await expect(hideComments.getByRole('checkbox')).not.toBeChecked()
+    await expect(distraction.locator('.profileSettingIndicator')).toHaveCount(0)
+
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
+    await expect.poll(effective).toEqual([true, true])
+    await hideComments.locator('.profileSettingIndicator').click()
+    await expect.poll(effective).toEqual([false, true])
+    await expect(hideComments.locator('.profileSettingIndicator')).toHaveCount(0)
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // A custom theme of its own that is gone, such as one deleted while
+    // another profile was active, is replaced when the profile shows again.
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))
+    await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
+      profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
+    }))
+    await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'e2eprofile'))
+    const baseTheme = () => page.evaluate(() => window.$store.getters.getBaseTheme)
+    await expect.poll(baseTheme).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // The same goes for one restored while the profile shows,
+    expect(await page.evaluate(() => window.$store.dispatch('restoreProfileSettings', {
+      profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:deleted' },
+    }))).toBe(true)
+    await expect.poll(baseTheme).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+
+    // and for one another window deletes while the profile shows.
+    await page.evaluate(async theme => {
+      window.$store.commit('setCustomThemes', [theme])
+      await window.$store.dispatch('restoreProfileSettings', {
+        profileId: 'e2eprofile', settings: { hideLiveChat: true, baseTheme: 'custom:kept' },
+      })
+    }, { ...structuredClone(DEFAULT_CUSTOM_THEME), id: 'kept' })
+    await expect.poll(baseTheme).toBe('custom:kept')
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.send('custom-theme-updated', []))
+    await expect.poll(baseTheme).toBe('system')
+    await expect.poll(saved).toEqual([false, false, { hideLiveChat: true }])
+  })
+
+  test('switches between its own and the shared settings in the profile editor', async ({ app, page }) => {
+    const ownSettings = () => latestSettings(readDatastore(app.userDataDir, 'settings'))[ownSettingsId]
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+    await page.locator('.card .profileList').getByText('Car').click()
+    const keepSettingsSeparate = page.getByText('Keep settings separate')
+
+    // Its own settings are only deleted once the user confirms it.
+    await keepSettingsSeparate.click()
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    const prompt = page.getByRole('dialog', { name: 'Use shared settings' })
+    await expect(prompt).toBeVisible()
+    expect(ownSettings()).toEqual({ hideComments: true, landingPage: 'history' })
+    await prompt.getByRole('button', { name: 'Use shared settings' }).click()
+    await expect.poll(ownSettings).toBeNull()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getHideComments)).toBe(false)
+
+    // Turning them back on in the same editor saves again.
+    await keepSettingsSeparate.click()
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    await expect.poll(ownSettings).toEqual({})
+  })
+})
+
+test.describe('default profile with its own settings that inherits a missing custom theme', () => {
+  const ownSettingsId = 'profileSettings-65326570726f66696c65'
+  test.use({
+    seed: {
+      settings: { defaultProfile: 'e2eprofile', baseTheme: 'custom:missing', [ownSettingsId]: { hideComments: true } },
+      profiles: [mainProfile, { ...secondProfile, name: 'Car' }],
+    }
+  })
+
+  test('repairs the shared theme instead of giving the profile its own', async ({ app, page }) => {
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getBaseTheme)).toBe('system')
+    await expect.poll(() => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return [settings.baseTheme, settings[ownSettingsId]]
+    }).toEqual(['system', { hideComments: true }])
   })
 })
 

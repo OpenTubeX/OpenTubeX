@@ -1694,6 +1694,7 @@ Settings:
     Title: "Tabiau tanysgrifio"
     Hint: "Newidiwch drefn y tabiau ar y dudalen Tanysgrifiadau. Mae tabiau cudd yn cadw eu lle ar gyfer pan fyddwch yn eu dangos eto."
     Hidden: "(cudd)"
+  Profile Setting: "Dim ond {profile} sy'n ei ddefnyddio. Dewiswch i ddefnyddio'r gwerth a rennir yn lle."
 Tutorial:
   Skip: Hepgor
   Next: Nesaf
@@ -1769,6 +1770,13 @@ Profile:
   The selected image could not be loaded: Nid oedd modd llwytho'r ddelwedd a ddewiswyd
   Theme Color: Lliw'r thema
   Go To Profile Manager: Mynd i'r rheolwr proffiliau
+  Keep Settings Separate: "Cadw gosodiadau ar wahân"
+  Keep Settings Separate Tooltip: "Yn rhoi ei osodiadau ei hun i'r proffil hwn, sy'n dechrau yr un fath â'ch gosodiadau a rennir. Tra bod y proffil hwn yn weithredol, dim ond iddo ef y mae newidiadau yn y Gosodiadau'n berthnasol. Mae gosodiadau'r ddyfais hon, fel cysoni, dirprwy, copïau wrth gefn a ffolderi llwytho i lawr, yn parhau i gael eu rhannu."
+  Own Settings: "Gosodiadau ei hun"
+  Own Settings Notice: "Mae {profile} yn cadw ei osodiadau ar wahân, felly dim ond iddo ef y mae newidiadau yma'n berthnasol. Mae gosodiadau'r ddyfais, fel cysoni, dirprwy a chopïau wrth gefn, yn parhau i gael eu rhannu."
+  Use Shared Settings: "Defnyddio gosodiadau a rennir"
+  Use Shared Settings Warning: "Bydd {profile} yn defnyddio'ch gosodiadau a rennir eto, a bydd y gosodiadau a newidioch ar ei gyfer yn cael eu dileu."
+  Profile Could Not Be Saved: "Nid oedd modd cadw'r proffil"
 Channel:
   Hide Watched: Cuddio’r rhai a wyliwyd
   All Videos Watched: "Rydych chi wedi gwylio’r holl fideos hyn. Diffoddwch “Cuddio’r rhai a wyliwyd” i’w dangos."

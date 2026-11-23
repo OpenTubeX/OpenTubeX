@@ -2017,6 +2017,7 @@ Settings:
     Title: "Zavihki naročnin"
     Hint: "Spremenite vrstni red zavihkov na strani Naročnine. Skriti zavihki ohranijo svoje mesto za takrat, ko jih znova prikažete."
     Hidden: "(skrito)"
+  Profile Setting: "Uporablja samo {profile}. Izberite za uporabo skupne vrednosti."
 Tutorial:
   Skip: Preskoči
   Next: Naprej
@@ -2103,6 +2104,13 @@ Profile:
   Close Profile Dropdown: Zapri spustni meni profila
   Open Profile Dropdown: Odpri spustni meni profila
   Go To Profile Manager: Pojdi v upravitelja profilov
+  Keep Settings Separate: "Ločene nastavitve"
+  Keep Settings Separate Tooltip: "Temu profilu da lastne nastavitve, ki so na začetku enake skupnim nastavitvam. Dokler je ta profil aktiven, spremembe v Nastavitvah veljajo samo zanj. Nastavitve te naprave, kot so sinhronizacija, posredniški strežnik, varnostne kopije in mape za prenose, ostanejo skupne."
+  Own Settings: "Lastne nastavitve"
+  Own Settings Notice: "{profile} ima ločene nastavitve, zato spremembe tukaj veljajo samo zanj. Nastavitve naprave, kot so sinhronizacija, posredniški strežnik in varnostne kopije, ostanejo skupne."
+  Use Shared Settings: "Uporabi skupne nastavitve"
+  Use Shared Settings Warning: "{profile} bo znova uporabljal vaše skupne nastavitve, nastavitve, ki ste jih spremenili zanj, pa bodo izbrisane."
+  Profile Could Not Be Saved: "Profila ni bilo mogoče shraniti"
 Channel:
   Hide Watched: Skrij ogledane
   All Videos Watched: "Ogledali ste si vse te videoposnetke. Za prikaz izklopite »Skrij ogledane«."

@@ -8,8 +8,9 @@ import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
+import * as profileSettings from '../../src/profileSettings.js'
 
 const key = subscriptionSync.SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
@@ -28,6 +29,7 @@ const context = vm.createContext({
   mergeSettingItemsEntry,
   isListSetting,
   mergeSettingListEntry,
+  mergeProfileSettingsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
   CUSTOM_THEMES_SYNC_KEY: 'customThemes',
@@ -35,6 +37,9 @@ const context = vm.createContext({
   getSyncableSettingKeys: () => [],
   isSettingSyncEnabled: (settings, settingKey) => !settings.syncServerSettingsExcluded.includes(settingKey),
   settingWritesSettled: () => null,
+  ...profileSettings,
+  syncedProfileSettings: profileSettings.syncedProfileSettingsOf,
+  withSharedSettings: operation => operation(),
   deepCopy: structuredClone,
 })
 vm.runInContext(source

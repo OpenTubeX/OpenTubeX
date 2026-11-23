@@ -34,7 +34,7 @@ import Datastore from '@seald-io/nedb'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
@@ -45,6 +45,7 @@ import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
 import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
+import * as profileSettings from '../../src/profileSettings.js'
 
 // These modules use bundler imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
@@ -206,11 +207,15 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     mergeSettingItemsEntry,
     isListSetting,
     mergeSettingListEntry,
+    mergeProfileSettingsEntry,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
     settingWritesSettled: () => null,
+    ...profileSettings,
+    syncedProfileSettings: profileSettings.syncedProfileSettingsOf,
+    withSharedSettings: operation => operation(),
     isPlaylistSortOrder: () => false,
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })

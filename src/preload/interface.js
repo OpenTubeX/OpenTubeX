@@ -303,6 +303,14 @@ export default {
   /** Whether this is the Windows portable build */
   portableBuild: process.argv.includes('--portable=true'),
   /**
+   * Tells the main process which own settings the window's active profile
+   * shows, for its new tabs and the native theme.
+   * @param {Record<string, unknown>} profileSettings
+   */
+  applyProfileSettings: (profileSettings) => {
+    ipcRenderer.send(IpcChannels.APPLY_PROFILE_SETTINGS, profileSettings)
+  },
+  /**
    * @param {{ color: string, symbolColor: string, height: number }} overlay height in CSS pixels
    */
   setTitleBarOverlay: ({ color, symbolColor, height }) => {

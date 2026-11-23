@@ -1684,6 +1684,7 @@ Settings:
     Title: "Abonelik sekmeleri"
     Hint: "Abonelikler sayfasındaki sekmelerin sırasını değiştirin. Gizlenen sekmeler, yeniden gösterdiğinizde yerlerini korur."
     Hidden: "(gizli)"
+  Profile Setting: "Yalnızca {profile} kullanır. Bunun yerine ortak değeri kullanmak için seçin."
 Tutorial:
   Skip: Atla
   Next: İleri
@@ -1758,6 +1759,13 @@ Profile:
   Use Initial: Baş Harfi Kullan
   The selected image could not be loaded: Seçilen görsel yüklenemedi
   Theme Color: Tema Rengi
+  Keep Settings Separate: "Ayarları ayrı tut"
+  Keep Settings Separate Tooltip: "Bu profile kendi ayarlarını verir; bu ayarlar başlangıçta ortak ayarlarınızla aynıdır. Bu profil etkinken Ayarlar'daki değişiklikler yalnızca ona uygulanır. Eşitleme, proxy, yedekler ve indirme klasörleri gibi bu cihazın ayarları ortak kalır."
+  Own Settings: "Kendi ayarları"
+  Own Settings Notice: "{profile} ayarlarını ayrı tutar, bu yüzden buradaki değişiklikler yalnızca ona uygulanır. Eşitleme, proxy ve yedekler gibi cihaz ayarları ortak kalır."
+  Use Shared Settings: "Ortak ayarları kullan"
+  Use Shared Settings Warning: "{profile} yeniden ortak ayarlarınızı kullanacak ve onun için değiştirdiğiniz ayarlar silinecek."
+  Profile Could Not Be Saved: "Profil kaydedilemedi"
 Channel:
   Hide Watched: İzlenenleri gizle
   All Videos Watched: "Bu videoların hepsini izlediniz. Göstermek için “İzlenenleri gizle” seçeneğini kapatın."

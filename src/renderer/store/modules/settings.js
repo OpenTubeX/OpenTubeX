@@ -20,7 +20,7 @@ import { applyCapacitorNotificationMode } from '../../helpers/liveReminders'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { clearSeekHistories } from '../../helpers/player/seekHistory'
-import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
+import { isIconPack, loadIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 import { normalizeAppFont } from '../../helpers/appFont.js'
@@ -47,6 +47,22 @@ import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../
 import { setDiagnosticLogging } from '../../helpers/diagnostics.js'
 import { setAlwaysUseGoogleVideoBackupServer } from '../../helpers/player/googleVideoFallback.js'
 import { networkMetered } from '../../helpers/player/meteredNetworkQuality.js'
+import {
+  SHARED_ONLY_SETTINGS,
+  canHaveOwnSettings,
+  collectProfileSettings,
+  isPlainObject,
+  isProfileSettingsId,
+  ownSettingsOf,
+  planProfileSettingsOf,
+  profileIdFromSettingsId,
+  profileSettingsId,
+  profileSettingsOf,
+  sameSettingValue,
+  sharedSettingValue,
+  syncedProfileSettingsOf,
+} from '../../../profileSettings.js'
+export { sharedSettingValue } from '../../../profileSettings.js'
 export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
@@ -358,13 +374,19 @@ const sideEffectHandlers = {
 
   iconPack: async (_, value) => {
     const preferredPack = isIconPack(value) ? value : 'material'
-    if (await setIconPack(preferredPack)) {
+    const preferred = await loadIconPack(preferredPack)
+    // A newer selection, such as that of a profile switch, shows its own pack.
+    if (preferred === 'applied' || preferred === 'superseded') {
       return preferredPack
     }
 
     const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
-    if (await setIconPack(fallbackPack)) {
+    const fallback = await loadIconPack(fallbackPack)
+    if (fallback === 'applied') {
       return fallbackPack
+    }
+    if (fallback === 'superseded') {
+      return preferredPack
     }
 
     throw new Error(`Unable to apply icon pack: ${value}`)
@@ -499,7 +521,7 @@ function updateSettingSyncTimestamp(commit, settingId, update) {
  * @returns {Promise<T>}
  */
 function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
-  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY && !isProfileSettingsId(settingId)) return save()
 
   return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
     let previous
@@ -542,7 +564,333 @@ export function trackSettingWrite(settingId, write) {
   return settingWrites.track(settingId, write)
 }
 
+// #region profile settings
+
+/*
+ * A profile with its own settings saves only the values that differ from the
+ * shared ones, see `profileSettingsId`. While it is active, the state holds
+ * its values, so everything that reads a setting sees them, and the shared
+ * values they replace wait in `profileSettingsState.shared`:
+ * - `set<Setting>` mutations always set the shared value. While the active
+ *   profile replaces it, they keep it in `shared` instead.
+ * - Updaters save to the active profile instead of the shared settings, unless
+ *   they run in `withSharedSettings`, like sync and imports do.
+ * - `applyProfileSettings` shows the values of the profile that is active and
+ *   runs their side effects, see `profileSettingsPlugin`.
+ */
+
+// Settings with their own updater that also save to a profile. The other
+// settings with their own updater keep data rather than a preference.
+const PROFILE_ROUTED_CUSTOM_SETTINGS = new Set([
+  'preferredCaptionLocale', 'baseTheme', 'systemLightTheme', 'systemDarkTheme', 'mainColor', 'secColor',
+  'tabBarPosition', 'materialSeedColor', 'signalAccentColor', 'iconPack', 'moveDownloadsToAppHeader',
+  'fullscreenActions', 'subscriptionTabs', 'controlBarButtons', 'playerMenuControls', 'hiddenPlayerMenuControls',
+  'quickSettings', 'quickPlaybackSpeedBarOptions', 'navigationItems', 'homeSectionLayout',
+])
+
+/** @type {Set<string>} Filled once the actions exist, see below. */
+const PROFILE_SPECIFIC_SETTINGS = new Set()
+
+/**
+ * Whether a profile with its own settings can give the setting its own value.
+ * @param {unknown} settingId
+ */
+export function isProfileSpecificSetting(settingId) {
+  return typeof settingId === 'string' && PROFILE_SPECIFIC_SETTINGS.has(settingId)
+}
+
+/**
+ * The settings of a profile that it can have, from a backup, sync or the datastore.
+ * @param {unknown} settings
+ * @returns {Record<string, unknown>}
+ */
+export function sanitizeProfileSettings(settings) {
+  return profileSettingsOf(settings, isProfileSpecificSetting)
+}
+
+/**
+ * The own settings of a profile that sync uploads, see `syncedProfileSettingsOf`.
+ * @param {unknown} settings the profile's own settings, or null if it uses the shared ones
+ * @param {(settingId: string) => boolean} isSynced whether this device syncs a setting
+ */
+export function syncedProfileSettings(settings, isSynced) {
+  return syncedProfileSettingsOf(settings, settingId => isProfileSpecificSetting(settingId) && isSynced(settingId))
+}
+
+/**
+ * What showing the settings of `target` changes, see `planProfileSettingsOf`.
+ * @param {Record<string, any>} settings the settings state
+ * @param {string | null} target
+ */
+export function planProfileSettings(settings, target) {
+  return planProfileSettingsOf(settings, target, isProfileSpecificSetting, normalizeProfileSetting)
+}
+
+/**
+ * A profile's own value as the setting's mutation would save it, as restored
+ * or synced values skip it.
+ * @param {string} settingId
+ * @param {unknown} value
+ */
+function normalizeProfileSetting(settingId, value) {
+  switch (settingId) {
+    case 'preferredCaptionLocale': return normalizeYouTubeCaptionLanguageCode(value)
+    case 'tabBarPosition': return normalizeTabBarPosition(value)
+    default: return value
+  }
+}
+
+let sharedSettingWrites = 0
+
+/**
+ * Runs `operation` so that the updaters it dispatches save the shared settings
+ * even while a profile with its own settings is active, as sync and imports
+ * do. Like `withDataScope`, `operation` must dispatch them synchronously.
+ * @template T
+ * @param {() => T} operation
+ * @returns {T}
+ */
+export function withSharedSettings(operation) {
+  sharedSettingWrites++
+  try {
+    return operation()
+  } finally {
+    sharedSettingWrites--
+  }
+}
+
+/**
+ * The profile an update of `settingId` saves to, or null for the shared settings.
+ * @param {string} settingId
+ */
+function settingTarget(settingId) {
+  const applied = state.profileSettingsState.applied
+  return applied !== null && sharedSettingWrites === 0 && PROFILE_SPECIFIC_SETTINGS.has(settingId) ? applied : null
+}
+
+/** Whether the active profile replaces the shared value of `settingId` */
+function isSettingReplaced(settingId) {
+  return Object.hasOwn(state.profileSettingsState.shared, settingId)
+}
+
+function assignSharedSetting(settingsState, settingId, value) {
+  const shared = settingsState.profileSettingsState.shared
+  if (Object.hasOwn(shared, settingId)) shared[settingId] = value
+  else settingsState[settingId] = value
+}
+
+/**
+ * Runs `run` inside the lock that writes of a profile's own settings take, so
+ * deleting the profile can't run between a write's read and save.
+ * @template T
+ * @param {string} profileId
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+export function withProfileSettingsLock(profileId, run) {
+  return canHaveOwnSettings(profileId) ? runLocked(`opentubex-setting-${profileSettingsId(profileId)}`, run) : run()
+}
+
+/**
+ * Whether a profile still exists. Writes that can create its settings record
+ * check this inside its lock, so they can't recreate the record of a profile
+ * deleted meanwhile, see `withProfileSettingsLock`.
+ * @param {string} profileId
+ */
+async function profileExists(profileId) {
+  return (await DBProfileHandlers.find()).some(profile => profile._id === profileId)
+}
+
+/**
+ * Saves the value of `settingId` in the own settings of a profile, or with
+ * `undefined` goes back to the shared value. Edits read the saved settings
+ * inside a lock all windows share, so they build on each other.
+ * @param {Function} commit
+ * @param {string} profileId
+ * @param {string} settingId
+ * @param {unknown} value
+ */
+function saveProfileSettingValue(commit, profileId, settingId, value) {
+  const id = profileSettingsId(profileId)
+  return runLocked(`opentubex-setting-${id}`, async () => {
+    const saved = await DBSettingHandlers.findValue(id)
+    if (!isPlainObject(saved)) throw new Error('The profile no longer has its own settings')
+    if (value === undefined ? !Object.hasOwn(saved, settingId) : sameSettingValue(saved[settingId], value)) {
+      commit('setProfileOwnSettings', { profileId, settings: saved })
+      return
+    }
+    const settings = { ...saved }
+    if (value === undefined) delete settings[settingId]
+    else settings[settingId] = value
+    await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+    commit('setProfileOwnSettings', { profileId, settings })
+  })
+}
+
+const runProfileSettingUpdate = createSettingUpdateQueue()
+
+/**
+ * Optimistic edits of profiles' own settings that are still saving, by
+ * setting ID and profile. Saved settings that show meanwhile keep them, so the
+ * next edit builds on them.
+ * @type {Map<string, { profileId: string, settingId: string, value: unknown, count: number }>}
+ */
+const pendingProfileEdits = new Map()
+
+/**
+ * @param {string} profileId
+ * @param {Record<string, unknown>} settings saved settings of the profile
+ */
+function withPendingProfileEdits(profileId, settings) {
+  const edits = [...pendingProfileEdits.values()].filter(edit => edit.profileId === profileId)
+  if (edits.length === 0) return settings
+  const shown = { ...settings }
+  for (const { settingId, value } of edits) {
+    if (value === undefined) delete shown[settingId]
+    else shown[settingId] = value
+  }
+  return shown
+}
+
+/**
+ * Saves an edit of `settingId` to the own settings of `profileId`. Optimistic
+ * edits show right away, so the next edit builds on them.
+ * @returns {Promise<boolean>} whether the edit was saved
+ */
+function updateProfileSetting(commit, profileId, settingId, value, optimistic = false) {
+  // A profile saves only the values that differ from the shared ones, so it
+  // follows later changes of the others.
+  if (value !== undefined && sameSettingValue(value, sharedSettingValue(state, settingId))) value = undefined
+  const id = profileSettingsId(profileId)
+  const key = `${id}/${settingId}`
+  /** @type {{ profileId: string, settingId: string, value: unknown, count: number, confirmed: unknown } | undefined} */
+  let pending
+  if (optimistic) {
+    // The value saved before these edits, which a failed edit shows again if
+    // the saved settings can't be read either
+    pending = pendingProfileEdits.get(key) ?? {
+      profileId, settingId, value, count: 0, confirmed: ownSettingsOf(state.profileSettingsState.overrides, profileId)?.[settingId],
+    }
+    pending.value = value
+    pending.count++
+    pendingProfileEdits.set(key, pending)
+    commit('setProfileSettingValue', { profileId, settingId, value })
+  }
+  const settle = () => {
+    if (pending && --pending.count === 0 && pendingProfileEdits.get(key) === pending) pendingProfileEdits.delete(key)
+  }
+  // The edit stops showing over the saved settings before the write
+  // tracker shows those another window saved meanwhile.
+  return settingWrites.track(id, async () => {
+    try {
+      // A newer queued edit skips this one, which then confirms no value.
+      await runProfileSettingUpdate(key, async () => {
+        await saveProfileSettingValue(commit, profileId, settingId, value)
+        if (pending) pending.confirmed = value
+      })
+    } finally {
+      settle()
+    }
+  }).then(() => true, async error => {
+    console.error(error)
+    if (optimistic) {
+      const saved = await DBSettingHandlers.findValue(id).catch(() => undefined)
+      if (saved !== undefined) {
+        commit('setProfileOwnSettings', { profileId, settings: isPlainObject(saved) ? saved : null })
+      } else if (!pendingProfileEdits.has(key)) {
+        commit('setProfileSettingValue', { profileId, settingId, value: pending.confirmed })
+      }
+    }
+    return false
+  })
+}
+
+/** Mutations that can change which settings show, see `profileSettingsPlugin` */
+const PROFILE_SETTINGS_MUTATIONS = new Set([
+  'setActiveProfile', 'setProfileList', 'removeProfileFromList', 'setProfileSettingsList', 'setProfileOwnSettings',
+  'setProfileSettingValue',
+])
+
+/**
+ * Shows the settings of the active profile: its own while it has them,
+ * otherwise the shared ones. Until the profiles load, the settings stay those
+ * that `grabUserSettings` showed for the default profile.
+ * @param {import('vuex').Store<any>} store
+ */
+function applyActiveProfileSettings(store) {
+  const settings = store.state.settings
+  const { activeProfile, profilesLoaded } = store.state.profiles
+  const current = settings.profileSettingsState
+  const target = !profilesLoaded
+    ? current.applied
+    : canHaveOwnSettings(activeProfile) && isPlainObject(ownSettingsOf(current.overrides, activeProfile)) ? activeProfile : null
+  const plan = planProfileSettings(settings, target)
+  // The replaced settings can change while every value stays the same.
+  const replaced = shared => Object.keys(shared).sort().join('\0')
+  if (plan.applied === current.applied && plan.changed.length === 0 && replaced(plan.shared) === replaced(current.shared)) return
+  // The commit updates `current`.
+  const previous = current.applied
+  store.commit('applyProfileSettings', plan)
+  for (const settingId of plan.changed) {
+    applySettingSideEffects(store, settingId, settings[settingId])
+  }
+  // An icon pack still loading for the previous profile must not show, also
+  // when this one uses the same pack.
+  if (plan.applied !== previous && !plan.changed.includes('iconPack')) {
+    applySettingSideEffects(store, 'iconPack', settings.iconPack)
+  }
+  reportProfileSettings(settings)
+}
+
+/**
+ * Tells the main process which own settings this window's active profile
+ * shows, as it opens tabs on its landing page and follows its base theme.
+ * @param {Record<string, any>} settings the settings state
+ */
+function reportProfileSettings(settings) {
+  if (!process.env.IS_ELECTRON) return
+  const shown = Object.fromEntries(Object.keys(settings.profileSettingsState.shared).map(key => [key, settings[key]]))
+  // The store's proxies can't be sent.
+  window.ftElectron.applyProfileSettings(JSON.parse(JSON.stringify(shown)))
+}
+
+/**
+ * Runs what a setting does once it shows a new value that came from
+ * elsewhere: another window, or a profile switch.
+ */
+function applySettingSideEffects({ dispatch }, settingId, value) {
+  if (settingsWithSideEffects.includes(settingId)) {
+    Promise.resolve(dispatch(defaultSideEffectsTriggerId(settingId), value)).catch(error => console.error(error))
+  }
+  if (settingId === 'navigationItems' && !normalizeNavigationItems(value).includes('home')) {
+    dispatch('redirectHomeTabsToLandingPage').catch(error => {
+      console.error('Failed to redirect Home tabs after the navigation items changed', error)
+    })
+  }
+}
+
+/**
+ * Shows the settings of the active profile whenever it, or the settings of a
+ * profile, change.
+ * @param {import('vuex').Store<any>} store
+ */
+export function profileSettingsPlugin(store) {
+  store.subscribe(mutation => {
+    if (PROFILE_SETTINGS_MUTATIONS.has(mutation.type)) applyActiveProfileSettings(store)
+  })
+}
+
+// #endregion profile settings
+
 const customState = {
+  profileSettingsState: {
+    /** The profile whose own settings show, or null for the shared settings */
+    applied: null,
+    /** The own settings of each profile that has them, by profile ID */
+    overrides: {},
+    /** The shared values of the settings the applied profile replaces */
+    shared: {},
+  },
 }
 
 const customGetters = {
@@ -650,9 +998,26 @@ const customGetters = {
     return getters.getBlurBlockedItemsActive ? [] : getters.getActiveForbiddenTitles
   },
 
+  // The shared settings, also while the active profile has its own
   getTransferableSettings: (state) => {
-    return getTransferableSettings(state)
+    return getTransferableSettings({ ...state, ...state.profileSettingsState.shared })
   },
+
+  getSharedSettingValue: (state) => (settingId) => sharedSettingValue(state, settingId),
+
+  /** The own settings of a profile, or null if it uses the shared settings */
+  getProfileOwnSettings: (state) => (profileId) => {
+    const settings = ownSettingsOf(state.profileSettingsState.overrides, profileId)
+    return isPlainObject(settings) ? settings : null
+  },
+
+  /** The profile whose own settings show, or null while the shared settings do */
+  getProfileSettingsTarget: (state) => state.profileSettingsState.applied,
+
+  /** Whether the active profile gives the setting its own value */
+  isSettingProfileSpecificValue: (state) => (settingId) => (
+    state.profileSettingsState.applied !== null && Object.hasOwn(state.profileSettingsState.shared, settingId)
+  ),
 
   getDefaultPlayback(state) {
     return Math.round((state.defaultPlayback + Number.EPSILON) * 100) / 100
@@ -661,14 +1026,42 @@ const customGetters = {
 
 const customMutations = {
   setPreferredCaptionLocale: (state, value) => {
-    state.preferredCaptionLocale = normalizeYouTubeCaptionLanguageCode(value)
+    assignSharedSetting(state, 'preferredCaptionLocale', normalizeYouTubeCaptionLanguageCode(value))
   },
   setTabBarPosition: (state, value) => {
-    state.tabBarPosition = normalizeTabBarPosition(value)
-  }
+    assignSharedSetting(state, 'tabBarPosition', normalizeTabBarPosition(value))
+  },
+
+  // The own settings of each profile that has them, by profile ID
+  setProfileSettingsList: (state, profiles) => {
+    state.profileSettingsState.overrides = profiles
+  },
+
+  // `settings` is null when the profile uses the shared settings.
+  setProfileOwnSettings: (state, { profileId, settings }) => {
+    if (isPlainObject(settings)) state.profileSettingsState.overrides[profileId] = withPendingProfileEdits(profileId, settings)
+    else delete state.profileSettingsState.overrides[profileId]
+  },
+
+  /** Shows an edit of a profile's own setting before it is saved */
+  setProfileSettingValue: (state, { profileId, settingId, value }) => {
+    const settings = ownSettingsOf(state.profileSettingsState.overrides, profileId)
+    if (!isPlainObject(settings)) return
+    if (value === undefined) delete settings[settingId]
+    else settings[settingId] = value
+  },
+
+  // Takes a plan from `planProfileSettings`.
+  applyProfileSettings: (state, { applied, shared, values }) => {
+    state.profileSettingsState.applied = applied
+    state.profileSettingsState.shared = shared
+    Object.assign(state, values)
+  },
 }
 
 function updateValidatedSetting(commit, settingId, value) {
+  const target = settingTarget(settingId)
+  if (target !== null) return updateProfileSetting(commit, target, settingId, value)
   return settingWrites.track(settingId, async () => {
     await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
     commit(defaultMutationId(settingId), value)
@@ -731,8 +1124,12 @@ function updateSavedPlaylistBookmarks(commit, update) {
 const updateOptimisticSetting = createOptimisticSettingUpdater()
 
 function updateOrderedSetting(commit, settings, settingId, value) {
+  const target = settingTarget(settingId)
+  if (target !== null) return updateProfileSetting(commit, target, settingId, value, true)
   return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
-    read: () => settings[settingId],
+    // The shared value, also while the active profile replaces it, so a failed
+    // write restores it rather than the profile's.
+    read: () => sharedSettingValue(settings, settingId),
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
     persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
   })).then(() => true).catch(error => {
@@ -757,7 +1154,7 @@ const editSavedSetting = createSavedSettingEditor()
 function updateSharedSetting(commit, settings, settingId, update) {
   const edit = typeof update === 'function' ? update : () => update
   return settingWrites.track(settingId, () => editSavedSetting(settingId, edit, {
-    read: () => settings[settingId],
+    read: () => sharedSettingValue(settings, settingId),
     commit: value => commit(defaultMutationId(settingId), value),
     readSaved: async () => (await DBSettingHandlers.findValue(settingId)) ?? structuredClone(DEFAULT_SETTINGS[settingId]),
     write: value => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value)),
@@ -1080,14 +1477,18 @@ const customActions = {
     normalizeAppFont(value)
   ),
 
-  updateMoveDownloadsToAppHeader: ({ commit }, value) => settingWrites.track('moveDownloadsToAppHeader', async () => {
-    await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
-    commit('setMoveDownloadsToAppHeader', value)
-    await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
-  }).then(() => true, error => {
-    console.error(error)
-    return false
-  }),
+  updateMoveDownloadsToAppHeader: ({ commit }, value) => {
+    const target = settingTarget('moveDownloadsToAppHeader')
+    if (target !== null) return updateProfileSetting(commit, target, 'moveDownloadsToAppHeader', value)
+    return settingWrites.track('moveDownloadsToAppHeader', async () => {
+      await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
+      commit('setMoveDownloadsToAppHeader', value)
+      await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+    }).then(() => true, error => {
+      console.error(error)
+      return false
+    })
+  },
 
   updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
@@ -1133,24 +1534,130 @@ const customActions = {
     normalizeTabBarPosition(value)
   ),
 
-  updateIconPack: ({ commit }, value) => settingWrites.track('iconPack', async () => {
-    const previousIconPack = currentIconPack.value
-    if (!isIconPack(value) || !await setIconPack(value)) {
-      return false
+  updateIconPack: async ({ commit, state }, value) => {
+    if (!isIconPack(value)) return false
+    const target = settingTarget('iconPack')
+    // The active profile's own icons keep showing.
+    const shown = target !== null || !isSettingReplaced('iconPack')
+    if (shown && !await setIconPack(value)) return false
+    // The profile's own pack is shown again once it is saved, see `applyActiveProfileSettings`.
+    if (target !== null) {
+      const saved = await updateProfileSetting(commit, target, 'iconPack', value)
+      if (!saved && isIconPack(state.iconPack)) await setIconPack(state.iconPack)
+      return saved
     }
-
-    try {
-      await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
-      commit('setIconPack', value)
-      return true
-    } catch (error) {
-      if (isIconPack(previousIconPack)) {
-        await setIconPack(previousIconPack)
+    return settingWrites.track('iconPack', async () => {
+      try {
+        await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
+        commit('setIconPack', value)
+        return true
+      } catch (error) {
+        // Show the pack of the settings that show now, which a profile switch
+        // meanwhile can have changed.
+        if (shown && isIconPack(state.iconPack)) {
+          await setIconPack(state.iconPack)
+        }
+        console.error(error)
+        return false
       }
-      console.error(error)
-      return false
-    }
-  }),
+    })
+  },
+
+  /**
+   * Gives a profile its own settings, which start as the shared ones, or
+   * deletes them so that it uses the shared settings again.
+   * @param {{ profileId: string, enabled: boolean }} payload
+   * @returns {Promise<boolean>} whether it was saved
+   */
+  setProfileOwnSettingsEnabled: ({ commit }, { profileId, enabled }) => {
+    if (!canHaveOwnSettings(profileId)) return Promise.resolve(false)
+    const id = profileSettingsId(profileId)
+    return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
+      const saved = await DBSettingHandlers.findValue(id)
+      if (isPlainObject(saved) === enabled) {
+        commit('setProfileOwnSettings', { profileId, settings: enabled ? saved : null })
+        return
+      }
+      if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
+      // Turning them off saves null rather than deleting them, so other
+      // windows and devices learn about it.
+      const settings = enabled ? {} : null
+      await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+      commit('setProfileOwnSettings', { profileId, settings })
+    }))
+  },
+
+  /**
+   * Lets the active profile use the shared values of settings again. They all
+   * go to the profile active now, even if another one becomes active meanwhile.
+   * @param {string[]} settingIds
+   * @returns {Promise<boolean>} whether every one was saved
+   */
+  useSharedSettingValue: ({ commit, state }, settingIds) => {
+    const profileId = state.profileSettingsState.applied
+    const ids = settingIds.filter(isProfileSpecificSetting)
+    if (profileId === null || ids.length === 0) return Promise.resolve(false)
+    return Promise.all(ids.map(settingId => updateProfileSetting(commit, profileId, settingId, undefined)))
+      .then(results => results.every(Boolean))
+  },
+
+  /**
+   * Saves a repaired value of a shown setting, such as a theme that names a
+   * deleted custom theme, where its value comes from: the own settings of the
+   * active profile, or the shared ones it inherits.
+   * @param {{ settingId: string, value: unknown }} payload
+   */
+  repairShownSetting: ({ dispatch, state }, { settingId, value }) => {
+    const update = () => dispatch(defaultUpdaterId(settingId), value)
+    return Object.hasOwn(state.profileSettingsState.shared, settingId) ? update() : withSharedSettings(update)
+  },
+
+  /**
+   * Replaces the own settings of a profile with restored ones, such as those
+   * of a backup. They count as a new edit, so sync keeps them.
+   * @param {{ profileId: string, settings: unknown }} payload
+   * @returns {Promise<boolean>} whether they were saved
+   */
+  restoreProfileSettings: ({ commit }, { profileId, settings }) => {
+    if (!canHaveOwnSettings(profileId) || !isPlainObject(settings)) return Promise.resolve(false)
+    const id = profileSettingsId(profileId)
+    const restored = sanitizeProfileSettings(settings)
+    return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
+      const saved = await DBSettingHandlers.findValue(id)
+      if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
+      if (!isPlainObject(saved) || !sameSettingValue(sanitizeProfileSettings(saved), restored)) {
+        await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored))
+      }
+      commit('setProfileOwnSettings', { profileId, settings: restored })
+    }))
+  },
+
+  /**
+   * Saves the own settings of a profile from sync, unless they changed since
+   * sync read them. Settings this device doesn't sync keep their own value.
+   * @param {{ profileId: string, settings: Record<string, unknown> | null, previous: Record<string, unknown> | null, isSynced: (settingId: string) => boolean }} payload
+   *   `previous` holds the synced settings as sync read them, null if the profile used the shared settings
+   * @returns {Promise<boolean>} false if they changed meanwhile
+   */
+  saveSyncedProfileSettings: ({ commit }, { profileId, settings, previous, isSynced }) => {
+    if (!canHaveOwnSettings(profileId)) return Promise.resolve(false)
+    const id = profileSettingsId(profileId)
+    let saved = false
+    return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
+      const current = await DBSettingHandlers.findValue(id)
+      if (!sameSettingValue(syncedProfileSettings(current, isSynced), previous)) return
+      if (!isPlainObject(current) && !await profileExists(profileId)) return
+      const next = isPlainObject(settings)
+        ? {
+            ...Object.fromEntries(Object.entries(sanitizeProfileSettings(current)).filter(([key]) => !isSynced(key))),
+            ...Object.fromEntries(Object.entries(sanitizeProfileSettings(settings)).filter(([key]) => isSynced(key))),
+          }
+        : null
+      await DBSettingHandlers.upsert(id, next)
+      commit('setProfileOwnSettings', { profileId, settings: next })
+      saved = true
+    })).then(ok => ok && saved)
+  },
 
   resetSettingToDefault: ({ dispatch }, settingKey) => {
     if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
@@ -1187,9 +1694,13 @@ const customActions = {
       // The icons load alongside the other settings' side effects. A pack that
       // cannot load is replaced by the other one, which is then saved.
       let iconPackApplied
-      const applyIconPack = (value) => {
+      // `owner` is the profile whose own pack `value` is, or null for the shared one.
+      const applyIconPack = (value, owner = null) => {
         iconPackApplied = dispatch(defaultSideEffectsTriggerId('iconPack'), value).then(async (resolvedValue) => {
-          if (resolvedValue !== value) {
+          if (resolvedValue === value) return
+          if (owner !== null) {
+            await updateProfileSetting(commit, owner, 'iconPack', resolvedValue)
+          } else {
             await DBSettingHandlers.upsert('iconPack', resolvedValue)
             commit('setIconPack', resolvedValue)
           }
@@ -1197,6 +1708,16 @@ const customActions = {
         // A failure is handled where the result is awaited below.
         iconPackApplied.catch(() => {})
       }
+
+      // The default profile shows its own settings from the start, so their
+      // side effects run once, with its values. Until the profiles load,
+      // `applyActiveProfileSettings` keeps them.
+      const profileSettings = collectProfileSettings(userSettings)
+      const defaultProfile = userSettings.find(entry => entry._id === 'defaultProfile')?.value
+      const startupProfile = canHaveOwnSettings(defaultProfile) && Object.hasOwn(profileSettings, defaultProfile)
+        ? defaultProfile
+        : null
+      const startupProfileSettings = sanitizeProfileSettings(profileSettings[startupProfile])
 
       for (const { _id, value } of userSettings) {
         let resolvedValue = value
@@ -1211,7 +1732,7 @@ const customActions = {
             }
           }
         }
-        if (settingsWithSideEffects.includes(_id)) {
+        if (settingsWithSideEffects.includes(_id) && !Object.hasOwn(startupProfileSettings, _id)) {
           if (_id === 'iconPack') {
             applyIconPack(value)
           } else {
@@ -1425,10 +1946,16 @@ const customActions = {
         await dispatch('updateSyncServerEnabled', token !== '')
       }
 
+      commit('setProfileSettingsList', profileSettings)
+      if (startupProfile !== null) commit('applyProfileSettings', planProfileSettings(state, startupProfile))
+      // Also without own settings, so the main process forgets those a
+      // reloaded window showed before.
+      reportProfileSettings(state)
+
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            applyIconPack(state[_id])
+            applyIconPack(state[_id], Object.hasOwn(startupProfileSettings, 'iconPack') ? startupProfile : null)
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), state[_id])
@@ -1526,13 +2053,20 @@ const customActions = {
           if (seenMarks !== null) commit(defaultMutationId(seenMarks), value)
           return
         }
-        if (settingsWithSideEffects.includes(settingId)) {
+        const profileId = profileIdFromSettingsId(settingId)
+        if (profileId !== null) {
+          commit('setProfileOwnSettings', { profileId, settings: isPlainObject(value) ? value : null })
+          return
+        }
+        // The active profile's own value keeps showing.
+        const replaced = isSettingReplaced(settingId)
+        if (settingsWithSideEffects.includes(settingId) && !replaced) {
           dispatch(defaultSideEffectsTriggerId(settingId), value)
         }
 
         commit(defaultMutationId(settingId), value)
         if (
-          settingId === 'navigationItems' &&
+          settingId === 'navigationItems' && !replaced &&
           !normalizeNavigationItems(value).includes('home')
         ) {
           dispatch('redirectHomeTabsToLandingPage').catch(error => {
@@ -1809,7 +2343,8 @@ for (const settingId of Object.keys(state)) {
   }
 
   getters[getterId] = (state) => state[settingId]
-  mutations[mutationId] = (state, value) => { state[settingId] = value }
+  // The shared value, see `assignSharedSetting`
+  mutations[mutationId] = (state, value) => assignSharedSetting(state, settingId, value)
 
   if (settingsWithSideEffects.includes(settingId)) {
     const triggerId = defaultSideEffectsTriggerId(settingId)
@@ -1817,26 +2352,38 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = ({ commit, dispatch }, value) => (
-      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+    actions[updaterId] = ({ commit, dispatch }, value) => {
+      const target = settingTarget(settingId)
+      if (target !== null) return updateProfileSetting(commit, target, settingId, value)
+      return settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
         // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
         await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (!isLatest()) return
-        dispatch(triggerId, value)
+        // The active profile's own value keeps showing.
+        if (!isSettingReplaced(settingId)) dispatch(triggerId, value)
 
         commit(mutationId, value)
       })).then(() => true, handleUpdateError)
-    )
+    }
   } else {
-    actions[updaterId] = ({ commit }, value) => (
-      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+    actions[updaterId] = ({ commit }, value) => {
+      const target = settingTarget(settingId)
+      if (target !== null) return updateProfileSetting(commit, target, settingId, value)
+      return settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
         // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
         await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (isLatest()) commit(mutationId, value)
       })).then(() => true, handleUpdateError)
-    )
+    }
+  }
+}
+
+for (const settingId of Object.keys(DEFAULT_SETTINGS)) {
+  const ownUpdater = Object.hasOwn(customActions, defaultUpdaterId(settingId))
+  if (!SHARED_ONLY_SETTINGS.has(settingId) && (!ownUpdater || PROFILE_ROUTED_CUSTOM_SETTINGS.has(settingId))) {
+    PROFILE_SPECIFIC_SETTINGS.add(settingId)
   }
 }
 

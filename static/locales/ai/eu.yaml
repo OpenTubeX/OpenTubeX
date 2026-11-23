@@ -1685,6 +1685,7 @@ Settings:
     Title: "Harpidetzen fitxak"
     Hint: "Aldatu Harpidetzak orriko fitxen ordena. Ezkutatutako fitxek beren lekua gordetzen dute berriro erakusten dituzunerako."
     Hidden: "(ezkutatuta)"
+  Profile Setting: "{profile} profilak bakarrik erabiltzen du. Hautatu balio partekatua erabiltzeko."
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
@@ -1759,6 +1760,13 @@ Profile:
   Use Initial: Erabili iniziala
   The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
   Theme Color: Gaiaren kolorea
+  Keep Settings Separate: "Mantendu ezarpenak bereizita"
+  Keep Settings Separate Tooltip: "Profil honi bere ezarpenak ematen dizkio, hasieran zure ezarpen partekatuen berdinak direnak. Profil hau aktibo dagoen bitartean, Ezarpenetako aldaketak profil honi bakarrik aplikatzen zaizkio. Gailu honen ezarpenak, hala nola sinkronizazioa, proxya, babeskopiak eta deskarga-karpetak, partekatuta geratzen dira."
+  Own Settings: "Ezarpen propioak"
+  Own Settings Notice: "{profile} profilak bere ezarpenak bereizita ditu, beraz hemengo aldaketak berari bakarrik aplikatzen zaizkio. Gailuaren ezarpenak, hala nola sinkronizazioa, proxya eta babeskopiak, partekatuta geratzen dira."
+  Use Shared Settings: "Erabili ezarpen partekatuak"
+  Use Shared Settings Warning: "{profile} profilak zure ezarpen partekatuak erabiliko ditu berriro, eta harentzat aldatu dituzun ezarpenak ezabatu egingo dira."
+  Profile Could Not Be Saved: "Ezin izan da profila gorde"
 Channel:
   Hide Watched: Ezkutatu ikusitakoak
   All Videos Watched: "Bideo hauek guztiak ikusi dituzu. Desaktibatu “Ezkutatu ikusitakoak” erakusteko."

@@ -1720,6 +1720,7 @@ Settings:
     Title: "Abonnementstabbladen"
     Hint: "Wijzig de volgorde van de tabbladen op de pagina Abonnementen. Verborgen tabbladen behouden hun plek voor wanneer je ze weer toont."
     Hidden: "(verborgen)"
+  Profile Setting: "Alleen gebruikt door {profile}. Selecteer om in plaats daarvan de gedeelde waarde te gebruiken."
 Tutorial:
   Skip: Overslaan
   Next: Volgende
@@ -1798,6 +1799,13 @@ Profile:
   The selected image could not be loaded: De geselecteerde afbeelding kan niet worden geladen
   Theme Color: Themakleur
   Go To Profile Manager: Naar profielbeheer
+  Keep Settings Separate: "Instellingen apart houden"
+  Keep Settings Separate Tooltip: "Geeft dit profiel eigen instellingen, die in het begin gelijk zijn aan je gedeelde instellingen. Zolang dit profiel actief is, gelden wijzigingen in Instellingen alleen voor dit profiel. Instellingen van dit apparaat, zoals synchronisatie, proxy, back-ups en downloadmappen, blijven gedeeld."
+  Own Settings: "Eigen instellingen"
+  Own Settings Notice: "{profile} houdt zijn instellingen apart, dus wijzigingen hier gelden alleen voor dit profiel. Apparaatinstellingen, zoals synchronisatie, proxy en back-ups, blijven gedeeld."
+  Use Shared Settings: "Gedeelde instellingen gebruiken"
+  Use Shared Settings Warning: "{profile} gebruikt dan weer je gedeelde instellingen, en de instellingen die je ervoor hebt gewijzigd, worden verwijderd."
+  Profile Could Not Be Saved: "Het profiel kon niet worden opgeslagen"
 Channel:
   Hide Watched: Bekeken verbergen
   All Videos Watched: "Je hebt al deze video’s bekeken. Schakel ‘Bekeken verbergen’ uit om ze te tonen."

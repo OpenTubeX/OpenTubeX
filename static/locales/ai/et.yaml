@@ -1684,6 +1684,7 @@ Settings:
     Title: "Tellimuste vahekaardid"
     Hint: "Muuda vahekaartide järjekorda lehel Tellimused. Peidetud vahekaardid säilitavad oma koha, kui need uuesti kuvad."
     Hidden: "(peidetud)"
+  Profile Setting: "Kasutab ainult {profile}. Vali, et kasutada selle asemel ühist väärtust."
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi
@@ -1758,6 +1759,13 @@ Profile:
   Use Initial: Kasuta esitähte
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
+  Keep Settings Separate: "Hoia seaded eraldi"
+  Keep Settings Separate Tooltip: "Annab sellele profiilile oma seaded, mis on alguses samad mis sinu ühised seaded. Kui see profiil on aktiivne, kehtivad muudatused seadetes ainult sellele. Selle seadme seaded, näiteks sünkroonimine, puhverserver, varukoopiad ja allalaadimiskaustad, jäävad ühiseks."
+  Own Settings: "Oma seaded"
+  Own Settings Notice: "{profile} hoiab oma seadeid eraldi, seega kehtivad siinsed muudatused ainult sellele. Seadme seaded, näiteks sünkroonimine, puhverserver ja varukoopiad, jäävad ühiseks."
+  Use Shared Settings: "Kasuta ühiseid seadeid"
+  Use Shared Settings Warning: "{profile} kasutab jälle sinu ühiseid seadeid ja seaded, mida selle jaoks muutsid, kustutatakse."
+  Profile Could Not Be Saved: "Profiili ei õnnestunud salvestada"
 Channel:
   Hide Watched: Peida vaadatud
   All Videos Watched: "Oled kõiki neid videoid vaadanud. Nende näitamiseks lülita „Peida vaadatud“ välja."

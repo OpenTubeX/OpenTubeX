@@ -1962,6 +1962,7 @@ Settings:
     Title: "Prenumeratų kortelės"
     Hint: "Pakeiskite kortelių tvarką Prenumeratų puslapyje. Paslėptos kortelės išlaiko savo vietą, kai vėl jas parodysite."
     Hidden: "(paslėpta)"
+  Profile Setting: "Naudoja tik {profile}. Pasirinkite, kad būtų naudojama bendra reikšmė."
 Tutorial:
   Skip: Praleisti
   Next: Toliau
@@ -2048,6 +2049,13 @@ Profile:
   Close Profile Dropdown: Užverti profilio išskleidžiamąjį meniu
   Open Profile Dropdown: Atverti profilio išskleidžiamąjį meniu
   Go To Profile Manager: Eiti į profilių tvarkytuvę
+  Keep Settings Separate: "Laikyti nustatymus atskirai"
+  Keep Settings Separate Tooltip: "Suteikia šiam profiliui savus nustatymus, kurie iš pradžių yra tokie patys kaip bendri nustatymai. Kol šis profilis aktyvus, pakeitimai Nustatymuose taikomi tik jam. Šio įrenginio nustatymai, pvz., sinchronizavimas, tarpinis serveris, atsarginės kopijos ir atsisiuntimų aplankai, lieka bendri."
+  Own Settings: "Savi nustatymai"
+  Own Settings Notice: "{profile} laiko savo nustatymus atskirai, todėl pakeitimai čia taikomi tik jam. Įrenginio nustatymai, pvz., sinchronizavimas, tarpinis serveris ir atsarginės kopijos, lieka bendri."
+  Use Shared Settings: "Naudoti bendrus nustatymus"
+  Use Shared Settings Warning: "{profile} vėl naudos jūsų bendrus nustatymus, o jam pakeisti nustatymai bus ištrinti."
+  Profile Could Not Be Saved: "Profilio išsaugoti nepavyko"
 Channel:
   Hide Watched: Slėpti peržiūrėtus
   All Videos Watched: "Peržiūrėjote visus šiuos vaizdo įrašus. Kad jie būtų rodomi, išjunkite „Slėpti peržiūrėtus“."

@@ -22,6 +22,7 @@ async function importFile(content, failingKeys = [], authorizedRulesWrite = null
     },
     migrateLegacySettings: value => value,
     defaultUpdaterId: key => key,
+    withSharedSettings: operation => operation(),
     NON_TRANSFERABLE_SETTINGS: new Set(['syncServerToken']),
     transferableSettings: { value: { uiScale: 100, rememberHistory: true, ytDlpAutomaticDownloadRules: '{}' } },
     store: {

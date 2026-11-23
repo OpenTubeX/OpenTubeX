@@ -8,7 +8,7 @@ import recommendations from './modules/recommendations'
 import invidious from './modules/invidious'
 import playlists from './modules/playlists'
 import profiles from './modules/profiles'
-import settings, { isSettingSyncEnabled, isSettingSyncable } from './modules/settings'
+import settings, { isSettingSyncEnabled, isSettingSyncable, profileSettingsPlugin, sharedSettingValue } from './modules/settings'
 import searchHistory from './modules/search-history'
 import subscriptionCache from './modules/subscription-cache'
 import subscriptionGroups from './modules/subscription-groups'
@@ -37,8 +37,8 @@ function syncOnLocalChanges(store) {
   const actionRevisions = new WeakMap()
   const remoteActions = new WeakSet()
   let profileValue = getProfileSyncSignature(store.state.profiles?.profileList ?? [])
-  const settingValues = new Map(Object.entries(store.state.settings).map(([key, value]) => {
-    return [key, JSON.stringify(value)]
+  const settingValues = new Map(Object.keys(store.state.settings).map(key => {
+    return [key, JSON.stringify(sharedSettingValue(store.state.settings, key))]
   }))
 
   const incrementRevision = reason => {
@@ -56,7 +56,8 @@ function syncOnLocalChanges(store) {
     if (mutation.type.startsWith('set')) {
       const setting = mutation.type.charAt(3).toLowerCase() + mutation.type.slice(4)
       if (isSettingSyncable(setting)) {
-        const value = JSON.stringify(state.settings[setting])
+        // Sync uploads the shared values, also while a profile shows its own.
+        const value = JSON.stringify(sharedSettingValue(state.settings, setting))
         if (settingValues.get(setting) !== value) incrementRevision('settings')
         settingValues.set(setting, value)
       }
@@ -149,7 +150,7 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, trackHistoryChanges, confirmLocalSyncDeletions, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue, shareWellbeingAcrossWindows]
+  plugins: [profileSettingsPlugin, syncOnLocalChanges, trackHistoryChanges, confirmLocalSyncDeletions, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue, shareWellbeingAcrossWindows]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]

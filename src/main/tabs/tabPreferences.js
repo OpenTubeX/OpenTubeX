@@ -9,6 +9,7 @@ import {
 } from '../../navigationItems.js'
 import { filterAvailableNavigationItems } from '../../navigationAvailability.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
+import { canHaveOwnSettings, isPlainObject, profileSettingsId } from '../../profileSettings.js'
 import { normalizeRoutePath } from './tabRoutes.js'
 
 export const DEFAULT_NEW_TAB_POSITION = 'afterCurrentInOrder'
@@ -119,9 +120,32 @@ export async function getStoredNewTabPosition() {
 }
 
 /**
+ * The own settings of the profile a window shows when it opens, its default
+ * profile, until its renderer reports the active profile's.
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function getStoredStartupProfileSettings() {
+  try {
+    const defaultProfile = (await baseHandlers.settings._findOne('defaultProfile'))?.value
+    if (!canHaveOwnSettings(defaultProfile)) return {}
+    const settings = (await baseHandlers.settings._findOne(profileSettingsId(defaultProfile)))?.value
+    return isPlainObject(settings) ? settings : {}
+  } catch (error) {
+    console.error('Failed to load the default profile\'s own settings:', error)
+    return {}
+  }
+}
+
+/**
+ * @param {Record<string, unknown>} [profileSettings] the own settings of the
+ *   window's active profile, which replace the saved ones
  * @returns {Promise<string>}
  */
-export async function getStoredLandingRoute() {
+export async function getStoredLandingRoute(profileSettings = {}) {
+  /** @param {string} settingId */
+  const findSetting = settingId => Object.hasOwn(profileSettings, settingId)
+    ? { value: profileSettings[settingId] }
+    : baseHandlers.settings._findOne(settingId)
   try {
     const [
       landingPageSetting,
@@ -136,17 +160,17 @@ export async function getStoredLandingRoute() {
       enableWatchStatsSetting,
       enableTwitchPageSetting,
     ] = await Promise.all([
-      baseHandlers.settings._findOne('landingPage'),
-      baseHandlers.settings._findOne('navigationItems'),
-      baseHandlers.settings._findOne('hideHome'),
-      baseHandlers.settings._findOne('hidePlaylists'),
-      baseHandlers.settings._findOne('hidePopularVideos'),
-      baseHandlers.settings._findOne('hideTrendingVideos'),
-      baseHandlers.settings._findOne('backendPreference'),
-      baseHandlers.settings._findOne('backendFallback'),
-      baseHandlers.settings._findOne('rememberHistory'),
-      baseHandlers.settings._findOne('enableWatchStats'),
-      baseHandlers.settings._findOne('enableTwitchPage'),
+      findSetting('landingPage'),
+      findSetting('navigationItems'),
+      findSetting('hideHome'),
+      findSetting('hidePlaylists'),
+      findSetting('hidePopularVideos'),
+      findSetting('hideTrendingVideos'),
+      findSetting('backendPreference'),
+      findSetting('backendFallback'),
+      findSetting('rememberHistory'),
+      findSetting('enableWatchStats'),
+      findSetting('enableTwitchPage'),
     ])
 
     let landingPage = landingPageSetting?.value

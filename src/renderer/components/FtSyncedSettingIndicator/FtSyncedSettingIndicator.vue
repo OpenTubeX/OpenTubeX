@@ -13,6 +13,18 @@
     <FtIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
   </button>
   <button
+    v-if="profileSpecificKeys.length > 0"
+    type="button"
+    class="changedSettingIndicator profileSettingIndicator"
+    :class="{ indicatorDisabled: disabled }"
+    :disabled="disabled"
+    :aria-label="profileSettingLabel"
+    :title="profileSettingLabel"
+    @click.prevent.stop="useSharedValue"
+  >
+    <FtIcon :icon="['fas', 'circle-user']" />
+  </button>
+  <button
     v-if="showReset"
     type="button"
     class="changedSettingIndicator"
@@ -117,6 +129,21 @@ const label = computed(() => isSynced.value
   : props.enableLabel || t('Settings.Sync Settings.Enable Setting Sync'))
 
 const resetLabel = computed(() => t('Settings.Reset Setting to Default'))
+
+/** The settings shown here to which the active profile gives its own value */
+const profileSpecificKeys = computed(() => {
+  const keys = props.settingKeys.length > 0 ? props.settingKeys : [props.settingKey]
+  return keys.filter(settingKey => store.getters.isSettingProfileSpecificValue(settingKey))
+})
+
+const profileSettingLabel = computed(() => t('Settings.Profile Setting', {
+  profile: store.getters.getActiveProfile?.name ?? ''
+}))
+
+function useSharedValue() {
+  if (props.disabled) return
+  store.dispatch('useSharedSettingValue', profileSpecificKeys.value)
+}
 
 function settingsValuesEqual(currentValue, defaultValue) {
   if (Object.is(currentValue, defaultValue)) {

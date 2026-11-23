@@ -805,6 +805,7 @@ Settings:
   Highlight Changed Settings: Highlight settings changed from defaults
   Highlight Changed Settings Label: Changed
   Reset Setting to Default: Reset this setting to its default
+  Profile Setting: 'Only used by {profile}. Select to use the shared value instead.'
   Experimental Badge: Experimental
   Performance Impact:
     Show Performance Impact: Show performance impact indicators
@@ -2472,6 +2473,13 @@ Profile:
   Keep Data Separate: Keep data separate
   Keep Data Separate Tooltip: Gives this profile its own subscriptions, watch history, playlists, search history, watch statistics, and queue. Your other profiles don't see them, and this profile doesn't see theirs. You can't change this after creating the profile.
   Separate Profile: Separate profile
+  Keep Settings Separate: Keep settings separate
+  Keep Settings Separate Tooltip: Gives this profile its own settings, which start out the same as your shared settings. While this profile is active, changes in Settings only apply to it. Settings of this device, such as sync, proxy, backups, and download folders, stay shared.
+  Own Settings: Own settings
+  Own Settings Notice: '{profile} keeps its settings separate, so changes here only apply to it. Device settings, such as sync, proxy, and backups, stay shared.'
+  Use Shared Settings: Use shared settings
+  Use Shared Settings Warning: '{profile} will use your shared settings again, and the settings you changed for it will be deleted.'
+  Profile Could Not Be Saved: The profile could not be saved
   Separate Profile Note: This profile keeps its subscriptions, history, and playlists separate from your other profiles.
   Separate Profile Deletion Warning: Its subscriptions, watch history, playlists, search history, watch statistics, and queue will also be deleted.
   Separate Data Notice: '{profile} keeps its data separate, so the imports and exports below only use its subscriptions, history, playlists, and search history.'

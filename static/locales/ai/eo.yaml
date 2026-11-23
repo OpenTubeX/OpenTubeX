@@ -1729,6 +1729,7 @@ Settings:
     Title: "Abonaj langetoj"
     Hint: "Ŝanĝu la ordon de la langetoj en la paĝo Abonoj. Kaŝitaj langetoj konservas sian lokon por kiam vi denove montros ilin."
     Hidden: "(kaŝita)"
+  Profile Setting: "Uzata nur de {profile}. Elektu por uzi la komunan valoron anstataŭe."
 Tutorial:
   Skip: Preterlasi
   Next: Sekva
@@ -1803,6 +1804,13 @@ Profile:
   Use Initial: Uzi komencliteron
   The selected image could not be loaded: La elektita bildo ne povis esti ŝargita
   Theme Color: Etosa koloro
+  Keep Settings Separate: "Teni agordojn apartaj"
+  Keep Settings Separate Tooltip: "Donas al ĉi tiu profilo proprajn agordojn, kiuj komence samas al viaj komunaj agordoj. Dum ĉi tiu profilo estas aktiva, ŝanĝoj en Agordoj validas nur por ĝi. Agordoj de ĉi tiu aparato, kiel sinkronigo, prokurilo, savkopioj kaj elŝutaj dosierujoj, restas komunaj."
+  Own Settings: "Propraj agordoj"
+  Own Settings Notice: "{profile} tenas siajn agordojn apartaj, do ŝanĝoj ĉi tie validas nur por ĝi. Aparataj agordoj, kiel sinkronigo, prokurilo kaj savkopioj, restas komunaj."
+  Use Shared Settings: "Uzi komunajn agordojn"
+  Use Shared Settings Warning: "{profile} denove uzos viajn komunajn agordojn, kaj la agordoj, kiujn vi ŝanĝis por ĝi, estos forigitaj."
+  Profile Could Not Be Saved: "La profilo ne povis esti konservita"
 Channel:
   Hide Watched: Kaŝi spektitajn
   All Videos Watched: "Vi spektis ĉiujn ĉi tiujn videojn. Malŝaltu „Kaŝi spektitajn“ por montri ilin."

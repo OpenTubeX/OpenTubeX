@@ -323,7 +323,7 @@ import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import ScheduledBackupSettings from './ScheduledBackupSettings.vue'
 
 import store from '../../../store/index'
-import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../../store/modules/settings'
+import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS, withSharedSettings } from '../../../store/modules/settings'
 import { migrateLegacySettings } from '../../../helpers/settings-migrations'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { startProgressBarOperation } from '../../../helpers/progressBar'
@@ -520,12 +520,12 @@ async function exportUnifiedBackup() {
           // The main process reads and compresses the library in a worker
           // instead of copying it into this window. Writes still being
           // prepared here are sent first, so the archive includes them.
-          const settings = selected.includes('settings') ? deepCopy(transferableSettings.value) : undefined
+          const settings = selected.includes('settings') ? backupSettings() : undefined
           await Promise.all([DBHistoryHandlers.sent(), DBPlaylistHandlers.sent()])
           return new Blob([await window.ftElectron.createBackupArchive(selected, settings)], { type: 'application/zip' })
         }
         const backup = Object.fromEntries(await readBackupSections(null, selected))
-        if (selected.includes('settings')) backup.settings = deepCopy(transferableSettings.value)
+        if (selected.includes('settings')) backup.settings = backupSettings()
         const dataSelected = PROFILE_DATA_SECTIONS.some(section => selected.includes(section))
         const profiles = selected.includes('profiles') || dataSelected ? await DBProfileHandlers.find() : []
         if (selected.includes('profiles')) backup.profiles = profiles
@@ -2305,6 +2305,21 @@ const transferableSettings = computed(() => {
 })
 
 /**
+ * The settings a backup holds: the shared ones, and in `profileSettings` the
+ * own settings of each profile that has them, by profile ID.
+ */
+function backupSettings() {
+  const profileSettings = Object.fromEntries(profileList.value.flatMap(profile => {
+    const settings = store.getters.getProfileOwnSettings(profile._id)
+    return settings === null ? [] : [[profile._id, deepCopy(settings)]]
+  }))
+  return {
+    ...deepCopy(transferableSettings.value),
+    ...(Object.keys(profileSettings).length > 0 ? { profileSettings } : {}),
+  }
+}
+
+/**
  * Imports save automatic download rules after the click's user activation has
  * expired, so authorize that write while the click is still active.
  */
@@ -2388,7 +2403,9 @@ function settingsImportFailureMessage({ total, failed }) {
 }
 
 async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
-  importedSettings = migrateLegacySettings(importedSettings)
+  // Backups hold the own settings of profiles too, see `backupSettings`.
+  const { profileSettings, ...sharedSettings } = importedSettings
+  importedSettings = migrateLegacySettings(sharedSettings)
 
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings
@@ -2421,10 +2438,20 @@ async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
       ? { value: importedValue, authorizedWrite: authorizedRulesWrite }
       : importedValue
     try {
-      if (await store.dispatch(updaterId, update) === false) failed++
+      // Imports replace the shared settings, whichever profile is active.
+      if (await withSharedSettings(() => store.dispatch(updaterId, update)) === false) failed++
     } catch (error) {
       console.error(error)
       failed++
+    }
+  }
+
+  // The profile they belong to was restored first, or is on this device.
+  if (profileSettings !== null && typeof profileSettings === 'object' && !Array.isArray(profileSettings)) {
+    for (const [profileId, settings] of Object.entries(profileSettings)) {
+      if (!store.getters.profileById(profileId)) continue
+      total++
+      if (await store.dispatch('restoreProfileSettings', { profileId, settings }) !== true) failed++
     }
   }
   return { total, failed }

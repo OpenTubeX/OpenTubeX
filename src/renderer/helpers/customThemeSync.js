@@ -11,8 +11,7 @@ export async function repairSystemThemeSettings({ dispatch, getters, rootGetters
 
   await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => {
     const currentValue = currentSettings[key]
-    const action = `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
-    return value === currentValue ? null : dispatch(action, value)
+    return value === currentValue ? null : dispatch('repairShownSetting', { settingId: key, value })
   }))
 }
 
@@ -29,11 +28,14 @@ export async function commitCustomThemesEdit(context, save) {
   const baseTheme = getters.getBaseTheme
   if (isCustomThemeValue(baseTheme) && !themes.some(theme => customThemeValue(theme.id) === baseTheme)) {
     const deletedTheme = getters.getCustomThemes?.find(theme => customThemeValue(theme.id) === baseTheme)
+    // Another profile can show while a repair saves, whose settings only
+    // need the repairs if they name the deleted theme too.
+    const stillShown = () => getters.getBaseTheme === baseTheme
     if (deletedTheme) {
-      await dispatch('updateMainColor', deletedTheme.mainColor)
-      await dispatch('updateSecColor', deletedTheme.secondaryColor)
+      await dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      if (stillShown()) await dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
     }
-    await dispatch('updateBaseTheme', deletedTheme?.basedOn ?? 'system')
+    if (stillShown()) await dispatch('repairShownSetting', { settingId: 'baseTheme', value: deletedTheme?.basedOn ?? 'system' })
   }
   commit('setCustomThemes', themes)
   await repairSystemThemeSettings(context, themes)

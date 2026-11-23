@@ -35,12 +35,16 @@ async function getConfirmCloseWindowWithMultipleTabs() {
 
 /**
  * @param {'close' | 'load' | 'unload'} action
+ * @param {Record<string, unknown> | null | undefined} profileSettings the own
+ *   settings of the window's active profile, which replace the saved ones
  * @returns {Promise<boolean>}
  */
-async function getConfirmMultipleTabsAction(action) {
+async function getConfirmMultipleTabsAction(action, profileSettings) {
   const settingKey = MULTIPLE_TABS_CONFIRMATION_SETTING_KEYS[action]
   try {
-    const value = (await baseHandlers.settings._findOne(settingKey))?.value
+    const value = profileSettings && Object.hasOwn(profileSettings, settingKey)
+      ? profileSettings[settingKey]
+      : (await baseHandlers.settings._findOne(settingKey))?.value
     return typeof value === 'boolean' ? value : true
   } catch (error) {
     console.error(`Failed to load ${action} tabs confirmation preference:`, error)
@@ -199,7 +203,7 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
    * @returns {Promise<boolean>}
    */
   async function confirmMultipleTabsAction(manager, count, action) {
-    if (count < MULTIPLE_TABS_CONFIRM_THRESHOLD || !await getConfirmMultipleTabsAction(action)) {
+    if (count < MULTIPLE_TABS_CONFIRM_THRESHOLD || !await getConfirmMultipleTabsAction(action, manager?.profileSettings)) {
       return true
     }
 

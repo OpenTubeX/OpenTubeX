@@ -2049,6 +2049,7 @@ Settings:
     Title: "Pestanyes de subscripcions"
     Hint: "Canvieu l'ordre de les pestanyes de la pàgina Subscripcions. Les pestanyes amagades conserven el seu lloc per quan les torneu a mostrar."
     Hidden: "(amagada)"
+  Profile Setting: "Només l'utilitza {profile}. Selecciona per utilitzar el valor compartit."
 Tutorial:
   Skip: Omet
   Next: Següent
@@ -2135,6 +2136,13 @@ Profile:
   Close Profile Dropdown: Tanca el desplegable del perfil
   Open Profile Dropdown: Obre el desplegable del perfil
   Go To Profile Manager: Ves al gestor de perfils
+  Keep Settings Separate: "Mantén la configuració separada"
+  Keep Settings Separate Tooltip: "Dona a aquest perfil la seva pròpia configuració, que al principi és igual que la configuració compartida. Mentre aquest perfil estigui actiu, els canvis a Configuració només s'hi apliquen a ell. La configuració d'aquest dispositiu, com la sincronització, el servidor intermediari, les còpies de seguretat i les carpetes de baixada, continua compartida."
+  Own Settings: "Configuració pròpia"
+  Own Settings Notice: "{profile} manté la seva configuració separada, així que els canvis d'aquí només s'hi apliquen a ell. La configuració del dispositiu, com la sincronització, el servidor intermediari i les còpies de seguretat, continua compartida."
+  Use Shared Settings: "Utilitza la configuració compartida"
+  Use Shared Settings Warning: "{profile} tornarà a utilitzar la configuració compartida i se suprimirà la configuració que hi has canviat."
+  Profile Could Not Be Saved: "No s'ha pogut desar el perfil"
 Channel:
   Hide Watched: Amaga els vistos
   All Videos Watched: "Has vist tots aquests vídeos. Desactiva «Amaga els vistos» per mostrar-los."

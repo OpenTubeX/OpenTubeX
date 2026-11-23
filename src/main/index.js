@@ -30,6 +30,7 @@ import {
 import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
 import { resolveSystemTheme } from '../appearanceSettings'
+import { SHARED_ONLY_SETTINGS, profileSettingsOf } from '../profileSettings.js'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import { applyYouTubeUserAgent } from '../youTubeUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -781,7 +782,19 @@ function runApp() {
   let notificationMode = 'both'
   let thumbnailPreference = ''
   let blurThumbnails = false
-  setNotificationImagesAllowed(() => thumbnailPreference !== 'hidden' && !blurThumbnails)
+  // Notifications show thumbnails only while every window would, so a profile
+  // that hides or blurs them in one window keeps them out of notifications.
+  const notificationImagesAllowed = () => {
+    const shown = [...TabManager.getAll()]
+      .filter(manager => !manager.browserWindow.isDestroyed())
+      .map(({ profileSettings }) => profileSettings ?? {})
+    return (shown.length > 0 ? shown : [{}]).every(settings => {
+      const own = settingId => Object.hasOwn(settings, settingId)
+      return (own('thumbnailPreference') ? settings.thumbnailPreference : thumbnailPreference) !== 'hidden' &&
+        (own('blurThumbnails') ? settings.blurThumbnails : blurThumbnails) !== true
+    })
+  }
+  setNotificationImagesAllowed(notificationImagesAllowed)
   const notify = createNotifier({
     history: notificationHistory,
     getMode: () => notificationMode,
@@ -807,7 +820,7 @@ function runApp() {
         : download.errorMessage === 'ENOENT'
           ? t('Downloads.yt-dlp Not Found')
           : t('Downloads.Download Failed Template', { title: download.title }),
-      thumbnail: thumbnailPreference !== 'hidden' && !blurThumbnails ? download.thumbnail : undefined
+      thumbnail: notificationImagesAllowed() ? download.thumbnail : undefined
     })
     if (notification) await notificationHistory.record(notification)
   })
@@ -2537,6 +2550,10 @@ function runApp() {
 
       stopPowerSaveBlockerForWindow(newWindow)
       updateBackgroundSubscriptionVisibility()
+      // The base theme it showed no longer counts for the native theme.
+      if (allWindows.length !== 0) {
+        applyShownBaseThemes().catch(error => console.error('Failed to apply the base themes of the open windows', error))
+      }
       // Closing the last tabs confirmed the quit before closing their window.
       // Auxiliary windows, such as GPU Internals, would keep window-all-closed from firing.
       if (allWindows.length === 0 && isQuitConfirmed && !isQuitting) app.quit()
@@ -2895,7 +2912,7 @@ function runApp() {
 
   handleTrusted(IpcChannels.READ_CLIPBOARD, () => clipboard.readText())
 
-  const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
+  const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, refreshThemeSource: () => applyShownBaseThemes() })
   setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl })
 
   setupDatastoreIpc({
@@ -2904,6 +2921,52 @@ function runApp() {
     onSettingDeleted: id => {
       if (id === 'contextMenuSearchEngines') contextMenu.setSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
     }
+  })
+
+  let baseThemeRequest = 0
+
+  /**
+   * @param {unknown} baseTheme
+   * @returns {Promise<'light' | 'dark' | 'system'>}
+   */
+  async function themeSourceOf(baseTheme) {
+    if (typeof baseTheme !== 'string') return 'system'
+    if (isCustomThemeValue(baseTheme)) return (await getSelectedCustomTheme(baseTheme))?.isDark ? 'dark' : 'light'
+    return LIGHT_BASE_THEMES.includes(baseTheme) ? 'light' : DARK_BASE_THEMES.includes(baseTheme) ? 'dark' : 'system'
+  }
+
+  /**
+   * Sets the native theme source, which native controls and the system color
+   * scheme of every window follow, from the base theme each window shows: the
+   * own one of its active profile, or the saved one. Windows that show
+   * different ones keep following the system, so the System theme still
+   * detects it.
+   * @param {unknown} savedBaseTheme
+   */
+  async function applyBaseTheme(savedBaseTheme) {
+    if (typeof savedBaseTheme !== 'string') return
+    const request = ++baseThemeRequest
+    const shown = [...TabManager.getAll()]
+      .filter(manager => !manager.browserWindow.isDestroyed())
+      .map(({ profileSettings }) => profileSettings && Object.hasOwn(profileSettings, 'baseTheme') ? profileSettings.baseTheme : savedBaseTheme)
+    const sources = new Set(await Promise.all((shown.length > 0 ? shown : [savedBaseTheme]).map(themeSourceOf)))
+    // A newer theme can have been applied while a custom one loaded.
+    if (request === baseThemeRequest) nativeTheme.themeSource = sources.size === 1 ? [...sources][0] : 'system'
+  }
+
+  async function applyShownBaseThemes() {
+    // Without a saved one, the native theme follows the system.
+    await applyBaseTheme((await baseHandlers.settings._findOne('baseTheme'))?.value ?? 'system')
+  }
+
+  // A window's active profile can show its own settings instead of the saved
+  // ones: its tabs open its landing page, and the native theme follows its
+  // base theme.
+  onTrusted(IpcChannels.APPLY_PROFILE_SETTINGS, (event, profileSettings) => {
+    const tabManager = TabManager.getFromWebContents(event.sender)
+    if (!tabManager) return
+    tabManager.profileSettings = profileSettingsOf(profileSettings, settingId => !SHARED_ONLY_SETTINGS.has(settingId))
+    applyShownBaseThemes().catch(error => console.error('Failed to apply the profile base theme', error))
   })
 
   /** @param {{ _id: string, value: any }} data */
@@ -2970,11 +3033,7 @@ function runApp() {
         blurThumbnails = data.value === true
         break
       case 'baseTheme':
-        if (isCustomThemeValue(data.value)) {
-          nativeTheme.themeSource = (await getSelectedCustomTheme(data.value))?.isDark ? 'dark' : 'light'
-        } else {
-          updateThemeSource(data.value)
-        }
+        await applyBaseTheme(data.value)
         break
       case 'ytDlpMaxConcurrentDownloads':
       case 'ytDlpDownloadBandwidthLimit':

@@ -280,6 +280,36 @@ test('system notifications follow thumbnail settings changed after a reminder wa
   expect(await app.electronApp.evaluate(() => globalThis.fetchedImages)).toStrictEqual([])
 })
 
+test('system notifications leave out thumbnails that a profile with its own settings blurs', async ({ app, page }) => {
+  await mockSystemNotifications(app)
+  await app.electronApp.evaluate(({ net }) => {
+    globalThis.fetchedImages = []
+    net.fetch = async url => {
+      globalThis.fetchedImages.push(String(url))
+      throw new Error('No thumbnails offline')
+    }
+  })
+  // Only the car profile blurs them, so the shared settings still show them.
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('createProfile', { name: 'Car', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [], ownSettings: true })
+    store.dispatch('updateActiveProfile', store.getters.getProfileList.find(profile => profile.name === 'Car')._id)
+    await store.dispatch('updateBlurThumbnails', true)
+  })
+  const videoId = 'abcdefghijk'
+  await page.evaluate(videoId => window.ftElectron.liveReminder.schedule({
+    videoId,
+    startTimestamp: Date.now() + 2000,
+    notificationTitle: 'Premiere starting',
+    notificationBody: 'Starting now',
+    thumbnail: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+  }), videoId)
+
+  await expect.poll(async () => (await shownNotifications(app)).map(notification => notification.title)).toStrictEqual(['Premiere starting'])
+  expect(await app.electronApp.evaluate(() => globalThis.fetchedImages)).toStrictEqual([])
+  expect(latestSettings(readDatastore(app.userDataDir, 'settings')).blurThumbnails).not.toBe(true)
+})
+
 test('the bell records notifications the system cannot show', async ({ app, page }) => {
   await mockSystemNotifications(app, { supported: false })
   await announceUploads(page, ['a'])

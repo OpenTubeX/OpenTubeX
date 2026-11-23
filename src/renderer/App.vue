@@ -1886,9 +1886,10 @@ onMounted(async () => {
     removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
     removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
+  // A failed load is no empty catalog, so it repairs no theme selections.
   const customThemesReady = loadCustomThemes().catch((error) => {
     console.error('Failed to load custom theme:', error)
-    return []
+    return null
   })
   const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
   const profilesReady = settingsReady.then(() => (
@@ -1949,18 +1950,25 @@ onMounted(async () => {
     await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
   }
 
-  try {
-    store.commit('setCustomThemes', themes)
-    if (baseTheme.value === 'custom' && themes.length > 0) {
-      await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+  if (themes !== null) {
+    try {
+      store.commit('setCustomThemes', themes)
+      customThemesLoaded = true
+      if (baseTheme.value === 'custom' && themes.length > 0) {
+        await store.dispatch('repairShownSetting', { settingId: 'baseTheme', value: `custom:${themes[0].id}` })
+      }
+      await sanitizeAppearanceSettings(themes)
+    } catch (error) {
+      console.error('Failed to load custom theme:', error)
     }
-    await sanitizeAppearanceSettings(themes)
-  } catch (error) {
-    console.error('Failed to load custom theme:', error)
   }
   removeCustomThemeListener = handleCustomThemeUpdated(async (themes) => {
     store.commit('setCustomThemes', themes)
-    await repairSystemThemeSettings(store, themes)
+    customThemesLoaded = true
+    // A later update can commit newer themes while this one repairs settings.
+    await repairSystemThemeSettings(store, store.getters.getCustomThemes)
+    // Another window can have deleted a custom theme of the active profile's own settings.
+    await sanitizeAppearanceSettings(store.getters.getCustomThemes, true)
     updateTheme()
   })
   appearanceSettingsReady = true
@@ -2371,6 +2379,7 @@ onBeforeUnmount(() => capacitorUiScale?.dispose())
 
 const appFont = computed(() => store.getters.getAppFont)
 let removeCustomThemeListener = () => {}
+let customThemesLoaded = false
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
@@ -2439,6 +2448,20 @@ const mainColor = computed(() => store.getters.getMainColor)
 watch(mainColor, updateTheme)
 watch(() => store.getters.getHideStartupSplash, cacheNextStartupAppearance)
 watch(() => store.getters.getCustomThemes, cacheNextStartupAppearance)
+// The own settings of the profile switched to, or those sync or a restore
+// gave the active profile, can name a deleted custom theme. Only the shown
+// settings repair them.
+watch(() => [
+  store.state.settings.profileSettingsState.applied,
+  store.getters.getBaseTheme,
+  store.getters.getSystemLightTheme,
+  store.getters.getSystemDarkTheme,
+  store.getters.getMainColor,
+  store.getters.getSecColor,
+], () => {
+  if (!customThemesLoaded) return
+  sanitizeAppearanceSettings(store.getters.getCustomThemes, true).catch(error => console.error(error))
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
@@ -2543,7 +2566,14 @@ function updateAppFont() {
   )
 }
 
-async function sanitizeAppearanceSettings(customThemes) {
+/**
+ * Replaces theme settings that name missing custom themes and invalid colors.
+ * @param {object[]} customThemes
+ * @param {boolean} [profileOnly] only those the active profile replaces with
+ *   its own values. The main process repairs the shared ones.
+ */
+async function sanitizeAppearanceSettings(customThemes, profileOnly = false) {
+  const replaced = store.state.settings.profileSettingsState.shared
   const systemThemes = resolveSystemThemeSettings({
     systemLightTheme: store.getters.getSystemLightTheme,
     systemDarkTheme: store.getters.getSystemDarkTheme,
@@ -2556,8 +2586,10 @@ async function sanitizeAppearanceSettings(customThemes) {
     ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
   ]
 
-  await Promise.all(settings.map(([name, value]) =>
-    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
+  await Promise.all(settings.map(([name, value]) => {
+    if (profileOnly && !Object.hasOwn(replaced, name.charAt(0).toLowerCase() + name.slice(1))) return null
+    return store.getters[`get${name}`] === value ? null : store.dispatch('repairShownSetting', { settingId: name.charAt(0).toLowerCase() + name.slice(1), value })
+  }))
 }
 
 function handleSystemColorSchemeChange(event) {

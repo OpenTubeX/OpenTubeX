@@ -147,6 +147,14 @@
                       :title="t('Profile.Separate Profile')"
                       :aria-label="t('Profile.Separate Profile')"
                     />
+                    <FtIcon
+                      v-if="store.getters.getProfileOwnSettings(profile._id) !== null"
+                      class="separateProfileIcon"
+                      :icon="['fas', 'circle-user']"
+                      role="img"
+                      :title="t('Profile.Own Settings')"
+                      :aria-label="t('Profile.Own Settings')"
+                    />
                   </span>
                   <FtIcon
                     v-if="profile._id === activeProfile._id"

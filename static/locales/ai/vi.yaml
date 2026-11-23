@@ -1690,6 +1690,7 @@ Settings:
     Title: "Thẻ đăng ký"
     Hint: "Thay đổi thứ tự các thẻ trên trang Đăng ký. Các thẻ bị ẩn vẫn giữ vị trí cho đến khi bạn hiển thị lại."
     Hidden: "(đã ẩn)"
+  Profile Setting: "Chỉ {profile} sử dụng. Chọn để dùng giá trị dùng chung thay thế."
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp
@@ -1764,6 +1765,13 @@ Profile:
   Use Initial: Dùng chữ cái đầu
   The selected image could not be loaded: Không thể tải ảnh đã chọn
   Theme Color: Màu chủ đề
+  Keep Settings Separate: "Tách riêng cài đặt"
+  Keep Settings Separate Tooltip: "Cung cấp cho hồ sơ này cài đặt riêng, ban đầu giống với cài đặt dùng chung của bạn. Khi hồ sơ này đang hoạt động, các thay đổi trong Cài đặt chỉ áp dụng cho nó. Cài đặt của thiết bị này, như đồng bộ hóa, proxy, bản sao lưu và thư mục tải xuống, vẫn được dùng chung."
+  Own Settings: "Cài đặt riêng"
+  Own Settings Notice: "{profile} tách riêng cài đặt, vì vậy các thay đổi ở đây chỉ áp dụng cho hồ sơ này. Cài đặt thiết bị, như đồng bộ hóa, proxy và bản sao lưu, vẫn được dùng chung."
+  Use Shared Settings: "Dùng cài đặt dùng chung"
+  Use Shared Settings Warning: "{profile} sẽ dùng lại cài đặt dùng chung của bạn, và các cài đặt bạn đã thay đổi cho hồ sơ này sẽ bị xóa."
+  Profile Could Not Be Saved: "Không thể lưu hồ sơ"
 Channel:
   Hide Watched: Ẩn video đã xem
   All Videos Watched: "Bạn đã xem tất cả các video này. Tắt \"Ẩn video đã xem\" để hiển thị chúng."

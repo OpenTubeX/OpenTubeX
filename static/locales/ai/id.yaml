@@ -1693,6 +1693,7 @@ Settings:
     Title: "Tab langganan"
     Hint: "Ubah urutan tab di halaman Langganan. Tab yang disembunyikan tetap di tempatnya untuk saat Anda menampilkannya lagi."
     Hidden: "(disembunyikan)"
+  Profile Setting: "Hanya digunakan oleh {profile}. Pilih untuk menggunakan nilai bersama."
 Tutorial:
   Skip: Lewati
   Next: Berikutnya
@@ -1767,6 +1768,13 @@ Profile:
   Use Initial: Gunakan Inisial
   The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
   Theme Color: Warna Tema
+  Keep Settings Separate: "Pisahkan pengaturan"
+  Keep Settings Separate Tooltip: "Memberi profil ini pengaturannya sendiri, yang awalnya sama dengan pengaturan bersama Anda. Selama profil ini aktif, perubahan di Pengaturan hanya berlaku untuknya. Pengaturan perangkat ini, seperti sinkronisasi, proksi, cadangan, dan folder unduhan, tetap dibagikan."
+  Own Settings: "Pengaturan sendiri"
+  Own Settings Notice: "{profile} memisahkan pengaturannya, jadi perubahan di sini hanya berlaku untuknya. Pengaturan perangkat, seperti sinkronisasi, proksi, dan cadangan, tetap dibagikan."
+  Use Shared Settings: "Gunakan pengaturan bersama"
+  Use Shared Settings Warning: "{profile} akan kembali menggunakan pengaturan bersama Anda, dan pengaturan yang Anda ubah untuknya akan dihapus."
+  Profile Could Not Be Saved: "Profil tidak dapat disimpan"
 Channel:
   Hide Watched: Sembunyikan yang sudah ditonton
   All Videos Watched: "Anda sudah menonton semua video ini. Matikan “Sembunyikan yang sudah ditonton” untuk menampilkannya."

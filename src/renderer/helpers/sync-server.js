@@ -29,7 +29,8 @@ import {
   isSessionExpiredError,
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
-import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled } from '../store/modules/settings'
+import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingsId } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -51,6 +52,7 @@ import {
   mergeSettingEntry,
   mergeSettingItemsEntry,
   mergeSettingListEntry,
+  mergeProfileSettingsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
@@ -1681,6 +1683,22 @@ async function mergeSeparateProfiles(client, store, previous, options) {
   return next
 }
 
+/**
+ * A profile's own settings as merged on this device, with the settings of
+ * `remoteEntry` that this device doesn't sync, so that its upload keeps them.
+ * Turning the profile's own settings off drops them all.
+ * @param {{ key: string, value: any, updatedAt: number }} entry the merged settings this device syncs
+ * @param {{ value: unknown } | undefined} remoteEntry
+ * @param {Record<string, unknown> | null | undefined} syncedRemote the settings of `remoteEntry` this device syncs
+ */
+function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
+  if (entry.value === null || !remoteEntry || !syncedRemote) return entry
+  const elsewhere = Object.entries(remoteEntry.value).filter(([key]) => !Object.hasOwn(syncedRemote, key))
+  if (elsewhere.length === 0) return entry
+  const value = Object.fromEntries([...elsewhere, ...Object.entries(entry.value)].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
+  return { ...entry, value }
+}
+
 function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
@@ -1699,11 +1717,16 @@ async function repairCustomThemeReferences(store, previousThemes, themes) {
     if (id === null || themeIds.has(id)) continue
 
     const deletedTheme = previousById.get(id)
+    // Each repair saves where the shown value comes from. Another profile can
+    // show meanwhile, whose settings only need it if they name the theme too.
+    const stillNamed = () => customThemeIdFromValue(store.state.settings[key]) === id
     if (key === 'baseTheme' && deletedTheme) {
-      await store.dispatch('updateMainColor', deletedTheme.mainColor)
-      await store.dispatch('updateSecColor', deletedTheme.secondaryColor)
+      await store.dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      if (!stillNamed()) continue
+      await store.dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
     }
-    await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
+    if (!stillNamed()) continue
+    await store.dispatch('repairShownSetting', { settingId: key, value: deletedTheme?.basedOn ?? defaultTheme })
   }
 
   await repairSystemThemeSettings(store, themes)
@@ -1838,10 +1861,11 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 
 // `playlistSnapshot` holds the baselines of this sync's playlist merge, which
 // map local playlist IDs to the server's. Without it, playlist preferences stay
-// as the server has them. Lists merge against `options.listSnapshot`, and
-// `options.onRetryBaseline` receives a getter for the one a retry after a
-// rejected upload merges them against: the lists this sync applied. The
-// rejected result would drop this device's items the server never received.
+// as the server has them. Lists and profiles' own settings merge against
+// `options.listSnapshot`, and `options.onRetryBaseline` receives a getter for
+// the one a retry after a rejected upload merges them against: those this sync
+// applied. The rejected result would drop this device's edits the server never
+// received.
 // `store.persistSettingsSyncBaseline` receives the server entries this sync
 // merged and applied, so a failed upload cannot make them look like local edits.
 // `options.dataScope` is the separate profile whose data the store shows, whose
@@ -1869,10 +1893,30 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     : {}
   const local = Object.fromEntries([
     [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    // A profile with its own settings may show other values, which sync with that profile.
     ...getSyncableSettingKeys(store.state.settings).map(key => (
-      [key, deepCopy(store.state.settings[key])]
+      [key, deepCopy(sharedSettingValue(store.state.settings, key))]
     )),
   ])
+
+  // The own settings of each profile, by their settings key. Those of a
+  // profile this device lacks wait on the server until it syncs the profile.
+  const isSynced = key => isSettingSyncEnabled(store.state.settings, key)
+  const syncedOwnSettingsOf = profileId => syncedProfileSettings(ownSettingsOf(store.state.settings.profileSettingsState?.overrides, profileId), isSynced)
+  const profileSettingsProfiles = new Map()
+  for (const profile of store.state.profiles.profileList) {
+    if (!canHaveOwnSettings(profile._id)) continue
+    const key = profileSettingsId(profile._id)
+    const value = syncedOwnSettingsOf(profile._id)
+    // Entries that aren't settings, which other versions may write, stay as they are.
+    if (remote[key] && remote[key].value !== null && !isPlainObject(remote[key].value)) continue
+    if (value === null && !previous[key] && !remote[key]) continue
+    profileSettingsProfiles.set(key, profile._id)
+    local[key] = value
+  }
+  for (const id of removedProfileIds) {
+    if (canHaveOwnSettings(id)) delete merged[profileSettingsId(id)]
+  }
 
   // The profiles whose channel settings sync, by their settings key
   const channelSettingsProfiles = new Map()
@@ -1895,30 +1939,47 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
   let themesDeferred = false
+  // Settings that merge their items or settings against `listSnapshot`
+  const mergesAgainstLists = key => isListSetting(key) || profileSettingsProfiles.has(key)
+  const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
+  // A profile's synced settings keep only those this device syncs, so a
+  // setting it starts syncing later has no baseline here, and its value on the
+  // server doesn't look removed.
+  const baselineOf = (key, entry) => profileSettingsProfiles.has(key) ? syncedEntry(entry) : entry
   // Lists and failed saves this sync didn't apply, which keep their previous baseline
   const skippedSettings = new Set()
   // Server entries of the settings this sync merged and applied
   const applied = {}
   try {
     for (const [key, value] of Object.entries(local)) {
-      const old = isListSetting(key) ? previousLists[key] : previous[key]
+      const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
       const remoteEntry = remote[key]
       if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
         continue
       }
+      const profileSettingsKey = profileSettingsProfiles.has(key)
       const mergeEntry = itemKeys.has(key)
         ? mergeSettingItemsEntry
-        : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
+        : isListSetting(key)
+          ? mergeSettingListEntry
+          : profileSettingsKey ? mergeProfileSettingsEntry : mergeSettingEntry
+      // A profile's own settings merge as this device syncs them, and keep the
+      // settings that only other devices sync.
       let entry = mergeEntry({
         key,
         value,
-        old,
-        remoteEntry,
+        old: profileSettingsKey ? syncedEntry(old) : old,
+        remoteEntry: profileSettingsKey ? syncedEntry(remoteEntry) : remoteEntry,
         localUpdatedAt: localUpdatedAt[key],
         now,
       })
+      if (profileSettingsKey) {
+        entry = remoteEntry && metadataEquals(entry, syncedEntry(remoteEntry))
+          ? remoteEntry
+          : withSettingsSyncedElsewhere(entry, remoteEntry, syncedEntry(remoteEntry)?.value)
+      }
 
       entry = resolveMergedThemeEntry(
         entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
@@ -1931,16 +1992,18 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       }
       const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
         ? value
-        : store.state.settings[key]
+        : profileSettingsProfiles.has(key)
+          ? syncedOwnSettingsOf(profileSettingsProfiles.get(key))
+          : sharedSettingValue(store.state.settings, key)
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)
-        : metadataEquals(currentValue, entry.value)
+        : metadataEquals(currentValue, profileSettingsKey ? syncedProfileSettings(entry.value, isSynced) : entry.value)
       // Edited while this sync saved an earlier setting. Applying the merge would
       // undo the edit, so the server keeps its entry and the next sync merges it.
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
-        if (isListSetting(key)) skippedSettings.add(key)
+        if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
         skip()
@@ -1949,6 +2012,14 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       if (!valuesEqual) {
         if (channelSettingsProfiles.has(key)) {
           await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
+        } else if (profileSettingsProfiles.has(key)) {
+          // Changed meanwhile: the next sync merges the edit.
+          if (!await store.dispatch('saveSyncedProfileSettings', {
+            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, isSynced,
+          })) {
+            skip()
+            continue
+          }
         } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
           await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
         } else if (key === CUSTOM_THEMES_SYNC_KEY) {
@@ -1965,35 +2036,41 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
           // Another window may save the list after this sync read it. That edit
           // or a failed save keeps the server entry, and the next sync merges it.
           let applied = false
-          const saved = await store.dispatch(settingUpdater(key), current => {
+          const saved = await withSharedSettings(() => store.dispatch(settingUpdater(key), current => {
             applied = metadataEquals(current, value)
             return applied ? deepCopy(entry.value) : current
-          })
+          }))
           if (!applied || saved === false) skip()
-        } else if (await store.dispatch(settingUpdater(key), deepCopy(entry.value)) === false) {
+        } else if (await withSharedSettings(() => store.dispatch(settingUpdater(key), deepCopy(entry.value))) === false) {
           // The local value did not change, so the next sync applies the server entry again
           skip()
           skippedSettings.add(key)
           continue
         }
       }
-      if (remoteEntry && !skippedSettings.has(key)) applied[key] = remoteEntry
+      if (remoteEntry && !skippedSettings.has(key)) applied[key] = baselineOf(key, remoteEntry)
     }
   } finally {
     await store.persistSettingsSyncBaseline?.(applied)
   }
 
-  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(isListSetting).flatMap(key => {
+  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(mergesAgainstLists).flatMap(key => {
     const entry = skippedSettings.has(key) ? previousLists[key] : remote[key]
-    return entry ? [[key, entry]] : []
+    return entry ? [[key, baselineOf(key, entry)]] : []
   })))
   await client.putSettings(Object.values(merged))
-  if (skippedSettings.size === 0) return merged
-  // Items from the server that this device never applied must not count as removed here next time.
   const snapshot = { ...merged }
+  for (const key of Object.keys(snapshot)) {
+    if (!isProfileSettingsId(key)) continue
+    // Settings waiting for a profile this device lacks have no baseline, so
+    // when the profile arrives, they apply instead of looking turned off here.
+    if (profileSettingsProfiles.has(key)) snapshot[key] = baselineOf(key, snapshot[key])
+    else delete snapshot[key]
+  }
+  // Items from the server that this device never applied must not count as removed here next time.
   for (const key of skippedSettings) {
-    const old = isListSetting(key) ? previousLists[key] : previous[key]
-    if (old) snapshot[key] = old
+    const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
+    if (old) snapshot[key] = baselineOf(key, old)
     else delete snapshot[key]
   }
   return snapshot
