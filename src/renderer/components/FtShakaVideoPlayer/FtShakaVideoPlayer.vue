@@ -11946,11 +11946,14 @@ function handleError(error, context, details) {
 
   // Caption loading can also fail with MANIFEST errors (e.g. 4033).
   // Log caption and thumbnail failures without triggering video recovery.
+  // That covers every network error of a caption request, not only HTTP statuses:
+  // a response the browser can't read (e.g. without CORS headers) is an HTTP_ERROR (#3510).
   if (
     !ignoreErrors &&
     context !== 'addTextTrackAsync' &&
-    error.category !== shaka.util.Error.Category.TEXT &&
-    !(error.code === shaka.util.Error.Code.BAD_HTTP_STATUS && error.data[0].startsWith('https://www.youtube.com/api/timedtext'))
+    error.category !== ErrorCategory.TEXT &&
+    !(error.category === ErrorCategory.NETWORK && typeof error.data?.[0] === 'string' &&
+      error.data[0].startsWith('https://www.youtube.com/api/timedtext'))
   ) {
     // Retained Shorts can finish requests after navigation. Recover only
     // when that player is presented again; caption failures stay optional.

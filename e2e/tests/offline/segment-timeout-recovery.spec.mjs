@@ -25,6 +25,45 @@ const MANIFEST = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" media
   </Period>
 </MPD>`
 
+/**
+ * Answers the demo stream's byte range requests.
+ * @param {import('@playwright/test').Route} route
+ * @param {number} start
+ * @param {number} end
+ */
+function fulfillRange(route, start, end) {
+  return route.fulfill({
+    status: 206,
+    contentType: 'video/webm',
+    headers: { 'content-range': `bytes ${start}-${end}/${MEDIA.length}` },
+    body: MEDIA.subarray(start, end + 1)
+  })
+}
+
+/**
+ * Parses a segment request's byte range. The last segment runs to the end of the file.
+ * @param {import('@playwright/test').Route} route
+ */
+function requestedRange(route) {
+  const [, rawStart, rawEnd] = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range)
+  return [Number(rawStart), rawEnd === '' ? MEDIA.length - 1 : Number(rawEnd)]
+}
+
+/**
+ * Reloads the open video from the demo DASH manifest.
+ * @param {import('@playwright/test').Page} page
+ */
+async function switchToDash(page) {
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, url) => {
+    component.proxy.manifestMimeType = 'application/dash+xml'
+    component.proxy.manifestSrc = url
+    component.proxy.activeFormat = 'dash'
+    component.proxy.playerLoadGeneration++
+  }, MANIFEST_URL)
+  return watch
+}
+
 // High-latency networks answered segment requests after Shaka's connection timeout,
 // which dropped the video to the legacy formats and reloaded it in a loop (#2604)
 test('keeps streaming after a segment request times out', async ({ app, page }) => {
@@ -36,22 +75,14 @@ test('keeps streaming after a segment request times out', async ({ app, page }) 
   let timedOutRange = null
   let timedOutRangeRequests = 0
   await page.route(SEGMENT_URL, async route => {
-    const [, rawStart, rawEnd] = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range)
-    const start = Number(rawStart)
-    // The last segment runs to the end of the file
-    const end = rawEnd === '' ? MEDIA.length - 1 : Number(rawEnd)
+    const [start, end] = requestedRange(route)
     // Leave the first media segment unanswered once, like a server that's too slow to respond.
     // Playback resumes where the previous player stopped, so it doesn't have to be the first one.
     if (start >= FIRST_CLUSTER) {
       timedOutRange ??= start
       if (start === timedOutRange && ++timedOutRangeRequests === 1) return
     }
-    await route.fulfill({
-      status: 206,
-      contentType: 'video/webm',
-      headers: { 'content-range': `bytes ${start}-${end}/${MEDIA.length}` },
-      body: MEDIA.subarray(start, end + 1)
-    })
+    await fulfillRange(route, start, end)
   })
 
   let releaseManifest
@@ -65,13 +96,7 @@ test('keeps streaming after a segment request times out', async ({ app, page }) 
   })
 
   try {
-    const watch = await page.evaluateHandle(findWatchComponent)
-    await watch.evaluate((component, url) => {
-      component.proxy.manifestMimeType = 'application/dash+xml'
-      component.proxy.manifestSrc = url
-      component.proxy.activeFormat = 'dash'
-      component.proxy.playerLoadGeneration++
-    }, MANIFEST_URL)
+    const watch = await switchToDash(page)
     await requested
 
     // Time out within the test instead of after Shaka's 10 seconds, and without its own retry
@@ -94,4 +119,34 @@ test('keeps streaming after a segment request times out', async ({ app, page }) 
   } finally {
     releaseManifest()
   }
+})
+
+// Android's WebView reports an unreadable caption response as a failed fetch. That
+// reloaded the video and dropped it to the legacy formats in a loop (#3510)
+test.describe('caption request failures', () => {
+  test.use({ seed: { settings: { enableSubtitlesByDefault: true } } })
+
+  test('keeps streaming when a caption request fails', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    await openMockedVideo(page)
+
+    await page.route(SEGMENT_URL, route => fulfillRange(route, ...requestedRange(route)))
+    await page.route(MANIFEST_URL, route => route.fulfill({ contentType: 'application/dash+xml', body: MANIFEST }))
+    await page.route('https://www.youtube.com/api/timedtext**', route => route.abort('failed'))
+    const captionError = page.waitForEvent('console', message => message.type() === 'error' &&
+      message.text().includes('"shaka error handler"') && message.text().includes('api/timedtext'))
+
+    const watch = await switchToDash(page)
+    await captionError
+    const video = await waitForPlayback(page)
+    const element = await video.elementHandle()
+    try {
+      const playedTo = await element.evaluate(node => node.currentTime)
+      await expect.poll(() => element.evaluate(node => node.isConnected && node.currentTime)).toBeGreaterThan(playedTo + 1)
+      expect(await watch.evaluate(component => [component.proxy.activeFormat, component.proxy.errorMessage]))
+        .toEqual(['dash', null])
+    } finally {
+      await element.dispose()
+    }
+  })
 })
