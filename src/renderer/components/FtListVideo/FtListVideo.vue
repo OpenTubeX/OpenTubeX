@@ -2269,6 +2269,7 @@ async function handleWatchPageLinkClick(event) {
   if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
     event.preventDefault()
     if (plainLeftClick) emit('pause-player')
+    const markAsSeen = captureSubscriptionSeenMark()
     let played = true
     await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
       refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
@@ -2279,7 +2280,7 @@ async function handleWatchPageLinkClick(event) {
         showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
       }
     })
-    if (played) markSubscriptionVideoAsOpened()
+    if (played) markAsSeen()
     // A file that could not play stays wherever it was listed, such as the queue.
     if (played && plainLeftClick) emit('open-video', { opensWatchPage: false })
     return
@@ -2421,10 +2422,16 @@ function markSubscriptionVideoAsSeen() {
 
 /**
  * For playback outside a Watch page, which marks its video as seen itself.
- * Opening a video from an incognito tab leaves it new.
+ * Captures the video before playback starts, since the card can show another
+ * one by the time it has. Opening a video from an incognito tab leaves it new.
+ * @returns {() => void} marks the captured video as seen
  */
-function markSubscriptionVideoAsOpened() {
-  if (!isIncognitoTab.value) markSubscriptionVideoAsSeen()
+function captureSubscriptionSeenMark() {
+  const videoId = id.value
+  const marks = props.data.isNewInSubscriptionFeed === true && !!videoId && !isIncognitoTab.value
+  return () => {
+    if (marks) store.dispatch('markSubscriptionVideoAsSeen', videoId)
+  }
 }
 
 /**
@@ -2433,6 +2440,7 @@ function markSubscriptionVideoAsOpened() {
  */
 async function openInExternalPlayer() {
   emit('pause-player')
+  const markAsSeen = captureSubscriptionSeenMark()
 
   const payload = {
     videoId: id.value,
@@ -2459,7 +2467,7 @@ async function openInExternalPlayer() {
     return false
   }
 
-  markSubscriptionVideoAsOpened()
+  markAsSeen()
   if (rememberHistory.value && canMarkAsWatched.value) {
     markAsWatched()
   }

@@ -117,6 +117,7 @@ export async function setupTabsIPC(options = {}) {
       route: structuredClone(tab.route),
       title: tab.title,
       isPinned: tab.isPinned,
+      isIncognito: tab.isIncognito,
       color: tab.color
     }
   })
