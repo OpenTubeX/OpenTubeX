@@ -636,9 +636,41 @@ test.describe('new subscriptions feed', () => {
     // A middle click opens it in a new tab, which stays incognito
     await video.locator('.title').click({ button: 'middle' })
     await expect(page.locator('.tab .incognitoIcon')).toHaveCount(2)
+    // So does a tab that Ctrl+Alt leaves unloaded
+    await video.locator('.title').click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+    await expect(page.locator('.tab .incognitoIcon')).toHaveCount(3)
     await video.locator('.title').click()
     await expect(page).toHaveURL(/#\/watch\/new-video-1/)
     expect(await seenMarks()).toBe(0)
+  })
+
+  test('opening a new video outside the feed, as from a notification, marks it as seen', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const video = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await expect(video).toBeVisible()
+
+    // Notifications open their video in a new tab
+    await page.evaluate(() => window.$store.dispatch('createTab', { route: '/watch/new-video-1', makeActive: true }))
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos)
+      .some(entry => entry.videoId === 'new-video-1'))).toBe(true)
+
+    await page.locator('.tabBar .tab').first().click()
+    await expect(video).toHaveCount(0)
+  })
+
+  test('opening a new video in an unloaded background tab marks it as seen', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const video = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await video.locator('.title').click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+    await expect(page.locator('.tabBar .tab').nth(1)).toHaveClass(/unloaded/)
+    await expect(video).toHaveCount(0)
   })
 
   test('keeps display metadata reactive in New and Shorts without copying the full cache', async ({ page }) => {

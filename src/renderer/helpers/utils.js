@@ -499,6 +499,18 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         openerTabId: getTabNavigationService().getPresentedTabId(),
         preloadInBackground: !makeActive && !lazyLoad && path.startsWith('/watch/')
       })
+      const videoId = /^\/watch\/([^/]+)/.exec(path)?.[1]
+      if (lazyLoad && !makeActive && videoId) {
+        // Its Watch page, which marks the video as seen, loads only once the
+        // tab is opened. Incognito tabs leave it new.
+        creation
+          .then(async tab => {
+            if (!tab || tab.isIncognito) return
+            const { default: store } = await import('../store/index')
+            await store.dispatch('markSubscriptionVideoAsSeen', videoId)
+          })
+          .catch(error => console.error('Failed to mark an unloaded video tab as seen', error))
+      }
       if (lazyLoad && !makeActive && !title) {
         creation
           .then(async tab => {
