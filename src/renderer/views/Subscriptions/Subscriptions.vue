@@ -405,7 +405,7 @@ import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import { useVisibleSubscriptionTabs } from '../../composables/useVisibleSubscriptionTabs'
-import { SUBSCRIPTION_TAB_DEFINITIONS } from '../../helpers/subscriptionTabs'
+import { SUBSCRIPTION_TAB_DEFINITIONS, SUBSCRIPTIONS_CURRENT_TAB_STORAGE_KEY } from '../../helpers/subscriptionTabs'
 import { isSubscriptionRefreshReserved, takeSubscriptionFeedRefreshRequest } from '../../helpers/subscriptionFeedRefreshRequest'
 import { useSubscriptionPremiereUpdates } from '../../composables/useSubscriptionPremiereUpdates'
 import { requestSubscriptionRefreshCancellation } from '../../helpers/subscriptions'
@@ -590,7 +590,6 @@ const {
   refresh: refreshAllFeeds,
   showRefreshWarning: showAllFeedsRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
-const currentTabStorageKey = 'Subscriptions/currentTab'
 const currentNewFeedTabStorageKey = 'Subscriptions/currentNewFeedTab'
 const NEW_FEED_SORT_BY_VALUES = ['newest', 'oldest']
 
@@ -833,9 +832,9 @@ watch(currentTab, async (value) => {
   resetHeaderScrollVisibility()
   if (value !== null) {
     // Use the last selected feed when opening another subscription view
-    localStorage.setItem(currentTabStorageKey, value)
+    localStorage.setItem(SUBSCRIPTIONS_CURRENT_TAB_STORAGE_KEY, value)
   } else {
-    localStorage.removeItem(currentTabStorageKey)
+    localStorage.removeItem(SUBSCRIPTIONS_CURRENT_TAB_STORAGE_KEY)
   }
 
   if (!isMounted) {
@@ -979,7 +978,7 @@ if (visibleTabs.value.length === 0) {
   currentTab.value = null
 } else {
   const requestedTabId = typeof route.query.tab === 'string' ? route.query.tab : null
-  const lastCurrentTabId = localStorage.getItem(currentTabStorageKey)
+  const lastCurrentTabId = localStorage.getItem(SUBSCRIPTIONS_CURRENT_TAB_STORAGE_KEY)
   if (requestedTabId !== null && visibleTabs.value.includes(requestedTabId)) {
     changeTab(requestedTabId)
   } else if (lastCurrentTabId !== null) {

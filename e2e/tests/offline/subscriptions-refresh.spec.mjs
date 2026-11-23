@@ -415,6 +415,38 @@ test.describe('subscription feed refresh controls', () => {
   })
 })
 
+test.describe('holding the Subscriptions navigation item', () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profileWith(1)],
+      subscriptionCache: [cachedChannel(0)]
+    }
+  })
+
+  test('refreshes the feed without opening the page, while a click still opens it', async ({ page }) => {
+    await routeFeeds(page, () => 0)
+    await goTo(page, 'history')
+
+    const link = page.locator(sel.sideNavLink('subscriptions')).first()
+    await link.evaluate(element => {
+      window.subscriptionsLinkClicks = 0
+      element.addEventListener('click', () => window.subscriptionsLinkClicks++)
+    })
+    const box = await link.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await expect.poll(() => cachedVideoTitle(page, 0)).toBe('Fresh video 0')
+    await page.mouse.up()
+    expect(await page.evaluate(() => window.subscriptionsLinkClicks)).toBe(0)
+    await expect(page).toHaveURL(/#\/history/)
+
+    await link.click()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+  })
+})
+
 test.describe('seen state after a subscription feed refresh', () => {
   test.use({
     seed: {

@@ -24,6 +24,7 @@
         :to="`/${item.id}`"
         :title="item.id === 'history' ? historyTitle : item.label"
         :aria-label="item.label"
+        @pointerdown="item.id === 'subscriptions' && startSubscriptionsHold($event)"
       >
         <div class="thumbnailContainer">
           <FtIcon
@@ -44,6 +45,7 @@
         :reorder-status="reorderStatus"
         :class="{ compactLabels: compactNavigationLabels }"
         @move-pinned="movePinned"
+        @refresh-subscriptions="refreshSubscriptionsInBackground"
       />
       <hr>
       <div
@@ -196,6 +198,20 @@
         />
       </div>
     </div>
+    <FtPrompt
+      v-if="subscriptionsHoldRefresh?.showRefreshWarning.value"
+      theme="readable-width"
+      :label="$t('Subscriptions.New Feed Refresh Warning Title')"
+      :extra-labels="[
+        $t('Subscriptions.New Feed Refresh Warning', { count: subscriptionsHoldRefresh.activeSubscriptionIds.value.size }, subscriptionsHoldRefresh.activeSubscriptionIds.value.size),
+        $t('Confirmations.Settings Hint')
+      ]"
+      :option-names="[$t('Yes'), $t('No'), $t('Confirmations.Never Ask Again')]"
+      :option-values="['refresh', 'cancel', 'neverAskAgain']"
+      :option-icons="[['fas', 'sync'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
+      autosize
+      @click="subscriptionsHoldRefresh.handleRefreshWarning"
+    />
     <!-- A plain live region, as pages own the status role. -->
     <p
       class="pinReorderStatus"
@@ -208,10 +224,11 @@
 </template>
 
 <script setup>
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { computed, effectScope, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -234,6 +251,8 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'
 import { useGridReorder } from '../../composables/useGridReorder'
 import { moveItemToRenderedOrder } from '../../../orderedItems'
+import { usePointerHold } from '../../composables/usePointerHold'
+import { lightHaptic } from '../../helpers/mobileHaptics.js'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -456,6 +475,26 @@ async function movePinnedWithKeyboard(event, reorder) {
   await nextTick()
   if (link.isConnected && document.activeElement !== link) link.focus()
 }
+
+// ===== Holding Subscriptions refreshes its feed =====
+const subscriptionsHoldRefreshScope = effectScope()
+/** @type {import('vue').ShallowRef<ReturnType<typeof import('../../composables/useSubscriptionsHoldRefresh').useSubscriptionsHoldRefresh> | null>} */
+const subscriptionsHoldRefresh = shallowRef(null)
+
+async function refreshSubscriptionsInBackground() {
+  lightHaptic()
+  try {
+    if (subscriptionsHoldRefresh.value === null) {
+      const { useSubscriptionsHoldRefresh } = await import('../../composables/useSubscriptionsHoldRefresh')
+      subscriptionsHoldRefresh.value ??= subscriptionsHoldRefreshScope.run(useSubscriptionsHoldRefresh)
+    }
+    subscriptionsHoldRefresh.value?.refresh()
+  } catch (error) {
+    console.error('Failed to refresh the subscriptions', error)
+  }
+}
+
+const { onPointerDown: startSubscriptionsHold } = usePointerHold(refreshSubscriptionsInBackground)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {
@@ -703,6 +742,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  subscriptionsHoldRefreshScope.stop()
   cancelAnimationFrame(labelFitFrame)
   labelObserver?.disconnect()
   cancelAnimationFrame(layoutTransitionFrame)

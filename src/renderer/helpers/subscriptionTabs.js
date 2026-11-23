@@ -16,6 +16,9 @@ export const SUBSCRIPTION_TAB_DEFINITIONS = Object.freeze([
 export const DEFAULT_SUBSCRIPTION_TABS = Object.freeze(SUBSCRIPTION_TAB_DEFINITIONS.map(({ id }) => /** @type {SubscriptionTabId} */ (id)))
 const TAB_IDS = new Set(DEFAULT_SUBSCRIPTION_TABS)
 
+/** Where the subscriptions page remembers its feed, which it opens to next time */
+export const SUBSCRIPTIONS_CURRENT_TAB_STORAGE_KEY = 'Subscriptions/currentTab'
+
 /**
  * Keeps the saved order of the known tabs and appends missing ones, so every
  * tab can be shown.

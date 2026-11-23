@@ -82,6 +82,7 @@
                   :title="item.label"
                   :to="`/${item.id}`"
                   @click="closeMenu"
+                  @pointerdown="item.id === 'subscriptions' && startSubscriptionsHold($event)"
                 >
                   <FtIcon
                     :icon="item.icon"
@@ -180,6 +181,7 @@ import NavLabel from '../SideNav/NavLabel.vue'
 import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
 import { useGridReorder } from '../../composables/useGridReorder'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { usePointerHold } from '../../composables/usePointerHold'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
@@ -198,7 +200,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['move-pinned'])
+const emit = defineEmits(['move-pinned', 'refresh-subscriptions'])
 
 const openMoreOptions = ref(false)
 const mobileLayout = usePhoneLayout('(max-width: 680px)')
@@ -206,6 +208,12 @@ watch(mobileLayout, (isMobile) => {
   if (!isMobile) closeMenu()
 })
 const route = useRoute()
+
+// Like in the bottom bar, holding Subscriptions refreshes it in the background.
+const { cancel: cancelSubscriptionsHold, onPointerDown: startSubscriptionsHold } = usePointerHold(() => {
+  closeMenu()
+  emit('refresh-subscriptions')
+})
 
 const promptId = useId()
 const sheetRef = useTemplateRef('sheetRef')
@@ -300,6 +308,7 @@ function moveFocus(event) {
 }
 
 function closeMenu() {
+  cancelSubscriptionsHold()
   openMoreOptions.value = false
 }
 

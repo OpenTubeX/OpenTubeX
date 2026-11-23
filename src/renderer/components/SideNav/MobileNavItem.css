@@ -61,7 +61,14 @@
     transform: scaleX(1);
   }
 
-  .sideNav .mobileNavItem:hover::before,
+  /* Touch keeps hovering a held item that did not navigate. */
+  @media (hover: hover) {
+    .sideNav .mobileNavItem:hover::before {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
   .sideNav .mobileNavItem:focus-visible::before,
   .sideNav .mobileNavItem[aria-expanded='true']::before {
     opacity: 1;
