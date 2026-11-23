@@ -23,12 +23,17 @@ const SCHEMA = [
 ]
 
 const SELECT_DOCS = 'SELECT id, data, has_children FROM docs'
+// Long enough for startup to reach the read, short enough not to keep an
+// unused copy of a large datastore in memory.
+const PREFETCH_LIFETIME_MS = 30_000
+
 const SQL = {
   all: SELECT_DOCS,
   allData: 'SELECT data FROM docs',
   byId: `${SELECT_DOCS} WHERE id = ?`,
   byIds: `${SELECT_DOCS} WHERE id IN (SELECT value FROM json_each(?))`,
   existingIds: 'SELECT id FROM docs WHERE id IN (SELECT value FROM json_each(?))',
+  exceptIds: `${SELECT_DOCS} WHERE id NOT IN (SELECT value FROM json_each(?))`,
   upsert: 'INSERT INTO docs (id, data, has_children) VALUES (?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, has_children = excluded.has_children',
   insert: 'INSERT INTO docs (id, data, has_children) VALUES (?, ?, ?)',
   remove: 'DELETE FROM docs WHERE id = ?',
@@ -56,13 +61,16 @@ function keyOf(id) {
   return typeof id === 'string' || typeof id === 'number' ? id : `\u0001${model.serialize({ id })}`
 }
 
+/** Keys that lookups pass to SQLite as they are, which JSON keeps only for finite numbers. */
 function isPrimitiveKey(value) {
-  return typeof value === 'string' || typeof value === 'number'
+  return typeof value === 'string' || Number.isFinite(value)
 }
 
 // NeDB's reviver costs more than the parse itself. Only dates need it.
-function deserialize(text) {
-  return text.includes('"$$date"') ? model.deserialize(text) : JSON.parse(text)
+/** A stored document from its JSON text, or the document a driver's `read` already parsed. */
+function deserialize(data) {
+  if (typeof data !== 'string') return data
+  return data.includes('"$$date"') ? model.deserialize(data) : JSON.parse(data)
 }
 
 /** True when a query or modifier can read or write `field`. */
@@ -189,7 +197,9 @@ export async function parseLegacyDatafile(raw) {
  *   `transaction`, either every statement commits or none does.
  * @property {() => Promise<void>} drop Deletes the database.
  * @property {() => Promise<string>} [backup] Copies the database, returning the copy's name.
- * @property {(sql: string, params?: unknown[]) => Promise<unknown[][]>} [read] Runs a large read-only query.
+ * @property {(sql: string, params?: unknown[], documentColumn?: number) => Promise<unknown[][]>} [read]
+ *   Runs a large read-only query. Values in `documentColumn` hold a document's
+ *   JSON and may come back as the parsed document.
  * @property {() => void | Promise<void>} [close] Closes the connection; the next statement reopens it.
  * @property {(statements: Statement[]) => Promise<void>} [cleanBackups] Runs statements in every backup.
  *
@@ -240,6 +250,29 @@ export class SqliteDatastore {
     // After dropDatabaseAsync, reads find nothing without recreating the database.
     this.dropped = false
     this.executor = { pushAsync: operation => this._exclusive(operation, 'read') }
+    // Counts queued writes, so a prefetched read is only used while none came after it.
+    this.writes = 0
+    /** @type {{ writes: number, started: boolean, rows: Promise<unknown[][]> } | null} */
+    this.prefetched = null
+  }
+
+  /**
+   * Starts reading every document, for the next read of every document to
+   * use instead of waiting for its own. A write queued meanwhile discards it,
+   * and so does not reading every document for a while.
+   */
+  prefetchAll() {
+    if (this.prefetched) return
+    const prefetched = { writes: this.writes, started: false, rows: null }
+    prefetched.rows = this._exclusive(async () => {
+      prefetched.started = true
+      return this.dropped ? [] : this._query(SQL.all, [], true, 1)
+    }, 'read')
+    prefetched.rows.catch(() => {})
+    this.prefetched = prefetched
+    setTimeout(() => {
+      if (this.prefetched === prefetched) this.prefetched = null
+    }, PREFETCH_LIFETIME_MS).unref?.()
   }
 
   get autoloadPromise() {
@@ -263,6 +296,7 @@ export class SqliteDatastore {
   _exclusive(operation, access = 'write') {
     // Decided when it runs, so an operation queued behind a drop sees it.
     const open = () => access === 'write' || (access === 'read' && !this.dropped)
+    if (access !== 'read') this.writes++
     const result = this.pending.then(() => open() ? this.loadDatabaseAsync() : undefined).then(operation)
     this.pending = result.catch(() => {})
     return result
@@ -272,8 +306,14 @@ export class SqliteDatastore {
     return statements.length ? this.driver.execute(statements, transaction) : []
   }
 
-  async _query(sql, params = [], large = false) {
-    if (large && this.driver.read) return this.driver.read(sql, params)
+  /**
+   * @param {string} sql
+   * @param {unknown[]} [params]
+   * @param {boolean} [large] whether the result can be large
+   * @param {number} [documentColumn] the column that holds documents, for `deserialize`
+   */
+  async _query(sql, params = [], large = false, documentColumn = undefined) {
+    if (large && this.driver.read) return this.driver.read(sql, params, documentColumn)
     return (await this.driver.execute([[sql, params]]))[0]
   }
 
@@ -468,9 +508,15 @@ export class SqliteDatastore {
   /**
    * An indexed read for simple equality lookups in `query`, with a check for
    * whether a document outside its rows can match, or null for a full scan.
-   * @returns {{ statement: Statement, mayMatch: (doc: object) => boolean } | null}
+   * @returns {{ statement: Statement, large?: boolean, mayMatch: (doc: object) => boolean } | null}
    */
   _indexedLookup(query) {
+    // Every document but a few, such as the settings without a large one.
+    const excluded = query._id?.$nin
+    if (Array.isArray(excluded) && Object.keys(query._id).length === 1 && excluded.every(isPrimitiveKey)) {
+      const skipped = new Set(excluded)
+      return { statement: [SQL.exceptIds, [JSON.stringify(excluded)]], large: true, mayMatch: doc => !skipped.has(doc._id) }
+    }
     for (const field of ['_id', ...this.indexes]) {
       if (!Object.hasOwn(query, field)) continue
       const value = query[field]
@@ -491,7 +537,15 @@ export class SqliteDatastore {
   /** Rows that can match `query`, using an index for simple equality lookups. */
   _candidateRows(query) {
     const lookup = this._indexedLookup(query)
-    return lookup ? this._query(...lookup.statement) : this._query(SQL.all, [], true)
+    if (lookup) return this._query(...lookup.statement, lookup.large, 1)
+    // Operations run one at a time, so one queued before the prefetch runs
+    // before it, and waiting for it there would never end.
+    const prefetched = this.prefetched
+    if (prefetched?.started) {
+      this.prefetched = null
+      if (prefetched.writes === this.writes) return prefetched.rows
+    }
+    return this._query(SQL.all, [], true, 1)
   }
 
   /** @returns {Promise<{ id: unknown, doc: object, hasChildren: boolean }[]>} */
@@ -506,7 +560,7 @@ export class SqliteDatastore {
         doc[this.childField] = []
         byParent.set(id, doc[this.childField])
       }
-      for (const [parent, data] of await this._query(SQL.childrenOf, [JSON.stringify([...byParent.keys()])], true)) {
+      for (const [parent, data] of await this._query(SQL.childrenOf, [JSON.stringify([...byParent.keys()])], true, 1)) {
         byParent.get(parent).push(deserialize(data))
       }
     }
@@ -743,7 +797,7 @@ export class SqliteDatastore {
       const results = []
       for (const [index, { query, update, options = {} }] of updates.entries()) {
         const lookup = lookups[index]
-        const rows = lookup ? rowSets[read++] : await this._query(SQL.all, [], true)
+        const rows = lookup ? rowSets[read++] : await this._query(SQL.all, [], true, 1)
         try {
           const { multi = false, upsert = false, returnUpdatedDocs = false } = options
           const modifier = isModifierUpdate(update)
@@ -851,6 +905,11 @@ export class SqliteDatastore {
   removeOlderCopiesAsync(condition, params = []) {
     return this._exclusive(async () => {
       if (this.dropped) return
+      // Reading the legacy datastore can take seconds, so skip it while
+      // neither the rule nor the legacy data changed since the last cleanup.
+      // Backups are only made when an older version changed the legacy data.
+      const cleaned = async () => JSON.stringify([condition, params, await this.legacy?.fingerprint?.() ?? null])
+      if (await this._meta('olderCopiesCleaned') === await cleaned()) return
       let backupFailure = null
       try {
         await this.driver.cleanBackups?.([
@@ -863,6 +922,7 @@ export class SqliteDatastore {
       }
       await this._removeLegacyCopies(condition, params)
       if (backupFailure) throw backupFailure
+      await this._execute([[SQL.setMeta, ['olderCopiesCleaned', await cleaned()]]])
     }, 'read')
   }
 

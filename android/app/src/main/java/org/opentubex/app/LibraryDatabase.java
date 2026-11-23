@@ -1,14 +1,15 @@
 package org.opentubex.app;
 
 import android.content.Context;
-import android.util.JsonWriter;
 import androidx.sqlite.SQLiteConnection;
 import androidx.sqlite.SQLiteStatement;
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
@@ -108,31 +109,98 @@ final class LibraryDatabase implements AutoCloseable {
         }
     }
 
-    /** Streams one statement's rows as a JSON array of row arrays. */
-    synchronized void query(String sql, JSONArray params, Writer output) throws JSONException, IOException {
+    private static final String DATE_KEY = "\"$$date\"";
+    private static final byte[] NULL = "null".getBytes(StandardCharsets.UTF_8);
+
+    /**
+     * Streams one statement's rows as a JSON array of row arrays. Text in
+     * {@code documentColumn} is a stored document's JSON and is copied as that
+     * JSON rather than as a string, so neither side escapes or parses it twice.
+     * Only objects and arrays are copied: a member that is a string would arrive
+     * as that string instead of its JSON. Documents with NeDB dates stay strings,
+     * because only parsing their text restores the dates.
+     */
+    synchronized void query(String sql, JSONArray params, int documentColumn, OutputStream output) throws JSONException, IOException {
         open();
         SQLiteStatement statement = prepare(sql, params);
-        try (JsonWriter json = new JsonWriter(output)) {
-            json.beginArray();
+        try {
+            output.write('[');
             int columns = statement.getColumnCount();
+            boolean firstRow = true;
             while (statement.step()) {
-                json.beginArray();
+                if (!firstRow) output.write(',');
+                firstRow = false;
+                output.write('[');
                 for (int column = 0; column < columns; column++) {
+                    if (column > 0) output.write(',');
                     switch (statement.getColumnType(column)) {
-                        case TYPE_INTEGER: json.value(statement.getLong(column)); break;
-                        case TYPE_FLOAT: json.value(statement.getDouble(column)); break;
-                        case TYPE_TEXT: json.value(statement.getText(column)); break;
-                        case TYPE_NULL: json.nullValue(); break;
+                        case TYPE_INTEGER: writeAscii(output, Long.toString(statement.getLong(column))); break;
+                        case TYPE_FLOAT: writeDouble(output, statement.getDouble(column)); break;
+                        case TYPE_TEXT: {
+                            // The stored UTF-8 bytes, without decoding them into a Java string.
+                            byte[] text = statement.getBlob(column);
+                            if (column == documentColumn && isContainer(text) && !hasDate(text)) {
+                                output.write(text);
+                            } else {
+                                writeString(output, new String(text, StandardCharsets.UTF_8));
+                            }
+                            break;
+                        }
+                        case TYPE_NULL: output.write(NULL); break;
                         default: throw new IllegalStateException("Unsupported library value");
                     }
                 }
-                json.endArray();
+                output.write(']');
             }
-            json.endArray();
+            output.write(']');
         } finally {
             statement.reset();
             statement.clearBindings();
         }
+    }
+
+    /** Whether stored JSON is an object or an array, which never starts with whitespace. */
+    private static boolean isContainer(byte[] text) {
+        return text.length > 0 && (text[0] == '{' || text[0] == '[');
+    }
+
+    /**
+     * Whether the document has a NeDB date. Reading the UTF-8 bytes as Latin-1
+     * keeps the search in the runtime's native string code; the key is ASCII.
+     */
+    private static boolean hasDate(byte[] text) {
+        return new String(text, StandardCharsets.ISO_8859_1).contains(DATE_KEY);
+    }
+
+    private static void writeAscii(OutputStream output, String text) throws IOException {
+        output.write(text.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private static void writeDouble(OutputStream output, double value) throws IOException {
+        if (Double.isNaN(value) || Double.isInfinite(value)) throw new IllegalStateException("Unsupported library value");
+        writeAscii(output, Double.toString(value));
+    }
+
+    /** Writes text as a JSON string. */
+    static void writeString(OutputStream output, String text) throws IOException {
+        StringBuilder json = new StringBuilder(text.length() + 16).append('"');
+        for (int index = 0; index < text.length(); index++) {
+            char character = text.charAt(index);
+            switch (character) {
+                case '"': json.append("\\\""); break;
+                case '\\': json.append("\\\\"); break;
+                case '\n': json.append("\\n"); break;
+                case '\r': json.append("\\r"); break;
+                case '\t': json.append("\\t"); break;
+                default:
+                    if (character < 0x20 || character == '\u2028' || character == '\u2029') {
+                        json.append(String.format(Locale.ROOT, "\\u%04x", (int) character));
+                    } else {
+                        json.append(character);
+                    }
+            }
+        }
+        output.write(json.append('"').toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private SQLiteStatement prepare(String sql, JSONArray params) throws JSONException {

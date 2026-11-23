@@ -6,12 +6,12 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Map;
@@ -100,13 +100,13 @@ public class LibraryDatabasePlugin extends Plugin {
     }
 
     /** Buffers small JSON results in memory and spills larger ones to a cache file. */
-    private static final class InlineOrFileWriter extends Writer {
+    private static final class InlineOrFileOutput extends OutputStream {
         private final File directory;
-        private StringBuilder buffer = new StringBuilder(1024);
+        private ByteArrayOutputStream buffer = new ByteArrayOutputStream(1024);
         private File file;
-        private Writer fileWriter;
+        private OutputStream fileOutput;
 
-        InlineOrFileWriter(File directory) {
+        InlineOrFileOutput(File directory) {
             this.directory = directory;
         }
 
@@ -115,33 +115,33 @@ public class LibraryDatabasePlugin extends Plugin {
                 throw new IllegalStateException("Unable to create the library results directory");
             }
             file = new File(directory, UUID.randomUUID() + ".json");
-            fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
-            fileWriter.write(buffer.toString());
+            fileOutput = new BufferedOutputStream(new FileOutputStream(file), 64 * 1024);
+            buffer.writeTo(fileOutput);
             buffer = null;
         }
 
         @Override
-        public void write(char[] chars, int offset, int length) throws IOException {
-            if (fileWriter != null) {
-                fileWriter.write(chars, offset, length);
-                return;
-            }
-            if (buffer.length() + length > INLINE_RESULT_LIMIT) {
-                spill();
-                fileWriter.write(chars, offset, length);
-            } else {
-                buffer.append(chars, offset, length);
-            }
+        public void write(int value) throws IOException {
+            if (fileOutput == null && buffer.size() + 1 > INLINE_RESULT_LIMIT) spill();
+            if (fileOutput != null) fileOutput.write(value);
+            else buffer.write(value);
+        }
+
+        @Override
+        public void write(byte[] bytes, int offset, int length) throws IOException {
+            if (fileOutput == null && buffer.size() + length > INLINE_RESULT_LIMIT) spill();
+            if (fileOutput != null) fileOutput.write(bytes, offset, length);
+            else buffer.write(bytes, offset, length);
         }
 
         @Override
         public void flush() throws IOException {
-            if (fileWriter != null) fileWriter.flush();
+            if (fileOutput != null) fileOutput.flush();
         }
 
         @Override
         public void close() throws IOException {
-            if (fileWriter != null) fileWriter.close();
+            if (fileOutput != null) fileOutput.close();
         }
 
         File spilledFile() {
@@ -149,7 +149,7 @@ public class LibraryDatabasePlugin extends Plugin {
         }
 
         String inlineText() {
-            return buffer == null ? null : buffer.toString();
+            return buffer == null ? null : new String(buffer.toByteArray(), StandardCharsets.UTF_8);
         }
     }
 
@@ -174,7 +174,10 @@ public class LibraryDatabasePlugin extends Plugin {
         });
     }
 
-    /** Writes one read-only statement's rows to a file and resolves its path. */
+    /**
+     * Runs one read-only statement. Small results resolve inline; larger ones
+     * are written to a file whose path resolves instead.
+     */
     @PluginMethod
     public void query(PluginCall call) {
         String name = call.getString("name");
@@ -184,12 +187,13 @@ public class LibraryDatabasePlugin extends Plugin {
         }
         String sql = call.getString("sql");
         JSArray params = call.getArray("params");
+        int documentColumn = call.getInt("documentColumn", -1);
         run(call, name, () -> {
-            InlineOrFileWriter output = new InlineOrFileWriter(results());
+            InlineOrFileOutput output = new InlineOrFileOutput(results());
             try {
                 if (sql == null) throw new IllegalArgumentException("Missing statement");
                 try {
-                    database(name).query(sql, params, output);
+                    database(name).query(sql, params, documentColumn, output);
                 } finally {
                     output.close();
                 }

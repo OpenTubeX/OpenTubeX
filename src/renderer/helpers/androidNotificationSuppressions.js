@@ -1,4 +1,4 @@
-import { DBHistoryHandlers } from '../../datastores/handlers/index'
+import { DBHistoryHandlers, getDataScope } from '../../datastores/handlers/index'
 import store from '../store/index'
 import { suppressAndroidNotifications } from './androidBackgroundSync.js'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory.js'
@@ -10,26 +10,32 @@ const WATCHED_LIMIT = 1000
 
 /**
  * @param {{ videoId: string, timeWatched: number }[]} history newest first
- * @returns {string[]}
+ * @param {number} [since]
+ * @returns {{ videoId: string, timeWatched: number }[]}
  */
-function getRecentlyWatchedStoreIds(history) {
-  const since = Date.now() - WATCHED_WINDOW_MS
-  const ids = []
+function getRecentlyWatchedStoreEntries(history, since = Date.now() - WATCHED_WINDOW_MS) {
+  const entries = []
   for (const { videoId, timeWatched } of history) {
-    if (ids.length === WATCHED_LIMIT || !(timeWatched >= since)) break
-    ids.push(videoId)
+    if (entries.length === WATCHED_LIMIT || !(timeWatched >= since)) break
+    entries.push({ videoId, timeWatched })
   }
-  return ids
+  return entries
 }
 
 /**
  * The videos watched recently in any profile, newest first. Notifications
  * cover the channels of every profile, while the store only holds the history
- * of one data scope.
+ * of one data scope. That one comes from the store, which has it loaded and
+ * reflects its writes, rather than from reading the whole history again.
  * @returns {Promise<string[]>}
  */
 async function getRecentlyWatchedIds() {
-  const entries = await DBHistoryHandlers.findRecentlyWatchedInEveryScope(Date.now() - WATCHED_WINDOW_MS, WATCHED_LIMIT)
+  const since = Date.now() - WATCHED_WINDOW_MS
+  const scope = getDataScope()
+  const others = await DBHistoryHandlers.findRecentlyWatchedInEveryScope(since, WATCHED_LIMIT, scope)
+  // A switch to another profile's data meanwhile runs this again once its history loads.
+  const shown = scope === getDataScope() ? store.state.history.historyCacheSorted : []
+  const entries = [...others, ...getRecentlyWatchedStoreEntries(shown, since)]
   entries.sort((a, b) => b.timeWatched - a.timeWatched)
   return [...new Set(entries.map(entry => entry.videoId))].slice(0, WATCHED_LIMIT)
 }
@@ -56,7 +62,7 @@ export function startAndroidNotificationSuppressions() {
   return store.watch(
     state => [
       ...state.profiles.profileList.filter(profile => profile.separate === true).map(profile => profile._id),
-      ...getRecentlyWatchedStoreIds(state.history.historyCacheSorted),
+      ...getRecentlyWatchedStoreEntries(state.history.historyCacheSorted).map(entry => entry.videoId),
     ].join('\n'),
     () => {
       update = update.then(suppressWatchedAndroidNotifications).catch(error => console.error(error))

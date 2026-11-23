@@ -53,7 +53,7 @@ import {
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
 import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
-import { isSettingSyncEnabled } from './settings'
+import { isSettingSyncEnabled, whenSyncServerSnapshotLoaded } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, savedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
@@ -492,12 +492,14 @@ function markDataLossNotificationsRead() {
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
-  const settings = rootState.settings
-  const encrypted = requiresEncryptedSync(settings)
   // A sync merges the history, playlists, watch statistics, and subscriptions
   // of the data the store shows: a separate profile's, or else the shared ones.
   // A profile switch first loads the other profile's data.
   for (let loading = dataScopeLoading(); loading; loading = dataScopeLoading()) await loading.catch(() => {})
+  await whenSyncServerSnapshotLoaded()
+  // Read after waiting, so a sign-in or privacy-mode change made meanwhile applies.
+  const settings = rootState.settings
+  const encrypted = requiresEncryptedSync(settings)
   const dataScope = rootGetters.getActiveDataScope ?? null
   const scopeKey = syncScopeKey(dataScope)
   // The server keeps a separate profile's collections under their own names.
@@ -1759,6 +1761,7 @@ const actions = {
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
       throw new Error('Connect to the sync server first')
     }
+    await whenSyncServerSnapshotLoaded()
 
     const deleteSession = async () => {
       const client = trackSyncClient(new SyncServerClient(
@@ -1866,6 +1869,7 @@ const actions = {
           shownDataScope(rootGetters) !== dataScope) throw new SyncServerCancelledError()
     }
     return withSyncLock(async () => {
+      await whenSyncServerSnapshotLoaded()
       const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
       try {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
@@ -2292,8 +2296,11 @@ const actions = {
   },
 
   /** Shows the synced data of the profile switched to and syncs it */
-  applySyncServerDataScope({ commit, dispatch, rootGetters, rootState }) {
+  async applySyncServerDataScope({ commit, dispatch, rootGetters, rootState }) {
     const settings = rootState.settings
+    if (!settings.syncServerEnabled || !settings.syncServerToken) return
+    await whenSyncServerSnapshotLoaded()
+    // Sync may have been turned off while the snapshot loaded.
     if (!settings.syncServerEnabled || !settings.syncServerToken) return
     commit('setSyncedWatchStats', syncedWatchStatsOf(parseSnapshot(settings.syncServerSnapshot), rootGetters))
     return dispatch('scheduleSyncServer', 'data')
@@ -2370,6 +2377,16 @@ const actions = {
 
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
+    try {
+      await whenSyncServerSnapshotLoaded()
+    } catch (error) {
+      // Automatic sync does not start without the snapshot.
+      commit('setSyncServerError', error.message)
+      commit('setSyncServerStatus', 'error')
+      return
+    }
+    // Sync may have been turned off while the snapshot loaded.
+    if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
     const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
     commit('setSyncedWatchStats', syncedWatchStatsOf(snapshot, rootGetters))
     commit(

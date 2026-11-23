@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -66,6 +67,45 @@ public class LibraryDatabaseTest {
             assertEquals(3, rows.getJSONArray(0).getJSONArray(0).getInt(0));
             reopened.drop();
             assertFalse(new File(directory, "library-test.sqlite").exists());
+        }
+    }
+
+    @Test
+    public void queriesWriteDocumentsAsJsonAndEscapeOtherText() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File directory = new File(context.getCacheDir(), "library-test");
+        try (LibraryDatabase database = new LibraryDatabase(directory, "query")) {
+            database.drop();
+            String document = "{\"title\":\"\\\"Quoted\\\"\\n\u00e9\ud83d\ude00\u2028\",\"n\":1}";
+            String dated = "{\"at\":{\"$$date\":5}}";
+            database.execute(list(
+                statement("CREATE TABLE docs (id PRIMARY KEY NOT NULL, data TEXT NOT NULL) WITHOUT ROWID"),
+                statement("INSERT INTO docs VALUES (?, ?)", "a\n\"\u0001\u2028", document),
+                statement("INSERT INTO docs VALUES (?, ?)", "b", dated),
+                statement("INSERT INTO docs VALUES (?, ?)", "c", "\"member\"")
+            ), true);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            database.query("SELECT id, data, 1.5, NULL, 7 FROM docs ORDER BY id", null, 1, output);
+            JSONArray rows = new JSONArray(output.toString("UTF-8"));
+
+            JSONArray first = rows.getJSONArray(0);
+            assertEquals("a\n\"\u0001\u2028", first.getString(0));
+            JSONObject parsed = first.getJSONObject(1);
+            assertEquals("\"Quoted\"\n\u00e9\ud83d\ude00\u2028", parsed.getString("title"));
+            assertEquals(1, parsed.getInt("n"));
+            assertEquals(1.5, first.getDouble(2), 0);
+            assertTrue(first.isNull(3));
+            assertEquals(7L, first.getLong(4));
+            // Only parsing the text restores NeDB dates, so those documents stay strings.
+            assertEquals(dated, rows.getJSONArray(1).getString(1));
+            // A string member stays its JSON, which a copy would turn into the bare string.
+            assertEquals("\"member\"", rows.getJSONArray(2).getString(1));
+
+            output.reset();
+            database.query("SELECT data FROM docs WHERE id = ?", new JSONArray().put("b"), -1, output);
+            assertEquals(dated, new JSONArray(output.toString("UTF-8")).getJSONArray(0).getString(0));
+            database.drop();
         }
     }
 

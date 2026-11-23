@@ -241,6 +241,19 @@ test('secrets removed from older copies are gone from the legacy file and backup
   await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'oldest' } }))
   const again = open(t, dir, 'settings', options)
   assert.deepEqual(await again.findAsync({}).sort({ _id: 1 }), [{ _id: 'proxyPassword', value: 'second-secret' }, { _id: 'theme', value: 'oldest' }])
+
+  // Once every copy is clean, later starts skip reading the legacy file until an older version writes it again.
+  await rm(changes[0].backup.replace(/\d+$/, '0'))
+  const secrets = [JSON.stringify(['proxyPassword', 'syncServerToken'])]
+  await again.removeOlderCopiesAsync(byIds, secrets)
+  const reads = t.mock.method(again.legacy, 'records')
+  await again.removeOlderCopiesAsync(byIds, secrets)
+  assert.equal(reads.mock.callCount(), 0)
+  again.driver.close()
+  await editAsOlderVersion(legacyFile, older => older.insertAsync({ _id: 'syncServerToken', value: 'later-secret' }))
+  const downgraded = open(t, dir, 'settings', options)
+  await downgraded.removeOlderCopiesAsync(byIds, secrets)
+  assert.doesNotMatch(await readFile(legacyFile, 'utf8'), /later-secret/)
 })
 
 test('changes from an older version wait for the next start when the backup fails', async (t) => {
@@ -614,6 +627,9 @@ test('indexed lookups find string and numeric IDs exactly like NeDB', async (t) 
   await store.insertAsync([{ _id: '5', videoId: 'x' }, { _id: 5, videoId: 'y' }, { _id: 'z', videoId: ['x'] }])
   assert.deepEqual(await store.findAsync({ _id: 5 }), [{ _id: 5, videoId: 'y' }])
   assert.deepEqual(await store.findAsync({ _id: { $in: ['5'] } }), [{ _id: '5', videoId: 'x' }])
+  assert.deepEqual((await store.findAsync({ _id: { $nin: ['5', 'missing'] } })).map(doc => doc._id).sort(), [5, 'z'])
+  // JSON turns Infinity into null, which would exclude every document.
+  assert.equal(await store.countAsync({ _id: { $nin: [Infinity] } }), 3)
   // An array field is not an indexed scalar, but NeDB matches its members.
   assert.deepEqual((await store.findAsync({ videoId: 'x' })).map(doc => doc._id).sort(), ['5', 'z'])
 })
@@ -642,6 +658,35 @@ test('existing NeDB handler tests pass against SQLite', async () => {
     'sync-seen-videos',
   ].map(name => `tests/unit/${name}.test.mjs`)
   await promisify(execFile)(process.execPath, ['--import', './tests/helpers/nedb-as-sqlite.mjs', '--test', ...files], { maxBuffer: 64 * 1024 * 1024 })
+})
+
+test('a prefetched full read is used once, and never after a write', async (t) => {
+  const store = memory(t)
+  await store.insertAsync([{ _id: 'a', n: 1 }, { _id: 'b', n: 2 }])
+  const reads = []
+  const execute = store.driver.execute
+  store.driver.execute = (statements, transaction) => {
+    reads.push(...statements.filter(([sql]) => sql === 'SELECT id, data, has_children FROM docs'))
+    return execute(statements, transaction)
+  }
+
+  store.prefetchAll()
+  assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [{ _id: 'a', n: 1 }, { _id: 'b', n: 2 }])
+  assert.equal(reads.length, 1, 'the read waits for the prefetched rows')
+  await store.findAsync({})
+  assert.equal(reads.length, 2, 'they are used only once')
+
+  store.prefetchAll()
+  await store.updateAsync({ _id: 'a' }, { $set: { n: 3 } })
+  assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [{ _id: 'a', n: 3 }, { _id: 'b', n: 2 }])
+  assert.equal(reads.length, 4, 'a write discards them')
+
+  // A read queued before the prefetch runs before it, so it reads on its own.
+  const earlier = store.findAsync({ n: 2 }).execAsync()
+  store.prefetchAll()
+  assert.deepEqual(await earlier, [{ _id: 'b', n: 2 }])
+  assert.equal((await store.findAsync({})).length, 2)
+  assert.equal(reads.length, 6, 'the prefetch is left for the read after it')
 })
 
 test('updateManyAsync applies updates in order in one transaction', async (t) => {

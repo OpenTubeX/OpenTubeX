@@ -83,6 +83,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
     assertSyncEnabled: () => {},
     SyncServerCancelledError: Error,
     withSyncLock: callback => callback(),
+    whenSyncServerSnapshotLoaded: async () => {},
     trackSyncClient: value => value,
     releaseSyncClient: () => {},
     collectionCache: { put: () => {} },

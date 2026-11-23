@@ -1024,7 +1024,43 @@ const customGetters = {
   },
 }
 
+// The sync server snapshot holds the last synced state of the library and can
+// take several megabytes. Startup reads the settings without it, and the sync
+// loads it before its first use, see `whenSyncServerSnapshotLoaded`.
+let syncServerSnapshotLoaded = false
+let syncServerSnapshotRevision = 0
+/** @type {Promise<void> | null} */
+let syncServerSnapshotLoad = null
+/** @type {((value: string) => void) | null} */
+let commitLoadedSyncServerSnapshot = null
+
+/**
+ * Resolves once the store holds the saved sync server snapshot, loading it
+ * if no value was committed yet. Read it only after this.
+ * @returns {Promise<void>}
+ */
+export function whenSyncServerSnapshotLoaded() {
+  // Without loaded settings there is nothing to sync.
+  if (syncServerSnapshotLoaded || !commitLoadedSyncServerSnapshot) return Promise.resolve()
+  const commitSnapshot = commitLoadedSyncServerSnapshot
+  syncServerSnapshotLoad ??= (async () => {
+    const revision = syncServerSnapshotRevision
+    const value = await DBSettingHandlers.findValue('syncServerSnapshot')
+    // A value committed meanwhile, saved or from another window, is newer.
+    if (revision === syncServerSnapshotRevision) commitSnapshot(value ?? DEFAULT_SETTINGS.syncServerSnapshot)
+  })().finally(() => {
+    // A failed read is tried again by the next sync.
+    syncServerSnapshotLoad = null
+  })
+  return syncServerSnapshotLoad
+}
+
 const customMutations = {
+  setSyncServerSnapshot: (state, value) => {
+    state.syncServerSnapshot = value
+    syncServerSnapshotLoaded = true
+    syncServerSnapshotRevision++
+  },
   setPreferredCaptionLocale: (state, value) => {
     assignSharedSetting(state, 'preferredCaptionLocale', normalizeYouTubeCaptionLanguageCode(value))
   },
@@ -1683,7 +1719,9 @@ const customActions = {
 
   grabUserSettings: async ({ commit, dispatch, state }) => {
     try {
+      // Leaves out the sync server snapshot, which the sync loads when it needs it.
       const userSettings = await DBSettingHandlers.find()
+      commitLoadedSyncServerSnapshot = value => commit('setSyncServerSnapshot', value)
       let landingPageToInitialize = null
 
       const mutationIds = Object.keys(mutations)

@@ -566,3 +566,44 @@ test('settings sync waits for an optimistic edit to save its edit time', async (
   assert.deepEqual(dispatched, [])
   assert.deepEqual(client.entries.find(entry => entry.key === key).value, ['first', 'local'])
 })
+
+test('the sync server snapshot loads on first use, and a value committed meanwhile wins', async () => {
+  const source = settingsSection('let syncServerSnapshotLoaded', '  setPreferredCaptionLocale:')
+  const reads = []
+  const context = vm.createContext({
+    DEFAULT_SETTINGS: { syncServerSnapshot: '{}' },
+    DBSettingHandlers: {
+      findValue: id => {
+        const read = deferred()
+        reads.push({ id, ...read })
+        return read.promise
+      },
+    },
+  })
+  vm.runInContext(source.replace('export function', 'function') + '}', context)
+  const state = { syncServerSnapshot: '{}' }
+  const load = vm.runInContext('whenSyncServerSnapshotLoaded', context)
+  const commit = value => vm.runInContext('customMutations', context).setSyncServerSnapshot(state, value)
+
+  await load()
+  assert.equal(reads.length, 0, 'nothing loads before the settings did')
+  vm.runInContext('commitLoadedSyncServerSnapshot = value => setSnapshot(value)', Object.assign(context, { setSnapshot: commit }))
+
+  const first = load()
+  const second = load()
+  assert.equal(reads.length, 1, 'concurrent syncs share one read')
+  assert.equal(reads[0].id, 'syncServerSnapshot')
+  reads[0].resolve('{"saved":true}')
+  await Promise.all([first, second])
+  assert.equal(state.syncServerSnapshot, '{"saved":true}')
+  await load()
+  assert.equal(reads.length, 1, 'later syncs use the loaded value')
+
+  // A fresh start, where a disconnect saves an empty snapshot before the read returns.
+  vm.runInContext('syncServerSnapshotLoaded = false', context)
+  const pending = load()
+  commit('{}')
+  reads[1].resolve('{"stale":true}')
+  await pending
+  assert.equal(state.syncServerSnapshot, '{}')
+})
