@@ -182,7 +182,7 @@ async function chooseDownloadFolder() {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 410px));
   justify-content: center;
-  align-items: end;
+  align-items: start;
   gap: 16px 12px;
 }
 
