@@ -227,12 +227,28 @@ test('profile settings edited while a sync saves keep their last synced baseline
   })
 })
 
+test('a profile setting this device starts syncing keeps the value other devices synced', async () => {
+  const car = profileSettingsId('car')
+  const json = value => JSON.parse(JSON.stringify(value))
+  const client = createClient([{ key: car, value: { hideLiveChat: true }, updatedAt: 1 }])
+  // This device doesn't sync Hide Live Chat yet, and its car profile shows the shared value.
+  const device = createDevice({ car: {} })
+  device.state.settings.syncServerSettingsExcluded.push('hideLiveChat')
+  const snapshot = await context.syncSettings(client, device)
+
+  device.state.settings.syncServerSettingsExcluded.pop()
+  await context.syncSettings(client, device, snapshot)
+  assert.deepEqual(json(client.entries.find(entry => entry.key === car).value), { hideLiveChat: true })
+  assert.deepEqual(json(device.state.settings.profileSettingsState.overrides.car), { hideLiveChat: true })
+})
+
 test('a retry after a rejected upload keeps the profile settings edits the server never received', async () => {
   const car = profileSettingsId('car')
   const json = value => JSON.parse(JSON.stringify(value))
   const client = createClient([{ key: car, value: { hideComments: false }, updatedAt: 1 }])
   const previous = { [car]: { key: car, value: { hideComments: false }, updatedAt: 1 } }
-  // This device hid comments for the car profile, and the upload of that is rejected.
+  // This device hid comments for the car profile. Encrypted sync uploads the
+  // merged document later, and the server rejects it for a newer revision.
   const device = createDevice({ car: { hideComments: true } })
   device.state.settings.syncServerSettingUpdatedAt[car] = 2
   let retryBaseline

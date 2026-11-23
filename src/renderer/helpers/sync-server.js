@@ -1936,6 +1936,11 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   let themesDeferred = false
   // Settings that merge their items or settings against `listSnapshot`
   const mergesAgainstLists = key => isListSetting(key) || profileSettingsProfiles.has(key)
+  const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
+  // A profile's synced settings keep only those this device syncs, so a
+  // setting it starts syncing later has no baseline here, and its value on the
+  // server doesn't look removed.
+  const baselineOf = (key, entry) => profileSettingsProfiles.has(key) ? syncedEntry(entry) : entry
   // Lists and failed saves this sync didn't apply, which keep their previous baseline
   const skippedSettings = new Set()
   // Server entries of the settings this sync merged and applied
@@ -1957,7 +1962,6 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
           : profileSettingsKey ? mergeProfileSettingsEntry : mergeSettingEntry
       // A profile's own settings merge as this device syncs them, and keep the
       // settings that only other devices sync.
-      const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
       let entry = mergeEntry({
         key,
         value,
@@ -2039,7 +2043,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
           continue
         }
       }
-      if (remoteEntry && !skippedSettings.has(key)) applied[key] = remoteEntry
+      if (remoteEntry && !skippedSettings.has(key)) applied[key] = baselineOf(key, remoteEntry)
     }
   } finally {
     await store.persistSettingsSyncBaseline?.(applied)
@@ -2047,15 +2051,17 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
 
   onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(mergesAgainstLists).flatMap(key => {
     const entry = skippedSettings.has(key) ? previousLists[key] : remote[key]
-    return entry ? [[key, entry]] : []
+    return entry ? [[key, baselineOf(key, entry)]] : []
   })))
   await client.putSettings(Object.values(merged))
-  if (skippedSettings.size === 0) return merged
-  // Items from the server that this device never applied must not count as removed here next time.
   const snapshot = { ...merged }
+  for (const key of profileSettingsProfiles.keys()) {
+    if (snapshot[key]) snapshot[key] = baselineOf(key, snapshot[key])
+  }
+  // Items from the server that this device never applied must not count as removed here next time.
   for (const key of skippedSettings) {
     const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
-    if (old) snapshot[key] = old
+    if (old) snapshot[key] = baselineOf(key, old)
     else delete snapshot[key]
   }
   return snapshot
