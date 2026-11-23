@@ -125,8 +125,22 @@ body > .os-scrollbar {
 
 /* The header and a pinned Watch page player cover the top of the page, and a
    bottom tab bar its bottom. */
+body {
+  --page-scrollbar-block-start: max(var(--page-header-block-end, 0px), var(--pinned-player-block-end, 0px));
+}
+
 body > .os-scrollbar-vertical {
-  inset-block: max(var(--page-header-block-end, 0px), var(--pinned-player-block-end, 0px)) calc(var(--page-footer-block-size, 0px) + var(--os-size));
+  inset-block: var(--page-scrollbar-block-start) calc(var(--page-footer-block-size, 0px) + var(--os-size));
+}
+
+/* Measures the start for Android's native page scrollbar, see pageScrollbar.js. */
+.pageScrollbarStartProbe {
+  position: fixed;
+  inset-block-start: 0;
+  inline-size: 0;
+  block-size: var(--page-scrollbar-block-start);
+  visibility: hidden;
+  pointer-events: none;
 }
 
 body > .os-scrollbar-vertical.os-scrollbar-cornerless,

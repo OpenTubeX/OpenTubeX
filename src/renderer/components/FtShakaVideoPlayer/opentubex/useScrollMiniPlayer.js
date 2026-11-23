@@ -17,7 +17,6 @@ import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import { watchNavigationKey } from '../../../tabs/TabContext'
 import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
 import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
-import { setAndroidPageScrollbarInsetTop } from '../../../helpers/androidUi'
 import {
   BOUNCE_MS,
   easeOutBack,
@@ -1981,10 +1980,6 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     } else {
       document.documentElement.style.setProperty('--pinned-player-block-end', `${blockEnd}px`)
     }
-    // Android draws the page scrollbar natively.
-    setAndroidPageScrollbarInsetTop(blockEnd).catch(error => {
-      console.warn('Could not move the Android page scrollbar', error)
-    })
   }
   watch(scrollPinnedPlayer, pinned => {
     releasePinnedArea()

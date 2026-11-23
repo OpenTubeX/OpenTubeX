@@ -6,9 +6,9 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
-import { initializePageScrollbar, observePageScrollbarVisibility } from './pageScrollbar'
+import { initializePageScrollbar, observePageScrollbarStart, observePageScrollbarVisibility } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
-import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from './androidUi'
+import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarInsetTop, setAndroidPageScrollbarsHidden } from './androidUi'
 
 /*
  * Chromium's own overlay scrollbars can't be styled and fade out when idle,
@@ -790,6 +790,11 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
     observePageScrollbarVisibility(document, hidden => {
       setAndroidPageScrollbarsHidden(hidden).catch(error => {
         console.warn('Could not update Android page scrollbar visibility', error)
+      })
+    })
+    observePageScrollbarStart(document, blockStart => {
+      setAndroidPageScrollbarInsetTop(blockStart).catch(error => {
+        console.warn('Could not move the Android page scrollbar', error)
       })
     })
   }

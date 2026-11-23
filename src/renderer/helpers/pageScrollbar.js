@@ -52,3 +52,29 @@ export function observePageScrollbarVisibility(pageDocument, setHidden) {
     pageDocument.removeEventListener('fullscreenchange', update)
   }
 }
+
+/**
+ * Reports where the page scrollbar starts, below the header and a pinned
+ * Watch page player, for native page scrollbars that CSS can't place. A probe
+ * resolves `--page-scrollbar-block-start`, so it follows every change to it.
+ * @param {Document} pageDocument
+ * @param {(blockStart: number) => void} setBlockStart CSS pixels from the top of the page
+ * @returns {() => void}
+ */
+export function observePageScrollbarStart(pageDocument, setBlockStart) {
+  const view = pageDocument.defaultView
+  const probe = pageDocument.createElement('div')
+  probe.className = 'pageScrollbarStartProbe'
+  probe.setAttribute('aria-hidden', 'true')
+  pageDocument.body.append(probe)
+  const update = () => setBlockStart(probe.getBoundingClientRect().height)
+  const observer = new view.ResizeObserver(update)
+  observer.observe(probe)
+  // UI Scale changes the device pixels per CSS pixel without resizing the probe.
+  view.visualViewport?.addEventListener('resize', update)
+  return () => {
+    observer.disconnect()
+    view.visualViewport?.removeEventListener('resize', update)
+    probe.remove()
+  }
+}
