@@ -1,21 +1,36 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { chromium, expect as baseExpect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
+
+// A software-rendered emulator on a busy host can block the renderer for seconds.
+const expect = baseExpect.configure({ timeout: 30000 })
+
 test('Android fullscreen keeps the video inside the viewport throughout rotation', {
-  skip: !process.env.ANDROID_CDP_URL, timeout: 120000,
+  skip: !process.env.ANDROID_CDP_URL, timeout: 600000,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
-  const page = context.pages()[0]
+  const page = context.pages().find(page => page.url().startsWith('https://localhost/'))
   const session = await context.newCDPSession(page)
   let settings
   let watch
   const originalRoute = await page.evaluate(() => location.hash)
+  // Shaka ignores the button while its controls are hidden, which a busy
+  // device reaches before the next click.
+  const clickFullscreenButton = async () => {
+    const result = await session.send('Runtime.evaluate', {
+      expression: `document.querySelector('.shaka-controls-container').setAttribute('shown', 'true');
+        document.querySelector('.shaka-fullscreen-button').click()`,
+      userGesture: true,
+      awaitPromise: true,
+    })
+    assert.equal(result.exceptionDetails, undefined)
+  }
   try {
     await page.locator('.profileTrigger').waitFor()
     const skipTour = page.getByRole('button', { name: 'Skip', exact: true })
@@ -79,7 +94,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
     assert.equal(await player.evaluate(element => element.ui.getControls().getConfig().forceLandscapeOnFullscreen), false)
-    await expect.poll(() => video.evaluate(video => ({ ready: video.readyState, source: video.currentSrc.slice(0, 80), error: video.error?.message })), { timeout: 15000 }).toMatchObject({ ready: 4 })
+    await expect.poll(() => video.evaluate(video => ({ ready: video.readyState, source: video.currentSrc.slice(0, 80), error: video.error?.message }))).toMatchObject({ ready: 4 })
     // A saved position from seek tests can loop this short fixture mid-assertion.
     await video.evaluate(video => { video.currentTime = 0; video.loop = true; return video.play() })
     await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
@@ -102,7 +117,8 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
             const height = video.videoHeight * fit
             window.__transitionFrames.push({
               time: performance.now() - start,
-              viewport: [innerWidth, innerHeight],
+              // UI Scale makes the visible area fractional; innerHeight rounds it.
+              viewport: [visualViewport.width, visualViewport.height],
               fullscreen: !!document.fullscreenElement,
               video: [rect.x + (rect.width - width) / 2, rect.y + (rect.height - height) / 2, width, height],
               player: document.querySelector('.ftVideoPlayer').getBoundingClientRect().toJSON()
@@ -112,14 +128,8 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
           }
           requestAnimationFrame(sample)
         })
-        const result = await session.send('Runtime.evaluate', {
-          expression: `document.querySelector('.shaka-controls-container').setAttribute('shown', 'true');
-            document.querySelector('.shaka-fullscreen-button').click()`,
-          userGesture: true,
-          awaitPromise: true,
-        })
-        assert.equal(result.exceptionDetails, undefined)
-        await expect.poll(() => page.evaluate(() => window.__transitionFinished), { timeout: 15000 }).toBe(true)
+        await clickFullscreenButton()
+        await expect.poll(() => page.evaluate(() => window.__transitionFinished)).toBe(true)
         const frames = await page.evaluate(() => window.__transitionFrames)
         const clipped = frames.filter(({ video: [x, y, w, h], viewport: [vw, vh], player }) =>
           x < -1 || y < -1 || x + w > vw + 1 || y + h > vh + 1 ||
@@ -199,7 +209,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
         const entering = i % 2 === 0
         // Target the presented player, not the old viewport while Android is
         // rotating it (rotation cancels a pointer stream already in progress).
-        await expect.poll(() => page.evaluate(() => innerHeight > innerWidth), { timeout: 10000 }).toBe(entering)
+        await expect.poll(() => page.evaluate(() => innerHeight > innerWidth)).toBe(entering)
         await player.evaluate(element => element.ui.getControls().hideUI())
         const bounds = await player.boundingBox()
         const x = bounds.x + bounds.width / 2
@@ -213,10 +223,10 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
         }
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect.poll(() => page.evaluate(() => !!document.fullscreenElement), {
-          message: `Swipe ${i + 1} at ${scale}%`, timeout: 10000,
+          message: `Swipe ${i + 1} at ${scale}%`,
         }).toBe(entering)
       }
-      await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), { timeout: 10000 }).toBe(true)
+      await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open'))).toBe(true)
       const { swipeFrames, presentationFrames } = await page.evaluate(() => {
         Element.prototype.requestFullscreen = window.__originalRequestFullscreen
         document.exitFullscreen = window.__originalExitFullscreen
@@ -244,29 +254,32 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
     // Emulate a system policy that keeps landscape after unlocking (for example,
     // the user physically turned the phone while watching). The native display
     // remains real; only the unlock request is held for this case.
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
+    await clickFullscreenButton()
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement && innerWidth > innerHeight)).toBe(true)
     await page.evaluate(() => {
       window.__originalOrientationPromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = function (plugin, method, ...args) {
         if (plugin === 'ScreenOrientation' && method === 'unlock') return Promise.resolve()
-        return window.__originalOrientationPromise.call(this, plugin, method, ...args)
+        const result = window.__originalOrientationPromise.call(this, plugin, method, ...args)
+        if (plugin === 'ScreenOrientation' && method === 'getCurrentOrientation' && !document.fullscreenElement) {
+          // Inspect the surface after the app has handled the native answer.
+          result.then(({ type }) => setTimeout(() => {
+            window.__landscapeExitChecked ??= { type, exited: !document.querySelector(':popover-open') }
+          }))
+        }
+        return result
       }
     })
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
-    await expect.poll(() => page.evaluate(() => !document.fullscreenElement && !document.querySelector(':popover-open')), {
-      timeout: 1500, message: 'Exit promptly when the native display remains landscape',
-    }).toBe(true)
+    await clickFullscreenButton()
+    // Exit must follow the display check, not wait for a rotation that never comes.
+    await expect.poll(() => page.evaluate(() => window.__landscapeExitChecked ?? null), {
+      message: 'Exit promptly when the native display remains landscape',
+    }).toEqual({ type: expect.stringMatching(/^landscape/), exited: true })
+    assert.equal(await page.evaluate(() => !!document.fullscreenElement), false)
     assert.equal(await page.evaluate(() => innerWidth > innerHeight), true)
     // Start the next session in landscape, then let unlock restore portrait.
     // Entry orientation cannot predict where a locked device will rotate on exit.
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
+    await clickFullscreenButton()
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     await page.evaluate(() => {
       window.Capacitor.nativePromise = window.__originalOrientationPromise
@@ -277,21 +290,15 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
         window.__landscapeExitRetained = !!document.querySelector('.videoLayout:popover-open')
       })
     })
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
+    await clickFullscreenButton()
     await expect.poll(() => page.evaluate(() => window.__landscapeExitRetained), {
       message: 'Protect rotation even when fullscreen started in landscape',
     }).toBe(true)
-    await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), {
-      timeout: 10000,
-    }).toBe(true)
+    await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open'))).toBe(true)
     await page.evaluate(() => {
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setRotateFullscreenToLandscape', false)
     })
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
+    await clickFullscreenButton()
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     await page.evaluate(() => {
       document.addEventListener('fullscreenchange', function exited() {
@@ -300,9 +307,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
         window.__portraitExitRetained = !!document.querySelector('.videoLayout:popover-open')
       })
     })
-    await session.send('Runtime.evaluate', {
-      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
-    })
+    await clickFullscreenButton()
     await expect.poll(() => page.evaluate(() => window.__portraitExitRetained), {
       message: 'Exit immediately when fullscreen never requested rotation',
     }).toBe(false)
@@ -334,6 +339,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       delete window.__fullscreenReentered
       delete window.__landscapeExitRetained
       delete window.__portraitExitRetained
+      delete window.__landscapeExitChecked
       delete window.__transitionFrames
       delete window.__transitionFinished
       location.hash = originalRoute

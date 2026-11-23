@@ -2317,7 +2317,7 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, lockCurrentOrientation, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, isLandscapeLocked, lockCurrentOrientation, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
@@ -8107,7 +8107,9 @@ function handleAndroidRotation(landscape) {
   if (pictureInPictureActive.value || androidFullscreenEntering) return
   if (!landscape) {
     if (androidRotationFullscreen) exitAndroidRotationFullscreen()
-    else if (isNativeFullscreenActive()) {
+    // A late portrait display event from the previous exit must not end
+    // fullscreen that was entered again since. Physical rotation is current.
+    else if (isNativeFullscreenActive() && (fullscreenRotationIgnoresSystemLock.value || !isLandscapeLocked())) {
       document.exitFullscreen().catch(() => {})
     }
     return
@@ -12168,12 +12170,13 @@ function requestFullscreenOrientation(fullscreen) {
   // Keep this until exit finishes: unlocking after a preference/metadata
   // change can still have a rotation in flight when fullscreen closes.
   androidFullscreenRotationRequested ||= shouldRotateFullscreenToLandscape(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
-  setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+  return setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
 }
+/** @returns {Promise<void> | undefined} Settles once the native orientation request was applied. */
 function updateFullscreenOrientation(fullscreen) {
   if (!isActiveTab.value || isNativeFullscreenActive() !== fullscreen) return
   if (fullscreen && androidFullscreenEntering) return
-  requestFullscreenOrientation(fullscreen)
+  return requestFullscreenOrientation(fullscreen)
 }
 /** @type {(preserveOrientation?: boolean) => void} */
 let finishAndroidFullscreenExit = () => {}
@@ -12185,7 +12188,8 @@ watch(isActiveTab, active => {
   }
 })
 
-function retainAndroidFullscreenDuringRotation() {
+/** @param {Promise<void> | undefined} unlocked Settles once native code applied the exit orientation. */
+function retainAndroidFullscreenDuringRotation(unlocked) {
   if (!androidFullscreenHost || !androidFullscreenRotationRequested) return
   const portraitBeforeUnlock = window.innerHeight >= window.innerWidth
 
@@ -12229,15 +12233,21 @@ function retainAndroidFullscreenDuringRotation() {
   // replace the expected orientation with an immediate, potentially stale
   // read after unlock. If native rotation has arrived but the WebView has
   // not resized yet, keep protecting it until resize or the safety deadline.
-  let timeout = window.setTimeout(() => {
-    timeout = window.setTimeout(finish, 4500)
-    getAndroidDisplayOrientation().then(orientation => {
-      if (finishAndroidFullscreenExit !== finish) return
-      if (orientation.startsWith('portrait') === portraitBeforeUnlock) finish()
-    }).catch(() => {
-      if (finishAndroidFullscreenExit === finish) finish()
-    })
-  }, 500)
+  // A busy device can take seconds to apply the unlock itself, so the
+  // settling time starts once it has.
+  let timeout = null
+  Promise.resolve(unlocked).then(() => {
+    if (finishAndroidFullscreenExit !== finish) return
+    timeout = window.setTimeout(() => {
+      timeout = window.setTimeout(finish, 4500)
+      getAndroidDisplayOrientation().then(orientation => {
+        if (finishAndroidFullscreenExit !== finish) return
+        if (orientation.startsWith('portrait') === portraitBeforeUnlock) finish()
+      }).catch(() => {
+        if (finishAndroidFullscreenExit === finish) finish()
+      })
+    }, 500)
+  })
   finishAndroidFullscreenExit = finish
   window.addEventListener('resize', resized)
 }
@@ -12284,8 +12294,8 @@ function fullscreenChangeHandler() {
     return
   }
 
-  updateFullscreenOrientation(fullscreen)
-  if (retainDuringRotation) retainAndroidFullscreenDuringRotation()
+  const orientationApplied = updateFullscreenOrientation(fullscreen)
+  if (retainDuringRotation) retainAndroidFullscreenDuringRotation(orientationApplied)
   syncAndroidStatusBarVisibility()
 
   if (fullscreen) {
