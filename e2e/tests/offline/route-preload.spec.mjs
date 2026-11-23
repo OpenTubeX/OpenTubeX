@@ -19,7 +19,47 @@ const history = Array.from({ length: 1 }, (_, index) => ({
   timeWatched: now - index * 60_000,
 }))
 
+// On CI, the Channel code twice finished loading after the test blocked the
+// bundle although no hover requested it. Record the bundle requests and the
+// pointer and focus events on links from window creation on, which show what
+// started that load.
+let bundleRequests = []
+
+/** Records pointer and focus events on internal links in `window.__e2eEvents`. */
+function recordLinkEvents() {
+  if (window.__routePreloadLinkEvents) return
+  window.__routePreloadLinkEvents = true
+  const events = window.__e2eEvents ??= []
+  for (const type of ['pointerover', 'pointermove', 'focusin']) {
+    document.addEventListener(type, (event) => {
+      const link = event.target instanceof Element ? event.target.closest('a[href^="#/"]') : null
+      if (!link) return
+      events.push({
+        t: Date.now(),
+        type,
+        link: link.getAttribute('href'),
+        ...(event instanceof PointerEvent
+          ? { pointerType: event.pointerType, x: event.clientX, y: event.clientY }
+          : { focusVisible: link.matches(':focus-visible') }),
+      })
+    }, { capture: true, passive: true })
+  }
+}
+
 test.use({
+  // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+  onPhase: async ({}, use) => use(async (phase, page) => {
+    if (phase !== 'windowCreated') return
+    bundleRequests = []
+    page.on('request', (request) => {
+      if (request.url().startsWith('app://bundle/') && request.url().endsWith('.js')) {
+        bundleRequests.push({ t: Date.now(), url: request.url() })
+      }
+    })
+    await page.addInitScript(recordLinkEvents)
+    // The window may still be navigating to the app, which the init script covers.
+    await page.evaluate(recordLinkEvents).catch(() => {})
+  }),
   seed: {
     settings: {
       landingPage: 'history',
@@ -96,6 +136,7 @@ test('resting the pointer on a video loads Watch without fetching it, and the cl
 
 test('a route whose code failed to preload still opens on click', async ({ page }) => {
   await page.route(/^app:\/\/bundle\/.*\.js$/, route => route.abort())
+  const blockedAt = Date.now()
 
   const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.channelName').first()
   let preloadFailed = false
@@ -113,10 +154,14 @@ test('a route whose code failed to preload still opens on click', async ({ page 
       await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
     }).toPass({ timeout: 20_000 })
   } catch (error) {
-    // On CI, no hover in a whole run requested the code. Record whether it
-    // had already loaded, which a request started before the route would do.
+    // On CI, no hover in a whole run requested the code, which had loaded.
+    // The link events are attached with the failure.
     await test.info().attach('route preload state', {
-      body: JSON.stringify({ channelLoaded: await isRouteLoaded(page, '/channel/UCroutePreload0') }),
+      body: JSON.stringify({
+        channelLoaded: await isRouteLoaded(page, '/channel/UCroutePreload0'),
+        blockedAt,
+        bundleRequests,
+      }, null, 2),
       contentType: 'application/json',
     })
     throw error
