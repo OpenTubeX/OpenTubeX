@@ -65,9 +65,7 @@
               :key="extraLabel"
               class="center"
             >
-              <strong>
-                {{ extraLabel }}
-              </strong>
+              {{ extraLabel }}
             </p>
             <FtButtonGroup>
               <FtButton

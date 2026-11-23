@@ -217,7 +217,7 @@
       @click="dismissLibraryNotice"
     >
       <p class="libraryNoticeText">
-        <strong>{{ libraryNotice.message }}</strong>
+        {{ libraryNotice.message }}
       </p>
       <p class="libraryNoticeText">
         {{ libraryNotice.detail }}
