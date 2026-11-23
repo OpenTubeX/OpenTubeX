@@ -91,6 +91,12 @@
                 @click="retryWaitingRequests"
               />
             </div>
+            <ft-loader
+              v-else
+              compact
+              class="videoPlayerPlaceholderLoader"
+              :tab-loading-indicator="false"
+            />
           </div>
           <div
             v-else-if="isLoading"
@@ -111,6 +117,12 @@
                 @click="retryWaitingRequests"
               />
             </div>
+            <ft-loader
+              v-else
+              compact
+              class="videoPlayerPlaceholderLoader"
+              :tab-loading-indicator="false"
+            />
           </div>
           <div
             v-else-if="(ytDlpStreamsPending || (vrStreamsPending && !isYtDlpPlaybackRequested())) && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"

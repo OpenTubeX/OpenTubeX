@@ -43,6 +43,39 @@
   min-inline-size: 0;
 }
 
+// The skeleton's shimmer sweeps three times (1.4s each, themes.css) and then
+// stops to save CPU, so a slow load shows this loader once it has stopped.
+// It stays out of the layout until then, so it doesn't animate unseen.
+.videoPlayerPlaceholderLoader {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  --loading-indicator-size: 48px;
+
+  animation: video-player-placeholder-loader-appear 150ms ease-out 4.2s both;
+}
+
+// Without a shimmer, only wait long enough that fast loads don't flash it.
+.shortsTransitionPreview ~ .videoPlayerPlaceholderLoader,
+:root[data-reduced-motion='reduce'] .videoPlayerPlaceholderLoader {
+  animation-delay: 400ms;
+}
+
+// Waits along with a paused shimmer, for the sweeps it still has left.
+:root[data-shimmer-hidden] .videoPlayerPlaceholderLoader,
+.ft-shimmer:not([data-shimmer-visible]) > .videoPlayerPlaceholderLoader,
+.shortsPlayerPlaceholder:has(.ft-shimmer:not([data-shimmer-visible])) > .videoPlayerPlaceholderLoader {
+  animation-play-state: paused;
+}
+
+@keyframes video-player-placeholder-loader-appear {
+  from {
+    display: none;
+    opacity: 0;
+  }
+}
+
 // Centered over the loading placeholder, which positions its skeleton absolutely.
 .connectionWaitNotice {
   position: absolute;

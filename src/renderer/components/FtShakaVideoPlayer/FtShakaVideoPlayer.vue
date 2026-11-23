@@ -118,6 +118,7 @@
         videoZoomTouchEnabled: videoZoomPossible,
         vrMode: useVrMode,
         playerPaused: playerPaused && hasLoaded,
+        bufferingSpinnerShown,
         endedScreenShown: showEndedScreen && endedRecommendations.length > 0,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
@@ -5331,6 +5332,9 @@ const uiConfig = computed(() => {
     addSeekBar: seekingIsPossible.value,
     controlPanelElements: controlPanelElements,
     bigButtons: getBigButtons(displayVideoPlayButton.value, mobile),
+    // Shaka's mobile defaults turn the spinner off for their buffering play
+    // button, which our center play button replaces.
+    showBufferingSpinner: true,
     // Mobile audio artwork uses the same tap-to-toggle controls as video.
     showUIAlwaysOnAudioOnly: !mobile,
     topControlPanelElements: [],
@@ -12152,6 +12156,20 @@ const isBuffering = ref(false)
 // Shaka stops reporting buffering once its streaming failed, but the
 // media element still reports running out of data.
 const mediaWaiting = ref(false)
+
+// The spinner takes the center play button's place once it fades in, after
+// the same delay as in bufferSpinner.css, so short buffers while seeking keep it.
+const bufferingSpinnerShown = ref(false)
+let bufferingSpinnerTimeout
+watch(isBuffering, (buffering) => {
+  clearTimeout(bufferingSpinnerTimeout)
+  if (buffering) {
+    bufferingSpinnerTimeout = setTimeout(() => { bufferingSpinnerShown.value = true }, 400)
+  } else {
+    bufferingSpinnerShown.value = false
+  }
+})
+onBeforeUnmount(() => clearTimeout(bufferingSpinnerTimeout))
 
 function onlineHandler() {
   isOffline.value = false
