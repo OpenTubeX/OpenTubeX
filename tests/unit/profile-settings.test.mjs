@@ -197,6 +197,36 @@ test('an upload keeps the profile settings that only other devices sync', async 
   })
 })
 
+test('profile settings edited while a sync saves keep their last synced baseline', async () => {
+  const car = profileSettingsId('car')
+  // The other device hid comments, both for everyone and for the car profile.
+  const client = createClient([
+    { key: 'hideComments', value: true, updatedAt: 2 },
+    { key: car, value: { hideComments: true }, updatedAt: 2 },
+  ])
+  const previous = {
+    hideComments: { key: 'hideComments', value: false, updatedAt: 1 },
+    [car]: { key: car, value: { hideComments: false }, updatedAt: 1 },
+  }
+  const device = createDevice({ car: { hideComments: false } })
+  const { overrides } = device.state.settings.profileSettingsState
+  const saveSyncedProfileSettings = device.dispatch
+  device.dispatch = async (action, payload) => {
+    if (action === 'saveSyncedProfileSettings') return saveSyncedProfileSettings(action, payload)
+    // The car profile hides live chat while the shared setting saves.
+    device.state.settings.hideComments = payload
+    overrides.car = { hideComments: false, hideLiveChat: true }
+  }
+  const snapshot = await context.syncSettings(client, device, previous)
+  assert.deepEqual(JSON.parse(JSON.stringify(snapshot[car])), previous[car])
+
+  // The next sync keeps the other device's edit and adds this one.
+  await context.syncSettings(client, device, snapshot)
+  assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === car).value)), {
+    hideComments: true, hideLiveChat: true,
+  })
+})
+
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 const between = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end, settingsSource.indexOf(start)))
 

@@ -1991,7 +1991,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
-        if (isListSetting(key)) skippedSettings.add(key)
+        if (isListSetting(key) || profileSettingsKey) skippedSettings.add(key)
       }
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
         skip()
@@ -2006,7 +2006,6 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
             profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, isSynced,
           })) {
             skip()
-            skippedSettings.add(key)
             continue
           }
         } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
