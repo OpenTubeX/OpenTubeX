@@ -779,15 +779,17 @@ function updateProfileSetting(commit, profileId, settingId, value, optimistic = 
   const settle = () => {
     if (pending && --pending.count === 0 && pendingProfileEdits.get(key) === pending) pendingProfileEdits.delete(key)
   }
-  return settingWrites.track(id, () => runProfileSettingUpdate(key, () => (
-    saveProfileSettingValue(commit, profileId, settingId, value)
-  ))).then(() => {
-    if (pending) pending.confirmed = value
-    settle()
-    return true
-  }, async error => {
+  // The edit stops showing over the saved settings before the write
+  // tracker shows those another window saved meanwhile.
+  return settingWrites.track(id, async () => {
+    try {
+      await runProfileSettingUpdate(key, () => saveProfileSettingValue(commit, profileId, settingId, value))
+      if (pending) pending.confirmed = value
+    } finally {
+      settle()
+    }
+  }).then(() => true, async error => {
     console.error(error)
-    settle()
     if (optimistic) {
       const saved = await DBSettingHandlers.findValue(id).catch(() => undefined)
       if (saved !== undefined) {

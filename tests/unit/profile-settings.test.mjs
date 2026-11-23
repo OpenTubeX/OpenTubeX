@@ -298,13 +298,14 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   })
   const state = { quickSettings: ['shared'], profileSettingsState: { overrides } }
   const commit = (type, payload) => mutations[type](state, payload)
+  const settingWrites = createSettingWriteTracker(async key => structuredClone(saved.get(key)))
   const region = vm.runInNewContext(`${between('function saveProfileSettingValue(', '/** Mutations that can change which settings show')}
 ({ updateProfileSetting, withPendingProfileEdits })`, {
     ...profileSettings,
     state,
     isPlainObject,
     createSettingUpdateQueue,
-    settingWrites: createSettingWriteTracker(async () => undefined),
+    settingWrites,
     runLocked: (_name, run) => run(),
     saveSettingEdit: (_commit, _id, save) => save(),
     DBSettingHandlers: {
@@ -353,6 +354,17 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   unreadable = true
   assert.equal(await region.updateProfileSetting(commit, 'car', 'quickSettings', ['c'], true), false)
   assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), {})
+
+  // Another window saves the profile's settings right after this one's edit
+  // saved. They show once the edit finishes.
+  unreadable = false
+  const fourth = region.updateProfileSetting(commit, 'car', 'quickSettings', ['d'], true)
+  await untilSaving(fourth)
+  settingWrites.savedElsewhere(id, settings => commit('setProfileOwnSettings', { profileId: 'car', settings }))
+  releases.shift()()
+  saved.set(id, { quickSettings: ['e'] })
+  assert.equal(await fourth, true)
+  assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), { quickSettings: ['e'] })
 })
 
 test('a failed shared write of a setting the active profile replaces keeps the previous shared value', async () => {
