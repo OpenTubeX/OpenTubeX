@@ -99,7 +99,8 @@ test('subscribes from a channel name context menu and unsubscribes after confirm
 
   await title.click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
-  const prompt = page.getByRole('dialog', { name: channel.name })
+  const prompt = page.getByRole('dialog', { name: 'Unsubscribe', exact: true })
+  await expect(prompt).toHaveAccessibleDescription(new RegExp(channel.name))
   await prompt.getByRole('button', { name: 'No', exact: true }).click()
   await expect(prompt).toBeHidden()
   expect(subscribedIds()).toEqual([otherChannel.id, channel.id])
