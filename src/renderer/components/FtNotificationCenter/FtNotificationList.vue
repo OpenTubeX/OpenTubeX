@@ -245,6 +245,8 @@ function settle(row) {
 
 /** @param {MouseEvent} event */
 function suppressSwipeClick(event) {
+  // Keyboard and assistive technology activations have no click count.
+  if (event.detail === 0) return
   event.currentTarget.removeEventListener('click', suppressSwipeClick, true)
   swipedRow = null
   event.preventDefault()
