@@ -38,6 +38,10 @@ export const SHARED_ONLY_SETTINGS = new Set([
   'autoUnloadTabPercentage',
   'scrollMiniPlayerSavedRect',
   'crossTabMiniPlayerSavedRect',
+  // The main process reads these when it opens a window, before a profile is
+  // active, and its zoom commands change the shared scale.
+  'hideStartupSplash',
+  'uiScale',
   // The main process applies these to every window.
   'contextMenuSearchEngines',
   'keyboardShortcuts',
