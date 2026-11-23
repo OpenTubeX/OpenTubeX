@@ -677,6 +677,7 @@ Settings:
     URL Hint: Usa %s nel punto dell'URL in cui inserire il testo selezionato codificato.
     Add Custom Engine: Aggiungi un motore personalizzato
     Add Engine: Aggiungi motore
+    Rename Engine: Rinomina {engine}
     Remove Engine: Rimuovi {engine}
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.

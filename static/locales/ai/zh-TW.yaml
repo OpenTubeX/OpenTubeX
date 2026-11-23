@@ -677,6 +677,7 @@ Settings:
     URL Hint: 請在 URL 中使用 %s 代表應插入經編碼所選文字的位置。
     Add Custom Engine: 新增自訂搜尋引擎
     Add Engine: 新增搜尋引擎
+    Rename Engine: 重新命名 {engine}
     Remove Engine: 移除 {engine}
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。

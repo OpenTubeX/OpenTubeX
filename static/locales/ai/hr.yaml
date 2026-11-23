@@ -680,6 +680,7 @@ Settings:
     URL Hint: Upotrijebite %s na mjestu na kojem URL treba sadržavati kodirani odabrani tekst.
     Add Custom Engine: Dodaj prilagođenu tražilicu
     Add Engine: Dodaj tražilicu
+    Rename Engine: Preimenuj {engine}
     Remove Engine: Ukloni {engine}
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.

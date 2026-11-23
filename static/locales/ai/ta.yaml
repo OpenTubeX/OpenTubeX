@@ -690,6 +690,7 @@ Settings:
     URL Hint: குறியாக்கப்பட்ட தேர்ந்தெடுத்த உரை URL-இல் இடம்பெற வேண்டிய இடத்தில் %s-ஐப் பயன்படுத்தவும்.
     Add Custom Engine: தனிப்பயன் தேடுபொறியைச் சேர்
     Add Engine: தேடுபொறியைச் சேர்
+    Rename Engine: '{engine}-இன் பெயரை மாற்று'
     Remove Engine: '{engine}-ஐ அகற்று'
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.

@@ -431,6 +431,8 @@ Settings:
       Tooltip: Wczytuj komentarze po otwarciu strony i kolejne podczas przewijania.
     Haptic Feedback: Reakcja haptyczna
     Ignore System Haptics Setting: Ignoruj systemowe ustawienie haptyki
+  Context Menu Search Settings:
+    Rename Engine: Zmień nazwę wyszukiwarki {engine}
   Theme Settings:
     Toggle Playback With Tab Icon: Odtwarzaj i wstrzymuj ikoną karty
     Show New Tab Button Next to Tabs: Pokaż przycisk nowej karty obok kart

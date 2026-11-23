@@ -719,6 +719,7 @@ Settings:
     URL Hint: Uzu %s kie la URL enhavu la koditan elektitan tekston.
     Add Custom Engine: Aldoni laŭmendan serĉilon
     Add Engine: Aldoni serĉilon
+    Rename Engine: Renomi {engine}
     Remove Engine: Forigi {engine}
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.

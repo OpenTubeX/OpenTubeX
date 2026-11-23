@@ -636,6 +636,7 @@ Settings:
     URL Hint: Вставьте %s в то место URL, где должен быть закодированный выделенный текст.
     Add Custom Engine: Добавить свою поисковую систему
     Add Engine: Добавить поисковую систему
+    Rename Engine: Переименовать {engine}
     Remove Engine: Удалить {engine}
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.

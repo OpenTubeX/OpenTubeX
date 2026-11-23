@@ -701,6 +701,7 @@ Settings:
     URL Hint: Устаўце %s у тое месца URL, дзе мусіць быць закадаваны вылучаны тэкст.
     Add Custom Engine: Дадаць уласную пошукавую сістэму
     Add Engine: Дадаць пошукавую сістэму
+    Rename Engine: Перайменаваць {engine}
     Remove Engine: Выдаліць {engine}
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.

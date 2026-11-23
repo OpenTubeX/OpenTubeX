@@ -677,6 +677,7 @@ Settings:
     URL Hint: "Implijit %s el lec'h ma rank an URL enderc'hel an destenn diuzet boneget."
     Add Custom Engine: "Ouzhpennañ ur c'heflusker personelaet"
     Add Engine: "Ouzhpennañ ur c'heflusker"
+    Rename Engine: "Adenvel {engine}"
     Remove Engine: "Dilemel {engine}"
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."

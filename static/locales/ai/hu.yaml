@@ -677,6 +677,7 @@ Settings:
     URL Hint: Az URL-ben %s helyére kerül a kódolt kijelölt szöveg.
     Add Custom Engine: Egyéni keresőmotor hozzáadása
     Add Engine: Keresőmotor hozzáadása
+    Rename Engine: A(z) {engine} átnevezése
     Remove Engine: A(z) {engine} eltávolítása
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.

@@ -687,6 +687,7 @@ Settings:
     URL Hint: Употребите %s на месту на којем URL треба да садржи кодирани изабрани текст.
     Add Custom Engine: Додај прилагођени претраживач
     Add Engine: Додај претраживач
+    Rename Engine: Преименуј претраживач {engine}
     Remove Engine: Уклони претраживач {engine}
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.

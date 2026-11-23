@@ -696,6 +696,7 @@ Settings:
     URL Hint: Bruk %s der nettadressa skal innehalde den koda merkte teksten.
     Add Custom Engine: Legg til ein eigen søkjemotor
     Add Engine: Legg til søkjemotor
+    Rename Engine: Gje {engine} nytt namn
     Remove Engine: Fjern {engine}
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.

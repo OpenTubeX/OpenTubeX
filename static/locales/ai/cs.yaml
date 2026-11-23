@@ -677,6 +677,7 @@ Settings:
     URL Hint: Na místo, kam se má v adrese URL vložit zakódovaný vybraný text, zadejte %s.
     Add Custom Engine: Přidat vlastní vyhledávač
     Add Engine: Přidat vyhledávač
+    Rename Engine: Přejmenovat {engine}
     Remove Engine: Odebrat {engine}
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.

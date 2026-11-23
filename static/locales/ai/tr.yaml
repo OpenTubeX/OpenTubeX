@@ -677,6 +677,7 @@ Settings:
     URL Hint: URL'de kodlanmış seçili metnin bulunacağı yerde %s kullanın.
     Add Custom Engine: Özel arama motoru ekle
     Add Engine: Arama motoru ekle
+    Rename Engine: '{engine} arama motorunu yeniden adlandır'
     Remove Engine: '{engine} arama motorunu kaldır'
     Invalid Engine: Bir ad ve %s içeren geçerli bir HTTP veya HTTPS arama URL'si girin.
     Engine Limit: En fazla {count} özel arama motoru ekleyebilirsiniz.

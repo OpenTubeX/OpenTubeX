@@ -11,7 +11,10 @@
       {{ t('Settings.Context Menu Search Settings.Icon Hint') }}
     </p>
 
-    <div class="engineList">
+    <div
+      ref="engineList"
+      class="engineList"
+    >
       <div
         v-for="engine in searchEngines"
         :key="engine.id"
@@ -36,28 +39,51 @@
             :label="engine.name"
             :default-value="engine.enabled"
             :compact="true"
+            :hide-label="isCustomEngine(engine)"
             @change="updateEnabled(engine.id, $event)"
           />
+          <template v-if="isCustomEngine(engine)">
+            <input
+              v-if="editingNameId === engine.id"
+              v-model="editingName"
+              class="engineNameInput"
+              type="text"
+              maxlength="50"
+              :placeholder="t('Form Inputs.Example', { example: 'DuckDuckGo' })"
+              :aria-label="t('Settings.Context Menu Search Settings.Engine Name')"
+              :data-engine-name-input="engine.id"
+              data-settings-escape-scope
+              @blur="finishRename(engine.id)"
+              @keydown.enter.prevent="finishRename(engine.id, true)"
+              @keydown.escape.stop.prevent="cancelRename(engine.id)"
+            >
+            <button
+              v-else
+              type="button"
+              class="engineNameButton"
+              :data-engine-name-button="engine.id"
+              :aria-label="t('Settings.Context Menu Search Settings.Rename Engine', { engine: engine.name })"
+              :title="t('Settings.Context Menu Search Settings.Rename Engine', { engine: engine.name })"
+              @click="startRename(engine)"
+            >
+              <span>{{ engine.name }}</span>
+              <FtIcon
+                :icon="['fas', 'edit']"
+                aria-hidden="true"
+              />
+            </button>
+          </template>
         </div>
-        <template v-if="engine.id.startsWith('custom-')">
+        <template v-if="isCustomEngine(engine)">
           <FtInput
-            :key="inputKey(engine.id, 'name')"
-            :label="t('Settings.Context Menu Search Settings.Engine Name')"
-            :icon="['fas', 'font']"
-            :placeholder="t('Form Inputs.Example', { example: 'DuckDuckGo' })"
-            :value="engine.name"
-            :show-action-button="false"
-            @blur="updateCustomEngine(engine.id, 'name', $event)"
-          />
-          <FtInput
-            :key="inputKey(engine.id, 'url')"
+            :key="urlInputRevisions.get(engine.id) ?? 0"
             input-type="url"
             :label="t('Settings.Context Menu Search Settings.Search URL')"
             :icon="['fas', 'link']"
             placeholder="https://example.com/search?q=%s"
             :value="engine.url"
             :show-action-button="false"
-            @blur="updateCustomEngine(engine.id, 'url', $event)"
+            @blur="updateCustomEngineUrl(engine.id, $event)"
           />
           <FtButton
             class="removeEngine"
@@ -110,7 +136,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
@@ -133,7 +159,10 @@ const customName = ref('')
 const customUrl = ref('')
 const failedFavicons = ref(new Set())
 const resolvedFavicons = ref(new Map())
-const inputRevisions = ref(new Map())
+const urlInputRevisions = ref(new Map())
+const editingNameId = ref(null)
+const editingName = ref('')
+const engineList = useTemplateRef('engineList')
 
 const configuredSearchEngines = computed(() => {
   return parseSearchEngines(store.getters.getContextMenuSearchEngines)
@@ -193,32 +222,57 @@ function showEngineLimitToast() {
   })
 }
 
-function inputKey(id, field) {
-  return `${id}:${field}:${inputRevisions.value.get(`${id}:${field}`) ?? 0}`
+function isCustomEngine(engine) {
+  return engine.id.startsWith('custom-')
 }
 
-function resetCustomEngineInput(id, field) {
-  const key = `${id}:${field}`
-  inputRevisions.value = new Map([
-    ...inputRevisions.value,
-    [key, (inputRevisions.value.get(key) ?? 0) + 1]
-  ])
+function updateCustomEngine(id, changes) {
+  saveSearchEngines(searchEngines.value.map(engine => (
+    engine.id === id ? { ...engine, ...changes } : engine
+  )))
 }
 
-function updateCustomEngine(id, field, value) {
-  const trimmedValue = value.trim()
-  if (
-    (field === 'name' && (trimmedValue.length === 0 || trimmedValue.length > 50)) ||
-    (field === 'url' && !isValidSearchUrlTemplate(trimmedValue))
-  ) {
+async function focusEngineElement(attribute, id) {
+  await nextTick()
+  const element = engineList.value?.querySelector(`[${attribute}="${CSS.escape(id)}"]`)
+  element?.focus()
+  return element
+}
+
+async function startRename(engine) {
+  editingNameId.value = engine.id
+  editingName.value = engine.name
+  const input = await focusEngineElement('data-engine-name-input', engine.id)
+  input?.select()
+}
+
+function finishRename(id, keepFocus = false) {
+  if (editingNameId.value !== id) return
+  const name = editingName.value.trim()
+  editingNameId.value = null
+  editingName.value = ''
+  // Like renaming a tab group, an empty name keeps the old one.
+  if (name.length > 0) updateCustomEngine(id, { name })
+  if (keepFocus) focusEngineElement('data-engine-name-button', id)
+}
+
+function cancelRename(id) {
+  if (editingNameId.value !== id) return
+  editingNameId.value = null
+  editingName.value = ''
+  focusEngineElement('data-engine-name-button', id)
+}
+
+function updateCustomEngineUrl(id, value) {
+  const url = value.trim()
+  if (!isValidSearchUrlTemplate(url)) {
     showInvalidEngineToast()
-    resetCustomEngineInput(id, field)
+    // Remount the field, so it shows the saved address again.
+    urlInputRevisions.value = new Map([...urlInputRevisions.value, [id, (urlInputRevisions.value.get(id) ?? 0) + 1]])
     return
   }
 
-  saveSearchEngines(searchEngines.value.map(engine => (
-    engine.id === id ? { ...engine, [field]: trimmedValue } : engine
-  )))
+  updateCustomEngine(id, { url })
 }
 
 function addCustomEngine() {
@@ -228,9 +282,7 @@ function addCustomEngine() {
     showInvalidEngineToast()
     return
   }
-  const customEngineCount = searchEngines.value
-    .filter(engine => engine.id.startsWith('custom-'))
-    .length
+  const customEngineCount = searchEngines.value.filter(isCustomEngine).length
   if (customEngineCount >= MAX_CUSTOM_SEARCH_ENGINES) {
     showEngineLimitToast()
     return

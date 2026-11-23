@@ -678,6 +678,7 @@ Settings:
     URL Hint: Gunakan %s pada posisi teks terpilih yang telah dikodekan di dalam URL.
     Add Custom Engine: Tambahkan mesin pencari khusus
     Add Engine: Tambahkan mesin pencari
+    Rename Engine: Ubah nama {engine}
     Remove Engine: Hapus {engine}
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.

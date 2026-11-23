@@ -682,6 +682,7 @@ Settings:
     URL Hint: Gebruik %s op de plaats waar de URL de gecodeerde geselecteerde tekst moet bevatten.
     Add Custom Engine: Aangepaste zoekmachine toevoegen
     Add Engine: Zoekmachine toevoegen
+    Rename Engine: '{engine} hernoemen'
     Remove Engine: '{engine} verwijderen'
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
