@@ -2534,6 +2534,10 @@ function runApp() {
 
       stopPowerSaveBlockerForWindow(newWindow)
       updateBackgroundSubscriptionVisibility()
+      // The base theme it showed no longer counts for the native theme.
+      if (allWindows.length !== 0) {
+        applyShownBaseThemes().catch(error => console.error('Failed to apply the base themes of the open windows', error))
+      }
       // Closing the last tabs confirmed the quit before closing their window.
       // Auxiliary windows, such as GPU Internals, would keep window-all-closed from firing.
       if (allWindows.length === 0 && isQuitConfirmed && !isQuitting) app.quit()
