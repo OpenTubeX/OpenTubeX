@@ -462,13 +462,13 @@ export async function completeYouTubeSignIn(code, signal) {
       signal.throwIfAborted()
       throw new Error('Could not save the YouTube account on this device')
     }
-    // Signed in again, so the request to do so is over.
-    removeOverNotifications(entry => entry.kind === 'youtube-signed-out')
     // Cancelled while the account saved, so undo the sign-in.
     if (signal.aborted && store.getters.getYouTubeAccount?.credentials?.refresh_token === credentials.refresh_token) {
       await signOutOfYouTubeAccount().catch(error => console.error(error))
     }
     signal.throwIfAborted()
+    // Signed in again, so the request to do so is over.
+    removeOverNotifications(entry => entry.kind === 'youtube-signed-out')
     return
   }
 

@@ -124,7 +124,9 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const cancel = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    abortAutoplayCountdown: function (', '\n    handleRouteChange:')} })`, {
     clearTimeout() {}, clearInterval() {}, tabMediaCoordinator,
   }).abortAutoplayCountdown
-  const replay = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoPlay() {', '\n    handlePlayerSeeking()')} })`).handleVideoPlay
+  const replay = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoPlay() {', '\n    handlePlayerSeeking()')} })`, {
+    markVideoNotificationsRead() {}, removeDownloadNotifications() {},
+  }).handleVideoPlay
   context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
   return {
     observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),

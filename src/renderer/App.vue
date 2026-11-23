@@ -1507,6 +1507,9 @@ const tabSwitcherSelectedTabId = computed(() => {
   return tab ? `tab-switcher-option-${tab.id}` : undefined
 })
 
+/** When each managed tool last downloaded or updated fine in this session. */
+const managedToolUpdatedAt = new Map()
+
 /**
  * Falls back to OpenTubeX-managed external software when the configured system
  * executables are unavailable. Selected managed executables are updated when
@@ -1660,10 +1663,13 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
       }
     }))
     const failures = results.filter(({ result }) => result === null || 'error' in result)
-    // An earlier failure is over once each of its tools updated fine.
-    const succeeded = results.filter(({ result }) => result !== null && !('error' in result)).map(({ binary }) => binary)
-    removeOverNotifications(entry => entry.kind === 'tool-update-failed' &&
-      !!entry.query?.tools && entry.query.tools.split(',').every(tool => succeeded.includes(tool)))
+    for (const { binary, result } of results) {
+      if (result !== null && !('error' in result)) managedToolUpdatedAt.set(binary, Date.now())
+    }
+    // An earlier failure is over once each of its tools updated fine since,
+    // possibly in separate updates.
+    removeOverNotifications(entry => entry.kind === 'tool-update-failed' && !!entry.query?.tools &&
+      entry.query.tools.split(',').every(tool => (managedToolUpdatedAt.get(tool) ?? -Infinity) > entry.createdAt))
     const updatedBinaries = results
       .filter(({ result }) => result !== null && 'version' in result && result.updated)
       .map(({ binary }) => binary)

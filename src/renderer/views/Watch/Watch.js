@@ -666,8 +666,6 @@ export default defineComponent({
       formatBeforeBackground: null,
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
-      notificationsReadVideoId: null,
-      notificationsRemovedDownloadId: null,
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
@@ -5566,15 +5564,13 @@ export default defineComponent({
       this.$store.commit('markWellbeingPlay', Date.now())
       this.dropQueuedCopyOfCurrentVideo()
       this.addToYouTubeWatchHistory()
-      // Its upload or reminder was seen, except in incognito tabs, which leave no trace.
-      if (this.notificationsReadVideoId !== this.videoId && !this.isIncognitoTab) {
-        this.notificationsReadVideoId = this.videoId
-        markVideoNotificationsRead(this.videoId)
-      }
-      // The download was announced so it could be played.
-      if (this.localFilePlayback && this.notificationsRemovedDownloadId !== this.localPlaybackDownloadId) {
-        this.notificationsRemovedDownloadId = this.localPlaybackDownloadId
-        removeDownloadNotifications([this.localPlaybackDownloadId])
+      // A background tab's brief autoplay attempt is not watching. Each play
+      // updates again, which catches news that arrived in between.
+      if (this.isPlaybackPresented()) {
+        // Its upload or reminder was seen, except in incognito tabs, which leave no trace.
+        if (!this.isIncognitoTab) markVideoNotificationsRead(this.videoId)
+        // The download was announced so it could be played.
+        if (this.localFilePlayback) removeDownloadNotifications([this.localPlaybackDownloadId])
       }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()

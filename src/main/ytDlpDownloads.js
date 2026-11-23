@@ -286,7 +286,7 @@ export function setFinishedDownloadListener(listener) {
   finishedDownloadListener = listener
 }
 
-/** @type {((id: number) => void) | null} */
+/** @type {((id: number) => unknown) | null} */
 let endedDownloadListener = null
 
 /**
@@ -299,7 +299,10 @@ export function setEndedDownloadListener(listener) {
 
 function broadcastDownloadStatus(record) {
   broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...record })
-  if (['completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) endedDownloadListener?.(record.id)
+  if (['completed', 'failed', 'cancelled', 'skipped'].includes(record.status) && endedDownloadListener) {
+    Promise.resolve(endedDownloadListener(record.id))
+      .catch(error => console.error('Failed to handle an ended download', error))
+  }
   // Automatic downloads have notifications of their own.
   if (record.automatic !== true && (record.status === 'completed' || record.status === 'failed')) {
     finishedDownloadListener?.({ ...record })

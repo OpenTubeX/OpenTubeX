@@ -39,6 +39,7 @@ function setup(t, online, checkInternet) {
     showToast: toast => toasts.push(toast),
     recordNotification: notification => recorded.push(notification),
     removeOverNotifications: isOver => removals.push(isOver),
+    managedToolUpdatedAt: new Map(),
     getSettingsNotificationTarget: section => ({ path: '/settings', query: { section } }),
     startProgressBarOperation: () => ({ update() {}, finish() {} }),
   })
@@ -98,10 +99,21 @@ test('managed tool failures while connected remain visible', async t => {
   assert.deepEqual(app.recorded.map(notification => notification.kind), ['tool-update-failed'])
   const entry = { ...app.recorded[0], id: '1', createdAt: 1, read: false }
   assert.equal(app.removals.at(-1)(entry), false)
-  // until a later update installs the tools that failed.
+  // until later updates installed each tool that failed, also separately.
+  const bothFailed = { ...entry, query: { ...entry.query, tools: 'yt-dlp,ffmpeg' } }
   app.context.ytDlp.ytDlpDownloadBinary = async () => ({ version: '1', updated: true })
   await app.context.initializeManagedExternalSoftware()
   assert.equal(app.removals.at(-1)(entry), true)
+  assert.equal(app.removals.at(-1)(bothFailed), false)
+  app.context.store.getters.getExternalSoftwareUpdateMode = 'ask'
+  app.context.notifyAboutManagedExternalSoftwareUpdates = async () => {}
+  app.context.ytDlp.ytDlpGetInfo = async () => ({ ytDlp: { available: true }, ffmpeg: { available: false }, ffprobe: { available: true } })
+  app.context.ytDlp.ytDlpDownloadBinary = async binary => {
+    assert.equal(binary, 'ffmpeg')
+    return { version: '1', updated: true }
+  }
+  await app.context.initializeManagedExternalSoftware()
+  assert.equal(app.removals.at(-1)(bothFailed), true)
 })
 
 for (const stage of ['info', 'download']) {
