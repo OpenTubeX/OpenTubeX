@@ -82,6 +82,26 @@ test('Android opens fullscreen after manual display rotation without overriding 
   assert.equal(isPopoverOpen(), false)
 })
 
+test('Android ignores a late portrait display event while fullscreen holds a landscape lock', () => {
+  let landscapeLocked = true
+  let exits = 0
+  const { context, handlers } = androidRotationHarness({
+    isNativeFullscreenActive: () => true,
+    isLandscapeLocked: () => landscapeLocked,
+    document: { exitFullscreen: async () => { exits++ } },
+  })
+  // Re-entering right after an exit can deliver the exit's portrait rotation.
+  handlers.handleAndroidRotation(false)
+  assert.equal(exits, 0)
+  landscapeLocked = false
+  handlers.handleAndroidRotation(false)
+  assert.equal(exits, 1, 'Unlocked fullscreen still exits when the display turns portrait')
+  landscapeLocked = true
+  context.fullscreenRotationIgnoresSystemLock.value = true
+  handlers.handleAndroidRotation(false)
+  assert.equal(exits, 2, 'Physical rotation is current even under a landscape lock')
+})
+
 test('Android can rotate to fullscreen with the system rotation lock when explicitly enabled', () => {
   const { calls, handlers, isPopoverOpen } = androidRotationHarness({
     fullscreenRotationIgnoresSystemLock: { value: true },
@@ -317,7 +337,8 @@ test('Android retains the exit surface only for a requested rotation', async () 
     },
   }
   const retain = vm.runInNewContext(`${source.slice(start, end)}
-    (requested = true) => { androidFullscreenRotationRequested = requested; retainAndroidFullscreenDuringRotation() }`, context)
+    (requested = true, unlocked) => { androidFullscreenRotationRequested = requested; retainAndroidFullscreenDuringRotation(unlocked) }`, context)
+  const settle = () => new Promise(resolve => setImmediate(resolve))
   retain(false)
   assert.equal(open, false, 'An exit without a rotation request must remain immediate')
   assert.equal(timers.size, 0)
@@ -342,25 +363,47 @@ test('Android retains the exit surface only for a requested rotation', async () 
 
   context.window.innerWidth = 900
   retain()
+  await settle()
   timers.get(1)() // A user/device policy can keep the display landscape.
-  await new Promise(resolve => setImmediate(resolve))
+  await settle()
   assert.equal(open, false)
   assert.equal(listeners.size, 0)
+  // A busy device can take seconds to apply the unlock, and reads the old
+  // landscape display until then.
+  let unlock
+  retain(true, new Promise(resolve => { unlock = resolve }))
+  await settle()
+  assert.equal(exitTimeout, 5000, 'Let the rotation settle only after the unlock was applied')
+  unlock()
+  await settle()
+  assert.equal(exitTimeout, 500)
+  timers.get(1)()
+  await settle()
+  assert.equal(open, false)
+  // An unlock that never answers must not keep the surface forever.
+  retain(true, new Promise(() => {}))
+  await settle()
+  timers.get(1)()
+  assert.equal(exitTimeout, 500)
+  timers.get(1)()
+  await settle()
+  assert.equal(open, false)
   retain()
-  await new Promise(resolve => setImmediate(resolve))
+  await settle()
   frames.get(1)?.()
   frames.get(1)?.()
   assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
   assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
   timers.get(1)()
-  await new Promise(resolve => setImmediate(resolve))
+  await settle()
   assert.equal(open, false)
   assert.equal(timers.size, 0)
   // Native rotation may complete before the WebView's resized frame arrives.
   context.getAndroidDisplayOrientation = async () => 'portrait-primary'
   retain()
+  await settle()
   timers.get(1)()
-  await new Promise(resolve => setImmediate(resolve))
+  await settle()
   assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
   context.window.innerWidth = 400
   context.window.innerHeight = 900

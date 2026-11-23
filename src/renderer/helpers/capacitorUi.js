@@ -2,6 +2,17 @@ import { Capacitor } from '@capacitor/core'
 import { OrientationType, ScreenOrientation } from '@capawesome/capacitor-screen-orientation'
 import { SettingsLauncher } from '@capawesome/capacitor-settings-launcher'
 
+// Native code applies orientation requests in order, so the last one wins.
+let landscapeLocked = false
+
+/**
+ * While the display is locked to landscape, a portrait orientation event comes
+ * from a rotation requested earlier, which a busy device can deliver late.
+ */
+export function isLandscapeLocked() {
+  return landscapeLocked
+}
+
 export function getFullscreenAspectRatio(videoAspectRatio, shortsPlayer) {
   return videoAspectRatio > 0 ? videoAspectRatio : shortsPlayer ? 9 / 16 : null
 }
@@ -19,6 +30,7 @@ export function shouldRotateFullscreenToLandscape(fullscreen, video, enabled = t
 }
 
 export function setLandscapeOrientation(landscape) {
+  landscapeLocked = landscape
   return landscape
     ? ScreenOrientation.lock({ type: OrientationType.LANDSCAPE })
     : ScreenOrientation.unlock()
@@ -27,7 +39,9 @@ export function setLandscapeOrientation(landscape) {
 /** @param {() => boolean} stillWanted Checked once the orientation is known. */
 export async function lockCurrentOrientation(stillWanted) {
   const { type } = await ScreenOrientation.getCurrentOrientation()
-  if (stillWanted()) await ScreenOrientation.lock({ type })
+  if (!stillWanted()) return
+  landscapeLocked = type.startsWith('landscape')
+  await ScreenOrientation.lock({ type })
 }
 
 export async function setFullscreenOrientation(fullscreen, video, enabled = true, aspectRatio = null) {
