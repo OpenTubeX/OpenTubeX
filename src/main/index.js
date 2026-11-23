@@ -778,7 +778,19 @@ function runApp() {
   let notificationMode = 'both'
   let thumbnailPreference = ''
   let blurThumbnails = false
-  setNotificationImagesAllowed(() => thumbnailPreference !== 'hidden' && !blurThumbnails)
+  // Notifications show thumbnails only while every window would, so a profile
+  // that hides or blurs them in one window keeps them out of notifications.
+  const notificationImagesAllowed = () => {
+    const shown = [...TabManager.getAll()]
+      .filter(manager => !manager.browserWindow.isDestroyed())
+      .map(({ profileSettings }) => profileSettings ?? {})
+    return (shown.length > 0 ? shown : [{}]).every(settings => {
+      const own = settingId => Object.hasOwn(settings, settingId)
+      return (own('thumbnailPreference') ? settings.thumbnailPreference : thumbnailPreference) !== 'hidden' &&
+        (own('blurThumbnails') ? settings.blurThumbnails : blurThumbnails) !== true
+    })
+  }
+  setNotificationImagesAllowed(notificationImagesAllowed)
   const notify = createNotifier({
     history: notificationHistory,
     getMode: () => notificationMode,
@@ -804,7 +816,7 @@ function runApp() {
         : download.errorMessage === 'ENOENT'
           ? t('Downloads.yt-dlp Not Found')
           : t('Downloads.Download Failed Template', { title: download.title }),
-      thumbnail: thumbnailPreference !== 'hidden' && !blurThumbnails ? download.thumbnail : undefined
+      thumbnail: notificationImagesAllowed() ? download.thumbnail : undefined
     })
     if (notification) await notificationHistory.record(notification)
   })
