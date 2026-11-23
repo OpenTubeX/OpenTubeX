@@ -79,6 +79,8 @@ export class TabPreviewController {
     this.avatarsEnabled = true
     /** Tabs whose saved preview stays in memory, least recently used first. */
     this._memoryCachedTabIds = new Set()
+    /** Tabs whose newest preview is not on disk yet, so it must stay in memory. */
+    this._writingPreviewTabIds = new Set()
   }
 
   /**
@@ -96,7 +98,9 @@ export class TabPreviewController {
       this._memoryCachedTabIds.delete(tabId)
       const cached = this.manager.tabs.get(tabId)
       // Incognito previews are never written to disk.
-      if (cached && !cached.isIncognito && cached.previewFileName != null) cached.previewDataUrl = null
+      if (cached && !cached.isIncognito && cached.previewFileName != null && !this._writingPreviewTabIds.has(tabId)) {
+        cached.previewDataUrl = null
+      }
     }
   }
 
@@ -151,6 +155,11 @@ export class TabPreviewController {
     }
 
     const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
+    // A capture during the read stored a newer preview than the file had.
+    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
+      this._rememberDataUrl(tab, tab.previewDataUrl)
+      return tab.previewDataUrl
+    }
     if (dataUrl != null) {
       this._rememberDataUrl(tab, dataUrl)
     }
@@ -383,9 +392,14 @@ export class TabPreviewController {
         tab.previewCapturedAt = Date.now()
         // Incognito tabs keep their previews in memory only
         if (!tab.isIncognito) {
-          tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
-          // Other tabs' previews can evict this one while its first file is
-          // written, which keeps it in memory without a file to read it from.
+          // Other tabs' previews can evict this one during the write. It stays
+          // in memory until the file has it, and counts toward the limit again.
+          this._writingPreviewTabIds.add(tab.id)
+          try {
+            tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
+          } finally {
+            this._writingPreviewTabIds.delete(tab.id)
+          }
           if (tab.previewDataUrl === dataUrl && this.manager.tabs.get(tab.id) === tab) {
             this._rememberDataUrl(tab, dataUrl)
           }
