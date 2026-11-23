@@ -19,6 +19,10 @@
         :key="entry.id"
         class="notificationRow"
         :class="{ unread: !entry.read }"
+        @pointerdown="startSwipe(entry, $event)"
+        @pointermove="moveSwipe"
+        @pointerup="finishSwipe"
+        @pointercancel="cancelSwipe"
       >
         <component
           :is="opensTab(entry) ? RouterLink : 'button'"
@@ -149,6 +153,108 @@ function opensTab(entry) {
  */
 function makeInert(element) {
   element.inert = true
+}
+
+/** Flicks dismiss by the speed over this many milliseconds before release. */
+const FLICK_WINDOW = 100
+
+/**
+ * Touch and pen swipes dismiss a notification sideways, like the system's do. Vertical
+ * movement keeps scrolling the list.
+ * @type {{ entry: import('../../../notificationHistory').NotificationHistoryEntry, id: number, x: number, y: number, samples: { time: number, offset: number }[], locked: boolean } | null}
+ */
+let swipe = null
+/**
+ * The row whose swipe just ended. The released finger can still click the
+ * entry or button under it, so the row drops its next click, until the next press.
+ * @type {HTMLElement | null}
+ */
+let swipedRow = null
+
+/**
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ * @param {PointerEvent} event
+ */
+function startSwipe(entry, event) {
+  swipedRow?.removeEventListener('click', suppressSwipeClick, true)
+  swipedRow = null
+  // A new primary pointer replaces a swipe that lost its row, as when the
+  // entry was removed elsewhere during it.
+  // Some Android input reports no pointer type, so only the mouse is left out.
+  if (event.pointerType === 'mouse' || !event.isPrimary) return
+  swipe = { entry, id: event.pointerId, x: event.clientX, y: event.clientY, samples: [{ time: event.timeStamp, offset: 0 }], locked: false }
+}
+
+/** @param {PointerEvent} event */
+function moveSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const row = /** @type {HTMLElement} */ (event.currentTarget)
+  const offset = event.clientX - swipe.x
+  if (!swipe.locked) {
+    const vertical = Math.abs(event.clientY - swipe.y)
+    if (vertical > 10 && vertical >= Math.abs(offset)) {
+      swipe = null
+      return
+    }
+    if (Math.abs(offset) < 10) return
+    swipe.locked = true
+    row.setPointerCapture(event.pointerId)
+    row.dataset.swipe = 'dragging'
+  }
+  swipe.samples = swipe.samples.filter(sample => event.timeStamp - sample.time <= FLICK_WINDOW)
+  swipe.samples.push({ time: event.timeStamp, offset })
+  row.style.translate = `${offset}px 0`
+  row.style.opacity = String(Math.max(0.2, 1 - Math.abs(offset) / row.offsetWidth))
+}
+
+/** @param {PointerEvent} event */
+function finishSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const { entry, locked, samples } = swipe
+  const offset = event.clientX - swipe.x
+  swipe = null
+  if (!locked) return
+  const row = /** @type {HTMLElement} */ (event.currentTarget)
+  swipedRow = row
+  row.addEventListener('click', suppressSwipeClick, true)
+  // A finger held still before release is no longer flicking.
+  const start = samples.find(sample => event.timeStamp - sample.time <= FLICK_WINDOW)
+  const velocity = start ? (offset - start.offset) / Math.max(1, event.timeStamp - start.time) : 0
+  const flicked = Math.abs(offset) > 24 && Math.abs(velocity) > 0.3 && Math.sign(velocity) === Math.sign(offset)
+  if (Math.abs(offset) > row.offsetWidth * 0.35 || flicked) {
+    // The row leaves from where the finger released it, in the swiped direction.
+    row.style.setProperty('--dismiss-direction', String(Math.sign(offset)))
+    delete row.dataset.swipe
+    emit('remove', entry, event)
+  } else {
+    settle(row)
+  }
+}
+
+/** @param {PointerEvent} event */
+function cancelSwipe(event) {
+  if (swipe?.id !== event.pointerId) return
+  const { locked } = swipe
+  swipe = null
+  if (locked) settle(/** @type {HTMLElement} */ (event.currentTarget))
+}
+
+/** @param {HTMLElement} row */
+function settle(row) {
+  row.dataset.swipe = 'settling'
+  row.style.translate = ''
+  row.style.opacity = ''
+  row.addEventListener('transitionend', () => { if (row.dataset.swipe === 'settling') delete row.dataset.swipe }, { once: true })
+}
+
+/** @param {MouseEvent} event */
+function suppressSwipeClick(event) {
+  // Keyboard and assistive technology activations have no click count.
+  if (event.detail === 0) return
+  event.currentTarget.removeEventListener('click', suppressSwipeClick, true)
+  swipedRow = null
+  event.preventDefault()
+  event.stopPropagation()
 }
 
 /**

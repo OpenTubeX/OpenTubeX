@@ -753,8 +753,8 @@ import { channelUnsubscribeConfirmation, getChannelLinkDetails, getChannelLinkMe
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
   getSettingsNotificationTarget,
-  markOverNotificationsRead,
   recordNotification,
+  removeOverNotifications,
   setUpdateNotificationHandler,
   showInAppNotification,
   supportsNotificationHistory
@@ -2675,6 +2675,9 @@ function openUpdateNotification(tagName) {
 setUpdateNotificationHandler(openUpdateNotification)
 
 async function checkForNewUpdates() {
+  // An announced update is over once it is installed, also with update checks off.
+  removeOverNotifications(entry => entry.kind === 'app-update' &&
+    !isOlderRelease(packageDetails.version, entry.query?.version ?? ''))
   // Self-hosted servers are updated by their admin
   if (!checkForUpdates.value || process.env.IS_SELF_HOSTED) {
     return
@@ -2687,10 +2690,6 @@ async function checkForNewUpdates() {
     const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
-      // The announced update is installed. A check that finished late in
-      // another window must not dismiss a newer one it did not see.
-      markOverNotificationsRead(entry => entry.kind === 'app-update' &&
-        !isOlderRelease(packageDetails.version, entry.query?.version ?? ''))
       return
     }
 
@@ -2699,7 +2698,7 @@ async function checkForNewUpdates() {
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
     // A newer release replaces the one announced before, also when this
     // window announced it already and an older entry arrived late.
-    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
+    removeOverNotifications(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     // The toast for this release is open, was dismissed, or was answered already
     if (
       availableUpdate?.tagName === tagName ||
