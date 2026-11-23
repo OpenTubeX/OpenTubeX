@@ -8,7 +8,7 @@ const SHARD_GROUPS = {
 
 // PRs rerun changed offline tests to catch flaky tests before they merge.
 // A change to a shared helper selects most of the suite; skip those PRs.
-export const REPEAT_EACH = 5
+export const REPEAT_EACH = 60
 export const REPEAT_LIMIT = 100
 
 /**
