@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "與 YouTube 同步訂閱內容"
     Sync Playlists: "與 YouTube 同步播放清單"
     Add to YouTube Watch History: "將看過的影片加入 YouTube 觀看紀錄"
+    YouTube Watch History: "在 YouTube 上儲存觀看紀錄"
+    Watch History Change Failed: "無法變更 YouTube 觀看紀錄設定：{error}"
+    Import Watch History: "匯入觀看紀錄"
+    Import Watch History Confirmation: "要將您的 YouTube 觀看紀錄匯入此設定檔的紀錄嗎？YouTube 不會提供您觀看每部影片的時間，因此新項目會保留 YouTube 上的順序，並以目前時間記錄。已在紀錄中的影片會保留原本的日期。"
+    Importing Watch History: "正在匯入 YouTube 觀看紀錄：已讀取 {count} 部影片"
+    Watch History Imported: "已從您的 YouTube 觀看紀錄匯入 {count} 部影片"
+    Import Watch History Failed: "無法匯入 YouTube 觀看紀錄：{error}"
+    Keep Playlists Confirmation: "要在這部裝置上保留從 YouTube 同步的播放清單嗎？保留的播放清單會變成一般播放清單，不再與 YouTube 同步。無論如何選擇，它們都會保留在 YouTube 上。"
+    Keep Playlists: "保留播放清單"
+    Remove Playlists: "從這部裝置移除"
+    Keep Playlists Failed: "無法保留播放清單：{error}"
     Rate Videos: "對影片和貼文表示喜歡和不喜歡"
     Sync Now: "立即同步"
     Synced: "已與 YouTube 同步"
@@ -2375,8 +2386,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "只要在留言設定中開啟回覆通知，你在這裡發布的留言就會自動追蹤回覆。"
     Sync Subscriptions: "您在 YouTube 上訂閱的頻道會加入「所有頻道」，在 YouTube 上取消訂閱的頻道則會從所有設定檔中移除。在這裡的「所有頻道」中訂閱或取消訂閱，也會在 YouTube 上進行相同操作。"
-    Sync Playlists: "您的 YouTube 播放清單、「稍後觀看」和「喜歡的影片」會顯示在「您的播放清單」中，您在這裡對它們所做的變更也會套用到 YouTube。它們不會同步到您的其他裝置，在您匯出所有播放清單或備份資料時也不會包含在內。關閉此選項會將它們從這部裝置中移除，但不會從 YouTube 移除。"
+    Sync Playlists: "您的 YouTube 播放清單、「稍後觀看」和「喜歡的影片」會顯示在「您的播放清單」中，您在這裡對它們所做的變更也會套用到 YouTube。它們不會同步到您的其他裝置，在您匯出所有播放清單或備份資料時也不會包含在內。關閉此選項或登出時，您可以將它們以一般播放清單的形式保留在這部裝置上。無論如何，它們都會保留在 YouTube 上。"
     Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
+    YouTube Watch History: "YouTube 是否在所有裝置上儲存您使用此頻道觀看的影片。關閉此選項會暫停 YouTube 上的觀看紀錄。"
     Rate Videos: "在影片和貼文上顯示喜歡和不喜歡按鈕。為了顯示你的評價，你開啟的每部影片都會用你的帳戶在 YouTube 上查詢，因此即使影片沒有加入觀看記錄，YouTube 也會知道你開啟了哪些影片。貼文的評價不會被查詢，因此只會顯示你在這裡做出的評價。"
   General Settings:
     Invidious Instance Credentials: '僅在執行個體要求使用者名稱和密碼時需要。它們只會儲存在此裝置上，並且只會傳送到此執行個體。'

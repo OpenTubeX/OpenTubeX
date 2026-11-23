@@ -579,6 +579,17 @@ Settings:
     Sync Subscriptions: "Sinkroniseer intekeninge met YouTube"
     Sync Playlists: "Sinkroniseer afspeellyste met YouTube"
     Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
+    YouTube Watch History: "Stoor kykgeskiedenis op YouTube"
+    Watch History Change Failed: "Kon nie die YouTube-kykgeskiedenisinstelling verander nie: {error}"
+    Import Watch History: "Voer kykgeskiedenis in"
+    Import Watch History Confirmation: "Voer u YouTube-kykgeskiedenis in die geskiedenis van hierdie profiel in? YouTube sê nie wanneer u elke video gekyk het nie, dus behou nuwe inskrywings YouTube se volgorde en kry hulle die huidige datum. Video’s wat reeds in u geskiedenis is, behou hul datums."
+    Importing Watch History: "Voer YouTube-kykgeskiedenis in: {count} video gelees | Voer YouTube-kykgeskiedenis in: {count} video’s gelees"
+    Watch History Imported: "{count} video uit u YouTube-kykgeskiedenis ingevoer | {count} video’s uit u YouTube-kykgeskiedenis ingevoer"
+    Import Watch History Failed: "Kon nie die YouTube-kykgeskiedenis invoer nie: {error}"
+    Keep Playlists Confirmation: "Hou die afspeellyste wat van YouTube af gesinkroniseer is op hierdie toestel? Behoue afspeellyste word gewone afspeellyste wat nie meer met YouTube sinkroniseer nie. Hoe ook al, hulle bly op YouTube."
+    Keep Playlists: "Hou afspeellyste"
+    Remove Playlists: "Verwyder van hierdie toestel"
+    Keep Playlists Failed: "Kon nie die afspeellyste hou nie: {error}"
     Rate Videos: "Hou van en hou nie van video's en plasings nie"
     Sync Now: "Sinkroniseer nou"
     Synced: "Met YouTube gesinkroniseer"
@@ -2634,8 +2645,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Kommentaar wat jy hier plaas, word outomaties vir antwoorde gevolg, solank antwoordkennisgewings in die kommentaarinstellings aangeskakel is."
     Sync Subscriptions: "Kanale waarop u op YouTube inteken, word by “Alle kanale” gevoeg, en kanale waarop u daar uitteken, word uit elke profiel verwyder. As u hier in “Alle kanale” inteken of uitteken, gebeur dieselfde op YouTube."
-    Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer of ingesluit wanneer u alle afspeellyste uitvoer of u data rugsteun nie. As u dit afskakel, word hulle van hierdie toestel verwyder, maar nie van YouTube nie."
+    Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer of ingesluit wanneer u alle afspeellyste uitvoer of u data rugsteun nie. As u dit afskakel of afmeld, kan u hulle as gewone afspeellyste op hierdie toestel hou. Hulle bly in elk geval op YouTube."
     Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
+    YouTube Watch History: "Of YouTube die video’s wat u met hierdie kanaal kyk, op elke toestel stoor. As u dit afskakel, word die kykgeskiedenis op YouTube onderbreek."
     Rate Videos: "Wys knoppies om van video's en plasings te hou of nie te hou nie. Om jou gradering te wys, word elke video wat jy oopmaak met jou rekening op YouTube opgesoek, sodat YouTube leer watter video's jy oopmaak, selfs wanneer hulle nie by jou kykgeskiedenis gevoeg word nie. Graderings van plasings word nie opgesoek nie, so net dié wat jy hier gee, word gewys."
   General Settings:
     Invidious Instance Credentials: 'Slegs nodig as die instansie ''n gebruikersnaam en wagwoord vra. Hulle word slegs op hierdie toestel gestoor en slegs na hierdie instansie gestuur.'

@@ -302,7 +302,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'youtube-account',
     key: 'Settings.YouTube Account Settings',
-    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Rate Videos', 'Watch Posted Comments']),
+    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'YouTube Watch History', 'Add to YouTube Watch History', 'Import Watch History', 'Rate Videos', 'Watch Posted Comments']),
     electronOnly: true,
     capacitorSupported: true,
     tab: 'youtube-account'

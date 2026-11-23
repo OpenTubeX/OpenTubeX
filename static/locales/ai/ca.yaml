@@ -551,6 +551,17 @@ Settings:
     Sync Subscriptions: "Sincronitza les subscripcions amb YouTube"
     Sync Playlists: "Sincronitza les llistes de reproducció amb YouTube"
     Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"
+    YouTube Watch History: "Desa l'historial de visualitzacions a YouTube"
+    Watch History Change Failed: "No s'ha pogut canviar la configuració de l'historial de visualitzacions de YouTube: {error}"
+    Import Watch History: "Importa l'historial de visualitzacions"
+    Import Watch History Confirmation: "Vols importar el teu historial de visualitzacions de YouTube a l'historial d'aquest perfil? YouTube no indica quan vas veure cada vídeo, de manera que les entrades noves mantenen l'ordre de YouTube i porten la data d'ara. Els vídeos que ja són al teu historial mantenen les seves dates."
+    Importing Watch History: "S'està important l'historial de visualitzacions de YouTube: {count} vídeo llegit | S'està important l'historial de visualitzacions de YouTube: {count} de vídeos llegits | S'està important l'historial de visualitzacions de YouTube: {count} vídeos llegits"
+    Watch History Imported: "S'ha importat {count} vídeo del teu historial de visualitzacions de YouTube | S'han importat {count} de vídeos del teu historial de visualitzacions de YouTube | S'han importat {count} vídeos del teu historial de visualitzacions de YouTube"
+    Import Watch History Failed: "No s'ha pogut importar l'historial de visualitzacions de YouTube: {error}"
+    Keep Playlists Confirmation: "Vols conservar en aquest dispositiu les llistes de reproducció sincronitzades des de YouTube? Les llistes conservades es converteixen en llistes de reproducció normals que ja no se sincronitzen amb YouTube. En qualsevol cas, es mantenen a YouTube."
+    Keep Playlists: "Conserva les llistes"
+    Remove Playlists: "Suprimeix d'aquest dispositiu"
+    Keep Playlists Failed: "No s'han pogut conservar les llistes de reproducció: {error}"
     Rate Videos: "Indicar que t'agraden o no els vídeos i les publicacions"
     Sync Now: "Sincronitza ara"
     Synced: "S'ha sincronitzat amb YouTube"
@@ -2914,8 +2925,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Els comentaris que publiquis aquí se segueixen automàticament per si reben respostes, sempre que els avisos de respostes estiguin activats a la configuració dels comentaris."
     Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
-    Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
+    Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Quan desactives aquesta opció o tanques la sessió, pots conservar-les en aquest dispositiu com a llistes de reproducció normals. En qualsevol cas, es mantenen a YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
+    YouTube Watch History: "Si YouTube desa els vídeos que mires amb aquest canal, a tots els dispositius. Si ho desactives, l'historial de visualitzacions de YouTube es posa en pausa."
     Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos i a les publicacions. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions. Les valoracions de les publicacions no es consulten, així que només es mostren les que fas aquí."
   General Settings:
     Invidious Instance Credentials: 'Només cal si la instància demana un nom d''usuari i una contrasenya. Només es desen en aquest dispositiu i només s''envien a aquesta instància.'

@@ -413,6 +413,17 @@ Settings:
     Sync Subscriptions: "Synchronizovat odběry s YouTube"
     Sync Playlists: "Synchronizovat playlisty s YouTube"
     Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
+    YouTube Watch History: "Ukládat historii sledování na YouTube"
+    Watch History Change Failed: "Nastavení historie sledování na YouTube se nepodařilo změnit: {error}"
+    Import Watch History: "Importovat historii sledování"
+    Import Watch History Confirmation: "Importovat historii sledování z YouTube do historie tohoto profilu? YouTube neuvádí, kdy jste jednotlivá videa sledovali, proto nové záznamy zachovají pořadí z YouTube a dostanou aktuální datum. Videa, která už v historii máte, si svá data ponechají."
+    Importing Watch History: "Importuje se historie sledování z YouTube: načteno {count} video | Importuje se historie sledování z YouTube: načtena {count} videa | Importuje se historie sledování z YouTube: načteno {count} videí"
+    Watch History Imported: "Z vaší historie sledování na YouTube bylo importováno {count} video | Z vaší historie sledování na YouTube byla importována {count} videa | Z vaší historie sledování na YouTube bylo importováno {count} videí"
+    Import Watch History Failed: "Historii sledování z YouTube se nepodařilo importovat: {error}"
+    Keep Playlists Confirmation: "Ponechat playlisty synchronizované z YouTube v tomto zařízení? Ponechané playlisty se stanou běžnými playlisty, které se už s YouTube nesynchronizují. Na YouTube zůstanou v každém případě."
+    Keep Playlists: "Ponechat playlisty"
+    Remove Playlists: "Odebrat z tohoto zařízení"
+    Keep Playlists Failed: "Playlisty se nepodařilo ponechat: {error}"
     Rate Videos: "Označovat videa a příspěvky jako líbí a nelíbí"
     Sync Now: "Synchronizovat nyní"
     Synced: "Synchronizováno s YouTube"
@@ -2372,8 +2383,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Komentáře, které zde zveřejníte, se automaticky sledují kvůli odpovědím, pokud máte v nastavení komentářů zapnutá upozornění na odpovědi."
     Sync Subscriptions: "Kanály, které začnete odebírat na YouTube, se přidají do profilu „Všechny kanály“ a kanály, jejichž odběr tam zrušíte, se odeberou ze všech profilů. Když zde v profilu „Všechny kanály“ odběr přidáte nebo zrušíte, stane se totéž na YouTube."
-    Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Vypnutím této volby je odeberete z tohoto zařízení, ale ne z YouTube."
+    Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Když tuto volbu vypnete nebo se odhlásíte, můžete si je v tomto zařízení ponechat jako běžné playlisty. Na YouTube zůstanou v každém případě."
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
+    YouTube Watch History: "Zda YouTube ukládá videa, která sledujete s tímto kanálem, na všech zařízeních. Vypnutím této volby pozastavíte historii sledování na YouTube."
     Rate Videos: "Zobrazuje u videí a příspěvků tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování. Hodnocení příspěvků se nevyhledává, takže se zobrazí jen to, které zadáte zde."
   General Settings:
     Invidious Instance Credentials: 'Potřeba jen tehdy, když instance vyžaduje uživatelské jméno a heslo. Ukládají se jen v tomto zařízení a posílají se jen této instanci.'

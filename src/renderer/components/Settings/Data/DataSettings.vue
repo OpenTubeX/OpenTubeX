@@ -1575,7 +1575,7 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'libretube' }) !== true) {
+  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'undated' }) !== true) {
     throw new Error('Could not import history')
   }
 

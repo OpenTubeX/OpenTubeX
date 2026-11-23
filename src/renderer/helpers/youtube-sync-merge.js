@@ -209,3 +209,53 @@ export function planYouTubePlaylistMoves(current, desired) {
   })
   return moves
 }
+
+/**
+ * History records for the account's watch history, read newest first. Each
+ * video counts once, at its latest watch. YouTube shows no watch times, so
+ * the records keep the history's order, counting down from `now`. Like
+ * Takeout entries, they count as watched.
+ * @param {import('./api/youtube-account-parsers.js').YouTubeHistoryVideo[]} videos
+ * @param {number} now
+ * @returns {object[]}
+ */
+export function youTubeHistoryRecords(videos, now) {
+  const seen = new Set()
+  return videos.filter(video => !seen.has(video.videoId) && seen.add(video.videoId)).map((video, index) => {
+    const timeWatched = now - index
+    return {
+      videoId: video.videoId,
+      title: video.title,
+      timeWatched,
+      author: video.author,
+      authorId: video.authorId,
+      type: 'video',
+      published: timeWatched,
+      description: '',
+      lengthSeconds: video.lengthSeconds === '' ? null : video.lengthSeconds,
+      watchProgress: 1,
+      isWatched: true,
+      isLive: video.liveNow
+    }
+  })
+}
+
+/**
+ * A playlist synced from YouTube as a regular playlist, which stays when the
+ * sync ends. `youTube` becomes null rather than missing, as other windows
+ * merge the saved fields into theirs. Like a copied playlist, it links to the
+ * playlist on YouTube, except for Watch later and Liked videos, which only
+ * the account can open.
+ * @template {{ youTube: { playlistId: string }, videos: SavedPlaylistVideo[], sourcePlaylistId?: string }} T
+ * @param {T} playlist
+ */
+export function unlinkYouTubePlaylist(playlist) {
+  const { playlistId } = playlist.youTube
+  const linkable = playlistId !== 'WL' && playlistId !== 'LL'
+  return {
+    ...playlist,
+    ...(linkable && !playlist.sourcePlaylistId ? { sourcePlaylistId: playlistId } : {}),
+    videos: playlist.videos.map(({ youTubeSetVideoId: _setVideoId, ...video }) => video),
+    youTube: null
+  }
+}

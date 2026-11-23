@@ -485,6 +485,30 @@ export function parseOwnedPlaylistIds(data) {
 }
 
 /**
+ * @param {any} tile a TV `tileRenderer`
+ * @returns {any[]} the renderers of the tile's long-press menu items
+ */
+function tileMenuItems(tile) {
+  return (tile.onLongPressCommand?.showMenuCommand?.menu?.menuRenderer?.items ?? [])
+    .flatMap(item => Object.values(item ?? {}))
+}
+
+/**
+ * The channel name links to the channel on playlist pages, and the menu's
+ * Go to channel item does on the watch history.
+ * @param {any} tile a TV `tileRenderer`
+ * @returns {string}
+ */
+function tileChannelId(tile) {
+  const runs = (tile.metadata?.tileMetadataRenderer?.lines ?? [])
+    .flatMap(line => line?.lineRenderer?.items ?? [])
+    .flatMap(item => item?.lineItemRenderer?.text?.runs ?? [])
+  return [...runs, ...tileMenuItems(tile)]
+    .map(entry => entry?.navigationEndpoint?.browseEndpoint?.browseId)
+    .find(id => typeof id === 'string' && id.startsWith('UC')) ?? ''
+}
+
+/**
  * @param {any} tile a TV `tileRenderer` of a playlist page
  * @returns {YouTubePlaylistVideo | null}
  */
@@ -492,14 +516,9 @@ function parsePlaylistTile(tile) {
   const video = parseTile(tile)
   if (!video) return null
 
-  const authorId = (tile.metadata?.tileMetadataRenderer?.lines ?? [])
-    .flatMap(line => line?.lineRenderer?.items ?? [])
-    .flatMap(item => item?.lineItemRenderer?.text?.runs ?? [])
-    .map(run => run?.navigationEndpoint?.browseEndpoint?.browseId)
-    .find(id => typeof id === 'string' && id.startsWith('UC')) ?? ''
+  const authorId = tileChannelId(tile)
   // Only the menu's remove action names the entry.
-  const setVideoId = (tile.onLongPressCommand?.showMenuCommand?.menu?.menuRenderer?.items ?? [])
-    .flatMap(item => Object.values(item ?? {}))
+  const setVideoId = tileMenuItems(tile)
     .flatMap(item => item?.serviceEndpoint?.playlistEditEndpoint?.actions ?? [])
     .find(action => action?.action === 'ACTION_REMOVE_VIDEO' && typeof action.setVideoId === 'string')
     ?.setVideoId ?? null
@@ -562,6 +581,46 @@ export function parsePlaylistPage(data) {
     videos,
     continuation
   }
+}
+
+/**
+ * @typedef {object} YouTubeHistoryVideo
+ * @property {string} videoId
+ * @property {string} title
+ * @property {string} author
+ * @property {string} authorId
+ * @property {number | ''} lengthSeconds
+ * @property {boolean} liveNow
+ */
+
+/**
+ * A page of the account's watch history, newest first, with an entry for
+ * each time a video was watched. The TV app shows no watch times. The page
+ * header has the button that pauses or turns on the history.
+ * @param {any} data TV `browse` response for `FEhistory` or one of its continuations
+ * @returns {{ videos: YouTubeHistoryVideo[], continuation: string | null, paused: boolean | null }}
+ */
+export function parseWatchHistoryPage(data) {
+  const surface = data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer
+  const grid = data?.continuationContents?.gridContinuation ?? surface?.content?.gridRenderer
+  // An empty history has no grid. A page with neither cannot be read.
+  if (!grid && !surface) throw new Error('YouTube returned no watch history page')
+
+  const videos = (grid?.items ?? []).flatMap(item => {
+    const tile = item?.tileRenderer
+    const video = parseTile(tile)
+    if (!video) return []
+    const { videoId, title, author, lengthSeconds, liveNow } = video
+    return [{ videoId, title, author, authorId: tileChannelId(tile), lengthSeconds, liveNow }]
+  })
+  const continuation = grid?.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+  const toggle = (surface?.header?.tvSurfaceHeaderRenderer?.buttons ?? [])
+    .map(button => button?.toggleButtonRenderer)
+    .find(button => button?.defaultServiceEndpoint?.pauseWatchHistoryEndpoint)
+
+  return { videos, continuation, paused: toggle ? toggle.isToggled === true : null }
 }
 
 /**

@@ -366,6 +366,17 @@ Settings:
     Sync Subscriptions: "Sincronizar inscrições com o YouTube"
     Sync Playlists: "Sincronizar playlists com o YouTube"
     Add to YouTube Watch History: "Adicionar vídeos assistidos ao histórico do YouTube"
+    YouTube Watch History: "Salvar o histórico de reprodução no YouTube"
+    Watch History Change Failed: "Não foi possível alterar a configuração do histórico de reprodução do YouTube: {error}"
+    Import Watch History: "Importar histórico de reprodução"
+    Import Watch History Confirmation: "Importar seu histórico de reprodução do YouTube para o histórico deste perfil? O YouTube não informa quando você assistiu a cada vídeo, então as novas entradas mantêm a ordem do YouTube e recebem a data atual. Os vídeos que já estão no seu histórico mantêm suas datas."
+    Importing Watch History: "Importando o histórico de reprodução do YouTube: {count} vídeo lido | Importando o histórico de reprodução do YouTube: {count} de vídeos lidos | Importando o histórico de reprodução do YouTube: {count} vídeos lidos"
+    Watch History Imported: "{count} vídeo importado do seu histórico de reprodução do YouTube | {count} de vídeos importados do seu histórico de reprodução do YouTube | {count} vídeos importados do seu histórico de reprodução do YouTube"
+    Import Watch History Failed: "Não foi possível importar o histórico de reprodução do YouTube: {error}"
+    Keep Playlists Confirmation: "Manter neste dispositivo as playlists sincronizadas do YouTube? As playlists mantidas se tornam playlists comuns que não são mais sincronizadas com o YouTube. De qualquer forma, elas continuam no YouTube."
+    Keep Playlists: "Manter playlists"
+    Remove Playlists: "Remover deste dispositivo"
+    Keep Playlists Failed: "Não foi possível manter as playlists: {error}"
     Rate Videos: "Gostar e não gostar de vídeos e postagens"
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado com o YouTube"
@@ -2326,8 +2337,9 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Os comentários que você publica aqui são acompanhados automaticamente para detectar novas respostas, desde que os avisos de respostas estejam ativados nas configurações de comentários."
     Sync Subscriptions: "Os canais em que você se inscreve no YouTube são adicionados a Todos os canais, e os canais dos quais você cancela a inscrição lá são removidos de todos os perfis. Inscrever-se ou cancelar a inscrição em Todos os canais aqui faz o mesmo no YouTube."
-    Sync Playlists: "Suas playlists do YouTube, Assistir mais tarde e Vídeos marcados com \"Gostei\" aparecem em Suas playlists, e as alterações que você fizer nelas aqui também são feitas no YouTube. Elas não são sincronizadas com seus outros dispositivos nem incluídas quando você exporta todas as playlists ou faz backup dos seus dados. Desativar esta opção as remove deste dispositivo, mas não do YouTube."
+    Sync Playlists: "Suas playlists do YouTube, Assistir mais tarde e Vídeos marcados com \"Gostei\" aparecem em Suas playlists, e as alterações que você fizer nelas aqui também são feitas no YouTube. Elas não são sincronizadas com seus outros dispositivos nem incluídas quando você exporta todas as playlists ou faz backup dos seus dados. Ao desativar esta opção ou sair, você pode manter as playlists neste dispositivo como playlists comuns. De qualquer forma, elas continuam no YouTube."
     Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
+    YouTube Watch History: "Define se o YouTube salva os vídeos que você assiste com este canal, em todos os dispositivos. Desativar esta opção pausa o histórico de reprodução no YouTube."
     Rate Videos: "Mostra os botões gostei e não gostei nos vídeos e nas postagens. Para mostrar sua avaliação, cada vídeo que você abre é consultado no YouTube com sua conta, então o YouTube fica sabendo quais vídeos você abre, mesmo quando eles não são adicionados ao seu histórico de exibição. As avaliações de postagens não são consultadas, então só aparecem as que você fizer aqui."
   General Settings:
     Invidious Instance Credentials: 'Só é necessário se a instância pedir um nome de usuário e uma senha. Eles ficam salvos apenas neste dispositivo e são enviados apenas para esta instância.'

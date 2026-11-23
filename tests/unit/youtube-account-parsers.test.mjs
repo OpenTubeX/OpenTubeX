@@ -17,6 +17,7 @@ import {
   parsePollResults,
   parseSubscribedChannels,
   parseVideoRating,
+  parseWatchHistoryPage,
   parseWatchHistoryUrl,
   pollVoteParams,
   postRatingParams,
@@ -565,6 +566,63 @@ test('only uses the watch history URL of a playable TV player response', () => {
   const tracking = { videostatsPlaybackUrl: { baseUrl: 'https://s.youtube.com/api/stats/playback?docid=video000001' } }
   assert.equal(parseWatchHistoryUrl({ playabilityStatus: { status: 'OK' }, playbackTracking: tracking }), tracking.videostatsPlaybackUrl.baseUrl)
   assert.equal(parseWatchHistoryUrl({ playabilityStatus: { status: 'UNPLAYABLE' }, playbackTracking: tracking }), null)
+})
+
+test('reads the account watch history, its next page, and whether it is paused from the TV history page', () => {
+  // The history tiles only link the channel from their menu.
+  const historyTile = (videoId, channelId) => {
+    const item = tile({ videoId, title: `Video ${videoId}`, lines: [[{ text: { runs: [{ text: 'Example Channel' }] } }], [{ text: { simpleText: '12 views' } }]], duration: '1:05' })
+    item.tileRenderer.onLongPressCommand = {
+      showMenuCommand: {
+        menu: {
+          menuRenderer: {
+            items: [
+              { menuServiceItemRenderer: { text: { runs: [{ text: 'Remove from watch history' }] }, serviceEndpoint: { feedbackEndpoint: { feedbackToken: 'TOKEN' } } } },
+              { menuNavigationItemRenderer: { text: { runs: [{ text: 'Go to channel' }] }, navigationEndpoint: { browseEndpoint: { browseId: channelId } } } }
+            ]
+          }
+        }
+      }
+    }
+    return item
+  }
+  const pauseButton = isToggled => ({
+    toggleButtonRenderer: {
+      isToggled,
+      defaultServiceEndpoint: { pauseWatchHistoryEndpoint: {} },
+      toggledServiceEndpoint: { resumeWatchHistoryEndpoint: {} }
+    }
+  })
+  const surface = (content, isToggled) => ({
+    tvBrowseRenderer: {
+      content: {
+        tvSurfaceContentRenderer: {
+          header: { tvSurfaceHeaderRenderer: { buttons: [{ buttonRenderer: { text: { simpleText: 'All' } } }, pauseButton(isToggled)] } },
+          content
+        }
+      }
+    }
+  })
+  const next = token => [{ nextContinuationData: { continuation: token } }]
+
+  const firstPage = parseWatchHistoryPage({
+    contents: surface({ gridRenderer: { items: [historyTile('video000001', 'UCaaaaaaaaaaaaaaaaaaaaaa'), { tileRenderer: { contentType: 'TILE_CONTENT_TYPE_PLAYLIST' } }], continuations: next('PAGE2') } }, false)
+  })
+  assert.deepEqual(firstPage, {
+    videos: [{ videoId: 'video000001', title: 'Video video000001', author: 'Example Channel', authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa', lengthSeconds: 65, liveNow: false }],
+    continuation: 'PAGE2',
+    paused: false
+  })
+
+  // Further pages come as grid continuations, and the last has no next page.
+  const lastPage = parseWatchHistoryPage({ continuationContents: { gridContinuation: { items: [historyTile('video000002', 'UCbbbbbbbbbbbbbbbbbbbbbb')] } } })
+  assert.deepEqual(lastPage.videos.map(video => video.videoId), ['video000002'])
+  assert.equal(lastPage.continuation, null)
+  assert.equal(lastPage.paused, null)
+
+  // A paused, empty history has no grid, which is different from an unreadable page.
+  assert.deepEqual(parseWatchHistoryPage({ contents: surface({}, true) }), { videos: [], continuation: null, paused: true })
+  assert.throws(() => parseWatchHistoryPage({ contents: {} }))
 })
 
 test('only YouTube requests get the TV user agent, and the marker never leaves the app', () => {
