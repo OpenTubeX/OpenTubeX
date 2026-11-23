@@ -2546,7 +2546,8 @@ export function parseLocalComment(comment, commentThread = undefined) {
     isPinned: comment.is_pinned,
     isOwner: !!comment.author_is_channel_owner,
     isMember: !!comment.is_member,
-    text: Autolinker.link(parseLocalTextRuns(commentTextRuns, 16, { looseChannelNameDetection: true })),
+    // Timed comments can start with the space around a timestamp.
+    text: Autolinker.link(parseLocalTextRuns(commentTextRuns, 16, { looseChannelNameDetection: true }).trim()),
     translationText: getCommentTranslationSource(commentTextRuns),
     imageAttachment: parseLocalCommentImageAttachment(comment.image_attachment),
     isHearted: !!comment.is_hearted,
