@@ -184,23 +184,29 @@ export async function hasYouTubePlaylists() {
 }
 
 /**
- * Turns the playlists synced from YouTube into regular playlists, then runs
- * `end`, which signs out or turns playlist sync off. No sync can bring the
- * playlists back as new copies in between.
+ * Runs `end`, which signs out or turns playlist sync off, then turns the
+ * playlists it stopped syncing into regular playlists. No sync can remove
+ * them in between.
  * @param {() => Promise<unknown>} end
  */
 export async function keepYouTubePlaylists(end) {
   await withSyncLock(async () => {
+    await end()
+    // Playlists the sync still covers stay linked, as it would bring kept
+    // ones back as copies. This also leaves them all linked when `end` failed.
+    const key = store.getters.getYouTubeAccountSyncPlaylists ? getYouTubeSyncKey(getSyncAccount()) : null
     const shared = showsSharedPlaylists()
+    const failed = []
     for (const playlist of await findYouTubePlaylists(shared)) {
+      if (key && playlist.youTube.accountKey === key) continue
       const previous = deepCopy(toRaw(playlist))
       const kept = unlinkYouTubePlaylist(previous)
       const saved = shared
         ? await store.dispatch('updatePlaylistFromSync', { playlist: kept, previous })
         : await withDataScope(null, () => DBPlaylistHandlers.upsertIfUnchanged({ ...kept, lastUpdatedAt: Date.now() }, previous))
-      if (!saved) throw new Error(`Could not keep the playlist ${playlist.playlistName}`)
+      if (!saved) failed.push(playlist.playlistName)
     }
-    await end()
+    if (failed.length > 0) throw new Error(`Could not keep the playlists ${failed.join(', ')}`)
   })
 }
 

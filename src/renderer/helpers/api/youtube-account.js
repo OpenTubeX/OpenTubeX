@@ -811,6 +811,7 @@ export async function getYouTubeWatchHistory(onProgress) {
       page = parseWatchHistoryPage((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
       videos.push(...page.videos)
     }
+    throwIfSignedOut(account)
     return videos
   }, { account })
 }
