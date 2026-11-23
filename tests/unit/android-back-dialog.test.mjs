@@ -52,7 +52,7 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     applyAnimationSpeed: animation => animation,
     requestAnimationFrame: callback => queueMicrotask(callback),
     isReducedMotionEnabled: () => reducedMotion,
-    getComputedStyle: () => ({ transform: 'none', opacity: '1' }),
+    getComputedStyle: () => ({ transform: 'none', opacity: '1', willChange: 'auto' }),
   })
   const preview = create(element, async () => {
     assert.deepEqual(properties.get('animation'), ['none', 'important'], 'Back must not replay a CSS leave animation')

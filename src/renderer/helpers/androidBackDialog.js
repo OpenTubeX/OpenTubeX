@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
 import { settleAndroidBackAnimation } from './androidBackGesture'
-import { HIDDEN_MODAL_BACKDROP, getModalBackdropStyle } from './modalBackdropHandoff'
+import { HIDDEN_MODAL_BACKDROP } from './modalBackdropHandoff'
 
 /** @param {HTMLElement} element */
 function getDialogExitKeyframes(element) {
@@ -12,14 +12,17 @@ function getDialogExitKeyframes(element) {
 
 /**
  * @param {HTMLElement} element
- * @returns {[HTMLElement, Keyframe[]][]}
+ * @returns {[HTMLElement, Keyframe[], string?][]} Targets, their keyframes and pseudo-elements
  */
 function getDialogExitAnimations(element) {
   const card = element.matches('.prompt') ? element.querySelector(':scope > .promptCard') : null
   if (!card) return [[element, getDialogExitKeyframes(element)]]
-  // Clear the backdrop's dim and blur and fade the card instead.
+  // Clear the backdrop's blur, and fade its dim layer and the card instead.
+  const { backdropFilter } = getComputedStyle(element)
+  const { opacity } = getComputedStyle(element, '::before')
   return [
-    [element, [getModalBackdropStyle(element), HIDDEN_MODAL_BACKDROP]],
+    [element, [{ backdropFilter }, { backdropFilter: HIDDEN_MODAL_BACKDROP.backdropFilter }]],
+    [element, [{ opacity }, { opacity: 0 }], '::before'],
     [card, getDialogExitKeyframes(card)]
   ]
 }
@@ -59,8 +62,12 @@ export function createAndroidBackDialogPreview(element, back, isAvailable, getKe
         element.querySelector('.promptCard[inert]')) return false
       const targets = getKeyframes ? [[element, getKeyframes(element)]] : getDialogExitAnimations(element)
       // Progress changes the transform from script. Without this hint,
-      // Chromium rasterizes the content again at every new scale.
-      const transformed = targets.filter(([, keyframes]) => keyframes.some(frame => 'transform' in frame)).map(([target]) => target)
+      // Chromium rasterizes the content again at every new scale. Changing
+      // the hint repaints the target, so keep one that it already has.
+      const transformed = targets
+        .filter(([target, keyframes]) => keyframes.some(frame => 'transform' in frame) &&
+          !getComputedStyle(target).willChange.split(',').some(hint => hint.trim() === 'transform'))
+        .map(([target]) => target)
       styles = [
         saveStyle(element, 'transition'),
         saveStyle(element, 'animation'),
@@ -69,8 +76,8 @@ export function createAndroidBackDialogPreview(element, back, isAvailable, getKe
       // Progress must follow the gesture without a competing CSS transition.
       element.style.setProperty('transition', 'none', 'important')
       for (const target of transformed) target.style.setProperty('will-change', 'transform', 'important')
-      animations = targets.map(([target, keyframes]) => {
-        const animation = applyAnimationSpeed(target.animate(keyframes, { duration: 180, fill: 'both' }))
+      animations = targets.map(([target, keyframes, pseudoElement]) => {
+        const animation = applyAnimationSpeed(target.animate(keyframes, { duration: 180, fill: 'both', pseudoElement }))
         animation.pause()
         return animation
       })

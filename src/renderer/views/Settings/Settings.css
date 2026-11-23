@@ -701,6 +701,15 @@
   will-change: translate;
 }
 
+/* The Android Back preview moves, scales and fades the window from script.
+   Promoting it only then repaints the whole window as the gesture starts and
+   ends, and Android WebView can draw those frames before the window is
+   rastered again: its background vanishes and the page shows through. Mobile
+   text has no subpixel antialiasing to keep. */
+:global(:root.appCapacitorTabs .settingsWindow) {
+  will-change: transform, opacity;
+}
+
 .settingsResizeHandle {
   position: absolute;
   z-index: 2;
