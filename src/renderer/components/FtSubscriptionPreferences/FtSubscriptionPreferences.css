@@ -123,3 +123,17 @@
     flex: 1;
   }
 }
+
+/* Restores errors hidden from the subscriptions page, a rare action that stays out of the way. */
+.hiddenRefreshErrors {
+  display: flex;
+  justify-content: flex-end;
+  padding-inline: 6px;
+}
+
+/* Lines the label up with the controls above it. */
+.hiddenRefreshErrors .btn {
+  --button-foreground: var(--secondary-text-color);
+
+  margin-inline-end: calc(-1 * var(--button-padding-inline));
+}

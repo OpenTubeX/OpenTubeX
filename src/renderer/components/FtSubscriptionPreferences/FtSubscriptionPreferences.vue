@@ -121,22 +121,17 @@
         @change="value => emit('update-show-members-only', value)"
       />
     </div>
+    <!-- Only errors hidden from the subscriptions page can be shown again here -->
     <div
-      v-if="showRefreshErrors !== null"
-      class="togglePreference refreshErrorsPreference"
+      v-if="refreshErrorsHidden"
+      class="hiddenRefreshErrors"
     >
-      <FtIcon
-        class="togglePreferenceIcon"
-        :icon="['fas', 'triangle-exclamation']"
-        aria-hidden="true"
-      />
-      <FtToggleSwitch
+      <FtButton
         :label="t('Channel.Show refresh errors')"
-        :default-value="showRefreshErrors"
-        compact
-        trailing
-        controlled
-        @change="value => emit('update-show-refresh-errors', value)"
+        :icon="['fas', 'eye']"
+        variant="text"
+        size="extra-small"
+        @click="emit('show-refresh-errors')"
       />
     </div>
   </div>
@@ -147,6 +142,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import {
@@ -182,14 +178,13 @@ const props = defineProps({
     type: [Boolean, String],
     default: null
   },
-  /** `null` hides the refresh errors switch. */
-  showRefreshErrors: {
+  refreshErrorsHidden: {
     type: Boolean,
-    default: null
+    default: false
   }
 })
 
-const emit = defineEmits(['toggle-feed-type', 'update-daily-video-limit', 'update-show-members-only', 'update-show-refresh-errors'])
+const emit = defineEmits(['toggle-feed-type', 'update-daily-video-limit', 'update-show-members-only', 'show-refresh-errors'])
 
 const { t } = useI18n()
 const id = useId()
