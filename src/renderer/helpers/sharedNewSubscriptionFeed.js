@@ -7,12 +7,13 @@ import {
   getNewSubscriptionEntryTimestamp,
 } from './newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from './restricted-playback'
+import { keepComputedLinked } from './keepComputedLinked'
 
 // Home and the Subscriptions page remount on every navigation. Building the
 // New feed scans the whole subscription cache, so these computeds outlive the
 // pages and rebuild only when the cache, settings, profile, group, history or
-// seen marks change. A computed without subscribers keeps validating its
-// sources, so a page that mounts later still reads a current feed.
+// seen marks change. They stay linked to their sources between mounts, see
+// keepComputedLinked.
 
 /** Invalidates the feeds once a premiere or scheduled stream in them starts. */
 const clock = shallowRef(0)
@@ -105,11 +106,13 @@ const subscriptionsPageContent = computed(() => {
 /** Home's New shelf entries, across categories and newest first. */
 export function useHomeNewSubscriptionEntries() {
   expireStartedEntries()
+  keepComputedLinked(homeEntries)
   return homeEntries
 }
 
 /** The New feed of the active subscription group, with raw entries. */
 export function useSubscriptionsNewFeedContent() {
   expireStartedEntries()
+  keepComputedLinked(subscriptionsPageContent)
   return subscriptionsPageContent
 }
