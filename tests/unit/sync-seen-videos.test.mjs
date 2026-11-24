@@ -425,6 +425,11 @@ test('windows end with the same marks whatever order changes arrive in', () => {
   // The same when the window had the mark already, and for a repeated reply.
   for (const index of [0, 1, 0, 0]) marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[index]))
   assert.deepEqual([...marks.byId.values()], [kept])
+  // A delayed older removal keeps the newer one's watermark.
+  const older = { upserts: [], removals: [{ ...dropped, seenAt: 500 }] }
+  const between = { upserts: [{ ...dropped, seenAt: 800 }], removals: [] }
+  for (const change of [older, between]) marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(change))
+  assert.deepEqual([...marks.byId.values()], [kept])
   marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[2]))
   assert.deepEqual([...marks.byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)), [kept, remarked])
 })

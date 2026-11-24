@@ -200,8 +200,12 @@ export function applySeenMarkChanges(kind, byId, changes, dropped) {
       changed = true
     }
     if (dropped && !byId.has(id)) {
+      // A delayed older removal must not lower the watermark.
+      const earlier = dropped.get(id)
       dropped.delete(id)
-      dropped.set(id, removed)
+      dropped.set(id, earlier
+        ? { ...removed, seenAt: Math.max(earlier.seenAt ?? 0, removed.seenAt ?? 0), unseenAt: Math.max(earlier.unseenAt ?? 0, removed.unseenAt ?? 0) }
+        : removed)
       // Only delayed changes need these, and they arrive soon, so a small bound suffices.
       if (dropped.size > MAX_DROPPED_SEEN_MARKS) dropped.delete(/** @type {string} */ (dropped.keys().next().value))
     }
