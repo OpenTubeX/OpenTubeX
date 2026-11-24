@@ -517,7 +517,6 @@ export default defineComponent({
       showTranscript: false,
       showSidebarChapters: false,
       showSidebarSponsorBlock: false,
-      sidebarPanelLeaving: false,
       sponsorBlockInfoLoading: false,
       sponsorBlockInfoPendingUuid: null,
       sponsorBlockInfoSegments: [],
@@ -1388,9 +1387,8 @@ export default defineComponent({
         this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
-    // Keeps the sidebar column while its last panel animates out.
     noSidebar: function () {
-      return !this.theatrePossible && !this.sidebarPanelLeaving
+      return !this.theatrePossible
     },
     theatreTogglePossible: function () {
       return this.theatreLayoutAvailable && this.theatrePossible
@@ -2451,9 +2449,6 @@ export default defineComponent({
       if (this.phonePanelsEnabled) {
         this.mobilePanel = open ? 'chapters' : (this.mobilePanel === 'chapters' ? null : this.mobilePanel)
       }
-      if (!open && this.showSidebarChapters) {
-        this.sidebarPanelLeaving = true
-      }
       this.showSidebarChapters = open
     },
     handleChapterThumbnailsChange(thumbnails) {
@@ -2470,9 +2465,6 @@ export default defineComponent({
       contributionStatsLoaded,
       contributionStatsLoading,
     }) {
-      if (!open && this.showSidebarSponsorBlock) {
-        this.sidebarPanelLeaving = true
-      }
       if (!open && this.mobilePanel === 'sponsorBlock') this.mobilePanel = null
       if (open && !this.showSidebarSponsorBlock && this.phonePanelsEnabled) this.mobilePanel = 'sponsorBlock'
       this.showSidebarSponsorBlock = open
@@ -2541,9 +2533,6 @@ export default defineComponent({
         }
         this.closeShortsComments()
       }
-      if (this.showTranscript) {
-        this.sidebarPanelLeaving = true
-      }
       this.showTranscript = !this.showTranscript
       if (this.showTranscript && this.fullscreenMetadataOpen) {
         this.$nextTick(() => this.$refs.player?.setFullscreenTranscript(true))
@@ -2555,9 +2544,6 @@ export default defineComponent({
     closeTranscript() {
       // Leave another open phone panel, such as the comments, in place.
       if (this.mobilePanel === 'transcript') this.mobilePanel = null
-      if (this.showTranscript) {
-        this.sidebarPanelLeaving = true
-      }
       this.showTranscript = false
       this.$refs.player?.dismissFullscreenTranscript()
       this.clampShortsAuxPanelScroll()
@@ -2632,9 +2618,6 @@ export default defineComponent({
     },
     closeSidebarChapters() {
       this.mobilePanel = null
-      if (this.showSidebarChapters) {
-        this.sidebarPanelLeaving = true
-      }
       this.showSidebarChapters = false
     },
     copyChapterTimestamp(startSeconds) {

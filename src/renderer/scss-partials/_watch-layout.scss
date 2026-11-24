@@ -166,15 +166,48 @@
     max-block-size: var(--sidebar-panel-max-block-size, 700px);
     opacity: 1;
   }
+
+  // The sidebar column's last panel slides out with the column instead
+  // (helpers/watchLayout.js), so it keeps its height and only fades. An
+  // animation starts with the column, while a transition would wait for the
+  // leave-to class a frame later.
+  @container route (width >= 1051px) {
+    &.noSidebar {
+      .chapters-panel-leave-active,
+      .sidebar-panel-leave-active {
+        transition: none;
+        animation: sidebar-panel-fade-out var(--motion-default-effects) forwards;
+      }
+
+      .chapters-panel-leave-to {
+        max-block-size: 540px;
+      }
+
+      .sidebar-panel-leave-to {
+        max-block-size: var(--sidebar-panel-max-block-size, 700px);
+      }
+    }
+  }
+
+  @keyframes sidebar-panel-fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
 }
 
 // Include at the end of the page's .videoLayout rule, so the responsive
 // templates override page-specific ones.
 @mixin watch-layout-responsive {
-  // Theater mode keeps the same side gaps as the default layout.
+  // Theater mode and pages without a sidebar keep the same side gaps as the
+  // default layout.
   @media (width > 1350px) {
     @container route (width >= 1051px) {
-      &:not(.noSidebar, .shortsPlayerActive) {
+      &:not(.shortsPlayerActive) {
         .videoAreaMargin,
         .watchVideo {
           margin-inline: 8px;

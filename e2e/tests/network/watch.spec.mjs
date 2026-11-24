@@ -565,11 +565,7 @@ test.describe('watch page', () => {
       window.transcriptScrollCalls = []
       Element.prototype.scrollTo = function (...args) {
         if (this.classList.contains('transcriptSegments')) {
-          window.transcriptScrollCalls.push({
-            behavior: args[0]?.behavior,
-            distance: Math.abs(args[0]?.top - this.scrollTop),
-            clientHeight: this.clientHeight
-          })
+          window.transcriptScrollCalls.push(args[0]?.behavior)
         }
         return nativeScrollTo.apply(this, args)
       }
@@ -579,10 +575,13 @@ test.describe('watch page', () => {
     const activeSegment = page.locator('.transcriptSegment[aria-current="true"]')
     await expect(activeSegment).toBeVisible({ timeout: 30_000 })
     expect(Number(await activeSegment.getAttribute('data-segment-index'))).toBeGreaterThan(100)
-    await expect.poll(() => page.evaluate(() => window.transcriptScrollCalls[0])).toBeTruthy()
-    const scrollCall = await page.evaluate(() => window.transcriptScrollCalls[0])
-    expect(scrollCall.behavior).toBe('smooth')
-    expect(scrollCall.distance).toBeLessThanOrEqual(scrollCall.clientHeight)
+    // It jumps to the cue instead of scrolling there.
+    await expect.poll(() => page.locator('.transcriptSegments').evaluate(list => {
+      const active = list.querySelector('[aria-current="true"]')
+      const offset = active.getBoundingClientRect().top - list.getBoundingClientRect().top
+      return Math.abs(offset + active.offsetHeight / 2 - list.clientHeight / 2)
+    })).toBeLessThanOrEqual(1)
+    expect(await page.evaluate(() => window.transcriptScrollCalls)).toEqual([])
   })
 
   test('keeps the current chapter centered in the sidebar and fullscreen dock', async ({ page, innertube }) => {

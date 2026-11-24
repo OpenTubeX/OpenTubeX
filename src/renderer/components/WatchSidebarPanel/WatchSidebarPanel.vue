@@ -13,12 +13,7 @@
       @close="emit('close', $event)"
     >
       <!-- The page's layout styles define the transition classes. -->
-      <Transition
-        :name="transition"
-        @before-leave="emit('leaving', true)"
-        @after-leave="emit('leaving', false)"
-        @leave-cancelled="emit('leaving', false)"
-      >
+      <Transition :name="transition">
         <slot />
       </Transition>
     </FtPhonePanel>
@@ -38,5 +33,5 @@ defineProps({
   customHeader: { type: Boolean, default: false },
   transition: { type: String, default: 'sidebar-panel' }
 })
-const emit = defineEmits(['close', 'leaving'])
+const emit = defineEmits(['close'])
 </script>

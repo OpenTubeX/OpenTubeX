@@ -435,7 +435,6 @@
             :icon="['fas', 'list-ol']"
             transition="chapters-panel"
             @close="showChapters = false"
-            @leaving="setSidebarPanelLeaving"
           >
             <WatchVideoChaptersPanel
               v-if="chaptersPanelOpen"
@@ -459,7 +458,6 @@
             :title="t('Video.Transcript.Title')"
             custom-header
             @close="reason => closeSidebarPanel(reason, fullscreenTranscriptOpen, closeTranscript)"
-            @leaving="setSidebarPanelLeaving"
           >
             <WatchVideoTranscript
               v-if="transcriptPanelOpen"
@@ -480,7 +478,6 @@
             :title="twitchChatTarget?.type === 'replay' ? t('Video.Live Chat Replay') : t('Video.Live Chat')"
             custom-header
             @close="reason => closeSidebarPanel(reason, fullscreenLiveChatOpen, closeChat)"
-            @leaving="setSidebarPanelLeaving"
           >
             <TwitchChat
               v-if="chatAvailable && chatOpen"
@@ -501,7 +498,6 @@
             :title="t('Video.Queue')"
             custom-header
             @close="reason => closeSidebarPanel(reason, fullscreenQueueOpen, closeQueue)"
-            @leaving="setSidebarPanelLeaving"
           >
             <WatchVideoQueue
               v-if="queueAvailable"
@@ -690,7 +686,6 @@ const fullscreenTranscriptOpen = ref(false)
 const fullscreenTranscriptTarget = shallowRef(null)
 const fullscreenQueueOpen = ref(false)
 const fullscreenQueueTarget = shallowRef(null)
-const sidebarPanelLeaving = ref(false)
 // Like on the watch page, phones show the panels as sheets over the page.
 const phonePanelsEnabled = computed(() => phoneLayout.value && !fullscreenLiveChatOpen.value &&
   !fullscreenTranscriptOpen.value && !fullscreenQueueOpen.value)
@@ -745,18 +740,8 @@ const sidebarPanelsOpen = computed(() => Boolean(chatAvailable.value && chatOpen
   transcriptPanelOpen.value || queueAvailable.value)
 // Phones show the panels as sheets instead.
 const hasSidebar = computed(() => !phonePanelsEnabled.value && sidebarPanelsOpen.value)
-// Keep the sidebar column while its last panel animates out. This has to run
-// before the render that removes the panel, which is too late for its
-// before-leave hook.
-watch(sidebarPanelsOpen, (open, wasOpen) => {
-  if (wasOpen && !open && !phonePanelsEnabled.value) sidebarPanelLeaving.value = true
-}, { flush: 'sync' })
-/** @param {boolean} leaving */
-function setSidebarPanelLeaving(leaving) {
-  sidebarPanelLeaving.value = leaving && !phonePanelsEnabled.value
-}
 const theatreTogglePossible = computed(() => theatreLayoutAvailable.value && hasSidebar.value)
-const noSidebar = computed(() => !hasSidebar.value && !sidebarPanelLeaving.value)
+const noSidebar = computed(() => !hasSidebar.value)
 // This runs before the render that changes the layout, so the animator
 // measures the areas where they were drawn.
 watch(noSidebar, () => {
@@ -1635,8 +1620,6 @@ async function loadMedia(url, useCookies = usesYtDlpCookiesFor(store.getters.get
   fullscreenLiveChatTarget.value = null
   fullscreenTranscriptOpen.value = false
   fullscreenTranscriptTarget.value = null
-  // The panels unmount with the layout, without a leave transition.
-  sidebarPanelLeaving.value = false
   setTabTitle(hostname.value || 'Watch')
 
   if (!isExternalMediaUrl(url)) {
