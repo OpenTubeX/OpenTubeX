@@ -35,7 +35,7 @@ import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
 import { GRID_COLUMNS_SETTINGS, getGridColumns, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
-import { measureStableGridWidth } from './gridWidth'
+import { getLastScrollY, getViewportWidth } from '../../helpers/viewport'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
 import { findAdjacentTileIndex, focusTile, getPageTiles, getTileDirection, isTileFocusable, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
@@ -91,7 +91,6 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // costs a layout pass over the whole feed. Dragging the thumbnail size slider
 // emits an event per step, which turned that into hundreds of forced layouts.
 let gridWidth = 0
-let renderedGridWidth = 0
 let active = true
 
 function updateGridSliderLimit() {
@@ -160,8 +159,8 @@ function applyThumbnailSizeStyles() {
   const styles = getThumbnailGridStyles(
     store.state.settings[thumbnailSizeSetting],
     gridWidth,
-    window.innerWidth,
-    renderedGridWidth,
+    getViewportWidth(),
+    gridWidth,
     getGridColumns(thumbnailSizeSetting),
     getUiDensityScale(store.state.settings.uiDensity)
   )
@@ -317,8 +316,6 @@ function handleBeforeLeave(element) {
 
 let resizeObserver = null
 let phoneWidthQuery = null
-let observedScrollbarWidth = 0
-let observedViewportWidth = null
 let pageAtBottom = false
 
 // A newer measurement, deactivation or unmount cancels pending settle frames.
@@ -342,6 +339,12 @@ function keepPageAtBottom(frames, generation) {
 }
 
 function updatePageAtBottom() {
+  // Only a scrolled page can be at its end, and reading whether it is lays out
+  // a page that has changed since the last layout, such as one mounting.
+  if (getLastScrollY() <= 0) {
+    pageAtBottom = false
+    return
+  }
   const root = document.documentElement
   pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
 }
@@ -353,36 +356,21 @@ function updatePageAtBottom() {
 function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
   const element = gridElement.value?.$el
   if (!element) return
-  const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
-    document.body.style.paddingInlineEnd !== ''
-  const measurement = measureStableGridWidth(
-    contentWidth,
-    observedScrollbarWidth,
-    observedViewportWidth,
-    window.innerWidth,
-    document.documentElement.clientWidth,
-    scrollbarCompensated
-  )
-  observedScrollbarWidth = measurement.scrollbarWidth
-  observedViewportWidth = measurement.viewportWidth
 
-  const widthAdjustmentChanged = contentWidth - measurement.gridWidth !== renderedGridWidth - gridWidth
-  renderedGridWidth = contentWidth
-
-  if (measurement.gridWidth !== gridWidth) {
+  if (contentWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
     // page that was scrolled to its end above the new end. This includes the
     // first measurement, when a grid replaces a list at the end of the page.
     // Resize observations run after layout and any restored scroll position.
     if (gridWidth === 0) updatePageAtBottom()
-    const keepBottom = pageAtBottom && measurement.gridWidth > 0 && !element.closest('[inert]')
+    const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert]')
     suppressMoveTransition.value = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
       suppressMoveTransition.value = false
     }, 100)
 
-    gridWidth = measurement.gridWidth
+    gridWidth = contentWidth
     updateGridSliderLimit()
     applyThumbnailSizeStyles()
     thumbnailSizeReady.value = gridWidth > 0
@@ -392,9 +380,12 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
       const generation = ++keepBottomGeneration
       nextTick(() => keepPageAtBottom(2, generation))
     }
-  } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
-    // Keeps the stretched size equal to the stable one under a transient
-    // scrollbar, and applies the phone column minimum to a constrained grid.
+    // The cards resize with the new width, and the observation for that
+    // updates whether the page is at its end.
+    return
+  }
+  if (viewportCrossedPhoneWidth) {
+    // Applies the phone column minimum to a constrained grid.
     applyThumbnailSizeStyles()
   }
   updatePageAtBottom()

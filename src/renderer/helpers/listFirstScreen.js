@@ -1,4 +1,5 @@
 import { getThumbnailGridColumnCount } from '../constants/thumbnailSize'
+import { getViewportHeight, getViewportWidth } from './viewport'
 
 // The minimum block sizes of the row shells in FtListLazyWrapper.css.
 const GRID_ITEM_MIN_HEIGHT = 264
@@ -8,20 +9,6 @@ const GRID_ROW_GAP = 8
 const LIST_ROW_GAP = 4
 // Used before the window has a size.
 const FALLBACK_ITEM_COUNT = 16
-
-// Android WebView lays out the page to answer innerWidth and innerHeight, which
-// a list mounting with a new page would force mid-render. Keep the size that
-// the last resize reported instead.
-let viewportWidth = 0
-let viewportHeight = 0
-function readViewportSize() {
-  viewportWidth = window.innerWidth
-  viewportHeight = window.innerHeight
-}
-if (typeof window !== 'undefined') {
-  readViewportSize()
-  window.addEventListener('resize', readViewportSize)
-}
 
 /**
  * The most rows a list starting inside the viewport can show in it. Rows are
@@ -35,7 +22,7 @@ if (typeof window !== 'undefined') {
  * @param {number} layout.densityScale
  * @param {{ width: number, height: number }} [viewport]
  */
-export function getFirstScreenItemCount({ grid, youtubeStyleShorts, thumbnailSize, columns, densityScale }, viewport = { width: viewportWidth, height: viewportHeight }) {
+export function getFirstScreenItemCount({ grid, youtubeStyleShorts, thumbnailSize, columns, densityScale }, viewport = { width: getViewportWidth(), height: getViewportHeight() }) {
   const { width, height } = viewport
   if (!(width > 0 && height > 0)) return FALLBACK_ITEM_COUNT
   const rowHeight = grid
