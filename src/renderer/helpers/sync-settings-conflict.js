@@ -243,7 +243,8 @@ export function mergeProfileSettingsEntry(options) {
   // Only times that devices recorded for a setting show an edit that went
   // back to the synced value; fallback times are those of the whole entry.
   const remoteSettingTimes = isSettingsObject(remoteEntry.settingsUpdatedAt) ? remoteEntry.settingsUpdatedAt : {}
-  for (const settingId of new Set([...Object.keys(base), ...Object.keys(value)])) {
+  // Remote settings too, which this device may have set and reset since it last synced.
+  for (const settingId of new Set([...Object.keys(base), ...Object.keys(value), ...Object.keys(remoteEntry.value)])) {
     const local = Object.hasOwn(value, settingId) ? value[settingId] : undefined
     const synced = Object.hasOwn(base, settingId) ? base[settingId] : undefined
     const remote = Object.hasOwn(merged, settingId) ? merged[settingId] : undefined

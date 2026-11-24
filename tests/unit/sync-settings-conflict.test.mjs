@@ -374,6 +374,15 @@ test('the later edit of a profile setting wins even when one device went back to
   const both = mergeProfileSettingsEntry({ ...local('fr', 40), remoteEntry: remote('fr', 20) })
   assert.deepEqual(both.value, { preferredCaptionLocale: 'fr' })
   assert.deepEqual(both.settingsUpdatedAt, { preferredCaptionLocale: 40 })
+
+  // This device set captions at 20 and went back to the shared value at 40,
+  // before it synced; the other device's captions from 30 lose.
+  const unset = { key, value: {}, updatedAt: 10, settingsUpdatedAt: {} }
+  const resetHere = mergeProfileSettingsEntry({
+    key, value: {}, old: unset, localUpdatedAt: 40, localSettingUpdatedAt: () => 40, now: 50, remoteEntry: remote('de', 30),
+  })
+  assert.deepEqual(resetHere.value, {})
+  assert.deepEqual(resetHere.settingsUpdatedAt, { preferredCaptionLocale: 40 })
 })
 
 test('the later edit of a profile setting wins, whenever either device edited its other settings', () => {
