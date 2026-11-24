@@ -31,9 +31,7 @@ jobs:
         RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         RUN_EVENT: ${{ github.event.workflow_run.event }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
-        WORKFLOW_PATH: ${{ github.event.workflow_run.path }}
       shell: bash
       run: |
         set -euo pipefail
@@ -51,23 +49,13 @@ jobs:
           exit 0
         fi
 
-        # A rerun joins the push build's concurrency group and would cancel a newer build.
-        if [[ "$RUN_EVENT" == 'push' ]]; then
-          branch_sha="$(gh api "repos/${GH_REPO}/commits/${HEAD_BRANCH}" --jq .sha)"
-          if [[ "$branch_sha" != "$HEAD_SHA" ]]; then
-            echo "$HEAD_BRANCH has moved on to $branch_sha; not retrying."
-            exit 0
-          fi
-        fi
-
-        # iOS runs of one event on a ref share a concurrency group, so a rerun
-        # would take the place of a newer waiting run.
-        if [[ "$WORKFLOW_PATH" == '.github/workflows/ios.yml' ]]; then
-          latest_run="$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs?branch=${HEAD_BRANCH}&per_page=1" --jq '.workflow_runs[0].id')"
-          if [[ "$latest_run" != "$RUN_ID" ]]; then
-            echo "Run $latest_run is newer; not retrying."
-            exit 0
-          fi
+        # A rerun joins the run's concurrency group, so it would cancel or take
+        # the place of a newer run. Compare runs, not commits: pushes that only
+        # change ignored paths move the branch without starting a newer run.
+        latest_run="$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs?branch=${HEAD_BRANCH}&event=${RUN_EVENT}&per_page=1" --jq '.workflow_runs[0].id')"
+        if [[ "$latest_run" != "$RUN_ID" ]]; then
+          echo "Run $latest_run is newer; not retrying."
+          exit 0
         fi
 
         gh run rerun "$RUN_ID" --failed
