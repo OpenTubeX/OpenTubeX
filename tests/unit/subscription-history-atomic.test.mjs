@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { migrateLegacyHistoryRecord } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
+import * as seenMarks from '../../src/seenMarks.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import * as secretSettings from '../../src/datastores/secretSettings.js'
 import { getSecretCipher } from '../../src/datastores/secretCipher.js'
@@ -22,7 +23,7 @@ async function fixture(marks = []) {
   const errors = []
   const { Settings, History } = vm.runInNewContext(
     source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {')) + '\n({Settings, History})',
-    { db, ...seenVideos, ...seenMarkSettings, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
+    { db, ...seenVideos, ...seenMarks, ...seenMarkSettings, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
   )
   return { db, Settings, History, errors }
 }

@@ -94,7 +94,7 @@ test('settings broadcasts older than a save this window already has are dropped'
   assert.deepEqual(applied, ['newer'])
 })
 
-test('seen-video changes reach the window whatever revision they have', async () => {
+test('seen-mark changes reach the window whatever revision they have', async () => {
   const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
   const applied = []
   api.handleSyncSettings((event, data) => applied.push([event, data.changes ?? data.value]))
@@ -104,11 +104,11 @@ test('seen-video changes reach the window whatever revision they have', async ()
   // Each merge changes only some marks, so none may be dropped.
   await api.dbSettings(2, { _id: 'subscriptionSeenVideos', value: '[]' })
   const changes = { upserts: [{ videoId: 'video', seenAt: 1000 }], removals: [] }
-  send(SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS, { _id: 'subscriptionSeenVideos', changes }, 1)
+  send(SyncEvents.SETTINGS.MERGE_SEEN_MARKS, { _id: 'subscriptionSeenVideos', changes }, 1)
   send(SyncEvents.GENERAL.UPSERT, { _id: 'subscriptionSeenVideos', value: 'older' }, 1)
   send(SyncEvents.GENERAL.UPSERT, { _id: 'subscriptionSeenVideos', value: 'newer' }, 3)
   assert.deepEqual(applied, [
-    [SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS, changes],
+    [SyncEvents.SETTINGS.MERGE_SEEN_MARKS, changes],
     [SyncEvents.GENERAL.UPSERT, 'newer'],
   ])
 })

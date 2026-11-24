@@ -1,4 +1,5 @@
 // @ts-check
+import { isSeenMarksState, mergeSeenMarks, parseSeenMarks } from '../../seenMarks.js'
 
 /**
  * Seen and unseen marks of RSS feed items, so that items marked on one device
@@ -25,27 +26,41 @@ function isTimestamp(value) {
   return typeof value === 'number' && Number.isFinite(value) && value > 0
 }
 
-/**
- * @param {unknown} value A JSON string or an array
- * @returns {RssFeedSeenItem[]}
- */
-export function parseRssFeedSeenItems(value) {
-  try {
-    const entries = typeof value === 'string' ? JSON.parse(value) : value
-    if (!Array.isArray(entries)) return []
-    return entries
-      .filter(entry => (
-        typeof entry?.key === 'string' && entry.key.length > 0 &&
-        (isTimestamp(entry.seenAt) || isTimestamp(entry.unseenAt))
-      ))
-      .map(({ key, seenAt, unseenAt }) => ({
+/** @type {import('../../seenMarks.js').SeenMarkKind<RssFeedSeenItem>} */
+export const RSS_FEED_SEEN_ITEM_MARKS = {
+  idKey: 'key',
+  max: MAX_RSS_FEED_SEEN_ITEMS,
+  parse: entries => entries
+    .filter(entry => (
+      typeof (/** @type {any} */ (entry)?.key) === 'string' && /** @type {any} */ (entry).key.length > 0 &&
+      (isTimestamp(/** @type {any} */ (entry).seenAt) || isTimestamp(/** @type {any} */ (entry).unseenAt))
+    ))
+    .map(entry => {
+      const { key, seenAt, unseenAt } = /** @type {RssFeedSeenItem} */ (entry)
+      return {
         key,
         ...(isTimestamp(seenAt) ? { seenAt } : {}),
         ...(isTimestamp(unseenAt) ? { unseenAt } : {})
-      }))
-  } catch {
-    return []
-  }
+      }
+    }),
+  merge(previous, entry) {
+    const seenAt = Math.max(previous?.seenAt ?? 0, entry.seenAt ?? 0)
+    const unseenAt = Math.max(previous?.unseenAt ?? 0, entry.unseenAt ?? 0)
+    return {
+      key: entry.key,
+      ...(seenAt > 0 ? { seenAt } : {}),
+      ...(unseenAt > 0 ? { unseenAt } : {})
+    }
+  },
+  latest: entry => latestMark(entry),
+}
+
+/**
+ * @param {unknown} value A JSON string, an array, or the store's marks
+ * @returns {RssFeedSeenItem[]}
+ */
+export function parseRssFeedSeenItems(value) {
+  return parseSeenMarks(RSS_FEED_SEEN_ITEM_MARKS, value)
 }
 
 /**
@@ -70,24 +85,7 @@ export function isRssFeedItemSeen(entry) {
  * @returns {RssFeedSeenItem[]}
  */
 export function mergeRssFeedSeenItems(local, remote) {
-  /** @type {Map<string, RssFeedSeenItem>} */
-  const byKey = new Map()
-  for (const entry of [...parseRssFeedSeenItems(local), ...parseRssFeedSeenItems(remote)]) {
-    const current = byKey.get(entry.key)
-    const seenAt = Math.max(current?.seenAt ?? 0, entry.seenAt ?? 0)
-    const unseenAt = Math.max(current?.unseenAt ?? 0, entry.unseenAt ?? 0)
-    byKey.set(entry.key, {
-      key: entry.key,
-      ...(seenAt > 0 ? { seenAt } : {}),
-      ...(unseenAt > 0 ? { unseenAt } : {})
-    })
-  }
-  /** @param {RssFeedSeenItem} a @param {RssFeedSeenItem} b */
-  const byItemKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0
-  return [...byKey.values()]
-    .sort((a, b) => latestMark(b) - latestMark(a) || byItemKey(a, b))
-    .slice(0, MAX_RSS_FEED_SEEN_ITEMS)
-    .sort(byItemKey)
+  return mergeSeenMarks(RSS_FEED_SEEN_ITEM_MARKS, local, remote)
 }
 
 /**
@@ -109,10 +107,26 @@ export function createRssFeedSeenMarks(saved, keys, seen, timestamp = Date.now()
 }
 
 /**
- * @param {unknown} value A JSON string or an array
- * @returns {Map<string, boolean>} whether each marked item is seen
+ * Whether each marked item is seen.
+ * @typedef {{ readonly size: number, get: (key: string) => boolean | undefined }} RssFeedSeenMarks
+ */
+
+/**
+ * @param {unknown} value A JSON string, an array, or the store's marks, which
+ *   it looks up without copying them
+ * @returns {RssFeedSeenMarks}
  */
 export function toRssFeedSeenMarks(value) {
+  if (isSeenMarksState(value)) {
+    const { byId } = value
+    return {
+      get size() { return byId.size },
+      get: key => {
+        const entry = byId.get(key)
+        return entry && isRssFeedItemSeen(entry)
+      },
+    }
+  }
   return new Map(parseRssFeedSeenItems(value).map(entry => [entry.key, isRssFeedItemSeen(entry)]))
 }
 
@@ -127,13 +141,13 @@ export function onRssFeedSeenItemsSynced(listener) {
 /**
  * Syncs the marks with the `seenRssItems` collection.
  * @param {{ getSeenRssItems: () => Promise<unknown>, putSeenRssItems: (entries: RssFeedSeenItem[]) => Promise<void> }} client
- * @param {{ dispatch: (action: string, payload: unknown) => Promise<unknown>, state: { settings: { rssFeedSeenItems: string } } }} store
+ * @param {{ dispatch: (action: string, payload: unknown) => Promise<unknown>, state: { settings: { rssFeedSeenItems: unknown } } }} store
  * @returns {Promise<number>} the number of synced marks
  */
 export async function syncRssFeedSeenItems(client, store) {
   const remote = await client.getSeenRssItems()
   await store.dispatch('mergeRssFeedSeenItems', remote)
-  const merged = parseRssFeedSeenItems(store.state.settings.rssFeedSeenItems)
+  const merged = mergeRssFeedSeenItems(store.state.settings.rssFeedSeenItems, [])
   for (const listener of listeners) listener(merged)
   await client.putSeenRssItems(merged)
   return merged.length

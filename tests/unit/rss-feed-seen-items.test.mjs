@@ -7,9 +7,12 @@ import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.j
 import * as secretSettings from '../../src/datastores/secretSettings.js'
 import { getSecretCipher } from '../../src/datastores/secretCipher.js'
 import * as rssSeenItems from '../../src/renderer/helpers/rssFeedSeenItems.js'
+import * as seenMarks from '../../src/seenMarks.js'
+import { seenMarksState, withSeenMarkChanges } from '../../src/renderer/helpers/seenMarksState.js'
 
 const {
   MAX_RSS_FEED_SEEN_ITEMS,
+  RSS_FEED_SEEN_ITEM_MARKS,
   createRssFeedSeenMarks,
   mergeRssFeedSeenItems,
   onRssFeedSeenItemsSynced,
@@ -23,22 +26,23 @@ async function settingsDatabase() {
   const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
   const db = { settings: new Datastore({ inMemoryOnly: true }) }
   const Settings = vm.runInNewContext(source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass History {')) +
-    '\nSettings', { db, ...rssSeenItems, ...secretSettings, getSecretCipher, migrateStoredSettings })
+    '\nSettings', { db, ...rssSeenItems, ...seenMarks, ...secretSettings, getSecretCipher, migrateStoredSettings })
   return { db, Settings }
 }
 
 /** A window's store, whose marks the database replies update */
 async function windowStore(Settings) {
   const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-  const context = vm.createContext({ ...rssSeenItems, DBSettingHandlers: Settings, ANDROID_PROXY_SETTING_KEYS: [] })
+  const context = vm.createContext({ ...rssSeenItems, ...seenMarks, DBSettingHandlers: Settings, ANDROID_PROXY_SETTING_KEYS: [] })
   vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  saveSyncSettingEdit:')) +
     '\n}\nglobalThis.actions = customActions', context)
-  const state = { rssFeedSeenItems: '[]' }
+  const state = { rssFeedSeenItems: seenMarksState(RSS_FEED_SEEN_ITEM_MARKS, '[]') }
   const module = {
     state,
-    commit: (type, value) => {
-      assert.equal(type, 'setRssFeedSeenItems')
-      state.rssFeedSeenItems = value
+    commit: (type, { setting, changes }) => {
+      assert.equal(type, 'applySeenMarkChanges')
+      assert.equal(setting, 'rssFeedSeenItems')
+      state.rssFeedSeenItems = withSeenMarkChanges(RSS_FEED_SEEN_ITEM_MARKS, state.rssFeedSeenItems, changes)
     },
     dispatch: (type, payload) => context.actions[type](module, payload),
   }
@@ -104,9 +108,9 @@ test('a new mark stays ahead of earlier marks from a device whose clock is ahead
 
 test('the marks are saved in the settings database and ignore malformed keys', async () => {
   const { db, Settings } = await settingsDatabase()
-  const value = await Settings.mergeSeenRssItems({ keys: ['feed\na', '', null], seen: true })
-  assert.deepEqual(JSON.parse(value).map(entry => entry.key), ['feed\na'])
-  assert.equal((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value, value)
+  const changes = await Settings.mergeSeenRssItems({ keys: ['feed\na', '', null], seen: true })
+  assert.deepEqual(changes.upserts.map(entry => entry.key), ['feed\na'])
+  assert.deepEqual(JSON.parse((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value), changes.upserts)
   await Settings.mergeSeenRssItems({ keys: ['feed\na'], seen: false })
   assert.equal(toRssFeedSeenMarks((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value).get('feed\na'), false)
 })
@@ -133,7 +137,7 @@ test('syncing merges both sides, reports the marks and uploads them', async () =
   ]
   assert.equal(count, 3)
   assert.deepEqual(uploaded, expected)
-  assert.deepEqual(JSON.parse(store.state.settings.rssFeedSeenItems), expected)
+  assert.deepEqual(mergeRssFeedSeenItems(store.state.settings.rssFeedSeenItems, []), expected)
   assert.deepEqual(reported, [expected])
 })
 
@@ -155,11 +159,41 @@ test('a mark saved in another window while a sync writes is kept', async () => {
 })
 
 test('a delayed database reply keeps newer marks of the window', async () => {
-  const { Settings } = await settingsDatabase()
+  const { db, Settings } = await settingsDatabase()
   const store = await windowStore(Settings)
   const older = await Settings.mergeSeenRssItems({ keys: ['feed\na'], seen: true })
-  const newer = await Settings.mergeSeenRssItems({ keys: ['feed\nb'], seen: true })
-  await store.dispatch('applyRssFeedSeenItems', newer)
-  await store.dispatch('applyRssFeedSeenItems', older)
-  assert.equal(store.state.settings.rssFeedSeenItems, newer)
+  const newer = await Settings.mergeSeenRssItems({ keys: ['feed\na', 'feed\nb'], seen: false })
+  await store.dispatch('applySeenMarkChanges', { setting: 'rssFeedSeenItems', changes: newer })
+  await store.dispatch('applySeenMarkChanges', { setting: 'rssFeedSeenItems', changes: older })
+  assert.deepEqual(mergeRssFeedSeenItems(store.state.settings.rssFeedSeenItems, []),
+    mergeRssFeedSeenItems((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value, []))
+  assert.equal(toRssFeedSeenMarks(store.state.settings.rssFeedSeenItems).get('feed\na'), false)
+})
+
+test('merges parse the saved list once, report only their changes and evict like the saved list', async () => {
+  const { db, Settings } = await settingsDatabase()
+  const stored = Array.from({ length: MAX_RSS_FEED_SEEN_ITEMS }, (_, index) => ({ key: `feed\n${String(index).padStart(5, '0')}`, seenAt: 1000 + index }))
+  await db.settings.insertAsync({ _id: 'rssFeedSeenItems', value: JSON.stringify(stored) })
+  let indexed = 0
+  const index = Settings._savedSeenMarks
+  Settings._savedSeenMarks = async function (kind, _id) {
+    const before = this.seenMarksCache.get(_id)
+    const marks = await index.call(this, kind, _id)
+    if (marks !== before) indexed++
+    return marks
+  }
+  const shown = seenMarks.indexSeenMarks(RSS_FEED_SEEN_ITEM_MARKS, stored)
+  // Marking a saved item unseen changes only its mark, and a new item evicts the oldest.
+  const unseen = await Settings.mergeSeenRssItems({ keys: ['feed\n00005'], seen: false })
+  assert.deepEqual(unseen.upserts.map(entry => entry.key), ['feed\n00005'])
+  assert.deepEqual(unseen.removals, [])
+  const seen = await Settings.mergeSeenRssItems({ keys: ['feed\nnew'], seen: true })
+  assert.deepEqual(seen.upserts.map(entry => entry.key), ['feed\nnew'])
+  assert.deepEqual(seen.removals.map(entry => entry.key), ['feed\n00000'])
+  for (const changes of [seen, unseen]) seenMarks.applySeenMarkChanges(RSS_FEED_SEEN_ITEM_MARKS, shown, changes)
+  assert.equal(indexed, 1)
+  const saved = mergeRssFeedSeenItems((await db.settings.findOneAsync({ _id: 'rssFeedSeenItems' })).value, [])
+  assert.equal(saved.length, MAX_RSS_FEED_SEEN_ITEMS)
+  assert.deepEqual(mergeRssFeedSeenItems(shown, []), saved)
+  assert.equal(toRssFeedSeenMarks(seenMarksState(RSS_FEED_SEEN_ITEM_MARKS, saved)).get('feed\n00005'), false)
 })

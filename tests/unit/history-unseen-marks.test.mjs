@@ -6,6 +6,7 @@ import Datastore from '@seald-io/nedb'
 import { toRaw } from 'vue'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
+import * as seenMarks from '../../src/seenMarks.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import * as secretSettings from '../../src/datastores/secretSettings.js'
 import { getSecretCipher } from '../../src/datastores/secretCipher.js'
@@ -25,7 +26,7 @@ async function fixture(fail = false) {
   await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(savedMarks) })
   const records = ['unseen', 'seen', 'unrelated'].map(record)
   await db.history.insertAsync(records)
-  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, ...seenMarkSettings, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error() {} } }
+  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, ...seenMarks, ...seenMarkSettings, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error() {} } }
   const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {')) +
     '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }
@@ -34,13 +35,14 @@ async function fixture(fail = false) {
     .replace('export default', 'return'), Object.keys(dependencies))(...Object.values(dependencies))
   // The marks the renderer shows after each change it applies
   const appliedMarks = []
-  const shownMarks = seenHelpers.indexSubscriptionSeenVideos(savedMarks)
+  const shownMarks = seenMarks.indexSeenMarks(seenHelpers.SEEN_VIDEO_MARKS, savedMarks)
   const context = {
     state: module.state,
     commit: (type, payload) => module.mutations[type](module.state, payload),
     dispatch: async (type, payload) => {
-      if (type !== 'applySubscriptionSeenVideos') return module.actions[type](context, payload)
-      seenHelpers.applySubscriptionSeenVideoChanges(shownMarks, payload)
+      if (type !== 'applySeenMarkChanges') return module.actions[type](context, payload)
+      assert.equal(payload.setting, 'subscriptionSeenVideos')
+      seenMarks.applySeenMarkChanges(seenHelpers.SEEN_VIDEO_MARKS, shownMarks, payload.changes)
       appliedMarks.push(byVideoId([...shownMarks.values()]))
     },
   }

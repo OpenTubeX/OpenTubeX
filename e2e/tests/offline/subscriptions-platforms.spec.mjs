@@ -349,7 +349,7 @@ test.describe('Channels on other platforms', () => {
 
       await page.getByRole('button', { name: 'Mark All as Seen' }).click()
       await expect(section).toHaveCount(0)
-      await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getRssFeedSeenItems).map(entry => entry.key).sort()))
+      await expect.poll(() => page.evaluate(() => [...window.$store.getters.getRssFeedSeenItems.byId.values()].map(entry => entry.key).sort()))
         .toEqual([`twitch:${CHANNEL.id}\n10013`, `twitch:${CHANNEL.id}\nstream-2`])
 
       // The video of the stream isn't new again once the stream ends

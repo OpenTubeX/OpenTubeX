@@ -52,7 +52,7 @@ function fixture () {
     settings: {
       state: {},
       actions: {
-        applySubscriptionSeenVideos({ state }, value) { state.subscriptionSeenVideos = value },
+        applySeenMarkChanges({ state }, { setting, changes }) { state[setting] = changes },
       },
       getters: {
         getEnableHomeRecommendations: () => true,

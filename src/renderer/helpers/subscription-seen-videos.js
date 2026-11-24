@@ -1,47 +1,11 @@
-import { computed, isReactive, markRaw, shallowReactive, shallowRef } from 'vue'
-import { applySubscriptionSeenVideoChanges, mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
+import { computed, isReactive, shallowRef } from 'vue'
+import { mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
 import { isHistoryEntryWatched } from '../../history.js'
-import { parseSubscriptionSeenPosts, mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
+import { mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
+import { isSeenMarksState } from '../../seenMarks.js'
 import { feedEntryInScope } from '../../subscriptionFeedState.js'
 
 const cacheSelectors = new WeakMap()
-
-/**
- * Seen-video marks as the store keeps them. Merges change `byId` in place, so
- * only the feeds that show a changed video update, and replace this object,
- * so watchers learn that the marks changed.
- * @typedef {{ byId: Map<string, import('../../subscriptionSeenVideos.js').SeenVideoMark> }} SubscriptionSeenVideosState
- */
-
-/**
- * @param {unknown} value
- * @returns {value is SubscriptionSeenVideosState}
- */
-export function isSubscriptionSeenVideosState(value) {
-  return value?.byId instanceof Map
-}
-
-/**
- * The store's marks from a saved value, as a JSON string or an array.
- * @param {unknown} value
- * @returns {SubscriptionSeenVideosState}
- */
-export function subscriptionSeenVideosState(value) {
-  if (isSubscriptionSeenVideosState(value)) return value
-  return markRaw({
-    byId: shallowReactive(new Map(mergeSubscriptionSeenVideos(value, []).map(entry => [entry.videoId, entry])))
-  })
-}
-
-/**
- * The store's marks after a merge's changes.
- * @param {SubscriptionSeenVideosState} marks
- * @param {import('../../subscriptionSeenVideos.js').SeenVideoChanges | null | undefined} changes
- * @returns {SubscriptionSeenVideosState}
- */
-export function withSubscriptionSeenVideoChanges(marks, changes) {
-  return applySubscriptionSeenVideoChanges(marks.byId, changes) ? markRaw({ byId: marks.byId }) : marks
-}
 
 /**
  * The cached feeds as a data scope shows them, with its seen marks.
@@ -64,14 +28,14 @@ export function applySubscriptionSeenPostsToCache(cache, seenPosts, scope = null
 
 function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idKey, merge, scope) {
   // The store's marks are indexed already, and reactive per video.
-  const index = entries => isSubscriptionSeenVideosState(entries)
+  const index = entries => isSeenMarksState(entries)
     ? entries.byId
     : new Map(merge([], entries).map(entry => [entry[idKey], entry]))
   const indexSeenEntries = () => index(seenEntries)
   // Plain mutable inputs cannot invalidate computed results. Keep those calls
   // uncached, as with the feed's entry snapshots.
   const canCache = isReactive(cache) && (typeof seenEntries === 'string' || isReactive(seenEntries) ||
-    isSubscriptionSeenVideosState(seenEntries))
+    isSeenMarksState(seenEntries))
   let selectors
   if (canCache) {
     selectors = cacheSelectors.get(cache)
@@ -163,7 +127,7 @@ export async function syncSubscriptionSeenVideos(client, store, assertActive = (
   await store.dispatch('mergeSubscriptionSeenVideos', remote)
   assertActive()
   // Like the merges, the upload leaves out videos watched since their marks.
-  const merged = mergeSubscriptionSeenVideos(subscriptionSeenVideosState(store.state.settings.subscriptionSeenVideos).byId,
+  const merged = mergeSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos,
     [], store.state.history?.historyCacheById ?? {})
   const unseenById = new Map(merged.filter(entry => entry.unseenAt >= entry.seenAt)
     .map(entry => [entry.videoId, entry.unseenAt]))
@@ -199,7 +163,7 @@ export async function syncSubscriptionSeenPosts(client, store, assertActive = ()
   assertActive()
   await store.dispatch('mergeSubscriptionSeenPosts', remote)
   assertActive()
-  const merged = parseSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts)
+  const merged = mergeSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts, [])
   await client.putSeenPosts(merged)
   return merged.length
 }

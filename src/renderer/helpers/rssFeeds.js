@@ -331,7 +331,7 @@ const LAST_REFRESH_STORAGE_KEY = 'rssFeedsLastRefresh'
 const MAX_SEEN_HISTORY_PER_FEED = 500
 
 /**
- * @returns {Map<string, boolean>} whether each marked item is seen
+ * @returns {import('./rssFeedSeenItems').RssFeedSeenMarks} whether each marked item is seen
  */
 function loadRssFeedSeenMarks() {
   return toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
@@ -340,7 +340,7 @@ function loadRssFeedSeenMarks() {
 /**
  * Items marked as seen are no longer new, items marked as unseen are new again.
  * @param {RssFeedItem[]} items
- * @param {Map<string, boolean>} marks whether each marked item is seen
+ * @param {import('./rssFeedSeenItems').RssFeedSeenMarks} marks whether each marked item is seen
  */
 function applySeenMarks(items, marks) {
   if (marks.size === 0) return items

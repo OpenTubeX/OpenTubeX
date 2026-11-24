@@ -9,7 +9,7 @@ import { canRendererWriteSetting } from './settingWriteGuard'
 import { TabManager } from './tabs/TabManager'
 import { recordSubscriptionFeedTitles } from './videoMetadataCache'
 import { seenMarksSettingId } from '../subscriptionSeenMarkSettings.js'
-import { hasSubscriptionSeenVideoChanges } from '../subscriptionSeenVideos.js'
+import { hasSeenMarkChanges } from '../seenMarks.js'
 
 /**
  * Whether a datastore request reads the whole datastore.
@@ -81,8 +81,8 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   }
 
   /**
-   * Sends the changes a merge made to a seen-videos setting to the other windows.
-   * @typedef {(_id: string, changes: import('../subscriptionSeenVideos').SeenVideoChanges) => void} SyncSeenVideoChanges
+   * Sends the changes a merge made to a seen-marks setting to the other windows.
+   * @typedef {(_id: string, changes: import('../seenMarks.js').SeenMarkChanges<unknown>) => void} SyncSeenMarkChanges
    */
 
   /**
@@ -97,7 +97,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
    *   event: import('electron').IpcMainInvokeEvent,
    *   request: { action: number, data: any },
    *   syncSetting: (_id: string, value: unknown) => void,
-   *   syncSeenVideoChanges: SyncSeenVideoChanges
+   *   syncSeenMarkChanges: SyncSeenMarkChanges
    * ) => Promise<unknown>} handler
    * @param {(request: { action: number, data: any }) => Promise<void> | void} [afterSave]
    */
@@ -111,18 +111,18 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
         sendToOtherAppWindows(event.sender, IpcChannels.SYNC_SETTINGS, message)
         savedSetting = { _id, revision: message.revision }
       }
-      /** @type {SyncSeenVideoChanges} */
-      const syncSeenVideoChanges = (_id, changes) => {
-        if (!hasSubscriptionSeenVideoChanges(changes)) return
+      /** @type {SyncSeenMarkChanges} */
+      const syncSeenMarkChanges = (_id, changes) => {
+        if (!hasSeenMarkChanges(changes)) return
         // Changes apply in any order, so they need no revision of the setting.
         sendToOtherAppWindows(event.sender, IpcChannels.SYNC_SETTINGS, numberSyncMessage({
-          event: SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS,
+          event: SyncEvents.SETTINGS.MERGE_SEEN_MARKS,
           data: { _id, changes },
         }))
       }
-      if (isFullRead(request)) return readSynced(syncChannel, () => handler(event, request, syncSetting, syncSeenVideoChanges))
+      if (isFullRead(request)) return readSynced(syncChannel, () => handler(event, request, syncSetting, syncSeenMarkChanges))
 
-      const result = await writeSynced([syncChannel, IpcChannels.SYNC_SETTINGS], () => handler(event, request, syncSetting, syncSeenVideoChanges))
+      const result = await writeSynced([syncChannel, IpcChannels.SYNC_SETTINGS], () => handler(event, request, syncSetting, syncSeenMarkChanges))
       if (savedSetting) {
         try {
           await afterSave(request)
@@ -135,27 +135,27 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   }
 
   // Settings
-  handleRequestsSavingSettings(IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS, async (event, { action, data }, syncSetting, syncSeenVideoChanges) => {
+  handleRequestsSavingSettings(IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS, async (event, { action, data }, syncSetting, syncSeenMarkChanges) => {
     try {
       switch (action) {
         case DBActions.SETTINGS.MERGE_SEEN_VIDEOS: {
           const { scope } = await resolveScope(data?.scope)
           const changes = await baseHandlers.settings.mergeSeenVideos(data?.update, scope)
-          syncSeenVideoChanges(seenMarksSettingId('subscriptionSeenVideos', scope), changes)
+          syncSeenMarkChanges(seenMarksSettingId('subscriptionSeenVideos', scope), changes)
           return changes
         }
 
         case DBActions.SETTINGS.MERGE_SEEN_POSTS: {
           const { scope } = await resolveScope(data?.scope)
-          const value = await baseHandlers.settings.mergeSeenPosts(data?.update, scope)
-          syncSetting(seenMarksSettingId('subscriptionSeenPosts', scope), value)
-          return value
+          const changes = await baseHandlers.settings.mergeSeenPosts(data?.update, scope)
+          syncSeenMarkChanges(seenMarksSettingId('subscriptionSeenPosts', scope), changes)
+          return changes
         }
 
         case DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS: {
-          const value = await baseHandlers.settings.mergeSeenRssItems(data)
-          syncSetting('rssFeedSeenItems', value)
-          return value
+          const changes = await baseHandlers.settings.mergeSeenRssItems(data)
+          syncSeenMarkChanges('rssFeedSeenItems', changes)
+          return changes
         }
 
         case DBActions.GENERAL.FIND:
@@ -192,7 +192,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   }, ({ action, data }) => action === DBActions.GENERAL.UPSERT ? onSettingUpserted(data) : undefined)
 
   // History
-  handleRequestsSavingSettings(IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY, async (event, { action, data, scope: requestedScope }, syncSetting, syncSeenVideoChanges) => {
+  handleRequestsSavingSettings(IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY, async (event, { action, data, scope: requestedScope }, syncSetting, syncSeenMarkChanges) => {
     const { scope, handlers } = await resolveScope(requestedScope)
     try {
       switch (action) {
@@ -206,7 +206,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
                   data: { insertions: [], updates: result.records, deletions: [] }
                 })
           }
-          if (result.seenVideos != null) syncSeenVideoChanges(seenMarksSettingId('subscriptionSeenVideos', scope), result.seenVideos)
+          if (result.seenVideos != null) syncSeenMarkChanges(seenMarksSettingId('subscriptionSeenVideos', scope), result.seenVideos)
           return result
         }
 

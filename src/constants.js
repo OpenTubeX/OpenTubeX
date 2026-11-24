@@ -372,7 +372,7 @@ const SyncEvents = {
   },
 
   SETTINGS: {
-    MERGE_SEEN_VIDEOS: 20,
+    MERGE_SEEN_MARKS: 20,
   },
 
   HISTORY: {

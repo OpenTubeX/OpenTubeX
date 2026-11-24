@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computed, reactive, ref, toRaw } from 'vue'
-import {
-  applySubscriptionSeenVideosToCache, subscriptionSeenVideosState, withSubscriptionSeenVideoChanges,
-} from '../../src/renderer/helpers/subscription-seen-videos.js'
+import { applySubscriptionSeenVideosToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
+import { seenMarksState, withSeenMarkChanges } from '../../src/renderer/helpers/seenMarksState.js'
+import { SEEN_VIDEO_MARKS } from '../../src/subscriptionSeenVideos.js'
 
 test('looking up one cached channel does not scan every channel with seen marks', () => {
   let reads = 0
@@ -118,7 +118,7 @@ test('applying a merge to the store marks reads only the changed video and its c
       isNewInSubscriptionFeed: true
     }))
   }])))
-  const store = { marks: subscriptionSeenVideosState('[]') }
+  const store = { marks: seenMarksState(SEEN_VIDEO_MARKS, '[]') }
   // A full list, whose marks count their reads
   const byId = toRaw(store.marks.byId)
   for (let index = 0; index < 10000; index++) {
@@ -132,7 +132,7 @@ test('applying a merge to the store marks reads only the changed video and its c
   const channels = Object.keys(cache).map(channel => feed.value[channel])
   markReads = 0
   idReads = 0
-  marks.value = withSubscriptionSeenVideoChanges(marks.value, {
+  marks.value = withSeenMarkChanges(SEEN_VIDEO_MARKS, marks.value, {
     upserts: [{ videoId: '2-0', seenAt: 20000, isMembersOnly: false }],
     removals: [],
   })

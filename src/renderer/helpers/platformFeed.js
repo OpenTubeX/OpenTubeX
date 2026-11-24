@@ -364,7 +364,7 @@ function reconcileNewItems(items, channelKeys) {
 
 /**
  * @param {PlatformFeedCache} feed
- * @param {Map<string, boolean>} marks whether each marked item is seen
+ * @param {import('./rssFeedSeenItems').RssFeedSeenMarks} marks whether each marked item is seen
  * @returns {PlatformFeedCache}
  */
 function applySeenMarks(feed, marks) {

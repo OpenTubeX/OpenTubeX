@@ -674,7 +674,7 @@ test.describe('new subscriptions feed', () => {
     await expect(video).toHaveCount(0)
   })
 
-  test('shows a video marked seen or unseen in one window the same way in the others', async ({ app, page }) => {
+  test('shows entries marked seen or unseen in one window the same way in the others', async ({ app, page }) => {
     // Launches a second window, which takes longer than the default under load.
     test.setTimeout(120_000)
     await goTo(page, 'subscriptions')
@@ -702,6 +702,16 @@ test.describe('new subscriptions feed', () => {
       await expect.poll(() => isSeen(window)).toBe(false)
       await expect(card(window).locator('.newContentDot')).toBeVisible()
     }
+
+    // Posts and RSS feed items share the same changes.
+    await page.evaluate(() => Promise.all([
+      window.$store.dispatch('mergeSubscriptionSeenPosts', { posts: [{ postId: 'cross-window-post' }] }),
+      window.$store.dispatch('mergeRssFeedSeenItems', { keys: ['https://example.com/feed\nitem'], seen: true }),
+    ]))
+    await expect.poll(() => other.evaluate(() => [
+      window.$store.getters.getSubscriptionSeenPosts.byId.has('cross-window-post'),
+      window.$store.getters.getRssFeedSeenItems.byId.get('https://example.com/feed\nitem')?.seenAt > 0,
+    ])).toEqual([true, true])
     await other.close()
   })
 
