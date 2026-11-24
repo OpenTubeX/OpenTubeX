@@ -166,6 +166,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // For grid cards shorter than the row shells, see listFirstScreen.js.
+  thumbnailRows: {
+    type: Function,
+    default: null,
+  },
 })
 
 provide(subscriptionFeedTypeKey, computed(() => props.subscriptionFeedType))
@@ -209,6 +214,7 @@ function updateFirstScreenItemCount() {
         thumbnailSize: store.state.settings[thumbnailSizeSetting],
         columns: getGridColumns(thumbnailSizeSetting),
         densityScale: getUiDensityScale(store.state.settings.uiDensity),
+        thumbnailRows: props.thumbnailRows,
       })
 }
 updateFirstScreenItemCount()

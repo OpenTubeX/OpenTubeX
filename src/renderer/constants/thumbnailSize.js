@@ -102,6 +102,30 @@ export function getThumbnailGridColumnCount(thumbnailSize, gridWidth, viewportWi
 }
 
 /**
+ * The narrowest card that a grid at least `minGridWidth` and at most
+ * `maxGridWidth` wide lays out with the track size that
+ * {@link getThumbnailGridStyles} sets. Cards widen with the grid until another
+ * one fits per row, which happens at whole pixel widths, so checking those and
+ * the smallest width finds it.
+ * @param {number} thumbnailSize
+ * @param {number} minGridWidth
+ * @param {number} maxGridWidth
+ * @param {number} viewportWidth
+ * @param {number} columns as for {@link getThumbnailGridStyles}
+ * @param {number} densityScale
+ */
+export function getNarrowestGridCardWidth(thumbnailSize, minGridWidth, maxGridWidth, viewportWidth, columns, densityScale) {
+  const getCardWidth = gridWidth => Math.min(gridWidth, Number.parseFloat(
+    getThumbnailGridStyles(thumbnailSize, gridWidth, viewportWidth, gridWidth, columns, densityScale)['--thumbnail-grid-size']
+  ))
+  let narrowest = getCardWidth(minGridWidth)
+  for (let gridWidth = Math.ceil(minGridWidth); gridWidth <= maxGridWidth; gridWidth++) {
+    narrowest = Math.min(narrowest, getCardWidth(gridWidth))
+  }
+  return narrowest
+}
+
+/**
  * List thumbnails scale off fixed values only. Set these on the document body
  * for general lists or on a playlist page for its independent preference.
  * @param {number} thumbnailSize

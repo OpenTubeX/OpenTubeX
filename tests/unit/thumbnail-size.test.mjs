@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { FULL_WIDTH_COLUMNS, getThumbnailGridColumnCount, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
+import { FULL_WIDTH_COLUMNS, getNarrowestGridCardWidth, getThumbnailGridColumnCount, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
 
 test('phone grids fit two columns at the default thumbnail size', () => {
   for (const width of [240, 313, 343, 380, 428.8]) {
@@ -80,4 +80,27 @@ test('a grid narrower than the viewport holds no more cards per row', () => {
   assert.equal(getThumbnailGridColumnCount(100, 400, 412, 0, 1, false), 2)
   assert.equal(getThumbnailGridColumnCount(100, 1000, 1280, 7, 1, false), 7)
   assert.equal(getThumbnailGridColumnCount(100, 1000, 1280, FULL_WIDTH_COLUMNS, 1, false), 1)
+})
+
+// Lists whose cards are as tall as their thumbnails size the rows they mount
+// up front by the narrowest card. A wider estimate leaves placeholders on screen.
+test('no grid in a width range lays out a card narrower than its narrowest', () => {
+  const cardWidth = (size, width, viewportWidth, columns, densityScale) => Math.min(width, Number.parseFloat(
+    getThumbnailGridStyles(size, width, viewportWidth, width, columns, densityScale)['--thumbnail-grid-size']
+  ))
+  for (const size of [60, 100, 180]) {
+    for (const densityScale of [0.5, 1, 1.5]) {
+      for (const columns of [0, 3, FULL_WIDTH_COLUMNS]) {
+        for (const viewportWidth of [412, 1280]) {
+          for (let minWidth = 240.3; minWidth < viewportWidth; minWidth += 97) {
+            const maxWidth = Math.min(viewportWidth, minWidth + 300)
+            const narrowest = getNarrowestGridCardWidth(size, minWidth, maxWidth, viewportWidth, columns, densityScale)
+            for (let width = minWidth; width <= maxWidth; width += 0.25) {
+              assert.ok(narrowest <= cardWidth(size, width, viewportWidth, columns, densityScale) + 1e-9)
+            }
+          }
+        }
+      }
+    }
+  }
 })
