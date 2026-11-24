@@ -84,6 +84,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'disableSmoothScrolling',
   'useTrayIcon',
   'trayIconPreset',
+  'appIconPreset',
   'hideToTrayOnClose',
   'hideToTrayOnMinimize',
   'settingsPassword',

@@ -2866,6 +2866,8 @@ App Icon:
   Saved Message: "Icona gardada. O iniciador pode tardar un momento en actualizarse."
   Title: "Icona da aplicación"
   Error: "Non se puido cargar ou cambiar a icona da aplicación"
+  Running Only Hint: "Aplícase ás xanelas abertas. O dock, o panel ou o iniciador poden seguir mostrando a icona orixinal."
+  Windows Hint: "Tamén cambia os atallos de OpenTubeX. As iconas fixadas na barra de tarefas actualízanse despois de pechar a sesión ou reiniciar Windows."
 
 App Lock:
   Title: "Bloqueo da aplicación"

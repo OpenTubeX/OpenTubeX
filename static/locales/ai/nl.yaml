@@ -2874,6 +2874,8 @@ App Icon:
   Saved Message: "Pictogram opgeslagen. Het kan even duren voordat je launcher is bijgewerkt."
   Title: "App-pictogram"
   Error: "Kan het app-pictogram niet laden of wijzigen"
+  Running Only Hint: "Geldt voor geopende vensters. Je dock, paneel of starter kan het oorspronkelijke pictogram blijven tonen."
+  Windows Hint: "Wijzigt ook snelkoppelingen naar OpenTubeX. Vastgemaakte taakbalkpictogrammen worden bijgewerkt nadat je je afmeldt of Windows opnieuw opstart."
 
 App Lock:
   Title: "App-vergrendeling"

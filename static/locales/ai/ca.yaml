@@ -3458,6 +3458,8 @@ App Icon:
   Saved Message: "Icona desada. El llançador pot trigar un moment a actualitzar-se."
   Title: "Icona de l'aplicació"
   Error: "No s'ha pogut carregar o canviar la icona de l'aplicació"
+  Running Only Hint: "S'aplica a les finestres obertes. L'acoblador, el tauler o el llançador poden continuar mostrant la icona original."
+  Windows Hint: "També canvia les dreceres d'OpenTubeX. Les icones fixades a la barra de tasques s'actualitzen després de tancar la sessió o reiniciar Windows."
 
 App Lock:
   Title: "Bloqueig de l'aplicació"

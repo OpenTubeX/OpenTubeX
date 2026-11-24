@@ -159,6 +159,7 @@ const IpcChannels = {
 
   SYNC_SETTINGS: 'sync-settings',
   SET_TRAY_ICON: 'set-tray-icon',
+  SET_APP_ICON: 'set-app-icon',
   SYNC_HISTORY: 'sync-history',
   SYNC_WATCH_STATS: 'sync-watch-stats',
   SYNC_SEARCH_HISTORY: 'sync-search-history',

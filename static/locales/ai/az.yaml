@@ -2806,6 +2806,8 @@ App Icon:
   Saved Message: "Nişan saxlanıldı. Başladıcının yenilənməsi bir qədər vaxt ala bilər."
   Title: "Tətbiq nişanı"
   Error: "Tətbiq nişanını yükləmək və ya dəyişmək mümkün olmadı"
+  Running Only Hint: "Açıq pəncərələrə tətbiq olunur. Dok, panel və ya başladıcı əvvəlki nişanı göstərməyə davam edə bilər."
+  Windows Hint: "OpenTubeX qısayollarını da dəyişir. Tapşırıq panelinə bərkidilmiş nişanlar hesabdan çıxdıqdan və ya Windows-u yenidən başlatdıqdan sonra yenilənir."
 
 App Lock:
   Title: "Tətbiq kilidi"

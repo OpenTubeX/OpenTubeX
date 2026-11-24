@@ -4067,6 +4067,8 @@ App Icon:
   Saved Message: "Symbol gespeichert. Es kann einen Moment dauern, bis dein Launcher es aktualisiert."
   Title: "App-Symbol"
   Error: "Das App-Symbol konnte nicht geladen oder geändert werden"
+  Running Only Hint: "Gilt für geöffnete Fenster. Dock, Leiste oder Starter zeigen eventuell weiterhin das ursprüngliche Symbol."
+  Windows Hint: "Ändert auch die Verknüpfungen zu OpenTubeX. Angeheftete Taskleistensymbole ändern sich, nachdem du dich abmeldest oder Windows neu startest."
 
 App Lock:
   Title: "App-Sperre"

@@ -2796,6 +2796,8 @@ App Icon:
   Saved Message: "Ikona byla uložena. Aktualizace spouštěče může chvíli trvat."
   Title: "Ikona aplikace"
   Error: "Ikonu aplikace se nepodařilo načíst nebo změnit"
+  Running Only Hint: "Platí pro otevřená okna. Dok, panel nebo spouštěč mohou dál zobrazovat původní ikonu."
+  Windows Hint: "Změní také zástupce OpenTubeX. Ikony připnuté na hlavním panelu se aktualizují po odhlášení nebo restartu Windows."
 
 App Lock:
   Title: "Zámek aplikace"

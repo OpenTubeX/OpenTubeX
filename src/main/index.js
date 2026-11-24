@@ -100,6 +100,7 @@ import { resolveScope, setupDatastoreIpc } from './datastoreIpc'
 import { settingSyncMessage, writeSynced } from './datastoreSync'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
+import { createAppIconManager } from './appIcon'
 import { readStartupColorScheme, systemPrefersDark } from './startupColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 import { getMainTranslator, resetMainTranslator } from './mainTranslator'
@@ -966,6 +967,18 @@ function runApp() {
     }
   }
   app.whenReady().then(updateTrayColorSchemeWatcher)
+  const appIcon = createAppIconManager({
+    userDataPath,
+    defaultIconPath: process.env.NODE_ENV === 'development'
+      ? path.join(__dirname, '../../_icons/iconColor.png')
+      : path.join(__dirname, '../_icons/iconColor.png'),
+    executablePath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath,
+  })
+  app.whenReady().then(() => appIcon.restore())
+  handleTrusted(IpcChannels.SET_APP_ICON, async (event, dataUrl) => {
+    if (!TabManager.getFromWebContents(event.sender)) return
+    await appIcon.set(dataUrl)
+  })
   const enqueueTrayIconWrite = createSerialQueue()
   handleTrusted(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
     if (!TabManager.getFromWebContents(event.sender)) return
@@ -2080,9 +2093,7 @@ function runApp() {
       // The initial HTML paints a splash before the shared renderer boots.
       show: false,
       backgroundColor: windowBackground,
-      icon: process.env.NODE_ENV === 'development'
-        ? path.join(__dirname, '../../_icons/iconColor.png')
-        : path.join(__dirname, '../_icons/iconColor.png'),
+      icon: appIcon.getWindowIcon(),
       autoHideMenuBar: true,
       ...customTitleBar
         ? {
@@ -3142,6 +3153,7 @@ function runApp() {
 
       await Promise.allSettled([
         enqueueTrayIconWrite(() => {}),
+        appIcon.flush(),
         // A script left in KWin would act on a later process with the same ID
         closeKwinPictureInPictureBounds.then(close => close?.())
           .finally(() => pictureInPictureBoundsStore.settled()),

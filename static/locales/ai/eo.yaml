@@ -2858,6 +2858,8 @@ App Icon:
   Saved Message: Piktogramo konservita. Via lanĉilo eble bezonos momenton por ĝisdatiĝi.
   Title: Piktogramo de la aplikaĵo
   Error: Ne eblas ŝargi aŭ ŝanĝi la piktogramon de la aplikaĵo
+  Running Only Hint: "Validas por malfermitaj fenestroj. Via doko, panelo aŭ lanĉilo eble daŭre montros la originalan piktogramon."
+  Windows Hint: "Ankaŭ ŝanĝas la ligilojn al OpenTubeX. Alpinglitaj piktogramoj en la taskobreto ĝisdatiĝas post kiam vi elsalutas aŭ restartigas Windows."
 App Lock:
   Title: "Aplika ŝloso"
   Enable: "Postuli ekranŝloson"

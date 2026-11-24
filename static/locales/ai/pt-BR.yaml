@@ -2750,6 +2750,8 @@ App Icon:
   Saved Message: "Ícone salvo. O inicializador pode levar um momento para atualizar."
   Title: "Ícone do aplicativo"
   Error: "Não foi possível carregar ou alterar o ícone do aplicativo"
+  Running Only Hint: "Aplica-se às janelas abertas. Seu dock, painel ou inicializador pode continuar mostrando o ícone original."
+  Windows Hint: "Também altera os atalhos do OpenTubeX. Ícones fixados na barra de tarefas são atualizados depois que você sai da conta ou reinicia o Windows."
 
 App Lock:
   Title: "Bloqueio do app"

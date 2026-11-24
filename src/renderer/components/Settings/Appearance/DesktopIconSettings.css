@@ -1,4 +1,4 @@
-.trayIconPreview {
+.desktopIconPreview {
   background-color: var(--bg-color);
   border-radius: 22.5%;
   color: var(--logo-primary-color);
@@ -7,7 +7,7 @@
   inline-size: 64px;
 }
 
-.trayIconPreview > span {
+.desktopIconPreview > span {
   background-color: currentcolor;
   display: block;
   block-size: 100%;
@@ -18,11 +18,15 @@
 }
 
 /* The monochrome icon has no tile and matches the taskbar or panel, like the text here. */
-.trayIconPreview.monochrome {
+.desktopIconPreview.monochrome {
   background-color: transparent;
   color: var(--primary-text-color);
 }
 
-.trayIconPreview.monochrome > span {
+.desktopIconPreview.monochrome > span {
   mask-size: 140%;
+}
+
+.desktopIconHint {
+  margin-block: 0 12px;
 }

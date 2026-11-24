@@ -2807,6 +2807,8 @@ App Icon:
   Saved Message: "Enrollet eo an arlun. Un tamm amzer a c'hall bezañ ret d'al lañser evit hizivaat anezhañ."
   Title: "Arlun an arload"
   Error: "N'eus ket bet gallet kargañ pe cheñch arlun an arload"
+  Running Only Hint: "Arloet e vez d'ar prenestroù digor. Gallout a ra ho tok, ho panell pe ho loc'her derc'hel da ziskouez an arlun orin."
+  Windows Hint: "Kemmañ a ra ivez berradennoù OpenTubeX. Hizivaet e vo an arlunioù spilhennet er varrenn trevelloù goude ma kuitaot pe ma adloc'hot Windows."
 
 App Lock:
   Title: "Prenañ an arload"

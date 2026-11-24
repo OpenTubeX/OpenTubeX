@@ -2801,6 +2801,8 @@ App Icon:
   Saved Message: "Ikonen har sparats. Det kan ta en stund innan startskärmen uppdateras."
   Title: "Appikon"
   Error: "Kunde inte läsa in eller ändra appikonen"
+  Running Only Hint: "Gäller öppna fönster. Dockan, panelen eller startprogrammet kan fortsätta visa den ursprungliga ikonen."
+  Windows Hint: "Ändrar även genvägar till OpenTubeX. Fästa ikoner i aktivitetsfältet uppdateras när du loggar ut eller startar om Windows."
 
 App Lock:
   Title: "Applås"

@@ -2812,6 +2812,8 @@ App Icon:
   Saved Message: "Táknið hefur verið vistað. Uppfærsla heimaskjásins gæti tekið smástund."
   Title: "Tákn forrits"
   Error: "Ekki tókst að hlaða eða breyta tákni forritsins"
+  Running Only Hint: "Á við um opna glugga. Kvíin, spjaldið eða ræsirinn gæti áfram sýnt upprunalega táknið."
+  Windows Hint: "Breytir einnig flýtileiðum OpenTubeX. Fest tákn á verkstiku uppfærast eftir að þú skráir þig út eða endurræsir Windows."
 
 App Lock:
   Title: "Forritalás"

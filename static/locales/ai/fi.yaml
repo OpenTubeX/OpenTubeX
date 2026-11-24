@@ -2810,6 +2810,8 @@ App Icon:
   Saved Message: "Kuvake tallennettu. Käynnistyssovelluksen päivittyminen voi kestää hetken."
   Title: "Sovelluskuvake"
   Error: "Sovelluskuvaketta ei voitu ladata tai vaihtaa"
+  Running Only Hint: "Koskee avoimia ikkunoita. Telakka, paneeli tai käynnistin voi edelleen näyttää alkuperäisen kuvakkeen."
+  Windows Hint: "Muuttaa myös OpenTubeX-pikakuvakkeet. Tehtäväpalkkiin kiinnitetyt kuvakkeet päivittyvät, kun kirjaudut ulos tai käynnistät Windowsin uudelleen."
 
 App Lock:
   Title: "Sovelluslukitus"

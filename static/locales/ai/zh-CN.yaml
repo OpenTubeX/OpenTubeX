@@ -2796,6 +2796,8 @@ App Icon:
   Saved Message: "图标已保存。启动器可能需要一些时间来更新。"
   Title: "应用图标"
   Error: "无法加载或更改应用图标"
+  Running Only Hint: "应用于打开的窗口。程序坞、面板或启动器可能仍显示原始图标。"
+  Windows Hint: "也会更改 OpenTubeX 快捷方式。固定到任务栏的图标会在你注销或重启 Windows 后更新。"
 
 App Lock:
   Title: "应用锁"

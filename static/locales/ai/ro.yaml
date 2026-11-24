@@ -2859,6 +2859,8 @@ App Icon:
   Saved Message: "Pictograma a fost salvată. Actualizarea lansatorului poate dura puțin."
   Title: "Pictograma aplicației"
   Error: "Nu s-a putut încărca sau schimba pictograma aplicației"
+  Running Only Hint: "Se aplică ferestrelor deschise. Dock-ul, panoul sau lansatorul pot afișa în continuare pictograma originală."
+  Windows Hint: "Modifică și comenzile rapide OpenTubeX. Pictogramele fixate în bara de activități se actualizează după ce vă deconectați sau reporniți Windows."
 
 App Lock:
   Title: "Blocarea aplicației"

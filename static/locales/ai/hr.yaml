@@ -2842,6 +2842,8 @@ App Icon:
   Saved Message: "Ikona je spremljena. Ažuriranje pokretača može potrajati trenutak."
   Title: "Ikona aplikacije"
   Error: "Nije moguće učitati ili promijeniti ikonu aplikacije"
+  Running Only Hint: "Primjenjuje se na otvorene prozore. Dok, ploča ili pokretač mogu i dalje prikazivati izvornu ikonu."
+  Windows Hint: "Mijenja i prečace za OpenTubeX. Ikone prikvačene na programsku traku ažuriraju se nakon odjave ili ponovnog pokretanja sustava Windows."
 
 App Lock:
   Title: "Zaključavanje aplikacije"

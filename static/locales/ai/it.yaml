@@ -2796,6 +2796,8 @@ App Icon:
   Saved Message: "Icona salvata. L'aggiornamento del launcher potrebbe richiedere un momento."
   Title: "Icona dell'app"
   Error: "Impossibile caricare o cambiare l'icona dell'app"
+  Running Only Hint: "Si applica alle finestre aperte. Il dock, il pannello o il launcher potrebbero continuare a mostrare l'icona originale."
+  Windows Hint: "Modifica anche i collegamenti a OpenTubeX. Le icone aggiunte alla barra delle applicazioni si aggiornano dopo la disconnessione o il riavvio di Windows."
 
 App Lock:
   Title: "Blocco dell'app"
