@@ -1208,7 +1208,10 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
   releaseFrench()
   await frenchResponse
-  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  // The late French track is still added, but German stays selected
+  const captionLanguages = player.locator('.shaka-text-languages')
+  await expect(captionLanguages.getByRole('menuitemradio', { name: /^French/ })).toHaveCount(1)
+  await expect(captionLanguages.getByRole('menuitemradio', { name: /^German/ })).toHaveAttribute('aria-checked', 'true')
 
   const watchComponent = await page.evaluateHandle(findWatchComponent)
   await watchComponent.evaluate(async (component) => {
