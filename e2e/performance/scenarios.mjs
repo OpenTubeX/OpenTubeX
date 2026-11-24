@@ -44,7 +44,7 @@ function measureRendererAction(page, scenario) {
       }, actionTimeoutMs)
 
       const isComplete = () => {
-        const count = document.querySelector('.count')?.textContent ?? ''
+        const count = document.querySelector('.countBadge')?.title ?? ''
         if (scenario === 'navigation') {
           return location.hash.startsWith('#/subscribedchannels') &&
             count.includes('933') &&
@@ -94,7 +94,14 @@ function measureRendererAction(page, scenario) {
   }, { scenario, timeoutMessage, actionTimeoutMs })
 }
 
+async function expandSideNavigation(page) {
+  const expandNavigation = page.getByRole('button', { name: 'Expand side navigation', exact: true })
+  if (await expandNavigation.isVisible()) await expandNavigation.click()
+}
+
 async function measureSubscribedChannelsNavigation(page) {
+  // The collapsed side navigation omits Channels.
+  await expandSideNavigation(page)
   await goTo(page, 'trending')
 
   const result = await measureRendererAction(page, 'navigation')
@@ -280,8 +287,7 @@ async function measurePlaybackStart(electronApp, page) {
 }
 
 export async function measurePlaybackHeapGrowth(page) {
-  const expandNavigation = page.getByRole('button', { name: 'Expand side navigation', exact: true })
-  if (await expandNavigation.isVisible()) await expandNavigation.click()
+  await expandSideNavigation(page)
   await goTo(page, 'trending')
   await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
   await page.evaluate(() => {
