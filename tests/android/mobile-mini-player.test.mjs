@@ -322,7 +322,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         }, scale)
         await expect(page).toHaveURL(/#\/history/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-        const history = page.locator('.tabContent > .routerView').first()
+        // Pages visited before History stay retained in front of it.
+        const history = page.locator('.tabContent > .routerView:not(.retainedPage)')
         await expect(history.locator('.ft-list-video').first()).toBeVisible()
         await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
         const saved = await history.evaluate(element => ({ top: element.getBoundingClientRect().top, scroll: window.scrollY }))
@@ -332,7 +333,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await expect(player).not.toHaveClass(/scrollMiniPlayer/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         const box = await player.boundingBox()
-        const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+        // The seek bar's touch area reaches the middle of the small player at 125%.
+        const start = { x: box.x + 12, y: box.y + 12 }
         for (const cancelled of [true, false]) {
           await touch('touchStart', start)
           for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...start, y: start.y + distance })
@@ -665,17 +667,25 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
             // Let the nav's own reveal/hide transition finish before sampling geometry.
             await expect.poll(() => nav.evaluate(element => element.getAnimations().length)).toBe(0)
             const box = await player.boundingBox()
-            const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-            await touch('touchStart', point)
-            await touch('touchMove', { ...point, y: point.y + 30 })
-            await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-            await page.evaluate(() => window.dispatchEvent(new Event('resize')))
-            if (hidden) await expect(nav).toHaveClass(/scrollHidden/)
-            else await expect(nav).not.toHaveClass(/scrollHidden/)
-            // The overlay is laid out at the final morph endpoint throughout the drag.
-            const endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
-            for (const distance of [60, 100, 160]) await touch('touchMove', { ...point, y: point.y + distance })
-            await touch('touchEnd')
+            // The seek bar's touch area reaches the middle of the small player at 125%.
+            const point = { x: box.x + 12, y: box.y + 12 }
+            let endpoint
+            try {
+              await touch('touchStart', point)
+              await touch('touchMove', { ...point, y: point.y + 30 })
+              await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+              await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+              if (hidden) await expect(nav).toHaveClass(/scrollHidden/)
+              else await expect(nav).not.toHaveClass(/scrollHidden/)
+              // The overlay is laid out at the final morph endpoint throughout the drag.
+              endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
+              for (const distance of [60, 100, 160]) await touch('touchMove', { ...point, y: point.y + distance })
+              await touch('touchEnd')
+            } catch (error) {
+              // A touch left down turns the next subtest's touchStart into a no-op.
+              await touch('touchCancel').catch(() => {})
+              throw error
+            }
             await expect(page).toHaveURL(/#\/subscriptions/)
             await expect(player).toHaveClass(/mobileMiniBar/)
             await settle()
