@@ -351,6 +351,96 @@ test('settings of one profile edited on two devices before they sync are all kep
   assert.equal(unchanged, remoteEntry, 'Unedited settings must take the server ones')
 })
 
+test('the later edit of a profile setting wins, whenever either device edited its other settings', () => {
+  const key = 'profileSettings-636172'
+  const old = { key, value: { hideComments: false, preferredCaptionLocale: 'en' }, updatedAt: 10 }
+  // This device chose French captions at 20 and hid comments at 40; the other
+  // device chose German captions at 30.
+  const value = { hideComments: true, preferredCaptionLocale: 'fr' }
+  const localTimes = { hideComments: 40, preferredCaptionLocale: 20 }
+  const local = { key, value, old, localUpdatedAt: 40, localSettingUpdatedAt: id => localTimes[id], now: 50 }
+  const german = {
+    key,
+    value: { hideComments: false, preferredCaptionLocale: 'de' },
+    updatedAt: 30,
+    settingsUpdatedAt: { hideComments: 10, preferredCaptionLocale: 30 },
+  }
+  const entry = mergeProfileSettingsEntry({ ...local, remoteEntry: german })
+  assert.deepEqual(entry.value, { hideComments: true, preferredCaptionLocale: 'de' })
+  assert.deepEqual(entry.settingsUpdatedAt, { hideComments: 40, preferredCaptionLocale: 30 })
+  assert.equal(entry.updatedAt, 40)
+
+  // The same when this device synced first: the other device's later caption
+  // language wins over the server entry's later edit time.
+  const french = { key, value, updatedAt: 40, settingsUpdatedAt: localTimes }
+  const other = mergeProfileSettingsEntry({
+    key,
+    value: german.value,
+    old,
+    remoteEntry: french,
+    localUpdatedAt: 30,
+    localSettingUpdatedAt: id => ({ preferredCaptionLocale: 30 })[id],
+    now: 50,
+  })
+  assert.deepEqual(other.value, { hideComments: true, preferredCaptionLocale: 'de' })
+  assert.deepEqual(other.settingsUpdatedAt, { hideComments: 40, preferredCaptionLocale: 30 })
+})
+
+test('a profile setting that went back to the shared value keeps its edit time', () => {
+  const key = 'profileSettings-636172'
+  const old = { key, value: { hideComments: true, hideLiveChat: true }, updatedAt: 10 }
+  // The other device used the shared Hide Comments again at 30, and hid live chat at 35.
+  const remoteEntry = {
+    key,
+    value: { hideLiveChat: true, iconPack: 'remix' },
+    updatedAt: 35,
+    settingsUpdatedAt: { hideComments: 30, hideLiveChat: 10, iconPack: 35 },
+  }
+  // This device showed comments at 20, before the other device's removal.
+  const earlier = mergeProfileSettingsEntry({
+    key,
+    value: { hideComments: false, hideLiveChat: true },
+    old,
+    remoteEntry,
+    localUpdatedAt: 20,
+    localSettingUpdatedAt: id => ({ hideComments: 20 })[id],
+    now: 50,
+  })
+  assert.equal(earlier, remoteEntry)
+
+  // This device used the shared value of Hide Live Chat again at 40, after
+  // the other device's last edit, so the removal reaches the other devices.
+  const removed = mergeProfileSettingsEntry({
+    key,
+    value: { hideComments: false },
+    old,
+    remoteEntry,
+    localUpdatedAt: 40,
+    localSettingUpdatedAt: id => ({ hideComments: 20, hideLiveChat: 40 })[id],
+    now: 50,
+  })
+  assert.deepEqual(removed.value, { iconPack: 'remix' })
+  assert.deepEqual(removed.settingsUpdatedAt, { hideComments: 30, hideLiveChat: 40, iconPack: 35 })
+})
+
+test('profile settings synced without edit times of their own count as edited with the whole entry', () => {
+  const key = 'profileSettings-636172'
+  const old = { key, value: { hideComments: false, preferredCaptionLocale: 'en' }, updatedAt: 10 }
+  // An entry from a version that synced no edit times per setting
+  const remoteEntry = { key, value: { hideComments: false, preferredCaptionLocale: 'de' }, updatedAt: 30 }
+  const value = { hideComments: true, preferredCaptionLocale: 'fr' }
+  // Edits this device saved before it recorded them per setting count as edited with the profile's settings.
+  const later = mergeProfileSettingsEntry({ key, value, old, remoteEntry, localUpdatedAt: 40, now: 50 })
+  assert.deepEqual(later.value, value)
+  assert.deepEqual(later.settingsUpdatedAt, { hideComments: 40, preferredCaptionLocale: 40 })
+
+  const entry = mergeProfileSettingsEntry({
+    key, value, old, remoteEntry, localUpdatedAt: 40, localSettingUpdatedAt: id => ({ hideComments: 40, preferredCaptionLocale: 20 })[id], now: 50,
+  })
+  assert.deepEqual(entry.value, { hideComments: true, preferredCaptionLocale: 'de' })
+  assert.deepEqual(entry.settingsUpdatedAt, { hideComments: 40, preferredCaptionLocale: 30 })
+})
+
 test('hidden channels added and removed on two devices before they sync are all kept', () => {
   const channel = (name, preferredName = '') => ({ name, preferredName })
   const old = { key: 'channelsHidden', value: JSON.stringify([channel('UC-a'), channel('UC-b')]), updatedAt: 10 }

@@ -50,12 +50,14 @@ import { networkMetered } from '../../helpers/player/meteredNetworkQuality.js'
 import {
   SHARED_ONLY_SETTINGS,
   canHaveOwnSettings,
+  changedProfileSettingEditTimeIds,
   collectProfileSettings,
   isPlainObject,
   isProfileSettingsId,
   ownSettingsOf,
   planProfileSettingsOf,
   profileIdFromSettingsId,
+  profileSettingEditTimeId,
   profileSettingsId,
   profileSettingsOf,
   sameSettingValue,
@@ -484,23 +486,28 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 }
 
 /**
- * Saves the edit time `update` returns for `settingId`, for sync, or removes it
- * for `undefined`. Windows can edit different settings at once, so it reads the
- * saved times inside a lock they share.
+ * Saves the edit time `update` returns for each of `settingIds`, for sync, or
+ * removes it for `undefined`. Windows can edit different settings at once, so
+ * it reads the saved times inside a lock they share.
  * @param {Function} commit
- * @param {string} settingId
- * @param {(editedAt: number | undefined) => number | undefined} update
- * @returns {Promise<boolean>} whether the edit time was saved
+ * @param {string | string[]} settingIds
+ * @param {(editedAt: number | undefined, settingId: string) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit times were saved
  */
-function updateSettingSyncTimestamp(commit, settingId, update) {
+function updateSettingSyncTimestamp(commit, settingIds, update) {
   return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
     const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
-    const editedAt = update(updatedAt[settingId])
-    if (editedAt === updatedAt[settingId]) return
-    if (editedAt === undefined) delete updatedAt[settingId]
-    else updatedAt[settingId] = editedAt
+    let changed = false
+    for (const settingId of [settingIds].flat()) {
+      const editedAt = update(updatedAt[settingId], settingId)
+      if (editedAt === updatedAt[settingId]) continue
+      changed = true
+      if (editedAt === undefined) delete updatedAt[settingId]
+      else updatedAt[settingId] = editedAt
+    }
+    if (!changed) return
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
   })
@@ -519,15 +526,18 @@ function updateSettingSyncTimestamp(commit, settingId, update) {
  * @param {string} settingId
  * @param {() => Promise<T>} save
  * @param {number} [editedAt]
+ * @param {string[]} [editedParts] other edit times to save with it, such as
+ *   those of the settings a profile's own settings change, see `profileSettingEditTimeId`
  * @returns {Promise<T>}
  */
-function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now(), editedParts = []) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY && !isProfileSettingsId(settingId)) return save()
 
   return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
-    let previous
-    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
-      previous = saved
+    const ids = [settingId, ...editedParts]
+    const previous = new Map()
+    const recorded = await updateSettingSyncTimestamp(commit, ids, (saved, id) => {
+      previous.set(id, saved)
       return editedAt
     })
     if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
@@ -535,7 +545,7 @@ function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
       return await save()
     } catch (error) {
       // Keep an edit time that something else saved meanwhile.
-      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      await updateSettingSyncTimestamp(commit, ids, (saved, id) => saved === editedAt ? previous.get(id) : saved)
       throw error
     }
   })
@@ -723,7 +733,7 @@ function saveProfileSettingValue(commit, profileId, settingId, value) {
     const settings = { ...saved }
     if (value === undefined) delete settings[settingId]
     else settings[settingId] = value
-    await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+    await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings), Date.now(), [profileSettingEditTimeId(id, settingId)])
     commit('setProfileOwnSettings', { profileId, settings })
   })
 }
@@ -1624,7 +1634,8 @@ const customActions = {
       // Turning them off saves null rather than deleting them, so other
       // windows and devices learn about it.
       const settings = enabled ? {} : null
-      await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+      await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings), Date.now(),
+        changedProfileSettingEditTimeIds(id, saved, settings))
       commit('setProfileOwnSettings', { profileId, settings })
     }))
   },
@@ -1668,7 +1679,8 @@ const customActions = {
       const saved = await DBSettingHandlers.findValue(id)
       if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
       if (!isPlainObject(saved) || !sameSettingValue(sanitizeProfileSettings(saved), restored)) {
-        await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored))
+        await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored), Date.now(),
+          changedProfileSettingEditTimeIds(id, sanitizeProfileSettings(saved), restored))
       }
       commit('setProfileOwnSettings', { profileId, settings: restored })
     }))

@@ -34,7 +34,7 @@ import Datastore from '@seald-io/nedb'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, profileSettingTimesOf, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
@@ -210,6 +210,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isListSetting,
     mergeSettingListEntry,
     mergeProfileSettingsEntry,
+    profileSettingTimesOf,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,

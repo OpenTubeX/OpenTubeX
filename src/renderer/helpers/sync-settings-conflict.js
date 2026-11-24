@@ -203,32 +203,62 @@ export function mergeSettingListEntry(options) {
 const isSettingsObject = value => value !== null && typeof value === 'object' && !Array.isArray(value)
 
 /**
+ * When each of the own settings of a profile in a synced entry was last
+ * edited, by setting, also for those that went back to the shared value.
+ * Entries from versions that synced no such times count each setting as
+ * edited with the entry.
+ * @param {{ value: Record<string, unknown>, updatedAt: number, settingsUpdatedAt?: unknown }} entry
+ * @returns {Record<string, number>}
+ */
+export function profileSettingTimesOf(entry) {
+  const times = Object.fromEntries(Object.entries(isSettingsObject(entry.settingsUpdatedAt) ? entry.settingsUpdatedAt : {})
+    .filter(([, editedAt]) => Number.isFinite(editedAt)))
+  for (const settingId of Object.keys(entry.value)) {
+    if (!Object.hasOwn(times, settingId)) times[settingId] = entry.updatedAt
+  }
+  return times
+}
+
+/**
  * Merges the own settings of a profile by setting against the last synced
  * ones, so settings edited on two devices before they synced are all kept.
- * When both devices edited the same setting, the later edit wins. Turning own
- * settings on or off, or merging without synced settings, replaces them all.
+ * When both devices edited the same setting, the later edit of that setting
+ * wins, which `settingsUpdatedAt` of the entry and `localSettingUpdatedAt`
+ * give. Turning own settings on or off, or merging without synced settings,
+ * replaces them all.
+ * @param {object} options see `mergeSettingEntry`
+ * @param {(settingId: string) => number | undefined} [options.localSettingUpdatedAt]
+ *   when this device last edited a setting, if it saved that
  */
 export function mergeProfileSettingsEntry(options) {
-  const { key, value, old, remoteEntry, localUpdatedAt, now } = options
+  const { key, value, old, remoteEntry, localUpdatedAt, localSettingUpdatedAt = () => undefined, now } = options
   if (!isSettingsObject(value) || !isSettingsObject(remoteEntry?.value) || !isSettingsObject(old?.value)) {
     return mergeSettingEntry(options)
   }
 
   const base = old.value
   const merged = { ...remoteEntry.value }
-  const localWins = (localUpdatedAt ?? now) >= remoteEntry.updatedAt
+  const times = profileSettingTimesOf(remoteEntry)
   for (const settingId of new Set([...Object.keys(base), ...Object.keys(value)])) {
     const local = Object.hasOwn(value, settingId) ? value[settingId] : undefined
     const synced = Object.hasOwn(base, settingId) ? base[settingId] : undefined
     const remote = Object.hasOwn(merged, settingId) ? merged[settingId] : undefined
     if (areJsonValuesEqual(local, synced)) continue
-    if (!areJsonValuesEqual(remote, synced) && !localWins) continue
+    const editedAt = localSettingUpdatedAt(settingId) ?? localUpdatedAt ?? now
+    const remoteEditedAt = Object.hasOwn(times, settingId) ? times[settingId] : remoteEntry.updatedAt
+    if (!areJsonValuesEqual(remote, synced) && editedAt < remoteEditedAt) continue
     if (local === undefined) delete merged[settingId]
     else merged[settingId] = local
+    times[settingId] = editedAt
   }
 
   if (areJsonValuesEqual(merged, remoteEntry.value)) return remoteEntry
-  return { key, value: merged, updatedAt: Math.max(localUpdatedAt ?? now, remoteEntry.updatedAt) }
+  return {
+    key,
+    value: merged,
+    updatedAt: Math.max(localUpdatedAt ?? now, remoteEntry.updatedAt),
+    settingsUpdatedAt: times,
+  }
 }
 
 /**
