@@ -50,10 +50,13 @@ const Trending = createAsyncRoute(() => import('../views/Trending/Trending.vue')
 const Popular = createAsyncRoute(() => import('../views/Popular/Popular.vue'))
 // Your Playlists only shows playlist cards, which load lazily as well. Loading
 // them with the view renders them in its first frame instead of a frame after
-// their own request. The view still opens if they fail; its cards retry then.
+// their own request. The view still opens if they fail. Their async wrapper
+// keeps a failed request, so it only loads once the card code is here and
+// cannot fail; the cards then load it again themselves.
 const UserPlaylists = createAsyncRoute(() => Promise.all([
   import('../views/UserPlaylists/UserPlaylists.vue'),
-  import('../components/FtListLazyWrapper/lazyListComponents')
+  import('../components/FtListPlaylist/FtListPlaylist.vue')
+    .then(() => import('../components/FtListLazyWrapper/lazyListComponents'))
     .then(({ FtListPlaylist }) => FtListPlaylist.__asyncLoader())
     .catch(() => {})
 ]).then(([view]) => view))
