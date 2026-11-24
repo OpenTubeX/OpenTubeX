@@ -4,9 +4,9 @@
     tag="div"
     name="feed"
     :appear="appear"
-    :duration="transitionDurations"
-    :move-class="moveClass"
-    :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
+    :duration="getTransitionDurations()"
+    :move-class="getMoveClass()"
+    :data-skip-move="getMoveClass() === 'feed-move-suppressed' ? '' : null"
     :data-feed-enter-together="appear && !reducedMotion ? '' : null"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
@@ -113,39 +113,45 @@ onDeactivated(() => {
 // just once, right after mount.
 const thumbnailSizeReady = ref(false)
 
-// While the container itself is being sized or resized (initial layout,
-// window resize, or a modal's
-// scrollbar compensation nudging the layout by a fraction of a pixel at
-// fractional display scales), the FLIP move transition must not run —
-// it should only animate actual list changes. 'feed-move-suppressed' has
-// no transition, so the TransitionGroup skips the move handling entirely.
-const suppressMoveTransition = ref(false)
+// While the container itself is being sized or resized (initial layout or
+// window resize), the FLIP move transition must not run — it should only
+// animate actual list changes. 'feed-move-suppressed' has no transition, so
+// the TransitionGroup skips the move handling entirely. Only renders during
+// the resize read this. Rendering again just to lift it would have
+// TransitionGroup measure every card, which ran 100 ms after each grid
+// mounted, such as while its page was still opening.
+let suppressMoveTransition = false
 let suppressResetTimeout = null
 
 const systemReducedMotion = usePhoneLayout('(prefers-reduced-motion: reduce)')
 const reducedMotion = computed(() => store.getters.getReducedMotion === 'on' ||
   (store.getters.getReducedMotion === 'system' && systemReducedMotion.value))
 
+// Only the New feed fades departing cards; other lists remove them immediately.
+// Cards only leave in later renders, so this is known by then. Reading the
+// template ref while rendering instead rendered every grid a second time once
+// it mounted, and TransitionGroup measures each card for that render.
+let inNewFeed = false
+
 // Vue otherwise infers timing with getComputedStyle for every entering card,
 // interleaving style reads with class writes across the whole incoming batch.
-const transitionDurations = computed(() => {
+function getTransitionDurations() {
   return {
     enter: reducedMotion.value ? 0 : 300 / animationSpeedMultiplier.value,
-    // Only the New feed fades departing cards; other lists remove them immediately.
-    leave: reducedMotion.value || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
+    leave: reducedMotion.value || !inNewFeed ? 0 : 200 / animationSpeedMultiplier.value
   }
-})
+}
 
 // 'feed-move-suppressed' has no transition, and data-skip-move tells the
 // patched TransitionGroup not to measure every child before each update.
-const moveClass = computed(() => {
-  const suppressed = suppressMoveTransition.value ||
+function getMoveClass() {
+  const suppressed = suppressMoveTransition ||
     props.disableMoveTransition ||
     reducedMotion.value ||
     props.itemCount > MOVE_TRANSITION_MAX_ITEMS
 
   return suppressed ? 'feed-move-suppressed' : undefined
-})
+}
 
 const fullWidth = computed(() => store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth')
 
@@ -364,10 +370,10 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     // Resize observations run after layout and any restored scroll position.
     if (gridWidth === 0) updatePageAtBottom()
     const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert]')
-    suppressMoveTransition.value = true
+    suppressMoveTransition = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
-      suppressMoveTransition.value = false
+      suppressMoveTransition = false
     }, 100)
 
     gridWidth = contentWidth
@@ -403,6 +409,7 @@ function handlePhoneWidthChange() {
 }
 
 onMounted(() => {
+  inNewFeed = gridElement.value.$el.closest('.newFeed') !== null
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
 
