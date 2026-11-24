@@ -1034,7 +1034,7 @@ export class TabManager {
       this._finalizeDeferredDisposals(tabId)
     }
 
-    this._broadcastStateUpdate()
+    this._broadcastStateUpdateAfterTabCreations()
     this._scheduleSessionSave()
   }
 
