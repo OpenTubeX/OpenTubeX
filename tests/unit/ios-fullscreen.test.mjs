@@ -23,3 +23,31 @@ test('iOS fullscreen stays app-owned for swipes, dock scrolling and keyboard inp
   assert.equal(controls.toggleFullScreen, browserToggle)
   assert.equal(controls.compiledToggle, browserToggle)
 })
+
+test('iOS rotation toggles the app full window instead of WebKit fullscreen', () => {
+  let enabled = false
+  let canRotate = true
+  const orientation = new EventTarget()
+  orientation.type = 'portrait-primary'
+  const rotate = type => {
+    orientation.type = type
+    orientation.dispatchEvent(new Event('change'))
+  }
+  const restore = bindIosFullscreen(Object.create({}), {
+    isEnabled: () => enabled,
+    setEnabled: value => { enabled = value },
+    canRotate: () => canRotate,
+    orientation,
+  })
+  rotate('landscape-primary')
+  assert.equal(enabled, true)
+  rotate('portrait-primary')
+  assert.equal(enabled, false)
+  canRotate = false
+  rotate('landscape-secondary')
+  assert.equal(enabled, false)
+  canRotate = true
+  restore()
+  rotate('landscape-primary')
+  assert.equal(enabled, false)
+})

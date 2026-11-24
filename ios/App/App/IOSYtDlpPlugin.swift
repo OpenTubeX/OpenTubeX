@@ -750,7 +750,12 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         let activity = UIActivityViewController(activityItems: [URL(fileURLWithPath: path)], applicationActivities: nil)
         activity.completionWithItemsHandler = { _, _, _, _ in if accessed { target.stopAccessingSecurityScopedResource() } }
-        activity.popoverPresentationController?.sourceView = controller.view
+        // Without a source rectangle, iPad pins the popover to the view's top-left corner.
+        if let popover = activity.popoverPresentationController {
+            popover.sourceView = controller.view
+            popover.sourceRect = CGRect(x: controller.view.bounds.midX, y: controller.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
         controller.present(activity, animated: true)
         call.resolve(["ok": true])
     }

@@ -351,7 +351,10 @@ function closeBulkMenu() {
 }
 useSettingsOverlay(closeBulkMenu)
 onBeforeUnmount(closeBulkMenu)
-const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => total + (download.sizeBytes ?? 0), 0))
+// iOS and Android keep the size recorded at download time after the files are deleted.
+const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => (
+  download.availability === 'missing' ? total : total + (download.sizeBytes ?? 0)
+), 0))
 const formattedTotalSize = computed(() => formatBytes(totalSizeBytes.value))
 
 function openDownloadOptions() {
