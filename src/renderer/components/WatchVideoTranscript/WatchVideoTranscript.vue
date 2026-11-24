@@ -182,7 +182,6 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtWindowedListItem from '../FtWindowedListItem/FtWindowedListItem.vue'
 import { useScrollClamp } from '../../composables/useScrollClamp'
-import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
 
@@ -382,8 +381,8 @@ watch(() => props.fullscreenOverlay, () => {
 })
 
 watch(normalizedSearchQuery, () => {
-  // Search resets the viewport, so resume playback with the same bounded
-  // alignment as opening the transcript instead of animating from the top.
+  // Search resets the viewport, so resume playback with the same jump as
+  // opening the transcript instead of animating from the top.
   hasAlignedActiveSegment = false
   if (segmentList.value != null) {
     restoreOverlayScrollTop(segmentList.value, 0)
@@ -417,11 +416,13 @@ watch(activeSegmentIndex, async (index) => {
   }
 
   const top = activeSegment.offsetTop - list.clientHeight / 2 + activeSegment.clientHeight / 2
-  if (!hasAlignedActiveSegment) {
-    list.scrollTop = getTranscriptPreScrollTop(list.scrollTop, top, list.clientHeight)
+  // The first alignment jumps while the panel appears. Scrolling there would
+  // mount rows on every frame of the sidebar animation.
+  if (hasAlignedActiveSegment) {
+    list.scrollTo({ top, behavior: 'smooth' })
+  } else {
+    list.scrollTop = top
   }
-
-  list.scrollTo({ top, behavior: 'smooth' })
   hasAlignedActiveSegment = true
 })
 
@@ -611,13 +612,23 @@ function parseTimestamp(timestamp) {
   return hours * 3600 + minutes * 60 + seconds
 }
 
+// The styling tags of WebVTT and SRT cues. They hold no text of their own.
+const CUE_STYLE_TAG = /<\/?(?:[bciu]|v|lang|ruby|rt|font)(?:[\s.][^<>]*)?>/gi
+
 function cleanCaptionText(text) {
-  // Captions can come from any site. An inert document neither loads images
-  // nor runs handlers from markup in the cue text.
-  const element = new DOMParser().parseFromString(text
+  const markup = text
     .replaceAll(/<(?:\d+:)?\d{2}:\d{2}[.,]\d{3}>/g, '')
-    .replaceAll(/<br\s*\/?>/gi, '\n'), 'text/html').body
-  return element.textContent.replaceAll(/\s*\n\s*/g, ' ').replaceAll(/\s+/g, ' ').trim()
+    .replaceAll(/<br\s*\/?>/gi, '\n')
+  // Most cues, including all of YouTube's, are plain text once their styling
+  // tags are gone. Parsing a document for each of the thousands of cues in a
+  // long video blocked the page for a noticeable time.
+  let plainText = markup.replaceAll(CUE_STYLE_TAG, '')
+  if (/[<&]/.test(plainText)) {
+    // Captions can come from any site. An inert document neither loads images
+    // nor runs handlers from markup in the cue text.
+    plainText = new DOMParser().parseFromString(markup, 'text/html').body.textContent
+  }
+  return plainText.replaceAll(/\s*\n\s*/g, ' ').replaceAll(/\s+/g, ' ').trim()
 }
 </script>
 

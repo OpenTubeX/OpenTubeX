@@ -1148,7 +1148,6 @@
         :icon="['fas', 'list-ol']"
         transition="chapters-panel"
         @close="closeSidebarChapters"
-        @leaving="sidebarPanelLeaving = $event"
       >
         <WatchVideoChaptersPanel
           v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
@@ -1174,7 +1173,6 @@
         :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
         custom-header
         @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
-        @leaving="sidebarPanelLeaving = $event"
       >
         <watch-video-sponsor-block
           v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
@@ -1209,7 +1207,6 @@
         :title="$t('Video.Transcript.Title')"
         custom-header
         @close="closeTranscript"
-        @leaving="sidebarPanelLeaving = $event"
       >
         <watch-video-transcript
           v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
@@ -1233,7 +1230,6 @@
         :title="liveChatIsReplay ? $t('Video.Live Chat Replay') : $t('Video.Live Chat')"
         custom-header
         @close="closeLiveChat"
-        @leaving="sidebarPanelLeaving = $event"
       >
         <watch-video-live-chat
           v-if="!isLoading && (showLiveChat || (isOffline && liveChatLoaded))"
