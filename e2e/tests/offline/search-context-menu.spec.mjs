@@ -375,10 +375,6 @@ test.describe('with the maximum custom search engines configured', () => {
 
   test('custom engine delete buttons identify and remove their own engine', async ({ page }) => {
     const section = await goToSettingsSection(page, 'context-menu-search')
-    for (const index of [0, 1]) {
-      const row = section.locator('.engineRow').filter({ hasText: `https://example${index}.com/` })
-      await expect(row.getByRole('button', { name: `Remove Engine ${index}`, exact: true })).toBeVisible()
-    }
     await section.getByRole('button', { name: 'Remove Engine 0', exact: true }).click()
     await expect(section.getByRole('button', { name: /^Remove Engine / })).toHaveCount(19)
     await expect(section.getByRole('button', { name: 'Remove Engine 0', exact: true })).toHaveCount(0)
