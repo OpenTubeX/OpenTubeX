@@ -2488,7 +2488,11 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   // While the panel opens, it clips its content and Playwright scrolls it to
   // reach a button. The button moves once the panel grows past it, which can
   // happen between mousedown and mouseup, so wait for the panel to open.
+  // A forced click skips the stability check, so first wait for the player
+  // to finish sliding back after a previous panel closed, or the click lands
+  // on the seek bar where the button was.
   const openChapters = async () => {
+    await chaptersButton.click({ trial: true })
     await chaptersButton.click({ force: true })
     await expect(chaptersPanel).toHaveCount(1)
     await expect(chaptersPanel).not.toHaveClass(/chapters-panel-enter-active/)
