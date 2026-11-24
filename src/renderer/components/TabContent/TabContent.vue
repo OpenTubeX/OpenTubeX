@@ -580,10 +580,18 @@ function cancelLoaderSettle() {
    gesture starts, and Android WebView can draw that frame before the page is
    rastered again, so it flashes. The page keeps its layer instead, and this
    cover gives it a background and shadow while it slides. Dialogs, menus and
-   players render outside pages, so no fixed-position descendant anchors to
-   the page through its hint. */
+   players render outside pages. */
 .backSlidePage {
   will-change: transform;
+}
+
+/* The hint would also anchor the fixed card fields of themes that paint them
+   (FtFixedBackground) to the page instead of the viewport, so those pages get
+   their layer only while they slide. */
+@container style(--fixed-background-display: block) {
+  .backSlidePage {
+    will-change: auto;
+  }
 }
 
 .backSlideCover {
