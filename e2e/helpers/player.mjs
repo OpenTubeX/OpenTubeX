@@ -13,6 +13,8 @@ export const mobileMiniPlayerRegions = ['thumbnail', 'title', 'uploader', 'left 
  */
 export function mobileMiniPlayerReturnPoint(element, region) {
   const bar = element.getBoundingClientRect()
+  // A 411.43px wide Android viewport reports 412 for the bar but hit-tests only up to 411.
+  const right = Math.min(bar.right, window.innerWidth)
   const details = element.querySelector('.mobileMiniBarDetails').getBoundingClientRect()
   const label = element.querySelector(region === 'uploader' ? '.mobileMiniBarUploader' : '.mobileMiniBarTitle').getBoundingClientRect()
   return {
@@ -20,7 +22,7 @@ export function mobileMiniPlayerReturnPoint(element, region) {
       ? bar.left + 60
       : ['left edge', 'bottom padding'].includes(region)
           ? bar.left + (region === 'bottom padding' ? 8 : 1)
-          : region === 'right edge' ? bar.right - 1 : details.left + details.width / 2,
+          : region === 'right edge' ? right - 1 : details.left + details.width / 2,
     y: region === 'top padding'
       ? bar.top + 20
       : region === 'bottom padding'
