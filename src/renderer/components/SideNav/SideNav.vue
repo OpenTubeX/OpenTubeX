@@ -594,8 +594,12 @@ const historyTitle = computed(() => {
 })
 
 // Fit visible mobile labels together so every destination has the same size.
+// The resize observer measures them after layout and the next frame applies
+// the result, so neither a page that is mounting nor the fit's own writes make
+// the browser lay out the page early. Both spellings of a label stay laid out
+// for this (see NavLabel).
 let labelObserver
-let observedLabelTexts = []
+let observedLabels = []
 let labelFitFrame
 const mobileLayout = window.matchMedia('(max-width: 680px)')
 
@@ -605,7 +609,6 @@ const layoutTransitionsDisabled = ref(false)
 let layoutTransitionFrame
 
 function handleMobileLayoutChange() {
-  scheduleLabelFit()
   layoutTransitionsDisabled.value = true
   cancelAnimationFrame(layoutTransitionFrame)
   layoutTransitionFrame = requestAnimationFrame(() => {
@@ -615,52 +618,65 @@ function handleMobileLayoutChange() {
   })
 }
 
-function scheduleLabelFit() {
-  cancelAnimationFrame(labelFitFrame)
-  labelFitFrame = requestAnimationFrame(fitNavigationLabels)
+// Labels and their text resize whenever the fit has to change: with the bar,
+// the destinations, the locale, the active destination's weight and the fit.
+function observeNavigationLabels() {
+  const nav = innerRef.value?.closest('.sideNav')
+  if (!nav || !labelObserver) return
+  const labels = [...nav.querySelectorAll('.mobileNavItem .navLabel')]
+  if (labels.length === observedLabels.length && labels.every((label, index) => label === observedLabels[index])) return
+  labelObserver.disconnect()
+  labelObserver.observe(nav)
+  for (const label of labels) {
+    labelObserver.observe(label)
+    for (const text of label.children) labelObserver.observe(text)
+  }
+  observedLabels = labels
+}
+
+/** @param {HTMLElement} label */
+function measureNavigationLabel(label) {
+  const availableWidth = label.getBoundingClientRect().width
+  const fullText = label.firstElementChild
+  const fullWidth = fullText.getBoundingClientRect().width
+  if (availableWidth === 0 || fullWidth === 0) return null
+  const maximumSize = parseFloat(getComputedStyle(label).fontSize)
+  const currentSize = parseFloat(getComputedStyle(fullText).fontSize)
+  const shortText = label.querySelector('.shortLabel')
+  const useShortLabel = shortText !== null && currentSize * (availableWidth - 0.25) / fullWidth < 10
+  // Both spellings have the same font size.
+  const textWidth = useShortLabel ? shortText.getBoundingClientRect().width : fullWidth
+  return { useShortLabel, size: Math.min(maximumSize, currentSize * (availableWidth - 0.25) / textWidth) }
 }
 
 function fitNavigationLabels() {
   const nav = innerRef.value?.closest('.sideNav')
-  if (!nav || !labelObserver) return
-  const texts = [...nav.querySelectorAll('.mobileNavItem .navLabel > span')]
-  if (texts.length !== observedLabelTexts.length || texts.some((text, index) => text !== observedLabelTexts[index])) {
-    labelObserver.disconnect()
-    labelObserver.observe(nav)
-    texts.forEach(text => labelObserver.observe(text))
-    observedLabelTexts = texts
-  }
-  if (!mobileLayout.matches) {
-    nav.style.removeProperty('--fitted-nav-label-size')
-    texts.forEach(text => text.parentElement.classList.remove('useShortLabel'))
-    return
-  }
-  const labels = [...new Set(texts.map(text => text.parentElement))]
-  labels.forEach(label => label.classList.remove('useShortLabel'))
-  const sizes = labels.flatMap(label => {
-    let text = label.querySelector('span')
-    const availableWidth = label.getBoundingClientRect().width
-    let textWidth = text.getBoundingClientRect().width
-    if (availableWidth === 0 || textWidth === 0) return []
-    const maximumSize = parseFloat(getComputedStyle(label).fontSize)
-    let currentSize = parseFloat(getComputedStyle(text).fontSize)
-    const shortText = label.querySelector('.shortLabel')
-    if (shortText && currentSize * (availableWidth - 0.25) / textWidth < 10) {
-      label.classList.add('useShortLabel')
-      text = shortText
-      textWidth = text.getBoundingClientRect().width
-      currentSize = parseFloat(getComputedStyle(text).fontSize)
+  if (!nav) return
+  const labels = observedLabels.filter(label => label.isConnected)
+  const fits = new Map()
+  if (mobileLayout.matches) {
+    for (const label of labels) {
+      const fit = measureNavigationLabel(label)
+      if (fit) fits.set(label, fit)
     }
-    return [Math.min(maximumSize, currentSize * (availableWidth - 0.25) / textWidth)]
-  })
-  if (sizes.length === 0) return
-  const size = `${Math.max(10, Math.floor(Math.min(...sizes) * 100) / 100)}px`
-  if (nav.style.getPropertyValue('--fitted-nav-label-size') !== size) {
-    nav.style.setProperty('--fitted-nav-label-size', size)
   }
+  cancelAnimationFrame(labelFitFrame)
+  labelFitFrame = requestAnimationFrame(() => {
+    for (const label of labels) label.classList.toggle('useShortLabel', fits.get(label)?.useShortLabel ?? false)
+    if (!mobileLayout.matches) {
+      nav.style.removeProperty('--fitted-nav-label-size')
+      return
+    }
+    if (fits.size === 0) return
+    const smallest = Math.min(...[...fits.values()].map(fit => fit.size))
+    const size = `${Math.max(10, Math.floor(smallest * 100) / 100)}px`
+    if (nav.style.getPropertyValue('--fitted-nav-label-size') !== size) {
+      nav.style.setProperty('--fitted-nav-label-size', size)
+    }
+  })
 }
 
-onUpdated(scheduleLabelFit)
+onUpdated(observeNavigationLabels)
 
 // ===== Bottom navigation scroll visibility =====
 const innerRef = useTemplateRef('innerRef')
@@ -736,9 +752,9 @@ watch([isOpen, () => props.forceExpanded, hideText, () => store.getters.getUiDen
 }, { flush: 'post' })
 
 onMounted(() => {
-  labelObserver = new ResizeObserver(scheduleLabelFit)
+  labelObserver = new ResizeObserver(fitNavigationLabels)
   mobileLayout.addEventListener('change', handleMobileLayoutChange)
-  scheduleLabelFit()
+  observeNavigationLabels()
   updateScrollLayout()
   window.addEventListener('scroll', updateScrollVisibility, { passive: true })
   window.addEventListener('resize', updateScrollLayout)

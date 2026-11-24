@@ -30,16 +30,16 @@ defineProps({
     font-size: var(--fitted-nav-label-size, inherit);
   }
 
+  /* SideNav measures the spelling it does not show, so it stays laid out. */
+  .navLabel > .shortLabel,
   .navLabel.useShortLabel > .fullLabel {
-    display: none;
-  }
-
-  .navLabel > .shortLabel {
-    display: none;
+    position: absolute;
+    visibility: hidden;
   }
 
   .navLabel.useShortLabel > .shortLabel {
-    display: inline-block;
+    position: static;
+    visibility: inherit;
   }
 }
 </style>
