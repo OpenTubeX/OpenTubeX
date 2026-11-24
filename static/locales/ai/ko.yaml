@@ -686,7 +686,7 @@ Settings:
       Label: 다음 페이지 자동 불러오기
       Lists Tooltip: 피드, 검색 결과 및 기타 목록의 추가 페이지를 자동으로 불러옵니다.
     New Tab Position:
-      New Tab Position: 새 탭 위치
+      New Tab Position: 새 탭 열기 위치
       At the end: 끝
       After current tab: 현재 탭 뒤
       After current tab in opened order: 현재 탭 뒤, 연 순서대로

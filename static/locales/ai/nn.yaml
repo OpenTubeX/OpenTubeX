@@ -605,7 +605,7 @@ Settings:
       Label: Last inn neste side automatisk
       Lists Tooltip: Last inn fleire sider av straumar, søkjeresultat og andre lister automatisk.
     New Tab Position:
-      New Tab Position: Plassering av ny fane
+      New Tab Position: Opne nye faner
       At the end: Til slutt
       After current tab: Etter gjeldande fane
       After current tab in opened order: Etter gjeldande fane, i opningsrekkjefølgje

@@ -727,7 +727,7 @@ Settings:
       Label: Carrega automàticament la pàgina següent
       Lists Tooltip: Carrega automàticament més pàgines de subscripcions, resultats de cerca i altres llistes.
     New Tab Position:
-      New Tab Position: Posició de les pestanyes noves
+      New Tab Position: Obrir pestanyes noves
       At the end: Al final
       After current tab: Després de la pestanya actual
       After current tab in opened order: Després de la pestanya actual, en l'ordre d'obertura

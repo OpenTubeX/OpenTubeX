@@ -911,7 +911,7 @@ Settings:
       Tooltip: Load comments when the page opens and load more comments as you scroll.
     Default Landing Page: Default Landing Page
     New Tab Position:
-      New Tab Position: New Tab Position
+      New Tab Position: Open New Tabs
       At the end: At the end
       After current tab: After current tab
       After current tab in opened order: After current tab, in opened order
