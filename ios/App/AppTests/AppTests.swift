@@ -326,7 +326,8 @@ final class AppTests: XCTestCase {
         XCTAssertNotNil(HomeWidgetStore.directory, "The app and its widgets must share an App Group")
         _ = try await evaluate("testStore.dispatch('updateHistory', { videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19, watchProgress: 7.5, timeWatched: Date.now(), isWatched: false, type: 'video' }); true")
         var deadline = Date().addingTimeInterval(15)
-        while HomeWidgetStore.videos().first?.videoId != "jNQXAC9IVRw" && Date() < deadline {
+        // History can already hold this video, so wait for the new progress too.
+        while HomeWidgetStore.videos().first.map({ $0.videoId != "jNQXAC9IVRw" || $0.watchProgress != 7 }) ?? true && Date() < deadline {
             try await Task.sleep(nanoseconds: 200_000_000)
         }
         let video = try XCTUnwrap(HomeWidgetStore.videos().first)
@@ -403,12 +404,12 @@ final class AppTests: XCTestCase {
         }
         let shortcuts = UIApplication.shared.shortcutItems ?? []
         XCTAssertTrue(shortcuts.contains { $0.type == "downloads" })
-        for type in ["history", "userplaylists", "subscriptions"] {
-            let shortcut = try XCTUnwrap(shortcuts.first { $0.type == type })
+        for (type, path) in [("history", "/history"), ("userplaylists", "/userplaylists"), ("refreshSubscriptions", "/subscriptions")] {
+            let shortcut = try XCTUnwrap(shortcuts.first { $0.type == type }, type)
             var handled = false
             delegate.windowScene(scene, performActionFor: shortcut) { handled = $0 }
             XCTAssertTrue(handled)
-            try await wait("testRouter.currentRoute.value.path === '/\(type)'")
+            try await wait("testRouter.currentRoute.value.path === '\(path)'")
         }
     }
 

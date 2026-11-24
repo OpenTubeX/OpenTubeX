@@ -513,6 +513,12 @@ extension AppTests {
                         (window.dlnaStartAttempts ??= []).push(options);
                         if (window.dlnaStartupFailure && options.audioUrl) return Promise.reject(new Error('Fixture native mux startup failure'));
                     }
+                    if (plugin === 'YtDlp' && method === 'registerMedia' && window.dlnaMenuOpened) {
+                        return dlnaOriginalNativePromise.call(this, plugin, method, options).then(result => {
+                            window.dlnaMenuTracksRegistered = true;
+                            return result;
+                        });
+                    }
                     if (plugin === 'YtDlp' && method === 'extract' && options.args?.some(arg => arg.includes('DlnaTest001'))) {
                         return Promise.resolve({stdout: JSON.stringify({id:'DlnaTest001', formats:window.dlnaExtractionFormats ?? [], is_live:false})});
                     }
@@ -536,7 +542,7 @@ extension AppTests {
         """, arguments: ["merged": merged, "startupFailure": startupFailure, "keyframeRecovery": keyframeRecovery, "videoSource": "capacitor://localhost/_opentubex_media/\(videoId)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"])
         // Navigation preserves cached Watch state. Discard the fixture source
         // too, so neither the cached page nor its cast control retains it.
-        let cleanup = "document.querySelector('video')?.pause(); if (dlnaKeyframeRecovery && window.dlnaOriginalCurrentTime) watchFixture.$refs.player.getCurrentTime=dlnaOriginalCurrentTime; watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateCastProtocols', originalCastProtocols); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
+        let cleanup = "document.querySelector('video')?.pause(); if (dlnaKeyframeRecovery && window.dlnaOriginalCurrentTime) watchFixture.$refs.player.getCurrentTime=dlnaOriginalCurrentTime; watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateCastProtocols', originalCastProtocols); window.Capacitor.nativePromise=dlnaOriginalNativePromise; window.dlnaMenuOpened=false"
         do {
             // Cancelling metadata during teardown can retain a destroyed player.
             let preparationReady = "(() => { const watch = findWatch(document.querySelector('#app').__vue_app__._container._vnode); return watch?.videoId === 'DlnaTest001' && watch.preparingVideoLoadGeneration === null && !watch.playerTeardownInProgress; })()"
@@ -610,8 +616,11 @@ extension AppTests {
                 }
                 responded.fulfill()
             }
-            _ = try await webView.callPageScript("document.querySelector('video').loop=true; await document.querySelector('video').play(); document.querySelector('.dlnaCastControl button').click()")
+            _ = try await webView.callPageScript("document.querySelector('video').loop=true; await document.querySelector('video').play(); window.dlnaMenuOpened=true; window.dlnaMenuTracksRegistered=false; document.querySelector('.dlnaCastControl button').click()")
             try await wait("!!document.querySelector('.mobileLinkActions button[aria-label=\"iOS test TV\"]:not(:disabled)')")
+            // The menu offers the TV before it has loaded yt-dlp's separate
+            // tracks, which it registers last; a cast before then uses the complete MP4.
+            if merged { try await wait("window.dlnaMenuTracksRegistered === true") }
             _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;document.querySelector('.mobileLinkActions button[aria-label=\"iOS test TV\"]:not(:disabled)').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'")
             await fulfillment(of: [responded, transferred], timeout: 12)
@@ -670,6 +679,9 @@ extension AppTests {
             try await waitForNative { !UIApplication.shared.isIdleTimerDisabled }
             print("DLNA UI \(merged ? "streaming merge" : "complete MP4"): discovered renderer, Play/Stop, decoded frame, resumed local playback, closed relay")
         } catch {
+            // Show which sources and credentials each relay start received.
+            let state = try? await evaluate("JSON.stringify({instance: testStore.getters.getCurrentInvidiousInstanceUrl, authorized: !!testStore.getters.getCurrentInvidiousInstanceAuthorization, starts: dlnaStartAttempts.map(({authorization, ...options}) => ({...options, authorization: authorization?.url ?? null}))})")
+            print("DLNA cast state: \(state.map { String(describing: $0) } ?? "unavailable")")
             _ = try? await webView.callPageScript(cleanup, arguments: ["originalInstance": originalInstance])
             throw error
         }

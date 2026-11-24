@@ -526,7 +526,8 @@ extension AppTests {
             let result = try await Task.detached { try IOSFFmpeg.execute([tool, "-version"]) }.value
             XCTAssertEqual(result["returncode"] as? Int, 0)
             let output = (result["stdout"] as? String ?? "") + (result["stderr"] as? String ?? "")
-            XCTAssertTrue(output.contains("version n8.1.2"), output)
+            // The vendored-dependencies workflow updates FFmpegKit, so any release passes.
+            XCTAssertTrue(output.hasPrefix("\(tool) version n"), output)
         }
         let media = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
         let result = try await Task.detached {
