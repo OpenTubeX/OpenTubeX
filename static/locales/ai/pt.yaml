@@ -181,7 +181,7 @@ Home Page:
   All sections hidden description: Personalize a página inicial para voltar a mostrar uma secção.
 Subscriptions:
   Channel Errors:
-    Summary: "Não foi possível atualizar 1 canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais."
+    Summary: "Não foi possível atualizar {count} canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais."
     Toast: "Não foi possível atualizar alguns canais subscritos. Clique para os ver."
     Retry Channel: "Tentar novamente {channel}"
     Retry All: "Tentar novamente todos"
@@ -203,7 +203,7 @@ Subscriptions:
   Refreshing Subscription Posts: A atualizar as publicações das subscrições
   New Content: Novo conteúdo
   New Feed Refresh Warning Title: Atualizar todos os feeds de subscrições?
-  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo para 1 subscrição pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar?
+  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo para {count} subscrição pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar?
   New Since Last Refresh: Novidades desde a última atualização
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar tudo como visto
@@ -225,7 +225,7 @@ Subscriptions:
     Feed Already Followed: Você já segue este feed.
     Feed Could Not Be Loaded: Não foi possível carregar o feed. Verifique se o endereço aponta para um feed RSS ou Atom.
     Feed Requires Browser Check: Este site exige uma verificação do navegador que o OpenTubeX não consegue concluir. Experimente outro endereço ou outra instância do RSSHub para este feed.
-    Refresh Errors: Não foi possível atualizar 1 feed. | Não foi possível atualizar {count} feeds. | Não foi possível atualizar {count} feeds.
+    Refresh Errors: Não foi possível atualizar {count} feed. | Não foi possível atualizar {count} feeds. | Não foi possível atualizar {count} feeds.
     Description: Adicione um feed RSS ou Atom para seguir criadores de outras plataformas. Instâncias do {rssHub} fornecem feeds para muitos sites, como a Twitch.
     Empty Items: Seus feeds não têm nenhum item no momento.
     No Feeds: Você ainda não segue nenhum feed RSS.
@@ -249,7 +249,7 @@ Subscriptions:
     OPML File: Ficheiro OPML
     Invalid OPML File: Este ficheiro não contém feeds.
     Feeds Could Not Be Saved: Não foi possível guardar os feeds.
-    Feeds Imported: 1 novo feed importado. | {count} de novos feeds importados. | {count} novos feeds importados.
+    Feeds Imported: '{count} novo feed importado. | {count} de novos feeds importados. | {count} novos feeds importados.'
     All Feeds Already Followed: Já segue todos os feeds deste ficheiro.
     YouTube Channels Skipped: Os canais do YouTube foram ignorados. Para os subscrever, importe o ficheiro em Dados e armazenamento.
     Feeds Exported: Os seus feeds RSS foram exportados.
@@ -283,7 +283,7 @@ Subscriptions:
     Follow: Seguir
     Following: A seguir
     Clips: Clips
-    Refresh Errors: Não foi possível atualizar 1 canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais.
+    Refresh Errors: Não foi possível atualizar {count} canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais.
     Content Tabs: Separadores de conteúdo das plataformas
 Trending:
   Music: Música
@@ -384,7 +384,7 @@ History:
   1 Year: 1 ano
   All Time: Todo o período
   Custom: Personalizado
-  History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
+  History Older Than Days Removed: Foi removido o histórico de reprodução com mais de {days} dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
   Restart Required: 'Reinício necessário'
   Experimental Badge: Experimental
@@ -2392,11 +2392,11 @@ Comments:
   Stop Watching for Replies: "Deixar de acompanhar respostas"
   Watch for Replies: "Acompanhar respostas"
   Image unavailable: "Imagem indisponível"
-  Comment Count: 1 comentário | {count} comentários | {count} comentários
+  Comment Count: '{count} comentário | {count} comentários | {count} comentários'
   Show Comments: Mostrar comentários
   Getting comment replies, please wait: A obter respostas ao comentário. Aguarde
   Reload Comments: Recarregar comentários
-  Reply Count: 1 resposta | {replyCount} respostas | {replyCount} respostas
+  Reply Count: '{replyCount} resposta | {replyCount} respostas | {replyCount} respostas'
   YouTube did not provide advertised replies: O YouTube indicou que este comentário tem respostas, mas não as forneceu. Podem ter sido eliminadas ou ocultadas, pelo que o botão de resposta foi removido.
   Pinned by you: Afixado por si
   A reply is pinned: Está afixada uma resposta
@@ -2412,7 +2412,7 @@ Comments:
   Highlighted reply: Resposta destacada
   Search loaded comments: Pesquisar nos comentários carregados
   Close search: Fechar pesquisa
-  Loaded comment search result count: 1 de {total} comentários carregados | {count} de {total} comentários carregados | {count} de {total} comentários carregados
+  Loaded comment search result count: '{count} de {total} comentários carregados | {count} de {total} comentários carregados | {count} de {total} comentários carregados'
   No loaded comments match your filters: Nenhum comentário carregado corresponde aos seus filtros
   YouTube comment link copied to clipboard: Hiperligação do comentário do YouTube copiada para a área de transferência
   Translate to {language}: Traduzir para {language}
@@ -2703,7 +2703,7 @@ Downloads:
   File Not Found: Não foi possível encontrar o ficheiro descarregado.
   Files Missing: O ficheiro descarregado já não está disponível no sistema de ficheiros. | Os ficheiros descarregados já não estão disponíveis no sistema de ficheiros. | Os ficheiros descarregados já não estão disponíveis no sistema de ficheiros.
   Files Available: 'Estão disponíveis {available} de {total} ficheiros descarregados.'
-  More Files: Mais 1 ficheiro | Mais {count} ficheiros | Mais {count} ficheiros
+  More Files: Mais {count} ficheiro | Mais {count} ficheiros | Mais {count} ficheiros
   Template Used: 'Modelo: {name}'
   Template: Modelo
   Unsaved: Não guardado
@@ -2998,7 +2998,7 @@ Notification Center:
 Platforms:
   Tracks: Faixas
   Playlists: Playlists
-  Follower Count: 1 seguidor | {count} de seguidores | {count} seguidores
+  Follower Count: '{count} seguidor | {count} de seguidores | {count} seguidores'
   Open Website: Abrir em {platform}
   Channel Not Found: Não foi possível encontrar este canal.
   Playlist Not Found: Não foi possível encontrar esta playlist.

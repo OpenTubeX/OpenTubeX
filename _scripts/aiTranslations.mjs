@@ -77,12 +77,12 @@ function missingSourceStrings(locale) {
 
 function oneCoversOtherCounts(locale) {
   const pluralRules = new Intl.PluralRules(locale)
-  return [21, 101].some(count => pluralRules.select(count) === 'one')
+  return [0, 21, 101].some(count => pluralRules.select(count) === 'one')
 }
 
 /**
  * The English "one" form can name the count 1, but in locales whose "one"
- * also covers counts like 21, that form has to show the count like "other".
+ * also covers counts like 0 or 21, that form has to show the count like "other".
  */
 function sourceCategory(locale, category) {
   return category === 'one' && oneCoversOtherCounts(locale) ? 'other' : category
