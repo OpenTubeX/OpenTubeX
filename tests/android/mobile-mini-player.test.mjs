@@ -164,6 +164,9 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         const watch = component.proxy
         watch.videoLoadGeneration++
         Object.assign(watch, {
+          // Replace the player like a real load does. A Watch page kept from an
+          // earlier test would otherwise keep playing that test's fixture.
+          playerLoadGeneration: watch.videoLoadGeneration,
           isLoading: false,
           ytDlpStreamsPending: false,
           errorMessage: null,
@@ -192,7 +195,9 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await expect(player).toBeVisible()
       await page.evaluate(() => window.scrollTo(0, 0))
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-      await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
+      // Wait for the new fixture rather than one an earlier player had loaded.
+      await expect.poll(() => video.evaluate(video => [video.readyState, video.videoWidth, video.videoHeight]), { timeout: 15000 })
+        .toEqual([4, ...(posterOnly ? [320, 240] : [640, 360])])
       await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
       await video.evaluate(video => { video.loop = true; return video.play() })
     }
