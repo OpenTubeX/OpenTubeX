@@ -109,7 +109,7 @@ test('iOS ignores imported silence skipping preferences while other platforms re
 test('iOS rotation fullscreen stays off during PiP and background transitions', async () => {
   const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
   const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n\}\)/)?.[0] ?? ''
-  const shakaDeclaration = source.match(/const shakaFullscreenOnRotationEnabled = computed\([^\n]+\)/)?.[0] ?? ''
+  const shakaDeclaration = source.match(/const shakaFullscreenOnRotationEnabled = computed\([\s\S]*?\)(?=\n)/)?.[0] ?? ''
   const rotationWatch = source.match(/watch\(shakaFullscreenOnRotationEnabled, \(newValue\) => \{[\s\S]*?\n\}(?:, \{ flush: 'sync' \})?\)/)?.[0]
   const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n {6}fullScreenElement/)?.[1]
   assert.ok(shakaDeclaration)
