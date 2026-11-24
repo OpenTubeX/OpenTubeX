@@ -64,8 +64,8 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   let image = nativeImage.createFromPath(cachePath)
   /** @type {Buffer | null} */
   let png = image.isEmpty() ? null : image.toPNG()
-  // The icon saved to the cache, which lags behind png until the write succeeds.
-  let savedPng = png
+  // The icon saved to the cache and shortcuts, which lags behind png until both succeed.
+  let appliedPng = png
   const enqueue = createSerialQueue(error => console.error('Unable to save the app icon', error))
 
   /** @returns {Electron.NativeImage | string} */
@@ -148,13 +148,16 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       .map(file => asyncFs.rm(file, { force: true })))
   }
 
-  /** @param {Buffer | null} data */
+  /**
+   * @param {Buffer | null} data
+   * @returns {Promise<boolean>} whether every shortcut uses the icon
+   */
   async function applyToShortcuts(data) {
-    if (process.platform !== 'win32') return
+    if (process.platform !== 'win32') return true
     if (data === null) {
       // Without generated icons, no shortcut can need its icon restored.
       const names = await asyncFs.readdir(userDataPath).catch(() => [])
-      if (!names.some(name => ICO_NAME.test(name))) return
+      if (!names.some(name => ICO_NAME.test(name))) return true
     }
     const icoPath = data === null ? null : getIcoPath(data)
     if (data !== null && icoPath !== null) {
@@ -163,7 +166,9 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       if (!exists) await writeFileAtomic(icoPath, encodeIco(nativeImage.createFromBuffer(data)))
     }
     // A shortcut that kept its old icon still needs the old file.
-    if (await updateShortcuts(icoPath)) await removeOldIcos(icoPath)
+    if (!await updateShortcuts(icoPath)) return false
+    await removeOldIcos(icoPath)
+    return true
   }
 
   function applyToDock() {
@@ -221,7 +226,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       if (width !== APP_ICON_SIZE || height !== APP_ICON_SIZE) return
     }
     const nextPng = nextImage.isEmpty() ? null : nextImage.toPNG()
-    if (samePng(nextPng, png) && samePng(nextPng, savedPng)) return
+    if (samePng(nextPng, png) && samePng(nextPng, appliedPng)) return
     if (!samePng(nextPng, png)) {
       image = nextImage
       png = nextPng
@@ -233,8 +238,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
     }
     await enqueue(async () => {
       await (nextPng === null ? asyncFs.rm(cachePath, { force: true }) : writeFileAtomic(cachePath, nextPng))
-      savedPng = nextPng
-      await applyToShortcuts(nextPng)
+      if (await applyToShortcuts(nextPng)) appliedPng = nextPng
     })
   }
 
