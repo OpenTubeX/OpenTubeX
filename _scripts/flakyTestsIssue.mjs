@@ -8,7 +8,8 @@ const MAX_BRANCHES = 5
 /** Each kind of test has its own issue and its own report file in the shard artifacts. */
 export const KINDS = {
   e2e: { report: 'e2e-flaky.json', description: 'E2E tests', workflow: 'E2E' },
-  android: { report: 'android-flaky.json', description: 'Android instrumentation tests', workflow: 'Android Tests' }
+  android: { report: 'android-flaky.json', description: 'Android instrumentation tests', workflow: 'Android Tests' },
+  ios: { report: 'ios-flaky.json', description: 'iOS and iPadOS simulator tests', workflow: 'iOS and iPadOS' }
 }
 
 // Test titles and branch names come from PR runs; keep them inert in Markdown.

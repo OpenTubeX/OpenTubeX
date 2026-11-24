@@ -60,8 +60,8 @@ jobs:
           fi
         fi
 
-        # Every iOS run on a ref shares one concurrency group, so a rerun would
-        # cancel a newer run of any event.
+        # iOS runs of one event on a ref share a concurrency group, so a rerun
+        # would take the place of a newer waiting run.
         if [[ "$WORKFLOW_PATH" == '.github/workflows/ios.yml' ]]; then
           latest_run="$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs?branch=${HEAD_BRANCH}&per_page=1" --jq '.workflow_runs[0].id')"
           if [[ "$latest_run" != "$RUN_ID" ]]; then
