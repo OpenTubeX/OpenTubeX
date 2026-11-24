@@ -397,7 +397,7 @@ import SubscriptionsPlatforms from '../../components/SubscriptionsPlatforms/Subs
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
-import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
+import { createMobileNavigationScroll, lastScrollPosition, readScrollPosition } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
@@ -559,9 +559,14 @@ const headerScrollHidden = ref(false)
 const headerScroll = createMobileNavigationScroll({ revealThreshold: 64 })
 const mobileHeaderLayout = window.matchMedia('(max-width: 680px), (orientation: landscape) and (max-height: 600px)')
 
-function resetHeaderScrollVisibility() {
-  headerScroll.reset(window.scrollY)
+/** @param {number} position */
+function anchorHeaderScroll(position) {
+  headerScroll.reset(position)
   headerScrollHidden.value = false
+}
+
+function resetHeaderScrollVisibility() {
+  anchorHeaderScroll(lastScrollPosition())
 }
 
 function updateHeaderScrollVisibility() {
@@ -570,13 +575,14 @@ function updateHeaderScrollVisibility() {
   const content = header?.nextElementSibling
   // The translated sticky header keeps its space in the document. Wait until
   // that space scrolls behind the top bar so hiding cannot expose an empty gap.
+  const position = readScrollPosition()
   if (!content || content.getBoundingClientRect().top > Number.parseFloat(getComputedStyle(header).top) ||
       header.querySelector(':focus-visible, [aria-expanded="true"]')) {
-    resetHeaderScrollVisibility()
+    anchorHeaderScroll(position)
     return
   }
   const page = document.scrollingElement
-  headerScrollHidden.value = headerScroll.update(window.scrollY, page.scrollHeight - page.clientHeight)
+  headerScrollHidden.value = headerScroll.update(position, page.scrollHeight - page.clientHeight)
 }
 
 watch(() => isTabPresented?.value, resetHeaderScrollVisibility)
@@ -791,7 +797,7 @@ useTabLifecycle({
     restoreScrollOnActivate = false
     const value = currentTab.value
     window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
-    resetHeaderScrollVisibility()
+    anchorHeaderScroll(readScrollPosition())
     scrollPositionOwnerTab = value
   }
 })
@@ -866,7 +872,7 @@ watch(currentTab, async (value) => {
   }
 
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
-  resetHeaderScrollVisibility()
+  anchorHeaderScroll(readScrollPosition())
   scrollPositionOwnerTab = value
 })
 

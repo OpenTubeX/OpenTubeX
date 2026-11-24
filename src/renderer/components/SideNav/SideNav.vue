@@ -245,7 +245,7 @@ import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
+import { createMobileNavigationScroll, lastScrollPosition, mobileNavigationMinimizePreview, readScrollPosition } from '../../helpers/mobileNavigationScroll'
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'
@@ -673,7 +673,7 @@ let hideOnScroll = false
 let scrollResumeFrame = null
 
 function resetScrollVisibility() {
-  navigationScroll.reset(window.scrollY)
+  navigationScroll.reset(lastScrollPosition())
   scrollHidden.value = false
 }
 
@@ -683,21 +683,24 @@ function updateScrollLayout() {
   hideOnScroll = nav != null && getComputedStyle(nav).getPropertyValue('--hide-on-scroll').trim() === '1'
   if (hideOnScroll && !alwaysShowNavigationBar.value &&
     (mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null)) {
-    navigationScroll.reset(window.scrollY, scrollHidden.value)
+    navigationScroll.reset(readScrollPosition(), scrollHidden.value)
   } else {
+    readScrollPosition()
     resetScrollVisibility()
   }
 }
 
 function updateScrollVisibility() {
-  if (!hideOnScroll || alwaysShowNavigationBar.value || mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null) return
+  if (!hideOnScroll) return
+  const position = readScrollPosition()
+  if (alwaysShowNavigationBar.value || mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null) return
   const nav = innerRef.value?.closest('.sideNav')
   if (!nav || nav.querySelector(':focus-visible, [aria-expanded="true"]')) {
     resetScrollVisibility()
     return
   }
   const page = document.scrollingElement
-  scrollHidden.value = navigationScroll.update(window.scrollY, page.scrollHeight - page.clientHeight)
+  scrollHidden.value = navigationScroll.update(position, page.scrollHeight - page.clientHeight)
 }
 watch(() => route.fullPath, () => {
   if (mobileNavigationMinimizePreview.value === null) resetScrollVisibility()
@@ -709,7 +712,7 @@ watch(mobileNavigationMinimizePreview, tabId => {
     // History restoration and the settled bar's scroll anchoring are not user
     // scrolls. Resume after the new layout, at its actual viewport offset.
     scrollResumeFrame = requestAnimationFrame(() => {
-      navigationScroll.reset(window.scrollY, scrollHidden.value)
+      navigationScroll.reset(readScrollPosition(), scrollHidden.value)
       scrollResumeFrame = null
     })
   }

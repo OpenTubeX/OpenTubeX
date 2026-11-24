@@ -4,6 +4,22 @@ import { ref } from 'vue'
 /** @type {import('vue').Ref<string | null>} */
 export const mobileNavigationMinimizePreview = ref(null)
 
+// Reading the scroll position lays out the page, which costs the most while a
+// new page mounts. Resets during navigation reuse the position that the scroll
+// handlers, which read it anyway, saw last.
+let lastScrollY = typeof window === 'undefined' ? 0 : window.scrollY
+
+/** Reads the page's scroll position and keeps it for {@link lastScrollPosition}. */
+export function readScrollPosition() {
+  lastScrollY = window.scrollY
+  return lastScrollY
+}
+
+/** The scroll position that the last {@link readScrollPosition} read. */
+export function lastScrollPosition() {
+  return lastScrollY
+}
+
 // Accumulate small scroll steps without reacting to subpixel jitter or overscroll.
 export function createMobileNavigationScroll({ revealThreshold = 8 } = {}) {
   let anchor = 0
