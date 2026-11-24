@@ -679,6 +679,7 @@ Settings:
     URL Hint: Defnyddiwch %s yn y man lle dylai'r URL gynnwys y testun a ddewiswyd wedi'i amgodio.
     Add Custom Engine: Ychwanegu peiriant personol
     Add Engine: Ychwanegu peiriant
+    Rename Engine: Ailenwi {engine}
     Remove Engine: Tynnu {engine}
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.

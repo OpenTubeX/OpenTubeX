@@ -678,6 +678,7 @@ Settings:
     URL Hint: Merkitse koodatun valitun tekstin paikka URL-osoitteessa merkkijonolla %s.
     Add Custom Engine: Lisää mukautettu hakukone
     Add Engine: Lisää hakukone
+    Rename Engine: Nimeä {engine} uudelleen
     Remove Engine: Poista {engine}
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.

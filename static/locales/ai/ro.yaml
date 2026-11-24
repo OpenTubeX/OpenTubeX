@@ -678,6 +678,7 @@ Settings:
     URL Hint: Folosiți %s în locul unde adresa URL trebuie să conțină textul selectat codificat.
     Add Custom Engine: Adaugă un motor personalizat
     Add Engine: Adaugă motorul
+    Rename Engine: Redenumește {engine}
     Remove Engine: Elimină {engine}
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.

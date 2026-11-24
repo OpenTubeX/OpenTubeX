@@ -265,15 +265,22 @@ test('adds a custom search engine from settings', async ({ page }) => {
   await urlInput.blur()
   await expect(urlInput).toHaveValue('https://example.com/search?q=%s')
 
+  await customRow.getByRole('button', { name: 'Rename Example Search' }).click()
+  const nameInput = customRow.getByRole('textbox', { name: 'Engine name' })
+  await expect(nameInput).toBeFocused()
+  await nameInput.fill('Renamed Search')
+  await nameInput.press('Enter')
+  await expect(section.getByRole('checkbox', { name: 'Renamed Search' })).toBeChecked()
+
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'custom search'
   }))
   // Built-ins are disabled by default, so a single custom engine is a direct action.
-  const searchWith = contextMenu.items.find(item => item.label === 'Search with Example Search')
+  const searchWith = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search With')
 
   expect(searchWith).toMatchObject({
     labelKey: 'Context Menu.Search With',
-    labelParameters: { engine: 'Example Search' }
+    labelParameters: { engine: 'Renamed Search' }
   })
   expect(searchWith.submenu).toBeUndefined()
   expect(searchWith.icon).toBeUndefined()

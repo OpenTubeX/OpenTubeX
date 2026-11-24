@@ -778,6 +778,7 @@ Settings:
     URL Hint: URL에서 인코딩된 선택 텍스트가 들어갈 위치에 %s을(를) 사용하세요.
     Add Custom Engine: 사용자 지정 검색 엔진 추가
     Add Engine: 검색 엔진 추가
+    Rename Engine: '{engine} 이름 바꾸기'
     Remove Engine: '{engine} 제거'
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.

@@ -683,6 +683,7 @@ Settings:
     URL Hint: Вставте %s у місці URL-адреси, де має бути закодований виділений текст.
     Add Custom Engine: Додати власну пошукову систему
     Add Engine: Додати пошукову систему
+    Rename Engine: Перейменувати {engine}
     Remove Engine: Видалити {engine}
     Invalid Engine: Введіть назву й дійсну URL-адресу пошуку HTTP або HTTPS, яка містить %s.
     Engine Limit: Можна додати до {count} власних пошукових систем.

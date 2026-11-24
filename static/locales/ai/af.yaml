@@ -848,6 +848,7 @@ Settings:
     URL Hint: Gebruik %s waar die URL die gekodeerde geselekteerde teks moet bevat.
     Add Custom Engine: Voeg ’n pasgemaakte enjin by
     Add Engine: Voeg enjin by
+    Rename Engine: Hernoem {engine}
     Remove Engine: Verwyder {engine}
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.

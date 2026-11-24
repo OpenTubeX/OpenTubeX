@@ -5,7 +5,7 @@
         class="tabOrganizerBackdrop"
         @pointerdown.self.stop
         @click.self.stop="close"
-        @keydown.esc="close"
+        @keydown.esc="handleBackdropEscape"
       >
         <section
           ref="dialogRef"
@@ -280,8 +280,7 @@
                       :aria-label="t('Tab Organizer.Group Name')"
                       :data-group-name-input="section.id"
                       @blur="finishGroupRename(section.id)"
-                      @keydown.enter.prevent="finishGroupRename(section.id)"
-                      @keydown.escape.stop.prevent="cancelGroupRename"
+                      @keydown="handleGroupRenameKeydown($event, section.id)"
                     >
                   </template>
                   <h3 v-else>
@@ -1162,6 +1161,19 @@ async function finishGroupRename(groupId) {
   })
 }
 
+function handleGroupRenameKeydown(event, groupId) {
+  // An IME confirms or cancels its composition with Enter and Escape.
+  if (event.isComposing) return
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    finishGroupRename(groupId)
+  } else if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    cancelGroupRename()
+  }
+}
+
 function cancelGroupRename() {
   editingNameGroupId.value = null
   editingGroupName.value = ''
@@ -1239,8 +1251,13 @@ function clampScroll() {
   }
 }
 
+function handleBackdropEscape(event) {
+  // An IME cancels its composition with Escape.
+  if (!event.isComposing) close()
+}
+
 function handleDialogKeydown(event) {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !event.isComposing) {
     event.preventDefault()
     close()
     return

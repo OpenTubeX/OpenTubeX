@@ -678,6 +678,7 @@ Settings:
     URL Hint: Bruk %s der URL-en skal inneholde den merkede teksten i kodet form.
     Add Custom Engine: Legg til en egendefinert søkemotor
     Add Engine: Legg til søkemotor
+    Rename Engine: Gi {engine} nytt navn
     Remove Engine: Fjern {engine}
     Invalid Engine: Skriv inn et navn og en gyldig HTTP- eller HTTPS-søke-URL som inneholder %s.
     Engine Limit: Du kan legge til opptil {count} egendefinerte søkemotorer.

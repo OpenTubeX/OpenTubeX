@@ -5,6 +5,7 @@
     :class="{
       compact,
       trailing,
+      labelHidden: hideLabel,
       disabled: disabled,
       containsTooltip: tooltip.length > 0
     }"
@@ -117,6 +118,12 @@ const props = defineProps({
     default: false
   },
   compact: {
+    type: Boolean,
+    default: false
+  },
+  // Keeps the label for assistive technology only, for a switch whose name
+  // is shown by a control beside it
+  hideLabel: {
     type: Boolean,
     default: false
   },

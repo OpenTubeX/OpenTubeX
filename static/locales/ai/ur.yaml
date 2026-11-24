@@ -734,6 +734,7 @@ Settings:
     URL Hint: URL میں جہاں انکوڈ شدہ منتخب متن ہونا چاہیے وہاں %s استعمال کریں۔
     Add Custom Engine: حسب ضرورت انجن شامل کریں
     Add Engine: انجن شامل کریں
+    Rename Engine: '{engine} کا نام بدلیں'
     Remove Engine: '{engine} ہٹائیں'
     Invalid Engine: نام اور %s پر مشتمل ایک درست HTTP یا HTTPS تلاش URL درج کریں۔
     Engine Limit: آپ زیادہ سے زیادہ {count} حسب ضرورت سرچ انجن شامل کر سکتے ہیں۔

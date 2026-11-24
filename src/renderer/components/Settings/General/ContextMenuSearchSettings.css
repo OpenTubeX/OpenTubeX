@@ -3,10 +3,13 @@
   text-align: center;
 }
 
+/* The rows share their columns, so the custom engines' addresses line up
+   with the built-in ones. */
 .engineList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(240px, 2fr) auto;
   gap: 12px;
+  align-items: center;
 
   /* As wide as the custom engine row below, so both line up. */
   max-inline-size: 840px;
@@ -14,13 +17,13 @@
 
 .engineRow {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(240px, 2fr);
-  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
 }
 
-.engineRow:has(.removeEngine) {
-  grid-template-columns: minmax(160px, 1fr) minmax(140px, 1fr) minmax(240px, 2fr) auto;
+.engineRow > code {
+  grid-column: 2 / -1;
 }
 
 :deep(.engineRow .ft-input),
@@ -32,10 +35,94 @@
   overflow-wrap: anywhere;
 }
 
+/* The address fills its column, up to the Delete button. */
+.engineRow :deep(.ft-input-component) {
+  inline-size: auto;
+}
+
 .engineToggle {
   display: flex;
   gap: 10px;
   align-items: center;
+  min-inline-size: 0;
+}
+
+/* The name follows the switch, so narrow sections' switch margins must not
+   push it away from the built-in names. */
+.engineToggle :deep(.switch-ctn.labelHidden) {
+  margin-inline-end: 0;
+}
+
+/* Like a tab group's name, a custom engine's name turns into a field when
+   clicked. */
+.engineNameButton {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: 32px;
+
+  /* Line the name up with the built-in engines' names, which start 12px after
+     the track. The hidden label leaves 18px after it, the row gap adds 10px,
+     and the button pads its text by 8px. */
+  margin-inline-start: -24px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: calc(16px * var(--ui-roundness));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  text-align: start;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.engineNameButton:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.engineNameButton:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.engineNameButton > span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.engineNameButton .ft-icon {
+  flex: 0 0 auto;
+  color: var(--secondary-text-color);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity var(--motion-fast-effects);
+}
+
+.engineNameButton:is(:hover, :focus-visible) .ft-icon {
+  opacity: 1;
+}
+
+.engineNameInput {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+  block-size: 32px;
+
+  /* Keep the field's outline clear of the switch. */
+  margin-inline-start: -18px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: var(--shape-corner-small);
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 4%, var(--search-bar-color));
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
 }
 
 .engineIcon {
@@ -74,7 +161,10 @@
   margin: 0;
 }
 
-/* New values have no saved-setting markers to reserve a gutter for. */
+/* Neither new values nor the custom engines' addresses have saved-setting
+   markers to reserve a gutter for. The gutter would also widen a field past
+   its column, against the button beside it. */
+.engineRow :deep(.ft-input-component.floatingLabel),
 .addEngine :deep(.ft-input-component.floatingLabel) {
   border-inline-start: 0;
   padding-inline-start: 0;
@@ -92,18 +182,16 @@ h3 {
   /* Stacked, the engines' icons and switches line up in a middle column as
      wide as the widest of them, and their addresses center below them. */
   .engineList {
-    display: grid;
     grid-template-columns: [row-start] minmax(0, 1fr) [toggle-start] minmax(0, max-content) [toggle-end] minmax(0, 1fr) [row-end];
   }
 
-  .engineRow,
-  .engineRow:has(.removeEngine) {
+  .engineRow {
     grid-column: row;
-    grid-template-columns: subgrid;
     row-gap: 4px;
   }
 
-  .engineRow > * {
+  .engineRow > *,
+  .engineRow > code {
     grid-column: row;
     justify-self: center;
     text-align: center;

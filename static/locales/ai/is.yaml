@@ -678,6 +678,7 @@ Settings:
     URL Hint: Notaðu %s á þeim stað í slóðinni þar sem kóðaði valdi textinn á að vera.
     Add Custom Engine: Bæta við sérsniðinni leitarvél
     Add Engine: Bæta við leitarvél
+    Rename Engine: Endurnefna {engine}
     Remove Engine: Fjarlægja {engine}
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.

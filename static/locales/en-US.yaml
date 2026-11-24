@@ -1025,6 +1025,7 @@ Settings:
     URL Hint: Use %s where the URL should contain the encoded selected text.
     Add Custom Engine: Add a custom engine
     Add Engine: Add engine
+    Rename Engine: Rename {engine}
     Remove Engine: Remove {engine}
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
