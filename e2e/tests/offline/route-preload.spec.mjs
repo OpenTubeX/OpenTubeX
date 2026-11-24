@@ -19,47 +19,7 @@ const history = Array.from({ length: 1 }, (_, index) => ({
   timeWatched: now - index * 60_000,
 }))
 
-// On CI, the Channel code twice finished loading after the test blocked the
-// bundle although no hover requested it. Record the bundle requests and the
-// pointer and focus events on links from window creation on, which show what
-// started that load.
-let bundleRequests = []
-
-/** Records pointer and focus events on internal links in `window.__e2eEvents`. */
-function recordLinkEvents() {
-  if (window.__routePreloadLinkEvents) return
-  window.__routePreloadLinkEvents = true
-  const events = window.__e2eEvents ??= []
-  for (const type of ['pointerover', 'pointermove', 'focusin']) {
-    document.addEventListener(type, (event) => {
-      const link = event.target instanceof Element ? event.target.closest('a[href^="#/"]') : null
-      if (!link) return
-      events.push({
-        t: Date.now(),
-        type,
-        link: link.getAttribute('href'),
-        ...(event instanceof PointerEvent
-          ? { pointerType: event.pointerType, x: event.clientX, y: event.clientY }
-          : { focusVisible: link.matches(':focus-visible') }),
-      })
-    }, { capture: true, passive: true })
-  }
-}
-
 test.use({
-  // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
-  onPhase: async ({}, use) => use(async (phase, page) => {
-    if (phase !== 'windowCreated') return
-    bundleRequests = []
-    page.on('request', (request) => {
-      if (request.url().startsWith('app://bundle/') && request.url().endsWith('.js')) {
-        bundleRequests.push({ t: Date.now(), url: request.url() })
-      }
-    })
-    await page.addInitScript(recordLinkEvents)
-    // The window may still be navigating to the app, which the init script covers.
-    await page.evaluate(recordLinkEvents).catch(() => {})
-  }),
   seed: {
     settings: {
       landingPage: 'history',
@@ -103,6 +63,32 @@ function recordRoutePlaceholders(page) {
   })
 }
 
+/**
+ * Makes the renderer's chunk scripts fail to load, like bundle files that
+ * cannot be read. Playwright's routes do not reliably see the app's own
+ * `app://` script requests: on CI, a page's routes and request events missed
+ * all of them, so the code loaded anyway. Returns a function that undoes it.
+ */
+async function blockChunkScripts(page) {
+  await page.evaluate(() => {
+    const src = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src')
+    window.__failedChunkScripts = 0
+    window.__unblockChunkScripts = () => Object.defineProperty(HTMLScriptElement.prototype, 'src', src)
+    Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+      ...src,
+      get() {
+        return src.get.call(this)
+      },
+      set(value) {
+        const blocked = String(value).startsWith('app://bundle/')
+        if (blocked) this.addEventListener('error', () => { window.__failedChunkScripts++ }, { once: true })
+        src.set.call(this, blocked ? 'app://bundle/e2e-blocked-chunk.js' : value)
+      },
+    })
+  })
+  return () => page.evaluate(() => window.__unblockChunkScripts())
+}
+
 test('resting the pointer on a video loads Watch without fetching it, and the click renders it directly', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const videoRequests = []
@@ -135,40 +121,21 @@ test('resting the pointer on a video loads Watch without fetching it, and the cl
 })
 
 test('a route whose code failed to preload still opens on click', async ({ page }) => {
-  await page.route(/^app:\/\/bundle\/.*\.js$/, route => route.abort())
-  const blockedAt = Date.now()
+  const unblockChunkScripts = await blockChunkScripts(page)
 
   const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.channelName').first()
-  let preloadFailed = false
-  page.on('requestfailed', (request) => {
-    if (request.url().startsWith('app://bundle/')) preloadFailed = true
-  })
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
   // The worker's Xvfb pointer rests on the page. Its first pointer event can
   // arrive just after a hover right at startup and move the intent off the
   // link, so hover again until the preload is requested.
-  try {
-    await expect(async () => {
-      await page.mouse.move(0, 0)
-      await link.hover()
-      await expect.poll(() => preloadFailed, { timeout: 1000 }).toBe(true)
-    }).toPass({ timeout: 20_000 })
-  } catch (error) {
-    // On CI, no hover in a whole run requested the code, which had loaded.
-    // The link events are attached with the failure.
-    await test.info().attach('route preload state', {
-      body: JSON.stringify({
-        channelLoaded: await isRouteLoaded(page, '/channel/UCroutePreload0'),
-        blockedAt,
-        bundleRequests,
-      }, null, 2),
-      contentType: 'application/json',
-    })
-    throw error
-  }
+  await expect(async () => {
+    await page.mouse.move(0, 0)
+    await link.hover()
+    await expect.poll(() => page.evaluate(() => window.__failedChunkScripts), { timeout: 1000 }).toBeGreaterThan(0)
+  }).toPass({ timeout: 20_000 })
   expect(await isRouteLoaded(page, '/channel/UCroutePreload0')).toBe(false)
 
-  await page.unroute(/^app:\/\/bundle\/.*\.js$/)
+  await unblockChunkScripts()
   await page.mouse.move(0, 0)
   // A failed mount would recover by reloading the window, losing this marker.
   await page.evaluate(() => { window.__routePreloadSameDocument = true })
