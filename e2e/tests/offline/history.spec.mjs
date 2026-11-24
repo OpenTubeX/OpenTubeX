@@ -277,6 +277,24 @@ test.describe('returning to scrolled history', () => {
       return after.key === before.key && Math.abs(after.top - before.top) <= 1
     }).toBe(true)
   })
+
+  test('tabs into rows that have not mounted yet', async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 })
+    await goTo(page, 'history')
+    const rows = page.locator('.tabContent[aria-hidden="false"] [data-feed-item-key]')
+    await expect(rows.first().locator('a.title')).toBeVisible()
+    // Only rows that can be on screen mount up front. Tab must not skip the rest.
+    const target = 20
+    expect(await rows.evaluateAll(elements => elements.filter(element => element.firstElementChild).length)).toBeLessThan(target)
+    const focusedRow = () => rows.evaluateAll(elements => elements.findIndex(element => element.contains(document.activeElement)))
+    await rows.first().locator('a.title').focus()
+    let row = 0
+    for (let presses = 0; presses < 200 && row >= 0 && row < target; presses++) {
+      await page.keyboard.press('Tab')
+      row = await focusedRow()
+    }
+    expect(row).toBe(target)
+  })
 })
 
 test.describe('history search pagination', () => {

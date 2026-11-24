@@ -13,6 +13,7 @@
     :data-video-id="videoData.videoId"
     :data-playlist-item-id="videoData.playlistItemId"
     @keydown="isDraggable && moveWithKeyboard($event, videoData)"
+    @focusin="revealNeighbors"
   >
     <template
       v-if="visible"
@@ -89,7 +90,7 @@ import {
   rememberListItemHeight,
   WINDOWED_LIST_OVERSCAN_PX
 } from '../../helpers/windowedList.js'
-import { vFirstVisible } from '../../helpers/firstVisible'
+import { revealFirstVisible, vFirstVisible } from '../../helpers/firstVisible'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
@@ -441,6 +442,13 @@ if (windowed) {
 
 function onFirstVisible() {
   visible.value = true
+}
+
+// Tab and Shift+Tab skip rows that have not mounted, which leaves the list
+// early. Rows below or above the viewport mount next to the focused one.
+function revealNeighbors() {
+  revealFirstVisible(shell.value?.previousElementSibling)
+  revealFirstVisible(shell.value?.nextElementSibling)
 }
 
 /**
