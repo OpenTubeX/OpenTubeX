@@ -801,6 +801,32 @@ function usesPrivateDisplay() {
 }
 
 /**
+ * Points `DISPLAY` at a new private Xvfb when `usesPrivateDisplay()` allows it,
+ * so app windows stay off the user's desktop and get a 1920x1080 screen.
+ *
+ * @returns {Promise<() => Promise<void>>} stops the X server again
+ */
+export async function usePrivateDisplay() {
+  if (!usesPrivateDisplay()) return async () => {}
+  const xvfb = spawn('Xvfb', ['-displayfd', '3', '-screen', '0', '1920x1080x24', '-nolisten', 'tcp'], {
+    stdio: ['ignore', 'ignore', 'ignore', 'pipe']
+  })
+  const [display] = await Promise.race([
+    once(xvfb.stdio[3], 'data'),
+    once(xvfb, 'exit').then(([code]) => { throw new Error(`Xvfb exited with code ${code}`) })
+  ])
+  process.env.DISPLAY = `:${String(display).trim()}`
+  return async () => {
+    // The startup race may already have consumed an early exit event.
+    if (xvfb.exitCode === null && xvfb.signalCode === null) {
+      const exited = once(xvfb, 'exit')
+      xvfb.kill()
+      await exited
+    }
+  }
+}
+
+/**
  * Playwright's test trace only records API calls for Electron. This records
  * the app's own trace (DOM snapshots, console and network) and the main
  * process output, and attaches them to failed tests. A screencast would slow
@@ -1003,27 +1029,11 @@ export const test = base.extend({
   // Each worker's private X server picks a free display.
   // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
   xvfbDisplay: [async ({}, use) => {
-    if (!usesPrivateDisplay()) {
-      await use(process.env.DISPLAY)
-      return
-    }
-    const xvfb = spawn('Xvfb', ['-displayfd', '3', '-screen', '0', '1920x1080x24', '-nolisten', 'tcp'], {
-      stdio: ['ignore', 'ignore', 'ignore', 'pipe']
-    })
-    const [display] = await Promise.race([
-      once(xvfb.stdio[3], 'data'),
-      once(xvfb, 'exit').then(([code]) => { throw new Error(`Xvfb exited with code ${code}`) })
-    ])
-    process.env.DISPLAY = `:${String(display).trim()}`
+    const stopDisplay = await usePrivateDisplay()
     try {
       await use(process.env.DISPLAY)
     } finally {
-      // The startup race may already have consumed an early exit event.
-      if (xvfb.exitCode === null && xvfb.signalCode === null) {
-        const exited = once(xvfb, 'exit')
-        xvfb.kill()
-        await exited
-      }
+      await stopDisplay()
     }
   }, { scope: 'worker', auto: true }],
   seed: [{}, { option: true }],

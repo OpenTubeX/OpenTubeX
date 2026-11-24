@@ -7,7 +7,8 @@ import { pathToFileURL } from 'node:url'
 import {
   createUserDataDir,
   expect,
-  launchApp
+  launchApp,
+  usePrivateDisplay
 } from '../helpers/app.mjs'
 import { largeSubscriptionsSeed } from './subscriptions.mjs'
 import { mockPerformanceServices, runPerformanceScenarios } from './scenarios.mjs'
@@ -215,6 +216,10 @@ async function main() {
   const options = parseArguments(process.argv.slice(2))
   let base
   let candidate
+  // Like the E2E workers, keep the windows off the user's desktop. On a
+  // display smaller than the seeded 1600x900 bounds, the app would also
+  // switch to its phone layout and the desktop scenarios would fail.
+  const stopDisplay = await usePrivateDisplay()
 
   try {
     base = await targetFor('base', options.baseRoot)
@@ -258,6 +263,8 @@ async function main() {
     console.error(summary)
     await writeReports(options, result, summary)
     throw error
+  } finally {
+    await stopDisplay()
   }
 }
 
