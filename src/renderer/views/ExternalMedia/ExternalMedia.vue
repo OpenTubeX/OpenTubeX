@@ -202,6 +202,17 @@
                   class="externalMediaMetrics externalMediaMainMetrics"
                   icon-labels
                 >
+                  <a
+                    v-if="hostname"
+                    class="externalMediaSiteLink"
+                    :href="mediaUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  ><FtIcon
+                    :icon="['fas', 'globe']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ hostname }}</a>
                   <time
                     v-if="publishedDate"
                     class="publishedDate"
@@ -304,12 +315,6 @@
                   />
                 </div>
               </div>
-              <a
-                class="externalMediaSiteLink"
-                :href="mediaUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-              >{{ hostname }}</a>
               <WatchVideoToolbar
                 :actions="toolbarActions"
                 :overflow-order="TOOLBAR_OVERFLOW_ORDER"
