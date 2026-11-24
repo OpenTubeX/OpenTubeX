@@ -47,7 +47,7 @@
             v-for="item in overflowItems"
             :key="item.id"
             class="previewOverflowItem"
-            :class="{ submenu: SUBMENU_CONTROLS.has(item.id) }"
+            :class="{ submenu: SUBMENU_CONTROLS.has(item.id), toggle: TOGGLE_CONTROLS.has(item.id) }"
             :data-preview-overflow-item="item.id"
           >
             <PreviewIcon
@@ -66,6 +66,18 @@
               v-if="item.value"
               class="previewOverflowValue"
             >{{ item.value }}</span>
+            <span
+              v-if="TOGGLE_CONTROLS.has(item.id)"
+              class="previewOverflowSwitch"
+              :class="{ on: item.on }"
+            >
+              <span class="previewOverflowSwitchThumb">
+                <FtIcon
+                  :icon="['fas', item.on ? 'check' : 'minus']"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
           </span>
         </div>
       </div>
@@ -299,6 +311,13 @@ const audioTrackLanguage = computed(() => {
 // The entries that open a submenu, which the list layout marks with a chevron.
 const SUBMENU_CONTROLS = new Set(['audioTracks', 'captions', 'playbackRate', 'quality', 'sleepTimer', 'seekHistory', 'videoZoom', 'rotateVideo', 'volumeBoost'])
 
+// The entries that turn something on or off, which the list layout shows as a
+// switch. Android's picture-in-picture entry has no state.
+const TOGGLE_CONTROLS = new Set([
+  'autoplay', 'musicVisualizer', 'skipSilence', 'musicMode', 'ambientMode', 'lightsOff', 'mirrorVideo', 'monoAudio', 'loop', 'theatreMode', 'fullWindow',
+  ...(IS_CAPACITOR && !process.env.IS_IOS ? [] : ['pictureInPicture']),
+])
+
 // Mirrors the overflow menu of a video that has every control available, with the current settings.
 const overflowItems = computed(() => {
   const off = t('Settings.Interface Customizer.Off')
@@ -308,7 +327,7 @@ const overflowItems = computed(() => {
     captions: { path: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS_STYLE, label: t('Settings.Player Settings.Caption Appearance.Captions'), value: off },
     chapters: { path: SHAKA_PREVIEW_ICONS.CHAPTER, label: t('Chapters.Chapters'), value: '' },
     voiceOverTranslation: store.getters.getUseVoiceOverTranslation && { path: PlayerIcons.RECORD_VOICE_OVER_FILLED, label: t('Settings.Player Settings.Voice-over Translation.Title'), value: t('Video.Player.Voice-over Translation.Start') },
-    musicVisualizer: { path: PlayerIcons.INSERT_CHART_FILLED, label: t('Settings.Player Settings.Music Visualizer'), value: '' },
+    musicVisualizer: { path: PlayerIcons.INSERT_CHART_FILLED, label: t('Settings.Player Settings.Music Visualizer'), value: '', on: store.getters.getMusicVisualizer },
     playbackRate: { path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' },
     quality: { path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
     sleepTimer: { path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },

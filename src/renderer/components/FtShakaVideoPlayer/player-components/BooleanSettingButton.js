@@ -3,6 +3,7 @@ import { h, render, watch } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 import { currentIconPack } from '../../../icons/iconPackState'
 import { resolveIconifyId } from '../../../icons/resolveIconifyId'
+import { appendMenuSwitch } from './menuSwitch'
 
 /**
  * Shared Shaka overflow-menu control for boolean Vue settings.
@@ -74,6 +75,10 @@ export class BooleanSettingButton extends shaka.ui.Element {
     label.appendChild(this.currentState_)
 
     this.button_.appendChild(label)
+
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     this.eventManager.listen(this.button_, 'click', () => {
@@ -98,6 +103,7 @@ export class BooleanSettingButton extends shaka.ui.Element {
       this.stopIconWatch_()
       render(null, this.icon_.getSvgElement())
     }
+    this.menuSwitch_.release()
     super.release()
   }
 

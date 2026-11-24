@@ -2,6 +2,7 @@ import shaka from 'shaka-player'
 
 import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
+import { appendMenuSwitch } from './menuSwitch'
 
 export class AutoplayToggle extends shaka.ui.Element {
   /**
@@ -46,6 +47,9 @@ export class AutoplayToggle extends shaka.ui.Element {
 
     this.button_.appendChild(label)
 
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     /** @private */
@@ -71,6 +75,11 @@ export class AutoplayToggle extends shaka.ui.Element {
     })
 
     this.updateLocalisedStrings_()
+  }
+
+  release() {
+    this.menuSwitch_.release()
+    super.release()
   }
 
   /** @private */

@@ -3,6 +3,7 @@ import { watch } from 'vue'
 
 import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
+import { appendMenuSwitch } from './menuSwitch'
 
 export class VoiceOverTranslationButton extends shaka.ui.Element {
   /**
@@ -39,6 +40,10 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
     label.appendChild(this.currentState_)
 
     this.button_.appendChild(label)
+
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     this.eventManager.listen(this.button_, 'click', this.toggle_)
@@ -50,6 +55,7 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
 
   release() {
     this.stopStateWatch_()
+    this.menuSwitch_.release()
     super.release()
   }
 
@@ -69,6 +75,8 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
 
     this.nameSpan_.textContent = label
     this.currentState_.textContent = stateLabel
+    // Only `On` and `Off` become a switch, not the actions before them.
+    this.menuSwitch_.element.hidden = this.state_.value !== 'ready'
     this.button_.ariaLabel = `${label}: ${stateLabel}`
     this.button_.ariaPressed = this.enabled_.value ? 'true' : 'false'
     this.button_.classList.toggle('voice-over-translation-loading', this.state_.value === 'loading')
