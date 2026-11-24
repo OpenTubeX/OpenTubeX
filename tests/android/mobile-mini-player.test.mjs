@@ -17,7 +17,7 @@ for (const navigationOnly of [true, false]) {
   test(navigationOnly
     ? 'mobile mini-player preserves bottom navigation during swipes'
     : 'mobile mini-player restores from the whole bar, swipes down to close, and keeps controls separate', {
-    skip: !process.env.ANDROID_CDP_URL,
+    skip: !process.env.ANDROID_CDP_URL || (!navigationOnly && !process.env.ANDROID_SERIAL),
   }, t => testMobileMiniPlayer(t, navigationOnly))
 }
 
@@ -87,8 +87,14 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
   let savedHistory
   let watch
   const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
-  const rotation = landscape ? adb('settings', 'get', 'system', 'user_rotation') : null
-  const automaticRotation = landscape ? adb('settings', 'get', 'system', 'accelerometer_rotation') : null
+  const rotates = Boolean(process.env.ANDROID_SERIAL)
+  const rotation = rotates ? adb('settings', 'get', 'system', 'user_rotation') : null
+  const automaticRotation = rotates ? adb('settings', 'get', 'system', 'accelerometer_rotation') : null
+  const setLandscape = async sideways => {
+    adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
+    adb('settings', 'put', 'system', 'user_rotation', sideways ? '1' : '0')
+    await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(sideways)
+  }
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
@@ -190,11 +196,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await video.evaluate(video => { video.loop = true; return video.play() })
     }
     await loadTestVideo()
-    if (landscape) {
-      adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
-      adb('settings', 'put', 'system', 'user_rotation', '1')
-      await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(true)
-    }
+    if (landscape) await setLandscape(true)
     const originalVideo = await video.elementHandle()
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
@@ -791,6 +793,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         spacer.style.height = '2000px'
         document.body.append(spacer)
       })
+      // A portrait phone pins the player, so only a landscape window docks it on scroll.
+      await setLandscape(true)
       for (const region of mobileMiniPlayerRegions) {
         await page.evaluate(() => window.scrollTo(0, 1200))
         await expect(player).toHaveClass(/mobileMiniBar/)
@@ -813,6 +817,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await expect(page).toHaveURL(/#\/watch\//)
       }
       await page.evaluate(() => document.querySelector('#mini-player-test-spacer')?.remove())
+      await setLandscape(false)
       for (const swipe of [false, true]) {
         for (const region of mobileMiniPlayerRegions) {
           // Navigate away while playback continues, retaining the actual player.
@@ -960,7 +965,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
     assert.deepEqual(await page.evaluate(() => window.__miniDismissFrames), { movedDown: true, reappeared: false })
     await expect(page).toHaveURL(/#\/subscriptions/)
   } finally {
-    if (landscape) {
+    if (rotates) {
       for (const [key, value] of [['user_rotation', rotation], ['accelerometer_rotation', automaticRotation]]) {
         if (value === 'null') adb('settings', 'delete', 'system', key)
         else adb('settings', 'put', 'system', key, value)
