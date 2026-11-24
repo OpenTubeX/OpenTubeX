@@ -50,7 +50,7 @@ test('styled transcript cues skip the HTML parser, other markup does not', () =>
     'WEBVTT',
     '00:00:01.000 --> 00:00:03.000 align:start position:0%\n \n<00:00:01.200><c> first</c><00:00:01.600><c> words</c>',
     '00:00:03.000 --> 00:00:05.000 align:start position:0%\nfirst words\n<00:00:03.400><c.colorE5E5E5> more</c>',
-    '00:00:05.000 --> 00:00:07.000\n<v Speaker Name><i>Said</i> <font color="#ffffff">this</font></v>',
+    '00:00:05.000 --> 00:00:07.000\n<v Speaker Name><i title="a>b">Said</i> <font color="#ffffff">this</font></v>',
     '00:00:07.000 --> 00:00:09.000\nSalt &amp; pepper',
   ].join('\n\n'))
 

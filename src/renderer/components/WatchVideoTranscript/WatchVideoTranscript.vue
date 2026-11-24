@@ -613,7 +613,8 @@ function parseTimestamp(timestamp) {
 }
 
 // The styling tags of WebVTT and SRT cues. They hold no text of their own.
-const CUE_STYLE_TAG = /<\/?(?:[bciu]|v|lang|ruby|rt|font)(?:[\s.][^<>]*)?>/gi
+// Quoted attribute values can contain `>`.
+const CUE_STYLE_TAG = /<\/?(?:[bciu]|v|lang|ruby|rt|font)(?:[\s.](?:[^<>"']|"[^"]*"|'[^']*')*)?>/gi
 
 function cleanCaptionText(text) {
   const markup = text
