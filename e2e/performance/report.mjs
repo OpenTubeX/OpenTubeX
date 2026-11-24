@@ -140,6 +140,44 @@ export const performanceMetrics = [
     minimumDelta: 100
   },
   {
+    key: 'homeReturnElapsedMs',
+    label: 'Returning to Home elapsed',
+    unit: 'ms',
+    absoluteLimit: 500,
+    relativeLimit: 1.15,
+    minimumDelta: 30,
+    optional: true
+  },
+  {
+    key: 'homeReturnLongestFrameMs',
+    label: 'Returning to Home longest frame',
+    unit: 'ms',
+    absoluteLimit: 200,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
+    relativeLimit: 1.2,
+    minimumDelta: longestFrameMinimumDeltaMs,
+    optional: true
+  },
+  {
+    key: 'subscriptionsReturnElapsedMs',
+    label: 'Returning to the New feed elapsed',
+    unit: 'ms',
+    absoluteLimit: 500,
+    relativeLimit: 1.15,
+    minimumDelta: 30,
+    optional: true
+  },
+  {
+    key: 'subscriptionsReturnLongestFrameMs',
+    label: 'Returning to the New feed longest frame',
+    unit: 'ms',
+    absoluteLimit: 200,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
+    relativeLimit: 1.2,
+    minimumDelta: longestFrameMinimumDeltaMs,
+    optional: true
+  },
+  {
     key: 'navigationHeapGrowthMiB',
     label: 'Renderer heap growth after 10 navigation cycles',
     unit: 'MiB',

@@ -209,6 +209,56 @@ async function measureHoveredWatchNavigation(page) {
   return elapsed
 }
 
+function measureSideNavigation(page, route, scenario) {
+  return page.evaluate(({ route, scenario, actionTimeoutMs }) => new Promise((resolve, reject) => {
+    const startedAt = performance.now()
+    let previousFrame = startedAt
+    let longestFrame = 0
+    const timeout = setTimeout(() => reject(new Error(`${route} did not render within the performance timeout`)), actionTimeoutMs)
+    const isComplete = () => scenario === 'home'
+      ? document.querySelector('.tabContent[aria-hidden="false"] .homePage[aria-busy="false"] [data-home-section="newSinceLastVisit"] .mediaGrid li') !== null
+      : document.querySelector('.tabContent[aria-hidden="false"] #subscriptionsPanel.newFeed .ft-list-video') !== null
+
+    function sampleFrame() {
+      const timestamp = performance.now()
+      longestFrame = Math.max(longestFrame, timestamp - previousFrame)
+      previousFrame = timestamp
+      if (!isComplete()) {
+        requestAnimationFrame(sampleFrame)
+        return
+      }
+      requestAnimationFrame(() => {
+        const finishedAt = performance.now()
+        clearTimeout(timeout)
+        resolve({ elapsed: finishedAt - startedAt, longestFrame: Math.max(longestFrame, finishedAt - previousFrame) })
+      })
+    }
+
+    const link = [...document.querySelectorAll(`.sideNav a[href="#/${route}"]`)]
+      .find(element => element.getClientRects().length > 0)
+    if (!link) throw new Error(`${route} navigation link is not visible`)
+    link.click()
+    requestAnimationFrame(sampleFrame)
+  }), { route, scenario, actionTimeoutMs })
+}
+
+// Pages remount on every navigation, as when switching the Android bottom
+// navigation. The first visits load their code, so measure returning visits.
+async function measureNewFeedPageSwitches(page) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+  await page.evaluate(() => localStorage.setItem('Subscriptions/currentTab', 'new'))
+  await measureSideNavigation(page, 'home', 'home')
+  await measureSideNavigation(page, 'subscriptions', 'subscriptions')
+  const home = await measureSideNavigation(page, 'home', 'home')
+  const subscriptions = await measureSideNavigation(page, 'subscriptions', 'subscriptions')
+  return {
+    homeReturnElapsedMs: home.elapsed,
+    homeReturnLongestFrameMs: home.longestFrame,
+    subscriptionsReturnElapsedMs: subscriptions.elapsed,
+    subscriptionsReturnLongestFrameMs: subscriptions.longestFrame
+  }
+}
+
 async function collectRendererHeapAfterGcKiB(page) {
   const session = await page.context().newCDPSession(page)
   try {
@@ -360,6 +410,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
   const subscriptionSwitches = await runLargeSubscriptionsBenchmark(page)
   const scroll = await measureLargeFeedScroll(page)
   const hoveredWatchNavigationElapsedMs = await measureHoveredWatchNavigation(page)
+  const newFeedPageSwitches = await measureNewFeedPageSwitches(page)
   const navigationHeapGrowthMiB = await measureNavigationHeapGrowth(page)
   const playbackStart = await measurePlaybackStart(electronApp, page)
   const playbackHeapGrowthMiB = await measurePlaybackHeapGrowth(page)
@@ -375,6 +426,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
     largeFeedScrollElapsedMs: scroll.elapsed,
     largeFeedScrollTaskMs: scroll.taskMs,
     hoveredWatchNavigationElapsedMs,
+    ...newFeedPageSwitches,
     navigationHeapGrowthMiB,
     playbackStartElapsedMs: playbackStart.elapsed,
     playbackStartLongestFrameMs: playbackStart.longestFrame,
