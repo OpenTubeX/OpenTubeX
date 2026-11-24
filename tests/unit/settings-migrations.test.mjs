@@ -828,6 +828,8 @@ test('imports the switches that turned settings on and off', () => {
     ytDlpPreloadCount: 4,
     quickSettings: ['blockedItemsMode'],
   })
+  // A count of 0 kept preloading off even with the switch on.
+  assert.deepEqual(migrateLegacySettings({ ytDlpPreloadEnabled: true, ytDlpPreloadCount: 0 }), { ytDlpPreloadCount: 0 })
   // Current exports hold only the values.
   assert.deepEqual(migrateLegacySettings({ fixedTabWidth: 0, ytDlpPreloadCount: 3 }), { fixedTabWidth: 0, ytDlpPreloadCount: 3 })
 })

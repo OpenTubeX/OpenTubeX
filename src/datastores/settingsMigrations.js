@@ -153,7 +153,8 @@ export function fixedTabWidthFromSwitch(enabled, width) {
  */
 export function ytDlpPreloadCountFromSwitch(enabled, count) {
   if (enabled !== true) return 0
-  return typeof count === 'number' && count > 0 ? count : 2
+  // The count could already be 0, which turned preloading off too.
+  return Number.isInteger(count) && count >= 0 ? count : 2
 }
 
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
