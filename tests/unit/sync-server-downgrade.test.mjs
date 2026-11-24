@@ -981,16 +981,18 @@ test('a supplied privacy passphrase cannot silently select plaintext login', asy
 })
 
 test('a recovery phrase that matches the password in another case is rejected before registering', async () => {
-  const f = fixture({}, { encrypted: true })
   const phrase = recoveryPhrase.generateRecoveryPhrase()
-  await assert.rejects(f.actions.authenticateSyncServer(f.context, {
-    ...credentials,
-    mode: 'register',
-    username: 'carol',
-    password: phrase,
-    privacyPassphrase: phrase.toUpperCase(),
-  }), /different from the account password/)
-  assert.ok(!f.requests.some(request => request.url.endsWith('/account/register')))
+  for (const [password, privacyPassphrase] of [[phrase, phrase.toUpperCase()], [phrase.toUpperCase(), phrase]]) {
+    const f = fixture({}, { encrypted: true })
+    await assert.rejects(f.actions.authenticateSyncServer(f.context, {
+      ...credentials,
+      mode: 'register',
+      username: 'carol',
+      password,
+      privacyPassphrase,
+    }), /different from the account password/)
+    assert.ok(!f.requests.some(request => request.url.endsWith('/account/register')))
+  }
 })
 
 test('connecting a different legacy account does not inherit the previous account encryption requirement', async () => {

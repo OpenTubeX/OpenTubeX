@@ -418,8 +418,10 @@ function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
   if (privacyPassphrase.length < 12) {
     throw new Error('The privacy passphrase must be at least 12 characters')
   }
-  // A recovery phrase derives the key in its canonical form.
-  if (privacyPassphrase === password || normalizeRecoveryPhrase(privacyPassphrase) === password) {
+  // A recovery phrase derives the key in its canonical form, which anyone who
+  // knows the password could also compute from it.
+  const canonical = value => normalizeRecoveryPhrase(value) ?? value
+  if (canonical(privacyPassphrase) === canonical(password)) {
     throw new Error('The privacy passphrase must be different from the account password')
   }
 }
