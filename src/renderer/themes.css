@@ -52,15 +52,17 @@ body {
   --switch-thumb-inset: 3px;
   --switch-unchecked-thumb-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
   --switch-touch-height: 36px;
-  --scrollbar-thumb-width: 6px;
-  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
 }
 
-/* The UI Density setting scales the spacing of lists, cards, menus, the side
-   navigation and Settings. App.vue sets it from UI_DENSITY_SCALES; Default
-   keeps the base sizes. */
 :root {
+  /* The UI Density setting scales the spacing of lists, cards, menus, the side
+     navigation and Settings. App.vue sets it from UI_DENSITY_SCALES; Default
+     keeps the base sizes. */
   --ui-density: 1;
+
+  /* On the root, so the page's scroll-padding can reserve the tab bars' height. */
+  --scrollbar-thumb-width: 6px;
+  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
 }
 
 /* Color defaults that themes override or derive from. Theme previews

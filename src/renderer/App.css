@@ -80,7 +80,8 @@
   letter-spacing: -0.01em;
 }
 
-:global(body) {
+/* On the root, which takes the page's scroll-padding below. */
+:global(:root) {
   /* Reserve the scrollbar's room even without one, so the gaps around the tabs
      and the bar's height stay the same. */
   --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
@@ -93,6 +94,14 @@
   /* The page's scrollbars, children of the body, stay between the header and a
      bottom tab bar. Android starts its native one there too; iOS draws its own. */
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
+  --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+
+  /* Keep a length so the empty space can be added inside calc(). */
+  /* stylelint-disable-next-line length-zero-no-unit */
+  --mobile-progress-bar-space: 0px;
+
+  /* Focus and scrollIntoView keep their target clear of the fixed bars. */
+  scroll-padding-block: var(--page-scrollbar-block-start) var(--page-footer-block-size, 0);
 }
 
 .app {
@@ -102,13 +111,8 @@
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
-  --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   --mobile-nav-reveal-transition: transform var(--motion-default-effects);
   --mobile-nav-hide-transition: transform var(--motion-fast-effects);
-
-  /* Keep a length so the empty space can be added inside calc(). */
-  /* stylelint-disable-next-line length-zero-no-unit */
-  --mobile-progress-bar-space: 0px;
   --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-nav-height));
 
   /* Main pages share their title position, so it stays in place when switching
@@ -1117,12 +1121,17 @@
 }
 
 @media only screen and (width <= 680px) {
-  :global(:root.appCompactNavigation body) {
+  :global(:root.appCompactNavigation) {
     --mobile-nav-content-height: 48px;
   }
 
-  :global(:root.appProgressBar .app) {
+  :global(:root.appProgressBar) {
     --mobile-progress-bar-space: var(--progress-bar-height);
+  }
+
+  /* The bottom navigation and the progress bar above it cover the page too. */
+  :global(:root) {
+    scroll-padding-block-end: calc(var(--page-footer-block-size, 0px) + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
   }
 
   .app > :deep(.progressBar) {
@@ -1224,11 +1233,11 @@
 
 /* The tab bar positions are mirrored on <html> by mirrorAppState(), because
    body:has(.app.topTabs) rechecked the body for every DOM change. */
-:global(:root.appTopTabs body) {
+:global(:root.appTopTabs) {
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
-:global(:root.appBottomTabs body) {
+:global(:root.appBottomTabs) {
   --page-footer-block-size: var(--bottom-tab-bar-height);
 }
 

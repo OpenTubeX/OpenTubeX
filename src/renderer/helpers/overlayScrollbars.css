@@ -125,7 +125,7 @@ body > .os-scrollbar {
 
 /* The header and a pinned Watch page player cover the top of the page, and a
    bottom tab bar its bottom. */
-body {
+:root {
   --page-scrollbar-block-start: max(var(--page-header-block-end, 0px), var(--pinned-player-block-end, 0px));
 }
 

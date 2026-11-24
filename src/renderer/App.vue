@@ -2636,7 +2636,7 @@ function updateFontSize() {
 }
 
 function updateScrollbarThumbWidth() {
-  document.body.style.setProperty(
+  document.documentElement.style.setProperty(
     '--scrollbar-thumb-width',
     `${normalizeScrollbarThumbWidth(scrollbarThumbWidth.value)}px`
   )
