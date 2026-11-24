@@ -66,12 +66,13 @@ test.describe('caption timing in grid menus', () => {
     test.setTimeout(120_000)
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await page.route('https://www.youtube.com/api/timedtext**', route => {
-      const translated = new URL(route.request().url()).searchParams.get('fmt') === 'srt'
+      // Translations are made from the original track, which they request as SRT
+      const srt = new URL(route.request().url()).searchParams.get('fmt') === 'srt'
       return route.fulfill({
         status: 200,
-        contentType: translated ? 'application/x-subrip' : 'text/vtt',
-        body: translated
-          ? '1\n00:00:05,000 --> 00:00:07,000\nTranslated timing test caption\n'
+        contentType: srt ? 'application/x-subrip' : 'text/vtt',
+        body: srt
+          ? '1\n00:00:05,000 --> 00:00:07,000\nTiming test caption\n'
           : 'WEBVTT\n\n00:00:05.000 --> 00:00:07.000\nTiming test caption\n'
       })
     })
@@ -183,7 +184,8 @@ test.describe('caption timing in grid menus', () => {
     await player.locator('.ft-caption-translation-menu').getByRole('button', { name: 'German', exact: true }).click()
     await expect.poll(offset).toBe(1.5)
     await video.evaluate(element => { element.currentTime = 7 })
-    await expect(caption).toHaveText('Translated timing test caption')
+    // The mocked translation service prefixes each line with the language
+    await expect(caption).toHaveText('[de] Timing test caption')
     await captionsMenu.getByRole('menuitemradio', { name: 'English (auto-generated)', exact: true }).click()
     await expect.poll(offset).toBe(1.5)
     const watch = await page.evaluateHandle(findWatchComponent)
