@@ -91,7 +91,7 @@
   --progress-bar-height: 10px;
 
   /* The page's scrollbars, children of the body, stay between the header and a
-     bottom tab bar. Android and iOS draw them natively. */
+     bottom tab bar. Android starts its native one there too; iOS draws its own. */
   --page-header-block-end: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height));
 }
 

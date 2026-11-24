@@ -447,7 +447,7 @@ export function setAndroidPageScrollbarsHidden(hidden) {
 }
 
 /**
- * Starts Android's page scrollbar below a pinned player.
+ * Starts Android's page scrollbar below the header and a pinned player.
  * @param {number} inset CSS pixels from the top of the page
  */
 export function setAndroidPageScrollbarInsetTop(inset) {
