@@ -5,7 +5,7 @@ import { test } from 'node:test'
 import { checkCompactMiniPlayer } from '../../e2e/helpers/compact-mini-player.mjs'
 import { checkMiniPlayerSeeking } from '../../e2e/helpers/mini-player-seeking.mjs'
 import { goTo } from '../../e2e/helpers/app.mjs'
-import { chromium, expect } from '@playwright/test'
+import { chromium, expect as baseExpect } from '@playwright/test'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint } from '../../e2e/helpers/player.mjs'
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
 import { watchHistoryEntry } from '../../e2e/helpers/watch.mjs'
@@ -13,6 +13,11 @@ import { appPage } from '../helpers/android-app-page.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
+// ANDROID_CPU_THROTTLE=4 slows the WebView down like a busy CI emulator.
+
+// A busy or software-rendered emulator can take longer than Playwright's 5 s
+// default to rotate, load a video or settle an animation.
+const expect = baseExpect.configure({ timeout: 30000 })
 for (const navigationOnly of [true, false]) {
   test(navigationOnly
     ? 'mobile mini-player preserves bottom navigation during swipes'
@@ -83,6 +88,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
   const context = browser.contexts()[0]
   const page = appPage(browser)
   const session = await context.newCDPSession(page)
+  const cpuThrottleRate = Number(process.env.ANDROID_CPU_THROTTLE)
+  if (cpuThrottleRate > 1) await session.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottleRate })
   let settings
   let savedHistory
   let watch
@@ -102,6 +109,9 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         VideoPlaybackEngine: 'built-in',
+        // A slow emulator can take long enough to load the fixture that the
+        // Watch page falls back to yt-dlp, which replaces the fixture.
+        PlaybackEngineFallback: false,
         AutoplayVideos: false,
         PlayNextVideo: false,
         UseSponsorBlock: false,
@@ -196,7 +206,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await page.evaluate(() => window.scrollTo(0, 0))
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       // Wait for the new fixture rather than one an earlier player had loaded.
-      await expect.poll(() => video.evaluate(video => [video.readyState, video.videoWidth, video.videoHeight]), { timeout: 15000 })
+      await expect.poll(() => video.evaluate(video => [video.readyState, video.videoWidth, video.videoHeight]))
         .toEqual([4, ...(posterOnly ? [320, 240] : [640, 360])])
       await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
       await video.evaluate(video => { video.loop = true; return video.play() })
@@ -207,6 +217,11 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    // The player ignores clicks for 350 ms after a gesture ends, so that the
+    // gesture's own click cannot activate what it uncovers. Wait that out in
+    // the page's time before clicking.
+    const pageTime = () => page.evaluate(() => performance.now())
+    const waitForClickWindow = released => expect.poll(() => page.evaluate(start => performance.now() - start, released)).toBeGreaterThan(400)
     if (feedbackOnly) {
       const thumbnail = (await readFile(new URL('../../e2e/fixtures/media/video-thumbnail.svg', import.meta.url))).toString('base64')
       await watch.evaluate((component, thumbnail) => {

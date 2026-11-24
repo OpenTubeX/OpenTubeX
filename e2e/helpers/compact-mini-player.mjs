@@ -1,7 +1,10 @@
-import { expect } from '@playwright/test'
+import { expect as defaultExpect } from '@playwright/test'
 
-/** Checks the compact strip using rendered geometry and real playback controls. */
-export async function checkCompactMiniPlayer(page, player, capture = async () => {}, prepareLayout = async () => {}) {
+/**
+ * Checks the compact strip using rendered geometry and real playback controls.
+ * Scripts outside the test runner pass an `expect` with their own timeout.
+ */
+export async function checkCompactMiniPlayer(page, player, capture = async () => {}, prepareLayout = async () => {}, { expect = defaultExpect } = {}) {
   const video = player.locator('video').first()
   const controls = player.locator('.mobileMiniBarPlayback')
   const expand = player.locator('.mobileMiniBarExpand')

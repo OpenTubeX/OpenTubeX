@@ -1,7 +1,10 @@
-import { expect } from '@playwright/test'
+import { expect as defaultExpect } from '@playwright/test'
 
-/** Exercises the native range control through touch, including its held state. */
-export async function checkMiniPlayerSeeking(page, player, touch, capture = async () => {}, { keyboard = true } = {}) {
+/**
+ * Exercises the native range control through touch, including its held state.
+ * Scripts outside the test runner pass an `expect` with their own timeout.
+ */
+export async function checkMiniPlayerSeeking(page, player, touch, capture = async () => {}, { keyboard = true, expect = defaultExpect } = {}) {
   const video = player.locator('video').first()
   const seek = player.locator('.mobileMiniBarSeek')
   const progress = player.locator('.mobileMiniBarProgress')
