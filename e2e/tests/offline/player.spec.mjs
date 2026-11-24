@@ -1191,8 +1191,9 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   const isTranslationInto = (request, language) => request.url().includes('/comment/perform_comment_action') &&
     decodeCommentTranslationAction(request.postData())?.targetLanguage === language
   const frenchResponse = page.waitForResponse(response => isTranslationInto(response.request(), 'fr'))
+  const germanResponse = page.waitForResponse(response => isTranslationInto(response.request(), 'de'))
   // Selecting a language closes the menu once its captions load. Hold French
-  // until German is chosen, so the later choice always overtakes the earlier one.
+  // until German has loaded, so the later choice always overtakes the earlier one.
   let releaseFrench
   const frenchHeld = new Promise(resolve => { releaseFrench = resolve })
   await page.route(/\/comment\/perform_comment_action/, async (route, request) => {
@@ -1201,10 +1202,11 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   })
   await translations.getByRole('button', { name: 'French' }).click()
   await translations.getByRole('button', { name: 'German' }).click()
-  releaseFrench()
+  await germanResponse
   await expect(player.locator('.shaka-text-languages')).toBeVisible()
   expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  releaseFrench()
   await frenchResponse
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
 

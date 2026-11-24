@@ -84,17 +84,19 @@ export function groupSentences(texts) {
   return sentences
 }
 
+const WITHOUT_SPACES = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/u
+
 /**
  * Spreads a translated sentence over its cues in proportion to their original
  * lengths, giving every cue at least one word (or character, for scripts
- * written without spaces).
+ * written without spaces, such as Chinese and Thai).
  * @param {string} text
  * @param {number[]} weights
  * @returns {string[]}
  */
 export function distributeText(text, weights) {
   const trimmed = text.trim()
-  const separator = /\s/.test(trimmed) ? ' ' : ''
+  const separator = /\s/.test(trimmed) || !WITHOUT_SPACES.test(trimmed) ? ' ' : ''
   const units = separator ? trimmed.split(/\s+/) : Array.from(trimmed)
   if (units.length < weights.length) return weights.map((_, index) => index === 0 ? trimmed : '')
 
@@ -174,10 +176,16 @@ async function loadTranslatedCaption(url, targetLanguage, translate, fetchFunc) 
   if (translatable.length === 0) throw new Error('The original captions have no text to translate')
 
   const translated = await translateCues(translatable.map(cue => cue.text), text => translate(text, targetLanguage))
-  translatable.forEach((cue, index) => { cue.text = translated[index] })
+  // A translation with fewer words than its sentence has cues leaves the later
+  // ones empty, so the cue holding the text stays up for the whole sentence
+  let lastWithText
+  translatable.forEach((cue, index) => {
+    cue.text = translated[index]
+    if (cue.text !== '') lastWithText = cue
+    else if (lastWithText) lastWithText.end = cue.end
+  })
 
   const mimeType = format === 'srt' ? 'text/srt' : 'text/vtt'
-  // A translation with fewer words than its sentence has cues leaves some of them empty
   return `data:${mimeType};charset=utf-8,${encodeURIComponent(serializeSubtitle(cues.filter(cue => cue.text !== ''), format))}`
 }
 

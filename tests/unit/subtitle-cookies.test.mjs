@@ -152,6 +152,10 @@ test('spreads sentences split across cues, and unpunctuated captions, over their
   assert.deepEqual(requests, ['so we went to the zoo and saw the elephants there'])
   const cues = (await (await fetch(result)).text()).trim().split('\n\n').map(block => block.split('\n')[2])
   assert.deepEqual(cues, ['Also gingen wir in', 'den Zoo und', 'sahen dort die Elefanten.'])
+
+  // A translation too short to spread keeps the sentence's duration
+  const short = await getSubtitleRequestUrl(url.replace('tlang=de', 'tlang=pt').replace('fmt=vtt', 'fmt=srt'), {}, null, async () => 'Danke.')
+  assert.equal(await (await fetch(short)).text(), '1\n00:00:00,000 --> 00:00:06,000\nDanke.\n')
 })
 
 test('falls back to translating the original track when the cookie request fails', async (t) => {
