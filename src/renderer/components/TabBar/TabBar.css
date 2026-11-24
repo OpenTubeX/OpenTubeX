@@ -4,7 +4,7 @@
 
   /* Keep the rounded tabs clear of both edges of the strip. */
   align-items: center;
-  background-color: var(--side-nav-color);
+  background-color: var(--tab-bar-color);
   box-shadow: none;
   block-size: var(--top-tab-bar-height, 32px);
   min-block-size: var(--top-tab-bar-height, 32px);
@@ -373,13 +373,13 @@
   inset-inline-end: 0;
   align-self: stretch;
   inline-size: var(--strip-new-tab-button-size);
-  box-shadow: 2px 0 var(--side-nav-color), -2px 0 var(--side-nav-color);
+  box-shadow: 2px 0 var(--tab-bar-color), -2px 0 var(--tab-bar-color);
 }
 
 .stripNewTabButton,
 .stripNewTabButton:is(:hover, :active) {
   border-radius: 0;
-  background-color: var(--side-nav-color);
+  background-color: var(--tab-bar-color);
 }
 
 /* Sticky positioning makes the button a stacking context, so this draws
@@ -408,7 +408,7 @@
   inset-block-end: 0;
   inline-size: auto;
   block-size: var(--strip-new-tab-button-size);
-  box-shadow: 0 2px var(--side-nav-color), 0 -2px var(--side-nav-color);
+  box-shadow: 0 2px var(--tab-bar-color), 0 -2px var(--tab-bar-color);
 }
 
 /* Keep the divider outside the tab bar's stacking context so it can straddle

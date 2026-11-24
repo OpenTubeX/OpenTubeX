@@ -11,7 +11,7 @@
   min-block-size: var(--top-tab-bar-height, 48px);
   padding-inline: 4px;
   color: var(--primary-text-color);
-  background-color: var(--side-nav-color);
+  background-color: var(--tab-bar-color);
   box-shadow: 0 1px 0 var(--primary-shadow-color);
   overflow: hidden;
   user-select: none;

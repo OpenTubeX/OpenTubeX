@@ -81,8 +81,11 @@ body,
   --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   --subtle-surface-color: var(--tertiary-text-color);
 
-  /* Themes whose page background matches the tab strip set a visible fill. */
-  --inactive-tab-color: var(--bg-color);
+  /* The tab strip sits a step below the navigation it borders, so it stays
+     apart from the header in themes that paint both in one color. Inactive
+     tabs are lifted from the strip toward the text color. */
+  --tab-bar-color: oklch(from var(--side-nav-color) calc(l - 0.03) c h);
+  --inactive-tab-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--tab-bar-color));
   --watched-thumbnail-overlay-color: rgb(from var(--bg-color) r g b / 70%);
   --thumbnail-badge-bg-color: color-mix(in srgb, var(--card-bg-color) 85%, transparent);
   --thumbnail-badge-blur: var(--card-bg-blur, none);
@@ -475,6 +478,7 @@ the link underline setting instead, which underlines them on hover by default. *
   --side-nav-hover-color: #272727;
   --side-nav-active-color: #3a3a3a;
   --inactive-tab-color: #272727;
+  --tab-bar-color: var(--side-nav-color);
   --search-bar-color: #181818;
   --settings-search-bar-color: var(--card-bg-color);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
@@ -885,7 +889,6 @@ the link underline setting instead, which underlines them on hover by default. *
   --side-nav-color: #eee8ce;
   --side-nav-hover-color: #d5cfb5;
   --side-nav-active-color: #d5cfb5;
-  --inactive-tab-color: #e5dfc5;
   --search-bar-color: #eae4ca;
   --logo-icon: url('../../_icons/iconEverforestDarkLowSmall.svg');
   --logo-text: url('../../_icons/textEverforestDarkLowSmall.svg');
@@ -2807,6 +2810,7 @@ a:visited {
   --side-nav-active-color: color-mix(in srgb, var(--signal-accent-fill) 14%, #ebe8e6);
   --search-bar-color: #ebe8e6;
   --inactive-tab-color: #ebe8e6;
+  --tab-bar-color: var(--side-nav-color);
   --border-color: rgb(26 26 26 / 12%);
   --primary-shadow-color: rgb(26 26 26 / 12%);
   --accent-color: var(--signal-accent-fill);
@@ -2837,6 +2841,7 @@ a:visited {
   --side-nav-active-color: color-mix(in srgb, var(--accent-color) 18%, #1c1c1c);
   --search-bar-color: #1e1e1e;
   --inactive-tab-color: #262626;
+  --tab-bar-color: var(--side-nav-color);
   --border-color: rgb(255 255 255 / 12%);
   --primary-shadow-color: rgb(0 0 0 / 24%);
 
@@ -3173,7 +3178,6 @@ a:visited {
   --card-bg-color: #12120f;
   --side-nav-hover-color: #1d1d1a;
   --side-nav-active-color: #242421;
-  --inactive-tab-color: #1d1d1a;
   --primary-color: #8a9a7b;
   --primary-color-hover: #96a488;
   --primary-color-active: #a1ae95;
@@ -3216,7 +3220,6 @@ a:visited {
   --card-bg-color: #10141c;
   --side-nav-hover-color: #1a1e25;
   --side-nav-active-color: #22252b;
-  --inactive-tab-color: #1a1e25;
   --primary-color: #e6b450;
   --primary-color-hover: #e8bc62;
   --primary-color-active: #ebc373;
@@ -3259,7 +3262,6 @@ a:visited {
   --card-bg-color: #fcfcfc;
   --side-nav-hover-color: #f2f3f3;
   --side-nav-active-color: #ececed;
-  --inactive-tab-color: #f2f3f3;
   --primary-color: #8f590e;
   --primary-color-hover: #81500d;
   --primary-color-active: #72470b;
@@ -3343,6 +3345,7 @@ a:visited {
   --settings-changed-color: var(--md-sys-color-primary);
   --settings-section-bg-color: var(--md-sys-color-surface-container-low);
   --inactive-tab-color: var(--md-sys-color-surface-container-high);
+  --tab-bar-color: var(--side-nav-color);
 
   .settingsWindow {
     background-color: var(--bg-color);
