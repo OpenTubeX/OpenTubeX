@@ -116,24 +116,36 @@ function getResizeObserver() {
   return resizeObserver
 }
 
-/** Instances whose update waits for the next frame. @type {Set<Instance>} */
+/** Instances whose update waits for the next frame's layout. @type {Set<Instance>} */
 const scheduledInstances = new Set()
-let scheduledFrame = null
+let updateScheduled = false
+let layoutObserver = null
 
 /**
- * Updates the instance in the next frame, together with the others scheduled
- * for it, so that none of them reads styles that another has just changed.
+ * Updates the instance after the next frame's layout, together with the others
+ * scheduled for it, so that none of them reads styles that another has just
+ * changed. Reading sizes in the frame callback instead would lay out the page
+ * early, such as one that has just mounted, and again for every frame callback
+ * after it that changes the page.
  *
  * @param {Instance} instance
  */
 function scheduleInstanceUpdate(instance) {
   scheduledInstances.add(instance)
-  scheduledFrame ??= requestAnimationFrame(() => {
-    scheduledFrame = null
+  if (updateScheduled) return
+  updateScheduled = true
+  layoutObserver ??= new ResizeObserver(() => {
+    layoutObserver.disconnect()
+    updateScheduled = false
     const changed = new Map([...scheduledInstances].map(scheduled => [scheduled, false]))
     scheduledInstances.clear()
     updateInstances(changed)
   })
+  // A new observation reports the root's size once the frame has laid out the
+  // page. Starting it in a frame callback, before any resize observer of that
+  // frame runs, delivers it in the same frame: started from another resize
+  // observer, Chromium would defer it and report a resize loop error.
+  requestAnimationFrame(() => layoutObserver.observe(document.documentElement))
 }
 
 /** @param {Map<Instance, boolean>} changed instances and whether to force their update */
