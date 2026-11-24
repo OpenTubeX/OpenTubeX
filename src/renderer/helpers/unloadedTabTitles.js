@@ -183,6 +183,8 @@ export async function resolveUnloadedTabTitle(tabId, path, query = {}) {
   } finally {
     pendingTabIds.delete(tabId)
   }
+  // Saved data can have loaded while the backend failed to answer.
+  title ||= findSavedTitle(path, query) ?? getFallbackTitle(path)
   if (!title) return
 
   // Leave tabs alone that have loaded and set their own title in the meantime.
@@ -202,21 +204,19 @@ export async function resolveUnloadedTabTitle(tabId, path, query = {}) {
  */
 export function titleUnloadedTabsFromSavedData() {
   return watch(
-    () => [
-      store.getters.getTabs.filter(showsPlaceholder).map(tab => tab.id).join('\n'),
-      // Saved data that loads after the tabs
-      store.getters.getHistoryCacheSorted.length,
-      store.getters.getPlaylistsReady,
-      store.getters.getSubscriptionCacheReady,
-      store.getters.getSubscribedChannelsById
-    ],
-    ([tabIds]) => {
-      if (!tabIds) return
-      for (const tabId of tabIds.split('\n')) {
+    // Looks up the titles here so that the watcher follows the saved data they
+    // come from, such as feed caches that a refresh fills in later. Covers tabs
+    // whose lookup is pending too, so that data loading after that lookup
+    // failed still titles them.
+    () => store.getters.getTabs.filter(showsPlaceholder).map(tab => {
+      const { path, query } = tab.route
+      return [tab.id, findSavedTitle(path, query ?? {}) ?? getFallbackTitle(path)]
+    }),
+    (titles) => {
+      for (const [tabId, title] of titles) {
         const tab = store.getters.getTabById(tabId)
-        if (pendingTabIds.has(tabId) || !showsPlaceholder(tab)) continue
-        const title = findSavedTitle(tab.route.path, tab.route.query ?? {}) ?? getFallbackTitle(tab.route.path)
-        if (title && title !== tab.title) window.ftElectron.tabs.updateTitle(title, tabId)
+        if (!title || title === tab?.title || pendingTabIds.has(tabId) || !showsPlaceholder(tab)) continue
+        window.ftElectron.tabs.updateTitle(title, tabId)
       }
     },
     { immediate: true }
