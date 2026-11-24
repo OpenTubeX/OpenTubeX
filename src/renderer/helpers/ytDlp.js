@@ -44,6 +44,8 @@ function configuration() {
       rules[channelId] = { rule, payload, args: buildYtDlpDownloadArguments(payload, store.getters.getYtDlpDownloadCustomArgs).args }
     } catch (error) { console.warn('Invalid automatic download options', error) }
   }
+  const conditions = store.getters.getYtDlpAutomaticDownloadConditions
+  const automaticDownloadConditions = Array.isArray(conditions) ? conditions : []
   return {
     rules,
     useCookies: usesYtDlpCookiesFor(store.getters.getYtDlpCookieUses, 'downloads') && store.getters.getYtDlpPlaybackAuthMode === 'file',
@@ -53,8 +55,8 @@ function configuration() {
     folder: store.getters.getYtDlpDownloadFolderPath,
     channel: store.getters.getYtDlpChannel,
     enabled: store.getters.getEnableDownloads,
-    automaticRequireUnmetered: store.getters.getYtDlpAutomaticDownloadConditions.includes('unmetered'),
-    automaticRequireCharging: store.getters.getYtDlpAutomaticDownloadConditions.includes('charging'),
+    automaticRequireUnmetered: automaticDownloadConditions.includes('unmetered'),
+    automaticRequireCharging: automaticDownloadConditions.includes('charging'),
   }
 }
 

@@ -279,7 +279,10 @@ const { locale, t } = useI18n()
 // Electron cannot detect metered connections; Android exposes both states.
 const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
 /** @type {import('vue').ComputedRef<string[]>} */
-const conditions = computed(() => store.getters.getYtDlpAutomaticDownloadConditions)
+const conditions = computed(() => {
+  const value = store.getters.getYtDlpAutomaticDownloadConditions
+  return Array.isArray(value) ? value : []
+})
 
 /**
  * Only charging can be detected on desktop. Keeps the unmetered network

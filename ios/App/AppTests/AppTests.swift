@@ -777,10 +777,10 @@ final class AppTests: XCTestCase {
             try await waitForNative { !UIApplication.shared.isIdleTimerDisabled }
             print("DLNA UI \(merged ? "streaming merge" : "complete MP4"): discovered renderer, Play/Stop, decoded frame, resumed local playback, closed relay")
         } catch {
-            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original, "originalInstance": originalInstance], in: nil, contentWorld: .page)
+            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["originalInstance": originalInstance], in: nil, contentWorld: .page)
             throw error
         }
-        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original, "originalInstance": originalInstance], in: nil, contentWorld: .page)
+        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["originalInstance": originalInstance], in: nil, contentWorld: .page)
         try await waitForNative {
             IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!) == nil &&
                 IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(audioId)")!) == nil
