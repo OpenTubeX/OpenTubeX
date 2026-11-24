@@ -124,7 +124,9 @@ final class AndroidProxy {
             });
     }
 
+    /** Call on the main thread for every WebView the app creates. */
     static void protectWebView(WebView view) {
+        WebViewNetworkState.attach(view);
         boolean ready = webViewReady.isDone() && !webViewReady.isCompletedExceptionally();
         view.getSettings().setBlockNetworkLoads(!ready);
         if (!webViewReady.isDone()) waitingViews.add(view);

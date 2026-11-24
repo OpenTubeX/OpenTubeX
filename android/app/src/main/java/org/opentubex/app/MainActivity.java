@@ -75,6 +75,7 @@ public class MainActivity extends BridgeActivity {
         // learns it is visible and reuses them, which would wait for a reply that
         // never comes. Tunnels that kept streaming, such as background playback, stay.
         if (hiddenAt != null) AndroidProxy.closeStaleTunnels(hiddenAt);
+        WebViewNetworkState.refresh();
         super.onStart();
         appLock.onStart();
         AppVisibility.setVisible(true);
