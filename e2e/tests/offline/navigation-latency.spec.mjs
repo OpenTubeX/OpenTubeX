@@ -230,7 +230,7 @@ for (const limit of ['global', 'daily']) {
   })
 }
 
-test.describe('opening a list on a phone', () => {
+test.describe('opening a list', () => {
   const now = Date.now()
   test.use({
     seed: {
@@ -249,43 +249,46 @@ test.describe('opening a list on a phone', () => {
     }
   })
 
-  test('mounts the rows on screen in the first frame and no rows windowing unmounts again', { tag: '@performance' }, async ({ page }) => {
-    await page.setViewportSize({ width: 412, height: 915 })
-    await goTo(page, 'userplaylists')
-    await page.evaluate(() => {
-      const rows = () => [...document.querySelectorAll('.tabContent[aria-hidden="false"] [data-feed-item-key^="video-firstscreen"]')]
-      const stats = window.firstScreenStats = { firstFrame: null, unmounted: 0, quietFrames: 0 }
-      const observer = new MutationObserver(records => {
-        stats.quietFrames = 0
-        for (const record of records) {
-          if (record.target instanceof Element && record.target.matches('[data-feed-item-key^="video-firstscreen"]')) {
-            stats.unmounted += [...record.removedNodes].filter(node => node instanceof Element).length
+  // Desktop windows size lists by the space beside the side bar.
+  for (const [name, size] of [['on a phone', { width: 412, height: 915 }], ['in a desktop window', { width: 1920, height: 1080 }]]) {
+    test(`mounts the rows on screen in the first frame and no rows windowing unmounts again ${name}`, { tag: '@performance' }, async ({ page }) => {
+      await page.setViewportSize(size)
+      await goTo(page, 'userplaylists')
+      await page.evaluate(() => {
+        const rows = () => [...document.querySelectorAll('.tabContent[aria-hidden="false"] [data-feed-item-key^="video-firstscreen"]')]
+        const stats = window.firstScreenStats = { firstFrame: null, unmounted: 0, quietFrames: 0 }
+        const observer = new MutationObserver(records => {
+          stats.quietFrames = 0
+          for (const record of records) {
+            if (record.target instanceof Element && record.target.matches('[data-feed-item-key^="video-firstscreen"]')) {
+              stats.unmounted += [...record.removedNodes].filter(node => node instanceof Element).length
+            }
           }
-        }
-        if (stats.firstFrame !== null || rows().length === 0) return
-        stats.firstFrame = false
-        // Rows the first render did not mount would appear a frame later.
-        requestAnimationFrame(() => {
-          stats.firstFrame = rows().filter(row => {
-            const bounds = row.getBoundingClientRect()
-            return bounds.bottom > 0 && bounds.top < innerHeight
-          }).map(row => row.firstElementChild !== null)
-          const countQuietFrame = () => {
-            stats.quietFrames++
+          if (stats.firstFrame !== null || rows().length === 0) return
+          stats.firstFrame = false
+          // Rows the first render did not mount would appear a frame later.
+          requestAnimationFrame(() => {
+            stats.firstFrame = rows().filter(row => {
+              const bounds = row.getBoundingClientRect()
+              return bounds.bottom > 0 && bounds.top < innerHeight
+            }).map(row => row.firstElementChild !== null)
+            const countQuietFrame = () => {
+              stats.quietFrames++
+              requestAnimationFrame(countQuietFrame)
+            }
             requestAnimationFrame(countQuietFrame)
-          }
-          requestAnimationFrame(countQuietFrame)
+          })
         })
+        observer.observe(document.body, { childList: true, subtree: true })
       })
-      observer.observe(document.body, { childList: true, subtree: true })
+      await goTo(page, 'history')
+      await expect(page.getByText('First screen video 0', { exact: true })).toBeVisible()
+      await expect.poll(() => page.evaluate(() => window.firstScreenStats.firstFrame)).toContain(true)
+      expect(await page.evaluate(() => window.firstScreenStats.firstFrame)).not.toContain(false)
+      // Windowing unmounts rows outside its overscan region within a few frames.
+      // Mounting those up front wastes the page switch on discarded work.
+      await expect.poll(() => page.evaluate(() => window.firstScreenStats.quietFrames)).toBeGreaterThan(30)
+      expect(await page.evaluate(() => window.firstScreenStats.unmounted)).toBe(0)
     })
-    await goTo(page, 'history')
-    await expect(page.getByText('First screen video 0', { exact: true })).toBeVisible()
-    await expect.poll(() => page.evaluate(() => window.firstScreenStats.firstFrame)).toContain(true)
-    expect(await page.evaluate(() => window.firstScreenStats.firstFrame)).not.toContain(false)
-    // Windowing unmounts rows outside its overscan region within a few frames.
-    // Mounting those up front wastes the page switch on discarded work.
-    await expect.poll(() => page.evaluate(() => window.firstScreenStats.quietFrames)).toBeGreaterThan(30)
-    expect(await page.evaluate(() => window.firstScreenStats.unmounted)).toBe(0)
-  })
+  }
 })
