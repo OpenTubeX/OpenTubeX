@@ -103,6 +103,7 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['setHistoryCacheSorted', 'history'],
   ['setHistoryCacheById', 'history'],
   ['setSubscriptionSeenVideos', 'history'],
+  ['applySubscriptionSeenVideoChanges', 'history'],
   ['setSubscriptionSeenPosts', 'history'],
   ['setRssFeedSeenItems', 'history'],
   ['removeFromHistoryCacheById', 'history'],

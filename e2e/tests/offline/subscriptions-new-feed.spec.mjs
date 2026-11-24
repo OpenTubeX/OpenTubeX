@@ -1,4 +1,4 @@
-import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
@@ -626,7 +626,7 @@ test.describe('new subscriptions feed', () => {
   })
 
   test('opening a new video in or from an incognito tab keeps it new', async ({ page }) => {
-    const seenMarks = () => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos)
+    const seenMarks = () => page.evaluate(() => [...window.$store.getters.getSubscriptionSeenVideos.byId.values()]
       .filter(entry => entry.videoId === 'new-video-1').length)
     await page.evaluate(() => window.$store.dispatch('createTab', { route: '/subscriptions', makeActive: true, isIncognito: true }))
     await expect(page.locator('.tab.active .incognitoIcon')).toBeVisible()
@@ -656,7 +656,7 @@ test.describe('new subscriptions feed', () => {
     // Notifications open their video in a new tab
     await page.evaluate(() => window.$store.dispatch('createTab', { route: '/watch/new-video-1', makeActive: true }))
     await expect(page.locator('.tabBar .tab')).toHaveCount(2)
-    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos)
+    await expect.poll(() => page.evaluate(() => [...window.$store.getters.getSubscriptionSeenVideos.byId.values()]
       .some(entry => entry.videoId === 'new-video-1'))).toBe(true)
 
     await page.locator('.tabBar .tab').first().click()
@@ -672,6 +672,37 @@ test.describe('new subscriptions feed', () => {
     await video.locator('.title').click({ button: 'middle', modifiers: ['Control', 'Alt'] })
     await expect(page.locator('.tabBar .tab').nth(1)).toHaveClass(/unloaded/)
     await expect(video).toHaveCount(0)
+  })
+
+  test('shows a video marked seen or unseen in one window the same way in the others', async ({ app, page }) => {
+    // Launches a second window, which takes longer than the default under load.
+    test.setTimeout(120_000)
+    await goTo(page, 'subscriptions')
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    await goTo(other, 'subscriptions')
+    const card = window => window.locator('.ft-list-video').filter({ has: window.getByText('New video', { exact: true }) })
+    const isSeen = window => window.evaluate(() => {
+      const mark = window.$store.getters.getSubscriptionSeenVideos.byId.get('new-video-1')
+      return mark ? mark.seenAt > (mark.unseenAt ?? 0) : false
+    })
+    for (const window of [page, other]) await expect(card(window).locator('.newContentDot')).toBeVisible()
+
+    await card(page).locator('.title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
+    for (const window of [page, other]) {
+      await expect.poll(() => isSeen(window)).toBe(true)
+      await expect(card(window).locator('.newContentDot')).toHaveCount(0)
+    }
+
+    // The reverse mark is saved with the history, through another request.
+    await card(other).locator('.title').click({ button: 'right' })
+    await other.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
+    for (const window of [page, other]) {
+      await expect.poll(() => isSeen(window)).toBe(false)
+      await expect(card(window).locator('.newContentDot')).toBeVisible()
+    }
+    await other.close()
   })
 
   test('keeps display metadata reactive in New and Shorts without copying the full cache', async ({ page }) => {
@@ -790,7 +821,7 @@ test.describe('new subscriptions feed', () => {
     await expect(card).toHaveClass(/watched/)
     await expect.poll(() => page.evaluate(() => {
       const store = window.$store
-      const mark = JSON.parse(store.getters.getSubscriptionSeenVideos).find(entry => entry.videoId === 'watched-new')
+      const mark = [...store.getters.getSubscriptionSeenVideos.byId.values()].find(entry => entry.videoId === 'watched-new')
       return mark?.seenAt > mark?.unseenAt
     })).toBe(true)
     const history = await page.evaluate(() => (
@@ -963,7 +994,7 @@ test.describe('new subscriptions feed', () => {
     await expect(relaunched.page.getByText('Fetched after sync', { exact: true })).toHaveCount(0)
     expect(await relaunched.page.evaluate(() => {
       const store = window.$store
-      return JSON.parse(store.getters.getSubscriptionSeenVideos).length
+      return [...store.getters.getSubscriptionSeenVideos.byId.values()].length
     })).toBe(10000)
   })
 })

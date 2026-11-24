@@ -178,6 +178,11 @@ test('mark all leaves newly public uploads new when their captured membership ch
   }
 })
 
+async function savedVideoMarks(db) {
+  const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
+  return JSON.parse(saved?.value ?? '[]').sort((a, b) => a.videoId.localeCompare(b.videoId))
+}
+
 async function settingsFixture(history = []) {
   const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
   const db = {
@@ -187,7 +192,12 @@ async function settingsFixture(history = []) {
   if (history.length > 0) await db.history.insertAsync(history)
   const { Settings, History } = vm.runInNewContext(baseSource.slice(baseSource.indexOf('class Settings {'),
     baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...seenMarkSettings, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
-  return { db, Settings, History }
+  // The saved marks after a merge, by video ID
+  const mergeVideos = async update => {
+    await Settings.mergeSeenVideos(update)
+    return savedVideoMarks(db)
+  }
+  return { db, Settings, History, mergeVideos }
 }
 
 function cacheFixture(applied = true, logger = console) {
@@ -238,8 +248,8 @@ test('marking a subscription video as seen records it for history sync without w
   await fixture.actions.markSubscriptionVideoAsSeen(fixture.context, 'videoCache')
   assert.equal(fixture.recorded.length, 1)
   assert.equal(fixture.recorded[0][0], 'mergeSubscriptionSeenVideos')
-  const { Settings } = await settingsFixture()
-  const marks = JSON.parse(await Settings.mergeSeenVideos(fixture.recorded[0][1]))
+  const { mergeVideos } = await settingsFixture()
+  const marks = await mergeVideos(fixture.recorded[0][1])
   assert.equal(marks[0].videoId, 'videoCache')
   assert.ok(Number.isFinite(marks[0].seenAt))
 })
@@ -320,16 +330,20 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
   const { db, Settings } = await settingsFixture()
   let releaseReply
   const delayedReply = new Promise(resolve => { releaseReply = resolve })
+  const windows = []
   const makeWindow = (delayReply = false) => {
+    const window = {}
     const context = vm.createContext({
       ...seenVideos,
       ANDROID_PROXY_SETTING_KEYS: [],
       getDataScope: () => null,
       DBSettingHandlers: {
         async mergeSeenVideos(entries) {
-          const saved = await Settings.mergeSeenVideos(entries)
+          const changes = await Settings.mergeSeenVideos(entries)
+          // The main process sends the changes to the other windows before it replies.
+          for (const other of windows) if (other !== window) other.receive(structuredClone(changes))
           if (delayReply) await delayedReply
-          return saved
+          return changes
         },
       },
     })
@@ -337,31 +351,55 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
       settingsSource.indexOf('const customActions ='),
       settingsSource.indexOf('  saveSyncSettingEdit:'),
     ) + '\n}\nglobalThis.actions = customActions', context)
-    const state = { subscriptionSeenVideos: '[]' }
+    const state = { subscriptionSeenVideos: seenVideos.subscriptionSeenVideosState('[]') }
     const actionContext = {
       state,
-      rootGetters: { getHistoryCacheById: {} },
-      commit(type, value) { state.subscriptionSeenVideos = value },
+      commit(type, changes) {
+        assert.equal(type, 'applySubscriptionSeenVideoChanges')
+        state.subscriptionSeenVideos = seenVideos.withSubscriptionSeenVideoChanges(state.subscriptionSeenVideos, changes)
+      },
       dispatch: (type, value) => context.actions[type](actionContext, value),
     }
-    return {
-      state,
+    Object.assign(window, {
+      shown: () => [...state.subscriptionSeenVideos.byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)),
       mark: entry => actionContext.dispatch('mergeSubscriptionSeenVideos', [entry]),
-    }
+      receive: changes => actionContext.commit('applySubscriptionSeenVideoChanges', changes),
+    })
+    windows.push(window)
+    return window
   }
   const first = makeWindow(true)
   const second = makeWindow()
   const firstMark = first.mark({ videoId: 'first', seenAt: 1000 })
   await second.mark({ videoId: 'second', seenAt: 2000 })
-  const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
-  assert.deepEqual(JSON.parse(saved.value).map(entry => entry.videoId), ['first', 'second'])
-  // Model the second write's broadcast reaching the first window before its
-  // own older IPC reply. Applying that reply must retain the second mark.
-  first.state.subscriptionSeenVideos = saved.value
+  const saved = await savedVideoMarks(db)
+  assert.deepEqual(saved.map(entry => entry.videoId), ['first', 'second'])
+  // The second write's changes reached the first window before its own older
+  // IPC reply. Applying that reply must retain the second mark.
+  assert.deepEqual(first.shown().map(entry => entry.videoId), ['second'])
   releaseReply()
   await firstMark
-  assert.equal(first.state.subscriptionSeenVideos, saved.value)
-  assert.equal(second.state.subscriptionSeenVideos, saved.value)
+  assert.deepEqual(first.shown(), saved)
+  assert.deepEqual(second.shown(), saved)
+})
+
+test('windows end with the same marks whatever order changes arrive in', () => {
+  const kept = { videoId: 'kept', seenAt: 1000, isMembersOnly: false }
+  const dropped = { videoId: 'video', seenAt: 1000, isMembersOnly: false }
+  const remarked = { videoId: 'video', seenAt: 3000, isMembersOnly: false }
+  // A merge drops a mark as its video was watched, and a later one marks it again.
+  const changes = [
+    { upserts: [kept, dropped], removals: [] },
+    { upserts: [], removals: [dropped] },
+    { upserts: [remarked], removals: [] },
+  ]
+  const shown = []
+  for (const order of [[0, 1, 2], [0, 2, 1], [2, 1, 0], [1, 2, 0], [0, 1, 2, 1, 0]]) {
+    const byId = new Map()
+    for (const index of order) seenVideos.applySubscriptionSeenVideoChanges(byId, structuredClone(changes[index]))
+    shown.push([...byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)))
+  }
+  for (const marks of shown) assert.deepEqual(marks, [kept, remarked])
 })
 
 test('mark all records videos, Shorts, live streams and community posts', async () => {
@@ -416,11 +454,12 @@ test('persistence prunes watched marks from saved and stale incoming data before
       ...marks, { videoId: 'watched', seenAt: 20000 },
     ])
   })
-  const saved = await Settings.mergeSeenVideos([{ videoId: 'watched', seenAt: 30000 }])
-  const retained = JSON.parse(saved)
+  const changes = await Settings.mergeSeenVideos([{ videoId: 'watched', seenAt: 30000 }])
+  const retained = await savedVideoMarks(db)
   assert.equal(retained.length, 10000)
   assert.ok(!retained.some(mark => ['watched', 'video-0'].includes(mark.videoId)))
-  assert.equal((await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value, saved)
+  assert.deepEqual(changes.removals.map(mark => mark.videoId).sort(), ['video-0', 'watched'])
+  assert.deepEqual(changes.upserts, [])
 })
 
 test('sync uploads the retained local set without restoring pruned remote marks', async () => {
@@ -460,10 +499,11 @@ test('seen mark persistence uses the history index instead of scanning unrelated
   ])
   await db.history.ensureIndexAsync({ fieldName: 'videoId' })
   db.history.getAllData = () => { throw new Error('Unexpected full-history scan') }
-  const saved = await Settings.mergeSeenVideos([
+  const changes = await Settings.mergeSeenVideos([
     { videoId: 'watched', seenAt: 2000 }, { videoId: 'keep', seenAt: 1000 },
   ])
-  assert.deepEqual(JSON.parse(saved).map(mark => mark.videoId), ['keep'])
+  assert.deepEqual(changes.upserts.map(mark => mark.videoId), ['keep'])
+  assert.deepEqual((await savedVideoMarks(db)).map(mark => mark.videoId), ['keep'])
 })
 
 test('individual and bulk UI marking handle failed seen-mark persistence', async () => {
@@ -535,7 +575,7 @@ test('marking a video unseen preserves watch progress and restores a seen video'
   const result = await History.updateSubscriptionState(update)
   assert.equal(result.records[0].isWatched, false)
   assert.equal(result.records[0].watchProgress, 123)
-  const restored = seenVideos.applySubscriptionSeenVideosToCache(fixture.state.videoCache, result.seenVideos)
+  const restored = seenVideos.applySubscriptionSeenVideosToCache(fixture.state.videoCache, result.seenVideos.upserts)
   assert.equal(restored.channel.videos[0].isNewInSubscriptionFeed, true)
 })
 
@@ -564,9 +604,9 @@ for (const bulk of [false, true]) {
       await fixture.actions.markSubscriptionVideoAsSeen(fixture.context, 'videoCache')
     }
     assert.equal(fixture.recorded.length, 1)
-    const { Settings } = await settingsFixture()
+    const { Settings, mergeVideos } = await settingsFixture()
     await Settings.mergeSeenVideos(unseen)
-    const marks = JSON.parse(await Settings.mergeSeenVideos(fixture.recorded[0][1]))
+    const marks = await mergeVideos(fixture.recorded[0][1])
     assert.ok(marks[0].seenAt > timestamp)
     assert.equal(seenVideos.applySubscriptionSeenVideosToCache(fixture.state.videoCache, marks).channel.videos[0].isNewInSubscriptionFeed, false)
   })
@@ -581,7 +621,9 @@ test('unseen marks persist without creating history for an unwatched video', asy
   const { Settings, History, db } = await settingsFixture()
   await History.updateSubscriptionState(fixture.recorded[0][1])
   assert.equal(await db.history.countAsync({}), 0)
-  const saved = await Settings.mergeSeenVideos([{ videoId: 'videoCache', seenAt: 1 }])
+  const saved = await savedVideoMarks(db)
+  await Settings.mergeSeenVideos([{ videoId: 'videoCache', seenAt: 1 }])
+  assert.deepEqual(await savedVideoMarks(db), saved)
   assert.equal(seenVideos.applySubscriptionSeenVideosToCache({
     channel: {
       videos: [{ videoId: 'videoCache', isNewInSubscriptionFeed: false }],
@@ -622,8 +664,8 @@ test('watched history does not prune reverse marks or their newer seen half', as
       videoId: 'video', seenAt: 3000, unseenAt: 2000, isMembersOnly: false,
     }])
   }
-  const { Settings } = await settingsFixture([history])
-  const saved = JSON.parse(await Settings.mergeSeenVideos([unseen]))
+  const { mergeVideos } = await settingsFixture([history])
+  const saved = await mergeVideos([unseen])
   assert.equal(saved[0]?.unseenAt, 2000)
   assert.deepEqual(seenVideos.mergeSubscriptionSeenVideos([], [{
     videoId: 'video', seenAt: 2000, unseenAt: 'invalid',
@@ -644,12 +686,13 @@ for (const timeWatched of [1000, 2000]) {
     const { Settings } = await settingsFixture([history])
     const store = {
       state: {
-        settings: { subscriptionSeenVideos: '[]' },
+        settings: { subscriptionSeenVideos: seenSync.subscriptionSeenVideosState('[]') },
         history: { historyCacheSorted: [history] },
       },
       async dispatch(type, value) {
         if (type === 'mergeSubscriptionSeenVideos') {
-          this.state.settings.subscriptionSeenVideos = await Settings.mergeSeenVideos(value)
+          this.state.settings.subscriptionSeenVideos = seenSync.withSubscriptionSeenVideoChanges(
+            this.state.settings.subscriptionSeenVideos, await Settings.mergeSeenVideos(value))
         } else {
           assert.equal(type, 'updateHistory')
           this.state.history.historyCacheSorted = [value]
@@ -657,7 +700,7 @@ for (const timeWatched of [1000, 2000]) {
       },
     }
     await seenVideos.syncSubscriptionSeenVideos(client, store)
-    assert.equal(JSON.parse(store.state.settings.subscriptionSeenVideos)[0]?.unseenAt, 2000)
+    assert.equal(store.state.settings.subscriptionSeenVideos.byId.get('video')?.unseenAt, 2000)
     assert.equal(store.state.history.historyCacheSorted[0].isWatched, timeWatched >= 2000)
     assert.equal(store.state.history.historyCacheSorted[0].watchProgress, 123)
     assert.equal(store.state.history.historyCacheSorted[0].timeWatched, timeWatched)
@@ -721,4 +764,68 @@ test('marking one video seen reads history for that video only until the list is
     assert.ok(JSON.parse(await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' }).then(saved => saved.value))
       .some(entry => entry.videoId === 'clicked'))
   }
+})
+
+test('merges parse the saved list once and report only the marks they change', async () => {
+  const { db, Settings } = await settingsFixture()
+  const stored = Array.from({ length: 5000 }, (_, index) => ({ videoId: `stored-${index}`, seenAt: 1000 + index, isMembersOnly: false }))
+  await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(stored) })
+  let indexed = 0
+  const index = Settings._savedSeenVideos
+  Settings._savedSeenVideos = async function (_id) {
+    const before = this.seenVideosCache.get(_id)
+    const marks = await index.call(this, _id)
+    if (marks !== before) indexed++
+    return marks
+  }
+  for (let mark = 0; mark < 3; mark++) {
+    const changes = await Settings.mergeSeenVideos({ videos: [{ videoId: `clicked-${mark}` }] })
+    assert.deepEqual(changes.upserts.map(entry => entry.videoId), [`clicked-${mark}`])
+    assert.deepEqual(changes.removals, [])
+  }
+  // Marking a video seen again changes nothing, so nothing is saved or sent.
+  db.settings.updateAsync = () => { throw new Error('Unexpected seen-mark write') }
+  assert.deepEqual(await Settings.mergeSeenVideos([{ videoId: 'stored-0', seenAt: 1000 }]), { upserts: [], removals: [] })
+  assert.equal(indexed, 1)
+  const saved = await savedVideoMarks(db)
+  assert.equal(saved.length, 5003)
+  assert.deepEqual(saved.filter(entry => entry.videoId.startsWith('clicked-')).map(entry => entry.videoId),
+    ['clicked-0', 'clicked-1', 'clicked-2'])
+})
+
+test('merges read the saved list again after another write or a failed save', async () => {
+  const { db, Settings } = await settingsFixture()
+  await Settings.mergeSeenVideos([{ videoId: 'first', seenAt: 1000 }])
+  // Another write, such as an older version's, replaces the saved list.
+  await db.settings.updateAsync({ _id: 'subscriptionSeenVideos' },
+    { $set: { value: JSON.stringify([{ videoId: 'elsewhere', seenAt: 1500 }]) } })
+  await Settings.mergeSeenVideos([{ videoId: 'second', seenAt: 2000 }])
+  assert.deepEqual((await savedVideoMarks(db)).map(entry => entry.videoId), ['elsewhere', 'second'])
+
+  const update = db.settings.updateAsync.bind(db.settings)
+  db.settings.updateAsync = async () => { throw new Error('Disk full') }
+  await assert.rejects(Settings.mergeSeenVideos([{ videoId: 'failed', seenAt: 3000 }]), /Disk full/)
+  db.settings.updateAsync = update
+  const changes = await Settings.mergeSeenVideos([{ videoId: 'third', seenAt: 4000 }])
+  assert.deepEqual(changes.upserts.map(entry => entry.videoId), ['third'])
+  assert.deepEqual((await savedVideoMarks(db)).map(entry => entry.videoId), ['elsewhere', 'second', 'third'])
+})
+
+test('changes of a merge at the cap evict the oldest mark from windows like from the saved list', async () => {
+  const { db, Settings } = await settingsFixture([{ videoId: 'watched', isWatched: true }])
+  const stored = Array.from({ length: seenData.MAX_SUBSCRIPTION_SEEN_VIDEOS }, (_, index) => ({
+    videoId: `stored-${String(index).padStart(5, '0')}`, seenAt: 1000 + index, isMembersOnly: false,
+  }))
+  stored[5000] = { videoId: 'watched', seenAt: 9000, isMembersOnly: false }
+  await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(stored) })
+  const shown = seenData.indexSubscriptionSeenVideos(stored)
+  for (const videoId of ['first', 'second']) {
+    seenData.applySubscriptionSeenVideoChanges(shown, await Settings.mergeSeenVideos({ videos: [{ videoId }] }))
+  }
+  const saved = await savedVideoMarks(db)
+  assert.equal(saved.length, seenData.MAX_SUBSCRIPTION_SEEN_VIDEOS)
+  // The watched video left first, then the oldest mark.
+  assert.ok(!saved.some(entry => ['watched', 'stored-00000'].includes(entry.videoId)))
+  assert.ok(saved.some(entry => entry.videoId === 'stored-00001'))
+  assert.deepEqual([...shown.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)), saved)
 })

@@ -38,7 +38,8 @@ import { normalizeSubscriptionTabs } from '../../helpers/subscriptionTabs.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
-import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
+import { subscriptionSeenVideosState, withSubscriptionSeenVideoChanges } from '../../helpers/subscription-seen-videos.js'
+import { hasSubscriptionSeenVideoChanges } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
@@ -894,6 +895,8 @@ export function profileSettingsPlugin(store) {
 // #endregion profile settings
 
 const customState = {
+  // Parsed once, and changed per merged mark, see `applySubscriptionSeenVideoChanges`
+  subscriptionSeenVideos: subscriptionSeenVideosState(DEFAULT_SETTINGS.subscriptionSeenVideos),
   profileSettingsState: {
     /** The profile whose own settings show, or null for the shared settings */
     applied: null,
@@ -1072,6 +1075,14 @@ export function whenSyncServerSnapshotLoaded() {
 }
 
 const customMutations = {
+  // Takes a saved value, which replaces the marks.
+  setSubscriptionSeenVideos: (state, value) => {
+    state.subscriptionSeenVideos = subscriptionSeenVideosState(value)
+  },
+  // Takes what a merge changed, see `SeenVideoChanges`.
+  applySubscriptionSeenVideoChanges: (state, changes) => {
+    state.subscriptionSeenVideos = withSubscriptionSeenVideoChanges(state.subscriptionSeenVideos, changes)
+  },
   setSyncServerSnapshot: (state, value) => {
     state.syncServerSnapshot = value
     syncServerSnapshotLoaded = true
@@ -1271,8 +1282,8 @@ const customActions = {
   // profile's own, or the shared ones.
   async mergeSubscriptionSeenVideos({ dispatch }, update) {
     const scope = getDataScope()
-    const saved = await DBSettingHandlers.mergeSeenVideos(update)
-    if (scope === getDataScope()) await dispatch('applySubscriptionSeenVideos', saved)
+    const changes = await DBSettingHandlers.mergeSeenVideos(update)
+    if (scope === getDataScope()) await dispatch('applySubscriptionSeenVideos', changes)
   },
   async mergeSubscriptionSeenPosts({ dispatch }, update) {
     const scope = getDataScope()
@@ -1304,12 +1315,10 @@ const customActions = {
     const value = JSON.stringify(mergeRssFeedSeenItems(state.rssFeedSeenItems, saved))
     if (value !== state.rssFeedSeenItems) commit('setRssFeedSeenItems', value)
   },
-  applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
-    // Another window's newer update may arrive before this request's reply.
-    const value = JSON.stringify(mergeSubscriptionSeenVideos(
-      state.subscriptionSeenVideos, saved, rootGetters.getHistoryCacheById
-    ))
-    if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
+  // Another window's newer update may arrive before this request's reply,
+  // which the changes allow.
+  applySubscriptionSeenVideos({ commit }, changes) {
+    if (hasSubscriptionSeenVideoChanges(changes)) commit('applySubscriptionSeenVideoChanges', changes)
   },
   // Saves an edit of a synced value that is not a setting, such as the custom themes.
   saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
@@ -2142,6 +2151,13 @@ const customActions = {
 
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
+          case SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS:
+            // Other windows can show another profile's seen marks.
+            if (shownSeenMarksSetting(data._id, getDataScope()) === 'subscriptionSeenVideos') {
+              commit('applySubscriptionSeenVideoChanges', data.changes)
+            }
+            break
+
           case SyncEvents.GENERAL.UPSERT:
             // If this window is writing the setting too, either save can end
             // up last, so this window shows the saved value once its writes finish.

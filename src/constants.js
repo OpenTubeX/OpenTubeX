@@ -371,6 +371,10 @@ const SyncEvents = {
     OVERWRITE: 5,
   },
 
+  SETTINGS: {
+    MERGE_SEEN_VIDEOS: 20,
+  },
+
   HISTORY: {
     UPDATE_WATCH_PROGRESS: 20,
     UPDATE_PLAYLIST: 21,

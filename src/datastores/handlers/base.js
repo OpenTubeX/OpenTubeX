@@ -13,7 +13,7 @@ import { hasReachedWatchedThreshold, mergeUndatedHistoryRecord, mergeTakeoutHist
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
-import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
+import { applySubscriptionSeenVideoChanges, hasSubscriptionSeenVideoChanges, indexSubscriptionSeenVideos, latestSubscriptionSeenTimestamp, planSubscriptionSeenVideoChanges } from '../../subscriptionSeenVideos'
 import { isOlderCollaborationCheck, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
@@ -31,6 +31,8 @@ const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
 class Settings {
   static pendingSeenStateUpdate = Promise.resolve()
   static migrationPromise = null
+  /** @type {Map<string, { value: unknown, byId: Map<string, import('../../subscriptionSeenVideos').SeenVideoMark>, latest: number }>} */
+  static seenVideosCache = new Map()
 
   static runSeenStateUpdate(operation) {
     // Share one queue for complete history-status and subscription-mark edits
@@ -97,50 +99,82 @@ class Settings {
     if (scope !== null && !await Profiles.isSeparate(scope)) throw new Error('The separate profile is gone')
   }
 
-  /** Runs in the seen-state queue, for a scope that {@link _assertSeenMarksScope} accepted */
+  /**
+   * The parsed marks saved in a seen-videos setting, kept while its saved
+   * value stays the same, so a merge doesn't parse the whole list again.
+   * @param {string} _id
+   */
+  static async _savedSeenVideos(_id) {
+    const saved = await db.settings.findOneAsync({ _id })
+    const cached = this.seenVideosCache.get(_id)
+    if (cached && cached.value === saved?.value) return cached
+    const byId = indexSubscriptionSeenVideos(saved?.value)
+    const marks = { value: saved?.value, byId, latest: latestSubscriptionSeenTimestamp(byId.values()) }
+    this.seenVideosCache.set(_id, marks)
+    return marks
+  }
+
+  /**
+   * Runs in the seen-state queue, for a scope that {@link _assertSeenMarksScope} accepted.
+   * @returns {Promise<import('../../subscriptionSeenVideos').SeenVideoChanges>}
+   */
   static async _mergeSeenVideos(update, scope = null) {
     const _id = seenMarksSettingId('subscriptionSeenVideos', scope)
     // Watched videos leave the list of the profile whose history has them.
     const history = scope === null ? db.history : scopedHandlers(scope).history.db.history
-    const saved = await db.settings.findOneAsync({ _id })
-    const local = parseSubscriptionSeenVideos(saved?.value)
+    const saved = await this._savedSeenVideos(_id)
     // Allocate local action timestamps inside the shared queue. Renderers
     // may still have identical stale getters while another write is pending.
-    const timestamp = nextSubscriptionSeenTimestamp(local)
-    const incoming = parseSubscriptionSeenVideos(Array.isArray(update?.videos)
+    const timestamp = Math.max(Date.now(), saved.latest + 1)
+    const incoming = Array.isArray(update?.videos)
       ? update.videos.map(video => ({
           videoId: video.videoId,
           isMembersOnly: video.isMembersOnly,
           seenAt: timestamp,
           ...(update.isUnseen === true ? { unseenAt: timestamp } : {})
         }))
-      : update)
-    // Watched videos leave the list. Checking every stored mark reads a
-    // history record per mark, so that only happens once the list is full and
-    // eviction would otherwise drop recent marks; stored marks were checked
-    // when they arrived.
-    const candidates = local.length + incoming.length > MAX_SUBSCRIPTION_SEEN_VIDEOS ? [...local, ...incoming] : incoming
-    const videoIds = [...new Set(candidates.map(entry => entry.videoId))]
-    await history.ensureIndexAsync({ fieldName: 'videoId' })
-    const historyById = {}
-    // NeDB checks each candidate against every ID in $in. Small indexed
-    // batches avoid quadratic work when merging thousands of seen marks.
-    const batchSize = 250
-    for (let index = 0; index < videoIds.length; index += batchSize) {
-      const records = await history.findAsync({ videoId: { $in: videoIds.slice(index, index + batchSize) } }, {
-        videoId: 1,
-        isWatched: 1,
-        isLive: 1,
-        isUpcoming: 1,
-        premiereTimestamp: 1,
-        watchProgress: 1,
-        lengthSeconds: 1,
-      })
-      for (const entry of records) historyById[entry.videoId] = entry
+      : update
+    const changes = await planSubscriptionSeenVideoChanges(saved.byId, incoming, async (videoIds) => {
+      await history.ensureIndexAsync({ fieldName: 'videoId' })
+      const historyById = {}
+      // NeDB checks each candidate against every ID in $in. Small indexed
+      // batches avoid quadratic work when merging thousands of seen marks.
+      const batchSize = 250
+      for (let index = 0; index < videoIds.length; index += batchSize) {
+        const records = await history.findAsync({ videoId: { $in: videoIds.slice(index, index + batchSize) } }, {
+          videoId: 1,
+          isWatched: 1,
+          isLive: 1,
+          isUpcoming: 1,
+          premiereTimestamp: 1,
+          watchProgress: 1,
+          lengthSeconds: 1,
+        })
+        for (const entry of records) historyById[entry.videoId] = entry
+      }
+      return historyById
+    })
+    if (!hasSubscriptionSeenVideoChanges(changes)) return changes
+
+    // The list stays one setting, which older versions read, so it is saved
+    // whole. Windows only receive the changes.
+    const upserts = new Map(changes.upserts.map(entry => [entry.videoId, entry]))
+    const removed = new Set(changes.removals.map(entry => entry.videoId))
+    const entries = []
+    for (const [videoId, entry] of saved.byId) {
+      if (removed.has(videoId)) continue
+      entries.push(upserts.get(videoId) ?? entry)
+      upserts.delete(videoId)
     }
-    const value = JSON.stringify(mergeSubscriptionSeenVideos(local, incoming, historyById))
-    if (value !== saved?.value) await this.upsert(_id, value)
-    return value
+    entries.push(...upserts.values())
+    const value = JSON.stringify(entries)
+    // The cache keeps the previous value if this fails, so the next merge
+    // parses the list again in case the write was saved.
+    await this.upsert(_id, value)
+    applySubscriptionSeenVideoChanges(saved.byId, changes)
+    saved.value = value
+    saved.latest = Math.max(saved.latest, latestSubscriptionSeenTimestamp(changes.upserts))
+    return changes
   }
 
   /**
@@ -394,9 +428,9 @@ class History {
           const watchedById = new Map(updatedRecords.filter(record => record.isWatched === true)
             .map(record => [record.videoId, record]))
           if (watchedById.size > 0) {
-            const saved = await db.settings.findOneAsync({ _id: seenMarksSettingId('subscriptionSeenVideos', this.scope) })
-            const videos = parseSubscriptionSeenVideos(saved?.value)
-              .filter(mark => watchedById.has(mark.videoId) && mark.unseenAt >= mark.seenAt)
+            const { byId } = await Settings._savedSeenVideos(seenMarksSettingId('subscriptionSeenVideos', this.scope))
+            const videos = [...watchedById.keys()].map(videoId => byId.get(videoId))
+              .filter(mark => mark?.unseenAt >= mark?.seenAt)
               .map(mark => ({
                 videoId: mark.videoId,
                 isMembersOnly: watchedById.get(mark.videoId).isMembersOnly === true
@@ -1961,6 +1995,7 @@ async function deleteScopeData(scope) {
         { _id: { $in: SCOPED_SEEN_MARK_SETTINGS.map(setting => seenMarksSettingId(setting, scope)) } },
         { multi: true }
       )
+      Settings.seenVideosCache.delete(seenMarksSettingId('subscriptionSeenVideos', scope))
     }),
     ...[...scopeDeletionListeners].map(listener => listener(scope)),
   ])

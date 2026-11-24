@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { SyncEvents } from '../../src/constants.js'
 
 async function loadPreloadInterface() {
   const ipcRenderer = new EventEmitter()
@@ -26,6 +27,7 @@ async function loadPreloadInterface() {
     globalThis: null,
     IpcChannels,
     DBActions: { GENERAL: { FIND: 1, UPSERT: 2 } },
+    SyncEvents,
     ipcRenderer,
     navigator: { userActivation },
     process: {
@@ -90,6 +92,25 @@ test('settings broadcasts older than a save this window already has are dropped'
   broadcast('newer', 3)
   broadcast('newer again', 3)
   assert.deepEqual(applied, ['newer'])
+})
+
+test('seen-video changes reach the window whatever revision they have', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  const applied = []
+  api.handleSyncSettings((event, data) => applied.push([event, data.changes ?? data.value]))
+  const send = (event, data, revision) => ipcRenderer.emit(IpcChannels.SYNC_SETTINGS, {}, { event, data, revision })
+  ipcRenderer.invoke = () => Promise.resolve({ result: null, savedSetting: { _id: 'subscriptionSeenVideos', revision: 2 } })
+
+  // Each merge changes only some marks, so none may be dropped.
+  await api.dbSettings(2, { _id: 'subscriptionSeenVideos', value: '[]' })
+  const changes = { upserts: [{ videoId: 'video', seenAt: 1000 }], removals: [] }
+  send(SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS, { _id: 'subscriptionSeenVideos', changes }, 1)
+  send(SyncEvents.GENERAL.UPSERT, { _id: 'subscriptionSeenVideos', value: 'older' }, 1)
+  send(SyncEvents.GENERAL.UPSERT, { _id: 'subscriptionSeenVideos', value: 'newer' }, 3)
+  assert.deepEqual(applied, [
+    [SyncEvents.SETTINGS.MERGE_SEEN_VIDEOS, changes],
+    [SyncEvents.GENERAL.UPSERT, 'newer'],
+  ])
 })
 
 test('Cast start checks activation before asynchronous payload preparation and invokes IPC once', async () => {

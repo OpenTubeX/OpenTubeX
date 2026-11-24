@@ -63,7 +63,7 @@ test('opens background videos promptly from a large subscriptions feed', async (
   await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
   await expect.poll(() => page.evaluate(id => {
     const store = window.$store
-    return JSON.parse(store.getters.getSubscriptionSeenVideos)
+    return [...store.getters.getSubscriptionSeenVideos.byId.values()]
       .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
   }, warmVideoId)).toBe(true)
   const session = await page.context().newCDPSession(page)
@@ -119,7 +119,7 @@ test('opens background videos promptly from a large subscriptions feed', async (
       await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
       await expect.poll(() => page.evaluate(id => {
         const store = window.$store
-        return JSON.parse(store.getters.getSubscriptionSeenVideos)
+        return [...store.getters.getSubscriptionSeenVideos.byId.values()]
           .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
       }, videoId)).toBe(true)
     }

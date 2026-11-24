@@ -87,7 +87,7 @@ test('a watched action queued after unseen supersedes it without resetting progr
   assert.equal(record.watchProgress, 12)
   assert.equal(record.timeWatched, 1)
   assert.deepEqual(result.records[0], record)
-  const [mark] = JSON.parse(result.seenVideos)
+  const [mark] = result.seenVideos.upserts
   assert.ok(mark.seenAt > mark.unseenAt)
 })
 
@@ -101,7 +101,7 @@ test('unseen patches persisted progress instead of replacing a renderer snapshot
   const absent = await History.updateSubscriptionState({ unseenVideo: { videoId: 'absent' } })
   assert.equal(absent.records.length, 0)
   assert.equal(await db.history.findOneAsync({ videoId: 'absent' }), null)
-  assert.ok(JSON.parse(absent.seenVideos).some(mark => mark.videoId === 'absent'))
+  assert.ok(absent.seenVideos.upserts.some(mark => mark.videoId === 'absent'))
 })
 
 test('bulk watched edits preserve unrelated history and only supersede matching reverse marks', async () => {
@@ -118,7 +118,10 @@ test('bulk watched edits preserve unrelated history and only supersede matching 
   })
   assert.equal(result.records.length, 1)
   assert.deepEqual(await db.history.findOneAsync({ videoId: 'other' }), other)
-  const marks = new Map(JSON.parse(result.seenVideos).map(mark => [mark.videoId, mark]))
+  assert.deepEqual(result.seenVideos.upserts.map(mark => mark.videoId), ['video'])
+  assert.deepEqual(result.seenVideos.removals, [])
+  const saved = JSON.parse((await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value)
+  const marks = new Map(saved.map(mark => [mark.videoId, mark]))
   assert.ok(marks.get('video').seenAt > marks.get('video').unseenAt)
   assert.equal(marks.get('other').seenAt, marks.get('other').unseenAt)
 })
@@ -148,7 +151,7 @@ test('a failed status write does not poison the shared queue or publish an unsee
   db.history.updateAsync = original
   const result = await History.updateSubscriptionState({ unseenVideo: { videoId: 'video' } })
   assert.equal(result.records[0].isWatched, false)
-  assert.equal(JSON.parse(result.seenVideos)[0].videoId, 'video')
+  assert.equal(result.seenVideos.upserts[0].videoId, 'video')
 })
 
 for (const unseen of [false, true]) {

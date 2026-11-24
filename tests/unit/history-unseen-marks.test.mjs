@@ -13,6 +13,7 @@ import * as seenMarkSettings from '../../src/subscriptionSeenMarkSettings.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
 const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+const byVideoId = marks => marks.toSorted((a, b) => a.videoId.localeCompare(b.videoId))
 const record = videoId => ({ videoId, isWatched: false, isMembersOnly: false, watchProgress: 123, lengthSeconds: 200, timeWatched: 1 })
 
 async function fixture(fail = false) {
@@ -31,13 +32,16 @@ async function fixture(fail = false) {
   const dependencies = { toRaw, ...historyHelpers, DBHistoryHandlers: History, console: { error() {} } }
   const module = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default', 'return'), Object.keys(dependencies))(...Object.values(dependencies))
+  // The marks the renderer shows after each change it applies
   const appliedMarks = []
+  const shownMarks = seenHelpers.indexSubscriptionSeenVideos(savedMarks)
   const context = {
     state: module.state,
     commit: (type, payload) => module.mutations[type](module.state, payload),
     dispatch: async (type, payload) => {
-      if (type === 'applySubscriptionSeenVideos') appliedMarks.push(JSON.parse(payload))
-      else return module.actions[type](context, payload)
+      if (type !== 'applySubscriptionSeenVideos') return module.actions[type](context, payload)
+      seenHelpers.applySubscriptionSeenVideoChanges(shownMarks, payload)
+      appliedMarks.push(byVideoId([...shownMarks.values()]))
     },
   }
   context.commit('setHistoryCacheSorted', structuredClone(records))
@@ -62,7 +66,7 @@ for (const bulk of [false, true]) {
       assert.equal(persisted.timeWatched, 1)
       assert.deepEqual(f.context.state.historyCacheById[videoId], persisted)
     }
-    const saved = JSON.parse((await f.db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value)
+    const saved = byVideoId(JSON.parse((await f.db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value))
     const unseen = saved.find(mark => mark.videoId === 'unseen')
     assert.ok(unseen.seenAt > unseen.unseenAt)
     assert.equal(unseen.isMembersOnly, false)
