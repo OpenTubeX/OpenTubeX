@@ -75,7 +75,7 @@
       <div
         ref="videoLayout"
         class="videoLayout"
-        :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar && !sidebarPanelLeaving }"
+        :class="{ ambientModeActive, useTheatreMode, noSidebar }"
       >
         <div class="videoArea">
           <FtFixedBackground />
@@ -555,7 +555,7 @@ import { getTwitchChatTarget } from './twitchChat'
 import { markTwitchLiveNotificationsRead } from '../../helpers/notificationHistory'
 import { parseTwitchChannelLogin } from '../../../twitchFollows'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
-import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
+import { createWatchLayoutAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { useRootClass } from '../../helpers/rootClasses'
 import { getPreferredCaption } from '../../../captionLanguages'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -675,7 +675,7 @@ const defaultViewingMode = computed(() => {
   return process.env.IS_CAPACITOR && (process.env.IS_IOS || !mode.startsWith('fullscreen')) ? 'default' : mode
 })
 let theatreModeToggledManually = false
-const theatreModeAnimator = createTheatreModeAnimator()
+const layoutAnimator = createWatchLayoutAnimator()
 const theatreLayoutAvailable = ref(isTheatreLayoutAvailable())
 const showTranscript = ref(false)
 const fullscreenLiveChatOpen = ref(false)
@@ -750,6 +750,12 @@ function setSidebarPanelLeaving(leaving) {
   sidebarPanelLeaving.value = leaving && !phonePanelsEnabled.value
 }
 const theatreTogglePossible = computed(() => theatreLayoutAvailable.value && hasSidebar.value)
+const noSidebar = computed(() => !hasSidebar.value && !sidebarPanelLeaving.value)
+// This runs before the render that changes the layout, so the animator
+// measures the areas where they were drawn.
+watch(noSidebar, () => {
+  if (!loading.value) layoutAnimator.animate(videoLayout.value)
+})
 // Like on the watch page, with theatre as the default, the first panel opened
 // on media without a sidebar appears below the video instead of beside it,
 // unless the user has chosen a layout.
@@ -764,7 +770,7 @@ function handleChaptersOverlayChange(open) {
 
 function toggleTheatreMode() {
   theatreModeToggledManually = true
-  return theatreModeAnimator.animate(videoLayout.value, () => {
+  return layoutAnimator.animate(videoLayout.value, () => {
     useTheatreMode.value = !useTheatreMode.value
   })
 }
@@ -1693,7 +1699,7 @@ onBeforeUnmount(() => {
   tabMediaCoordinator.setActionHandlers(tabId ?? 'web', 'playlist', {})
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
-  theatreModeAnimator.cancel()
+  layoutAnimator.cancel()
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)
   window.removeEventListener('resize', updateTheatreLayoutAvailability)

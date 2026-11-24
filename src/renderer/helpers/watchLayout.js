@@ -20,10 +20,11 @@ export function isTheatreLayoutAvailable() {
 }
 
 /**
- * Animates the layout areas from their previous positions after a theater
- * mode change. Starting a new change cancels the previous animation.
+ * Animates the layout areas from their previous positions and widths after a
+ * theater mode change or after the sidebar appears or disappears. Starting a
+ * new change cancels the previous animation.
  */
-export function createTheatreModeAnimator() {
+export function createWatchLayoutAnimator() {
   /** @type {Animation[]} */
   let animations = []
   /** @type {Set<HTMLElement>} */
@@ -106,7 +107,8 @@ export function createTheatreModeAnimator() {
 
   /**
    * @param {HTMLElement | null | undefined} layout
-   * @param {() => void} applyChange
+   * @param {() => void} [applyChange] Changes the layout. Watchers that run
+   * before the render that changes it can omit it.
    */
   async function animate(layout, applyChange) {
     const elements = ANIMATED_AREAS.flatMap(selector => layout?.querySelector(selector) ?? [])
@@ -114,48 +116,143 @@ export function createTheatreModeAnimator() {
     // Measure before cancelling, so an interrupted animation continues from
     // where the areas are drawn instead of jumping to their final positions.
     const previousRects = reducedMotion ? [] : elements.map(element => element.getBoundingClientRect())
+    const previousCardMargins = reducedMotion ? [] : measureCardMargins(layout)
+    const hadSidebar = !layout?.classList.contains('noSidebar')
     cancel()
-    if (reducedMotion) {
-      applyChange()
-      return
-    }
+    applyChange?.()
+    if (reducedMotion) { return }
 
-    applyChange()
     await nextTick()
+    if (!layout?.isConnected) { return }
 
     // The areas start where they were drawn, and the scaled player can reach
     // past the page, which would flash a horizontal scrollbar.
-    if (layout && elements.length > 0) {
+    if (elements.length > 0) {
       clippedLayout = layout
       layout.style.overflowX = 'clip'
     }
 
+    const hasSidebar = !layout.classList.contains('noSidebar')
+    const rtl = getComputedStyle(layout).direction === 'rtl'
+    let infoEndOffset = 0
+
     elements.forEach((element, index) => {
       const previousRect = previousRects[index]
       const nextRect = element.getBoundingClientRect()
-      const offsetX = previousRect.left - nextRect.left
-      const offsetY = previousRect.top - nextRect.top
-      // Only the player scales, and it has no fixed backgrounds.
       const isVideoPlayer = element.classList.contains('videoPlayer')
-      const scaleX = isVideoPlayer ? previousRect.width / nextRect.width : 1
-      const scaleY = isVideoPlayer ? previousRect.height / nextRect.height : 1
-      const animation = applyAnimationSpeed(element.animate([
-        {
-          transform: `translate(${offsetX}px, ${offsetY}px) scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'top left'
-        },
-        { transform: 'none', transformOrigin: 'top left' }
-      ], ANIMATION_OPTIONS))
-      track(animation)
-      if (!isVideoPlayer) {
-        keepFixedBackgroundsInPlace(element, offsetX, offsetY)
+      if (element.classList.contains('sidebarArea')) {
+        if (!hadSidebar && hasSidebar && Math.abs(infoEndOffset) >= 0.5) {
+          // An appearing sidebar has no previous place. It slides in beside
+          // the narrowing info area instead. Its relative offset is laid out
+          // in the same frame as the info area's margin, which a transform on
+          // the compositor would run ahead of.
+          track(applyAnimationSpeed(element.animate([
+            { left: `${infoEndOffset}px` },
+            { left: '0px' }
+          ], ANIMATION_OPTIONS)))
+        }
+        // A disappearing sidebar is already empty.
+        if (!hadSidebar || !hasSidebar) { return }
+      }
+
+      // Only the player scales. The other areas change their width instead,
+      // so their content reflows and slides with their end edge.
+      const resizes = !isVideoPlayer && Math.abs(previousRect.width - nextRect.width) >= 1
+      if (resizes) {
+        resize(element, previousRect.width, nextRect.width)
+        if (element.classList.contains('infoArea')) {
+          infoEndOffset = rtl ? previousRect.left - nextRect.left : previousRect.right - nextRect.right
+        }
+      }
+      // A resizing area stays at its inline start.
+      const offsetX = resizes
+        ? (rtl ? previousRect.right - nextRect.right : previousRect.left - nextRect.left)
+        : previousRect.left - nextRect.left
+      const offsetY = previousRect.top - nextRect.top
+      if (isVideoPlayer) {
+        const scaleX = previousRect.width / nextRect.width
+        const scaleY = previousRect.height / nextRect.height
+        if (offsetX === 0 && offsetY === 0 && scaleX === 1 && scaleY === 1) { return }
+        track(applyAnimationSpeed(element.animate([
+          {
+            transform: `translate(${offsetX}px, ${offsetY}px) scale(${scaleX}, ${scaleY})`,
+            transformOrigin: 'top left'
+          },
+          { transform: 'none', transformOrigin: 'top left' }
+        ], ANIMATION_OPTIONS)))
+      } else {
+        translate(element, offsetX, offsetY)
       }
     })
+
+    // The cards' side gaps depend on the layout too.
+    previousCardMargins.forEach(([card, previousMargins]) => {
+      const nextMargins = cardMargins(card)
+      if (!card.isConnected || nextMargins.every((margin, index) => margin === previousMargins[index])) { return }
+      track(applyAnimationSpeed(card.animate([
+        { marginInlineStart: previousMargins[0], marginInlineEnd: previousMargins[1] },
+        { marginInlineStart: nextMargins[0], marginInlineEnd: nextMargins[1] }
+      ], ANIMATION_OPTIONS)))
+    })
+
+    // Nothing moved, so no finished animation would restore the overflow.
+    if (animations.length === 0) {
+      cleanUp()
+      return
+    }
 
     if (insetElements.size > 0) {
       placeFixedBackgrounds()
       document.addEventListener('scroll', placeFixedBackgrounds, { capture: true, passive: true })
     }
+  }
+
+  /**
+   * @param {HTMLElement | null | undefined} layout
+   * @returns {[HTMLElement, string[]][]}
+   */
+  function measureCardMargins(layout) {
+    /** @type {HTMLElement[]} */
+    const cards = Array.from(layout?.querySelectorAll('.infoArea .watchVideo, .commentsArea .watchVideo') ?? [])
+    return cards.map(card => [card, cardMargins(card)])
+  }
+
+  /** @param {HTMLElement} card */
+  function cardMargins(card) {
+    const style = getComputedStyle(card)
+    return [style.marginInlineStart, style.marginInlineEnd]
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @param {number} offsetX
+   * @param {number} offsetY
+   */
+  function translate(element, offsetX, offsetY) {
+    // A transform would also make the area the containing block of its fixed
+    // backgrounds, so leave areas that don't move alone.
+    if (Math.abs(offsetX) < 0.5 && Math.abs(offsetY) < 0.5) { return }
+    track(applyAnimationSpeed(element.animate([
+      { transform: `translate(${offsetX}px, ${offsetY}px)` },
+      { transform: 'none' }
+    ], ANIMATION_OPTIONS)))
+    keepFixedBackgroundsInPlace(element, offsetX, offsetY)
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @param {number} previousWidth
+   * @param {number} nextWidth
+   */
+  function resize(element, previousWidth, nextWidth) {
+    // The area keeps stretching across its grid area while its end margin
+    // makes up the difference. Unlike a width, a margin doesn't widen the grid
+    // tracks, which would squeeze the sidebar during the animation.
+    const marginEnd = parseFloat(getComputedStyle(element).marginInlineEnd)
+    track(applyAnimationSpeed(element.animate([
+      { marginInlineEnd: `${marginEnd + nextWidth - previousWidth}px` },
+      { marginInlineEnd: `${marginEnd}px` }
+    ], ANIMATION_OPTIONS)))
   }
 
   return { animate, cancel }

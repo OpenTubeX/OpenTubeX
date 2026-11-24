@@ -55,7 +55,7 @@ import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPr
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
-import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
+import { createWatchLayoutAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -1385,6 +1385,10 @@ export default defineComponent({
         this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
+    // Keeps the sidebar column while its last panel animates out.
+    noSidebar: function () {
+      return !this.theatrePossible && !this.sidebarPanelLeaving
+    },
     theatreTogglePossible: function () {
       return this.theatreLayoutAvailable && this.theatrePossible
     },
@@ -1655,6 +1659,11 @@ export default defineComponent({
         this.useTheatreMode = true
       }
     },
+    noSidebar() {
+      // This runs before the render that changes the layout, so the animator
+      // measures the areas where they were drawn.
+      if (!this.isLoading) this.layoutAnimator.animate(this.$refs.videoLayout)
+    },
     isLoading(loading) {
       this.deferSecondaryContent(loading)
       if (loading) this.videoPlaying = false
@@ -1779,7 +1788,7 @@ export default defineComponent({
       (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, incognito: this.isIncognitoTab, retry })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
-    this.theatreModeAnimator = createTheatreModeAnimator()
+    this.layoutAnimator = createWatchLayoutAnimator()
     this.shortsNavigation = createShortsFeedNavigation({
       isActive: () => this.subscriptionShortsFeedActive,
       getFeed: () => this.subscriptionShortsFeed,
@@ -1872,7 +1881,7 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     document.removeEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
-    this.theatreModeAnimator.cancel()
+    this.layoutAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
     this.removeLiveReminderUpdatedListener = null
@@ -2631,7 +2640,7 @@ export default defineComponent({
     },
     toggleTheatreMode() {
       this.theatreModeToggledManually = true
-      return this.theatreModeAnimator.animate(this.$refs.videoLayout, () => {
+      return this.layoutAnimator.animate(this.$refs.videoLayout, () => {
         this.useTheatreMode = !this.useTheatreMode
       })
     },
