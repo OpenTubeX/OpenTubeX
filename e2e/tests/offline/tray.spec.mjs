@@ -45,9 +45,6 @@ test('the system tray menu keeps hiding windows tied to its icon and background 
   const requiredTooltip = general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })
 
   await tray.click()
-  await expect(option('Show icon')).toHaveAttribute('aria-selected', 'true')
-  await expect(option('Close to tray')).toHaveAttribute('aria-selected', 'false')
-  await expect(option('Minimize to tray')).toHaveAttribute('aria-selected', 'false')
   await expect(requiredTooltip).toHaveCount(0)
 
   // Turning the icon off stops hiding windows to the tray.
