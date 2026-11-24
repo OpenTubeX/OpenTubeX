@@ -3,7 +3,7 @@ category: feature
 platforms: [android, desktop, ios]
 ---
 
-The Download entry in the menus of videos and playlists lists your download templates, so a download can start right away. Click the entry to open the download dialog as before.
+The Download entry in the menus of videos and playlists now lists your download templates to start a download right away. Customize… opens the download dialog.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/f1a960cc-3445-4e1e-9d44-dacb050386fb">
