@@ -276,7 +276,7 @@ test('adds a custom search engine from settings', async ({ page }) => {
     selectionText: 'custom search'
   }))
   // Built-ins are disabled by default, so a single custom engine is a direct action.
-  const searchWith = contextMenu.items.find(item => item.label === 'Search with Renamed Search')
+  const searchWith = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search With')
 
   expect(searchWith).toMatchObject({
     labelKey: 'Context Menu.Search With',
