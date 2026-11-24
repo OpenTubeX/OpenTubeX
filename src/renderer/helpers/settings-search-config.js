@@ -204,7 +204,7 @@ export const SETTINGS_SEARCH_SOURCES = {
       ...YT_DLP_STREAMING_KEYS
     ])
   }, {
-    type: 'player',
+    type: 'player-controls',
     key: 'Settings.Player Settings.Player Controls',
     include: new Set(['Center Play Button'])
   }, {
@@ -385,7 +385,9 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
     'Settings.Player Settings.Show Lights Off Toggle': 'showLightsOffToggle',
     'Settings.Player Settings.Show Mirror Video Toggle': 'showMirrorVideoToggle',
     'Settings.Player Settings.Show Rotate Video Menu': 'showRotateVideoMenu',
-    'Settings.Player Settings.Show Seek Bar Filmstrip': 'showSeekBarFilmstrip',
+    'Settings.Player Settings.Show Seek Bar Filmstrip': 'showSeekBarFilmstrip'
+  },
+  'player-controls': {
     'Settings.Player Settings.Player Controls.Center Play Button': 'displayVideoPlayButton'
   },
   channel: {

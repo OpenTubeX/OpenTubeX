@@ -429,8 +429,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return false
   }
 
+  if (sectionType === 'player-controls' && isCapacitor && group === 'Center Play Button') {
+    return false
+  }
+
   if (sectionType === 'player' && isCapacitor && [
-    'Center Play Button',
     'Default Volume',
     'Remember Volume',
     'Scroll Volume Over Video Player',
