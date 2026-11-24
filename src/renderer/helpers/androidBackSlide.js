@@ -31,11 +31,13 @@ export function getAndroidBackSlide(edge, width) {
 }
 
 /**
- * @typedef {{ page: HTMLElement | null, scrim: HTMLElement | null }} AndroidBackSlideReveal
+ * @typedef {{ page: HTMLElement | null, scrim: HTMLElement | null, cover?: HTMLElement | null }} AndroidBackSlideReveal
  * @typedef {object} AndroidBackSlideTarget
  * @property {HTMLElement} element The view Back leaves, which slides away with the finger.
  * @property {HTMLElement | null} [area] Clips the slide, and its width is the distance to slide.
  * @property {Record<string, string>} [styles] Lets the view cover the one behind it while it slides.
+ * @property {boolean} [covered] Whether `reveal` shows a cover below the view, which slides
+ *   with it and casts its shadow, so that the view's own paint does not change.
  * @property {(shown: boolean) => Promise<AndroidBackSlideReveal | null>} [reveal]
  *   Shows the view Back returns to behind the current one, or hides it again.
  * @property {() => HTMLElement | null | Promise<HTMLElement | null>} [getEntering]
@@ -43,7 +45,8 @@ export function getAndroidBackSlide(edge, width) {
  * @typedef {{ element: HTMLElement, frame: (drag: number) => Keyframe, animation: Animation }} SlideLayer
  * @typedef {{
  *   target: AndroidBackSlideTarget, drag: number, slide: ReturnType<typeof getAndroidBackSlide>,
- *   layers: SlideLayer[], styles: { element: HTMLElement, name: string, value: string, priority: string }[]
+ *   layers: SlideLayer[], styles: { element: HTMLElement, name: string, value: string, priority: string }[],
+ *   revealed: boolean
  * }} SlideState
  */
 
@@ -131,17 +134,20 @@ export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) 
       if (!getComputedStyle(element).willChange.split(',').some(hint => hint.trim() === 'transform')) {
         setStyle(element, 'will-change', 'transform')
       }
-      setStyle(element, 'box-shadow', slide.shadow)
+      if (!target.covered) setStyle(element, 'box-shadow', slide.shadow)
       for (const [name, value] of Object.entries(target.styles ?? {})) setStyle(element, name, value)
       // A view moved aside must not widen its area.
       if (area) setStyle(area, 'overflow-x', 'clip')
 
       /** @type {SlideState} */
-      const current = { target, drag: 0, slide, layers: [], styles }
+      const current = { target, drag: 0, slide, layers: [], styles, revealed: false }
       state = current
       addLayer(current, element, slide.current)
       target.reveal?.(true).then(rendered => {
-        if (state !== current || !rendered?.page) return
+        if (state !== current || !rendered) return
+        if (rendered.cover) addLayer(current, rendered.cover, slide.current)
+        if (!rendered.page) return
+        current.revealed = true
         addLayer(current, rendered.page, slide.previous)
         if (rendered.scrim) addLayer(current, rendered.scrim, slide.scrim)
       })
@@ -165,7 +171,7 @@ export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) 
       }
       // The view behind has arrived. Drop its preview frames before Back makes
       // it the current view, so nothing moves when it does.
-      current.layers.slice(1).forEach(layer => layer.animation.cancel())
+      current.layers.filter(layer => layer.frame !== current.slide.current).forEach(layer => layer.animation.cancel())
       let wentBack = false
       try {
         if (isAvailable()) {
@@ -176,7 +182,7 @@ export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) 
         if (state === current) cancel()
       }
       // A view that was not kept arrives from where a kept view would have been.
-      if (!wentBack || current.target.reveal) return
+      if (!wentBack || current.revealed) return
       const entering = await (current.target.getEntering?.() ?? current.target.element)
       if (state !== null || !entering?.isConnected) return
       applyAnimationSpeed(entering.animate([

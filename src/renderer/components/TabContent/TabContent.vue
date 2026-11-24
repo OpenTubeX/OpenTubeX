@@ -28,6 +28,12 @@
         v-for="page in pages"
         :key="`${tab.refreshKey || 0}:${page.key}`"
       >
+        <!-- Gives the page Back slides away its background and shadow, below it. -->
+        <div
+          v-if="page.key === currentPageKey && backReveal"
+          class="backSlideCover"
+          :style="backReveal.cover"
+        />
         <TabBrowsingPage
           :tab-id="tab.id"
           :route="page.route"
@@ -35,7 +41,7 @@
           :presented="isBrowsingPresented && page.key === currentPageKey"
           class="routerView"
           :class="page.key === currentPageKey
-            ? { browsingBehindWatch: isWatchRoute }
+            ? { browsingBehindWatch: isWatchRoute, backSlidePage: RETAINS_PAGES }
             : { retainedPage: true, retainedPagePreview: backReveal?.key === page.key }"
           :inert="isWatchRoute || page.key !== currentPageKey"
           :aria-hidden="String(isWatchRoute || page.key !== currentPageKey)"
@@ -163,22 +169,33 @@ let nextPageKey = 0
 // Mounted browsing pages in history order. The last one is the page the tab shows.
 const pages = shallowRef([])
 const currentPageKey = computed(() => pages.value.at(-1)?.key)
-// The retained page Back shows behind the current page while the gesture lasts.
+// The retained page Back shows behind the current page while the gesture
+// lasts, if any, and where to cover it.
 const backReveal = shallowRef(null)
+/** @type {HTMLElement | null} */
+let backRevealPage = null
 
-/** @param {{ key: number, top: number } | null} reveal */
+/** @param {{ key: number | null, top: number, cover: Record<string, string> } | null} reveal */
 async function setBackReveal(reveal) {
   backReveal.value = reveal
-  // Offset through the preview class, so Vue never replaces the page's inline
-  // styles and the offset ends in the same render that shows the page.
-  if (reveal) tabContentRef.value?.style.setProperty('--retained-page-top', `${reveal.top}px`)
-  else tabContentRef.value?.style.removeProperty('--retained-page-top')
+  // The preview class shows the page at this offset. It is set on the page
+  // alone, before the render that shows it, since an inherited property on the
+  // tab would restyle the current page as well.
+  backRevealPage?.style.removeProperty('--retained-page-top')
+  backRevealPage = null
   if (!reveal) return null
   await nextTick()
   const root = tabContentRef.value
-  return root && {
-    page: root.querySelector(':scope > .retainedPagePreview'),
-    scrim: root.querySelector(':scope > .retainedPageScrim')
+  if (!root || backReveal.value !== reveal) return null
+  const page = root.querySelector(':scope > .retainedPagePreview')
+  if (page instanceof HTMLElement) {
+    page.style.setProperty('--retained-page-top', `${reveal.top}px`)
+    backRevealPage = page
+  }
+  return {
+    page,
+    scrim: root.querySelector(':scope > .retainedPageScrim'),
+    cover: root.querySelector(':scope > .backSlideCover')
   }
 }
 
@@ -318,7 +335,8 @@ watch(currentPageKey, scheduleLoaderUpdate)
 
 /**
  * Back slides the current page off the retained page it returns to. Without
- * one, such as on Watch or after an earlier Back, the whole tab slides.
+ * one, such as after an earlier Back, the page Back shows slides in once it
+ * loads. On Watch, the whole tab slides.
  */
 function getAndroidBackTarget() {
   const root = tabContentRef.value
@@ -328,14 +346,31 @@ function getAndroidBackTarget() {
   const index = props.tab.historyIndex
   const element = root.querySelector(':scope > .routerView:not(.retainedPage)')
   const area = root.closest('.app > .routerView')
-  if (!isWatchRoute.value && element && current?.index === index && previous?.index === index - 1 &&
-    previous.route.fullPath === getEntryPath(index - 1)) {
+  if (!isWatchRoute.value && element) {
+    const retained = current?.index === index && previous?.index === index - 1 &&
+      previous.route.fullPath === getEntryPath(index - 1)
     // Show the retained page at its own scroll position, which Back restores.
-    const scrollTop = props.tab.history[index - 1].scroll?.top ?? 0
-    const reveal = { key: previous.key, top: window.scrollY - scrollTop }
-    return { element, area, styles: getAndroidBackCover(element), reveal: shown => setBackReveal(shown ? reveal : null) }
+    const scrollTop = retained ? props.tab.history[index - 1].scroll?.top ?? 0 : 0
+    const reveal = { key: retained ? previous.key : null, top: window.scrollY - scrollTop, cover: getAndroidBackCoverArea(element) }
+    return {
+      element,
+      area,
+      covered: true,
+      reveal: shown => setBackReveal(shown ? reveal : null),
+      // The page Back shows mounts in this tab, which slides in instead.
+      getEntering: retained ? undefined : () => root
+    }
   }
   return { element: root, area, styles: getAndroidBackCover(root) }
+}
+
+/**
+ * The part of the viewport the page covers, also below the end of a short page.
+ * @param {HTMLElement} element
+ */
+function getAndroidBackCoverArea(element) {
+  const { top, left, width } = element.getBoundingClientRect()
+  return { top: `${Math.max(0, top)}px`, left: `${left}px`, width: `${width}px` }
 }
 
 /**
@@ -538,6 +573,47 @@ function cancelLoaderSettle() {
   opacity: 0;
   pointer-events: none;
   will-change: opacity;
+}
+
+/* Back slides the current page from script. Promoting the page, or changing
+   its background, shadow or height, only then repaints all of it as the
+   gesture starts, and Android WebView can draw that frame before the page is
+   rastered again, so it flashes. The page keeps its layer instead, and this
+   cover gives it a background and shadow while it slides. Dialogs, menus and
+   players render outside pages, so no fixed-position descendant anchors to
+   the page through its hint. */
+.backSlidePage {
+  will-change: transform;
+}
+
+.backSlideCover {
+  position: fixed;
+  inset-block-end: 0;
+  background-color: var(--bg-color);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* A shadow on each side, like the one androidBackSlide gives other views. The
+   page slides away from the edge the swipe starts at, which takes the other
+   side's shadow off the screen. Their own layers keep the cover a solid color,
+   which Chromium draws without rastering it. */
+.backSlideCover::before,
+.backSlideCover::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  will-change: transform;
+}
+
+.backSlideCover::before {
+  box-shadow: -2px 0 16px rgb(0 0 0 / 30%);
+  clip-path: inset(0 100% 0 -32px);
+}
+
+.backSlideCover::after {
+  box-shadow: 2px 0 16px rgb(0 0 0 / 30%);
+  clip-path: inset(0 -32px 0 100%);
 }
 
 .pageSwipePresented {
