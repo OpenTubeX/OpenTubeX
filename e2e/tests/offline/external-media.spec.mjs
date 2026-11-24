@@ -1310,8 +1310,11 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
 
   await toggle.click()
   await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
-  const closedPlayerBox = await externalMedia.locator('.videoPlayer').boundingBox()
-  expect(Math.abs(closedPlayerBox.width - theatrePlayerBox.width)).toBeLessThan(2)
+  // The player grows into the closed sidebar's space after the panel leaves.
+  await expect.poll(async () => {
+    const closedPlayerBox = await externalMedia.locator('.videoPlayer').boundingBox()
+    return Math.abs(closedPlayerBox.width - theatrePlayerBox.width)
+  }).toBeLessThan(2)
   const closedToggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Show Live Chat Replay' })
   await expect(closedToggle).toHaveAttribute('aria-pressed', 'false')
   await closedToggle.click()
