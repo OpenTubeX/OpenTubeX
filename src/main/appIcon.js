@@ -1,7 +1,7 @@
 // @ts-check
 import { app, BrowserWindow, nativeImage, shell } from 'electron'
 import { createHash } from 'node:crypto'
-import { watch } from 'node:fs'
+import { mkdirSync, watch } from 'node:fs'
 import asyncFs from 'node:fs/promises'
 import path from 'node:path'
 import { createSerialQueue } from './serialQueue.js'
@@ -38,6 +38,14 @@ export function encodeIco(image) {
 }
 
 /**
+ * @param {Buffer | null} a
+ * @param {Buffer | null} b
+ */
+function samePng(a, b) {
+  return a === null || b === null ? a === b : a.equals(b)
+}
+
+/**
  * @param {string} file
  * @returns {string}
  */
@@ -56,6 +64,8 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   let image = nativeImage.createFromPath(cachePath)
   /** @type {Buffer | null} */
   let png = image.isEmpty() ? null : image.toPNG()
+  // The icon saved to the cache, which lags behind png until the write succeeds.
+  let savedPng = png
   const enqueue = createSerialQueue(error => console.error('Unable to save the app icon', error))
 
   /** @returns {Electron.NativeImage | string} */
@@ -74,12 +84,19 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
     return path.win32.dirname(file) === normalizeWindowsPath(userDataPath) && ICO_NAME.test(path.win32.basename(file))
   }
 
+  function getPinnedDirectory() {
+    const appData = process.env.APPDATA ?? app.getPath('appData')
+    return path.join(appData, 'Microsoft', 'Internet Explorer', 'Quick Launch', 'User Pinned', 'TaskBar')
+  }
+
+  /** @returns {{ directory: string, recursive: boolean }[]} */
   function getShortcutDirectories() {
     const appData = process.env.APPDATA ?? app.getPath('appData')
     return [
-      path.join(appData, 'Microsoft', 'Internet Explorer', 'Quick Launch', 'User Pinned', 'TaskBar'),
-      path.join(appData, 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
-      app.getPath('desktop'),
+      { directory: getPinnedDirectory(), recursive: false },
+      // Package managers and users put shortcuts in Start menu folders.
+      { directory: path.join(appData, 'Microsoft', 'Windows', 'Start Menu', 'Programs'), recursive: true },
+      { directory: app.getPath('desktop'), recursive: false },
     ]
   }
 
@@ -93,8 +110,8 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
     let updated = true
     const target = normalizeWindowsPath(executablePath)
     const desiredIcon = icoPath ?? executablePath
-    for (const directory of getShortcutDirectories()) {
-      const names = await asyncFs.readdir(directory).catch(error => {
+    for (const { directory, recursive } of getShortcutDirectories()) {
+      const names = await asyncFs.readdir(directory, { recursive }).catch(error => {
         // An unreadable folder may hold shortcuts that use the old icon.
         if (error.code !== 'ENOENT') updated = false
         return []
@@ -163,7 +180,10 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
     /** @type {ReturnType<typeof setTimeout> | undefined} */
     let timer
     try {
-      const watcher = watch(getShortcutDirectories()[0], () => {
+      const directory = getPinnedDirectory()
+      // Windows creates the folder on the first pin, which the watcher would miss.
+      mkdirSync(directory, { recursive: true })
+      const watcher = watch(directory, () => {
         clearTimeout(timer)
         timer = setTimeout(() => {
           const data = png
@@ -173,8 +193,8 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       })
       watcher.on('error', () => watcher.close())
       watcher.unref()
-    } catch {
-      // Nothing was pinned yet, so the folder doesn't exist.
+    } catch (error) {
+      console.error('Unable to watch pinned shortcuts', error)
     }
   }
 
@@ -201,16 +221,19 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       if (width !== APP_ICON_SIZE || height !== APP_ICON_SIZE) return
     }
     const nextPng = nextImage.isEmpty() ? null : nextImage.toPNG()
-    if (nextPng === null ? png === null : png?.equals(nextPng)) return
-    image = nextImage
-    png = nextPng
-    const windowIcon = getWindowIcon()
-    if (process.platform !== 'darwin') {
-      for (const window of BrowserWindow.getAllWindows()) window.setIcon(windowIcon)
+    if (samePng(nextPng, png) && samePng(nextPng, savedPng)) return
+    if (!samePng(nextPng, png)) {
+      image = nextImage
+      png = nextPng
+      const windowIcon = getWindowIcon()
+      if (process.platform !== 'darwin') {
+        for (const window of BrowserWindow.getAllWindows()) window.setIcon(windowIcon)
+      }
+      applyToDock()
     }
-    applyToDock()
     await enqueue(async () => {
       await (nextPng === null ? asyncFs.rm(cachePath, { force: true }) : writeFileAtomic(cachePath, nextPng))
+      savedPng = nextPng
       await applyToShortcuts(nextPng)
     })
   }

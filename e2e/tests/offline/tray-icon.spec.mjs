@@ -135,6 +135,8 @@ test('app icon choices persist and follow the active app palette', async ({ app,
   await page.getByRole('button', { name: 'App icon', exact: true }).click()
   const choices = page.getByRole('group', { name: 'App icon', exact: true })
   await expect(choices.locator('input[value="monochrome"]')).toHaveCount(0)
+  // The light palette, since the System Default mode follows the machine's color scheme.
+  await setSetting(page, 'BaseTheme', 'openTubeXLight')
   await choices.locator('input[value="theme"]').check()
   await expect.poll(() => cachedIcon(app, 'app-icon.png')).not.toBeNull()
   const lightIcon = await cachedIcon(app, 'app-icon.png')
