@@ -31,6 +31,7 @@ import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { chromecast, fcast } from '../../helpers/player/chromecast'
 import { selectCastSource } from '../../helpers/player/castSource'
 import { getSubtitleRequestUrl, shouldUseSubtitleCookies } from '../../helpers/player/subtitleCookies'
+import { getCaptionTranslationLanguage } from '../../helpers/player/captionTranslation'
 
 // Google Cast and FCast share this sender UI; FCast has no subtitle tracks.
 const props = defineProps({
@@ -275,8 +276,10 @@ async function handleChoice(choice) {
     }
     let player
     const result = await cast.start(async () => {
-      // Optional authenticated tracks would each launch an unused yt-dlp process.
-      captions = captions.filter(item => item.url === caption?.url || !shouldUseSubtitleCookies(item.url, store.getters))
+      // Optional authenticated tracks would each launch an unused yt-dlp process,
+      // and the receiver can't load YouTube's translations without an account.
+      captions = captions.filter(item => item.url === caption?.url ||
+        (!shouldUseSubtitleCookies(item.url, store.getters) && getCaptionTranslationLanguage(item.url) === null))
       const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
       if (captionIndex !== null && captionIndex >= 0) {
         const selected = captions[captionIndex]

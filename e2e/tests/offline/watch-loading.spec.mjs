@@ -554,7 +554,8 @@ test.describe('local player request concurrency', () => {
       const captionRequests = []
       page.on('request', request => {
         const url = new URL(request.url())
-        if (url.pathname === '/api/timedtext') captionRequests.push(`${url.searchParams.get('request')} ${url.searchParams.get('tlang')}`)
+        // Only the German translation, which is made from the original track, requests SRT
+        if (url.pathname === '/api/timedtext') captionRequests.push(`${url.searchParams.get('request')} ${url.searchParams.get('fmt')}`)
       })
 
       const video = await openMockedVideo(page)
@@ -597,7 +598,7 @@ test.describe('local player request concurrency', () => {
       await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
       expect(visionOsRequests).toEqual(['jNQXAC9IVRw', 'jNQXAC9IVRw'])
       // The new source loads the captions again, from their fresh URL
-      await expect.poll(() => captionRequests.at(-1)).toBe('1 de')
+      await expect.poll(() => captionRequests.at(-1)).toBe('1 srt')
       expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
       expect(await watch.evaluate(view => view.legacyFormatAvailable)).toBe(false)
     })

@@ -184,6 +184,20 @@ export async function translateCommentText(text, targetLanguage) {
   })
 }
 
+/**
+ * Translates caption lines with the comment translation service, which, unlike
+ * YouTube's caption translations, needs no signed-in account.
+ * @param {string} text newline-separated lines
+ * @param {string} targetLanguage
+ * @returns {Promise<string>} the translated lines
+ */
+export async function translateCaptionText(text, targetLanguage) {
+  const innertube = await createInnertube()
+  const { translated_content: translatedContent } = await innertube.interact.translate(text, targetLanguage)
+  if (typeof translatedContent !== 'string') throw new Error('YouTube did not return a caption translation')
+  return translatedContent
+}
+
 export async function getLocalPlaylist(id, signal) {
   const innertube = await createInnertube({ signal })
   return await innertube.getPlaylist(id)
