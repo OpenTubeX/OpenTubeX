@@ -2,7 +2,6 @@ import { DEFAULT_MATERIAL_SEED_COLOR } from './materialTheme.js'
 import { DEFAULT_SIGNAL_ACCENT_COLOR } from './signalTheme.js'
 import { DEFAULT_LANDING_PAGE, DEFAULT_SYSTEM_THEMES, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
 import { DEFAULT_THUMBNAIL_SIZE } from './renderer/constants/thumbnailSize.js'
-import { DEFAULT_FIXED_TAB_WIDTH } from './renderer/constants/tabWidth.js'
 import { DEFAULT_VERTICAL_TAB_HEIGHT } from './renderer/constants/tabHeight.js'
 import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from './renderer/constants/scrollbar.js'
 import { DEFAULT_SCROLL_SPEED } from './renderer/helpers/scrollSpeed.js'
@@ -11,7 +10,6 @@ import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from './renderer/helpers/player/segmen
 import { BUFFER_PRESETS } from './renderer/helpers/player/buffering.js'
 import { DEFAULT_APP_FONT } from './renderer/helpers/appFont.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from './ytDlpPlaybackCacheSettings.js'
-import { DEFAULT_YT_DLP_PRELOAD_CONCURRENCY, DEFAULT_YT_DLP_PRELOAD_COUNT } from './renderer/helpers/player/ytDlpPlaybackPreload.js'
 import { DEFAULT_HOME_SECTION_LAYOUT } from './renderer/helpers/homeSections.js'
 import { DEFAULT_QUICK_SETTINGS } from './renderer/helpers/quickSettings.js'
 import { DEFAULT_FULLSCREEN_ACTIONS } from './renderer/helpers/fullscreenActions.js'
@@ -174,9 +172,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpSubtitleUseCookies: false,
     ytDlpDownloadUseCookies: true,
     ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
-    ytDlpPreloadEnabled: false,
-    ytDlpPreloadCount: DEFAULT_YT_DLP_PRELOAD_COUNT,
-    ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
+    // 0 turns preloading upcoming videos off.
+    ytDlpPreloadCount: 0,
     confirmLargePlaylistPreload: true,
     ytDlpFfmpegSource: 'system',
     ytDlpFfmpegPath: '',
@@ -219,8 +216,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideFeaturedChannels: false,
     channelsHidden: '[]',
     forbiddenTitles: '[]',
-    enableBlockLists: true,
-    blurBlockedItems: false,
+    // What the block lists do with matching items: 'hide' | 'blur' | 'show'
+    blockedItemsMode: 'hide',
     showAddedChannelsHidden: true,
     showAddedForbiddenTitles: true,
     videoDescriptionMode: 'collapsed',
@@ -251,11 +248,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     bedtimeWaitForVideoEnd: true,
     bedtimeSilenceNotifications: false,
     stopAutoplayAtBedtimeAndLimit: false,
-    // Former navigation switches remain loadable so older settings can migrate.
-    hideHome: false,
     // This also controls playlist actions outside navigation.
     hidePlaylists: false,
-    hidePopularVideos: false,
     hideRecommendedVideos: false,
     hideSearchBar: false,
     hideSideBarOnWatchPages: true,
@@ -265,7 +259,6 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideSubscriptionsLive: false,
     hideSubscriptionsCommunity: false,
     subscriptionTabs: [...DEFAULT_SUBSCRIPTION_TABS],
-    hideTrendingVideos: false,
     hideUnsubscribeButton: false,
     hideUpcomingPremieres: false,
     hideVideoLikesAndDislikes: false,
@@ -304,13 +297,12 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     toggleTabPlaybackWithIcon: false,
     newTabButtonNextToTabs: true,
     tabLoadingIndicator: 'bar',
-    updateRelativeTimestamps: true,
     tabBarPosition: 'top',
     customTitleBar: false,
     verticalTabBarWidth: 220,
     verticalTabHeight: DEFAULT_VERTICAL_TAB_HEIGHT,
-    useFixedTabWidth: false,
-    fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
+    // 0 sizes tabs to their titles.
+    fixedTabWidth: 0,
     listType: 'grid',
     playlistViewType: 'grid',
     // 0 derives the column count from the window width and thumbnail size.

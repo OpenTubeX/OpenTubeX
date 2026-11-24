@@ -74,6 +74,8 @@ Global:
   Loading More: Hleður inn fleiru
   New: Nýtt
   Show Blocked Item: Sýna útilokað atriði
+  Auto: Sjálfvirkt
+  'Off': Slökkt
 Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
@@ -568,7 +570,6 @@ Settings:
     Date Format: Dagsetningarsnið
     Time Format: Tímasnið
     Language Default: Sjálfgefið fyrir tungumál
-    Update Relative Timestamps: Uppfæra afstæða tímastimpla
     Stream Extraction Method:
       Stream Extraction Method: Aðferð við öflun streymis
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Hlaðið inn flipatákni sem vantaði: {count} | Hlaðið inn flipatáknum sem vantaði: {count}'
     Loaded Tab Icons With Failures: Hlaðið inn {loaded} flipatáknum; ekki tókst að hlaða inn {failed}
     Show Tab Previews: Sýna forskoðun flipa
-    Use Fixed Tab Width: Nota fasta flipabreidd í láréttri stöðu
     Use Custom Title Bar: Nota sérsniðna titilstiku
     Tab Width: Flipabreidd
     Vertical Tab Height: Hæð lóðréttra flipa
@@ -1046,9 +1046,7 @@ Settings:
     Parallel Segment Loading: Samhliða hleðsla búta
     Rotate Wide Videos to Landscape in Fullscreen: 'Snúa breiðum myndskeiðum lárétt á öllum skjánum'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Strjúktu upp eða niður til að opna eða loka öllum skjánum'
-    Preload Upcoming Videos: "Forhlaða næstu myndskeið"
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
-    Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
     Keep Status Bar Hidden in Fullscreen: "Halda stöðustikunni falinni á öllum skjánum"
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
@@ -1361,6 +1359,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Fela áhorfð myndskeið í leit og meðmælum"
     Hide Full Screen Video Title: Fela heiti myndbands í heilum glugga eða á öllum skjánum
+    Blocked Items:
+      Blocked Items: Útilokuð atriði
+      Hide: Fela
+      Blur: Þoka
+      Show: Sýna
     Digital Wellbeing:
       Count Watch Time From: "Telja áhorfstíma"
       Break Reminder Action: "Þegar kominn er tími á hlé"
@@ -1387,7 +1390,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Þagga tilkynningar um nýtt efni á háttatíma"
       Stop Autoplay at Bedtime and After the Daily Limit: "Stöðva sjálfvirka spilun á háttatíma og eftir daglegt hámark"
     Hide Popularity Graph: "Fela vinsældarit"
-    Enable Block Lists: "Virkja blokkunarlista"
     AI Video Summaries: Myndbandsyfirlit gervigreindar
     Hide: Fela
     Collapsed: Samanbrotin
@@ -1409,7 +1411,6 @@ Settings:
     Hide Channel Avatars: Fela auðkennismyndir rása
     Shorten View Counts: Stytta tölur yfir áhorf, athugasemdir og líkar við athugasemdir
     Hide Live Chat Replay: Fela endurspilun beinspjalls
-    Hide Home: Fela heimasíðu
     Disable A-B Repeat: Slökkva á A-B-endurtekningu
     Hide End-Screen Annotations: Fela skýringar á lokaskjá
     Hide End-Screen Recommendations: "Fela tillögur á lokaskjá"
@@ -1418,7 +1419,6 @@ Settings:
     Show Video Title: Sýna heiti myndbands
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
-    Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
   Data Settings:
     Backup separate profile data: "Þetta afrit inniheldur einnig gögn {count} aðskilins notandasniðs, sem eru endurheimt í það notandasnið. | Þetta afrit inniheldur einnig gögn {count} aðskilinna notandasniða, sem eru endurheimt í þau notandasnið."
     Subscription cache file: "Þessi skrá geymir aðeins myndskeið úr áskriftunum þínum í skyndiminni, ekki rásirnar. Veldu frekar profiles.db eða útflutning áskrifta."
@@ -2463,7 +2463,6 @@ Tooltips:
     Enable Tabs: "Heldur núverandi síðu opinni. Aðrir flipar eru geymdir þar til forritið er endurræst; virkjaðu flipa aftur til að endurheimta þá."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
-    Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.
     Stream Extraction Method: |
       Veldu hvernig OpenTubeX sækir myndbandsstreymi. yt-dlp þarf að vera tiltækt þegar sú aðferð er valin.
       Myndbönd geta verið lengur að hefja spilun þegar yt-dlp er notað.
@@ -2512,9 +2511,7 @@ Tooltips:
       Hærri gildi geta hjálpað á hægum eða óstöðugum tengingum en nota meiri bandbreidd og minni.
       Þau geta einnig valdið því að Sjálfvirkt vanmeti tengingarhraðann og velji minni gæði.
       Streymi sem er takmarkað við eina beiðni í einu hunsar þessa stillingu.
-    Preload Upcoming Videos: "Sækir og vistar yt-dlp-slóðir næstu myndskeiða. Biðröðin hefur forgang fram yfir spilunarlista og tillögur."
-    Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
-    Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
+    Upcoming Videos to Preload: "Sækir og vistar yt-dlp-streymisslóðir fyrir allt að þennan fjölda myndskeiða sem geta spilast næst. Áhorfsbiðröðin hefur forgang fram yfir spilunarlista og tillögur."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
     Keep Status Bar Hidden in Fullscreen: "Sýna stöðustikuna aðeins þegar þú strýkur frá skjábrúninni og fela hana aftur eftir smástund. Að ýta á spilarann sýnir hana ekki lengur."
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
@@ -2551,6 +2548,7 @@ Tooltips:
     Take a Break Reminder: "Gerir hlé á myndbandinu eftir svona langt áhorf. Hlé í 10 mínútur eða lengur byrjar talninguna upp á nýtt."
     Bedtime Reminder: "Gerir hlé á myndbandinu og minnir þig á að hætta að horfa milli upphafs- og lokatíma."
     Shorten View Counts: Sýnir fjölda áhorfa, athugasemda og fjölda þeirra sem líka við athugasemdir á styttu formi ef YouTube hefur þegar námundað tölurnar, t.d. 14 þ. í stað 14.000. Nákvæmur fjöldi er alltaf sýndur fullskrifaður.
+    Blocked Items: Fela fjarlægir myndskeið, spilunarlista og rásir sem passa við listana hér fyrir neðan. Þoka sýnir þau þokukennd þar til þú birtir þau. Sýna hunsar listana.
   Subscription Settings:
     Refresh These Feeds Together: "Þegar þú uppfærir eina af merktu veitunum eru hinar merktu veiturnar uppfærðar strax á eftir. Sjálfvirkar uppfærslur fylgja áfram tímabili hverrar veitu."
     Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
@@ -2571,13 +2569,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Ef smellt er á tákn flipa með myndskeiði í spilun eða í hléi er gert hlé á því eða það haldið áfram án þess að skipta yfir á þann flipa.
     Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu, þar á meðal þær sem bjóða upp á Afturkalla. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem biðja um ákvörðun, eins og uppfærslubeiðnir, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
+    Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd. Sjálfvirkt lagar breidd hvers flipa að titli hans.
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     Playlist Thumbnail Size: "Breytir stærð smámynda myndskeiða á síðum spilunarlista. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     UI Density: "Breytir bilum í listum, valmyndum, hliðarstiku og stillingum."
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
     Scroll Speed: Breytir hversu langt er skrunað með músarhjóli og snertifleti.
-    Use Fixed Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd í stað þess að laga breidd þeirra að titlinum.
     Use Custom Title Bar: Skiptir titilstiku kerfisins út fyrir flipastikuna, eða efri leiðsögnina þegar fliparnir eru ekki efst, til að spara lóðrétt pláss. Gluggahnapparnir birtast í horni þeirrar stiku.
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
     Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."

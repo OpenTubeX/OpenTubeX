@@ -90,6 +90,8 @@ Global:
   Loading More: Laai meer
   New: Nuut
   Show Blocked Item: Wys geblokkeerde item
+  Auto: Outomaties
+  'Off': Af
 Search Bar:
   Use Suggestion: Gebruik voorstel
   Open Search Container: Maak soekhouer oop
@@ -735,7 +737,6 @@ Settings:
       Automatic: Outomaties
       Phone: Foon
       Tablet: Tablet
-    Update Relative Timestamps: Hou relatiewe tydstempels bygewerk
     Automatically switch stream extraction methods: Wissel stroomonttrekkingsmetodes outomaties
     Stream Extraction Method:
       Stream Extraction Method: Stroomonttrekkingsmetode
@@ -893,7 +894,6 @@ Settings:
     Loaded Tab Icons: 'Ontbrekende oortjie-ikoon gelaai: {count} | Ontbrekende oortjie-ikone gelaai: {count}'
     Loaded Tab Icons With Failures: '{loaded} oortjie-ikone gelaai; {failed} kon nie gelaai word nie'
     Show Tab Previews: Wys oortjievoorskoue
-    Use Fixed Tab Width: Gebruik vaste oortjiebreedte in horisontale modus
     Use Custom Title Bar: Gebruik pasgemaakte titelbalk
     Tab Width: Oortjiebreedte
     Vertical Tab Height: Vertikale oortjiehoogte
@@ -1168,9 +1168,7 @@ Settings:
     Show Playback Rate Adjusted Timestamp: Wys tydstempel aangepas vir afspeelspoed
     Use YouTube-style Shorts: Gebruik kortvideo’s in YouTube-styl
     Loop Shorts: Herhaal kortvideo’s
-    Preload Upcoming Videos: Laai komende video’s vooraf
     Upcoming Videos to Preload: Komende video’s om vooraf te laai
-    Concurrent Preloads: Gelyktydige voorlaaie
     Remember Volume: Onthou volume
     Mono Audio: Mono-oudio
     Normalize Loudness: 'Normaliseer luidheid'
@@ -1548,6 +1546,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Versteek gekykte video’s in soektogte en aanbevelings"
     Hide Full Screen Video Title: Versteek videotitel in volle venster / volskerm
+    Blocked Items:
+      Blocked Items: Geblokkeerde items
+      Hide: Versteek
+      Blur: Vervaag
+      Show: Wys
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
       Break Reminder Action: Wanneer dit tyd vir ’n pouse is
@@ -1593,14 +1596,12 @@ Settings:
       Visible While Paused: Sigbaar terwyl gepouseer in volle venster / volskerm
     Hide Channel Avatars: Versteek kanaalavatars
     Shorten View Counts: Verkort getalle van kyke, kommentaar en kommentaar-hou-van’s
-    Hide Home: Versteek Tuis
     Hide Live Chat Replay: Versteek herspeel van regstreekse klets
     Hide Popularity Graph: Versteek gewildheidsgrafiek
     Disable A-B Repeat: Deaktiveer A-B-herhaling
     Hide End-Screen Annotations: Versteek eindskermaantekeninge
     Hide End-Screen Recommendations: Versteek eindskermaanbevelings
     Hide Paid Promotion Badge: Versteek kenteken vir betaalde promosie
-    Enable Block Lists: Aktiveer bloklyste
     Hide Channel Posts: Versteek kanaal-“plasings”-oortjie
     Hide Channel Courses: Versteek kanaal-“kursusse”-oortjie
     Hide Channel Shows: Versteek kanaal-“programme”-oortjie
@@ -1611,7 +1612,6 @@ Settings:
     Paused Interface Hide Delay: Versteekvertraging van koppelvlak tydens pouse
     Add: Voeg by
     Remove: Verwyder
-    Blur Blocked Items: Vervaag geblokkeerde items in plaas daarvan om hulle te versteek
   Data Settings:
     Backup separate profile data: "Hierdie rugsteun bevat ook die data van {count} afsonderlike profiel, wat in daardie profiel herstel word. | Hierdie rugsteun bevat ook die data van {count} afsonderlike profiele, wat in daardie profiele herstel word."
     Subscription cache file: "Hierdie lêer kas net die video's van jou intekeninge, nie die kanale nie. Kies eerder profiles.db of 'n uitvoer van intekeninge."
@@ -2708,7 +2708,6 @@ Tooltips:
     Enable Tabs: Hou die huidige blad oop. Ander oortjies word behou totdat die toep herbegin; aktiveer oortjies weer om hulle te herstel.
     Data Saver Thumbnails: Gebruik duimnaels met laer resolusie om datagebruik te verminder.
     Use AI Translation Completions: Vul gapings in menslike vertalings met KI-gegenereerde teks aan. Menslike vertalings kry altyd voorrang.
-    Update Relative Timestamps: Werk relatiewe tydstempels regdeur die toep by terwyl ’n blad oop bly. Wanneer gedeaktiveer, word hulle slegs bygewerk nadat die blad herlaai of weer besoek is.
     Automatically switch stream extraction methods: Probeer yt-dlp as ingeboude afspeel misluk, of ingeboude afspeel as yt-dlp misluk.
     Stream Extraction Method: |
       Kies hoe OpenTubeX videostrome verkry. yt-dlp moet beskikbaar wees wanneer dit gekies is.
@@ -2758,9 +2757,7 @@ Tooltips:
       Hoër waardes kan help op stadige of onstabiele verbindings, maar gebruik meer bandwydte en geheue.
       Hulle kan ook veroorsaak dat Outomaties die verbindingspoed onderskat en ’n laer kwaliteit kies.
       Strome wat tot een versoek op ’n slag beperk is, ignoreer hierdie instelling.
-    Preload Upcoming Videos: Haal yt-dlp-stroom-URL’s op en kas dit vir video’s wat volgende kan speel. Die kyktou kry voorrang bo afspeellyste en aanbevelings.
-    Upcoming Videos to Preload: Die maksimum aantal komende video’s waarvan die yt-dlp-stroom-URL’s in die agtergrond opgehaal word.
-    Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
+    Upcoming Videos to Preload: Haal yt-dlp-stroom-URL’s op en kas dit vir tot soveel video’s wat volgende kan speel. Die kyktou kry voorrang bo afspeellyste en aanbevelings.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
     Keep Status Bar Hidden in Fullscreen: "Wys die statusbalk slegs wanneer jy van die skermrand af swiep, en versteek dit weer na 'n oomblik. Om op die speler te tik, wys dit nie meer nie."
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
@@ -2797,6 +2794,7 @@ Tooltips:
     Take a Break Reminder: Pouseer die video na soveel kyk. ’n Pouse van 10 minute of meer begin die telling weer.
     Bedtime Reminder: Pouseer die video en herinner u om op te hou kyk tussen die begin- en eindtyd.
     Shorten View Counts: Wys getalle van kyke, kommentaar en kommentaar-hou-van’s wat YouTube reeds afgerond het in ’n verkorte vorm, bv. 14K in plaas van 14 000. Presiese getalle word altyd volledig gewys.
+    Blocked Items: Versteek verwyder video’s, afspeellyste en kanale wat by die lyste hieronder pas. Vervaag wys hulle vervaag totdat jy hulle onthul. Wys ignoreer die lyste.
   Subscription Settings:
     Refresh These Feeds Together: "Wanneer jy een van die gemerkte voere verfris, word die ander gemerkte voere direk daarna verfris. Outomatiese verfrissings volg steeds elke voer se eie interval."
     Fetch Feed on Startup: Wanneer geaktiveer, sal OpenTubeX u intekeningvoer outomaties by opstart ophaal en wanneer ’n nuwe venster oopgemaak word.
@@ -2822,7 +2820,7 @@ Tooltips:
     Always Show Scrollbars: Hou die rolstawe altyd sigbaar. Wanneer gedeaktiveer, verdof hulle kort nadat u ophou om die muis te beweeg en verskyn weer sodra u dit beweeg.
     Scroll Speed: Verander hoe ver muiswiel- en raakpaneelwielgebare rol.
     Visible Search Suggestions: Stel hoeveel soekgeskiedenisinskrywings en voorstelle die soekbalk wys voordat die lys rol. Die lys strek nooit verby die onderkant van die venster nie.
-    Use Fixed Tab Width: Gee elke oortjie in die horisontale oortjiebalk dieselfde breedte in plaas daarvan om hulle volgens hul titel te grootte te maak.
+    Tab Width: Gee elke oortjie in die horisontale oortjiebalk dieselfde breedte. Outomaties pas elke oortjie se grootte by sy titel aan.
     Use Custom Title Bar: Vervang die stelsel se titelbalk met die oortjiebalk, of met die boonste navigasie wanneer oortjies nie bo is nie, om vertikale spasie te bespaar. Die vensterkontroles verskyn in die hoek van daardie balk.
     Use Grid Player Menu: Rangskik die videospeler se instellingskieslys as ’n rooster van teëls in plaas van ’n lys rye.
     UI Density: "Verander die spasiëring in lyste, kieslyste, die kantbalk en Instellings."

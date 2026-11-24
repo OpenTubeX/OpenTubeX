@@ -73,6 +73,8 @@ Global:
   Loading More: Loading more
   New: New
   Show Blocked Item: Show blocked item
+  Auto: Auto
+  'Off': 'Off'
 Search Listing:
   Label:
     Members Only: Members only
@@ -566,7 +568,6 @@ Settings:
     Time Format: Time format
     Language Default: Language default
     Use AI Translation Completions: Fill missing translations with AI-generated ones
-    Update Relative Timestamps: Keep relative timestamps updated
     Stream Extraction Method:
       Stream Extraction Method: Stream extraction method
       yt-dlp: yt-dlp
@@ -729,7 +730,6 @@ Settings:
     Loaded Tab Icons: 'Missing tab icon loaded: {count} | Missing tab icons loaded: {count}'
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
-    Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width
     Vertical Tab Height: Vertical Tab Height
@@ -1029,9 +1029,7 @@ Settings:
     Parallel Segment Loading: Parallel Segment Loading
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotate wide videos to landscape in fullscreen'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Swipe up or down to enter or exit fullscreen'
-    Preload Upcoming Videos: "Preload Upcoming Videos"
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
-    Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
     Keep Status Bar Hidden in Fullscreen: "Keep status bar hidden in fullscreen"
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
@@ -1343,6 +1341,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Hide Watched Videos in Search and Recommendations"
     Hide Full Screen Video Title: Hide Video Title in Full Window / Full Screen
+    Blocked Items:
+      Blocked Items: Blocked Items
+      Hide: Hide
+      Blur: Blur
+      Show: Show
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
       Break Reminder Action: "When It's Time for a Break"
@@ -1371,7 +1374,6 @@ Settings:
     Sections:
       Digital Wellbeing: "Digital Wellbeing"
     Hide Popularity Graph: "Hide Popularity Graph"
-    Enable Block Lists: "Enable block lists"
     AI Video Summaries: AI video summaries
     Hide: Hide
     Collapsed: Collapsed
@@ -1389,7 +1391,6 @@ Settings:
     Hide Recommendation Details: Hide Recommendation Reasons and Feedback
     Hide Channel Avatars: Hide Channel Avatars
     Shorten View Counts: Shorten View, Comment and Comment Like Counts
-    Hide Home: Hide Home
     Hide Live Chat Replay: Hide Live Chat Replay
     Disable A-B Repeat: Disable A-B Repeat
     Hide End-Screen Annotations: Hide End-Screen Annotations
@@ -1398,7 +1399,6 @@ Settings:
     Add: Add
     Remove: Remove
     Hide Channel Shows: Hide Channel "Shows" Tab
-    Blur Blocked Items: Blur blocked items instead of hiding them
   Data Settings:
     Backup separate profile data: "This backup also contains the data of {count} separate profile, which is restored into that profile. | This backup also contains the data of {count} separate profiles, which is restored into those profiles."
     Subscription cache file: "This file only caches the videos from your subscriptions, not the channels. Choose profiles.db or a subscriptions export instead."
@@ -2443,7 +2443,6 @@ Tooltips:
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
-    Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.
@@ -2492,9 +2491,7 @@ Tooltips:
       Higher values may help on slow or unstable connections, but use more bandwidth and memory.
       They may also make Auto underestimate the connection speed and select a lower quality.
       Streams limited to one request at a time ignore this setting.
-    Preload Upcoming Videos: "Fetches and caches yt-dlp stream URLs for the videos that can play next. The queue takes priority over playlists and recommendations."
-    Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
-    Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
+    Upcoming Videos to Preload: "Fetches and caches yt-dlp stream URLs for up to this many videos that can play next. The watch queue takes priority over playlists and recommendations."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
     Keep Status Bar Hidden in Fullscreen: "Show the status bar only when you swipe from the screen edge, and hide it again after a moment. Tapping the player no longer shows it."
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
@@ -2531,6 +2528,7 @@ Tooltips:
     Take a Break Reminder: "Pauses the video after this much watching. A pause of 10 minutes or more starts the count again."
     Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
+    Blocked Items: Hide removes videos, playlists and channels that match the lists below. Blur shows them blurred until you reveal them. Show ignores the lists.
   Subscription Settings:
     Refresh These Feeds Together: "When you refresh one of the ticked feeds, the other ticked feeds refresh right after it. Automatic refreshes still follow each feed's own interval."
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
@@ -2550,13 +2548,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Clicking the icon of a tab with a playing or paused video pauses or resumes it without switching to that tab.
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status, including ones that offer Undo. Errors, warnings, reminders you set up, and notifications that ask for a decision, such as update prompts, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
+    Tab Width: Gives every tab in the horizontal tab bar the same width. Auto sizes each tab to its title.
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     UI Density: "Changes the spacing in lists, menus, the side bar, and Settings."
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
-    Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."

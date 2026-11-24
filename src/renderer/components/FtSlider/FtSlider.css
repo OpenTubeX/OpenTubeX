@@ -50,6 +50,12 @@
   visibility: hidden;
 }
 
+.value[data-width-label]::before {
+  content: attr(data-width-label);
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
 .valueText {
   grid-area: 1 / 1;
 }

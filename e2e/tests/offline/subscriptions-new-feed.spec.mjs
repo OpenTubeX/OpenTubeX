@@ -1341,7 +1341,7 @@ test.describe('new feed display filters', () => {
         settings: {
           ...commonSettings,
           forbiddenTitles: JSON.stringify(['Blocked']),
-          blurBlockedItems: true
+          blockedItemsMode: 'blur'
         },
         profiles: [profile()],
         subscriptionCache: hiddenCache

@@ -17,8 +17,16 @@
               <span
                 class="value"
                 :data-width-value="widestValue"
+                :data-width-label="minValueLabel || null"
               >
-                <span class="valueText">
+                <span
+                  v-if="showsMinValueLabel"
+                  class="valueText"
+                >{{ minValueLabel }}</span>
+                <span
+                  v-else
+                  class="valueText"
+                >
                   <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
                 </span>
               </span>
@@ -101,6 +109,11 @@ const props = defineProps({
     type: String,
     default: null
   },
+  // Shown instead of the minimum value when it turns the setting off or makes it automatic
+  minValueLabel: {
+    type: String,
+    default: ''
+  },
   disabled: {
     type: Boolean,
     default: false
@@ -140,6 +153,8 @@ const valuePrecision = computed(() => {
   const [coefficient, exponent = '0'] = String(props.step).split('e')
   return Math.max(0, (coefficient.split('.')[1]?.length ?? 0) - Number(exponent))
 })
+
+const showsMinValueLabel = computed(() => props.minValueLabel !== '' && currentValue.value === props.minValue)
 
 const displayValue = computed(() => currentValue.value.toFixed(valuePrecision.value))
 

@@ -74,6 +74,8 @@ Global:
   Loading More: A carregar mais
   New: Novo
   Show Blocked Item: Mostrar item bloqueado
+  Auto: Automático
+  'Off': Desativado
 Search Listing:
   Label:
     Members Only: Apenas para membros
@@ -568,7 +570,6 @@ Settings:
     Date Format: Formato da data
     Time Format: Formato da hora
     Language Default: Predefinição do idioma
-    Update Relative Timestamps: Manter as marcas temporais relativas atualizadas
     Stream Extraction Method:
       Stream Extraction Method: Método de extração de transmissões
       yt-dlp: yt-dlp
@@ -729,7 +730,6 @@ Settings:
     Loaded Tab Icons: 'Foi carregado {count} ícone de separador em falta | Foram carregados {count} ícones de separadores em falta | Foram carregados {count} ícones de separadores em falta'
     Loaded Tab Icons With Failures: Foram carregados {loaded} ícones de separadores; não foi possível carregar {failed}
     Show Tab Previews: Mostrar pré-visualizações dos separadores
-    Use Fixed Tab Width: Usar largura fixa dos separadores no modo horizontal
     Use Custom Title Bar: Usar barra de título personalizada
     Tab Width: Largura dos separadores
     Vertical Tab Height: Altura dos separadores verticais
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Carregamento paralelo de segmentos
     Rotate Wide Videos to Landscape in Fullscreen: 'Rodar vídeos largos para a orientação horizontal em ecrã inteiro'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslize para cima ou para baixo para entrar ou sair do ecrã inteiro'
-    Preload Upcoming Videos: "Pré-carregar os próximos vídeos"
     Upcoming Videos to Preload: "Número de vídeos a pré-carregar"
-    Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para ecrã inteiro
     Keep Status Bar Hidden in Fullscreen: "Manter a barra de estado oculta em ecrã inteiro"
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou recuar em ecrã inteiro
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ocultar vídeos assistidos na pesquisa e nas recomendações"
     Hide Full Screen Video Title: Ocultar título do vídeo em janela inteira ou ecrã inteiro
+    Blocked Items:
+      Blocked Items: Itens bloqueados
+      Hide: Ocultar
+      Blur: Desfocar
+      Show: Mostrar
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualização de"
       Break Reminder Action: "Quando for altura de fazer uma pausa"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Silenciar notificações de novos carregamentos à hora de dormir"
       Stop Autoplay at Bedtime and After the Daily Limit: "Parar a reprodução automática à hora de dormir e após o limite diário"
     Hide Popularity Graph: "Ocultar gráfico de popularidade"
-    Enable Block Lists: "Ativar listas de bloqueio"
     AI Video Summaries: Resumos de vídeos por IA
     Hide: Ocultar
     Collapsed: Recolhidos
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: Visível durante a pausa em janela inteira ou ecrã inteiro
     Hide Channel Avatars: Ocultar avatares dos canais
     Shorten View Counts: Abreviar contagens de visualizações, de comentários e de gostos nos comentários
-    Hide Home: Ocultar página inicial
     Hide Live Chat Replay: Ocultar repetição do chat em direto
     Disable A-B Repeat: Desativar repetição A-B
     Hide End-Screen Annotations: Ocultar anotações do ecrã final
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Mostrar título do vídeo
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
-    Blur Blocked Items: Desfocar itens bloqueados em vez de os ocultar
   Data Settings:
     Backup separate profile data: "Esta cópia de segurança também contém os dados de {count} perfil separado, que são restaurados nesse perfil. | Esta cópia de segurança também contém os dados de {count} de perfis separados, que são restaurados nesses perfis. | Esta cópia de segurança também contém os dados de {count} perfis separados, que são restaurados nesses perfis."
     Subscription cache file: "Este ficheiro só guarda em cache os vídeos das suas subscrições, não os canais. Escolha antes profiles.db ou uma exportação de subscrições."
@@ -2448,7 +2448,6 @@ Tooltips:
     Enable Tabs: "Mantém a página atual aberta. Os outros separadores são guardados até reiniciar a aplicação; volte a ativar os separadores para os restaurar."
     Data Saver Thumbnails: "Utilizar miniaturas de menor resolução para reduzir o consumo de dados."
     Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.
-    Update Relative Timestamps: Atualiza as marcas temporais relativas em toda a aplicação enquanto uma página permanece aberta. Quando esta opção está desativada, só são atualizadas após recarregar ou voltar a visitar a página.
     Stream Extraction Method: |
       Escolha como o OpenTubeX obtém as transmissões de vídeo. O yt-dlp tem de estar disponível quando for selecionado.
       Os vídeos podem demorar mais a começar quando utiliza o yt-dlp.
@@ -2497,9 +2496,7 @@ Tooltips:
       Valores mais altos podem ajudar em ligações lentas ou instáveis, mas utilizam mais largura de banda e memória.
       Também podem fazer com que o modo Automático subestime a velocidade da ligação e selecione uma qualidade inferior.
       As transmissões limitadas a um pedido de cada vez ignoram esta definição.
-    Preload Upcoming Videos: "Obtém e guarda em cache os URL do yt-dlp dos próximos vídeos. A fila tem prioridade sobre listas e recomendações."
-    Upcoming Videos to Preload: "Número máximo de próximos vídeos cujos URL do yt-dlp são obtidos em segundo plano."
-    Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
+    Upcoming Videos to Preload: "Obtém e guarda em cache os URL de transmissão do yt-dlp de até este número de vídeos que podem ser reproduzidos a seguir. A fila de visualização tem prioridade sobre listas de reprodução e recomendações."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
     Keep Status Bar Hidden in Fullscreen: "Mostra a barra de estado apenas quando desliza a partir da margem do ecrã e volta a ocultá-la após um momento. Tocar no leitor já não a mostra."
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
@@ -2536,6 +2533,7 @@ Tooltips:
     Take a Break Reminder: "Pausa o vídeo após este tempo de visualização. Uma pausa de 10 minutos ou mais reinicia a contagem."
     Bedtime Reminder: "Pausa o vídeo e lembra-o de parar de ver entre a hora de início e a hora de fim."
     Shorten View Counts: Mostra as contagens de visualizações, comentários e gostos nos comentários que o YouTube já arredondou num formato abreviado, por exemplo 14K em vez de 14,000. As contagens exatas são sempre mostradas por extenso.
+    Blocked Items: Ocultar remove os vídeos, listas de reprodução e canais que correspondem às listas abaixo. Desfocar mostra-os desfocados até os revelar. Mostrar ignora as listas.
   Subscription Settings:
     Refresh These Feeds Together: "Ao atualizar um dos feeds assinalados, os outros feeds assinalados são atualizados logo a seguir. As atualizações automáticas continuam a seguir o intervalo de cada feed."
     Fetch Feed on Startup: Quando esta opção está ativada, o OpenTubeX obtém automaticamente o feed de subscrições ao iniciar e ao abrir uma nova janela.
@@ -2556,13 +2554,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Clicar no ícone de um separador com um vídeo em reprodução ou em pausa coloca-o em pausa ou retoma-o sem mudar para esse separador.
     Only Show Important Notifications: Oculta as notificações da aplicação que apenas confirmam uma ação ou informam um estado, incluindo as que oferecem Desfazer. Erros, avisos, lembretes que configurou e notificações que pedem uma decisão, como os pedidos de atualização, continuam a aparecer. O progresso das operações em segundo plano, como a atualização das subscrições, é mostrado na barra de progresso global em vez de numa notificação. As notificações do sistema não são afetadas.
     Visible Search Suggestions: "Define quantas entradas do histórico de pesquisa e sugestões a barra de pesquisa mostra antes de a sua lista se deslocar. A lista nunca ultrapassa a parte inferior da janela."
+    Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal. Automático ajusta cada separador ao respetivo título.
     Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos em grelhas e listas. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
     Playlist Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos nas páginas de listas de reprodução. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
     UI Density: "Altera o espaçamento nas listas, nos menus, na barra lateral e nas Definições."
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.
     Scroll Speed: Altera a distância percorrida pelos gestos da roda do rato e do painel tátil.
-    Use Fixed Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal, em vez de ajustar a largura ao respetivo título.
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de separadores ou, quando os separadores não estão no topo, pela navegação superior, para poupar espaço vertical. Os controlos da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
     Modal Backdrop: "Define o aspeto da aplicação por trás das caixas de diálogo e dos menus. A desfocagem pode ser lenta em dispositivos menos potentes."

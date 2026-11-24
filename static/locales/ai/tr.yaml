@@ -74,6 +74,8 @@ Global:
   Loading More: Daha fazlası yükleniyor
   New: Yeni
   Show Blocked Item: Engellenen öğeyi göster
+  Auto: Otomatik
+  'Off': Kapalı
 Search Listing:
   Label:
     Members Only: Yalnızca üyelere özel
@@ -568,7 +570,6 @@ Settings:
     Date Format: Tarih biçimi
     Time Format: Saat biçimi
     Language Default: Dil varsayılanı
-    Update Relative Timestamps: Göreli zaman damgalarını güncel tut
     Stream Extraction Method:
       Stream Extraction Method: Akış çıkarma yöntemi
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Eksik sekme simgesi yüklendi: {count} | Eksik sekme simgeleri yüklendi: {count}'
     Loaded Tab Icons With Failures: '{loaded} sekme simgesi yüklendi; {failed} simge yüklenemedi'
     Show Tab Previews: Sekme Önizlemelerini Göster
-    Use Fixed Tab Width: Yatay Modda Sabit Sekme Genişliği Kullan
     Use Custom Title Bar: Özel Başlık Çubuğu Kullan
     Tab Width: Sekme Genişliği
     Vertical Tab Height: Dikey sekme yüksekliği
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Paralel Bölüm Yükleme
     Rotate Wide Videos to Landscape in Fullscreen: 'Geniş videoları tam ekranda yatay konuma döndür'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Tam ekrana girmek veya çıkmak için yukarı ya da aşağı kaydır'
-    Preload Upcoming Videos: "Sonraki videoları önceden yükle"
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
-    Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
     Keep Status Bar Hidden in Fullscreen: "Tam ekranda durum çubuğunu gizli tut"
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Aramada ve önerilerde izlenmiş videoları gizle"
     Hide Full Screen Video Title: Tam Pencere / Tam Ekranda Video Başlığını Gizle
+    Blocked Items:
+      Blocked Items: Engellenen Öğeler
+      Hide: Gizle
+      Blur: Bulanıklaştır
+      Show: Göster
     Digital Wellbeing:
       Count Watch Time From: "İzleme Süresi Kaynağı"
       Break Reminder Action: "Mola Zamanı Geldiğinde"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Uyku Vaktinde Yükleme Bildirimlerini Sessize Al"
       Stop Autoplay at Bedtime and After the Daily Limit: "Uyku Vaktinde ve Günlük Sınırdan Sonra Otomatik Oynatmayı Durdur"
     Hide Popularity Graph: "Popülerlik Grafiğini Gizle"
-    Enable Block Lists: "Engelleme listelerini etkinleştir"
     AI Video Summaries: Yapay zekâ video özetleri
     Hide: Gizle
     Collapsed: Daraltılmış
@@ -1407,7 +1409,6 @@ Settings:
     Hide Channel Avatars: Kanal Avatarlarını Gizle
     Shorten View Counts: İzlenme, Yorum ve Yorum Beğeni Sayılarını Kısalt
     Hide Live Chat Replay: Canlı Sohbet Tekrarını Gizle
-    Hide Home: Ana Sayfayı Gizle
     Disable A-B Repeat: A-B Tekrarını Devre Dışı Bırak
     Hide End-Screen Annotations: Bitiş Ekranı Ek Açıklamalarını Gizle
     Hide End-Screen Recommendations: "Bitiş ekranı önerilerini gizle"
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Video Başlığını Göster
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
-    Blur Blocked Items: Engellenen öğeleri gizlemek yerine bulanıklaştır
   Data Settings:
     Backup separate profile data: "Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profile geri yüklenir. | Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profillere geri yüklenir."
     Subscription cache file: "Bu dosya yalnızca aboneliklerinizdeki videoları önbelleğe alır, kanalları değil. Bunun yerine profiles.db dosyasını veya bir abonelik dışa aktarımını seçin."
@@ -2448,7 +2448,6 @@ Tooltips:
     Enable Tabs: "Geçerli sayfa açık kalır. Diğer sekmeler uygulama yeniden başlatılana kadar saklanır; onları geri yüklemek için sekmeleri yeniden etkinleştirin."
     Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."
     Use AI Translation Completions: İnsan çevirilerindeki eksikleri yapay zekâ tarafından oluşturulan metinlerle tamamlar. İnsan çevirileri her zaman önceliklidir.
-    Update Relative Timestamps: Sayfa açık kaldığı sürece uygulamadaki göreli zaman damgalarını günceller. Devre dışı bırakıldığında yalnızca sayfa yeniden yüklendiğinde veya ziyaret edildiğinde güncellenir.
     Stream Extraction Method: |
       OpenTubeX'in video akışlarını nasıl alacağını seçin. yt-dlp seçildiğinde kullanılabilir olmalıdır.
       yt-dlp kullanıldığında videoların başlaması daha uzun sürebilir.
@@ -2497,9 +2496,7 @@ Tooltips:
       Yüksek değerler yavaş veya kararsız bağlantılarda yardımcı olabilir ancak daha fazla bant genişliği ve bellek kullanır.
       Otomatik seçeneğinin bağlantı hızını düşük hesaplayıp daha düşük kalite seçmesine de neden olabilir.
       Aynı anda tek istekle sınırlı akışlar bu ayarı yok sayar.
-    Preload Upcoming Videos: "Sonraki videoların yt-dlp adreslerini alıp önbelleğe kaydeder. Kuyruk, oynatma listeleri ve önerilerden önce gelir."
-    Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
-    Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
+    Upcoming Videos to Preload: "Sonra oynatılabilecek en fazla bu sayıda video için yt-dlp akış adreslerini alıp önbelleğe kaydeder. İzleme kuyruğu, oynatma listeleri ve önerilerden önce gelir."
     Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
     Keep Status Bar Hidden in Fullscreen: "Durum çubuğunu yalnızca ekranın kenarından kaydırdığınızda göster ve kısa bir süre sonra yeniden gizle. Oynatıcıya dokunmak artık onu göstermez."
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
@@ -2536,6 +2533,7 @@ Tooltips:
     Take a Break Reminder: "Bu kadar izledikten sonra videoyu duraklatır. 10 dakika veya daha uzun bir ara, sayımı yeniden başlatır."
     Bedtime Reminder: "Başlangıç ve bitiş saatleri arasında videoyu duraklatır ve izlemeyi bırakmanızı hatırlatır."
     Shorten View Counts: YouTube'un zaten yuvarlayarak kısalttığı izlenme, yorum ve yorum beğeni sayılarını gösterir, örneğin 14.000 yerine 14 B. Kesin sayılar her zaman tam gösterilir.
+    Blocked Items: Gizle, aşağıdaki listelerle eşleşen videoları, oynatma listelerini ve kanalları kaldırır. Bulanıklaştır, siz gösterene kadar onları bulanık gösterir. Göster, listeleri yok sayar.
   Subscription Settings:
     Refresh These Feeds Together: "İşaretli akışlardan birini yenilediğinizde, diğer işaretli akışlar hemen ardından yenilenir. Otomatik yenilemeler her akışın kendi aralığını izlemeye devam eder."
     Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
@@ -2556,13 +2554,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Oynatılan veya duraklatılmış bir video içeren sekmenin simgesine tıklamak, o sekmeye geçmeden videoyu duraklatır veya devam ettirir.
     Only Show Important Notifications: Yalnızca bir işlemi onaylayan veya bir durumu bildiren uygulama içi bildirimleri, Geri al sunanlar dahil, gizler. Hatalar, uyarılar, ayarladığınız hatırlatıcılar ve güncelleme istemleri gibi karar gerektiren bildirimler görünmeye devam eder. Abonelikleri yenileme gibi arka plan işlemlerinin ilerlemesi bildirim yerine genel ilerleme çubuğunda gösterilir. Sistem bildirimleri etkilenmez.
     Visible Search Suggestions: "Arama çubuğunun listesi kaydırılmadan önce kaç arama geçmişi girdisi ve öneri göstereceğini belirler. Liste hiçbir zaman pencerenin alt kenarını aşmaz."
+    Tab Width: Yatay sekme çubuğundaki her sekmeye aynı genişliği verir. Otomatik, her sekmeyi başlığına göre boyutlandırır.
     Thumbnail Size: "Izgaralarda ve listelerde video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
     Playlist Thumbnail Size: "Oynatma listesi sayfalarında video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
     UI Density: "Listelerdeki, menülerdeki, kenar çubuğundaki ve Ayarlar’daki boşlukları değiştirir."
     Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.
     Scroll Speed: Fare tekerleği ve dokunmatik yüzey kaydırma hareketlerinin ne kadar uzağa kaydıracağını değiştirir.
-    Use Fixed Tab Width: Yatay sekme çubuğundaki her sekmeye başlığına göre boyut vermek yerine aynı genişliği verir.
     Use Custom Title Bar: Dikey alandan tasarruf etmek için sistem başlık çubuğunu sekme çubuğuyla, sekmeler üstte değilse üst gezinme çubuğuyla değiştirir. Pencere denetimleri bu çubuğun köşesinde görünür.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
     Modal Backdrop: "İletişim kutularının ve menülerin arkasında uygulamanın nasıl görüneceğini belirler. Bulanıklaştırma daha az güçlü cihazlarda yavaş olabilir."

@@ -74,6 +74,8 @@ Global:
   Loading More: 正在載入更多內容
   New: 新
   Show Blocked Item: 顯示已封鎖的項目
+  Auto: 自動
+  'Off': 關閉
 Search Listing:
   Label:
     Members Only: 會員專屬
@@ -568,7 +570,6 @@ Settings:
     Date Format: 日期格式
     Time Format: 時間格式
     Language Default: 語言預設
-    Update Relative Timestamps: 持續更新相對時間
     Stream Extraction Method:
       Stream Extraction Method: 串流擷取方式
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: '已載入 {count} 個缺少的頁籤圖示'
     Loaded Tab Icons With Failures: 已載入 {loaded} 個頁籤圖示；有 {failed} 個無法載入
     Show Tab Previews: 顯示頁籤預覽
-    Use Fixed Tab Width: 在水平模式中使用固定頁籤寬度
     Use Custom Title Bar: 使用自訂標題列
     Tab Width: 頁籤寬度
     Vertical Tab Height: 垂直頁籤高度
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: 平行載入片段
     Rotate Wide Videos to Landscape in Fullscreen: '全螢幕時將寬幅影片旋轉為橫向'
     Swipe Up or Down to Enter or Exit Fullscreen: '向上或向下滑動以進入或離開全螢幕'
-    Preload Upcoming Videos: "預先載入後續影片"
     Upcoming Videos to Preload: "要預先載入的影片數量"
-    Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
     Keep Status Bar Hidden in Fullscreen: "全螢幕時保持狀態列隱藏"
     Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "在搜尋和推薦中隱藏已觀看的影片"
     Hide Full Screen Video Title: 在全視窗／全螢幕模式隱藏影片標題
+    Blocked Items:
+      Blocked Items: 已封鎖的項目
+      Hide: 隱藏
+      Blur: 模糊
+      Show: 顯示
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
       Break Reminder Action: "到了休息時間時"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "就寢時間內將新上傳通知設為靜音"
       Stop Autoplay at Bedtime and After the Daily Limit: "在就寢時間內及達到每日上限後停止自動播放"
     Hide Popularity Graph: "隱藏熱門程度圖"
-    Enable Block Lists: "啟用封鎖清單"
     AI Video Summaries: AI 影片摘要
     Hide: 隱藏
     Collapsed: 收合
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示
     Hide Channel Avatars: 隱藏頻道頭像
     Shorten View Counts: 縮寫觀看次數、留言數和留言按讚數
-    Hide Home: 隱藏首頁
     Hide Live Chat Replay: 隱藏即時聊天室重播
     Disable A-B Repeat: 停用 A-B 循環
     Hide End-Screen Annotations: 隱藏結束畫面註解
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: 顯示影片標題
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
-    Blur Blocked Items: 模糊顯示已封鎖的項目，而非隱藏
   Data Settings:
     Backup separate profile data: "此備份還包含 {count} 個獨立設定檔的資料，這些資料會還原到對應的設定檔中。"
     Subscription cache file: "此檔案只快取了你訂閱中的影片，不包含頻道本身。請改為選擇 profiles.db 或訂閱匯出檔案。"
@@ -2450,7 +2450,6 @@ Tooltips:
     Enable Tabs: "保持目前頁面開啟。其他分頁會保留到應用程式重新啟動，再次啟用分頁即可還原。"
     Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
-    Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
     Stream Extraction Method: |
       選擇 OpenTubeX 取得影片串流的方式。選擇 yt-dlp 時，系統必須能使用 yt-dlp。
       使用 yt-dlp 時，影片可能需要更久才會開始播放。
@@ -2499,9 +2498,7 @@ Tooltips:
       較高的值可能有助於改善緩慢或不穩定的連線，但會使用更多頻寬與記憶體。
       也可能使「自動」低估連線速度並選擇較低的畫質。
       限制為一次只能提出一項請求的串流會忽略此設定。
-    Preload Upcoming Videos: "取得並快取後續影片的 yt-dlp 串流網址。佇列優先於播放清單和推薦。"
-    Upcoming Videos to Preload: "在背景取得 yt-dlp 串流網址的後續影片數量上限。"
-    Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
+    Upcoming Videos to Preload: "為最多這麼多部可接著播放的影片取得並快取 yt-dlp 串流網址。觀看佇列優先於播放清單和推薦。"
     Ignore System Rotation Lock for Fullscreen: 透過轉動裝置進入和退出全螢幕，即使 Android 的自動旋轉已關閉。
     Keep Status Bar Hidden in Fullscreen: "僅在從螢幕邊緣滑動時顯示狀態列，並在片刻後再次隱藏。輕觸播放器不再顯示狀態列。"
     Ask Before Preloading Large Playlists: "預先載入超過 {count} 部影片的播放清單中的所有影片前要求確認。"
@@ -2538,6 +2535,7 @@ Tooltips:
     Take a Break Reminder: "觀看達到這段時間後暫停影片。暫停 10 分鐘或更久會重新開始計算。"
     Bedtime Reminder: "在開始時間與結束時間之間暫停影片，並提醒你停止觀看。"
     Shorten View Counts: 將 YouTube 已四捨五入的觀看次數、留言數與留言按讚數以縮寫顯示，例如以 14K 取代 14,000。精確數字一律完整顯示。
+    Blocked Items: 「隱藏」會移除符合下方清單的影片、播放清單和頻道。「模糊」會模糊顯示它們，直到你點開查看。「顯示」會忽略這些清單。
   Subscription Settings:
     Refresh These Feeds Together: "重新整理任一已勾選的動態消息時，其他已勾選的動態消息會緊接著重新整理。自動重新整理仍依各動態消息自己的間隔進行。"
     Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
@@ -2558,13 +2556,13 @@ Tooltips:
     Toggle Playback With Tab Icon: 點選正在播放或已暫停影片的分頁圖示，即可暫停或繼續播放，無需切換至該分頁。
     Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知，包括提供復原的通知。錯誤、警告、你設定的提醒，以及需要你做出決定的通知（例如更新提示）仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
+    Tab Width: 水平分頁列中的每個分頁使用相同寬度。「自動」會依標題調整每個分頁的寬度。
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     Playlist Thumbnail Size: "縮放播放清單頁面中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     UI Density: "變更清單、選單、側邊欄和設定中的間距。"
     Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
     Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
-    Use Fixed Tab Width: 水平分頁列中的每個分頁使用相同寬度，而不依標題調整寬度。
     Use Custom Title Bar: 以分頁列（分頁不在頂端時則為頂端導覽列）取代系統標題列，以節省垂直空間。視窗控制按鈕會顯示在該列的角落。
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
     Modal Backdrop: "設定對話方塊與選單後方應用程式的顯示效果。模糊效果在效能較弱的裝置上可能較慢。"

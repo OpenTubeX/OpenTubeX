@@ -27,7 +27,6 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Thumbnail Swipe Gestures',
   'System Default',
   'Tab Close Focus',
-  'Update Relative Timestamps',
   'Use AI Translation Completions',
   'Watched Comments'
 ])
@@ -118,10 +117,8 @@ const QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS = new Set([
 
 const YT_DLP_STREAMING_KEYS = new Set([
   'yt-dlp Streaming',
-  'Preload Upcoming Videos',
   'Parallel Segment Loading',
   'Upcoming Videos to Preload',
-  'Concurrent Preloads',
   'Ask Before Preloading Large Playlists'
 ])
 
@@ -232,9 +229,6 @@ export const SETTINGS_SEARCH_SOURCES = {
     key: 'Settings.Distraction Free Settings',
     exclude: new Set([
       'Hide Active Subscriptions',
-      'Hide Home',
-      'Hide Popular Videos',
-      'Hide Trending Videos',
       'Digital Wellbeing',
     ]),
     tab: 'distraction'
@@ -532,6 +526,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Update Modes': [],
     'Cookie Sources': []
   },
+  distraction: { 'Blocked Items': ['Blocked Items'] },
   privacy: { 'Watched Progress Saving Mode.Modes': [] },
   'sponsor-block': { 'Skip Options': ['Skip Option'] }
 }

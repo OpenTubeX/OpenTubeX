@@ -756,3 +756,101 @@ test('startup copies Auto Load Next Page to comments with its sync edit time', a
     commits: {},
   })
 })
+
+test('replaces the switches that turned settings on and off in stored settings', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'hideHome', value: true },
+    { _id: 'hidePopularVideos', value: false },
+    { _id: 'hideTrendingVideos', value: true },
+    { _id: 'enableBlockLists', value: true },
+    { _id: 'blurBlockedItems', value: true },
+    { _id: 'useFixedTabWidth', value: false },
+    { _id: 'fixedTabWidth', value: 200 },
+    { _id: 'ytDlpPreloadEnabled', value: true },
+    { _id: 'ytDlpPreloadConcurrency', value: 8 },
+    { _id: 'updateRelativeTimestamps', value: false },
+    { _id: 'syncServerSettingUpdatedAt', value: { enableBlockLists: 10, blurBlockedItems: 20, useFixedTabWidth: 30, fixedTabWidth: 15 } },
+  ])
+
+  await migrateStoredSettings(settings)
+  // A second run must not change choices made after the upgrade.
+  await settings.updateAsync({ _id: 'fixedTabWidth' }, { _id: 'fixedTabWidth', value: 120 })
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    navigationItems: DEFAULT_NAVIGATION_ITEMS.filter(id => id !== 'home' && id !== 'trending'),
+    blockedItemsMode: 'blur',
+    fixedTabWidth: 120,
+    // Enabled preloading kept the former default count.
+    ytDlpPreloadCount: 2,
+    // The width keeps the newer edit time of the switch that turned it off.
+    syncServerSettingUpdatedAt: { enableBlockLists: 10, blurBlockedItems: 20, blockedItemsMode: 20, useFixedTabWidth: 30, fixedTabWidth: 30 },
+  })
+})
+
+test('turns off preloading and fixed tab widths whose switch was off', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'enableBlockLists', value: false },
+    { _id: 'blurBlockedItems', value: true },
+    { _id: 'useFixedTabWidth', value: true },
+    { _id: 'ytDlpPreloadEnabled', value: false },
+    { _id: 'ytDlpPreloadCount', value: 5 },
+  ])
+
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    blockedItemsMode: 'show',
+    // Fixed widths kept the former default width.
+    fixedTabWidth: 180,
+    ytDlpPreloadCount: 0,
+  })
+})
+
+test('imports the switches that turned settings on and off', () => {
+  assert.deepEqual(migrateLegacySettings({
+    enableBlockLists: true,
+    blurBlockedItems: false,
+    useFixedTabWidth: false,
+    fixedTabWidth: 200,
+    ytDlpPreloadEnabled: true,
+    ytDlpPreloadCount: 4,
+    ytDlpPreloadConcurrency: 8,
+    updateRelativeTimestamps: false,
+    quickSettings: ['enableBlockLists'],
+  }), {
+    blockedItemsMode: 'hide',
+    fixedTabWidth: 0,
+    ytDlpPreloadCount: 4,
+    quickSettings: ['blockedItemsMode'],
+  })
+  // A count of 0 kept preloading off even with the switch on.
+  assert.deepEqual(migrateLegacySettings({ ytDlpPreloadEnabled: true, ytDlpPreloadCount: 0 }), { ytDlpPreloadCount: 0 })
+  // Current exports hold only the values.
+  assert.deepEqual(migrateLegacySettings({ fixedTabWidth: 0, ytDlpPreloadCount: 3 }), { fixedTabWidth: 0, ytDlpPreloadCount: 3 })
+})
+
+test('reads synced switches from older versions until a newer value is synced', () => {
+  const migrated = migrateLegacySyncedSettings({
+    enableBlockLists: { key: 'enableBlockLists', value: true, updatedAt: 10 },
+    blurBlockedItems: { key: 'blurBlockedItems', value: true, updatedAt: 30 },
+    useFixedTabWidth: { key: 'useFixedTabWidth', value: false, updatedAt: 20 },
+    fixedTabWidth: { key: 'fixedTabWidth', value: 200, updatedAt: 10 },
+    ytDlpPreloadEnabled: { key: 'ytDlpPreloadEnabled', value: false, updatedAt: 10 },
+    ytDlpPreloadCount: { key: 'ytDlpPreloadCount', value: 4, updatedAt: 20 },
+  })
+  assert.deepEqual(migrated.blockedItemsMode, { key: 'blockedItemsMode', value: 'blur', updatedAt: 30 })
+  assert.deepEqual(migrated.fixedTabWidth, { key: 'fixedTabWidth', value: 0, updatedAt: 20 })
+  // The count was synced after the switch, so it is the newer choice.
+  assert.deepEqual(migrated.ytDlpPreloadCount, { key: 'ytDlpPreloadCount', value: 4, updatedAt: 20 })
+
+  const current = { key: 'blockedItemsMode', value: 'show', updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({
+    enableBlockLists: { key: 'enableBlockLists', value: true, updatedAt: 10 },
+    blockedItemsMode: current,
+  }).blockedItemsMode, current)
+})

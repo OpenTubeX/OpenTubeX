@@ -74,6 +74,8 @@ Global:
   Loading More: Načítava sa ďalší obsah
   New: Nové
   Show Blocked Item: Zobraziť blokovanú položku
+  Auto: Automaticky
+  'Off': Vypnuté
 Search Listing:
   Label:
     Members Only: Len pre členov
@@ -568,7 +570,6 @@ Settings:
     Date Format: Formát dátumu
     Time Format: Formát času
     Language Default: Predvolené pre jazyk
-    Update Relative Timestamps: Priebežne aktualizovať relatívne časové údaje
     Stream Extraction Method:
       Stream Extraction Method: Spôsob získavania streamov
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Načítala sa {count} chýbajúca ikona karty | Načítali sa {count} chýbajúce ikony kariet | Načítalo sa {count} chýbajúcich ikon kariet'
     Loaded Tab Icons With Failures: 'Načítané ikony kariet: {loaded}; nepodarilo sa načítať: {failed}'
     Show Tab Previews: Zobraziť náhľady kariet
-    Use Fixed Tab Width: Použiť pevnú šírku kariet vo vodorovnom režime
     Use Custom Title Bar: Použiť vlastné záhlavie okna
     Tab Width: Šírka kariet
     Vertical Tab Height: Výška zvislých kariet
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Súbežné načítavanie segmentov
     Rotate Wide Videos to Landscape in Fullscreen: 'Otočiť široké videá na šírku v režime celej obrazovky'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Potiahnutím nahor alebo nadol otvoriť či opustiť celú obrazovku'
-    Preload Upcoming Videos: "Prednačítavať nasledujúce videá"
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
-    Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
     Keep Status Bar Hidden in Fullscreen: "Ponechať stavový riadok skrytý na celej obrazovke"
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skryť pozreté videá vo vyhľadávaní a odporúčaniach"
     Hide Full Screen Video Title: Skryť názov videa v režime celého okna alebo celej obrazovky
+    Blocked Items:
+      Blocked Items: Blokované položky
+      Hide: Skryť
+      Blur: Rozmazať
+      Show: Zobraziť
     Digital Wellbeing:
       Count Watch Time From: "Započítavať čas sledovania"
       Break Reminder Action: "Keď je čas na prestávku"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Stlmiť oznámenia o novom obsahu počas času spánku"
       Stop Autoplay at Bedtime and After the Daily Limit: "Zastaviť automatické prehrávanie počas času spánku a po dosiahnutí denného limitu"
     Hide Popularity Graph: "Skryť graf popularity"
-    Enable Block Lists: "Povoliť zoznamy blokovaných"
     AI Video Summaries: Zhrnutia videí od AI
     Hide: Skryť
     Collapsed: Zbalené
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: Viditeľné počas pozastavenia v režime celého okna alebo celej obrazovky
     Hide Channel Avatars: Skryť avatary kanálov
     Shorten View Counts: Skrátiť počty pozretí, komentárov a označení Páči sa mi to pri komentároch
-    Hide Home: Skryť domovskú stránku
     Hide Live Chat Replay: Skryť záznam živého četu
     Disable A-B Repeat: Vypnúť opakovanie A-B
     Hide End-Screen Annotations: Skryť poznámky na záverečnej obrazovke
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Zobraziť názov videa
     Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
-    Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
   Data Settings:
     Backup separate profile data: "Táto záloha obsahuje aj údaje {count} samostatného profilu, ktoré sa obnovia do tohto profilu. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov."
     Subscription cache file: "Tento súbor obsahuje iba vyrovnávaciu pamäť videí z vašich odberov, nie samotné kanály. Namiesto neho vyberte profiles.db alebo export odberov."
@@ -2447,7 +2447,6 @@ Tooltips:
     Enable Tabs: "Aktuálna stránka zostane otvorená. Ostatné karty sa uchovajú do reštartovania aplikácie; opäť povoľte karty, aby ste ich obnovili."
     Data Saver Thumbnails: "Používať náhľady s nižším rozlíšením na zníženie spotreby dát."
     Use AI Translation Completions: Doplní medzery v ľudských prekladoch textom vytvoreným umelou inteligenciou. Ľudské preklady majú vždy prednosť.
-    Update Relative Timestamps: Aktualizuje relatívne časové údaje v celej aplikácii, kým je stránka otvorená. Ak je táto možnosť vypnutá, aktualizujú sa až po opätovnom načítaní alebo otvorení stránky.
     Stream Extraction Method: |
       Vyberte spôsob, akým OpenTubeX získava streamy videí. Ak vyberiete yt-dlp, musí byť dostupný.
       Pri použití yt-dlp môže spustenie videa trvať dlhšie.
@@ -2496,9 +2495,7 @@ Tooltips:
       Vyššie hodnoty môžu pomôcť pri pomalom alebo nestabilnom pripojení, ale využívajú väčšiu šírku pásma a viac pamäte.
       Môžu tiež spôsobiť, že automatický režim podhodnotí rýchlosť pripojenia a vyberie nižšiu kvalitu.
       Streamy obmedzené na jednu požiadavku naraz toto nastavenie ignorujú.
-    Preload Upcoming Videos: "Načíta a uloží do vyrovnávacej pamäte adresy yt-dlp pre nasledujúce videá. Front má prednosť pred zoznamami a odporúčaniami."
-    Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
-    Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
+    Upcoming Videos to Preload: "Načíta a uloží do vyrovnávacej pamäte adresy streamov yt-dlp až pre tento počet videí, ktoré sa môžu prehrať ako ďalšie. Front pozerania má prednosť pred zoznamami skladieb a odporúčaniami."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
     Keep Status Bar Hidden in Fullscreen: "Zobraziť stavový riadok len pri potiahnutí od okraja obrazovky a po chvíli ho znova skryť. Ťuknutie na prehrávač ho už nezobrazí."
     Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."
@@ -2535,6 +2532,7 @@ Tooltips:
     Take a Break Reminder: "Po takomto čase sledovania pozastaví video. Prestávka 10 minút alebo dlhšia spustí počítanie odznova."
     Bedtime Reminder: "Medzi časom začiatku a konca pozastaví video a pripomenie vám, aby ste prestali sledovať."
     Shorten View Counts: Počty pozretí, komentárov a označení Páči sa mi to pri komentároch zobrazí v skrátenej podobe, ktorú už zaokrúhlila služba YouTube, napríklad 14 tis. namiesto 14 000. Presné počty sa vždy zobrazia celé.
+    Blocked Items: Skryť odstráni videá, zoznamy skladieb a kanály, ktoré zodpovedajú zoznamom nižšie. Rozmazať ich zobrazí rozmazané, kým ich neodkryjete. Zobraziť zoznamy ignoruje.
   Subscription Settings:
     Refresh These Feeds Together: "Keď obnovíte jeden zo zaškrtnutých kanálov, ostatné zaškrtnuté kanály sa obnovia hneď po ňom. Automatické obnovovanie sa naďalej riadi vlastným intervalom každého kanála."
     Fetch Feed on Startup: Po zapnutí OpenTubeX automaticky načíta kanál odberov pri spustení a otvorení nového okna.
@@ -2555,13 +2553,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Kliknutím na ikonu karty s prehrávaným alebo pozastaveným videom ho pozastavíte alebo obnovíte bez prepnutia na túto kartu.
     Only Show Important Notifications: Skryje upozornenia v aplikácii, ktoré iba potvrdzujú akciu alebo hlásia stav, vrátane tých s možnosťou Vrátiť späť. Chyby, varovania, nastavené pripomienky a upozornenia vyžadujúce rozhodnutie, napríklad výzvy na aktualizáciu, sa zobrazujú aj naďalej. Priebeh operácií na pozadí, napríklad obnovovania odberov, sa namiesto upozornenia zobrazuje v globálnom ukazovateli priebehu. Systémové upozornenia nie sú ovplyvnené.
     Visible Search Suggestions: "Určuje, koľko položiek histórie vyhľadávania a návrhov zobrazí vyhľadávacie pole, kým sa jeho zoznam začne posúvať. Zoznam nikdy nepresiahne spodný okraj okna."
+    Tab Width: Všetkým kartám na vodorovnom paneli priradí rovnakú šírku. Automaticky prispôsobí šírku každej karty jej názvu.
     Thumbnail Size: "Mení veľkosť miniatúr videí v mriežkach a zoznamoch. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     Playlist Thumbnail Size: "Mení veľkosť miniatúr videí na stránkach playlistov. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     UI Density: "Mení rozostupy v zoznamoch, ponukách, bočnom paneli a Nastaveniach."
     Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
     Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.
     Scroll Speed: Mení vzdialenosť posúvania gestami kolieska myši a touchpadu.
-    Use Fixed Tab Width: Všetkým kartám na vodorovnom paneli priradí rovnakú šírku namiesto prispôsobenia podľa ich názvu.
     Use Custom Title Bar: Nahradí systémové záhlavie okna panelom kariet alebo hornou navigáciou, ak karty nie sú hore, a ušetrí tak zvislý priestor. Ovládacie prvky okna sa zobrazia v rohu tohto panela.
     Use Grid Player Menu: Usporiada ponuku nastavení prehrávača videa do mriežky dlaždíc namiesto zoznamu riadkov.
     Modal Backdrop: "Určuje, ako aplikácia vyzerá za dialógmi a ponukami. Rozmazanie môže byť na menej výkonných zariadeniach pomalé."

@@ -187,10 +187,7 @@ for (const currentSettings of [false, true]) {
           playlistThumbnailSize: 240,
         }
     for (const [key, value] of Object.entries(expected)) assert.deepEqual(backup.data.settings[key], value, key)
-    for (const key of ['hideHome', 'hidePopularVideos', 'hideTrendingVideos']) {
-      assert.equal(backup.data.settings[key], false, key)
-    }
-    for (const key of ['useVerticalTabBar', 'showSubscriptionRefreshToast', 'moveDownloadsToQuickSettings',
+    for (const key of ['hideHome', 'hidePopularVideos', 'hideTrendingVideos', 'useVerticalTabBar', 'showSubscriptionRefreshToast', 'moveDownloadsToQuickSettings',
       'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange', 'scrollMiniPlayerEnabled',
       'scrollPlayerMode']) {
       assert.equal(Object.hasOwn(backup.data.settings, key), false, key)

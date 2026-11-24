@@ -74,6 +74,8 @@ Global:
   Loading More: Se încarcă mai multe
   New: Nou
   Show Blocked Item: Afișează elementul blocat
+  Auto: Automat
+  'Off': Dezactivat
 Search Listing:
   Label:
     Members Only: Numai pentru membri
@@ -568,7 +570,6 @@ Settings:
     Date Format: Formatul datei
     Time Format: Formatul orei
     Language Default: Valoarea implicită a limbii
-    Update Relative Timestamps: Menține actualizate marcajele temporale relative
     Stream Extraction Method:
       Stream Extraction Method: Metodă de extragere a fluxului
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'S-a încărcat pictograma de filă lipsă: {count} | S-au încărcat pictogramele de filă lipsă: {count} | S-au încărcat pictogramele de filă lipsă: {count}'
     Loaded Tab Icons With Failures: S-au încărcat {loaded} pictograme de filă; {failed} nu au putut fi încărcate
     Show Tab Previews: Afișează previzualizările filelor
-    Use Fixed Tab Width: Folosește o lățime fixă a filelor în modul orizontal
     Use Custom Title Bar: Folosește o bară de titlu personalizată
     Tab Width: Lățimea filelor
     Vertical Tab Height: Înălțimea filelor verticale
@@ -1046,9 +1046,7 @@ Settings:
     Parallel Segment Loading: Încărcarea paralelă a segmentelor
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotește videoclipurile late în modul peisaj pe ecran complet'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Glisează în sus sau în jos pentru a intra sau a ieși din ecranul complet'
-    Preload Upcoming Videos: "Preîncarcă videoclipurile următoare"
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
-    Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
     Keep Status Bar Hidden in Fullscreen: "Păstrează bara de stare ascunsă pe ecran complet"
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
@@ -1361,6 +1359,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ascunde videoclipurile vizionate în căutare și recomandări"
     Hide Full Screen Video Title: Ascunde titlul videoclipului în fereastră completă / pe ecran complet
+    Blocked Items:
+      Blocked Items: Elemente blocate
+      Hide: Ascunde
+      Blur: Estompează
+      Show: Afișează
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
       Break Reminder Action: "Când este timpul pentru o pauză"
@@ -1387,7 +1390,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Silențiază notificările despre încărcări noi la ora de culcare"
       Stop Autoplay at Bedtime and After the Daily Limit: "Oprește redarea automată la ora de culcare și după limita zilnică"
     Hide Popularity Graph: "Ascunde graficul de popularitate"
-    Enable Block Lists: "Activează listele de blocare"
     AI Video Summaries: Rezumate video generate de IA
     Hide: Ascunde
     Collapsed: Restrânse
@@ -1408,7 +1410,6 @@ Settings:
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
     Hide Channel Avatars: Ascunde avatarurile canalelor
     Shorten View Counts: Abreviază numărul de vizionări, comentarii și aprecieri ale comentariilor
-    Hide Home: Ascunde pagina principală
     Hide Live Chat Replay: Ascunde reluarea chatului în direct
     Disable A-B Repeat: Dezactivează repetarea A-B
     Hide End-Screen Annotations: Ascunde adnotările de pe ecranul final
@@ -1421,7 +1422,6 @@ Settings:
     Add: Adaugă
     Remove: Elimină
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
-    Blur Blocked Items: Estompează elementele blocate în loc să le ascunzi
   Data Settings:
     Backup separate profile data: "Această copie de rezervă conține și datele unui profil separat ({count}), care sunt restaurate în acel profil. | Această copie de rezervă conține și datele a {count} profiluri separate, care sunt restaurate în acele profiluri. | Această copie de rezervă conține și datele a {count} de profiluri separate, care sunt restaurate în acele profiluri."
     Subscription cache file: "Acest fișier stochează în cache doar videoclipurile din abonamentele tale, nu și canalele. Alege în schimb profiles.db sau un export al abonamentelor."
@@ -2502,7 +2502,6 @@ Tooltips:
     Enable Tabs: "Păstrează pagina curentă deschisă. Celelalte file sunt păstrate până la repornirea aplicației; activați din nou filele pentru a le restaura."
     Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
-    Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.
     Stream Extraction Method: |
       Alegeți modul în care OpenTubeX obține fluxurile video. yt-dlp trebuie să fie disponibil când este selectat.
       Este posibil ca videoclipurile să pornească mai greu când folosiți yt-dlp.
@@ -2551,9 +2550,7 @@ Tooltips:
       Valorile mai mari pot fi utile în cazul conexiunilor lente sau instabile, dar folosesc mai multă lățime de bandă și memorie.
       De asemenea, pot determina modul Automat să subestimeze viteza conexiunii și să selecteze o calitate mai scăzută.
       Fluxurile limitate la o singură solicitare simultană ignoră această setare.
-    Preload Upcoming Videos: "Obține și memorează în cache adresele yt-dlp ale videoclipurilor următoare. Coada are prioritate față de liste și recomandări."
-    Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
-    Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
+    Upcoming Videos to Preload: "Obține și memorează în cache adresele fluxurilor yt-dlp pentru cel mult atâtea videoclipuri care pot fi redate în continuare. Coada de vizionare are prioritate față de playlisturi și recomandări."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
     Keep Status Bar Hidden in Fullscreen: "Afișează bara de stare doar când glisezi de la marginea ecranului și ascunde-o din nou după un moment. Atingerea playerului nu o mai afișează."
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
@@ -2590,6 +2587,7 @@ Tooltips:
     Take a Break Reminder: "Întrerupe videoclipul după acest timp de vizionare. O pauză de 10 minute sau mai mult reîncepe numărătoarea."
     Bedtime Reminder: "Întrerupe videoclipul și vă reamintește să nu mai vizionați între ora de început și cea de sfârșit."
     Shorten View Counts: Afișează în formă abreviată numărul de vizionări, de comentarii și de aprecieri ale comentariilor pe care YouTube le-a rotunjit deja, de exemplu 14 K în loc de 14.000. Valorile exacte sunt afișate întotdeauna integral.
+    Blocked Items: Ascunde elimină videoclipurile, playlisturile și canalele care se potrivesc cu listele de mai jos. Estompează le afișează estompate până când le dezvălui. Afișează ignoră listele.
   Subscription Settings:
     Refresh These Feeds Together: "Când reîmprospătezi unul dintre fluxurile bifate, celelalte fluxuri bifate se reîmprospătează imediat după el. Reîmprospătările automate respectă în continuare intervalul fiecărui flux."
     Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
@@ -2610,13 +2608,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Un clic pe pictograma unei file cu un videoclip redat sau pus pe pauză îl pune pe pauză sau îl reia fără a comuta la acea filă.
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare, inclusiv cele care oferă Anulare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care cer o decizie, precum solicitările de actualizare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
+    Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală. Automat dimensionează fiecare filă după titlul ei.
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Playlist Thumbnail Size: "Scalează miniaturile videoclipurilor pe paginile playlisturilor. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     UI Density: "Schimbă spațierea din liste, meniuri, bara laterală și Setări."
     Show Progress as Notification: Afișează o notificare persistentă cu progresul în timp real pentru operațiunile din fundal, cum ar fi reîmprospătarea abonamentelor și descărcarea instrumentelor gestionate, în locul barei globale de progres.
     Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.
     Scroll Speed: Modifică distanța de derulare a gesturilor rotiței mouse-ului și ale touchpadului.
-    Use Fixed Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală, în loc să o dimensioneze după titlu.
     Use Custom Title Bar: Înlocuiește bara de titlu a sistemului cu bara de file sau, când filele nu sunt sus, cu navigarea de sus, pentru a economisi spațiu vertical. Butoanele de control ale ferestrei apar în colțul acelei bare.
     Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
     Modal Backdrop: "Stabilește cum arată aplicația în spatele dialogurilor și meniurilor. Estomparea poate fi lentă pe dispozitivele mai puțin performante."

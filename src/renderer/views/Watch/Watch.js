@@ -1276,8 +1276,7 @@ export default defineComponent({
       if (
         !supportsYtDlp ||
         this.videoPlaybackEngine !== 'yt-dlp' ||
-        this.customShortsPlayerActive ||
-        !this.$store.getters.getYtDlpPreloadEnabled
+        this.customShortsPlayerActive
       ) return []
 
       const recommendedVideos = this.hideRecommendedVideos
@@ -1970,7 +1969,6 @@ export default defineComponent({
       if (videoIds.length === 0) return
 
       preloadYtDlpPlaybackSources(videoIds, {
-        concurrency: this.$store.getters.getYtDlpPreloadConcurrency,
         loadSource: videoId => getYtDlpPlaybackSource(
           videoId,
           this.ytDlpPlaybackCacheKey,

@@ -74,6 +74,8 @@ Global:
   Loading More: Ladataan lisää
   New: Uusi
   Show Blocked Item: Näytä estetty kohde
+  Auto: Automaattinen
+  'Off': Pois
 Search Listing:
   Label:
     Members Only: Vain jäsenille
@@ -568,7 +570,6 @@ Settings:
     Date Format: Päivämäärän muoto
     Time Format: Ajan muoto
     Language Default: Kielen oletus
-    Update Relative Timestamps: Pidä suhteelliset aikaleimat ajan tasalla
     Stream Extraction Method:
       Stream Extraction Method: Suoratoiston poimintatapa
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Puuttuva välilehtikuvake ladattu: {count} | Puuttuvat välilehtikuvakkeet ladattu: {count}'
     Loaded Tab Icons With Failures: Ladattiin {loaded} välilehtikuvaketta; {failed} kuvaketta ei voitu ladata
     Show Tab Previews: Näytä välilehtien esikatselut
-    Use Fixed Tab Width: Käytä vaakasuuntaisessa tilassa kiinteälevyisiä välilehtiä
     Use Custom Title Bar: Käytä mukautettua otsikkopalkkia
     Tab Width: Välilehden leveys
     Vertical Tab Height: Pystysuuntaisten välilehtien korkeus
@@ -1047,9 +1047,7 @@ Settings:
       Modern Formats: "Nykyaikaiset muodot"
     Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
-    Preload Upcoming Videos: "Esilataa seuraavat videot"
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
-    Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
     Keep Status Bar Hidden in Fullscreen: "Pidä tilarivi piilossa koko näytön tilassa"
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Piilota katsotut videot hausta ja suosituksista"
     Hide Full Screen Video Title: Piilota videon nimi koko ikkunan tai koko näytön tilassa
+    Blocked Items:
+      Blocked Items: Estetyt kohteet
+      Hide: Piilota
+      Blur: Sumenna
+      Show: Näytä
     Digital Wellbeing:
       Count Watch Time From: "Katseluaika lasketaan"
       Break Reminder Action: "Kun on tauon aika"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Mykistä uusien latausten ilmoitukset nukkumaanmenoaikana"
       Stop Autoplay at Bedtime and After the Daily Limit: "Lopeta automaattinen toisto nukkumaanmenoaikana ja päivittäisen rajan jälkeen"
     Hide Popularity Graph: "Piilota suosiokaavio"
-    Enable Block Lists: "Ota estolistat käyttöön"
     AI Video Summaries: Tekoälyn videoyhteenvedot
     Hide: Piilota
     Collapsed: Supistettu
@@ -1407,7 +1409,6 @@ Settings:
     Hide Channel Avatars: Piilota kanavien profiilikuvat
     Shorten View Counts: Lyhennä katselukertojen, kommenttien ja kommenttien tykkäysten määrät
     Hide Live Chat Replay: Piilota livekeskustelun tallenne
-    Hide Home: Piilota etusivu
     Disable A-B Repeat: Poista A-B-toisto käytöstä
     Hide End-Screen Annotations: Piilota loppuruudun merkinnät
     Hide End-Screen Recommendations: "Piilota loppunäytön suositukset"
@@ -1417,7 +1418,6 @@ Settings:
     Show Bottom Right Actions Dock: Näytä toimintopalkki oikeassa alakulmassa
     Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
     Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
-    Blur Blocked Items: Sumenna estetyt kohteet niiden piilottamisen sijaan
   Data Settings:
     Backup separate profile data: "Tämä varmuuskopio sisältää myös {count} erillisen profiilin tiedot, jotka palautetaan kyseiseen profiiliin. | Tämä varmuuskopio sisältää myös {count} erillisen profiilin tiedot, jotka palautetaan kyseisiin profiileihin."
     Subscription cache file: "Tämä tiedosto tallentaa välimuistiin vain tilaustesi videot, ei kanavia. Valitse sen sijaan profiles.db tai tilausten vienti."
@@ -2456,7 +2456,6 @@ Tooltips:
     Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
     Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.
-    Update Relative Timestamps: Päivittää suhteellisia aikaleimoja kaikkialla sovelluksessa sivun ollessa avoinna. Jos asetus on poistettu käytöstä, ne päivittyvät vasta, kun sivu ladataan uudelleen tai sillä käydään uudelleen.
     Stream Extraction Method: |
       Valitse, miten OpenTubeX hakee videovirrat. Jos yt-dlp valitaan, sen on oltava käytettävissä.
       Videoiden toiston alkaminen voi kestää kauemmin yt-dlp:tä käytettäessä.
@@ -2505,9 +2504,7 @@ Tooltips:
       Suuremmat arvot voivat auttaa hitailla tai epävakailla yhteyksillä, mutta ne käyttävät enemmän kaistanleveyttä ja muistia.
       Ne voivat myös saada automaattisen asetuksen aliarvioimaan yhteysnopeuden ja valitsemaan heikomman laadun.
       Tämä asetus ei vaikuta suoratoistovirtoihin, joissa sallitaan vain yksi pyyntö kerrallaan.
-    Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
-    Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
-    Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
+    Upcoming Videos to Preload: "Noutaa ja tallentaa välimuistiin yt-dlp-suoratoisto-osoitteet enintään näin monelle seuraavaksi toistettavalle videolle. Katselujono on etusijalla soittolistoihin ja suosituksiin nähden."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
     Keep Status Bar Hidden in Fullscreen: "Näytä tilarivi vain, kun pyyhkäiset näytön reunasta, ja piilota se taas hetken kuluttua. Soittimen napauttaminen ei enää näytä sitä."
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
@@ -2544,6 +2541,7 @@ Tooltips:
     Take a Break Reminder: "Keskeyttää videon, kun olet katsonut näin kauan. Vähintään 10 minuutin tauko aloittaa laskennan alusta."
     Bedtime Reminder: "Keskeyttää videon ja muistuttaa sinua lopettamaan katselun alku- ja loppuajan välillä."
     Shorten View Counts: Näyttää katselu-, kommentti- ja kommenttien tykkäysmäärät YouTuben valmiiksi pyöristämässä lyhyessä muodossa, esimerkiksi 14 t. 14 000:n sijaan. Tarkat määrät näytetään aina kokonaisina.
+    Blocked Items: Piilota poistaa alla olevia listoja vastaavat videot, soittolistat ja kanavat. Sumenna näyttää ne sumennettuina, kunnes paljastat ne. Näytä ohittaa listat.
   Subscription Settings:
     Refresh These Feeds Together: "Kun päivität yhden valituista syötteistä, muut valitut syötteet päivittyvät heti sen jälkeen. Automaattiset päivitykset noudattavat edelleen kunkin syötteen omaa väliä."
     Fetch Feed on Startup: Kun asetus on käytössä, OpenTubeX hakee tilausnäkymän automaattisesti käynnistyessään ja uuden ikkunan avautuessa.
@@ -2564,13 +2562,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Toistuvan tai keskeytetyn videon sisältävän välilehden kuvakkeen napsauttaminen keskeyttää tai jatkaa videota vaihtamatta kyseiseen välilehteen.
     Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta, mukaan lukien ilmoitukset, joissa on Kumoa-vaihtoehto. Virheet, varoitukset, asettamasi muistutukset ja päätöstä vaativat ilmoitukset, kuten päivityskehotteet, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
+    Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä. Automaattinen sovittaa kunkin välilehden leveyden sen nimeen.
     Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     UI Density: "Muuttaa välistystä luetteloissa, valikoissa, sivupalkissa ja asetuksissa."
     Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.
     Scroll Speed: Muuttaa hiiren rullan ja kosketuslevyn vierityseleiden vieritysmatkaa.
-    Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
     Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
     Modal Backdrop: "Määrittää, miltä sovellus näyttää valintaikkunoiden ja valikoiden takana. Sumennus voi olla hidas tehottomammilla laitteilla."

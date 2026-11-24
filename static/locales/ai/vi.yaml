@@ -74,6 +74,8 @@ Global:
   Loading More: Đang tải thêm
   New: Mới
   Show Blocked Item: Hiện mục bị chặn
+  Auto: Tự động
+  'Off': Tắt
 Search Listing:
   Label:
     Members Only: Chỉ dành cho hội viên
@@ -568,7 +570,6 @@ Settings:
     Date Format: Định dạng ngày
     Time Format: Định dạng thời gian
     Language Default: Mặc định theo ngôn ngữ
-    Update Relative Timestamps: Luôn cập nhật mốc thời gian tương đối
     Stream Extraction Method:
       Stream Extraction Method: Phương thức trích xuất luồng
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Số biểu tượng thẻ còn thiếu đã tải: {count}'
     Loaded Tab Icons With Failures: Đã tải {loaded} biểu tượng thẻ; không thể tải {failed} biểu tượng
     Show Tab Previews: Hiện bản xem trước thẻ
-    Use Fixed Tab Width: Dùng chiều rộng thẻ cố định ở chế độ ngang
     Use Custom Title Bar: Dùng thanh tiêu đề tùy chỉnh
     Tab Width: Chiều rộng thẻ
     Vertical Tab Height: Chiều cao thẻ dọc
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Tải song song các phân đoạn
     Rotate Wide Videos to Landscape in Fullscreen: 'Xoay video rộng sang ngang khi ở chế độ toàn màn hình'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
-    Preload Upcoming Videos: "Tải trước các video tiếp theo"
     Upcoming Videos to Preload: "Số video cần tải trước"
-    Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
     Keep Status Bar Hidden in Fullscreen: "Giữ thanh trạng thái ẩn khi toàn màn hình"
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ẩn video đã xem trong tìm kiếm và đề xuất"
     Hide Full Screen Video Title: Ẩn tiêu đề video ở chế độ toàn cửa sổ / toàn màn hình
+    Blocked Items:
+      Blocked Items: Mục bị chặn
+      Hide: Ẩn
+      Blur: Làm mờ
+      Show: Hiện
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
       Break Reminder Action: "Khi đến lúc nghỉ giải lao"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Tắt tiếng thông báo nội dung mới tải lên trong giờ đi ngủ"
       Stop Autoplay at Bedtime and After the Daily Limit: "Dừng tự động phát trong giờ đi ngủ và sau khi đạt giới hạn hằng ngày"
     Hide Popularity Graph: "Ẩn biểu đồ mức độ phổ biến"
-    Enable Block Lists: "Bật danh sách chặn"
     AI Video Summaries: Bản tóm tắt video bằng AI
     Hide: Ẩn
     Collapsed: Thu gọn
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
     Hide Channel Avatars: Ẩn ảnh đại diện kênh
     Shorten View Counts: Rút gọn số lượt xem, bình luận và lượt thích bình luận
-    Hide Home: Ẩn Trang chủ
     Hide Live Chat Replay: Ẩn bản phát lại trò chuyện trực tiếp
     Disable A-B Repeat: Tắt lặp A-B
     Hide End-Screen Annotations: Ẩn chú thích ở màn hình kết thúc
@@ -1417,7 +1418,6 @@ Settings:
     Show Bottom Right Actions Dock: Hiện thanh thao tác dưới bên phải
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
     Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
-    Blur Blocked Items: Làm mờ các mục bị chặn thay vì ẩn chúng
   Data Settings:
     Backup separate profile data: "Bản sao lưu này cũng chứa dữ liệu của {count} hồ sơ riêng biệt, sẽ được khôi phục vào các hồ sơ đó."
     Subscription cache file: "Tệp này chỉ lưu bộ nhớ đệm video từ các kênh bạn đăng ký, không phải bản thân các kênh. Hãy chọn profiles.db hoặc tệp xuất danh sách đăng ký."
@@ -2464,7 +2464,6 @@ Tooltips:
     Enable Tabs: "Giữ trang hiện tại mở. Các thẻ khác được giữ đến khi khởi động lại ứng dụng; bật lại thẻ để khôi phục chúng."
     Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
     Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.
-    Update Relative Timestamps: Cập nhật mốc thời gian tương đối trên toàn ứng dụng khi trang vẫn mở. Khi tắt, mốc thời gian chỉ cập nhật sau khi tải lại hoặc mở lại trang.
     Stream Extraction Method: |
       Chọn cách OpenTubeX lấy luồng video. yt-dlp phải dùng được khi được chọn.
       Video có thể mất nhiều thời gian hơn để bắt đầu khi dùng yt-dlp.
@@ -2513,9 +2512,7 @@ Tooltips:
       Giá trị cao hơn có thể hữu ích với kết nối chậm hoặc không ổn định nhưng dùng nhiều băng thông và bộ nhớ hơn.
       Giá trị cao cũng có thể khiến chế độ Tự động đánh giá thấp tốc độ kết nối và chọn chất lượng thấp hơn.
       Luồng bị giới hạn ở một yêu cầu mỗi lần sẽ bỏ qua cài đặt này.
-    Preload Upcoming Videos: "Lấy và lưu đệm URL yt-dlp của các video tiếp theo. Hàng đợi được ưu tiên hơn danh sách phát và đề xuất."
-    Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
-    Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
+    Upcoming Videos to Preload: "Lấy và lưu đệm URL luồng yt-dlp cho tối đa số video này có thể phát tiếp theo. Hàng đợi xem được ưu tiên hơn danh sách phát và đề xuất."
     Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
     Keep Status Bar Hidden in Fullscreen: "Chỉ hiển thị thanh trạng thái khi bạn vuốt từ cạnh màn hình, rồi ẩn lại sau một lát. Chạm vào trình phát sẽ không còn hiển thị nó nữa."
     Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
@@ -2552,6 +2549,7 @@ Tooltips:
     Take a Break Reminder: "Tạm dừng video sau khi xem trong khoảng thời gian này. Khoảng nghỉ từ 10 phút trở lên sẽ bắt đầu đếm lại."
     Bedtime Reminder: "Tạm dừng video và nhắc bạn ngừng xem trong khoảng giữa giờ bắt đầu và giờ kết thúc."
     Shorten View Counts: Hiện số lượt xem, bình luận và lượt thích bình luận theo dạng rút gọn mà YouTube đã làm tròn, ví dụ 14K thay vì 14.000. Số chính xác luôn được hiện đầy đủ.
+    Blocked Items: Ẩn sẽ loại bỏ video, danh sách phát và kênh khớp với các danh sách bên dưới. Làm mờ hiển thị chúng ở dạng mờ cho đến khi bạn mở. Hiện bỏ qua các danh sách.
   Subscription Settings:
     Refresh These Feeds Together: "Khi bạn làm mới một trong các bảng tin đã chọn, các bảng tin đã chọn khác sẽ được làm mới ngay sau đó. Việc làm mới tự động vẫn theo khoảng thời gian riêng của từng bảng tin."
     Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
@@ -2572,13 +2570,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Nhấp vào biểu tượng của thẻ có video đang phát hoặc đã tạm dừng sẽ tạm dừng hoặc tiếp tục video mà không chuyển sang thẻ đó.
     Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái, kể cả những thông báo có Hoàn tác. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo yêu cầu bạn đưa ra quyết định, chẳng hạn như đề nghị cập nhật, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
+    Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang. Tự động điều chỉnh mỗi thẻ theo tiêu đề của nó.
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     UI Density: "Thay đổi khoảng cách trong danh sách, menu, thanh bên và Cài đặt."
     Show Progress as Notification: Hiện thông báo cố định với tiến trình trực tiếp cho các thao tác nền, chẳng hạn làm mới đăng ký và tải công cụ được quản lý, thay cho thanh tiến trình chung.
     Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.
     Scroll Speed: Thay đổi khoảng cách cuộn của cử chỉ con lăn chuột và con lăn bàn di chuột.
-    Use Fixed Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang thay vì điều chỉnh theo tiêu đề.
     Use Custom Title Bar: Thay thanh tiêu đề của hệ thống bằng thanh thẻ, hoặc bằng thanh điều hướng trên cùng khi các thẻ không ở trên cùng, để tiết kiệm không gian theo chiều dọc. Các nút điều khiển cửa sổ xuất hiện ở góc của thanh đó.
     Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
     Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."

@@ -88,6 +88,8 @@ Global:
   Loading More: Ŝargado de pli
   New: Nova
   Show Blocked Item: Montri blokitan eron
+  Auto: Aŭtomata
+  'Off': Malŝaltita
 Search Bar:
   Use Suggestion: Uzi proponon
   Video Link: "Video: {title}"
@@ -609,7 +611,6 @@ Settings:
       Automatic: Aŭtomata
       Phone: Telefono
       Tablet: Tabulkomputilo
-    Update Relative Timestamps: Teni relativajn tempindikojn ĝisdataj
     Automatically switch stream extraction methods: Aŭtomate ŝanĝi metodojn de fluelĉerpado
     Stream Extraction Method:
       Stream Extraction Method: Metodo de fluelĉerpado
@@ -765,7 +766,6 @@ Settings:
     Loaded Tab Icons: 'Mankanta langeta piktogramo ŝargita: {count} | Mankantaj langetaj piktogramoj ŝargitaj: {count}'
     Loaded Tab Icons With Failures: Ŝargis {loaded} langetajn piktogramojn; {failed} ne povis esti ŝargitaj
     Show Tab Previews: Montri antaŭrigardojn de langetoj
-    Use Fixed Tab Width: Uzi fiksan langetan larĝon en horizontala reĝimo
     Use Custom Title Bar: Uzi laŭmendan titolbreton
     Tab Width: Langeta larĝo
     Vertical Tab Height: Alteco de vertikalaj langetoj
@@ -1033,9 +1033,7 @@ Settings:
     Show Playback Rate Adjusted Timestamp: Montri tempindikon alĝustigitan laŭ ludrapido
     Use YouTube-style Shorts: Uzi videaĵetojn laŭ stilo de YouTube
     Loop Shorts: Ripeti videaĵetojn
-    Preload Upcoming Videos: Antaŭŝargi venontajn videaĵojn
     Upcoming Videos to Preload: Venontaj videaĵoj antaŭŝargotaj
-    Concurrent Preloads: Samtempaj antaŭŝargoj
     Remember Volume: Memori laŭtecon
     Mono Audio: Monofonia sono
     Normalize Loudness: 'Normigi laŭtecon'
@@ -1401,6 +1399,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Kaŝi spektitajn videaĵojn en serĉo kaj rekomendoj"
     Hide Full Screen Video Title: Kaŝi titolon de videaĵo en plena fenestro / plena ekrano
+    Blocked Items:
+      Blocked Items: Blokitaj eroj
+      Hide: Kaŝi
+      Blur: Nebuligi
+      Show: Montri
     Digital Wellbeing:
       Count Watch Time From: Kalkuli spekttempon de
       Break Reminder Action: Kiam estas tempo por paŭzo
@@ -1446,19 +1449,16 @@ Settings:
       Visible While Paused: Videbla dum paŭzo en plena fenestro / plena ekrano
     Hide Channel Avatars: Kaŝi kanalajn avatarojn
     Shorten View Counts: Mallongigi nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj
-    Hide Home: Kaŝi hejmon
     Hide Live Chat Replay: Kaŝi reludon de tujelsenda babilejo
     Hide Popularity Graph: Kaŝi popularecan grafikaĵon
     Disable A-B Repeat: Malŝalti A-B-ripeton
     Hide End-Screen Annotations: Kaŝi finekranajn komentarojn
     Hide End-Screen Recommendations: Kaŝi finekranajn rekomendojn
     Hide Paid Promotion Badge: Kaŝi insignon de pagita reklamo
-    Enable Block Lists: Ŝalti bloklistojn
     Show Player Controls: Montri ludilajn regilojn
     Show Video Title: Montri titolon de videaĵo
     Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
-    Blur Blocked Items: Nebuligi blokitajn erojn anstataŭ kaŝi ilin
   Data Settings:
     Backup separate profile data: "Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} aparta profilo, kiuj restariĝos en tiu profilo. | Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} apartaj profiloj, kiuj restariĝos en tiuj profiloj."
     Subscription cache file: "Ĉi tiu dosiero nur kaŝmemoras la videojn de viaj abonoj, ne la kanalojn. Elektu anstataŭe profiles.db aŭ eksporton de abonoj."
@@ -2501,7 +2501,6 @@ Tooltips:
     Enable Tabs: Tenas la aktualan paĝon malfermita. Aliaj langetoj estas konservataj ĝis la aplikaĵo restartas; reŝaltu langetojn por restarigi ilin.
     Data Saver Thumbnails: Uzi bildetojn kun pli malalta distingivo por malpliigi datumuzon.
     Use AI Translation Completions: Plenigi mankojn en homaj tradukoj per teksto generita de AI. Homaj tradukoj ĉiam havas prioritaton.
-    Update Relative Timestamps: Ĝisdatigas relativajn tempindikojn tra la tuta aplikaĵo dum paĝo restas malfermita. Kiam malŝaltita, ili ĝisdatiĝas nur post reŝargo aŭ revizito de la paĝo.
     Automatically switch stream extraction methods: Provi yt-dlp se la integrita ludado malsukcesas, aŭ la integritan ludadon se yt-dlp malsukcesas.
     Stream Extraction Method: |
       Elektu kiel OpenTubeX akiras videofluojn. yt-dlp devas esti disponebla kiam elektita.
@@ -2551,9 +2550,7 @@ Tooltips:
       Pli altaj valoroj povas helpi ĉe malrapidaj aŭ nestabilaj konektoj, sed uzas pli da kapacito kaj memoro.
       Ili ankaŭ povas igi la aŭtomatan reĝimon subtaksi la konektan rapidon kaj elekti pli malaltan kvaliton.
       Fluoj limigitaj al unu peto samtempe ignoras ĉi tiun agordon.
-    Preload Upcoming Videos: Venigas kaj kaŝmemorigas URL-ojn de yt-dlp-fluoj por videaĵoj, kiuj povas ludiĝi sekve. La spektovico havas prioritaton super ludlistoj kaj rekomendoj.
-    Upcoming Videos to Preload: La maksimuma nombro de venontaj videaĵoj, kies URL-oj de yt-dlp-fluoj estas venigataj fone.
-    Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
+    Upcoming Videos to Preload: Venigas kaj kaŝmemorigas URL-ojn de yt-dlp-fluoj por ĝis tiom da videaĵoj, kiuj povas ludiĝi sekve. La spektovico havas prioritaton super ludlistoj kaj rekomendoj.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
     Keep Status Bar Hidden in Fullscreen: "Montri la statobreton nur kiam vi ŝovas de la ekranrando, kaj kaŝi ĝin denove post momento. Tuŝeti la ludilon ne plu montras ĝin."
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
@@ -2590,6 +2587,7 @@ Tooltips:
     Take a Break Reminder: Paŭzigas la videaĵon post tiom da spektado. Paŭzo de 10 minutoj aŭ pli rekomencigas la kalkulon.
     Bedtime Reminder: Paŭzigas la videaĵon kaj memorigas vin ĉesi spekti inter la komenca kaj fina horoj.
     Shorten View Counts: Montras nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj, kiujn YouTube jam rondigis, en mallongigita formo, ekz. 14K anstataŭ 14 000. Ĝustaj nombroj ĉiam estas montrataj plene.
+    Blocked Items: Kaŝi forigas videaĵojn, ludlistojn kaj kanalojn, kiuj kongruas kun la subaj listoj. Nebuligi montras ilin nebulaj ĝis vi malkaŝas ilin. Montri ignoras la listojn.
   Subscription Settings:
     Refresh These Feeds Together: "Kiam vi refreŝigas unu el la markitaj fluoj, la aliaj markitaj fluoj refreŝiĝas tuj poste. Aŭtomataj refreŝigoj ankoraŭ sekvas la propran intervalon de ĉiu fluo."
     Fetch Feed on Startup: Kiam ŝaltita, OpenTubeX aŭtomate venigos vian abonfluon je startigo kaj kiam nova fenestro malfermiĝas.
@@ -2615,7 +2613,7 @@ Tooltips:
     Always Show Scrollbars: Tenas la rulumbretojn ĉiam videblaj. Kiam malŝaltita, ili forvelkas baldaŭ post kiam vi ĉesas movi la muson kaj reaperas tuj kiam vi movas ĝin denove.
     Scroll Speed: Ŝanĝas kiom malproksimen rulumas gestoj de musrado kaj tuŝplato.
     Visible Search Suggestions: Difinas kiom da eroj de serĉa historio kaj proponoj la serĉobreto montras antaŭ ol ĝia listo rulumiĝas. La listo neniam etendiĝas preter la malsupro de la fenestro.
-    Use Fixed Tab Width: Donas al ĉiu langeto en la horizontala langetobreto la saman larĝon anstataŭ grandigi ilin laŭ ilia titolo.
+    Tab Width: Donas al ĉiu langeto en la horizontala langetobreto la saman larĝon. Aŭtomata grandigas ĉiun langeton laŭ ĝia titolo.
     Use Custom Title Bar: Anstataŭigas la sisteman titolbreton per la langetobreto, aŭ per la supra navigado kiam langetoj ne estas supre, por ŝpari vertikalan spacon. La fenestraj regiloj aperas en la angulo de tiu breto.
     Use Grid Player Menu: Aranĝas la agordan menuon de la videaĵa ludilo kiel kradon de kaheloj anstataŭ listo de vicoj.
     UI Density: "Ŝanĝas la interspacojn en listoj, menuoj, la flanka breto kaj Agordoj."

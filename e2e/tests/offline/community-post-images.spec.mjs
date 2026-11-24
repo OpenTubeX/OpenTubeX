@@ -191,9 +191,9 @@ test.describe('community post images', () => {
     ))
     await expect(post).toHaveCount(0)
 
-    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', false))
+    await page.evaluate(() => window.$store.dispatch('updateBlockedItemsMode', 'show'))
     await expect(post).toBeVisible()
-    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateBlockedItemsMode', 'hide'))
     await expect(post).toHaveCount(0)
   })
 
@@ -205,7 +205,7 @@ test.describe('community post images', () => {
 
     await page.evaluate(async (posts) => {
       const store = window.$store
-      await store.dispatch('updateEnableBlockLists', false)
+      await store.dispatch('updateBlockedItemsMode', 'show')
       await store.dispatch('updateForbiddenTitles', JSON.stringify(['Channel B']))
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
         channelId: posts[0].authorId,
@@ -222,7 +222,7 @@ test.describe('community post images', () => {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
-    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateBlockedItemsMode', 'hide'))
     await expect(page.locator('.ft-list-post')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => ({
       scrollY: window.scrollY,

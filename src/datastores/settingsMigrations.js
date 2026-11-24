@@ -1,4 +1,11 @@
 import { splitInvidiousInstanceCredentials } from '../apiBackends.js'
+import { navigationItemsFromLegacySettings } from '../navigationItems.js'
+
+/** The former navigation switches that the navigation list replaced */
+export const FORMER_NAVIGATION_SWITCHES = Object.freeze(['hideHome', 'hidePopularVideos', 'hideTrendingVideos'])
+
+/** Former settings that are no longer configurable */
+export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps', 'ytDlpPreloadConcurrency'])
 
 /**
  * The removed per-channel Enable switches, each with the automatic saving
@@ -50,6 +57,10 @@ const REPLACED_SETTING_IDS = new Map([
   ['holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier'],
   ['thumbnailDataSaver', 'thumbnailDataSaverMode'],
   ['compactNavigationLabels', 'navigationBarLabels'],
+  ['enableBlockLists', 'blockedItemsMode'],
+  ['blurBlockedItems', 'blockedItemsMode'],
+  ['useFixedTabWidth', 'fixedTabWidth'],
+  ['ytDlpPreloadEnabled', 'ytDlpPreloadCount'],
 ])
 
 /**
@@ -112,6 +123,40 @@ export function navigationBarLabelsFromCompactSwitch(enabled) {
   return enabled === true ? 'none' : 'all'
 }
 
+/**
+ * The Blocked Items select that replaced the former Enable Block Lists and
+ * Blur Blocked Items switches.
+ * @param {unknown} enabled
+ * @param {unknown} blur
+ */
+export function blockedItemsModeFromSwitches(enabled, blur) {
+  if (enabled === false) return 'show'
+  return blur === true ? 'blur' : 'hide'
+}
+
+/**
+ * The Tab Width that replaced the former Use Fixed Tab Width switch, 0 for
+ * tabs sized to their titles.
+ * @param {unknown} enabled
+ * @param {unknown} width the saved width, which used to default to 180
+ */
+export function fixedTabWidthFromSwitch(enabled, width) {
+  if (enabled !== true) return 0
+  return typeof width === 'number' && width > 0 ? width : 180
+}
+
+/**
+ * The count of upcoming videos to preload that replaced the former Preload
+ * Upcoming Videos switch, 0 to turn preloading off.
+ * @param {unknown} enabled
+ * @param {unknown} count the saved count, which used to default to 2
+ */
+export function ytDlpPreloadCountFromSwitch(enabled, count) {
+  if (enabled !== true) return 0
+  // The count could already be 0, which turned preloading off too.
+  return Number.isInteger(count) && count >= 0 ? count : 2
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -128,6 +173,10 @@ export async function migrateStoredSettings(datastore) {
         'thumbnailDataSaver', 'thumbnailDataSaverMode', 'defaultInvidiousInstance',
         'compactNavigationLabels', 'navigationBarLabels',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
+        ...FORMER_NAVIGATION_SWITCHES, 'hidePlaylists', 'navigationItems',
+        'enableBlockLists', 'blurBlockedItems', 'blockedItemsMode',
+        'useFixedTabWidth', 'fixedTabWidth', 'ytDlpPreloadEnabled', 'ytDlpPreloadCount',
+        ...REMOVED_SETTINGS,
       ]
     }
   })).map(setting => [setting._id, setting]))
@@ -253,6 +302,42 @@ export async function migrateStoredSettings(datastore) {
     await datastore.removeAsync({ _id: 'scrollPlayerMode' })
     await datastore.removeAsync({ _id: 'scrollMiniPlayerEnabled' })
   }
+  // The navigation list replaced the switches that hid Home, Most Popular and Trending.
+  const navigationSwitches = FORMER_NAVIGATION_SWITCHES.filter(key => stored.has(key))
+  if (navigationSwitches.length > 0) {
+    if (!stored.has('navigationItems')) {
+      await save('navigationItems', navigationItemsFromLegacySettings(Object.fromEntries(
+        [...FORMER_NAVIGATION_SWITCHES, 'hidePlaylists'].map(key => [key, stored.get(key)?.value])
+      )))
+    }
+    for (const key of navigationSwitches) await datastore.removeAsync({ _id: key })
+  }
+  // The Blocked Items select replaced Enable Block Lists and Blur Blocked Items.
+  const enableBlockLists = stored.get('enableBlockLists')
+  const blurBlockedItems = stored.get('blurBlockedItems')
+  if (enableBlockLists || blurBlockedItems) {
+    if (!stored.has('blockedItemsMode')) {
+      await save('blockedItemsMode', blockedItemsModeFromSwitches(enableBlockLists?.value, blurBlockedItems?.value))
+    }
+    for (const key of ['enableBlockLists', 'blurBlockedItems']) {
+      if (stored.has(key)) await datastore.removeAsync({ _id: key })
+    }
+  }
+  // Tab Width and Upcoming Videos to Preload turn off at 0 instead of with
+  // their own switch, and now default to off.
+  for (const [switchKey, valueKey, fromSwitch] of [
+    ['useFixedTabWidth', 'fixedTabWidth', fixedTabWidthFromSwitch],
+    ['ytDlpPreloadEnabled', 'ytDlpPreloadCount', ytDlpPreloadCountFromSwitch],
+  ]) {
+    const formerSwitch = stored.get(switchKey)
+    if (!formerSwitch) continue
+    const value = fromSwitch(formerSwitch.value, stored.get(valueKey)?.value)
+    if (value !== (stored.get(valueKey)?.value ?? 0)) await save(valueKey, value)
+    await datastore.removeAsync({ _id: switchKey })
+  }
+  for (const key of REMOVED_SETTINGS) {
+    if (stored.has(key)) await datastore.removeAsync({ _id: key })
+  }
   // Keep Playing When Navigating Away now also decides whether switching tabs
   // shows the mini player.
   if (stored.has('scrollMiniPlayerOnAllTabs')) {
@@ -268,11 +353,24 @@ export async function migrateStoredSettings(datastore) {
   }
   // Selects derived from a switch keep its sync edit time, so a newer choice from
   // another device still wins over an edit made here before the upgrade.
+  // Several switches can merge into one select, which keeps the latest edit.
   const updatedAt = stored.get('syncServerSettingUpdatedAt')?.value
   if (updatedAt && typeof updatedAt === 'object') {
-    const missing = [...REPLACED_SETTING_IDS].filter(([from, to]) => Object.hasOwn(updatedAt, from) && !Object.hasOwn(updatedAt, to))
-    if (missing.length > 0) {
-      await save('syncServerSettingUpdatedAt', { ...updatedAt, ...Object.fromEntries(missing.map(([from, to]) => [to, updatedAt[from]])) })
+    const carried = {}
+    for (const [from, to] of REPLACED_SETTING_IDS) {
+      if (Object.hasOwn(updatedAt, from) && !Object.hasOwn(updatedAt, to)) {
+        carried[to] = Math.max(carried[to] ?? -Infinity, updatedAt[from])
+      }
+    }
+    // A former switch edited after its value decided the migrated value, so
+    // the value keeps the switch's newer edit time.
+    for (const [switchKey, valueKey] of [['useFixedTabWidth', 'fixedTabWidth'], ['ytDlpPreloadEnabled', 'ytDlpPreloadCount']]) {
+      if (Object.hasOwn(updatedAt, switchKey) && updatedAt[switchKey] > (updatedAt[valueKey] ?? -Infinity)) {
+        carried[valueKey] = updatedAt[switchKey]
+      }
+    }
+    if (Object.keys(carried).length > 0) {
+      await save('syncServerSettingUpdatedAt', { ...updatedAt, ...carried })
     }
   }
   for (const key of ['quickSettings', 'syncServerSettingsExcluded']) {

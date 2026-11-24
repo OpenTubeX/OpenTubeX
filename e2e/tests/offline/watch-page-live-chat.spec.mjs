@@ -704,7 +704,7 @@ test.describe('watch page', () => {
     await expect(activeChat).toHaveCount(0)
   })
 
-  test('transitions a premiere when relative timestamp updates are disabled', async ({ app, page }) => {
+  test('transitions a premiere when its start time passes', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.clock.install({ time: Date.now() })
@@ -712,7 +712,6 @@ test.describe('watch page', () => {
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     await watchComponent.evaluate(async (component) => {
       const watchView = component.proxy
-      watchView.$store.commit('setUpdateRelativeTimestamps', false)
       watchView.isLoading = false
       watchView.errorMessage = ''
       watchView.isUpcoming = true

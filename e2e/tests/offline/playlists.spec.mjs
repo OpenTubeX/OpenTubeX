@@ -257,9 +257,6 @@ test.describe('seeded playlists', () => {
   })
 
   test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
-    await dispatchStoreAction(page, 'updateYtDlpPreloadEnabled', true)
-    await dispatchStoreAction(page, 'updateYtDlpPreloadCount', 0)
-    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
     await app.electronApp.evaluate(({ ipcMain }, channel) => {
       globalThis.__ytDlpPreloadVideoIds = []
       globalThis.__ytDlpPreloadResolvers = []
@@ -280,9 +277,10 @@ test.describe('seeded playlists', () => {
     await page.getByText('My seeded playlist').click()
     await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
+    // Both videos preload at once.
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
-    )).toEqual(['ccccccccccc'])
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
 
     await expect(page.getByRole('dialog', { name: 'Preload all videos?' })).toHaveCount(0)
     await expect(await openPlaylistMenuItem(page, 'Preloading all videos...')).toBeDisabled()
@@ -293,9 +291,6 @@ test.describe('seeded playlists', () => {
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 
     await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
-    await expect.poll(() => app.electronApp.evaluate(
-      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
-    )).toEqual(['ccccccccccc', 'ddddddddddd'])
     await expect(progressToast).toContainText('Preloading videos: 0 of 2')
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 
@@ -345,7 +340,6 @@ test.describe('seeded playlists', () => {
     }))
     await dispatchStoreAction(page, 'updateYtDlpSource', 'system')
     await choosePickerPaths(app, page, { ytDlpPath: executable })
-    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 32)
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
@@ -362,7 +356,6 @@ test.describe('seeded playlists', () => {
   })
 
   test('retries timed-out stream format probes before completing a playlist preload', async ({ app, page, attachScreenshot }) => {
-    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
     await app.electronApp.evaluate(({ ipcMain }, channel) => {
       globalThis.__ytDlpProbeExtractions = []
       ipcMain.removeHandler(channel)
@@ -421,8 +414,9 @@ test.describe('seeded playlists', () => {
 
     await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
     await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
-    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpProbeExtractions)).toEqual([
-      'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ddddddddddd', 'ccccccccccc',
+    // Both videos preload at once, so only the number of extractions per video is fixed.
+    expect((await app.electronApp.evaluate(() => globalThis.__ytDlpProbeExtractions)).toSorted()).toEqual([
+      'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ddddddddddd',
     ])
     await expect(async () => {
       const entries = await readPlaybackCacheEntries(app.userDataDir)

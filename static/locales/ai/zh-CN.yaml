@@ -74,6 +74,8 @@ Global:
   Loading More: 正在加载更多内容
   New: 新
   Show Blocked Item: 显示已屏蔽的项目
+  Auto: 自动
+  'Off': 关闭
 Search Listing:
   Label:
     Members Only: 仅限会员
@@ -568,7 +570,6 @@ Settings:
     Date Format: 日期格式
     Time Format: 时间格式
     Language Default: 语言默认
-    Update Relative Timestamps: 持续更新相对时间戳
     Stream Extraction Method:
       Stream Extraction Method: 流提取方式
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: '已加载缺失的标签页图标：{count}'
     Loaded Tab Icons With Failures: 已加载 {loaded} 个标签页图标，另有 {failed} 个无法加载
     Show Tab Previews: 显示标签页预览
-    Use Fixed Tab Width: 在水平模式下使用固定标签页宽度
     Use Custom Title Bar: 使用自定义标题栏
     Tab Width: 标签页宽度
     Vertical Tab Height: 垂直标签页高度
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: 并行加载视频片段
     Rotate Wide Videos to Landscape in Fullscreen: '全屏时将宽屏视频旋转为横屏'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下滑动以进入或退出全屏'
-    Preload Upcoming Videos: "预加载后续视频"
     Upcoming Videos to Preload: "要预加载的视频数量"
-    Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
     Keep Status Bar Hidden in Fullscreen: "全屏时保持状态栏隐藏"
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "在搜索和推荐中隐藏已观看的视频"
     Hide Full Screen Video Title: 在全窗口或全屏时隐藏视频标题
+    Blocked Items:
+      Blocked Items: 已屏蔽的项目
+      Hide: 隐藏
+      Blur: 模糊
+      Show: 显示
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
       Break Reminder Action: "到休息时间时"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "就寝时间内将新上传通知静音"
       Stop Autoplay at Bedtime and After the Daily Limit: "在就寝时间内和达到每日限额后停止自动播放"
     Hide Popularity Graph: "隐藏热度图"
-    Enable Block Lists: "启用屏蔽列表"
     AI Video Summaries: AI 视频摘要
     Hide: 隐藏
     Collapsed: 折叠
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: 全窗口或全屏暂停时显示
     Hide Channel Avatars: 隐藏频道头像
     Shorten View Counts: 简写观看次数、评论数和评论点赞数
-    Hide Home: 隐藏首页
     Hide Live Chat Replay: 隐藏直播聊天回放
     Disable A-B Repeat: 禁用 A-B 循环
     Hide End-Screen Annotations: 隐藏片尾画面注释
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: 显示视频标题
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
-    Blur Blocked Items: 模糊显示已屏蔽的项目，而不是隐藏
   Data Settings:
     Backup separate profile data: "此备份还包含 {count} 个独立个人资料的数据，这些数据将恢复到对应的个人资料中。"
     Subscription cache file: "此文件只缓存了你订阅中的视频，不包含频道本身。请改为选择 profiles.db 或订阅导出文件。"
@@ -2447,7 +2447,6 @@ Tooltips:
     Enable Tabs: "保持当前页面打开。其他标签页会保留到应用重启，再次启用标签页即可恢复。"
     Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"
     Use AI Translation Completions: 使用 AI 生成的文本补全人工翻译中的缺失内容。始终优先使用人工翻译。
-    Update Relative Timestamps: 页面保持打开时，持续更新应用各处的相对时间戳。禁用后，仅在重新加载或再次访问页面时更新。
     Stream Extraction Method: |
       选择 OpenTubeX 获取视频流的方式。选择 yt-dlp 时，系统中必须有可用的 yt-dlp。
       使用 yt-dlp 时，视频可能需要更长时间才能开始播放。
@@ -2496,9 +2495,7 @@ Tooltips:
       较高的值可能有助于改善缓慢或不稳定的连接，但会占用更多带宽和内存。
       这也可能导致“自动”低估连接速度并选择较低的画质。
       对于限制为一次只能发出一个请求的流，此设置无效。
-    Preload Upcoming Videos: "获取并缓存后续视频的 yt-dlp 流地址。队列优先于播放列表和推荐。"
-    Upcoming Videos to Preload: "在后台获取 yt-dlp 流地址的后续视频数量上限。"
-    Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
+    Upcoming Videos to Preload: "为最多这么多个可接着播放的视频获取并缓存 yt-dlp 流地址。观看队列优先于播放列表和推荐。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
     Keep Status Bar Hidden in Fullscreen: "仅在从屏幕边缘滑动时显示状态栏，并在片刻后再次隐藏。点按播放器不再显示状态栏。"
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
@@ -2535,6 +2532,7 @@ Tooltips:
     Take a Break Reminder: "观看达到此时长后暂停视频。暂停 10 分钟或更久会重新开始计时。"
     Bedtime Reminder: "在开始时间与结束时间之间暂停视频，并提醒你停止观看。"
     Shorten View Counts: 以缩写形式显示 YouTube 已取整的观看次数、评论数和评论点赞数，例如显示 14K 而不是 14,000。精确计数始终完整显示。
+    Blocked Items: “隐藏”会移除与下方列表匹配的视频、播放列表和频道。“模糊”会将它们模糊显示，直到你点开查看。“显示”会忽略这些列表。
   Subscription Settings:
     Refresh These Feeds Together: "刷新任一已勾选的订阅源时，其他已勾选的订阅源会紧接着刷新。自动刷新仍按各订阅源自己的间隔进行。"
     Fetch Feed on Startup: 启用后，OpenTubeX 会在启动时和打开新窗口时自动获取订阅动态。
@@ -2555,13 +2553,13 @@ Tooltips:
     Toggle Playback With Tab Icon: 点击正在播放或已暂停视频的标签页图标，即可暂停或继续播放，而无需切换到该标签页。
     Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知，包括提供撤销的通知。错误、警告、你设置的提醒以及需要你做出决定的通知（如更新提示）仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
+    Tab Width: 让水平标签栏中的所有标签页宽度相同。“自动”会根据标题调整每个标签页的宽度。
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     UI Density: "更改列表、菜单、侧边栏和设置中的间距。"
     Show Progress as Notification: 以持续通知实时显示后台操作的进度（例如刷新订阅动态和下载托管工具），而不使用全局进度条。
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。
     Scroll Speed: 更改鼠标滚轮和触控板滚轮手势的滚动距离。
-    Use Fixed Tab Width: 让水平标签栏中的所有标签页宽度相同，而不是根据标题调整宽度。
     Use Custom Title Bar: 用标签栏（标签页不在顶部时则用顶部导航栏）替换系统标题栏，以节省垂直空间。窗口控制按钮会显示在该栏的角落。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
     Modal Backdrop: "设置对话框和菜单后方应用的显示效果。模糊效果在性能较弱的设备上可能会较慢。"

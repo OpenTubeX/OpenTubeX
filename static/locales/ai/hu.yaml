@@ -74,6 +74,8 @@ Global:
   Loading More: Továbbiak betöltése
   New: Új
   Show Blocked Item: Letiltott elem megjelenítése
+  Auto: Automatikus
+  'Off': Ki
 Search Listing:
   Label:
     Members Only: Csak tagoknak
@@ -568,7 +570,6 @@ Settings:
     Date Format: Dátumformátum
     Time Format: Időformátum
     Language Default: Nyelvi alapértelmezés
-    Update Relative Timestamps: Relatív időbélyegek folyamatos frissítése
     Stream Extraction Method:
       Stream Extraction Method: Adatfolyam-kinyerési mód
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Hiányzó lapikon betöltve: {count} | Hiányzó lapikonok betöltve: {count}'
     Loaded Tab Icons With Failures: Betöltve {loaded} lapikon; {failed} nem tölthető be
     Show Tab Previews: Lapelőnézetek megjelenítése
-    Use Fixed Tab Width: Rögzített lapszélesség vízszintes módban
     Use Custom Title Bar: Egyéni címsor használata
     Tab Width: Lapszélesség
     Vertical Tab Height: Függőleges lapok magassága
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Szakaszok párhuzamos betöltése
     Rotate Wide Videos to Landscape in Fullscreen: 'A széles videók elforgatása fekvő helyzetbe teljes képernyőn'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Húzd felfelé vagy lefelé a teljes képernyő megnyitásához vagy bezárásához'
-    Preload Upcoming Videos: "Következő videók előtöltése"
     Upcoming Videos to Preload: "Előtöltendő videók száma"
-    Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
     Keep Status Bar Hidden in Fullscreen: "Állapotsor rejtve tartása teljes képernyőn"
     Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Megtekintett videók elrejtése a keresésben és az ajánlásokban"
     Hide Full Screen Video Title: Videó címének elrejtése teljes ablakos vagy teljes képernyős módban
+    Blocked Items:
+      Blocked Items: Letiltott elemek
+      Hide: Elrejtés
+      Blur: Elhomályosítás
+      Show: Megjelenítés
     Digital Wellbeing:
       Count Watch Time From: "Nézési idő számításának forrása"
       Break Reminder Action: "Amikor ideje szünetet tartani"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Új feltöltésekről szóló értesítések némítása lefekvési időben"
       Stop Autoplay at Bedtime and After the Daily Limit: "Automatikus lejátszás leállítása lefekvési időben és a napi korlát elérése után"
     Hide Popularity Graph: "Népszerűségi grafikon elrejtése"
-    Enable Block Lists: "Tiltólisták engedélyezése"
     AI Video Summaries: MI-videóösszefoglalók
     Hide: Elrejtés
     Collapsed: Összecsukva
@@ -1407,7 +1409,6 @@ Settings:
     Hide Channel Avatars: Csatornaavatarok elrejtése
     Shorten View Counts: Megtekintések, hozzászólások és hozzászóláskedvelések számának rövidítése
     Hide Live Chat Replay: Élő csevegés visszajátszásának elrejtése
-    Hide Home: Kezdőlap elrejtése
     Disable A-B Repeat: A-B ismétlés letiltása
     Hide End-Screen Annotations: Záróképernyő elemeinek elrejtése
     Hide End-Screen Recommendations: "Záróképernyős ajánlások elrejtése"
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Videó címének megjelenítése
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
-    Blur Blocked Items: Letiltott elemek elhomályosítása elrejtés helyett
   Data Settings:
     Backup separate profile data: "Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek abba a profilba állíthatók vissza. | Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek azokba a profilokba állíthatók vissza."
     Subscription cache file: "Ez a fájl csak a feliratkozásaid videóit tárolja gyorsítótárban, a csatornákat nem. Válaszd helyette a profiles.db fájlt vagy egy feliratkozás-exportot."
@@ -2448,7 +2448,6 @@ Tooltips:
     Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
     Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.
-    Update Relative Timestamps: A relatív időbélyegek frissítése az egész alkalmazásban, amíg nyitva van egy oldal. Kikapcsolva csak az oldal újratöltésekor vagy újbóli megnyitásakor frissülnek.
     Stream Extraction Method: |
       Válassza ki, hogyan szerezze be az OpenTubeX a videó-adatfolyamokat. A yt-dlp használatához annak elérhetőnek kell lennie.
       A videók indítása tovább tarthat a yt-dlp használatakor.
@@ -2497,9 +2496,7 @@ Tooltips:
       A nagyobb érték lassú vagy instabil kapcsolatnál segíthet, de több sávszélességet és memóriát használ.
       Emiatt az Auto alábecsülheti a kapcsolat sebességét, és gyengébb minőséget választhat.
       Az egyszerre egy kérésre korlátozott adatfolyamok figyelmen kívül hagyják ezt a beállítást.
-    Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
-    Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
-    Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
+    Upcoming Videos to Preload: "Lekéri és gyorsítótárazza a yt-dlp adatfolyam-címeit legfeljebb ennyi következőként lejátszható videóhoz. A megtekintési várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
     Keep Status Bar Hidden in Fullscreen: "Az állapotsor csak a képernyő széléről való húzáskor jelenjen meg, és egy pillanat múlva ismét rejtőzzön el. A lejátszó megérintése már nem jeleníti meg."
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
@@ -2536,6 +2533,7 @@ Tooltips:
     Take a Break Reminder: "Ennyi nézés után szünetelteti a videót. Egy legalább 10 perces szünet újraindítja a számlálást."
     Bedtime Reminder: "Szünetelteti a videót, és a kezdési és befejezési idő között emlékezteti, hogy hagyja abba a nézést."
     Shorten View Counts: A YouTube által már kerekített megtekintés-, hozzászólás- és hozzászóláskedvelési számok rövidített megjelenítése, például 14 E a 14 000 helyett. A pontos számok mindig teljesen jelennek meg.
+    Blocked Items: Az Elrejtés eltávolítja az alábbi listáknak megfelelő videókat, lejátszási listákat és csatornákat. Az Elhomályosítás elhomályosítva jeleníti meg őket, amíg fel nem feded őket. A Megjelenítés figyelmen kívül hagyja a listákat.
   Subscription Settings:
     Refresh These Feeds Together: "Ha frissíted az egyik bejelölt hírfolyamot, a többi bejelölt hírfolyam közvetlenül utána frissül. Az automatikus frissítések továbbra is az egyes hírfolyamok saját időközét követik."
     Fetch Feed on Startup: Bekapcsolva az OpenTubeX automatikusan lekéri a feliratkozási hírfolyamot indításkor és új ablak megnyitásakor.
@@ -2556,13 +2554,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Egy lejátszott vagy szüneteltetett videót tartalmazó lap ikonjára kattintva a videó szünetel vagy folytatódik anélkül, hogy arra a lapra váltana.
     Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek, beleértve a Visszavonás lehetőséget kínálókat is. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a döntést kérő értesítések, például a frissítési felkérések, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
+    Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon. Az Automatikus beállítás minden lapot a címéhez igazít.
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     UI Density: "Módosítja a térközöket a listákban, menükben, az oldalsávon és a Beállításokban."
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
     Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.
-    Use Fixed Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon, a címükhöz igazodó méretezés helyett.
     Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
     Modal Backdrop: "Beállítja, hogyan nézzen ki az alkalmazás a párbeszédablakok és menük mögött. Az elmosás lassú lehet kevésbé erős eszközökön."

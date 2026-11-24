@@ -53,6 +53,8 @@ Global:
   Posts: Beiträge
   Sort By: Sortieren nach
   Show Blocked Item: Blockierten Inhalt anzeigen
+  Auto: Automatisch
+  Off: Aus
 
 # Search Bar
   Counts:
@@ -759,7 +761,6 @@ Settings:
       Mark as Watched: Als „gesehen“ markieren
       Copy YouTube Link: YouTube-Link kopieren
       Open in YouTube: Auf YouTube öffnen
-    Update Relative Timestamps: Relative Zeitangaben aktuell halten
     Automatically switch stream extraction methods: "Methode zur Stream-Extraktion automatisch wechseln"
     Stream Extraction Method:
       Stream Extraction Method: Methode zur Stream-Extraktion
@@ -992,7 +993,6 @@ Settings:
     Show Tab Previews: Tab-Vorschauen anzeigen
     Toggle Playback With Tab Icon: Mit dem Tab-Symbol abspielen und pausieren
     Show New Tab Button Next to Tabs: Schaltfläche „Neuer Tab“ neben den Tabs anzeigen
-    Use Fixed Tab Width: Im horizontalen Modus feste Tab-Breite verwenden
     Use Custom Title Bar: Eigene Titelleiste verwenden
     Tab Width: Tab-Breite
     Vertical Tab Height: Vertikale Tab-Höhe
@@ -1321,9 +1321,7 @@ Settings:
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
     Show Playback Rate Adjusted Timestamp: Wiedergabegeschwindigkeitsangepasste Zeitstempel anzeigen
     Autoplay Interruption Timer: Abbruch-Timer für Automatische Wiedergabe
-    Preload Upcoming Videos: Bevorstehende Videos vorladen
     Upcoming Videos to Preload: Anzahl vorzuladender Videos
-    Concurrent Preloads: Gleichzeitige Vorladungen
     Ask Before Preloading Large Playlists: Vor dem Vorladen großer Playlists fragen
     Default Viewing Mode:
       Theater: Kinomodus
@@ -1700,10 +1698,7 @@ Settings:
     Hide Header Sync Indicator: Synchronisierungsanzeige in der App-Kopfzeile ausblenden
     Hide Repeat Stats: Wiederholungsstatistik ausblenden
     Hide Live Chat: Live-Chat ausblenden
-    Hide Popular Videos: Beliebte Videos ausblenden
-    Hide Trending Videos: Trending-Videos ausblenden
     Hide Recommended Videos: Empfohlene Videos ausblenden
-    Hide Home: Startseite ausblenden
     Hide Channel Subscribers: Abozahl für Kanäle ausblenden
     Hide Comment Likes: Likes bei Kommentaren ausblenden
     Hide Video Likes And Dislikes: Likes und Dislikes ausblenden
@@ -1723,9 +1718,12 @@ Settings:
     Hide Popularity Graph: Beliebtheitsdiagramm ausblenden
     Disable A-B Repeat: A-B-Wiederholung deaktivieren
     Hide Upcoming Premieres: Anstehende Premieren ausblenden
+    Blocked Items:
+      Blocked Items: Blockierte Inhalte
+      Hide: Ausblenden
+      Blur: Unscharf darstellen
+      Show: Anzeigen
     Hide Channels: Videos aus Kanälen ausblenden
-    Enable Block Lists: Blocklisten aktivieren
-    Blur Blocked Items: Blockierte Inhalte unscharf darstellen statt ausblenden
     Hide Channels Placeholder: Kanal-ID
     Display Titles Without Excessive Capitalisation: Titel ohne übermäßige Großschreibung und Zeichensetzung anzeigen
     Hide Channel Playlists: 'Tab „Playlists“ im Kanal ausblenden'
@@ -3235,9 +3233,6 @@ Tooltips:
       „Komplette Anwendung“ zeigt auch Kanalnamen und -beschreibungen in ihrer Originalsprache.
       Zu viele Anfragen, wie Videotitel in Listen abfragen kann die Zuverlässigkeit der
       Anwendung temporär beeinträchtigen.
-    Update Relative Timestamps: >-
-      Aktualisiert relative Zeitangaben in der gesamten App, während eine Seite geöffnet bleibt. Wenn dies deaktiviert ist,
-      werden sie erst nach dem Neuladen oder erneuten Aufrufen der Seite aktualisiert.
     Automatically switch stream extraction methods: Versucht yt-dlp, wenn die integrierte Wiedergabe fehlschlägt, oder die integrierte Wiedergabe, wenn yt-dlp fehlschlägt.
     Stream Extraction Method: |
       Lege fest, wie OpenTubeX Videostreams abruft. Bei Auswahl von yt-dlp muss es verfügbar sein.
@@ -3313,9 +3308,7 @@ Tooltips:
       auswählen.
 
       Streams, die auf jeweils eine Anfrage beschränkt sind, ignorieren diese Einstellung.
-    Preload Upcoming Videos: Ruft die yt-dlp-Stream-URLs der Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
-    Upcoming Videos to Preload: Die Höchstzahl bevorstehender Videos, deren yt-dlp-Stream-URLs im Hintergrund abgerufen werden.
-    Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
+    Upcoming Videos to Preload: Ruft die yt-dlp-Stream-URLs von bis zu so vielen Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
     Ask Before Preloading Large Playlists: Fragt nach einer Bestätigung, bevor alle Videos einer Playlist mit mehr als {count} Videos vorgeladen werden.
     Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
     Keep Status Bar Hidden in Fullscreen: Die Statusleiste nur beim Wischen vom Bildschirmrand einblenden und nach kurzer Zeit wieder ausblenden. Tippen auf den Player blendet sie nicht mehr ein.
@@ -3356,6 +3349,7 @@ Tooltips:
     Daily Shorts Limit: "Zählt die Shorts, die du heute auf diesem Gerät angesehen hast."
     Take a Break Reminder: "Pausiert das Video nach dieser Wiedergabedauer. Eine Pause von 10 Minuten oder länger setzt die Zählung zurück."
     Bedtime Reminder: "Pausiert das Video und erinnert dich zwischen Beginn und Ende daran, mit dem Ansehen aufzuhören."
+    Blocked Items: "Ausblenden entfernt Videos, Playlists und Kanäle, auf die die Listen unten zutreffen. Unscharf darstellen zeigt sie verschwommen, bis du sie aufdeckst. Anzeigen ignoriert die Listen."
     Hide Channels: Gib eine Kanal-ID ein, um zu verhindern, dass alle Videos, Playlists und der Kanal selbst in der Suche, den Trends, den beliebtesten und den empfohlenen Videos angezeigt werden. Die eingegebene Kanal-ID muss vollständig übereinstimmen, und es wird zwischen Groß- und Kleinschreibung unterschieden.
     Hide Subscriptions Live: Diese Einstellung wird durch die App-weite Einstellung „{appWideSetting}“ im Abschnitt „{subsection}“ der „{settingsSection}“ außer Kraft gesetzt
     Hide Videos, Playlists and Channels Containing Text: Gib ein Wort, einen Teil eines Wortes oder einen Satz ein (Groß-/Kleinschreibung wird ignoriert), um alle Videos und Playlists, welche es in ihren Originaltiteln enthalten, auf ganz OpenTubeX auszublenden. Dein Verlauf, deine eigenen Playlists und Videos innerhalb Playlists sind davon nicht betroffen.
@@ -3389,7 +3383,7 @@ Tooltips:
       immer so.
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
-    Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
+    Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite. Automatisch passt jeden Tab an seinen Titel an.
     Toggle Playback With Tab Icon: Ein Klick auf das Symbol eines Tabs mit laufendem oder pausiertem Video pausiert es oder setzt es fort, ohne zu diesem Tab zu wechseln.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.

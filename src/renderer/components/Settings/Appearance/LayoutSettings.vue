@@ -200,15 +200,6 @@
             @change="updateShowTabIcons"
           />
           <FtToggleSwitch
-            :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
-            :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
-            compact
-            :default-value="useFixedTabWidth"
-            setting-key="useFixedTabWidth"
-            :disabled="!store.getters.getTabsEnabled"
-            @change="updateUseFixedTabWidth"
-          />
-          <FtToggleSwitch
             v-if="usingElectron"
             :label="$t('Settings.Theme Settings.Show New Tab Button Next to Tabs')"
             compact
@@ -270,12 +261,14 @@
       <FtSliderGrid>
         <FtSlider
           :label="$t('Settings.Theme Settings.Tab Width')"
-          :default-value="fixedTabWidth"
+          :tooltip="$t('Tooltips.Theme Settings.Tab Width')"
+          :default-value="fixedTabWidthSliderValue"
           setting-key="fixedTabWidth"
-          :min-value="MIN_FIXED_TAB_WIDTH"
+          :min-value="AUTO_TAB_WIDTH_SLIDER_VALUE"
           :max-value="MAX_FIXED_TAB_WIDTH"
           :step="FIXED_TAB_WIDTH_STEP"
-          :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
+          :min-value-label="$t('Global.Auto')"
+          :disabled="!store.getters.getTabsEnabled"
           value-extension="px"
           @input="previewFixedTabWidth"
           @change="updateFixedTabWidth"
@@ -480,9 +473,10 @@ import InterfaceCustomizer from './InterfaceCustomizer/InterfaceCustomizer.vue'
 
 import store from '../../../store/index'
 import {
+  AUTO_TAB_WIDTH_SLIDER_VALUE,
   FIXED_TAB_WIDTH_STEP,
   MAX_FIXED_TAB_WIDTH,
-  MIN_FIXED_TAB_WIDTH
+  normalizeFixedTabWidth
 } from '../../../constants/tabWidth'
 import {
   MAX_VERTICAL_TAB_HEIGHT,
@@ -760,31 +754,30 @@ function updateShowTabPreviews(value) {
   store.dispatch('updateShowTabPreviews', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const useFixedTabWidth = computed(() => store.getters.getUseFixedTabWidth)
-
 /** @type {import('vue').ComputedRef<number>} */
-const fixedTabWidth = computed(() => store.getters.getFixedTabWidth)
+const fixedTabWidthSliderValue = computed(() =>
+  normalizeFixedTabWidth(store.getters.getFixedTabWidth) || AUTO_TAB_WIDTH_SLIDER_VALUE)
 
 /**
- * @param {boolean} value
+ * The saved tab width for a slider position, 0 for Auto.
+ * @param {number} value
  */
-function updateUseFixedTabWidth(value) {
-  store.dispatch('updateUseFixedTabWidth', value)
+function tabWidthFromSlider(value) {
+  return value === AUTO_TAB_WIDTH_SLIDER_VALUE ? 0 : value
 }
 
 /**
  * @param {number} value
  */
 function previewFixedTabWidth(value) {
-  store.commit('setFixedTabWidth', value)
+  store.commit('setFixedTabWidth', tabWidthFromSlider(value))
 }
 
 /**
  * @param {number} value
  */
 function updateFixedTabWidth(value) {
-  store.dispatch('updateFixedTabWidth', value)
+  store.dispatch('updateFixedTabWidth', tabWidthFromSlider(value))
 }
 
 /** @type {import('vue').ComputedRef<number>} */

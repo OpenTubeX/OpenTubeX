@@ -74,6 +74,8 @@ Global:
   Loading More: さらに読み込み中
   New: 新着
   Show Blocked Item: ブロックした項目を表示
+  Auto: 自動
+  'Off': オフ
 Search Listing:
   Label:
     Members Only: メンバー限定
@@ -568,7 +570,6 @@ Settings:
     Date Format: 日付形式
     Time Format: 時刻形式
     Language Default: 言語の既定値
-    Update Relative Timestamps: 相対日時を自動更新
     Stream Extraction Method:
       Stream Extraction Method: ストリーム抽出方式
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: '読み込んだタブアイコン: {count}件'
     Loaded Tab Icons With Failures: タブアイコンを{loaded}件読み込みました。{failed}件は読み込めませんでした
     Show Tab Previews: タブのプレビューを表示
-    Use Fixed Tab Width: 横表示でタブの幅を固定
     Use Custom Title Bar: カスタムタイトルバーを使用
     Tab Width: タブの幅
     Vertical Tab Height: 縦タブの高さ
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: セグメントを並列読み込み
     Rotate Wide Videos to Landscape in Fullscreen: '全画面表示で横長の動画を横向きに回転する'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下にスワイプして全画面表示を開始または終了する'
-    Preload Upcoming Videos: "次の動画を先読み"
     Upcoming Videos to Preload: "先読みする動画数"
-    Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
     Keep Status Bar Hidden in Fullscreen: "全画面表示でステータスバーを非表示のままにする"
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "検索とおすすめで視聴済みの動画を非表示"
     Hide Full Screen Video Title: 全ウィンドウ表示・全画面表示で動画タイトルを非表示
+    Blocked Items:
+      Blocked Items: ブロックした項目
+      Hide: 非表示
+      Blur: ぼかす
+      Show: 表示
     Digital Wellbeing:
       Count Watch Time From: "視聴時間のカウント対象"
       Break Reminder Action: "休憩の時間になったとき"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "就寝時間中は新着アップロードの通知をミュート"
       Stop Autoplay at Bedtime and After the Daily Limit: "就寝時間中と1日の上限に達した後は自動再生を停止"
     Hide Popularity Graph: "人気度グラフを非表示"
-    Enable Block Lists: "ブロックリストを有効にする"
     AI Video Summaries: AI による動画概要
     Hide: 非表示
     Collapsed: 折りたたむ
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
     Hide Channel Avatars: チャンネルのアバターを非表示
     Shorten View Counts: 視聴回数、コメント数、コメントの高評価数を省略表示
-    Hide Home: ホームを非表示
     Hide Live Chat Replay: ライブチャットのリプレイを非表示
     Disable A-B Repeat: A-Bリピートを無効化
     Hide End-Screen Annotations: 終了画面のアノテーションを非表示
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: 動画タイトルを表示
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
-    Blur Blocked Items: ブロックした項目を非表示にせずぼかす
   Data Settings:
     Backup separate profile data: "このバックアップには、独立した {count} 件のプロフィールのデータも含まれており、それぞれのプロフィールに復元されます。"
     Subscription cache file: "このファイルには登録チャンネルの動画のキャッシュだけが含まれ、チャンネル自体は含まれません。代わりに profiles.db または登録チャンネルのエクスポートを選択してください。"
@@ -2447,7 +2447,6 @@ Tooltips:
     Enable Tabs: "現在のページは開いたままになります。他のタブはアプリを再起動するまで保持されます。タブを再度有効にすると復元できます。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"
     Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。
-    Update Relative Timestamps: ページを開いている間、アプリ内の相対日時を更新します。無効にすると、ページを再読み込みするか開き直したときにのみ更新されます。
     Stream Extraction Method: |
       OpenTubeXが動画ストリームを取得する方法を選択します。yt-dlpを選択するには、yt-dlpが利用可能である必要があります。
       yt-dlpを使用すると、動画の再生開始に時間がかかる場合があります。
@@ -2496,9 +2495,7 @@ Tooltips:
       値を大きくすると、低速または不安定な接続では改善する場合がありますが、帯域幅とメモリの使用量が増えます。
       また、「自動」が接続速度を実際より低く見積もり、低い品質を選ぶ場合があります。
       一度に1件の要求しか行えないストリームでは、この設定は無視されます。
-    Preload Upcoming Videos: "次に再生可能な動画の yt-dlp URL を取得してキャッシュします。キューは再生リストやおすすめより優先されます。"
-    Upcoming Videos to Preload: "バックグラウンドで yt-dlp URL を取得する次の動画の最大数です。"
-    Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
+    Upcoming Videos to Preload: "次に再生可能な動画のうち、この数までの yt-dlp ストリーム URL を取得してキャッシュします。視聴キューは再生リストやおすすめより優先されます。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
     Keep Status Bar Hidden in Fullscreen: "画面の端からスワイプしたときだけステータスバーを表示し、少し経つと再び非表示にします。プレーヤーをタップしても表示されなくなります。"
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
@@ -2535,6 +2532,7 @@ Tooltips:
     Take a Break Reminder: "この時間だけ視聴すると動画を一時停止します。10分以上視聴を中断すると、カウントは最初からやり直しになります。"
     Bedtime Reminder: "開始時刻から終了時刻までの間、動画を一時停止して視聴をやめるようリマインドします。"
     Shorten View Counts: YouTubeですでに丸められた視聴回数、コメント数、コメントの高評価数を、14,000ではなく14Kのように省略表示します。正確な数値は常に省略せず表示します。
+    Blocked Items: 「非表示」は下のリストに一致する動画、再生リスト、チャンネルを取り除きます。「ぼかす」は表示するまでぼかして表示します。「表示」はリストを無視します。
   Subscription Settings:
     Refresh These Feeds Together: "チェックしたフィードのいずれかを更新すると、チェックした他のフィードもその直後に更新されます。自動更新は引き続き各フィードの間隔に従います。"
     Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
@@ -2555,13 +2553,13 @@ Tooltips:
     Toggle Playback With Tab Icon: 再生中または一時停止中の動画があるタブのアイコンをクリックすると、そのタブに切り替えずに一時停止または再開します。
     Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします（「元に戻す」が表示されるものも含みます）。エラー、警告、設定したリマインダー、およびアップデートの確認など判断を求める通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
+    Tab Width: 横型タブバーの各タブを同じ幅にします。「自動」では各タブの幅をタイトルに合わせます。
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Playlist Thumbnail Size: "再生リストのページの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     UI Density: "リスト、メニュー、サイドバー、設定の余白を変更します。"
     Show Progress as Notification: 登録チャンネルの更新や管理対象ツールのダウンロードなど、バックグラウンド処理の進行状況を共通の進行状況バーではなく、常に表示される通知で示します。
     Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。
     Scroll Speed: マウスホイールとタッチパッドのホイール操作によるスクロール距離を変更します。
-    Use Fixed Tab Width: 横型タブバーの各タブを、タイトルに合わせた幅ではなく同じ幅にします。
     Use Custom Title Bar: 縦方向のスペースを節約するため、システムのタイトルバーをタブバー（タブが上部にない場合は上部ナビゲーション）に置き換えます。ウィンドウ操作ボタンはそのバーの隅に表示されます。
     Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
     Modal Backdrop: "ダイアログやメニューの背後にあるアプリの見え方を設定します。ぼかしは性能の低いデバイスでは動作が遅くなることがあります。"

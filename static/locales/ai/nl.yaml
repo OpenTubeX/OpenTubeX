@@ -74,6 +74,8 @@ Global:
   Loading More: Meer laden
   New: Nieuw
   Show Blocked Item: Geblokkeerd item tonen
+  Auto: Automatisch
+  'Off': Uit
 Search Listing:
   Label:
     Members Only: Alleen voor leden
@@ -573,7 +575,6 @@ Settings:
     Date Format: Datumnotatie
     Time Format: Tijdnotatie
     Language Default: Standaard voor taal
-    Update Relative Timestamps: Relatieve tijdsaanduidingen blijven bijwerken
     Stream Extraction Method:
       Stream Extraction Method: Methode voor stream-extractie
       yt-dlp: yt-dlp
@@ -749,7 +750,6 @@ Settings:
     Loaded Tab Icons: 'Ontbrekend tabbladpictogram geladen: {count} | Ontbrekende tabbladpictogrammen geladen: {count}'
     Loaded Tab Icons With Failures: '{loaded} tabbladpictogrammen geladen; {failed} konden niet worden geladen'
     Show Tab Previews: Voorbeelden van tabbladen tonen
-    Use Fixed Tab Width: Vaste tabbladbreedte gebruiken in horizontale modus
     Use Custom Title Bar: Aangepaste titelbalk gebruiken
     Tab Width: Tabbladbreedte
     Vertical Tab Height: Hoogte van verticale tabbladen
@@ -1062,9 +1062,7 @@ Settings:
       Modern Formats: "Moderne formaten"
     Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
-    Preload Upcoming Videos: "Volgende video’s vooraf laden"
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
-    Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
     Keep Status Bar Hidden in Fullscreen: "Statusbalk verborgen houden in volledig scherm"
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
@@ -1374,6 +1372,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Bekeken video’s verbergen in zoekresultaten en aanbevelingen"
     Hide Full Screen Video Title: Videotitel verbergen in volledig venster of volledig scherm
+    Blocked Items:
+      Blocked Items: Geblokkeerde items
+      Hide: Verbergen
+      Blur: Vervagen
+      Show: Tonen
     Digital Wellbeing:
       Count Watch Time From: "Kijktijd tellen van"
       Break Reminder Action: "Als het tijd is voor een pauze"
@@ -1400,7 +1403,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Uploadmeldingen dempen tijdens bedtijd"
       Stop Autoplay at Bedtime and After the Daily Limit: "Automatisch afspelen stoppen tijdens bedtijd en na de daglimiet"
     Hide Popularity Graph: "Populariteitsgrafiek verbergen"
-    Enable Block Lists: "Blokkeerlijsten inschakelen"
     AI Video Summaries: AI-videosamenvattingen
     Hide: Verbergen
     Collapsed: Ingeklapt
@@ -1421,7 +1423,6 @@ Settings:
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
     Hide Channel Avatars: Kanaalavatars verbergen
     Shorten View Counts: Aantallen weergaven, reacties en vind-ik-leuks bij reacties inkorten
-    Hide Home: Startpagina verbergen
     Hide Live Chat Replay: Herhaling van livechat verbergen
     Disable A-B Repeat: A-B-herhaling uitschakelen
     Hide End-Screen Annotations: Eindschermannotaties verbergen
@@ -1434,7 +1435,6 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
-    Blur Blocked Items: Geblokkeerde items vervagen in plaats van verbergen
   Data Settings:
     Backup separate profile data: "Deze back-up bevat ook de gegevens van {count} apart profiel, die in dat profiel worden hersteld. | Deze back-up bevat ook de gegevens van {count} aparte profielen, die in die profielen worden hersteld."
     Subscription cache file: "Dit bestand bevat alleen een cache van de video's van je abonnementen, niet de kanalen. Kies in plaats daarvan profiles.db of een export van abonnementen."
@@ -2515,7 +2515,6 @@ Tooltips:
     Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."
     Use AI Translation Completions: Vul ontbrekende menselijke vertalingen aan met door AI gegenereerde tekst. Menselijke vertalingen krijgen altijd voorrang.
-    Update Relative Timestamps: Werkt relatieve tijdsaanduidingen in de hele app bij zolang een pagina geopend blijft. Als dit is uitgeschakeld, worden ze alleen bijgewerkt nadat je de pagina opnieuw laadt of bezoekt.
     Stream Extraction Method: |
       Kies hoe OpenTubeX videostreams ophaalt. yt-dlp moet beschikbaar zijn als je deze optie selecteert.
       Met yt-dlp kan het langer duren voordat video's beginnen.
@@ -2564,9 +2563,7 @@ Tooltips:
       Hogere waarden kunnen helpen bij langzame of instabiele verbindingen, maar gebruiken meer bandbreedte en geheugen.
       Hierdoor kan Automatisch de verbindingssnelheid ook onderschatten en een lagere kwaliteit kiezen.
       Streams die tot één aanvraag tegelijk zijn beperkt, negeren deze instelling.
-    Preload Upcoming Videos: "Haalt yt-dlp-URL’s voor de volgende video’s op en bewaart ze in de cache. De wachtrij heeft voorrang op afspeellijsten en aanbevelingen."
-    Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
-    Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
+    Upcoming Videos to Preload: "Haalt yt-dlp-stream-URL’s op voor maximaal dit aantal video’s die hierna kunnen worden afgespeeld en bewaart ze in de cache. De kijkwachtrij heeft voorrang op afspeellijsten en aanbevelingen."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
     Keep Status Bar Hidden in Fullscreen: "Toon de statusbalk alleen wanneer je vanaf de schermrand veegt en verberg deze na een moment weer. Tikken op de speler toont hem niet meer."
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
@@ -2603,6 +2600,7 @@ Tooltips:
     Take a Break Reminder: "Pauzeert de video na zoveel kijktijd. Een pauze van 10 minuten of langer start de telling opnieuw."
     Bedtime Reminder: "Pauzeert de video en herinnert je eraan om tussen de begin- en eindtijd te stoppen met kijken."
     Shorten View Counts: Toont aantallen weergaven, reacties en vind-ik-leuks bij reacties die YouTube al verkort heeft afgerond, bijvoorbeeld 14K in plaats van 14.000. Exacte aantallen worden altijd volledig weergegeven.
+    Blocked Items: Verbergen verwijdert video’s, afspeellijsten en kanalen die overeenkomen met de lijsten hieronder. Vervagen toont ze vervaagd totdat je ze onthult. Tonen negeert de lijsten.
   Subscription Settings:
     Refresh These Feeds Together: "Wanneer je een van de aangevinkte feeds vernieuwt, worden de andere aangevinkte feeds direct daarna vernieuwd. Automatische vernieuwingen volgen nog steeds het eigen interval van elke feed."
     Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
@@ -2623,13 +2621,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Klikken op het pictogram van een tabblad met een afspelende of gepauzeerde video pauzeert of hervat deze zonder naar dat tabblad te wisselen.
     Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden, ook als ze Ongedaan maken aanbieden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen die om een beslissing vragen, zoals updateverzoeken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
     Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
+    Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte. Automatisch past de breedte van elk tabblad aan de titel aan.
     Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     UI Density: "Wijzigt de witruimte in lijsten, menu’s, de zijbalk en Instellingen."
     Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.
     Scroll Speed: Wijzigt hoe ver muiswiel- en touchpadbewegingen scrollen.
-    Use Fixed Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte in plaats van de breedte aan de titel aan te passen.
     Use Custom Title Bar: Vervangt de titelbalk van het systeem door de tabbladbalk, of door de bovenste navigatie als de tabbladen niet bovenaan staan, om verticale ruimte te besparen. De vensterknoppen verschijnen in de hoek van die balk.
     Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
     Modal Backdrop: "Bepaalt hoe de app er achter dialoogvensters en menu’s uitziet. Vervagen kan traag zijn op minder krachtige apparaten."

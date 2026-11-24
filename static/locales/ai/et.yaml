@@ -74,6 +74,8 @@ Global:
   Loading More: Laaditakse juurde
   New: Uus
   Show Blocked Item: Näita blokeeritud üksust
+  Auto: Automaatne
+  'Off': Väljas
 Search Listing:
   Label:
     Members Only: Ainult liikmetele
@@ -568,7 +570,6 @@ Settings:
     Date Format: Kuupäevavorming
     Time Format: Kellaajavorming
     Language Default: Keele vaikeseade
-    Update Relative Timestamps: Hoia suhtelised ajatemplid ajakohasena
     Stream Extraction Method:
       Stream Extraction Method: Voo eraldamise meetod
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Laaditi {count} puuduv vahekaardiikoon | Laaditi {count} puuduvat vahekaardiikooni'
     Loaded Tab Icons With Failures: Laaditi {loaded} vahekaardiikooni; {failed} ikooni laadimine nurjus
     Show Tab Previews: Kuva vahekaartide eelvaated
-    Use Fixed Tab Width: Kasuta rõhtrežiimis vahekaartide kindlat laiust
     Use Custom Title Bar: Kasuta kohandatud tiitliriba
     Tab Width: Vahekaardi laius
     Vertical Tab Height: Vertikaalsete vahekaartide kõrgus
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Segmentide paralleelne laadimine
     Rotate Wide Videos to Landscape in Fullscreen: 'Pööra laiad videod täisekraanil rõhtpaigutusse'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Täisekraanile minemiseks või sealt väljumiseks nipsa üles või alla'
-    Preload Upcoming Videos: "Järgmiste videote eellaadimine"
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
-    Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
     Keep Status Bar Hidden in Fullscreen: "Hoia olekuriba täisekraanil peidus"
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Peida vaadatud videod otsingus ja soovitustes"
     Hide Full Screen Video Title: Peida video pealkiri täisaknas või täisekraanil
+    Blocked Items:
+      Blocked Items: Blokeeritud üksused
+      Hide: Peida
+      Blur: Hägusta
+      Show: Näita
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
       Break Reminder Action: "Kui on pausi aeg"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Vaigista uute üleslaadimiste teavitused magamaminekuajal"
       Stop Autoplay at Bedtime and After the Daily Limit: "Peata automaatne esitus magamaminekuajal ja pärast päevalimiiti"
     Hide Popularity Graph: "Peida populaarsuse graafik"
-    Enable Block Lists: "Luba blokeerimisloendid"
     AI Video Summaries: Tehisintellekti loodud videokokkuvõtted
     Hide: Peida
     Collapsed: Ahendatud
@@ -1407,7 +1409,6 @@ Settings:
     Hide Channel Avatars: Peida kanalite avatarid
     Shorten View Counts: Lühenda vaatamiste, kommentaaride ja kommentaaride meeldimiste arvu
     Hide Live Chat Replay: Peida otsevestluse kordus
-    Hide Home: Peida avaleht
     Disable A-B Repeat: Lülita A-B-kordus välja
     Hide End-Screen Annotations: Peida lõpuekraani märkused
     Hide End-Screen Recommendations: "Peida lõpuekraani soovitused"
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Kuva video pealkiri
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
-    Blur Blocked Items: Hägusta blokeeritud üksused nende peitmise asemel
   Data Settings:
     Backup separate profile data: "See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse sellesse profiili. | See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse neisse profiilidesse."
     Subscription cache file: "See fail puhverdab ainult sinu tellimuste videoid, mitte kanaleid. Vali selle asemel profiles.db või tellimuste eksport."
@@ -2450,7 +2450,6 @@ Tooltips:
     Enable Tabs: "Praegune leht jääb avatuks. Muud kaardid säilitatakse rakenduse taaskäivitamiseni; nende taastamiseks luba kaardid uuesti."
     Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
     Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.
-    Update Relative Timestamps: Uuendab suhtelisi ajamärke kogu rakenduses, kuni leht on avatud. Kui see on välja lülitatud, uuendatakse neid alles pärast lehe uuesti laadimist või sellele naasmist.
     Stream Extraction Method: |
       Vali, kuidas OpenTubeX videovooge hangib. Valimise korral peab yt-dlp olema saadaval.
       yt-dlp kasutamisel võib videote käivitumine kauem aega võtta.
@@ -2499,9 +2498,7 @@ Tooltips:
       Suuremad väärtused võivad aidata aeglase või ebastabiilse ühenduse korral, kuid kasutavad rohkem ribalaiust ja mälu.
       Samuti võivad need panna automaatvaliku ühenduse kiirust alahindama ja madalamat kvaliteeti valima.
       Vood, mida saab laadida ainult ühe päringu kaupa, eiravad seda seadet.
-    Preload Upcoming Videos: "Hangib ja salvestab järgmiste videote yt-dlp voogedastusaadressid vahemällu. Järjekord on esitusloenditest ja soovitustest tähtsam."
-    Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
-    Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
+    Upcoming Videos to Preload: "Hangib ja salvestab vahemällu yt-dlp voogedastusaadressid kuni nii paljudele videotele, mida saab järgmisena esitada. Vaatamisjärjekord on esitusloenditest ja soovitustest tähtsam."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
     Keep Status Bar Hidden in Fullscreen: "Näita olekuriba ainult siis, kui pühid ekraani servast, ja peida see hetke pärast uuesti. Mängijale toksamine seda enam ei näita."
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
@@ -2538,6 +2535,7 @@ Tooltips:
     Take a Break Reminder: "Peatab video pärast nii pikka vaatamist. Vähemalt 10-minutiline paus alustab loendust uuesti."
     Bedtime Reminder: "Peatab video ja tuletab sulle algus- ja lõpuaja vahel meelde, et vaatamine lõpetada."
     Shorten View Counts: Kuvab YouTube'i juba ümardatud vaatamiste arvu, kommentaaride arvu ja kommentaaride meeldimiste arvu lühendatud kujul, näiteks 14 000 asemel 14 tuh. Täpsed arvud kuvatakse alati täielikult.
+    Blocked Items: Peida eemaldab videod, esitusloendid ja kanalid, mis vastavad allolevatele loenditele. Hägusta näitab neid hägusana, kuni sa need avad. Näita eirab loendeid.
   Subscription Settings:
     Refresh These Feeds Together: "Kui värskendad üht märgitud voogu, värskendatakse teisi märgitud vooge kohe pärast seda. Automaatsed värskendused järgivad endiselt iga voo enda intervalli."
     Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
@@ -2558,13 +2556,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Klõps esitatava või peatatud videoga vahekaardi ikoonil peatab või jätkab video, ilma et vahekaardile lülitutaks.
     Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust, sealhulgas need, mis pakuvad valikut Võta tagasi. Vead, hoiatused, teie seadistatud meeldetuletused ja otsust nõudvad teavitused, nagu värskendusviibad, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
+    Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele sama laiuse. Automaatne sobitab iga vahelehe laiuse selle pealkirjaga.
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     UI Density: "Muudab vahesid loendites, menüüdes, külgribal ja seadetes."
     Show Progress as Notification: Kuvab üldise edenemisriba asemel taustatoimingute, näiteks tellimuste värskendamise ja hallatavate tööriistade allalaadimise, reaalajas edenemisega püsiva teavituse.
     Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.
     Scroll Speed: Muudab hiireratta ja puuteplaadi kerimisliigutuste vahemaad.
-    Use Fixed Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele pealkirjast sõltumata sama laiuse.
     Use Custom Title Bar: Asendab süsteemi tiitliriba vahekaardiribaga või ülemise navigeerimisega, kui vahekaardid pole üleval, et säästa vertikaalset ruumi. Akna juhtnupud kuvatakse selle riba nurgas.
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
     Modal Backdrop: "Määrab, kuidas rakendus dialoogide ja menüüde taga välja näeb. Hägustamine võib vähem võimsatel seadmetel aeglane olla."

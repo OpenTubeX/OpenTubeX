@@ -786,15 +786,16 @@ test.describe('customizable quick settings', () => {
   test.describe('block lists', () => {
     const channelsHidden = JSON.stringify([{ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Example channel', icon: 'data:image/svg+xml;base64,PHN2Zy8+' }])
     const forbiddenTitles = JSON.stringify(['spoiler'])
-    test.use({ seed: { settings: { channelsHidden, forbiddenTitles, quickSettings: ['enableBlockLists'] } } })
+    test.use({ seed: { settings: { channelsHidden, forbiddenTitles, quickSettings: ['blockedItemsMode'] } } })
 
-    test('toggles both lists without removing their entries and persists the choice', async ({ app, page }) => {
+    test('turns both lists off without removing their entries and persists the choice', async ({ app, page }) => {
       await page.locator('.profileTrigger').click()
       const menu = page.getByRole('dialog', { name: 'Quick settings' })
-      const toggle = menu.getByRole('checkbox', { name: 'Enable block lists' })
-      await expect(toggle).toBeChecked()
-      await menu.locator('label.switch-label').filter({ hasText: 'Enable block lists' }).click()
-      await expect(toggle).not.toBeChecked()
+      const select = menu.getByRole('combobox', { name: 'Blocked Items' })
+      await expect(select).toHaveText('Hide')
+      await select.click()
+      await page.getByRole('option', { name: 'Show', exact: true }).click()
+      await expect(select).toHaveText('Show')
 
       await expect.poll(() => page.evaluate(() => {
         const getters = window.$store.getters
@@ -803,20 +804,21 @@ test.describe('customizable quick settings', () => {
 
       await menu.getByRole('button', { name: 'All Settings' }).click()
       const distraction = await goToSettingsSection(page, 'distraction')
-      await expect(distraction.getByRole('checkbox', { name: 'Enable block lists' })).not.toBeChecked()
+      await expect(distraction.getByRole('combobox', { name: 'Blocked Items' })).toHaveText('Show')
       await expect(distraction.getByText('Example channel')).toBeVisible()
       await expect(distraction.getByText('spoiler')).toBeVisible()
 
       await expect.poll(async () => {
         const saved = latestSettings(readDatastore(app.userDataDir, 'settings'))
-        return [saved.enableBlockLists, saved.channelsHidden, saved.forbiddenTitles]
-      }).toEqual([false, channelsHidden, forbiddenTitles])
+        return [saved.blockedItemsMode, saved.channelsHidden, saved.forbiddenTitles]
+      }).toEqual(['show', channelsHidden, forbiddenTitles])
 
       ;({ page } = await app.relaunch())
       await page.locator('.profileTrigger').click()
-      const reopenedToggle = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('checkbox', { name: 'Enable block lists' })
-      await expect(reopenedToggle).not.toBeChecked()
-      await page.getByRole('dialog', { name: 'Quick settings' }).locator('label.switch-label').filter({ hasText: 'Enable block lists' }).click()
+      const reopened = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('combobox', { name: 'Blocked Items' })
+      await expect(reopened).toHaveText('Show')
+      await reopened.click()
+      await page.getByRole('option', { name: 'Hide', exact: true }).click()
       await expect.poll(() => page.evaluate(() => {
         const getters = window.$store.getters
         return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]

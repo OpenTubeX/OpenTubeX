@@ -133,6 +133,8 @@ Global:
   New: New
   Sort By: Sort By
   Show Blocked Item: Show blocked item
+  Auto: Auto
+  Off: 'Off'
   Counts:
     Video Count: 1 video | {count} videos
     Channel Count: 1 channel | {count} channels
@@ -872,7 +874,6 @@ Settings:
       Automatic: Automatic
       Phone: Phone
       Tablet: Tablet
-    Update Relative Timestamps: Keep relative timestamps updated
     Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
     Stream Extraction Method:
       Stream Extraction Method: Stream extraction method
@@ -1073,7 +1074,6 @@ Settings:
     Show Tab Previews: Show Tab Previews
     Toggle Playback With Tab Icon: Play and Pause With the Tab Icon
     Show New Tab Button Next to Tabs: Show New Tab Button Next to Tabs
-    Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width
     Vertical Tab Height: Vertical Tab Height
@@ -1498,9 +1498,7 @@ Settings:
     Loop Shorts: Loop Shorts
     Next Video Interval: Autoplay Countdown Timer
     Autoplay Interruption Timer: Autoplay Interruption Timer
-    Preload Upcoming Videos: Preload Upcoming Videos
     Upcoming Videos to Preload: Upcoming Videos to Preload
-    Concurrent Preloads: Concurrent Preloads
     Ask Before Preloading Large Playlists: Ask Before Preloading Large Playlists
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
     Default Volume: Default Volume
@@ -1977,9 +1975,6 @@ Settings:
     Hide Channel Subscribers: Hide Channel Subscribers
     Hide Comment Likes: Hide Comment Likes
     Hide Recommended Videos: Hide Recommended Videos
-    Hide Home: Hide Home
-    Hide Trending Videos: Hide Trending Videos
-    Hide Popular Videos: Hide Popular Videos
     Hide Playlists: Hide Playlists
     Hide Playlist Stats: Hide Playlist Stats
     Hide Recommendation Details: Hide Recommendation Reasons and Feedback
@@ -2001,9 +1996,12 @@ Settings:
     Hide End-Screen Recommendations: Hide End-Screen Recommendations
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Hide Full Screen Video Title: Hide Video Title in Full Window / Full Screen
+    Blocked Items:
+      Blocked Items: Blocked Items
+      Hide: Hide
+      Blur: Blur
+      Show: Show
     Hide Channels: Hide Videos From Channels
-    Enable Block Lists: Enable block lists
-    Blur Blocked Items: Blur blocked items instead of hiding them
     Hide Channels Disabled Message: Some channels were blocked using ID and weren't processed. Feature is blocked while those IDs are updating
     Hide Channels Placeholder: Channel ID
     Hide Channels Invalid: Channel ID provided was invalid
@@ -3526,7 +3524,6 @@ Tooltips:
     Title Lines: Shortens video and playlist titles in lists and grids to the chosen number of lines with an ellipsis, for more uniform cards. Hover over a title to see it in full.
     Ignore System Haptics Setting: Vibrate on long presses and gestures even when touch feedback is turned off in Android's settings.
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
-    Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Automatically switch stream extraction methods: Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails.
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
@@ -3615,9 +3612,7 @@ Tooltips:
       Higher values may help on slow or unstable connections, but use more bandwidth and memory.
       They may also make Auto underestimate the connection speed and select a lower quality.
       Streams limited to one request at a time ignore this setting.
-    Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
-    Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
-    Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
+    Upcoming Videos to Preload: Fetches and caches yt-dlp stream URLs for up to this many videos that can play next. The watch queue takes priority over playlists and recommendations.
     Ask Before Preloading Large Playlists: Asks for confirmation before preloading all videos of a playlist with more than {count} videos.
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
     Keep Status Bar Hidden in Fullscreen: Show the status bar only when you swipe from the screen edge, and hide it again after a moment. Tapping the player no longer shows it.
@@ -3668,6 +3663,7 @@ Tooltips:
     Take a Break Reminder: "Pauses the video after this much watching. A pause of 10 minutes or more starts the count again."
     Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
+    Blocked Items: "Hide removes videos, playlists and channels that match the lists below. Blur shows them blurred until you reveal them. Show ignores the lists."
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
     Hide Subscriptions Live: 'This setting is overridden by the app-wide "{appWideSetting}" setting, in the "{subsection}" section of the "{settingsSection}"'
@@ -3704,7 +3700,7 @@ Tooltips:
     Click Scrollbar Track to Scroll: Clicking a scrollbar outside its handle scrolls about one page toward the click. While this is on, a visible scrollbar catches clicks meant for items under it. The tab bar's scrollbar always works this way.
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Visible Search Suggestions: Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window.
-    Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Tab Width: Gives every tab in the horizontal tab bar the same width. Auto sizes each tab to its title.
     Toggle Playback With Tab Icon: Clicking the icon of a tab with a playing or paused video pauses or resumes it without switching to that tab.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.

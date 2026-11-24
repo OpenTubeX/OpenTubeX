@@ -60,7 +60,7 @@ const SETTING_PERFORMANCE_IMPACTS = new Map([
   // yt-dlp starts an extraction process for every video
   ['videoPlaybackEngine', { level: 'moderate', resources: ['CPU'] }],
   // runs a yt-dlp extraction for each upcoming video
-  ['ytDlpPreloadEnabled', { level: 'moderate', resources: ['CPU', 'Network'] }],
+  ['ytDlpPreloadCount', { level: 'moderate', resources: ['CPU', 'Network'] }],
   // segments are downloaded ahead of playback and kept around until they are needed
   ['segmentPrefetchLimit', { level: 'moderate', resources: ['Network', 'Memory'] }],
   ['bufferAhead', { level: 'moderate', resources: ['Network', 'Memory'] }],
