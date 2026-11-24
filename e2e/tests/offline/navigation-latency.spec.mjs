@@ -264,16 +264,12 @@ test.describe('opening a list', () => {
     // Desktop windows size lists by the space beside the side bar.
     { name: 'in a desktop window', size: { width: 1920, height: 1080 }, from: 'userplaylists', to: 'history', rowKey: 'video-firstscreen', firstRow: 'First screen video 0' },
     // Playlist cards are shorter than the row shells, so more rows fit. Their
-    // component loads on the first visit, which renders no cards at first.
-    { name: 'of playlists in a tall window', size: { width: 412, height: 1400 }, from: 'history', to: 'userplaylists', rowKey: 'playlist-firstscreenlist', firstRow: 'Short list 0', loadCards: true }
+    // component loads lazily, with the page on its first visit.
+    { name: 'of playlists in a tall window', size: { width: 412, height: 1400 }, from: 'history', to: 'userplaylists', rowKey: 'playlist-firstscreenlist', firstRow: 'Short list 0' }
   ]
-  for (const { name, size, from, to, rowKey, firstRow, loadCards = false } of cases) {
+  for (const { name, size, from, to, rowKey, firstRow } of cases) {
     test(`mounts the rows on screen in the first frame and no rows windowing unmounts again ${name}`, { tag: '@performance' }, async ({ page }) => {
       await page.setViewportSize(size)
-      if (loadCards) {
-        await goTo(page, to)
-        await expect(page.getByText(firstRow, { exact: true })).toBeVisible()
-      }
       await goTo(page, from)
       await page.evaluate((rowKey) => {
         const rowSelector = `[data-feed-item-key^="${rowKey}"]`

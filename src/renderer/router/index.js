@@ -48,7 +48,15 @@ const Home = createAsyncRoute(() => import('../views/Home/Home.vue'))
 const SubscribedChannels = createAsyncRoute(() => import('../views/SubscribedChannels/SubscribedChannels.vue'))
 const Trending = createAsyncRoute(() => import('../views/Trending/Trending.vue'))
 const Popular = createAsyncRoute(() => import('../views/Popular/Popular.vue'))
-const UserPlaylists = createAsyncRoute(() => import('../views/UserPlaylists/UserPlaylists.vue'))
+// Your Playlists only shows playlist cards, which load lazily as well. Loading
+// them with the view renders them in its first frame instead of a frame after
+// their own request. The view still opens if they fail; its cards retry then.
+const UserPlaylists = createAsyncRoute(() => Promise.all([
+  import('../views/UserPlaylists/UserPlaylists.vue'),
+  import('../components/FtListLazyWrapper/lazyListComponents')
+    .then(({ FtListPlaylist }) => FtListPlaylist.__asyncLoader())
+    .catch(() => {})
+]).then(([view]) => view))
 const History = createAsyncRoute(() => import('../views/History/History.vue'))
 const SearchPage = createAsyncRoute(() => import('../views/SearchPage/SearchPage.vue'))
 const Playlist = createAsyncRoute(() => import('../views/Playlist/Playlist.vue'))
