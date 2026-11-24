@@ -360,8 +360,11 @@ Settings:
       Last active tab: "Ostatnio aktywna karta"
       Next tab in tab order: "Następna karta w kolejności kart"
       Previous tab in tab order: "Poprzednia karta w kolejności kart"
-    Use tray icon: "Używaj ikony w zasobniku"
-    Close to system tray: "Zamykaj do zasobnika systemowego"
+    System Tray:
+      System Tray: "Zasobnik systemowy"
+      Show Icon: "Pokazuj ikonę"
+      Close to Tray: "Zamykaj do zasobnika"
+      Minimize to Tray: "Minimalizuj do zasobnika"
     Tray required for background refresh: "Ikona w zasobniku jest wymagana, gdy odświeżanie subskrypcji w tle jest włączone."
     Show Video Menu Button: Pokaż przycisk menu filmu
     Swipe to refresh: Przeciągnij, aby odświeżyć

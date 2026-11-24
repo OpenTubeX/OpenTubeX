@@ -552,8 +552,11 @@ Settings:
       Right: Jobbra húzás a bélyegképeken
       Description: Húzza vízszintesen a videó bélyegképét, majd engedje el a kiválasztott művelet végrehajtásához.
     Data Saver Thumbnails: "Adattakarékos bélyegképek"
-    Use tray icon: "Rendszertálcaikon használata"
-    Close to system tray: "Bezárás a rendszertálcára"
+    System Tray:
+      System Tray: "Rendszertálca"
+      Show Icon: "Ikon megjelenítése"
+      Close to Tray: "Bezárás a rendszertálcára"
+      Minimize to Tray: "Kicsinyítés a rendszertálcára"
     Tray required for background refresh: "A rendszertálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
     Show Video Menu Button: Videómenü gombjának megjelenítése
     Swipe to refresh: Frissítés húzással

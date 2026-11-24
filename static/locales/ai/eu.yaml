@@ -552,8 +552,11 @@ Settings:
       Right: Irudi txikietan eskuinera irristatu
       Description: Irristatu horizontalki bideo baten irudi txikian eta askatu hautatutako ekintza egiteko.
     Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
-    Use tray icon: "Erabili sistemaren erretiluko ikonoa"
-    Close to system tray: "Itxi sistemaren erretilura"
+    System Tray:
+      System Tray: "Sistemaren erretilua"
+      Show Icon: "Erakutsi ikonoa"
+      Close to Tray: "Itxi erretilura"
+      Minimize to Tray: "Minimizatu erretilura"
     Tray required for background refresh: "Sistemaren erretiluko ikonoa beharrezkoa da harpidetzak atzeko planoan eguneratzea gaituta dagoen bitartean."
     Show Video Menu Button: Erakutsi bideo-menuaren botoia
     Swipe to refresh: Irristatu freskatzeko

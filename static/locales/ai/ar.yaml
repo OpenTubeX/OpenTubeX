@@ -557,8 +557,11 @@ Settings:
       Right: السحب لليمين على الصور المصغرة
       Description: اسحب صورة الفيديو المصغرة أفقيًا ثم ارفع إصبعك لتنفيذ الإجراء المحدد.
     Data Saver Thumbnails: "صور مصغرة موفرة للبيانات"
-    Use tray icon: "استخدام أيقونة علبة النظام"
-    Close to system tray: "الإغلاق إلى علبة النظام"
+    System Tray:
+      System Tray: "علبة النظام"
+      Show Icon: "إظهار الأيقونة"
+      Close to Tray: "الإغلاق إلى علبة النظام"
+      Minimize to Tray: "التصغير إلى علبة النظام"
     Tray required for background refresh: "أيقونة علبة النظام مطلوبة أثناء تفعيل تحديث الاشتراكات في الخلفية."
     Show Video Menu Button: إظهار زر قائمة الفيديو
     Swipe to refresh: اسحب للتحديث

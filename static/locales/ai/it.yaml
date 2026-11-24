@@ -552,8 +552,11 @@ Settings:
       Right: Scorri a destra sulle miniature
       Description: Scorri orizzontalmente sulla miniatura di un video e rilascia per eseguire l'azione selezionata.
     Data Saver Thumbnails: "Miniature per il risparmio dati"
-    Use tray icon: "Usa l’icona nell’area di notifica"
-    Close to system tray: "Chiudi nell’area di notifica"
+    System Tray:
+      System Tray: "Area di notifica"
+      Show Icon: "Mostra l’icona"
+      Close to Tray: "Chiudi nell’area di notifica"
+      Minimize to Tray: "Riduci nell’area di notifica"
     Tray required for background refresh: "L’icona nell’area di notifica è necessaria quando l’aggiornamento degli abbonamenti in background è attivo."
     Show Video Menu Button: Mostra il pulsante del menu video
     Swipe to refresh: Scorri per aggiornare

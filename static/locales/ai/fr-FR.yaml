@@ -552,8 +552,11 @@ Settings:
       Right: Balayer à droite sur les miniatures
       Description: Balayez horizontalement une miniature de vidéo et relâchez pour effectuer l'action sélectionnée.
     Data Saver Thumbnails: "Miniatures économes en données"
-    Use tray icon: "Utiliser l’icône de notification"
-    Close to system tray: "Fermer dans la zone de notification"
+    System Tray:
+      System Tray: "Zone de notification"
+      Show Icon: "Afficher l’icône"
+      Close to Tray: "Fermer dans la zone de notification"
+      Minimize to Tray: "Réduire dans la zone de notification"
     Tray required for background refresh: "L’icône de notification est nécessaire lorsque l’actualisation des abonnements en arrière-plan est activée."
     Show Video Menu Button: Afficher le bouton du menu vidéo
     Swipe to refresh: Balayer pour actualiser

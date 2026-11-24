@@ -563,8 +563,11 @@ Settings:
       Right: Stryg til højre på miniaturebilleder
       Description: Stryg vandret på et videos miniaturebillede, og slip for at udføre den valgte handling.
     Data Saver Thumbnails: "Databesparende miniaturebilleder"
-    Use tray icon: "Brug ikon i systembakken"
-    Close to system tray: "Luk til systembakken"
+    System Tray:
+      System Tray: "Systembakke"
+      Show Icon: "Vis ikon"
+      Close to Tray: "Luk til systembakken"
+      Minimize to Tray: "Minimér til systembakken"
     Tray required for background refresh: "Ikonet i systembakken er påkrævet, mens opdatering af abonnementer i baggrunden er aktiveret."
     Show Video Menu Button: Vis videomenuknap
     Swipe to refresh: Stryg for at opdatere
@@ -594,7 +597,6 @@ Settings:
       Loading Tabs: Flere faner indlæses
       Unloading Tabs: Flere faner frigøres
       Refreshing All Feeds: Mange abonnementer opdateres
-    Minimize to system tray: Minimér til statusfeltet
     Remember Tab Navigation History: Husk navigationshistorik for faner
     New Tab Position:
       New Tab Position: Placering af ny fane

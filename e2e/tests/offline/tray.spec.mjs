@@ -32,31 +32,51 @@ async function trayClick(app) {
   await app.electronApp.evaluate(() => globalThis.testTray.emit('click'))
 }
 
-test('tray settings default independently and background refresh forces the tray', async ({ app, page }) => {
+test('the system tray menu keeps hiding windows tied to its icon and background refresh forces the icon', async ({ app, page }) => {
   await captureTray(app, page)
   const general = await goToSettingsSection(page, 'general')
-  const useTray = general.getByRole('checkbox', { name: /^Use tray icon/ })
-  const closeToTray = general.getByRole('checkbox', { name: /^Close to system tray/ })
-  const minimizeToTray = general.getByRole('checkbox', { name: /Minimi[sz]e to system tray/ })
-  await expect(useTray).toBeChecked()
-  await expect(general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })).toHaveCount(0)
-  await expect(closeToTray).not.toBeChecked()
-  await expect(minimizeToTray).not.toBeChecked()
-  await setting(page, 'updateUseTrayIcon', false)
-  await expect(useTray).not.toBeChecked()
-  await expect(closeToTray).toBeDisabled()
-  await expect(minimizeToTray).toBeDisabled()
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())).toBe(true)
+  const tray = general.getByRole('combobox', { name: 'System tray' })
+  const option = name => page.getByRole('option', { name, exact: true })
+  const traySettings = () => page.evaluate(() => {
+    const { getters } = window.$store
+    return [getters.getUseTrayIcon, getters.getHideToTrayOnClose, getters.getHideToTrayOnMinimize]
+  })
+  const trayDestroyed = () => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())
+  const requiredTooltip = general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })
+
+  await tray.click()
+  await expect(requiredTooltip).toHaveCount(0)
+
+  // Turning the icon off stops hiding windows to the tray.
+  await option('Close to tray').click()
+  await expect.poll(traySettings).toEqual([true, true, false])
+  await option('Show icon').click()
+  await expect.poll(traySettings).toEqual([false, false, false])
+  await expect(option('Close to tray')).toHaveAttribute('aria-selected', 'false')
+  await expect.poll(trayDestroyed).toBe(true)
+
+  // Hiding windows to the tray turns the icon back on.
+  await option('Minimize to tray').click()
+  await expect.poll(traySettings).toEqual([true, false, true])
+  await expect(option('Show icon')).toHaveAttribute('aria-selected', 'true')
+  await expect.poll(trayDestroyed).toBe(false)
+  await option('Show icon').click()
+  await expect.poll(traySettings).toEqual([false, false, false])
+  await page.keyboard.press('Escape')
+
   await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
-  await expect(useTray).toBeChecked()
-  await expect(useTray).toBeDisabled()
-  await expect(general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })).toBeVisible()
-  await expect(closeToTray).toBeEnabled()
-  await expect.poll(() => app.electronApp.evaluate(() => !globalThis.testTray.isDestroyed())).toBe(true)
+  await expect(requiredTooltip).toBeVisible()
+  await expect.poll(trayDestroyed).toBe(false)
+  await tray.click()
+  await expect(option('Show icon')).toHaveAttribute('aria-selected', 'true')
+  await option('Show icon').click()
+  await expect(option('Show icon')).toHaveAttribute('aria-selected', 'true')
+  await expect.poll(traySettings).toEqual([false, false, false])
+  await page.keyboard.press('Escape')
+
   await setting(page, 'updateEnableClosedAppSubscriptionRefresh', false)
-  await expect(useTray).not.toBeChecked()
-  await expect(useTray).toBeEnabled()
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())).toBe(true)
+  await expect(requiredTooltip).toHaveCount(0)
+  await expect.poll(trayDestroyed).toBe(true)
 })
 
 test('left click toggles the window and disabling the tray restores it', async ({ app, page }) => {

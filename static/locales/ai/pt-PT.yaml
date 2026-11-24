@@ -509,8 +509,11 @@ Settings:
       Right: Deslizar para a direita nas miniaturas
       Description: Deslize horizontalmente sobre a miniatura de um vídeo e solte para executar a ação selecionada.
     Data Saver Thumbnails: "Miniaturas com poupança de dados"
-    Use tray icon: "Usar ícone na área de notificação"
-    Close to system tray: "Fechar para a área de notificação"
+    System Tray:
+      System Tray: "Área de notificação"
+      Show Icon: "Mostrar ícone"
+      Close to Tray: "Fechar para a área de notificação"
+      Minimize to Tray: "Minimizar para a área de notificação"
     Tray required for background refresh: "O ícone na área de notificação é necessário enquanto a atualização de subscrições em segundo plano estiver ativada."
     Show Video Menu Button: Mostrar botão do menu do vídeo
     Swipe to refresh: Deslizar para atualizar

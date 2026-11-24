@@ -591,8 +591,11 @@ Settings:
       Right: Ŝovi dekstren sur bildetoj
       Description: Ŝovu bildeton de videaĵo horizontale kaj malpremu por plenumi la elektitan agon.
     Data Saver Thumbnails: Datumŝparaj bildetoj
-    Use tray icon: Uzi taskopletan piktogramon
-    Close to system tray: Fermi al la taskopleto
+    System Tray:
+      System Tray: "Taskopleto"
+      Show Icon: "Montri piktogramon"
+      Close to Tray: "Fermi al la taskopleto"
+      Minimize to Tray: "Minimumigi al la taskopleto"
     Tray required for background refresh: La taskopleta piktogramo necesas dum la fona aktualigo de abonoj estas ŝaltita.
     Show Video Menu Button: Montri butonon de videaĵa menuo
     Swipe to refresh: Ŝovi por aktualigi

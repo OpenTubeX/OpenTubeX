@@ -557,8 +557,11 @@ Settings:
       Right: Naar rechts vegen op miniaturen
       Description: Veeg horizontaal over een videominiatuur en laat los om de geselecteerde actie uit te voeren.
     Data Saver Thumbnails: "Databesparende miniaturen"
-    Use tray icon: "Systeemvakpictogram gebruiken"
-    Close to system tray: "Sluiten naar systeemvak"
+    System Tray:
+      System Tray: "Systeemvak"
+      Show Icon: "Pictogram tonen"
+      Close to Tray: "Sluiten naar systeemvak"
+      Minimize to Tray: "Minimaliseren naar systeemvak"
     Tray required for background refresh: "Het systeemvakpictogram is vereist zolang het vernieuwen van abonnementen op de achtergrond is ingeschakeld."
     Show Video Menu Button: Videomenuknop tonen
     Swipe to refresh: Vegen om te vernieuwen

@@ -552,8 +552,11 @@ Settings:
       Right: Strjúka til hægri á smámyndum
       Description: Strjúktu lárétt yfir smámynd myndskeiðs og slepptu til að framkvæma valda aðgerð.
     Data Saver Thumbnails: "Gagnasparandi smámyndir"
-    Use tray icon: "Nota tákn í kerfisbakka"
-    Close to system tray: "Loka í kerfisbakka"
+    System Tray:
+      System Tray: "Kerfisbakki"
+      Show Icon: "Sýna tákn"
+      Close to Tray: "Loka í kerfisbakka"
+      Minimize to Tray: "Lágmarka í kerfisbakka"
     Tray required for background refresh: "Tákn í kerfisbakka er nauðsynlegt meðan uppfærsla áskrifta í bakgrunni er virk."
     Show Video Menu Button: Sýna myndskeiðsvalmyndarhnapp
     Swipe to refresh: Strjúktu til að endurhlaða

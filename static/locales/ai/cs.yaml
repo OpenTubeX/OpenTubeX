@@ -552,8 +552,11 @@ Settings:
       Right: Přejetí doprava po náhledech
       Description: Přejeďte vodorovně po náhledu videa a uvolněním proveďte vybranou akci.
     Data Saver Thumbnails: "Úsporné náhledy"
-    Use tray icon: "Používat ikonu v oznamovací oblasti"
-    Close to system tray: "Při zavření skrýt do oznamovací oblasti"
+    System Tray:
+      System Tray: "Oznamovací oblast"
+      Show Icon: "Zobrazit ikonu"
+      Close to Tray: "Při zavření skrýt do oznamovací oblasti"
+      Minimize to Tray: "Minimalizovat do oznamovací oblasti"
     Tray required for background refresh: "Ikona v oznamovací oblasti je nutná, pokud je zapnutá aktualizace odběrů na pozadí."
     Show Video Menu Button: Zobrazit tlačítko nabídky videa
     Swipe to refresh: Obnovit potažením

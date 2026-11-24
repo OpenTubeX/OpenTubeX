@@ -605,8 +605,11 @@ Settings:
       Right: تھمب نیلز پر دائیں سوائپ
       Description: منتخب کردہ ایکشن انجام دینے کے لیے ویڈیو تھمب نیل کو افقی طور پر سوائپ کر کے چھوڑ دیں۔
     Data Saver Thumbnails: ڈیٹا بچانے والے تھمب نیلز
-    Use tray icon: ٹرے آئیکن استعمال کریں
-    Close to system tray: بند کرنے پر سسٹم ٹرے میں رکھیں
+    System Tray:
+      System Tray: "سسٹم ٹرے"
+      Show Icon: "آئیکن دکھائیں"
+      Close to Tray: "بند کرنے پر سسٹم ٹرے میں رکھیں"
+      Minimize to Tray: "سسٹم ٹرے میں چھوٹا کریں"
     Tray required for background refresh: پس منظر میں سبسکرپشن ریفریش فعال ہونے کے دوران ٹرے آئیکن ضروری ہے۔
     Show Video Menu Button: ویڈیو مینو بٹن دکھائیں
     Swipe to refresh: ریفریش کے لیے سوائپ کریں

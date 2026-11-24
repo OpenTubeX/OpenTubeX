@@ -679,8 +679,11 @@ Settings:
       Right: Podrsanje desno po sličicah
       Description: Podrsajte vodoravno po sličici videoposnetka in spustite za izvedbo izbranega dejanja.
     Data Saver Thumbnails: "Sličice za varčevanje s podatki"
-    Use tray icon: "Uporabi ikono v sistemski vrstici"
-    Close to system tray: "Zapri v sistemsko vrstico"
+    System Tray:
+      System Tray: "Sistemska vrstica"
+      Show Icon: "Prikaži ikono"
+      Close to Tray: "Zapri v sistemsko vrstico"
+      Minimize to Tray: "Pomanjšaj v sistemsko vrstico"
     Tray required for background refresh: "Ikona v sistemski vrstici je potrebna, dokler je omogočeno osveževanje naročnin v ozadju."
     Show Video Menu Button: Prikaži gumb menija videoposnetka
     Swipe to refresh: Povlecite za osvežitev
@@ -711,7 +714,6 @@ Settings:
       Unloading Tabs: sproščanjem več zavihkov
       Refreshing All Feeds: osveževanjem številnih naročnin
     Open Deep Links In New Window: Odpri URL-je, posredovane aplikaciji OpenTubeX, v novem oknu
-    Minimize to system tray: Pomanjšaj v sistemsko vrstico
     Remember Tab Navigation History: Zapomni si zgodovino krmarjenja po zavihkih
     Auto Load Next Page:
       Label: Samodejno naloži naslednjo stran

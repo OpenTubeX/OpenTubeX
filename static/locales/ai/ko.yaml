@@ -646,8 +646,11 @@ Settings:
       Right: 썸네일에서 오른쪽으로 스와이프
       Description: 동영상 썸네일을 가로로 스와이프한 후 손을 떼면 선택한 작업이 실행됩니다.
     Data Saver Thumbnails: "데이터 절약 썸네일"
-    Use tray icon: "트레이 아이콘 사용"
-    Close to system tray: "닫을 때 시스템 트레이로 보내기"
+    System Tray:
+      System Tray: "시스템 트레이"
+      Show Icon: "아이콘 표시"
+      Close to Tray: "닫을 때 트레이로 보내기"
+      Minimize to Tray: "최소화할 때 트레이로 보내기"
     Tray required for background refresh: "백그라운드 구독 새로고침이 활성화된 동안에는 트레이 아이콘이 필요합니다."
     Show Video Menu Button: 동영상 메뉴 버튼 표시
     Swipe to refresh: 스와이프하여 새로고침
@@ -678,7 +681,6 @@ Settings:
       Unloading Tabs: 여러 탭 언로드
       Refreshing All Feeds: 많은 구독 새로 고침
     Open Deep Links In New Window: OpenTubeX로 전달된 URL을 새 창에서 열기
-    Minimize to system tray: 시스템 트레이로 최소화
     Remember Tab Navigation History: 탭 탐색 기록 저장
     Auto Load Next Page:
       Label: 다음 페이지 자동 불러오기

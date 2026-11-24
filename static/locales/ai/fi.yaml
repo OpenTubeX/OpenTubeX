@@ -552,8 +552,11 @@ Settings:
       Right: Pyyhkäisy oikealle pikkukuvissa
       Description: Pyyhkäise videon pikkukuvaa vaakasuunnassa ja vapauta suorittaaksesi valitun toiminnon.
     Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
-    Use tray icon: "Käytä ilmoitusalueen kuvaketta"
-    Close to system tray: "Sulje ilmoitusalueelle"
+    System Tray:
+      System Tray: "Ilmoitusalue"
+      Show Icon: "Näytä kuvake"
+      Close to Tray: "Sulje ilmoitusalueelle"
+      Minimize to Tray: "Pienennä ilmoitusalueelle"
     Tray required for background refresh: "Ilmoitusalueen kuvake tarvitaan, kun tilausten päivitys taustalla on käytössä."
     Show Video Menu Button: Näytä videovalikon painike
     Swipe to refresh: Päivitä pyyhkäisemällä

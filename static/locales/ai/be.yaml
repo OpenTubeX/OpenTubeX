@@ -575,8 +575,11 @@ Settings:
       Right: Правесці ўправа па мініяцюрах
       Description: Правядзіце гарызантальна па мініяцюры відэа і адпусціце, каб выканаць выбраную дзею.
     Data Saver Thumbnails: "Эканомныя мініяцюры"
-    Use tray icon: "Выкарыстоўваць значок у трэі"
-    Close to system tray: "Згортваць у трэй пры закрыцці"
+    System Tray:
+      System Tray: "Сістэмны трэй"
+      Show Icon: "Паказваць значок"
+      Close to Tray: "Згортваць у трэй пры закрыцці"
+      Minimize to Tray: "Згортваць у трэй"
     Tray required for background refresh: "Значок у трэі неабходны, пакуль уключана фонавае абнаўленне падпісак."
     Show Video Menu Button: Паказваць кнопку меню відэа
     Swipe to refresh: Пацягніце, каб абнавіць
@@ -606,7 +609,6 @@ Settings:
       Loading Tabs: Загрузкай некалькіх укладак
       Unloading Tabs: Выгрузкай некалькіх укладак
       Refreshing All Feeds: Абнаўленнем мноства падпісак
-    Minimize to system tray: Згортваць у сістэмны латок
     Remember Tab Navigation History: Захоўваць гісторыю навігацыі па ўкладках
     New Tab Position:
       New Tab Position: Размяшчэнне новай укладкі

@@ -552,8 +552,11 @@ Settings:
       Right: Potiahnutie doprava po náhľadoch
       Description: Potiahnite vodorovne po náhľade videa a uvoľnením vykonajte vybranú akciu.
     Data Saver Thumbnails: "Úsporné náhľady"
-    Use tray icon: "Používať ikonu v systémovej lište"
-    Close to system tray: "Pri zatvorení skryť do systémovej lišty"
+    System Tray:
+      System Tray: "Systémová lišta"
+      Show Icon: "Zobraziť ikonu"
+      Close to Tray: "Pri zatvorení skryť do systémovej lišty"
+      Minimize to Tray: "Minimalizovať do systémovej lišty"
     Tray required for background refresh: "Ikona v systémovej lište je potrebná, kým je zapnutá aktualizácia odberov na pozadí."
     Show Video Menu Button: Zobraziť tlačidlo ponuky videa
     Swipe to refresh: Obnoviť potiahnutím

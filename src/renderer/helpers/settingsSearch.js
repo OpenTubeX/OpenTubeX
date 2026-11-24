@@ -191,9 +191,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh', 'Haptic Feedback', 'Ignore System Haptics Setting'].includes(group)) {
       return isCapacitor
     }
-    if (['Use tray icon', 'Close to system tray'].includes(group)) return usingElectron
-    if (group === 'Minimize to system tray') {
-      return usingElectron && supportsAutoPictureInPictureMinimize
+    if (group === 'System Tray') {
+      return usingElectron && (item !== 'Minimize to Tray' || supportsAutoPictureInPictureMinimize)
     }
     if (['New Tab Position', 'Tab Close Focus', 'Startup Behavior', 'Remember Tab Navigation History'].includes(group)) {
       return usingElectron || isCapacitor

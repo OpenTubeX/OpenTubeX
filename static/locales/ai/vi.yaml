@@ -552,8 +552,11 @@ Settings:
       Right: Vuốt sang phải trên hình thu nhỏ
       Description: Vuốt ngang trên hình thu nhỏ của video rồi thả tay để thực hiện thao tác đã chọn.
     Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
-    Use tray icon: "Sử dụng biểu tượng khay hệ thống"
-    Close to system tray: "Đóng vào khay hệ thống"
+    System Tray:
+      System Tray: "Khay hệ thống"
+      Show Icon: "Hiện biểu tượng"
+      Close to Tray: "Đóng vào khay hệ thống"
+      Minimize to Tray: "Thu nhỏ xuống khay hệ thống"
     Tray required for background refresh: "Biểu tượng khay hệ thống là bắt buộc khi bật làm mới kênh đăng ký trong nền."
     Show Video Menu Button: Hiện nút trình đơn video
     Swipe to refresh: Vuốt để làm mới

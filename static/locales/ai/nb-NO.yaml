@@ -552,8 +552,11 @@ Settings:
       Right: Sveip til høyre på miniatyrbilder
       Description: Sveip vannrett på et videominiatyrbilde og slipp for å utføre den valgte handlingen.
     Data Saver Thumbnails: "Databesparende miniatyrbilder"
-    Use tray icon: "Bruk ikon i systemstatusfeltet"
-    Close to system tray: "Lukk til systemstatusfeltet"
+    System Tray:
+      System Tray: "Systemstatusfelt"
+      Show Icon: "Vis ikon"
+      Close to Tray: "Lukk til systemstatusfeltet"
+      Minimize to Tray: "Minimer til systemstatusfeltet"
     Tray required for background refresh: "Ikonet i systemstatusfeltet kreves mens oppdatering av abonnementer i bakgrunnen er aktivert."
     Show Video Menu Button: Vis videomenyknapp
     Swipe to refresh: Sveip for å oppdatere
