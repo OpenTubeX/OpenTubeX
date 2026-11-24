@@ -127,7 +127,10 @@ export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) 
       // The view must follow the finger without a competing CSS transition.
       setStyle(element, 'transition', 'none')
       // Without this hint, Chromium paints the view again on every move.
-      setStyle(element, 'will-change', 'transform')
+      // Changing the hint repaints the view, so keep one that it already has.
+      if (!getComputedStyle(element).willChange.split(',').some(hint => hint.trim() === 'transform')) {
+        setStyle(element, 'will-change', 'transform')
+      }
       setStyle(element, 'box-shadow', slide.shadow)
       for (const [name, value] of Object.entries(target.styles ?? {})) setStyle(element, name, value)
       // A view moved aside must not widen its area.

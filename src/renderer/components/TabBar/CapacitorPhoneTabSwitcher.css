@@ -192,6 +192,11 @@
   padding-inline: 16px;
   overflow: hidden auto;
   overscroll-behavior: contain;
+
+  /* Back slides the history away from script. Promoting it only then
+     repaints it as the gesture starts and ends, which Android WebView can
+     draw before it is rastered again. Keep the overlay scrollbars' hint. */
+  will-change: scroll-position, transform;
 }
 
 .capacitorPhoneTabHistoryContent {
