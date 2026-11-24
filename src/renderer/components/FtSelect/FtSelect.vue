@@ -880,7 +880,8 @@ function handleButtonKeydown(event) {
     } else if (props.multiple) {
       openDropdown()
     } else {
-      selectOption(index)
+      const enabledIndex = enabledIndexFrom(index, event.key === 'Home' ? 1 : -1)
+      if (enabledIndex !== -1) selectOption(enabledIndex)
     }
     return
   }
@@ -958,8 +959,25 @@ function selectOffset(offset) {
     openDropdown()
     return
   }
-  const index = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
-  selectOption(index)
+  const target = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
+  const step = Math.sign(offset)
+  // Steps over disabled options, and at the end of the list falls back to the last one it can select
+  let index = enabledIndexFrom(target, step)
+  if (index === -1) index = enabledIndexFrom(target, -step)
+  if (index !== -1) selectOption(index)
+}
+
+/**
+ * The first option from `index` on, walking by `step`, that isn't in `disabledValues`.
+ * @param {number} index
+ * @param {number} step
+ * @returns {number} its index, or -1 if there is none
+ */
+function enabledIndexFrom(index, step) {
+  for (let i = index; i >= 0 && i < props.selectValues.length; i += step) {
+    if (!props.disabledValues.includes(props.selectValues[i])) return i
+  }
+  return -1
 }
 
 function selectOption(index) {

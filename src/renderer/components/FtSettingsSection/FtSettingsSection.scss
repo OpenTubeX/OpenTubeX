@@ -207,7 +207,8 @@
    columns. The longer column's other switches keep hugging the center line
    in a track as wide as the widest of them, and the shorter column still
    stacks on its own beside them. Columns that hold more than switches, such
-   as group titles, keep their layout. */
+   as group titles, keep their layout, and so do switches that share the
+   select columns below them. */
 @mixin unpartnered-switches($long, $short, $n, $columns, $long-track, $short-track) {
   $rows: 1fr;
 
@@ -215,7 +216,7 @@
     $rows: repeat($n - 1, auto) 1fr;
   }
 
-  $grid: '.switchColumnGrid:has(> .switchColumn:#{$short} > :nth-child(#{$n}):last-child):has(> .switchColumn:#{$long} > .switch-ctn:nth-child(#{$n + 1})):not(:has(> .switchColumn:#{$long} > :not(.switch-ctn))):not(:has(> .switchColumn:#{$short} > :not(.switch-ctn)))';
+  $grid: '.switchColumnGrid:has(> .switchColumn:#{$short} > :nth-child(#{$n}):last-child):has(> .switchColumn:#{$long} > .switch-ctn:nth-child(#{$n + 1})):not(:has(> .switchColumn:#{$long} > :not(.switch-ctn))):not(:has(> .switchColumn:#{$short} > :not(.switch-ctn))):not(.generalSelectGrid > *)';
 
   .sectionBody :deep(#{$grid}) {
     grid-template-columns: $columns;
