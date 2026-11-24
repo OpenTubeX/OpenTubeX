@@ -291,6 +291,7 @@ test.describe('seeded playlists', () => {
     await expect(progressToast).toContainText('Preloading videos: 0 of 2')
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadVideoIds)).toEqual(['ccccccccccc'])
     await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
