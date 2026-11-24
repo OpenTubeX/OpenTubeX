@@ -203,6 +203,49 @@
   }
 }
 
+/* Switches the other column has no partner for are centered below both
+   columns. The longer column's other switches keep hugging the center line
+   in a track as wide as the widest of them, and the shorter column still
+   stacks on its own beside them. Columns that hold more than switches, such
+   as group titles, keep their layout. */
+@mixin unpartnered-switches($long, $short, $n, $columns, $long-track, $short-track) {
+  $rows: 1fr;
+
+  @if $n > 1 {
+    $rows: repeat($n - 1, auto) 1fr;
+  }
+
+  $grid: '.switchColumnGrid:has(> .switchColumn:#{$short} > :nth-child(#{$n}):last-child):has(> .switchColumn:#{$long} > .switch-ctn:nth-child(#{$n + 1})):not(:has(> .switchColumn:#{$long} > :not(.switch-ctn))):not(:has(> .switchColumn:#{$short} > :not(.switch-ctn)))';
+
+  .sectionBody :deep(#{$grid}) {
+    grid-template-columns: $columns;
+    column-gap: 0;
+
+    /* When the shorter column is taller than the switches beside it, its
+       last row takes up the difference, so those switches stay packed. */
+    grid-template-rows: $rows;
+  }
+
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$long}) {
+    display: contents;
+  }
+
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > *) {
+    grid-column: $long-track;
+    justify-self: start;
+  }
+
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > :nth-child(n + #{$n + 1})) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$short}) {
+    grid-column: $short-track;
+    grid-row: 1 / span $n;
+  }
+}
+
 /* The columns meet in the middle of the card and each hugs the center line,
    so both sit the same distance from it. Each column stacks on its own, so a
    label that wraps only lengthens its own column. */
@@ -224,6 +267,25 @@
   .sectionBody :deep(.switchColumnGrid > :nth-child(odd):last-child) {
     grid-column: 1 / -1;
     justify-self: center;
+  }
+
+  @for $n from 1 through 9 {
+    @include unpartnered-switches(
+      first-child,
+      'nth-child(2):last-child',
+      $n,
+      minmax(0, 1fr) fit-content(calc(50% - 16px)) 32px calc(50% - 16px),
+      2,
+      4
+    );
+    @include unpartnered-switches(
+      'nth-child(2):last-child',
+      first-child,
+      $n,
+      calc(50% - 16px) 32px fit-content(calc(50% - 16px)) minmax(0, 1fr),
+      3,
+      1
+    );
   }
 }
 

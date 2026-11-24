@@ -14,6 +14,15 @@
           @change="updateFetchSubscriptionsAutomatically"
         />
         <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
+          :default-value="fastSubscriptionRefresh"
+          setting-key="fastSubscriptionRefresh"
+          :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
+          compact
+          @change="updateFastSubscriptionRefresh"
+        />
+        <FtToggleSwitch
           v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
           :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
           :default-value="enableClosedAppSubscriptionRefresh"
@@ -23,13 +32,45 @@
           @change="updateEnableClosedAppSubscriptionRefresh"
         />
         <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
-          :label="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
-          :default-value="fastSubscriptionRefresh"
-          setting-key="fastSubscriptionRefresh"
-          :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
+          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
+          :default-value="useRssFeeds"
+          setting-key="useRssFeeds"
+          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
           compact
-          @change="updateFastSubscriptionRefresh"
+          @change="updateUseRssFeeds"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
+          :default-value="unsubscriptionPopupStatus"
+          setting-key="unsubscriptionPopupStatus"
+          compact
+          @change="updateUnsubscriptionPopupStatus"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show New Content Feed')"
+          :default-value="showNewSubscriptionFeed"
+          setting-key="showNewSubscriptionFeed"
+          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Feed')"
+          compact
+          @change="updateShowNewSubscriptionFeed"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
+          :default-value="showNewSubscriptionFeedIndicators"
+          setting-key="showNewSubscriptionFeedIndicators"
+          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
+          compact
+          @change="updateShowNewSubscriptionFeedIndicators"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+          :default-value="showScheduledLiveStreamsFirst"
+          setting-key="showScheduledLiveStreamsFirst"
+          :tooltip="$t('Tooltips.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+          compact
+          @change="updateShowScheduledLiveStreamsFirst"
         />
         <FtToggleSwitch
           v-if="((IS_CAPACITOR && !IS_IOS) || IS_ELECTRON) && store.getters.getNotificationMode !== 'off'"
@@ -41,14 +82,6 @@
           @change="updateEnableUploadNotifications"
         />
         <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
-          :default-value="useRssFeeds"
-          setting-key="useRssFeeds"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
-          compact
-          @change="updateUseRssFeeds"
-        />
-        <FtToggleSwitch
           v-if="SUPPORTS_LOCAL_API"
           :label="$t('Settings.Subscription Settings.Show Collaborations From Other Channels')"
           :default-value="includeSubscriptionCollaborations"
@@ -57,14 +90,12 @@
           compact
           @change="updateIncludeSubscriptionCollaborations"
         />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
-          :default-value="unsubscriptionPopupStatus"
-          setting-key="unsubscriptionPopupStatus"
-          compact
-          @change="updateUnsubscriptionPopupStatus"
-        />
       </div>
+    </div>
+    <div class="subscriptionChannelSettingsManager">
+      <SubscriptionChannelSettings />
+    </div>
+    <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Limit the number of videos displayed for each channel')"
@@ -85,34 +116,7 @@
             @change="updateOnlyShowLatestFromChannelNumber"
           />
         </div>
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show New Content Feed')"
-          :default-value="showNewSubscriptionFeed"
-          setting-key="showNewSubscriptionFeed"
-          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Feed')"
-          compact
-          @change="updateShowNewSubscriptionFeed"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
-          :default-value="showScheduledLiveStreamsFirst"
-          setting-key="showScheduledLiveStreamsFirst"
-          :tooltip="$t('Tooltips.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
-          compact
-          @change="updateShowScheduledLiveStreamsFirst"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
-          :default-value="showNewSubscriptionFeedIndicators"
-          setting-key="showNewSubscriptionFeedIndicators"
-          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
-          compact
-          @change="updateShowNewSubscriptionFeedIndicators"
-        />
       </div>
-    </div>
-    <div class="subscriptionChannelSettingsManager">
-      <SubscriptionChannelSettings />
     </div>
     <div
       class="autoRefreshIntervals"

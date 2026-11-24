@@ -11,8 +11,7 @@
   }
 }
 
-/* The slider is centered under the switches of its column, or under the
-   stacked switches. Its end keeps as much room as the changed-setting
+/* The slider is centered under its switch. Its end keeps as much room as the changed-setting
    marker gutter takes at its start, so the track is centered too. */
 .onlyShowLatestFromChannelNumber {
   inline-size: 100%;

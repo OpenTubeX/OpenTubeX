@@ -256,7 +256,9 @@ function fitPendingLabels() {
 }
 
 let refitLabel = null
+let refitLabelNow = null
 let refitFrame = 0
+let labelMutationObserver = null
 
 onMounted(() => {
   const text = labelText.value
@@ -274,21 +276,26 @@ onMounted(() => {
   // Fit before the first paint, so a newly shown settings page doesn't
   // shift its columns a frame later.
   fitLabelToLines(text)
-  // The grid follows the available width, the label its own text. A font
-  // that finishes loading can narrow the text without resizing either.
+  // New content, such as other text after a language change or an indicator
+  // that appears once its state has loaded, and a font that finishes loading
+  // are fitted before the next paint too. Fitting a frame later would show
+  // the column at its old width first and then jump.
+  refitLabelNow = () => fitLabelToLines(text)
+  labelMutationObserver = new MutationObserver(refitLabelNow)
+  labelMutationObserver.observe(text, { childList: true, characterData: true, subtree: true })
+  document.fonts.addEventListener('loadingdone', refitLabelNow)
+  // The grid follows the available width, and the label can still resize
+  // without changing its content, such as when the font size changes.
   labelResizeObserver = new ResizeObserver(refitLabel)
   labelResizeObserver.observe(grid)
   labelResizeObserver.observe(text)
-  document.fonts.addEventListener('loadingdone', refitLabel)
 })
-
-// New text can wrap differently at the same size, such as after a language change.
-watch(() => props.label, () => refitLabel?.(), { flush: 'post' })
 
 onBeforeUnmount(() => {
   labelResizeObserver?.disconnect()
+  labelMutationObserver?.disconnect()
   cancelAnimationFrame(refitFrame)
-  if (refitLabel) document.fonts.removeEventListener('loadingdone', refitLabel)
+  if (refitLabelNow) document.fonts.removeEventListener('loadingdone', refitLabelNow)
 })
 </script>
 

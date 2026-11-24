@@ -21,13 +21,6 @@
           @change="handleRememberHistory"
         />
         <FtToggleSwitch
-          :label="$t('Settings.Privacy Settings.Remember Search History')"
-          compact
-          :default-value="rememberSearchHistory"
-          setting-key="rememberSearchHistory"
-          @change="updateRememberSearchHistory"
-        />
-        <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
           compact
           :disabled="!rememberHistory"
@@ -43,6 +36,13 @@
           setting-key="enableSearchSuggestions"
           compact
           @change="updateEnableSearchSuggestions"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Remember Search History')"
+          compact
+          :default-value="rememberSearchHistory"
+          setting-key="rememberSearchHistory"
+          @change="updateRememberSearchHistory"
         />
         <FtToggleSwitch
           v-if="USING_ELECTRON || IS_CAPACITOR"
