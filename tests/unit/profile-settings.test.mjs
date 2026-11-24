@@ -166,7 +166,7 @@ test('a profile\'s own settings sync to the same profile on another device, apar
   const secondSnapshot = await context.syncSettings(client, second)
   // Values from the sync context compare by their JSON.
   const json = value => JSON.parse(JSON.stringify(value))
-  assert.deepEqual(json(second.saved), [{ profileId: 'car', settings: { hideComments: true }, previous: null }])
+  assert.deepEqual(json(second.saved), [{ profileId: 'car', settings: { hideComments: true }, previous: null, updatedAt: {} }])
   assert.equal(second.state.settings.hideComments, false)
   assert.ok(!second.saved.some(payload => payload.profileId === 'other'))
 
@@ -291,6 +291,55 @@ test('a retry after a rejected upload keeps the profile settings edits the serve
   assert.deepEqual(json(device.state.settings.profileSettingsState.overrides.car), { hideComments: true, hideLiveChat: true })
 })
 
+test('settings edited and changed back while a sync saves keep that edit', async () => {
+  const car = profileSettingsId('car')
+  const carHideLiveChat = profileSettingEditTimeId(car, 'hideLiveChat')
+  const json = value => JSON.parse(JSON.stringify(value))
+  // Another device hid comments, live chat, and live chat for the car profile at 30.
+  const client = createClient([
+    { key: 'hideComments', value: true, updatedAt: 30 },
+    { key: 'hideLiveChat', value: true, updatedAt: 30 },
+    { key: car, value: { hideLiveChat: true }, updatedAt: 30, settingsUpdatedAt: { hideLiveChat: 30 } },
+  ])
+  const previous = {
+    hideComments: { key: 'hideComments', value: false, updatedAt: 10 },
+    hideLiveChat: { key: 'hideLiveChat', value: false, updatedAt: 10 },
+    [car]: { key: car, value: { hideLiveChat: false }, updatedAt: 10, settingsUpdatedAt: { hideLiveChat: 10 } },
+  }
+  const device = createDevice({ car: { hideLiveChat: false } })
+  const { settings } = device.state
+  settings.hideLiveChat = false
+  Object.assign(settings.syncServerSettingUpdatedAt, { hideComments: 10, hideLiveChat: 10, [car]: 10, [carHideLiveChat]: 10 })
+  const applied = []
+  const saveSyncedProfileSettings = device.dispatch
+  device.dispatch = async (action, payload) => {
+    if (action === 'saveSyncedProfileSettings') return saveSyncedProfileSettings(action, payload)
+    applied.push(action)
+    if (action === 'updateHideComments') {
+      settings.hideComments = payload
+      // While Hide Comments saves, this device shows live chat at 35 and hides
+      // it again at 40, both for everyone and for the car profile.
+      settings.syncServerSettingUpdatedAt = { ...settings.syncServerSettingUpdatedAt, hideLiveChat: 40, [car]: 40, [carHideLiveChat]: 40 }
+    }
+  }
+  const syncableSettingKeys = context.getSyncableSettingKeys
+  context.getSyncableSettingKeys = () => ['hideComments', 'hideLiveChat']
+  try {
+    const snapshot = await context.syncSettings(client, device, previous)
+    assert.deepEqual(applied, ['updateHideComments'])
+    assert.deepEqual(device.saved, [])
+
+    // The next sync uploads the edits at 40, which are newer than the other device's.
+    await context.syncSettings(client, device, snapshot)
+    assert.deepEqual(json(client.entries.find(entry => entry.key === 'hideLiveChat')), { key: 'hideLiveChat', value: false, updatedAt: 40 })
+    assert.deepEqual(json(client.entries.find(entry => entry.key === car).value), { hideLiveChat: false })
+    assert.deepEqual(applied, ['updateHideComments'])
+    assert.equal(settings.hideLiveChat, false)
+  } finally {
+    context.getSyncableSettingKeys = syncableSettingKeys
+  }
+})
+
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 /** The source of settings.js from `start` up to `end`, which must both be in it */
 const between = (start, end) => {
@@ -402,6 +451,38 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   const failed = region.updateProfileSetting(commit, 'car', 'quickSettings', ['g'], true)
   assert.deepEqual(await Promise.all([skipped, failed]), [true, false])
   assert.deepEqual(JSON.parse(JSON.stringify(overrides.car)), { quickSettings: ['e'] })
+})
+
+test('sync saves a profile\'s own settings only if none was edited since it read them', async () => {
+  const id = profileSettingsId('car')
+  const hideLiveChat = profileSettingEditTimeId(id, 'hideLiveChat')
+  // Sync read Hide Live Chat off, edited at 10. Another window turned it on at
+  // 35 and off again at 40 before the sync saved.
+  const saved = new Map([[id, { hideLiveChat: false }], ['syncServerSettingUpdatedAt', { [id]: 40, [hideLiveChat]: 40 }]])
+  const committed = []
+  const { saveSyncedProfileSettings } = vm.runInNewContext(`({${between('  saveSyncedProfileSettings: (', '  resetSettingToDefault:')}})`, {
+    ...profileSettings,
+    sanitizeProfileSettings: settings => profileSettings.profileSettingsOf(settings, () => true),
+    syncedProfileSettings: profileSettings.syncedProfileSettingsOf,
+    settingWrites: { track: (_id, run) => run() },
+    runLockedSettingUpdate: (_id, run) => run().then(() => true),
+    profileExists: async () => true,
+    DBSettingHandlers: {
+      findValue: async key => structuredClone(saved.get(key)),
+      upsert: async (key, value) => { saved.set(key, structuredClone(value)) },
+    },
+  })
+  const commit = (type, payload) => committed.push([type, payload])
+  const save = updatedAt => saveSyncedProfileSettings({ commit }, {
+    profileId: 'car', settings: { hideLiveChat: true }, previous: { hideLiveChat: false }, updatedAt, isSynced: () => true,
+  })
+
+  assert.equal(await save({ [id]: 10, [hideLiveChat]: 10 }), false)
+  assert.deepEqual(JSON.parse(JSON.stringify(saved.get(id))), { hideLiveChat: false })
+  assert.deepEqual(committed, [])
+
+  assert.equal(await save({ [id]: 40, [hideLiveChat]: 40 }), true)
+  assert.deepEqual(JSON.parse(JSON.stringify(saved.get(id))), { hideLiveChat: true })
 })
 
 test('a failed shared write of a setting the active profile replaces keeps the previous shared value', async () => {

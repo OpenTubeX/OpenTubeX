@@ -30,7 +30,7 @@ import {
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
-import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId } from '../../profileSettings.js'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId, settingEditedBetween } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -1888,11 +1888,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Reordering unchanged settings would create revisions that wake each other.
   const merged = { ...remote }
   const now = Date.now()
-  const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
-    typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
-    !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
-    ? store.state.settings.syncServerSettingUpdatedAt
-    : {}
+  // Edits save a new object, so this holds the times as this sync read them.
+  const editTimes = () => {
+    const times = store.state.settings.syncServerSettingUpdatedAt
+    return times !== null && typeof times === 'object' && !Array.isArray(times) ? times : {}
+  }
+  const localUpdatedAt = editTimes()
   const local = Object.fromEntries([
     [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
     // A profile with its own settings may show other values, which sync with that profile.
@@ -2005,14 +2006,16 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)
         : metadataEquals(currentValue, profileSettingsKey ? syncedProfileSettings(entry.value, isSynced) : entry.value)
-      // Edited while this sync saved an earlier setting. Applying the merge would
-      // undo the edit, so the server keeps its entry and the next sync merges it.
+      // Edited while this sync saved an earlier setting, also back to the value
+      // it read. Applying the merge would undo the edit, so the server keeps its
+      // entry and the next sync merges it.
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
         if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
-      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
+      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY &&
+          (!metadataEquals(currentValue, value) || settingEditedBetween(localUpdatedAt, editTimes(), key))) {
         skip()
         continue
       }
@@ -2020,9 +2023,9 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         if (channelSettingsProfiles.has(key)) {
           await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
         } else if (profileSettingsProfiles.has(key)) {
-          // Changed meanwhile: the next sync merges the edit.
+          // Edited meanwhile: the next sync merges the edit.
           if (!await store.dispatch('saveSyncedProfileSettings', {
-            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, isSynced,
+            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, updatedAt: localUpdatedAt, isSynced,
           })) {
             skip()
             continue

@@ -152,6 +152,21 @@ export function changedProfileSettingEditTimeIds(id, previous, next) {
 }
 
 /**
+ * Whether a setting, or for a profile's own settings any of them, was edited
+ * between two versions of `syncServerSettingUpdatedAt`, also when the edit
+ * restored the earlier value.
+ * @param {Record<string, unknown>} before
+ * @param {Record<string, unknown>} after
+ * @param {string} id the setting's ID, or that of a profile's own settings
+ */
+export function settingEditedBetween(before, after, id) {
+  const timeOf = (times, name) => Object.hasOwn(times, name) ? times[name] : undefined
+  const prefix = profileSettingEditTimeId(id, '')
+  return [...Object.keys(before), ...Object.keys(after)]
+    .some(name => (name === id || name.startsWith(prefix)) && timeOf(before, name) !== timeOf(after, name))
+}
+
+/**
  * @param {unknown} settingId
  * @returns {settingId is string}
  */
