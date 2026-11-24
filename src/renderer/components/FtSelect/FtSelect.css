@@ -132,12 +132,39 @@
   border-block-end-color: var(--primary-text-color);
 }
 
+.selectValueBox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+}
+
+.selectValueBox > * {
+  grid-area: 1 / 1;
+}
+
+/* Only the widest name counts; its lines take no height. */
+.selectValueSizer {
+  block-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.selectValueSizer::before {
+  content: attr(data-names);
+  white-space: pre;
+}
+
 .selectedValue {
   display: block;
   line-height: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* The value truncates instead of resizing the select. */
+.selectValueSizer + .selectedValue {
+  contain: inline-size;
 }
 
 .select-text.withOptionVisuals,
@@ -297,6 +324,14 @@
 
 .selectOption.selected {
   position: relative;
+}
+
+.selectOption.disabledOption {
+  cursor: not-allowed;
+}
+
+.selectOption.disabledOption > * {
+  opacity: 0.4;
 }
 
 .selectOption.selected::before {

@@ -412,6 +412,27 @@
   }
 }
 
+/* The player's select rows share the columns of the slider rows around them
+   (FtSliderGrid), with each field centered on its column. */
+@container settings-content (width > 680px) {
+  .sectionBody :deep(.playerSelectGrid) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 380px));
+    justify-content: center;
+    column-gap: 24px;
+  }
+
+  .sectionBody :deep(.playerSelectGrid > .select) {
+    @include balanced-select;
+
+    justify-self: center;
+  }
+
+  .sectionBody :deep(.playerSelectGrid > .select:nth-child(odd):last-child) {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Balance the indicator gutter so a standalone field's outline is centered. */
 :deep(.ft-flex-box > .ft-input-component:only-child:has(.inputIndicators > *)),
 :deep(.centeredSettingsInput:has(.inputIndicators > *)) {

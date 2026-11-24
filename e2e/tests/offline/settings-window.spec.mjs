@@ -702,13 +702,11 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).not.toHaveClass(/compactSettings/)
 
-    for (const grid of ['.switchColumnGrid', '.switchGrid']) {
-      expect(await page.locator(grid).first().evaluate(element => {
-        return new Set(Array.from(element.children).map(control => {
-          const bounds = (control.querySelector('.select-text') || control).getBoundingClientRect()
-          return Math.round(bounds.left + bounds.width / 2)
-        })).size
-      })).toBe(1)
+    // General's switches and selects each stack into one column.
+    for (const controls of ['.switchColumnGrid .switch-ctn', ':scope > .select .select-text']) {
+      expect(await page.locator('.generalSelectGrid').first().evaluate((grid, controls) => {
+        return new Set(Array.from(grid.querySelectorAll(controls), control => Math.round(control.getBoundingClientRect().left))).size
+      }, controls)).toBe(1)
     }
 
     const content = page.locator('.settingsContent')

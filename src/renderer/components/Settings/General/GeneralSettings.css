@@ -1,3 +1,45 @@
 .confirmations {
   margin-block-start: 30px;
 }
+
+/* The switches form the first rows of the select grid and use its field
+   columns, so each switch column starts where the fields below it do, and
+   the switches beside each other share a row. */
+.generalSelectGrid > .switchColumnGrid.switchColumnGrid {
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-auto-flow: row dense;
+  column-gap: 0;
+  align-items: center;
+
+  /* As far from the selects as the separate blocks were: the card's 2px gap
+     and both blocks' padding. */
+  margin-block-end: calc(2px + 16px * var(--ui-density));
+}
+
+.switchColumnGrid > .switchColumn {
+  display: contents;
+}
+
+/* The toggle sits 6px inside its switch, so the switch starts that much
+   before the field to line the toggle up with the field's edge. */
+.switchColumnGrid > .switchColumn > :deep(*) {
+  justify-self: start;
+  margin-inline-start: -6px;
+}
+
+.switchColumnGrid > .switchColumn:first-child > :deep(*) {
+  grid-column: 1 / span 2;
+}
+
+.switchColumnGrid > .switchColumn:last-child > :deep(*) {
+  grid-column: 3 / span 2;
+}
+
+/* The select grid stacks into one column here. Spanning the icons' track
+   too would hand that track the switches' width and squeeze the fields. */
+@container settings-content (width <= 800px) {
+  .switchColumnGrid > .switchColumn:nth-child(n) > :deep(*) {
+    grid-column: 1;
+  }
+}
