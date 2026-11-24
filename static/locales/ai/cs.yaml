@@ -2646,6 +2646,9 @@ CommandPalette:
     Download Finished: Toto stahování již neprobíhá
     Video: Nejprve otevřete video
 Downloads:
+  Customize Download: 'Přizpůsobit…'
+  Download Started: 'Zahájeno stahování „{title}“'
+  Already Downloading: '„{title}“ se již stahuje'
   Stop Recording: "Zastavit nahrávání"
   Recording: "Nahrává se"
   File Name Template Invalid: 'Použijte relativní cestu uvnitř složky stahování bez "..", "~", "$", "%" nebo předpony jako "thumbnail:".'

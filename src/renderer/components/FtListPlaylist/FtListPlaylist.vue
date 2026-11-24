@@ -140,7 +140,7 @@
       :is-playlist="true"
       :video-count="playlistMetadata.videoCount"
       :title="playlistMetadata.title"
-      :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? playlistMetadata.defaultThumbnailUrl : thumbnailForDisplay"
+      :thumbnail="downloadThumbnail"
       @close="showDownloadPrompt = false"
     />
   </div>
@@ -154,6 +154,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
+import { downloadMenuItem } from '../../helpers/templateDownloads'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
@@ -187,7 +188,7 @@ const props = defineProps({
   },
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const menuButton = useTemplateRef('menuButton')
 const openMobileContextActions = inject('openMobileContextActions')
 // Only the Playlists page sorts pinned playlists first.
@@ -233,11 +234,21 @@ const playlistMenuItems = computed(() => {
     })
   }
   if (supportsYtDlp && enableDownloads.value && playlistMetadata.value.videoCount > 0) {
-    items.push({
+    items.push(downloadMenuItem({
       label: t('Downloads.Download Playlist'),
-      icon: ['fas', 'download'],
-      run: () => { showDownloadPrompt.value = true },
-    })
+      target: () => ({
+        playlistId: isUserPlaylist.value ? '' : playlistMetadata.value.playlistId,
+        playlistKey: playlistMetadata.value.playlistId,
+        videoIds: isUserPlaylist.value ? props.data.videos.map(video => video.videoId) : [],
+        isPlaylist: true,
+        videoCount: playlistMetadata.value.videoCount,
+        title: playlistMetadata.value.title,
+        thumbnail: downloadThumbnail.value
+      }),
+      customize: () => { showDownloadPrompt.value = true },
+      t,
+      locale
+    }))
   }
   if (canPinPlaylistsToTop) {
     items.push({
@@ -407,6 +418,10 @@ const thumbnailForDisplay = computed(() => {
     ? playlistMetadata.value.thumbnailUrl
     : thumbnailPlaceholder
 })
+
+const downloadThumbnail = computed(() => isUserPlaylist.value && thumbnailPreference.value !== 'hidden'
+  ? playlistMetadata.value.defaultThumbnailUrl
+  : thumbnailForDisplay.value)
 
 // For `router-link` attribute `to`
 const playlistPageLinkTo = computed(() => {

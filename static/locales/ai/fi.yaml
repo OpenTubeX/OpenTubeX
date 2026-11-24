@@ -2655,6 +2655,9 @@ CommandPalette:
     Download Finished: Tämä lataus ei ole enää käynnissä
     Video: Avaa ensin video
 Downloads:
+  Customize Download: 'Mukauta…'
+  Download Started: 'Kohteen ”{title}” lataus aloitettiin'
+  Already Downloading: 'Kohdetta ”{title}” ladataan jo'
   Stop Recording: "Lopeta tallennus"
   Recording: "Tallennetaan"
   File Name Template Invalid: 'Käytä latauskansion sisäistä suhteellista polkua ilman merkkejä "..", "~", "$", "%" tai etuliitettä kuten "thumbnail:".'

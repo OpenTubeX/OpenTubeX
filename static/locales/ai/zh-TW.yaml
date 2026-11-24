@@ -2649,6 +2649,9 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  Customize Download: '自訂…'
+  Download Started: '已開始下載「{title}」'
+  Already Downloading: '「{title}」已在下載中'
   Stop Recording: "停止錄製"
   Recording: "正在錄製"
   File Name Template Invalid: '請使用下載資料夾內的相對路徑，不得包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前綴。'

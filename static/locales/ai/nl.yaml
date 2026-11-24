@@ -2718,6 +2718,9 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  Customize Download: 'Aanpassen…'
+  Download Started: 'Downloaden van ‘{title}’ gestart'
+  Already Downloading: '‘{title}’ wordt al gedownload'
   Stop Recording: "Opname stoppen"
   Recording: "Opnemen"
   File Name Template Invalid: 'Gebruik een relatief pad binnen de downloadmap zonder "..", "~", "$", "%" of een voorvoegsel zoals "thumbnail:".'

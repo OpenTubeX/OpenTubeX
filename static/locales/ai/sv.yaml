@@ -2647,6 +2647,9 @@ CommandPalette:
     Download Finished: Nedladdningen pågår inte längre
     Video: Öppna en video först
 Downloads:
+  Customize Download: 'Anpassa…'
+  Download Started: 'Började ladda ned ”{title}”'
+  Already Downloading: '”{title}” laddas redan ned'
   Stop Recording: "Stoppa inspelning"
   Recording: "Spelar in"
   File Name Template Invalid: 'Använd en relativ sökväg i nedladdningsmappen utan "..", "~", "$", "%" eller ett prefix som "thumbnail:".'

@@ -2665,6 +2665,9 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  Customize Download: 'Tùy chỉnh…'
+  Download Started: 'Đã bắt đầu tải xuống "{title}"'
+  Already Downloading: '"{title}" đang được tải xuống'
   Stop Recording: "Dừng ghi"
   Recording: "Đang ghi"
   File Name Template Invalid: 'Hãy dùng đường dẫn tương đối bên trong thư mục tải xuống, không có "..", "~", "$", "%" hoặc tiền tố như "thumbnail:".'

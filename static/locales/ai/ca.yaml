@@ -3310,6 +3310,9 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  Customize Download: 'Personalitza…'
+  Download Started: 'S’ha començat a baixar «{title}»'
+  Already Downloading: '«{title}» ja s’està baixant'
   Stop Recording: "Atura l’enregistrament"
   Recording: "S’està enregistrant"
   File Name Template Invalid: 'Utilitzeu un camí relatiu dins de la carpeta de baixades sense "..", "~", "$", "%" ni un prefix com ara "thumbnail:".'

@@ -2782,6 +2782,9 @@ CommandPalette:
     Download Finished: یہ ڈاؤن لوڈ اب نہیں چل رہا
     Video: پہلے کوئی ویڈیو کھولیں
 Downloads:
+  Customize Download: 'حسب ضرورت بنائیں…'
+  Download Started: '"{title}" کی ڈاؤن لوڈ شروع ہو گئی'
+  Already Downloading: '"{title}" پہلے ہی ڈاؤن لوڈ ہو رہا ہے'
   Stop Recording: "ریکارڈنگ روکیں"
   Recording: "ریکارڈ ہو رہا ہے"
   File Name Template Invalid: 'ڈاؤن لوڈ فولڈر کے اندر ایک نسبتی راستہ استعمال کریں، جس میں ".."، "~"، "$"، "%" یا "thumbnail:" جیسا سابقہ نہ ہو۔'

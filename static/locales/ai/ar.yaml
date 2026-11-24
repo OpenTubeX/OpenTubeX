@@ -2686,6 +2686,9 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  Customize Download: 'تخصيص…'
+  Download Started: 'بدأ تنزيل "{title}"'
+  Already Downloading: 'يجري تنزيل "{title}" بالفعل'
   Stop Recording: "إيقاف التسجيل"
   Recording: "جارٍ التسجيل"
   File Name Template Invalid: 'استخدم مسارًا نسبيًا داخل مجلد التنزيل بدون ".." أو "~" أو "$" أو "%" أو بادئة مثل "thumbnail:".'

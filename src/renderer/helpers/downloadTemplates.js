@@ -25,6 +25,65 @@ export const DEFAULT_DOWNLOAD_TEMPLATES = [
   { value: 'subtitles:vtt', label: t => t('Downloads.Templates.Subtitles Format', { format: 'VTT' }), options: { mode: 'subtitles', subtitleFormat: 'vtt' } }
 ]
 
+export const DOWNLOAD_SPONSORBLOCK_CATEGORIES = Object.freeze(['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler'])
+
+/**
+ * The options a download starts from before a template applies its own.
+ * @param {string} locale the app's locale, whose language leads the subtitle languages
+ */
+export function baseDownloadOptions(locale) {
+  return {
+    mode: 'video',
+    quality: '',
+    videoFormat: '',
+    videoCodec: '',
+    audioFormat: '',
+    filenameTemplate: '{title} [{id}].{ext}',
+    startTime: '',
+    endTime: '',
+    splitChapters: false,
+    removeSponsorblock: false,
+    sponsorBlockCategories: [...DOWNLOAD_SPONSORBLOCK_CATEGORIES],
+    includeSubtitles: false,
+    embedSubtitles: true,
+    // YouTube offers a machine translation of every video into a few hundred languages,
+    // and yt-dlp's "all" selector requests every single one of them, which its rate
+    // limiting cuts short long before it finishes.
+    subtitleLanguages: [...new Set([locale.split('-')[0], 'en'])].map(language => `${language}.*`).join(','),
+    subtitleFormat: '',
+    embedThumbnail: false,
+    embedMetadata: false,
+    customArgs: ''
+  }
+}
+
+/**
+ * Fills in the options a source leaves out and sorts lists, so equal options compare equal.
+ * @param {object} source
+ * @param {object} base from {@link baseDownloadOptions}, which also names the options to keep
+ */
+export function normalizeDownloadOptions(source, base) {
+  return Object.fromEntries(Object.keys(base).map(key => {
+    const value = source[key] ?? base[key]
+    return [key, Array.isArray(value) ? [...value].sort() : value]
+  }))
+}
+
+/**
+ * @param {string} value the stored custom templates
+ * @returns {{ name: string, options?: object, args?: string }[]}
+ */
+export function parseCustomDownloadTemplates(value) {
+  try {
+    const templates = JSON.parse(value || '[]')
+    return Array.isArray(templates)
+      ? templates.filter(template => typeof template?.name === 'string')
+      : []
+  } catch {
+    return []
+  }
+}
+
 /** @param {string} value */
 export function filterDownloadTimeInput(value) {
   return value.replaceAll(/[^0-9:]/g, '')

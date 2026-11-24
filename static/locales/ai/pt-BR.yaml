@@ -2600,6 +2600,9 @@ CommandPalette:
     Download Finished: Este download não está mais em andamento
     Video: Abra primeiro um vídeo
 Downloads:
+  Customize Download: 'Personalizar…'
+  Download Started: 'Download de "{title}" iniciado'
+  Already Downloading: '"{title}" já está sendo baixado'
   Stop Recording: "Parar gravação"
   Recording: "Gravando"
   File Name Template Invalid: 'Use um caminho relativo dentro da pasta de downloads sem "..", "~", "$", "%" ou um prefixo como "thumbnail:".'

@@ -328,6 +328,38 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
+  test('starts a template download from the context menu without the prompt', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'template-download.mp3')
+    const executable = path.join(app.userDataDir, 'template-yt-dlp.sh')
+    const capturedArgs = path.join(app.userDataDir, 'template-yt-dlp-args.txt')
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
+      `printf '%s\\n' "$@" > '${capturedArgs}'`,
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t0\\t0\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.title').click({ button: 'right' })
+    // Clicking the entry opens the prompt, hovering it the templates
+    await page.getByRole('menuitem', { name: 'Download Video' }).hover()
+    await page.getByRole('menuitem', { name: 'Audio - MP3', exact: true }).click()
+
+    await expect(page.getByText(/^Started downloading ".+"$/)).toBeVisible()
+    await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
+    await expect.poll(() => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('--extract-audio')
+    const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(passedArguments[passedArguments.indexOf('--audio-format') + 1]).toBe('mp3')
+    expect(passedArguments).toContain('--embed-thumbnail')
+    await expect.poll(() => page.evaluate(() => Object.values(window.$store.getters.getYtDlpDownloads)
+      .map(download => [download.status, download.template]))).toEqual([['completed', 'audio:mp3']])
+  })
+
   test('requests automatic subtitles only when needed and can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-playback-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')

@@ -3112,6 +3112,9 @@ CommandPalette:
     Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
     Video: 먼저 동영상을 여세요
 Downloads:
+  Customize Download: '사용자 지정…'
+  Download Started: '"{title}" 다운로드를 시작했습니다'
+  Already Downloading: '"{title}"을(를) 이미 다운로드하는 중입니다'
   Stop Recording: "녹화 중지"
   Recording: "녹화 중"
   File Name Template Invalid: '다운로드 폴더 안의 상대 경로를 사용하세요. "..", "~", "$", "%" 또는 "thumbnail:" 같은 접두사는 사용할 수 없습니다.'

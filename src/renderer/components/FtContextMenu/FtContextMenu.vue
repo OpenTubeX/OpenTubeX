@@ -106,7 +106,7 @@
                   role="menuitem"
                   :disabled="!item.enabled"
                   aria-haspopup="menu"
-                  @click="$event.currentTarget.focus()"
+                  @click="openSubmenuOrRun(item, $event)"
                   @pointerdown.prevent
                 >
                   <FtContextMenuItemIcon
@@ -617,6 +617,20 @@ function positionOpenSubmenu() {
     '.submenuContainer:hover, .submenuContainer:focus-within'
   )
   if (container instanceof HTMLElement) positionSubmenu(container)
+}
+
+/**
+ * Entries with their own action run it, like the download entry opening the
+ * download prompt. Touch has no hover, so a tap opens their submenu instead.
+ * @param {object} item
+ * @param {MouseEvent} event
+ */
+function openSubmenuOrRun(item, event) {
+  if (item.run && !(event instanceof PointerEvent && ['touch', 'pen'].includes(event.pointerType))) {
+    execute(item)
+    return
+  }
+  event.currentTarget.focus()
 }
 
 async function execute(item) {

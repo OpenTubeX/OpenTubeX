@@ -2719,6 +2719,9 @@ CommandPalette:
     Download Finished: இந்தப் பதிவிறக்கம் இனி இயங்கவில்லை
     Video: முதலில் ஒரு காணொளியைத் திறக்கவும்
 Downloads:
+  Customize Download: 'தனிப்பயனாக்கு…'
+  Download Started: '"{title}" பதிவிறக்கம் தொடங்கியது'
+  Already Downloading: '"{title}" ஏற்கனவே பதிவிறக்கப்படுகிறது'
   Stop Recording: "பதிவை நிறுத்து"
   Recording: "பதிவுசெய்கிறது"
   File Name Template Invalid: 'பதிவிறக்கக் கோப்புறைக்குள் "..", "~", "$", "%" அல்லது "thumbnail:" போன்ற முன்னொட்டு இல்லாத சார்புப் பாதையைப் பயன்படுத்தவும்.'

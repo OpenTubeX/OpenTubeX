@@ -2686,6 +2686,9 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  Customize Download: 'Addasu…'
+  Download Started: 'Wedi dechrau llwytho "{title}" i lawr'
+  Already Downloading: 'Mae "{title}" eisoes yn llwytho i lawr'
   Stop Recording: "Stopio recordio"
   Recording: "Yn recordio"
   File Name Template Invalid: 'Defnyddiwch lwybr cymharol y tu mewn i’r ffolder llwytho i lawr heb "..", "~", "$", "%" na rhagddodiad fel "thumbnail:".'

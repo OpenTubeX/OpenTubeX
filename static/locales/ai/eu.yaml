@@ -2657,6 +2657,9 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Customize Download: 'Pertsonalizatu…'
+  Download Started: '"{title}" deskargatzen hasi da'
+  Already Downloading: '"{title}" deskargatzen ari da dagoeneko'
   Stop Recording: "Gelditu grabazioa"
   Recording: "Grabatzen"
   File Name Template Invalid: 'Erabili deskargen karpetaren barruko bide erlatibo bat, "..", "~", "$", "%" edo "thumbnail:" bezalako aurrizkirik gabe.'

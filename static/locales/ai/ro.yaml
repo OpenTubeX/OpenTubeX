@@ -2705,6 +2705,9 @@ CommandPalette:
     Download Finished: Această descărcare nu mai rulează
     Video: Deschideți mai întâi un videoclip
 Downloads:
+  Customize Download: 'Personalizează…'
+  Download Started: 'A început descărcarea „{title}”'
+  Already Downloading: '„{title}” se descarcă deja'
   Stop Recording: "Oprește înregistrarea"
   Recording: "Se înregistrează"
   File Name Template Invalid: 'Folosește o cale relativă în dosarul de descărcări, fără "..", "~", "$", "%" sau un prefix precum "thumbnail:".'

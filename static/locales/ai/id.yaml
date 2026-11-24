@@ -2673,6 +2673,9 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Customize Download: 'Sesuaikan…'
+  Download Started: 'Mulai mengunduh "{title}"'
+  Already Downloading: '"{title}" sudah sedang diunduh'
   Stop Recording: "Hentikan perekaman"
   Recording: "Merekam"
   File Name Template Invalid: 'Gunakan jalur relatif di dalam folder unduhan tanpa "..", "~", "$", "%", atau awalan seperti "thumbnail:".'

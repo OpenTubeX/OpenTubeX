@@ -2743,6 +2743,9 @@ CommandPalette:
     Download Finished: Denne download kører ikke længere
     Video: Åbn en video først
 Downloads:
+  Customize Download: 'Tilpas…'
+  Download Started: 'Begyndte at downloade "{title}"'
+  Already Downloading: '"{title}" downloades allerede'
   Stop Recording: "Stop optagelse"
   Recording: "Optager"
   File Name Template Invalid: 'Brug en relativ sti i downloadmappen uden "..", "~", "$", "%" eller et præfiks som "thumbnail:".'

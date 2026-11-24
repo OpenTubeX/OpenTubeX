@@ -3158,6 +3158,9 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Customize Download: 'Tinkinti…'
+  Download Started: 'Pradėtas „{title}“ atsisiuntimas'
+  Already Downloading: '„{title}“ jau atsisiunčiamas'
   Stop Recording: "Stabdyti įrašymą"
   Recording: "Įrašoma"
   File Name Template Invalid: 'Naudokite santykinį kelią atsisiuntimų aplanke be "..", "~", "$", "%" ar priešdėlio, pvz., "thumbnail:".'

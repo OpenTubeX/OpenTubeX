@@ -3906,6 +3906,9 @@ Downloads:
     Audio Format: Audio - {format}
     Subtitles Format: Untertitel – {format}
   Download Playlist: Wiedergabeliste herunterladen
+  Customize Download: Anpassen…
+  Download Started: Download von „{title}“ gestartet
+  Already Downloading: „{title}“ wird bereits heruntergeladen
   Downloading: Wird heruntergeladen
   Queue: Warteschlange
   Downloaded: Heruntergeladen

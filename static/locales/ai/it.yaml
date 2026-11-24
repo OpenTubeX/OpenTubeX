@@ -2646,6 +2646,9 @@ CommandPalette:
     Download Finished: Questo download non è più in corso
     Video: Apri prima un video
 Downloads:
+  Customize Download: 'Personalizza…'
+  Download Started: 'Download di "{title}" avviato'
+  Already Downloading: '"{title}" è già in download'
   Stop Recording: "Interrompi registrazione"
   Recording: "Registrazione in corso"
   File Name Template Invalid: 'Usa un percorso relativo nella cartella dei download senza "..", "~", "$", "%" o un prefisso come "thumbnail:".'

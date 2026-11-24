@@ -2752,6 +2752,9 @@ CommandPalette:
     Download Finished: این بارگیری دیگر در حال اجرا نیست
     Video: ابتدا ویدیویی باز کنید
 Downloads:
+  Customize Download: 'سفارشی‌سازی…'
+  Download Started: 'بارگیری «{title}» آغاز شد'
+  Already Downloading: '«{title}» در حال بارگیری است'
   Stop Recording: "توقف ضبط"
   Recording: "در حال ضبط"
   File Name Template Invalid: 'از یک مسیر نسبی درون پوشهٔ بارگیری بدون ".."، "~"، "$"، "%" یا پیشوندی مانند "thumbnail:" استفاده کنید.'

@@ -37,6 +37,7 @@ test('playlist actions use the context menu and respect the menu icon setting', 
     await session.detach()
   }
   await page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Download Playlist', exact: true }).click()
+  await page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Customize…', exact: true }).click()
   await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
 })
 

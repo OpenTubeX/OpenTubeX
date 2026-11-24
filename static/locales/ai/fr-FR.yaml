@@ -2645,6 +2645,9 @@ CommandPalette:
     Download Finished: Ce téléchargement n’est plus en cours
     Video: Ouvrez d’abord une vidéo
 Downloads:
+  Customize Download: 'Personnaliser…'
+  Download Started: 'Téléchargement de « {title} » lancé'
+  Already Downloading: '« {title} » est déjà en cours de téléchargement'
   Stop Recording: "Arrêter l’enregistrement"
   Recording: "Enregistrement en cours"
   File Name Template Invalid: 'Utilisez un chemin relatif dans le dossier de téléchargement, sans « .. », « ~ », « $ », « % » ni préfixe comme « thumbnail: ».'

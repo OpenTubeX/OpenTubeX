@@ -2649,6 +2649,9 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  Customize Download: 'Kohanda…'
+  Download Started: '„{title}“ allalaadimine algas'
+  Already Downloading: '„{title}“ juba laaditakse alla'
   Stop Recording: "Peata salvestamine"
   Recording: "Salvestamine"
   File Name Template Invalid: 'Kasuta allalaadimiskaustas suhtelist teed ilma "..", "~", "$", "%" või eesliiteta nagu "thumbnail:".'

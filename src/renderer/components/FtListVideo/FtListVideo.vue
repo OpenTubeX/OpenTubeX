@@ -597,6 +597,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
+import { downloadMenuItem } from '../../helpers/templateDownloads'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -1556,17 +1557,28 @@ const quickActionShortLabels = computed(() => ({
 }))
 
 const videoContextMenuItems = computed(() => {
-  const items = videoMenuOptions.value.map(option => option.type === 'divider'
-    ? { type: 'separator' }
-    : {
+  const items = videoMenuOptions.value.map(option => {
+    if (option.type === 'divider') return { type: 'separator' }
+    if (option.value === 'download') {
+      return downloadMenuItem({
         label: option.label,
         actionId: option.value,
-        quickAction: option.value in quickActionShortLabels.value,
-        shortLabel: quickActionShortLabels.value[option.value],
-        icon: option.icon,
-        enabled: !option.disabled,
-        run: () => handleOptionsClick(option.value)
+        target: () => ({ videoId: id.value, title: title.value, thumbnail: thumbnail.value }),
+        customize: () => handleOptionsClick(option.value),
+        t,
+        locale
       })
+    }
+    return {
+      label: option.label,
+      actionId: option.value,
+      quickAction: option.value in quickActionShortLabels.value,
+      shortLabel: quickActionShortLabels.value[option.value],
+      icon: option.icon,
+      enabled: !option.disabled,
+      run: () => handleOptionsClick(option.value)
+    }
+  })
   const copyItems = items.filter(item => item.actionId?.startsWith('copy'))
   const openItems = items.filter(item => ['openYoutube', 'openInvidious', 'openYoutubeChannel', 'openInvidiousChannel'].includes(item.actionId))
   const rows = items.filter(item => !copyItems.includes(item) && !openItems.includes(item))
@@ -1734,7 +1746,8 @@ function getThumbnailSwipeAction(direction) {
     actionId = 'removeFromPlaylist'
   }
   const action = [...mobileThumbnailActions.value, ...videoContextMenuItems.value]
-    .flatMap(item => item.submenu ?? item)
+    // Submenu entries such as the download one are shortcuts themselves
+    .flatMap(item => item.submenu ? [item, ...item.submenu] : item)
     .find(item => item.actionId === actionId)
   return action?.enabled !== false && action?.run ? action : null
 }
