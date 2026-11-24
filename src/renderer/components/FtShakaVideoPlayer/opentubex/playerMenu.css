@@ -9,6 +9,103 @@
   overscroll-behavior: contain;
 }
 
+/*
+  Shaka lays its menus out on physical sides, which only suits left-to-right
+  languages. These rules repeat its offsets on logical sides, so that
+  right-to-left languages get a mirrored menu. Each one is only as specific as
+  Shaka's rule plus the scope, so that the more specific rules below still win.
+  The physical side is reset first, and the logical property after it takes
+  over in both directions.
+*/
+:deep(:is(.shaka-overflow-menu, .shaka-context-menu, .shaka-settings-menu) .shaka-ui-icon) {
+  padding-right: 0;
+  padding-inline-end: 10px;
+}
+
+:deep(.shaka-overflow-menu span) {
+  text-align: start;
+}
+
+:deep(.shaka-overflow-button-label-inline) {
+  padding-right: 0;
+  padding-inline-end: calc(var(--shaka-icon-size-sm) + 8px);
+}
+
+:deep(.shaka-overflow-button-label-inline::after) {
+  right: auto;
+  inset-inline-end: 5px;
+}
+
+/* The chevron points to the end of the row, where submenus open. */
+:deep(.shaka-overflow-button-label-inline:dir(rtl)::after) {
+  transform: translateY(-50%) scaleX(-1);
+}
+
+:deep(.shaka-current-selection-span) {
+  padding-left: 0;
+  padding-inline-start: 10px;
+}
+
+:deep(.shaka-current-auto-quality) {
+  margin-left: 0;
+  margin-inline-start: 5px;
+}
+
+/* stylelint-disable declaration-no-important -- Shaka's margins are important */
+:deep(:is(.shaka-quality-mark, .shaka-current-quality-mark)) {
+  margin-left: 0 !important;
+  margin-inline-start: 2px !important;
+}
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu) .shaka-queue-item-title) {
+  margin-inline-start: 0 !important;
+  text-align: start;
+}
+/* stylelint-enable declaration-no-important */
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu) span) {
+  margin-left: 0;
+  margin-inline-start: 28px;
+}
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu) span.shaka-chosen-item),
+:deep(.shaka-back-to-overflow-button span) {
+  margin-inline-start: 0;
+}
+
+:deep(.shaka-menu-group > button span) {
+  margin-inline-start: 0;
+}
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu).shaka-text-colors span) {
+  margin-right: 0;
+  margin-inline-end: 16px;
+}
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu) .shaka-color-swatch) {
+  margin-left: 0;
+  margin-inline-start: auto;
+}
+
+:deep(:is(.shaka-settings-menu, .shaka-sub-menu) :is(.shaka-chapter, .shaka-queue-item-text)) {
+  margin-left: 0;
+  margin-inline-start: 10px;
+}
+
+:deep(.shaka-queue-item-text .shaka-ui-icon.shaka-chosen-item) {
+  margin-left: 0;
+  margin-inline-start: 6px;
+}
+
+/*
+  Like the seek bar, the sliders of the playback speed and the other slider
+  menus run from left to right in every language, since their fill is drawn
+  from the left. The buttons beside them follow.
+*/
+:deep(.shaka-playback-rate-slider-row) {
+  direction: ltr;
+}
+
 /* Match the depth of the controls beneath the player menu. */
 .ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *)) {
   border-radius: calc(16px * var(--ui-roundness));
@@ -252,6 +349,132 @@
   align-self: flex-start;
   block-size: auto;
   line-height: 6px;
+}
+
+/*
+  In the list, toggles show the app's switch (`FtToggleSwitch`) instead of `On`
+  or `Off`, a little smaller to suit the rows. The menu is always dark, so the
+  switch takes light colors rather than the theme's, apart from the accent of
+  a switch that is on. The tiles keep the text. The switch follows the state
+  the button reports through `aria-pressed` or, for theatre mode, `ft-active`.
+*/
+:deep(.ft-menu-switch) {
+  --ft-menu-switch-width: 34px;
+  --ft-menu-switch-height: 20px;
+  --ft-menu-switch-border: 2px;
+  --ft-menu-switch-thumb-size: 14px;
+
+  display: none;
+  flex: none;
+  align-items: center;
+  align-self: center;
+  box-sizing: border-box;
+  inline-size: var(--ft-menu-switch-width);
+  block-size: var(--ft-menu-switch-height);
+  padding-inline: calc((var(--ft-menu-switch-height) - 2 * var(--ft-menu-switch-border) - var(--ft-menu-switch-thumb-size)) / 2);
+
+  /*
+    Ends where the chevrons of the submenu entries do: Shaka's label overflows
+    the button's padding by 10px, the chevron sits 5px inside it, and its glyph
+    leaves 8px of its box empty.
+  */
+  margin-inline: 10px 3px;
+  border: var(--ft-menu-switch-border) solid rgb(255 255 255 / 70%);
+  border-radius: calc(var(--ft-menu-switch-height) / 2 * max(1, var(--ui-roundness)));
+  background-color: rgb(255 255 255 / 8%);
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects);
+}
+
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button > .ft-menu-switch:not([hidden])) {
+  display: flex;
+}
+
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button:has(.ft-menu-switch:not([hidden])) .shaka-current-selection-span) {
+  display: none;
+}
+
+:deep(.ft-menu-switch-thumb) {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ft-menu-switch-thumb-size);
+  block-size: var(--ft-menu-switch-thumb-size);
+  border-radius: 50%;
+  background-color: rgb(255 255 255 / 70%);
+  color: #1c1c1c;
+  font-size: calc(var(--ft-menu-switch-thumb-size) * 0.8);
+  transition:
+    background-color var(--motion-default-effects),
+    color var(--motion-default-effects),
+    translate var(--motion-fast-spatial),
+    scale var(--motion-fast-spatial);
+}
+
+:deep(.ft-menu-switch-thumb > svg) {
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+:deep(.ft-menu-switch-on-icon),
+:deep(button:is([aria-pressed='true'], .ft-active) .ft-menu-switch-off-icon) {
+  display: none;
+}
+
+:deep(button:is([aria-pressed='true'], .ft-active) .ft-menu-switch-on-icon) {
+  display: block;
+}
+
+:deep(button:is([aria-pressed='true'], .ft-active) .ft-menu-switch) {
+  border-color: var(--toggle-checked-track-color, var(--accent-color));
+  background-color: var(--toggle-checked-track-color, var(--accent-color));
+}
+
+:deep(button:is([aria-pressed='true'], .ft-active) .ft-menu-switch-thumb) {
+  background-color: var(--toggle-checked-thumb-color, var(--accent-thumb-color, var(--text-with-accent-color)));
+  color: var(--toggle-checked-track-color, var(--accent-color));
+  translate: calc(var(--ft-menu-switch-width) - var(--ft-menu-switch-height));
+}
+
+:deep(button:is([aria-pressed='true'], .ft-active):dir(rtl) .ft-menu-switch-thumb) {
+  translate: calc(var(--ft-menu-switch-height) - var(--ft-menu-switch-width));
+}
+
+/* Like the app's switches, the thumb grows to fill the track while it is pressed. */
+:deep(button:active .ft-menu-switch-thumb) {
+  scale: calc(16 / 14);
+}
+
+/*
+  Shaka sizes these labels to leave room for an icon of the usual width, so
+  their values ended short of the chevrons of the submenu entries, and long
+  names pushed them out of line. Taking the rest of the row instead ends every
+  value and switch where the chevrons end (see `.ft-menu-switch`).
+*/
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button > .shaka-simple-overflow-button-label-inline) {
+  flex: 1 1 auto;
+  inline-size: auto;
+  padding-inline-end: 3px;
+}
+
+/* The switch after the label keeps that distance itself. */
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button:has(.ft-menu-switch:not([hidden])) > .shaka-overflow-button-label) {
+  padding-inline-end: 0;
+}
+
+/* The switch replaces the one that autoplay shows as its icon elsewhere, which leaves the icon in it. */
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > .autoplay-toggle > .ft-autoplay-switch) {
+  display: contents;
+}
+
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button.autoplay-toggle .ft-autoplay-switch-thumb) {
+  inline-size: 1em;
+  block-size: 1em;
+  padding-inline-end: 10px;
+  color: inherit;
+  transform: none;
 }
 
 /*

@@ -3,6 +3,7 @@ import shaka from 'shaka-player'
 import i18n from '../../../i18n/index'
 import { KeyboardShortcuts, PlayerIcons } from '../../../../constants'
 import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
+import { appendMenuSwitch } from './menuSwitch'
 
 export class TheatreModeButton extends shaka.ui.Element {
   /**
@@ -39,6 +40,9 @@ export class TheatreModeButton extends shaka.ui.Element {
 
     this.button_.appendChild(label)
 
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     /** @private */
@@ -71,6 +75,11 @@ export class TheatreModeButton extends shaka.ui.Element {
     })
 
     this.updateLocalisedStrings_()
+  }
+
+  release() {
+    this.menuSwitch_.release()
+    super.release()
   }
 
   /** @private */

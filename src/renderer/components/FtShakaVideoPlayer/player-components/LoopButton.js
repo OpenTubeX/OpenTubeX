@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 
 import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
+import { appendMenuSwitch } from './menuSwitch'
 
 /**
  * @typedef {{
@@ -83,6 +84,10 @@ export class LoopButton extends shaka.ui.Element {
     label.appendChild(this.currentState_)
 
     this.button_.appendChild(label)
+
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     this.eventManager.listen(this.button_, 'click', () => {
@@ -122,6 +127,7 @@ export class LoopButton extends shaka.ui.Element {
   release() {
     this.loopObserver_.disconnect()
     this.stopStateWatch_?.()
+    this.menuSwitch_.release()
     super.release()
   }
 

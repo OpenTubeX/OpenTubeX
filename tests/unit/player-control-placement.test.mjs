@@ -80,7 +80,7 @@ test('hidden controls leave the player', () => {
   const elements = [...config.overflowMenuButtons, ...config.controlPanelElements]
   for (const element of [
     'quality', 'playback_rate', 'captions', 'ft_caption_toggle', 'ft_audio_tracks', 'ft_sleep_timer', 'ft_autoplay_toggle', 'ft_chapters',
-    'ft_ambient_mode', 'ft_loop', 'picture_in_picture', 'ft_theatre_mode', 'ft_full_window',
+    'ft_ambient_mode', 'ft_loop', 'ft_picture_in_picture', 'ft_theatre_mode', 'ft_full_window',
   ]) {
     assert.equal(elements.includes(element), false, element)
   }
@@ -94,7 +94,7 @@ test('the caption toggle on the control bar keeps the caption menu', () => {
 
 test('controls on the control bar cannot be hidden', () => {
   const config = controls({ overflow: true, hidden: ['pictureInPicture', 'autoplay'] })
-  assert.ok(config.overflowMenuButtons.includes('picture_in_picture'))
+  assert.ok(config.overflowMenuButtons.includes('ft_picture_in_picture'))
   assert.ok(config.overflowMenuButtons.includes('ft_autoplay_toggle'))
 })
 
@@ -135,11 +135,11 @@ test('the compact controls of phones keep the chapters out of the menu', () => {
   assert.equal(config.overflowMenuButtons.includes('ft_chapters'), false)
   // A narrow phone control bar hides its picture in picture and caption
   // buttons, so the menu keeps both.
-  assert.ok(config.controlPanelElements.includes('picture_in_picture'))
-  assert.ok(config.overflowMenuButtons.includes('picture_in_picture'))
+  assert.ok(config.controlPanelElements.includes('ft_picture_in_picture'))
+  assert.ok(config.overflowMenuButtons.includes('ft_picture_in_picture'))
   assert.ok(config.overflowMenuButtons.includes('captions'))
 
   const removed = controls({ mobile: true, overflow: true, controlBarButtons: ['captions', 'menu', 'fullscreen'] })
   assert.ok(removed.overflowMenuButtons.includes('ft_chapters'))
-  assert.ok(removed.overflowMenuButtons.includes('picture_in_picture'))
+  assert.ok(removed.overflowMenuButtons.includes('ft_picture_in_picture'))
 })

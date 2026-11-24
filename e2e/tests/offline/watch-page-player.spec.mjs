@@ -693,7 +693,7 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
   await expectPlayerMenuScrollState(overflowMenu)
 
   const [loopIconPath, abRepeatIconPath, clearIconPath, sponsorBlockClearIconPath] = await Promise.all([
-    loopAction.locator('svg path').getAttribute('d'),
+    loopAction.locator(':scope > .shaka-ui-icon path').getAttribute('d'),
     abRepeatAction.locator('svg path').getAttribute('d'),
     overflowMenu.locator('.ab-repeat-clear-button svg path').getAttribute('d'),
     player.locator('.sponsorblock-clear-button svg path').getAttribute('d'),

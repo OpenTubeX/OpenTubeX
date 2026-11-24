@@ -2257,6 +2257,7 @@ import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { AndroidPictureInPictureButton } from './player-components/AndroidPictureInPictureButton'
+import { PictureInPictureButton } from './player-components/PictureInPictureButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { QualitySelection } from './player-components/QualitySelection'
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
@@ -5364,7 +5365,7 @@ const uiConfig = computed(() => {
 
   const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
     ? 'ft_android_picture_in_picture'
-    : 'picture_in_picture'
+    : 'ft_picture_in_picture'
   const qualityElement = props.format === 'legacy' ? 'ft_legacy_quality' : 'quality'
   const controlBarElements = {
     quality: qualityElement,
@@ -10316,6 +10317,19 @@ function registerAndroidPictureInPictureButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_android_picture_in_picture', factory)
 }
 
+function registerPictureInPictureButton() {
+  /** @implements {shaka.extern.IUIElement.Factory} */
+  class PictureInPictureButtonFactory {
+    create(rootElement, controls) {
+      return new PictureInPictureButton(rootElement, controls)
+    }
+  }
+
+  const factory = new PictureInPictureButtonFactory()
+  registerOwnElement(shakaControls, 'ft_picture_in_picture', factory)
+  registerOwnElement(shakaOverflowMenu, 'ft_picture_in_picture', factory)
+}
+
 function registerVideoInfoButton() {
   events.addEventListener('toggleVideoInfo', () => {
     if (props.shortsPlayer) emit('toggle-shorts-metadata')
@@ -12723,6 +12737,7 @@ onMounted(async () => {
   registerTheatreModeButton()
   registerFullWindowButton()
   registerAndroidPictureInPictureButton()
+  registerPictureInPictureButton()
   registerVideoInfoButton()
   registerLockControlsButton()
 

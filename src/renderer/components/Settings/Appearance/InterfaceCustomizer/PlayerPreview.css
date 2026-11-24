@@ -391,13 +391,61 @@
 .list .previewOverflowValue {
   flex-shrink: 0;
   font-size: calc(12 * var(--u));
-  margin-inline-end: calc(16 * var(--u));
+  margin-inline-end: calc(8 * var(--u));
   opacity: 1;
   padding-inline-start: calc(10 * var(--u));
 }
 
 .list .previewOverflowItem.submenu .previewOverflowValue {
   margin-inline-end: 0;
+}
+
+/* Like the player's list, toggles show a switch instead of their value. */
+.previewOverflowSwitch,
+.list .previewOverflowItem.toggle .previewOverflowValue {
+  display: none;
+}
+
+.list .previewOverflowSwitch {
+  --switch-unit: var(--u);
+
+  align-items: center;
+  background-color: rgb(255 255 255 / 8%);
+  block-size: calc(20 * var(--switch-unit));
+  border: calc(2 * var(--switch-unit)) solid rgb(255 255 255 / 70%);
+  border-radius: calc(10 * var(--switch-unit) * max(1, var(--ui-roundness)));
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  inline-size: calc(34 * var(--switch-unit));
+
+  /* Ends where the glyph of the chevrons ends, which leaves 8 units of its box empty. */
+  margin-inline: calc(10 * var(--switch-unit)) calc(8 * var(--switch-unit));
+  padding-inline: calc(1 * var(--switch-unit));
+}
+
+.list .previewOverflowSwitchThumb {
+  align-items: center;
+  background-color: rgb(255 255 255 / 70%);
+  block-size: calc(14 * var(--switch-unit));
+  border-radius: 50%;
+  color: #1c1c1c;
+  display: flex;
+  flex-shrink: 0;
+  font-size: calc(11 * var(--switch-unit));
+  inline-size: calc(14 * var(--switch-unit));
+  justify-content: center;
+}
+
+.list .previewOverflowSwitch.on {
+  background-color: var(--toggle-checked-track-color, var(--accent-color));
+  border-color: var(--toggle-checked-track-color, var(--accent-color));
+  justify-content: flex-end;
+}
+
+.list .previewOverflowSwitch.on .previewOverflowSwitchThumb {
+  background-color: var(--toggle-checked-thumb-color, var(--accent-thumb-color, var(--text-with-accent-color)));
+  color: var(--toggle-checked-track-color, var(--accent-color));
 }
 
 /* The same chevron as the player's submenu entries. */
@@ -530,12 +578,16 @@
   .list .previewOverflowValue {
     font-size: calc(12 * var(--p));
     margin-block-start: 0;
-    margin-inline-end: calc(16 * var(--p));
+    margin-inline-end: calc(8 * var(--p));
     padding-inline-start: calc(10 * var(--p));
   }
 
   .list .previewOverflowItem.submenu .previewOverflowValue {
     margin-inline-end: 0;
+  }
+
+  .list .previewOverflowSwitch {
+    --switch-unit: var(--p);
   }
 
   .list .previewOverflowItem.submenu::after {
