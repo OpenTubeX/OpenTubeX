@@ -314,6 +314,14 @@ test('devices read the Data Saver Thumbnails mode from the switch of older versi
   assert.equal(migrateLegacySyncedSettings({ thumbnailDataSaver: legacy, thumbnailDataSaverMode: current }).thumbnailDataSaverMode, current)
 })
 
+test('devices read the Keep the Player Visible switch from the scroll player settings of older versions', () => {
+  const legacy = { key: 'scrollPlayerMode', value: 'off', updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ scrollPlayerMode: legacy }).keepPlayerVisibleOnScroll,
+    { key: 'keepPlayerVisibleOnScroll', value: false, updatedAt: 10 })
+  const current = { key: 'keepPlayerVisibleOnScroll', value: true, updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ scrollPlayerMode: legacy, keepPlayerVisibleOnScroll: current }).keepPlayerVisibleOnScroll, current)
+})
+
 test('devices read the Title Lines select from the Limit Titles to Two Lines switch of older versions', () => {
   const legacy = { key: 'limitTitlesToTwoLines', value: false, updatedAt: 10 }
   assert.deepEqual(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy }).titleLineLimit,

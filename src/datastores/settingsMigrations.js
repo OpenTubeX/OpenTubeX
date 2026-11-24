@@ -41,9 +41,11 @@ export function isFormerDefaultQuickSettings(value) {
     value.every((id, index) => id === FORMER_DEFAULT_QUICK_SETTINGS[index])
 }
 
-/** Former switches and the selects that replaced them. */
+/** Former settings and the ones that replaced them. */
 const REPLACED_SETTING_IDS = new Map([
   ['hideVideoDescription', 'videoDescriptionMode'],
+  ['scrollMiniPlayerEnabled', 'keepPlayerVisibleOnScroll'],
+  ['scrollPlayerMode', 'keepPlayerVisibleOnScroll'],
   ['limitTitlesToTwoLines', 'titleLineLimit'],
   ['holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier'],
   ['thumbnailDataSaver', 'thumbnailDataSaverMode'],
@@ -64,6 +66,15 @@ export function migrateSettingIds(ids) {
 /** @param {unknown} ids */
 export function hasReplacedSettingId(ids) {
   return Array.isArray(ids) && ids.some(id => REPLACED_SETTING_IDS.has(id))
+}
+
+/**
+ * The Keep the Player Visible switch that replaced the When Scrolling Down
+ * select ('mini', 'pin' or 'off') and the mini player switch before it.
+ * @param {unknown} value
+ */
+export function keepPlayerVisibleOnScrollFromLegacy(value) {
+  return value !== false && value !== 'off'
 }
 
 /**
@@ -111,7 +122,7 @@ export async function migrateStoredSettings(datastore) {
         'currentLocale', 'externalPlayerCustomArgs', 'defaultTheatreMode', 'saveWatchedProgress',
         'watchedProgressSavingMode', 'screenshotAskPath', 'quickSettings',
         'hideVideoDescription', 'videoDescriptionMode', 'syncServerSettingsExcluded',
-        'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode',
+        'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode', 'keepPlayerVisibleOnScroll',
         'limitTitlesToTwoLines', 'titleLineLimit', 'syncServerSettingUpdatedAt',
         'holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier',
         'thumbnailDataSaver', 'thumbnailDataSaverMode', 'defaultInvidiousInstance',
@@ -230,11 +241,22 @@ export async function migrateStoredSettings(datastore) {
     }
     await datastore.removeAsync({ _id: 'compactNavigationLabels' })
   }
+  // The When Scrolling Down select, and the mini player switch before it,
+  // became the Keep the Player Visible switch.
+  const legacyScrollPlayer = stored.get('scrollPlayerMode') ?? stored.get('scrollMiniPlayerEnabled')
+  if (legacyScrollPlayer) {
+    // Always save the switch, since startup only maps the older
+    // Picture-in-Picture mode when it is not saved.
+    if (!stored.has('keepPlayerVisibleOnScroll')) {
+      await save('keepPlayerVisibleOnScroll', keepPlayerVisibleOnScrollFromLegacy(legacyScrollPlayer.value))
+    }
+    await datastore.removeAsync({ _id: 'scrollPlayerMode' })
+    await datastore.removeAsync({ _id: 'scrollMiniPlayerEnabled' })
+  }
   // Keep Playing When Navigating Away now also decides whether switching tabs
-  // shows the mini player, and scrolling past the player always pins it when
-  // there is room.
-  for (const key of ['scrollMiniPlayerOnAllTabs', 'scrollMiniPlayerEnabled', 'scrollPlayerMode']) {
-    if (stored.has(key)) await datastore.removeAsync({ _id: key })
+  // shows the mini player.
+  if (stored.has('scrollMiniPlayerOnAllTabs')) {
+    await datastore.removeAsync({ _id: 'scrollMiniPlayerOnAllTabs' })
   }
   // Older versions saved an Invidious instance's credentials in its URL, which
   // exports and sync include. They are a secret setting now, which

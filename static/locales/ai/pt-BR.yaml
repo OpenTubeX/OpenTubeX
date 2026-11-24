@@ -954,6 +954,8 @@ Settings:
       Wayland Minimize Unsupported: O Wayland não comunica às aplicações quando uma janela é minimizada, pelo que este acionador não está disponível. Use «Quando a janela perde o foco ou se muda para outra janela», que também abrange a minimização.
       On Tab Change Mini Player: Ao mudar de guia, o minileitor é exibido no lugar. Para usar isto, desative “Continuar reproduzindo ao sair de um vídeo”.
     Keep Playing After Leaving Video: Continuar reproduzindo ao sair de um vídeo
+    Keep Player Visible When Scrolling: Manter o player visível ao rolar
+    Keep Player Visible When Scrolling Tooltip: O player só é fixado enquanto ocupa no máximo metade da altura da janela. Caso contrário, como em celulares na horizontal ou em janelas largas, o miniplayer é exibido no lugar.
     Multiply Seek Interval by Playback Rate: Multiplicar o intervalo de avanço pela velocidade de reprodução
     Show Playback Rate Adjusted Timestamp: Mostrar marca temporal ajustada à velocidade de reprodução
     Use YouTube-style Shorts: Usar Shorts ao estilo do YouTube

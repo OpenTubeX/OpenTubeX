@@ -567,24 +567,39 @@ test('migrates the Compact Tab Labels switch to the Navigation Bar Labels select
   assert.equal(migrateLegacySyncedSettings({ compactNavigationLabels: legacy, navigationBarLabels: current }).navigationBarLabels, current)
 })
 
-test('removes the former scroll player settings', async () => {
-  const settings = new Datastore()
-  await settings.insertAsync([
-    { _id: 'scrollMiniPlayerEnabled', value: false },
-    { _id: 'scrollMiniPlayerOnAllTabs', value: true },
-    { _id: 'scrollPlayerMode', value: 'off' },
-    { _id: 'keepPlayingOnNavigation', value: false },
-  ])
+test('migrates the former scroll player settings to the Keep the Player Visible switch', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'scrollMiniPlayerOnAllTabs', value: true },
+        { _id: 'scrollPlayerMode', value: 'off' },
+        { _id: 'quickSettings', value: ['scrollPlayerMode', 'hideComments'] },
+      ],
+      { keepPlayerVisibleOnScroll: false, quickSettings: ['keepPlayerVisibleOnScroll', 'hideComments'] },
+    ],
+    [[{ _id: 'scrollMiniPlayerEnabled', value: false }], { keepPlayerVisibleOnScroll: false }],
+    // Startup maps the older Picture-in-Picture mode only while the switch is not saved.
+    [[{ _id: 'scrollPlayerMode', value: 'mini' }], { keepPlayerVisibleOnScroll: true }],
+    [
+      [{ _id: 'scrollMiniPlayerEnabled', value: false }, { _id: 'scrollPlayerMode', value: 'pin' }],
+      { keepPlayerVisibleOnScroll: true },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
 
-  await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
 
-  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
-  assert.deepEqual(stored, { keepPlayingOnNavigation: false })
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
 
   assert.deepEqual(
-    migrateLegacySettings({ scrollMiniPlayerEnabled: false, scrollMiniPlayerOnAllTabs: true, scrollPlayerMode: 'off' }),
-    {}
+    migrateLegacySettings({ scrollMiniPlayerEnabled: true, scrollMiniPlayerOnAllTabs: true, scrollPlayerMode: 'off' }),
+    { keepPlayerVisibleOnScroll: false }
   )
+  assert.deepEqual(migrateLegacySettings({ scrollMiniPlayerEnabled: false }), { keepPlayerVisibleOnScroll: false })
 })
 
 test('migrates the Limit Titles to Two Lines switch to the Title Lines select', async () => {

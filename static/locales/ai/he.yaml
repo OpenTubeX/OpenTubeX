@@ -1012,6 +1012,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland אינו מדווח ליישומים על מזעור חלון, ולכן גורם מפעיל זה אינו זמין. השתמשו במקום זאת באפשרות "כשהחלון מאבד מיקוד או כשעוברים ממנו", שחלה גם על מזעור.
       On Tab Change Mini Player: מעבר בין כרטיסיות מציג במקום זאת את נגן המיני. כדי להשתמש בזה, יש לכבות את “המשך ניגון לאחר יציאה מסרטון”.
     Keep Playing After Leaving Video: המשך ניגון לאחר יציאה מסרטון
+    Keep Player Visible When Scrolling: השארת הנגן גלוי בעת גלילה
+    Keep Player Visible When Scrolling Tooltip: הנגן מוצמד רק כל עוד הוא תופס לכל היותר מחצית מגובה החלון. אחרת, למשל בטלפונים לרוחב או בחלונות רחבים, מוצג במקום זאת הנגן המוקטן.
     Multiply Seek Interval by Playback Rate: הכפלת מרווח הדילוג במהירות ההפעלה
     Show Playback Rate Adjusted Timestamp: הצגת הזמן המותאם למהירות ההפעלה
     Use YouTube-style Shorts: שימוש בסרטוני Shorts בסגנון YouTube

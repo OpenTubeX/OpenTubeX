@@ -1004,6 +1004,8 @@ Settings:
       Wayland Minimize Unsupported: Nid yw Wayland yn rhoi gwybod i apiau pan gaiff ffenestr ei lleihau, felly nid yw'r sbardun hwn ar gael. Defnyddiwch "Pan fydd y ffenestr yn colli ffocws neu pan newidir i ffwrdd ohoni" yn ei le; mae hynny hefyd yn cynnwys lleihau.
       On Tab Change Mini Player: Mae newid tab yn dangos y chwaraewr bach yn lle hynny. I ddefnyddio hyn, diffoddwch “Parhau i chwarae ar ôl gadael fideo”.
     Keep Playing After Leaving Video: Parhau i chwarae ar ôl gadael fideo
+    Keep Player Visible When Scrolling: Cadw'r chwaraewr yn weladwy wrth sgrolio
+    Keep Player Visible When Scrolling Tooltip: "Dim ond tra bo'n cymryd hanner uchder y ffenestr ar y mwyaf y caiff y chwaraewr ei binio. Fel arall, fel ar ffonau yn y modd tirlun neu mewn ffenestri llydan, dangosir y chwaraewr bach yn lle hynny."
     Multiply Seek Interval by Playback Rate: Lluosi'r cyfwng neidio â'r gyfradd chwarae
     Show Playback Rate Adjusted Timestamp: Dangos stamp amser wedi'i addasu yn ôl y gyfradd chwarae
     Use YouTube-style Shorts: Defnyddio Byrion yn arddull YouTube

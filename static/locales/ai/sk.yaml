@@ -1001,6 +1001,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland neoznamuje aplikáciám minimalizovanie okna, preto táto možnosť nie je dostupná. Použite možnosť „Keď okno stratí zameranie alebo sa prepnete inam“, ktorá zahŕňa aj minimalizovanie.
       On Tab Change Mini Player: Pri prepnutí karty sa namiesto toho zobrazí miniatúrny prehrávač. Ak to chcete použiť, vypnite „Po opustení videa pokračovať v prehrávaní“.
     Keep Playing After Leaving Video: Po opustení videa pokračovať v prehrávaní
+    Keep Player Visible When Scrolling: Pri posúvaní ponechať prehrávač viditeľný
+    Keep Player Visible When Scrolling Tooltip: Prehrávač sa pripne len vtedy, keď zaberá najviac polovicu výšky okna. Inak, napríklad na telefónoch na šírku alebo v širokých oknách, sa namiesto toho zobrazí miniprehrávač.
     Multiply Seek Interval by Playback Rate: Násobiť interval posunu rýchlosťou prehrávania
     Show Playback Rate Adjusted Timestamp: Zobraziť čas upravený podľa rýchlosti prehrávania
     Use YouTube-style Shorts: Použiť krátke videá v štýle YouTube Shorts

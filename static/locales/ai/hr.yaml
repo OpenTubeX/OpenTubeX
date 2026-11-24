@@ -1006,6 +1006,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland aplikacijama ne dojavljuje minimiziranje prozora, pa ovaj okidač nije dostupan. Umjesto toga upotrijebite "Kada prozor izgubi fokus ili se prijeđe na drugi prozor", što obuhvaća i minimiziranje.
       On Tab Change Mini Player: Pri promjeni kartice umjesto toga prikazuje se minireproduktor. Za korištenje ove opcije isključite „Nastavi reprodukciju nakon napuštanja videozapisa”.
     Keep Playing After Leaving Video: Nastavi reprodukciju nakon napuštanja videozapisa
+    Keep Player Visible When Scrolling: Zadrži reproduktor vidljivim pri pomicanju
+    Keep Player Visible When Scrolling Tooltip: Player se prikvači samo dok zauzima najviše polovicu visine prozora. Inače, primjerice na telefonima u vodoravnom položaju ili u širokim prozorima, umjesto toga prikazuje se mini player.
     Multiply Seek Interval by Playback Rate: Pomnoži interval premotavanja brzinom reprodukcije
     Show Playback Rate Adjusted Timestamp: Prikaži vremensku oznaku prilagođenu brzini reprodukcije
     Use YouTube-style Shorts: Upotrebljavaj Shorts u stilu YouTubea

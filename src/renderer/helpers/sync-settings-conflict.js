@@ -4,6 +4,7 @@ import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes }
 import {
   hasReplacedSettingId,
   holdPlaybackRateMultiplierFromSwitch,
+  keepPlayerVisibleOnScrollFromLegacy,
   migrateSettingIds,
   navigationBarLabelsFromCompactSwitch,
   thumbnailDataSaverModeFromSwitch,
@@ -45,6 +46,12 @@ export function migrateLegacySyncedSettings(remote) {
   if (legacy && !remote.videoDescriptionMode) {
     migrated.videoDescriptionMode = {
       ...legacy, key: 'videoDescriptionMode', value: legacy.value === true ? 'hide' : 'collapsed',
+    }
+  }
+  const scrollPlayer = remote.scrollPlayerMode ?? remote.scrollMiniPlayerEnabled
+  if (scrollPlayer && !remote.keepPlayerVisibleOnScroll) {
+    migrated.keepPlayerVisibleOnScroll = {
+      ...scrollPlayer, key: 'keepPlayerVisibleOnScroll', value: keepPlayerVisibleOnScrollFromLegacy(scrollPlayer.value),
     }
   }
   const limitTitles = remote.limitTitlesToTwoLines

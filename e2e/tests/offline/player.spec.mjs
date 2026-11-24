@@ -2369,7 +2369,7 @@ test.describe('scroll mini player', () => {
 test.describe('pinned player', () => {
   test.use({ seed: { settings: PLAYER_SEED } })
 
-  test('stays below the top navigation while scrolling and docks when it is too tall', async ({ app, page }) => {
+  test('stays below the top navigation while scrolling, docks when it is too tall and scrolls away when turned off', async ({ app, page }) => {
     await openDemoVideo({ app, page })
     await setWindowSize(app, page, { width: 480, height: 860 })
     const player = page.locator('.ftVideoPlayer')
@@ -2424,6 +2424,15 @@ test.describe('pinned player', () => {
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     // Then the page scrollbar starts below the header again.
     await expect.poll(scrollbarTop).toBeCloseTo(navigationBottom, 0)
+
+    // Turned off, the player neither docks nor pins and scrolls with the page.
+    await page.evaluate(() => window.$store.dispatch('updateKeepPlayerVisibleOnScroll', false))
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await setWindowSize(app, page, { width: 480, height: 860 })
+    await page.evaluate(() => window.scrollTo(0, 700))
+    await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().bottom))
+      .toBeLessThanOrEqual(navigationBottom)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
   })
 })
 

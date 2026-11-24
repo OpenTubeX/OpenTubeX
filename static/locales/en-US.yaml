@@ -1482,6 +1482,8 @@ Settings:
       On Window Hide: When the window loses focus or is switched away
       Wayland Minimize Unsupported: Wayland does not report window minimize to apps, so this trigger is unavailable. Use "When the window loses focus or is switched away" instead, which also covers minimizing.
     Keep Playing After Leaving Video: Keep playing after leaving a video
+    Keep Player Visible When Scrolling: Keep player visible when scrolling
+    Keep Player Visible When Scrolling Tooltip: The player is only pinned while it takes up at most half of the window's height. Otherwise, such as on phones in landscape or in wide windows, the mini player shows instead.
     Scroll Volume Over Video Player: Scroll Volume Over Video Player
     Scroll Playback Rate Over Video Player: Scroll Playback Rate Over Video Player
     Skip by Scrolling Over Video Player: Skip by Scrolling Over Video Player

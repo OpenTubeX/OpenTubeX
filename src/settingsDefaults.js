@@ -43,6 +43,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
     autoPictureInPictureTriggers: [],
     mobileAutoPictureInPicture: true,
+    // Scrolling past the player pins it at the top when there is room and docks it into the mini player otherwise
+    keepPlayerVisibleOnScroll: true,
     compactMobileMiniPlayer: false,
     keepPlayingOnNavigation: true,
     scrollMiniPlayerSavedRect: '',

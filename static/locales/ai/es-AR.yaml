@@ -1084,6 +1084,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland no informa a las aplicaciones cuando se minimiza una ventana, por lo que este activador no está disponible. Usá «Cuando la ventana pierde el foco o se cambia a otra», que también abarca la minimización.
       On Tab Change Mini Player: Al cambiar de pestaña se muestra el minirreproductor. Para usar esto, desactivá “Seguir reproduciendo al salir de un video”.
     Keep Playing After Leaving Video: Seguir reproduciendo al salir de un video
+    Keep Player Visible When Scrolling: Mantener el reproductor visible al desplazarse
+    Keep Player Visible When Scrolling Tooltip: El reproductor solo se fija mientras ocupe como máximo la mitad de la altura de la ventana. Si no, como en teléfonos en horizontal o en ventanas anchas, se muestra el minirreproductor.
     Multiply Seek Interval by Playback Rate: Multiplicar el intervalo de avance por la velocidad de reproducción
     Show Playback Rate Adjusted Timestamp: Mostrar la marca de tiempo ajustada a la velocidad de reproducción
     Use YouTube-style Shorts: Usar Shorts al estilo de YouTube

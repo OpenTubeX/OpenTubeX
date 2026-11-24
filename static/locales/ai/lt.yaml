@@ -1196,6 +1196,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland nepraneša programoms apie lango sumažinimą, todėl šis paleidiklis nepasiekiamas. Vietoj jo naudokite „Langui praradus aktyvumą arba perėjus į kitą langą“, nes tai taip pat apima sumažinimą.
       On Tab Change Mini Player: Perjungiant skirtukus vietoj to rodomas mini leistuvas. Norėdami tai naudoti, išjunkite „Tęsti atkūrimą išėjus iš vaizdo įrašo“.
     Keep Playing After Leaving Video: Tęsti atkūrimą išėjus iš vaizdo įrašo
+    Keep Player Visible When Scrolling: Slenkant palikti grotuvą matomą
+    Keep Player Visible When Scrolling Tooltip: Grotuvas prisegamas tik tol, kol užima ne daugiau kaip pusę lango aukščio. Kitu atveju, pavyzdžiui, telefonuose gulsčiu režimu arba plačiuose languose, vietoj jo rodomas mini grotuvas.
     Multiply Seek Interval by Playback Rate: Dauginti persukimo intervalą iš atkūrimo greičio
     Show Playback Rate Adjusted Timestamp: Rodyti pagal atkūrimo greitį pakoreguotą laiko žymą
     Use YouTube-style Shorts: Naudoti „YouTube“ stiliaus „Shorts“

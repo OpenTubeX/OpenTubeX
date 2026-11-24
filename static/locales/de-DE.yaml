@@ -1342,6 +1342,8 @@ Settings:
       On Window Hide: Wenn das Fenster den Fokus verliert oder gewechselt wird
       Wayland Minimize Unsupported: Wayland meldet das Minimieren von Fenstern nicht an Anwendungen, daher ist dieser Auslöser nicht verfügbar. Verwende stattdessen „Wenn das Fenster den Fokus verliert oder gewechselt wird“, was das Minimieren ebenfalls abdeckt.
     Keep Playing After Leaving Video: Nach dem Verlassen eines Videos weiter abspielen
+    Keep Player Visible When Scrolling: Player beim Scrollen sichtbar halten
+    Keep Player Visible When Scrolling Tooltip: Der Player wird nur angeheftet, solange er höchstens die Hälfte der Fensterhöhe einnimmt. Sonst, etwa auf Smartphones im Querformat oder in breiten Fenstern, wird stattdessen der Mini-Player angezeigt.
     Remember Volume: Lautstärke beibehalten
     Mono Audio: Mono-Audio
     Normalize Loudness: Lautstärke normalisieren
