@@ -803,6 +803,19 @@ export class TabManager {
     return batch.promise
   }
 
+  /**
+   * Publishes a mount or loading change, or leaves it to an open burst of
+   * background tab creations. The burst's tabs report their mounts while it is
+   * still open, and publishing those reports would show the burst partially.
+   */
+  _broadcastStateUpdateAfterTabCreations() {
+    if (this._rapidTabCreationBatch) {
+      this._rapidTabCreationBatch.hasDeferredUpdates = true
+      return
+    }
+    this._broadcastStateUpdate()
+  }
+
   /** Whether the shown tab is incognito, so a window opened from it starts with an incognito tab */
   isPresentingIncognito() {
     return this.tabs.get(this.presentedTabId ?? this.activeTabId)?.isIncognito === true
@@ -982,7 +995,7 @@ export class TabManager {
     this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
     this._resolveTabMountWaiters(tabId, mountRevision, true)
 
-    this._broadcastStateUpdate()
+    this._broadcastStateUpdateAfterTabCreations()
   }
 
   /**
@@ -1686,7 +1699,7 @@ export class TabManager {
     }
 
     tab.isLoading = nextLoading
-    this._broadcastStateUpdate()
+    this._broadcastStateUpdateAfterTabCreations()
     if (!nextLoading) {
       this.previews.scheduleRefresh(tab)
     }
