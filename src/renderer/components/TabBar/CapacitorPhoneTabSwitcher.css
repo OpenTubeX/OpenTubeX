@@ -85,6 +85,12 @@
   background-color: var(--card-bg-color);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+
+  /* The Android Back preview scales and fades the switcher from script. Its
+     opacity adds an effect node, which repaints the whole switcher as the
+     gesture starts and ends, and Android WebView can draw those frames before
+     the switcher is rastered again, so the page shows through for a frame. */
+  will-change: transform, opacity;
 }
 
 .capacitorPhoneTabOverlay * {

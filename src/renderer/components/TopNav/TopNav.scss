@@ -531,6 +531,27 @@
   }
 }
 
+// The Android Back preview slides and fades the open search from script. Its
+// opacity adds an effect node, which repaints the whole search bar as the
+// gesture starts and ends, and Android WebView can draw those frames before the
+// bar is rastered again, so it flashes.
+.app.capacitorTabs .phoneLayout.phoneSearchOpen .searchContainer {
+  will-change: transform, opacity;
+}
+
+// The opacity hint also makes the bar the backdrop root of the field and its
+// suggestions, which then no longer blur the page behind them. Custom themes
+// set the blur, so keep only the transform hint while one blurs the search bar.
+body[data-custom-theme] .app.capacitorTabs .phoneLayout.phoneSearchOpen .searchContainer {
+  will-change: transform;
+}
+
+@container style(--search-bar-blur: none) {
+  body[data-custom-theme] .app.capacitorTabs .phoneLayout.phoneSearchOpen .searchContainer {
+    will-change: transform, opacity;
+  }
+}
+
 .app.capacitorTabs .phoneLayout {
   .topNavInner {
     display: flex;
