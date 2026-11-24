@@ -750,6 +750,7 @@ import {
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, isOlderRelease, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
+import { titleUnloadedTabsFromSavedData } from './helpers/unloadedTabTitles'
 import { channelUnsubscribeConfirmation, getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
@@ -1409,6 +1410,7 @@ let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeLibraryNoticesListener = null
 let removeOpenUrlListener = null
+let stopTitlingUnloadedTabs = null
 let removeRoutePreloadIntent = null
 let removeCapacitorIntegrationListeners = null
 let removeAndroidIncomingShare = null
@@ -2037,6 +2039,7 @@ onMounted(async () => {
 
     if (process.env.IS_ELECTRON) {
       removeOpenUrlListener = enableOpenUrl()
+      stopTitlingUnloadedTabs = titleUnloadedTabsFromSavedData()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
       removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
@@ -2226,6 +2229,7 @@ onBeforeUnmount(() => {
   removeConfirmMultipleTabsActionListener?.()
   removeLibraryNoticesListener?.()
   removeOpenUrlListener?.()
+  stopTitlingUnloadedTabs?.()
   removeRoutePreloadIntent?.()
   removeCapacitorIntegrationListeners?.()
   removeAndroidIncomingShare?.()

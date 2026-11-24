@@ -425,3 +425,91 @@ for (const existingLanding of [false, true]) {
     })
   })
 }
+
+test.describe('restored unloaded tabs that show their route', () => {
+  const VIDEO_ID = 'abcdefghijk'
+  const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  const routes = {
+    video: `/watch/${VIDEO_ID}`,
+    channel: `/channel/${CHANNEL_ID}`,
+    post: `/post/UgkxAAAA?authorId=${CHANNEL_ID}`,
+    search: '/search/saved%20query'
+  }
+
+  test.use({
+    seed: {
+      settings: { startupBehavior: 'restoreTabLoadState' },
+      // A channel that is only known from the history, not subscribed to
+      history: [{
+        _id: VIDEO_ID,
+        videoId: VIDEO_ID,
+        title: 'Watched video',
+        author: 'Watched channel',
+        authorId: CHANNEL_ID,
+        published: Date.now() - 86_400_000,
+        description: '',
+        viewCount: 1,
+        lengthSeconds: 60,
+        watchProgress: 10,
+        isWatched: false,
+        timeWatched: Date.now(),
+        isLive: false,
+        type: 'video'
+      }],
+      tabSessions: [{
+        _id: 'e2e-window-session',
+        value: {
+          tabs: [
+            { id: SUBSCRIPTIONS_TAB_ID, url: 'app://bundle/index.html#/subscriptions', title: 'Subscriptions', isUnloaded: false },
+            ...Object.entries(routes).map(([id, route]) => ({ id, url: `app://bundle/index.html#${route}`, title: route, isUnloaded: true }))
+          ],
+          activeTabId: SUBSCRIPTIONS_TAB_ID
+        }
+      }]
+    }
+  })
+
+  test('take their titles from the route and saved data', async ({ page }) => {
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return Object.fromEntries(state.tabs.filter(tab => tab.isUnloaded).map(tab => [tab.id, tab.title]))
+    })).toEqual({
+      video: 'Watched video',
+      channel: 'Watched channel',
+      post: 'Community Post | Watched channel',
+      search: 'saved query'
+    })
+  })
+
+  test('replace a post\'s title without its author once saved data has the author', async ({ page }) => {
+    const authorId = 'UCcccccccccccccccccccccc'
+    const tabId = await page.evaluate(async authorId => {
+      const tab = await window.ftElectron.tabs.create({ route: 'post/UgkxBBBB', query: { authorId }, makeActive: false, lazyLoad: true })
+      return tab.id
+    }, authorId)
+    const readTitle = () => page.evaluate(async tabId => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id === tabId)?.title
+    }, tabId)
+    await expect.poll(readTitle).toBe('Community Post')
+
+    await page.evaluate(async authorId => {
+      await window.$store.dispatch('updateHistory', {
+        videoId: 'zzzzzzzzzzz',
+        title: 'Later video',
+        author: 'Later channel',
+        authorId,
+        published: Date.now(),
+        description: '',
+        viewCount: 1,
+        lengthSeconds: 60,
+        watchProgress: 0,
+        timeWatched: Date.now(),
+        isLive: false,
+        type: 'video'
+      })
+    }, authorId)
+
+    await expect.poll(readTitle).toBe('Community Post | Later channel')
+  })
+})

@@ -1,13 +1,22 @@
+import { getFixedInternalRouteTitle, getRouteDerivedTitle } from '../../internalRoutes.js'
 import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
 import { cloneRoute, normalizeRoute } from './routes.js'
 
 const MAX_CLOSED_CAPACITOR_TABS = 10
 
+/**
+ * The title a tab shows before its page sets one, like on desktop.
+ * @param {{ path: string, fullPath: string }} route
+ */
+function getDefaultTabTitle(route) {
+  return getFixedInternalRouteTitle(route.path) ?? getRouteDerivedTitle(route.path) ?? route.fullPath
+}
+
 export function createCapacitorTab(route, title = '', id = window.crypto.randomUUID()) {
   const normalizedRoute = normalizeRoute(route)
   const resolvedTitle = typeof title === 'string' && title.length > 0
     ? title
-    : normalizedRoute.fullPath
+    : getDefaultTabTitle(normalizedRoute)
 
   return {
     id,
@@ -300,7 +309,7 @@ function normalizePersistedTab(tab, rememberHistory = true) {
   const route = normalizeRoute(tab.route)
   const title = typeof tab.title === 'string' && tab.title.length > 0
     ? tab.title
-    : route.fullPath
+    : getDefaultTabTitle(route)
   const history = rememberHistory && Array.isArray(tab.history) && tab.history.length > 0
     ? tab.history.map(entry => ({
         route: cloneRoute(entry?.route),
