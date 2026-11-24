@@ -266,8 +266,7 @@ test.describe('fallback navigation commands', () => {
     seed: {
       settings: {
         backendFallback: true,
-        hidePopularVideos: true,
-        hideTrendingVideos: true
+        navigationItems: ['subscriptions', 'history']
       }
     }
   })

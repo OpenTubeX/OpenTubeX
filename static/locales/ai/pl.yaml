@@ -6,6 +6,8 @@ Tabs Unloaded To Free Memory: Aby zwolnić pamięć, uśpiono {count} ostatnio n
 Global:
   Loading More: Wczytywanie kolejnych elementów
   Show Blocked Item: Pokaż zablokowany element
+  Auto: Automatycznie
+  'Off': Wyłączone
 Search Listing:
   Label:
     Members Only: Tylko dla wspierających
@@ -637,9 +639,7 @@ Settings:
       Attribution: (obsługiwane przez Yandex)
     Rotate Wide Videos to Landscape in Fullscreen: 'Obracaj szerokie filmy poziomo w trybie pełnoekranowym'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
-    Preload Upcoming Videos: "Wstępnie wczytuj następne filmy"
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
-    Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
     Keep Status Bar Hidden in Fullscreen: "Ukrywaj pasek stanu na pełnym ekranie"
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
@@ -883,6 +883,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ukrywaj obejrzane filmy w wyszukiwaniu i rekomendacjach"
     Hide Full Screen Video Title: Ukryj tytuł filmu w trybie pełnego okna lub pełnego ekranu
+    Blocked Items:
+      Blocked Items: Zablokowane elementy
+      Hide: Ukrywaj
+      Blur: Rozmywaj
+      Show: Pokazuj
     Digital Wellbeing:
       Count Watch Time From: "Licz czas oglądania"
       Break Reminder Action: "Gdy nadejdzie czas na przerwę"
@@ -909,7 +914,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Wycisz powiadomienia o nowościach w porze snu"
       Stop Autoplay at Bedtime and After the Daily Limit: "Zatrzymaj autoodtwarzanie w porze snu i po osiągnięciu dziennego limitu"
     Hide Popularity Graph: "Ukryj wykres popularności"
-    Enable Block Lists: "Włącz listy blokowania"
     Hide End-Screen Recommendations: "Ukryj rekomendacje na ekranie końcowym"
     AI Video Summaries: Podsumowania filmów SI
     Hide: Ukryj
@@ -931,7 +935,6 @@ Settings:
       Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu
     Hide Channel Avatars: Ukrywaj awatary kanałów
     Shorten View Counts: Skracaj liczbę wyświetleń, komentarzy i polubień komentarzy
-    Hide Home: Ukryj stronę główną
     Hide Live Chat Replay: Ukrywaj powtórkę czatu na żywo
     Disable A-B Repeat: Wyłącz powtarzanie A-B
     Hide Paid Promotion Badge: Ukrywaj oznaczenie płatnej promocji
@@ -939,7 +942,6 @@ Settings:
     Show Video Title: Pokazuj tytuł filmu
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
-    Blur Blocked Items: Rozmywaj zablokowane elementy zamiast je ukrywać
   Data Settings:
     Backup separate profile data: "Ta kopia zapasowa zawiera też dane {count} oddzielnego profilu, które zostaną przywrócone do tego profilu. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili."
     Subscription cache file: "Ten plik przechowuje w pamięci podręcznej tylko filmy z Twoich subskrypcji, a nie kanały. Zamiast niego wybierz profiles.db lub eksport subskrypcji."
@@ -1698,7 +1700,6 @@ Tooltips:
     Enable Tabs: "Bieżąca strona pozostaje otwarta. Pozostałe karty są zachowywane do ponownego uruchomienia aplikacji; włącz karty ponownie, aby je przywrócić."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."
     Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
-    Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.
     Stream Extraction Method: |
       Wybierz sposób pobierania strumieni filmów przez OpenTubeX. Po wybraniu yt-dlp musi być dostępny.
       Uruchamianie filmów za pomocą yt-dlp może trwać dłużej.
@@ -1727,9 +1728,7 @@ Tooltips:
       Wyższe wartości mogą pomóc przy wolnym lub niestabilnym połączeniu, ale zwiększają użycie transferu i pamięci.
       Mogą też sprawić, że tryb Auto zaniży prędkość połączenia i wybierze niższą jakość.
       To ustawienie nie wpływa na strumienie ograniczone do jednego żądania naraz.
-    Preload Upcoming Videos: "Pobiera i zapisuje w pamięci podręcznej adresy yt-dlp następnych filmów. Kolejka ma pierwszeństwo przed playlistami i rekomendacjami."
-    Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
-    Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
+    Upcoming Videos to Preload: "Pobiera i zapisuje w pamięci podręcznej adresy strumieni yt-dlp dla maksymalnie tylu filmów, które mogą zostać odtworzone jako następne. Kolejka oglądania ma pierwszeństwo przed playlistami i rekomendacjami."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
     Keep Status Bar Hidden in Fullscreen: "Pokazuj pasek stanu tylko po przesunięciu palcem od krawędzi ekranu i po chwili ukrywaj go ponownie. Dotknięcie odtwarzacza już go nie pokazuje."
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
@@ -1760,6 +1759,7 @@ Tooltips:
     Take a Break Reminder: "Wstrzymuje film po takim czasie oglądania. Przerwa trwająca 10 minut lub dłużej rozpoczyna liczenie od nowa."
     Bedtime Reminder: "Wstrzymuje film i przypomina o zakończeniu oglądania między godziną rozpoczęcia a godziną zakończenia."
     Shorten View Counts: Pokazuje liczbę wyświetleń, komentarzy i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
+    Blocked Items: Ukrywaj usuwa filmy, playlisty i kanały pasujące do poniższych list. Rozmywaj pokazuje je rozmyte, dopóki ich nie odsłonisz. Pokazuj ignoruje listy.
   Subscription Settings:
     Refresh These Feeds Together: "Gdy odświeżysz jeden z zaznaczonych kanałów, pozostałe zaznaczone kanały odświeżą się zaraz po nim. Automatyczne odświeżanie nadal działa według interwału każdego kanału."
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
@@ -1776,12 +1776,12 @@ Tooltips:
     Toggle Playback With Tab Icon: Kliknięcie ikony karty z odtwarzanym lub wstrzymanym filmem wstrzymuje go lub wznawia bez przełączania na tę kartę.
     Only Show Important Notifications: Ukrywa powiadomienia w aplikacji, które jedynie potwierdzają działanie lub informują o stanie, w tym te oferujące Cofnij. Błędy, ostrzeżenia, ustawione przez Ciebie przypomnienia oraz powiadomienia wymagające decyzji, takie jak monity o aktualizację, nadal się wyświetlają. Postęp operacji w tle, takich jak odświeżanie subskrypcji, jest pokazywany na globalnym pasku postępu zamiast w powiadomieniu. Nie dotyczy to powiadomień systemowych.
     Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."
+    Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość. Automatycznie dopasowuje szerokość każdej karty do jej tytułu.
     Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     Playlist Thumbnail Size: "Skaluje miniatury filmów na stronach playlist. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     UI Density: "Zmienia odstępy na listach, w menu, na pasku bocznym i w Ustawieniach."
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
-    Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
     Use Custom Title Bar: Zastępuje systemowy pasek tytułu paskiem kart lub, gdy karty nie są u góry, górną nawigacją, aby zaoszczędzić miejsce w pionie. Przyciski sterowania oknem pojawiają się w rogu tego paska.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
     Modal Backdrop: "Określa, jak wygląda aplikacja za oknami dialogowymi i menu. Rozmycie może działać wolno na słabszych urządzeniach."

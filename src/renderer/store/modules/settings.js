@@ -966,12 +966,17 @@ const customGetters = {
     return state.showProgressBarToast && !state.onlyShowImportantToasts
   },
 
-  getActiveChannelsHidden: (state, getters) => {
-    return state.enableBlockLists ? getters.getChannelsHiddenParsed : []
+  /** Whether the block lists hide or blur what they match */
+  getBlockListsActive: (state) => {
+    return state.blockedItemsMode !== 'show'
   },
 
-  getActiveChannelsHiddenNames: (state, getters) => {
-    return state.enableBlockLists ? getters.getChannelsHiddenNames : new Set()
+  getActiveChannelsHidden: (_state, getters) => {
+    return getters.getBlockListsActive ? getters.getChannelsHiddenParsed : []
+  },
+
+  getActiveChannelsHiddenNames: (_state, getters) => {
+    return getters.getBlockListsActive ? getters.getChannelsHiddenNames : new Set()
   },
 
   /** Lowercased for case-insensitive matching */
@@ -979,13 +984,13 @@ const customGetters = {
     return JSON.parse(state.forbiddenTitles).map((title) => title.toLowerCase())
   },
 
-  getActiveForbiddenTitles: (state, getters) => {
-    return state.enableBlockLists ? getters.getForbiddenTitlesParsed : []
+  getActiveForbiddenTitles: (_state, getters) => {
+    return getters.getBlockListsActive ? getters.getForbiddenTitlesParsed : []
   },
 
   /** Lists keep block list matches and blur them instead of removing them */
   getBlurBlockedItemsActive: (state) => {
-    return state.enableBlockLists && state.blurBlockedItems
+    return state.blockedItemsMode === 'blur'
   },
 
   /** Hidden channels that lists remove; autoplay and navigation use `getActiveChannelsHiddenNames` */

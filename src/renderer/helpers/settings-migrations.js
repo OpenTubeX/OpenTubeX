@@ -2,8 +2,13 @@ import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
 import { DEFAULT_QUICK_SETTINGS } from './quickSettings.js'
 
 import {
+  blockedItemsModeFromSwitches,
+  fixedTabWidthFromSwitch,
   FORMER_CHANNEL_SETTING_SWITCHES,
+  FORMER_NAVIGATION_SWITCHES,
   isFormerDefaultQuickSettings,
+  REMOVED_SETTINGS,
+  ytDlpPreloadCountFromSwitch,
   holdPlaybackRateMultiplierFromSwitch,
   keepPlayerVisibleOnScrollFromLegacy,
   navigationBarLabelsFromCompactSwitch,
@@ -62,19 +67,36 @@ export function migrateLegacySettings(settings) {
     migratedSettings.landingPage = 'subscriptions'
   }
 
-  const formerNavigationKeys = [
-    'hideHome',
-    'hidePopularVideos',
-    'hideTrendingVideos',
-  ]
-  const navigationMigrationKeys = [...formerNavigationKeys, 'hidePlaylists']
+  const navigationMigrationKeys = [...FORMER_NAVIGATION_SWITCHES, 'hidePlaylists']
   if (
     !Object.hasOwn(migratedSettings, 'navigationItems') &&
     navigationMigrationKeys.some(key => Object.hasOwn(migratedSettings, key))
   ) {
     migratedSettings.navigationItems = navigationItemsFromLegacySettings(migratedSettings)
   }
-  for (const key of formerNavigationKeys) delete migratedSettings[key]
+  for (const key of FORMER_NAVIGATION_SWITCHES) delete migratedSettings[key]
+
+  if (Object.hasOwn(migratedSettings, 'enableBlockLists') || Object.hasOwn(migratedSettings, 'blurBlockedItems')) {
+    if (!Object.hasOwn(migratedSettings, 'blockedItemsMode')) {
+      migratedSettings.blockedItemsMode = blockedItemsModeFromSwitches(
+        migratedSettings.enableBlockLists,
+        migratedSettings.blurBlockedItems
+      )
+    }
+    delete migratedSettings.enableBlockLists
+    delete migratedSettings.blurBlockedItems
+  }
+
+  // Exports from before these switches were removed hold both the switch and its value.
+  if (Object.hasOwn(migratedSettings, 'useFixedTabWidth')) {
+    migratedSettings.fixedTabWidth = fixedTabWidthFromSwitch(migratedSettings.useFixedTabWidth, migratedSettings.fixedTabWidth)
+    delete migratedSettings.useFixedTabWidth
+  }
+  if (Object.hasOwn(migratedSettings, 'ytDlpPreloadEnabled')) {
+    migratedSettings.ytDlpPreloadCount = ytDlpPreloadCountFromSwitch(migratedSettings.ytDlpPreloadEnabled, migratedSettings.ytDlpPreloadCount)
+    delete migratedSettings.ytDlpPreloadEnabled
+  }
+  for (const key of REMOVED_SETTINGS) delete migratedSettings[key]
 
   if (Object.hasOwn(migratedSettings, 'showSubscriptionRefreshToast')) {
     if (!Object.hasOwn(migratedSettings, 'showProgressBarToast')) {

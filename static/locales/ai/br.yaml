@@ -74,6 +74,8 @@ Global:
   Loading More: "O kargañ muioc'h"
   New: "Nevez"
   Show Blocked Item: Diskouez an elfenn stanket
+  Auto: Emgefreek
+  'Off': Lazhet
 Search Listing:
   Label:
     Members Only: "Evit an izili hepken"
@@ -568,7 +570,6 @@ Settings:
     Date Format: Mentrezh an deiziad
     Time Format: Mentrezh an eur
     Language Default: Dre ziouer ar yezh
-    Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel"
     Stream Extraction Method:
       Stream Extraction Method: "Doare eztennañ ar gwazh"
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: "Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke."
     Loaded Tab Icons With Failures: "Karget ez eus bet {loaded} arlun ivinell; n'eus ket bet gallet kargañ {failed} anezho"
     Show Tab Previews: "Diskouez rakwelioù an ivinelloù"
-    Use Fixed Tab Width: "Implijout ul ledander ivinell digemm er mod a-blaen"
     Use Custom Title Bar: Implijout ur varrenn-ditl personelaet
     Tab Width: "Ledander an ivinelloù"
     Vertical Tab Height: Uhelder an ivinelloù a-serzh
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: "Kargañ ar rannoù a-stroll"
     Rotate Wide Videos to Landscape in Fullscreen: 'C’hwelañ ar videoioù ledan d’ar mod gweledva er skramm leun'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
-    Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
-    Concurrent Preloads: "Rakgargadennoù war un dro"
     Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
     Keep Status Bar Hidden in Fullscreen: "Kuzhat ar varrenn-stad atav e skramm a-bezh"
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Kuzhat ar videoioù sellet outo er c’hlask hag en erbedadennoù"
     Hide Full Screen Video Title: Kuzhat titl ar video er prenestr leun pe er skramm leun
+    Blocked Items:
+      Blocked Items: Elfennoù stanket
+      Hide: Kuzhat
+      Blur: Dispisaat
+      Show: Diskouez
     Digital Wellbeing:
       Count Watch Time From: "Kontañ an amzer sellet diwar"
       Break Reminder Action: "Pa vez poent ober un ehan"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Mudañ ar rebuzadurioù a endalc'had nevez da vare kousket"
       Stop Autoplay at Bedtime and After the Daily Limit: "Paouez al lenn emgefreek da vare kousket ha goude ar vevenn bemdeziek"
     Hide Popularity Graph: "Kuzhat ar graf poblegezh"
-    Enable Block Lists: "Gweredekaat ar rolloù stankañ"
     AI Video Summaries: Diverradennoù video an IA
     Hide: Kuzhat
     Collapsed: Serret
@@ -1406,7 +1408,6 @@ Settings:
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
     Hide Channel Avatars: "Kuzhat skeudennoù ar chadennoù"
     Shorten View Counts: "Berraat niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù"
-    Hide Home: "Kuzhat ar bajenn degemer"
     Hide Live Chat Replay: "Kuzhat adlenn ar flapañ war-eeun"
     Disable A-B Repeat: "Diweredekaat an adlenn A-B"
     Hide End-Screen Annotations: "Kuzhat notennoù ar skramm echuiñ"
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: "Diskouez titl ar video"
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
-    Blur Blocked Items: Lakaat an elfennoù stanket da vezañ dispis e-lec'h o kuzhat
   Data Settings:
     Backup separate profile data: "Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profil-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} brofil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} a brofiloù distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se."
     Subscription cache file: "Ar restr-mañ a vir ar videoioù eus ho koumanantoù hepken, ket ar chadennoù. Dibabit profiles.db pe un ezporzhiadur koumanantoù en e lec'h."
@@ -2454,7 +2454,6 @@ Tooltips:
     Enable Tabs: "Chom a ra ar bajenn vremanel digor. Miret e vez an ivinelloù all betek adlocʼhañ an arload; gweredekait an ivinelloù en-dro evit o adsevel."
     Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
     Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."
-    Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel en arload a-bezh keit ha ma chom ur bajenn digor. Pa vez diweredekaet ne vezont hizivaet nemet goude adkargañ pe addigeriñ ar bajenn."
     Stream Extraction Method: |
       Dibabit penaos e tap OpenTubeX gwazhioù ar videoioù. yt-dlp a rank bezañ hegerz pa vez diuzet.
       Gallout a ra ar videoioù lakaat muioc'h a amzer da gregiñ gant yt-dlp.
@@ -2503,9 +2502,7 @@ Tooltips:
       Gallout a ra gwerzhioù uheloc'h sikour gant kennaskoù gorrek pe distabil, met muioc'h a ledander-bann hag a vemor a vez implijet ganto.
       Gallout a reont ivez lakaat ar mod Emgefreek da briziañ tizh ar c'hennask re izel ha da zibab ur berzhded izeloc'h.
       Ar gwazhioù bevennet d'un azgoulenn war un dro ne zalc'hont ket kont eus an arventenn-mañ.
-    Preload Upcoming Videos: "Kargañ ha krubuilhañ a ra liammoù yt-dlp ar videoioù da-heul. Ar steudad a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
-    Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
-    Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
+    Upcoming Videos to Preload: "Kargañ ha krubuilhañ a ra liammoù gwazhioù yt-dlp betek an niver-mañ a videoioù a c'hall bezañ lennet da-heul. Ar steudad sellet a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
     Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
     Keep Status Bar Hidden in Fullscreen: "Diskouez ar varrenn-stad pa riklit eus bord ar skramm hepken, ha kuzhat anezhi en-dro goude ur pennadig. Stokañ al lenner ne ziskouez ket anezhi ken."
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
@@ -2542,6 +2539,7 @@ Tooltips:
     Take a Break Reminder: "Ehanañ ar video goude kement-se a amzer sellet. Un ehan a 10 munutenn pe muioc'h a adlañs ar c'hont."
     Bedtime Reminder: "Ehanañ ar video ha degas da soñj deoc'h paouez da sellet etre an eur deroù hag an eur fin."
     Shorten View Counts: "Diskouez niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù er stumm berr rontaet dija gant YouTube, da skouer 14K e-lec'h 14 000. Diskouezet e vez an niver resis en e bezh bepred."
+    Blocked Items: Kuzhat a lam kuit ar videoioù, ar rolloù lenn hag ar chadennoù a glot gant ar rolloù dindan. Dispisaat a ziskouez anezho dispis betek ma tiskouezot anezho. Diskouez ne ra van ebet ouzh ar rolloù.
   Subscription Settings:
     Refresh These Feeds Together: "Pa freskaez unan eus ar gwazhioù merket, e vez freskaet ar gwazhioù merket all diouzhtu war he lerc'h. Ar freskadurioù emgefre a heuilh atav etrezamzer pep gwazh."
     Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
@@ -2562,13 +2560,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Klikañ war arlun un ivinell gant ur video o vezañ lennet pe ehanet a ehan pe a adlañs anezhañ hep mont d’an ivinell-se.
     Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad, en o zouez ar re a ginnig Dizober. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a c'houlenn un diviz, evel ar c'hinnigoù hizivaat. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
+    Tab Width: Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen. Emgefreek a azasa pep ivinell diouzh he zitl.
     Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     UI Density: "Kemmañ a ra an esaouennoù er rolloù, el lañserioù, er varrenn gostez hag en Arventennoù."
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
     Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."
-    Use Fixed Tab Width: "Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen e-lec'h azasaat anezho diouzh o zitl."
     Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
     Modal Backdrop: "Termeniñ a ra penaos e weler an arload a-dreñv ar boestoù-emziviz hag al lañserioù. Gorrek e c’hall bezañ an dispisaat war ar binvioù nebeutoc’h galloudek."

@@ -124,27 +124,18 @@
         />
       </div>
     </div>
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Enable Block Lists')"
-          :default-value="enableBlockLists"
-          setting-key="enableBlockLists"
-          compact
-          @change="updateEnableBlockLists"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Blur Blocked Items')"
-          :disabled="!enableBlockLists"
-          :default-value="blurBlockedItems"
-          setting-key="blurBlockedItems"
-          compact
-          @change="store.dispatch('updateBlurBlockedItems', $event)"
-        />
-      </div>
-    </div>
+    <FtFlexBox>
+      <FtSelect
+        :placeholder="t('Settings.Distraction Free Settings.Blocked Items.Blocked Items')"
+        :value="store.getters.getBlockedItemsMode"
+        setting-key="blockedItemsMode"
+        :select-names="blockedItemsModeNames"
+        :select-values="BLOCKED_ITEMS_MODES"
+        :icon="['fas', 'eye-slash']"
+        :tooltip="t('Tooltips.Distraction Free Settings.Blocked Items')"
+        @change="store.dispatch('updateBlockedItemsMode', $event)"
+      />
+    </FtFlexBox>
     <FtFlexBox>
       <FtInputTags
         :disabled="channelHiderDisabled"
@@ -606,7 +597,6 @@ function updateHideCommentLikes(value) {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideRecommendedVideos = computed(() => store.getters.getHideRecommendedVideos)
 
-/** @type {import('vue').ComputedRef<boolean>} */
 const hideEndScreenRecommendations = computed(() => store.getters.getHideEndScreenRecommendations)
 
 /**
@@ -768,6 +758,7 @@ const hideEndScreenAnnotations = computed(() => store.getters.getHideEndScreenAn
 function updateHideEndScreenAnnotations(value) {
   store.dispatch('updateHideEndScreenAnnotations', value)
 }
+/** @type {import('vue').ComputedRef<boolean>} */
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hidePaidPromotion = computed(() => store.getters.getHidePaidPromotion)
@@ -984,14 +975,13 @@ function updatePausedInterfaceHideDelay(value) {
   store.dispatch('updatePausedInterfaceHideDelay', value)
 }
 
-const enableBlockLists = computed(() => store.getters.getEnableBlockLists)
+const BLOCKED_ITEMS_MODES = ['hide', 'blur', 'show']
 
-function updateEnableBlockLists(value) {
-  store.dispatch('updateEnableBlockLists', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const blurBlockedItems = computed(() => store.getters.getBlurBlockedItems)
+const blockedItemsModeNames = computed(() => [
+  t('Settings.Distraction Free Settings.Blocked Items.Hide'),
+  t('Settings.Distraction Free Settings.Blocked Items.Blur'),
+  t('Settings.Distraction Free Settings.Blocked Items.Show'),
+])
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddedChannelsHidden = computed(() => store.getters.getShowAddedChannelsHidden)

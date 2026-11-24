@@ -369,7 +369,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       return store.getters.getChannelsHiddenParsed.length > 0 ||
         store.getters.getForbiddenTitlesParsed.length > 0
     }
-    if (group === 'Hide Trending Videos') return supportsLocalApi
   }
 
   if (sectionType === 'theme') {
@@ -390,7 +389,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['Move Downloads to App Header', 'Move Settings to App Header', 'UI Scale'].includes(group)) {
       return usingElectron || isCapacitor
     }
-    if (['Use Fixed Tab Width', 'Show Tab Icons', 'Tab Width'].includes(group)) {
+    if (['Show Tab Icons', 'Tab Width'].includes(group)) {
       return usingElectron || isCapacitor
     }
     if ([

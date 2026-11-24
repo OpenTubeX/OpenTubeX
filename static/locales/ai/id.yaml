@@ -74,6 +74,8 @@ Global:
   Loading More: Memuat lainnya
   New: Baru
   Show Blocked Item: Tampilkan item yang diblokir
+  Auto: Otomatis
+  'Off': Mati
 Search Listing:
   Label:
     Members Only: Khusus anggota
@@ -569,7 +571,6 @@ Settings:
     Date Format: Format tanggal
     Time Format: Format waktu
     Language Default: Default bahasa
-    Update Relative Timestamps: Terus perbarui stempel waktu relatif
     Stream Extraction Method:
       Stream Extraction Method: Metode ekstraksi stream
       yt-dlp: yt-dlp
@@ -745,7 +746,6 @@ Settings:
     Loaded Tab Icons: 'Ikon tab yang hilang berhasil dimuat: {count}'
     Loaded Tab Icons With Failures: Berhasil memuat {loaded} ikon tab; {failed} tidak dapat dimuat
     Show Tab Previews: Tampilkan Pratinjau Tab
-    Use Fixed Tab Width: Gunakan Lebar Tab Tetap dalam Mode Horizontal
     Use Custom Title Bar: Gunakan Bilah Judul Kustom
     Tab Width: Lebar Tab
     Vertical Tab Height: Tinggi tab vertikal
@@ -1047,9 +1047,7 @@ Settings:
     Parallel Segment Loading: Pemuatan Segmen Paralel
     Rotate Wide Videos to Landscape in Fullscreen: 'Putar video lebar ke lanskap dalam layar penuh'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Geser ke atas atau bawah untuk masuk atau keluar dari layar penuh'
-    Preload Upcoming Videos: "Pramuat video berikutnya"
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
-    Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
     Keep Status Bar Hidden in Fullscreen: "Tetap sembunyikan bilah status dalam layar penuh"
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
@@ -1362,6 +1360,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Sembunyikan video yang sudah ditonton di pencarian dan rekomendasi"
     Hide Full Screen Video Title: Sembunyikan Judul Video dalam Jendela Penuh / Layar Penuh
+    Blocked Items:
+      Blocked Items: Item yang Diblokir
+      Hide: Sembunyikan
+      Blur: Buramkan
+      Show: Tampilkan
     Digital Wellbeing:
       Count Watch Time From: "Hitung Waktu Tonton Dari"
       Break Reminder Action: "Saat Waktunya Istirahat"
@@ -1388,7 +1391,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Senyapkan Notifikasi Unggahan Baru Saat Waktu Tidur"
       Stop Autoplay at Bedtime and After the Daily Limit: "Hentikan Putar Otomatis Saat Waktu Tidur dan Setelah Batas Harian"
     Hide Popularity Graph: "Sembunyikan Grafik Popularitas"
-    Enable Block Lists: "Aktifkan daftar blokir"
     AI Video Summaries: Ringkasan video buatan AI
     Hide: Sembunyikan
     Collapsed: Diciutkan
@@ -1410,7 +1412,6 @@ Settings:
     Hide Channel Avatars: Sembunyikan Avatar Saluran
     Shorten View Counts: Persingkat Jumlah Penayangan, Komentar dan Suka Komentar
     Hide Live Chat Replay: Sembunyikan Pemutaran Ulang Chat Langsung
-    Hide Home: Sembunyikan Beranda
     Disable A-B Repeat: Nonaktifkan Pengulangan A-B
     Hide End-Screen Annotations: Sembunyikan Anotasi Layar Akhir
     Hide End-Screen Recommendations: "Sembunyikan rekomendasi layar akhir"
@@ -1420,7 +1421,6 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
     Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
-    Blur Blocked Items: Buramkan item yang diblokir alih-alih menyembunyikannya
   Data Settings:
     Backup separate profile data: "Cadangan ini juga berisi data {count} profil terpisah, yang dipulihkan ke profil tersebut."
     Subscription cache file: "File ini hanya menyimpan cache video dari langganan Anda, bukan salurannya. Pilih profiles.db atau ekspor langganan sebagai gantinya."
@@ -2470,7 +2470,6 @@ Tooltips:
     Enable Tabs: "Halaman saat ini tetap terbuka. Tab lain disimpan hingga aplikasi dimulai ulang; aktifkan tab lagi untuk memulihkannya."
     Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."
     Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
-    Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.
     Stream Extraction Method: |
       Pilih cara OpenTubeX memperoleh stream video. yt-dlp harus tersedia jika dipilih.
       Video mungkin membutuhkan waktu lebih lama untuk dimulai saat menggunakan yt-dlp.
@@ -2519,9 +2518,7 @@ Tooltips:
       Nilai yang lebih tinggi dapat membantu pada koneksi lambat atau tidak stabil, tetapi menggunakan lebih banyak lebar pita dan memori.
       Nilai tersebut juga dapat membuat Otomatis memperkirakan kecepatan koneksi terlalu rendah dan memilih kualitas yang lebih rendah.
       Stream yang dibatasi satu permintaan pada satu waktu mengabaikan pengaturan ini.
-    Preload Upcoming Videos: "Mengambil dan menyimpan URL yt-dlp untuk video berikutnya. Antrean didahulukan dari daftar putar dan rekomendasi."
-    Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
-    Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
+    Upcoming Videos to Preload: "Mengambil dan menyimpan URL stream yt-dlp untuk paling banyak sejumlah ini video yang dapat diputar berikutnya. Antrean tontonan didahulukan dari daftar putar dan rekomendasi."
     Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
     Keep Status Bar Hidden in Fullscreen: "Tampilkan bilah status hanya saat Anda menggeser dari tepi layar, lalu sembunyikan lagi setelah beberapa saat. Mengetuk pemutar tidak lagi menampilkannya."
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
@@ -2558,6 +2555,7 @@ Tooltips:
     Take a Break Reminder: "Menjeda video setelah ditonton selama ini. Jeda selama 10 menit atau lebih akan memulai hitungan dari awal."
     Bedtime Reminder: "Menjeda video dan mengingatkan Anda untuk berhenti menonton antara waktu mulai dan waktu akhir."
     Shorten View Counts: Menampilkan jumlah penayangan, komentar dan suka komentar yang telah dibulatkan YouTube dalam bentuk singkat, misalnya 14 rb, bukan 14.000. Jumlah persis selalu ditampilkan penuh.
+    Blocked Items: Sembunyikan menghapus video, daftar putar, dan saluran yang cocok dengan daftar di bawah. Buramkan menampilkannya secara buram hingga Anda membukanya. Tampilkan mengabaikan daftar tersebut.
   Subscription Settings:
     Refresh These Feeds Together: "Saat Anda menyegarkan salah satu umpan yang dicentang, umpan lain yang dicentang langsung disegarkan setelahnya. Penyegaran otomatis tetap mengikuti interval masing-masing umpan."
     Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
@@ -2578,13 +2576,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Mengklik ikon tab yang berisi video yang sedang diputar atau dijeda akan menjeda atau melanjutkannya tanpa beralih ke tab tersebut.
     Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status, termasuk yang menawarkan Urungkan. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang meminta keputusan, seperti permintaan pembaruan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
+    Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama. Otomatis menyesuaikan lebar setiap tab dengan judulnya.
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     UI Density: "Mengubah jarak di daftar, menu, bilah samping, dan Pengaturan."
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.
-    Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
     Use Custom Title Bar: Mengganti bilah judul sistem dengan bilah tab, atau dengan navigasi atas saat tab tidak berada di atas, untuk menghemat ruang vertikal. Kontrol jendela muncul di sudut bilah tersebut.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
     Modal Backdrop: "Mengatur tampilan aplikasi di belakang dialog dan menu. Efek buram dapat lambat pada perangkat yang kurang bertenaga."

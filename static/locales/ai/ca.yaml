@@ -78,6 +78,8 @@ Global:
     Comment Count: 1 comentari | {count} comentaris | {count} comentaris
     Watching Count: 1 espectador | {count} espectadors | {count} espectadors
   Show Blocked Item: Mostra l'element bloquejat
+  Auto: Automàtic
+  'Off': Desactivat
 Search Bar:
   Use Suggestion: Utilitza el suggeriment
   Remove: Suprimeix
@@ -703,7 +705,6 @@ Settings:
     Date Format: Format de data
     Time Format: Format d'hora
     Language Default: Predeterminat de l'idioma
-    Update Relative Timestamps: Manté actualitzades les marques horàries relatives
     Stream Extraction Method:
       Stream Extraction Method: Mètode d'extracció dels fluxos
       yt-dlp: yt-dlp
@@ -870,7 +871,6 @@ Settings:
     Loaded Tab Icons: "S'ha carregat la icona de pestanya que faltava: {count} | S'han carregat les icones de pestanya que faltaven: {count} | S'han carregat les icones de pestanya que faltaven: {count}"
     Loaded Tab Icons With Failures: S'han carregat {loaded} icones de pestanya; no se n'han pogut carregar {failed}
     Show Tab Previews: Mostra les previsualitzacions de les pestanyes
-    Use Fixed Tab Width: Utilitza una amplada fixa de pestanya en el mode horitzontal
     Use Custom Title Bar: Utilitza una barra de títol personalitzada
     Tab Width: Amplada de les pestanyes
     Vertical Tab Height: Alçada de les pestanyes verticals
@@ -1296,9 +1296,7 @@ Settings:
       Modern Formats: "Formats moderns"
     Rotate Wide Videos to Landscape in Fullscreen: 'Gira els vídeos amples al mode apaïsat en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llisca amunt o avall per entrar o sortir de la pantalla completa'
-    Preload Upcoming Videos: "Precarrega els vídeos següents"
     Upcoming Videos to Preload: "Vídeos següents per precarregar"
-    Concurrent Preloads: "Precàrregues simultànies"
     Ignore System Rotation Lock for Fullscreen: Ignora el bloqueig de rotació del sistema per a la pantalla completa
     Keep Status Bar Hidden in Fullscreen: "Mantén la barra d'estat amagada a pantalla completa"
     Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
@@ -1630,6 +1628,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Oculta els vídeos vistos a la cerca i les recomanacions"
     Hide Full Screen Video Title: Amaga el títol del vídeo a finestra completa o pantalla completa
+    Blocked Items:
+      Blocked Items: Elements bloquejats
+      Hide: Amaga
+      Blur: Difumina
+      Show: Mostra
     Digital Wellbeing:
       Count Watch Time From: "Compta el temps de visualització de"
       Break Reminder Action: "Quan sigui hora de fer una pausa"
@@ -1656,7 +1659,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Silencia les notificacions de pujades noves a l'hora d'anar a dormir"
       Stop Autoplay at Bedtime and After the Daily Limit: "Atura la reproducció automàtica a l'hora d'anar a dormir i després del límit diari"
     Hide Popularity Graph: "Amaga el gràfic de popularitat"
-    Enable Block Lists: "Activa les llistes de bloqueig"
     AI Video Summaries: Resums de vídeos amb IA
     Hide: Amaga
     Collapsed: Replegats
@@ -1682,7 +1684,6 @@ Settings:
       Visible While Paused: Visible durant la pausa a finestra completa o pantalla completa
     Hide Channel Avatars: Oculta els avatars dels canals
     Shorten View Counts: Abreuja els recomptes de visualitzacions, de comentaris i de m'agrades dels comentaris
-    Hide Home: Oculta l'inici
     Hide Live Chat Replay: Oculta la repetició del xat en directe
     Hide Comments: Oculta els comentaris
     Hide Profile Pictures in Comments: Oculta les imatges de perfil als comentaris
@@ -1723,7 +1724,6 @@ Settings:
     Paused Interface Hide Delay: Retard per ocultar la interfície en pausa
     Add: Afegeix
     Remove: Elimina
-    Blur Blocked Items: Difumina els elements bloquejats en lloc d'amagar-los
   Data Settings:
     Backup separate profile data: "Aquesta còpia de seguretat també conté les dades de {count} perfil separat, que es restaura en aquest perfil. | Aquesta còpia de seguretat també conté les dades de {count} de perfils separats, que es restauren en aquests perfils. | Aquesta còpia de seguretat també conté les dades de {count} perfils separats, que es restauren en aquests perfils."
     Subscription cache file: "Aquest fitxer només desa a la memòria cau els vídeos de les teves subscripcions, no els canals. Tria profiles.db o una exportació de subscripcions."
@@ -2985,7 +2985,6 @@ Tooltips:
     Enable Tabs: "Manté oberta la pàgina actual. Les altres pestanyes es conserven fins que es reinicia l’aplicació; torneu a activar les pestanyes per restaurar-les."
     Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
-    Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.
     Stream Extraction Method: |
       Trieu com obté l'OpenTubeX els fluxos de vídeo. Si seleccioneu yt-dlp, ha d'estar disponible.
       Els vídeos poden trigar més a començar quan s'utilitza yt-dlp.
@@ -3047,9 +3046,7 @@ Tooltips:
       Els valors més alts poden ajudar amb connexions lentes o inestables, però utilitzen més amplada de banda i memòria.
       També poden fer que Automàtic subestimi la velocitat de connexió i seleccioni una qualitat inferior.
       Els fluxos limitats a una sol·licitud alhora ignoren aquesta opció.
-    Preload Upcoming Videos: "Obté i desa a la memòria cau els URL de yt-dlp dels vídeos següents. La cua té prioritat sobre les llistes i les recomanacions."
-    Upcoming Videos to Preload: "Nombre màxim de vídeos següents els URL de yt-dlp dels quals s’obtenen en segon pla."
-    Concurrent Preloads: "El nombre màxim de processos yt-dlp que s'utilitzen per precàrregar vídeos alhora. Els valors més alts utilitzen més CPU, memòria i amplada de banda de xarxa."
+    Upcoming Videos to Preload: "Obté i desa a la memòria cau els URL dels fluxos de yt-dlp de fins a aquest nombre de vídeos que es poden reproduir a continuació. La cua de visualització té prioritat sobre les llistes de reproducció i les recomanacions."
     Ignore System Rotation Lock for Fullscreen: Gira físicament el dispositiu per entrar i sortir de la pantalla completa encara que la rotació automàtica d'Android estigui desactivada.
     Keep Status Bar Hidden in Fullscreen: "Mostra la barra d'estat només quan llisques des de la vora de la pantalla i torna-la a amagar al cap d'un moment. Tocar el reproductor ja no la mostra."
     Ask Before Preloading Large Playlists: "Demana confirmació abans de precarregar tots els vídeos d’una llista de reproducció amb més de {count} vídeos."
@@ -3093,6 +3090,7 @@ Tooltips:
     Take a Break Reminder: "Posa en pausa el vídeo després d'aquest temps de visualització. Una pausa de 10 minuts o més reinicia el recompte."
     Bedtime Reminder: "Posa en pausa el vídeo i us recorda que deixeu de mirar vídeos entre l'hora d'inici i la de final."
     Shorten View Counts: Mostra en format abreujat els recomptes de visualitzacions, de comentaris i de m'agrades dels comentaris que YouTube ja ha arrodonit, p. ex. 14K en lloc de 14.000. Els recomptes exactes sempre es mostren sencers.
+    Blocked Items: Amaga elimina els vídeos, les llistes de reproducció i els canals que coincideixen amb les llistes de sota. Difumina els mostra difuminats fins que els revelis. Mostra ignora les llistes.
     Hide Channels: Introduïu un ID de canal per ocultar tots els seus vídeos i llistes de reproducció, així com el canal mateix, de la cerca, les tendències, els més populars i les recomanacions. L'ID introduït ha de coincidir completament i distingeix entre majúscules i minúscules.
     Hide Subscriptions Live: L'opció general "{appWideSetting}", de la secció "{subsection}" de "{settingsSection}", substitueix aquesta opció
     Hide Videos, Playlists and Channels Containing Text: Introduïu una paraula, un fragment de paraula o una frase, sense distinció entre majúscules i minúscules, per ocultar a tot l'OpenTubeX els vídeos, les llistes de reproducció i els canals que la continguin al títol original. Només s'exclouen Historial, Les vostres llistes de reproducció i els vídeos dins de llistes.
@@ -3118,13 +3116,13 @@ Tooltips:
     Toggle Playback With Tab Icon: En fer clic a la icona d’una pestanya amb un vídeo en reproducció o en pausa, es posa en pausa o es reprèn sense canviar a aquesta pestanya.
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat, incloses les que ofereixen Desfés. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que demanen una decisió, com ara les sol·licituds d'actualització, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
+    Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal. Automàtic ajusta cada pestanya al seu títol.
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Playlist Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les pàgines de llistes de reproducció. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     UI Density: "Canvia l’espaiat a les llistes, els menús, la barra lateral i la configuració."
     Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.
     Scroll Speed: Canvia la distància de desplaçament dels gestos de roda del ratolí i del ratolí tàctil.
-    Use Fixed Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal en lloc d'ajustar-les al títol.
     Use Custom Title Bar: Substitueix la barra de títol del sistema per la barra de pestanyes, o per la navegació superior quan les pestanyes no són a dalt, per estalviar espai vertical. Els controls de la finestra apareixen a la cantonada d'aquesta barra.
     Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
     Modal Backdrop: "Defineix com es veu l’aplicació darrere dels diàlegs i els menús. El difuminat pot anar lent en dispositius menys potents."

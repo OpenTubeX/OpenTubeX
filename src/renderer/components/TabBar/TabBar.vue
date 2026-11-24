@@ -179,7 +179,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
-import { normalizeFixedTabWidth } from '../../constants/tabWidth'
+import { fixedTabWidthStyle } from '../../constants/tabWidth'
 import { normalizeVerticalTabHeight } from '../../constants/tabHeight'
 import { isVerticalTabBarPosition, normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
@@ -370,11 +370,7 @@ const tabSizeStyle = computed(() => {
     return { '--vertical-tab-height': `${verticalTabHeight.value}px` }
   }
 
-  if (!store.getters.getUseFixedTabWidth) {
-    return null
-  }
-
-  return { '--fixed-tab-width': `${normalizeFixedTabWidth(store.getters.getFixedTabWidth)}px` }
+  return fixedTabWidthStyle(store.getters.getFixedTabWidth)
 })
 
 const newTabTooltip = computed(() => {

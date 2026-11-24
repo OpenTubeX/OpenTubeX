@@ -74,6 +74,8 @@ Global:
   Loading More: Įkeliama daugiau
   New: Nauja
   Show Blocked Item: Rodyti užblokuotą elementą
+  Auto: Automatiškai
+  'Off': Išjungta
 Search Listing:
   Label:
     VR180: VR180
@@ -683,7 +685,6 @@ Settings:
     Date Format: Datos formatas
     Time Format: Laiko formatas
     Language Default: Pagal kalbą
-    Update Relative Timestamps: Nuolat atnaujinti santykines laiko žymas
     Stream Extraction Method:
       Stream Extraction Method: Srauto išgavimo būdas
       yt-dlp: yt-dlp
@@ -850,7 +851,6 @@ Settings:
     Loaded Tab Icons: 'Įkelta trūkstama skirtuko piktograma: {count} | Įkeltos trūkstamos skirtukų piktogramos: {count} | Įkelta trūkstamų skirtukų piktogramų: {count}'
     Loaded Tab Icons With Failures: Įkelta {loaded} skirtukų piktogramų; {failed} įkelti nepavyko
     Show Tab Previews: Rodyti skirtukų peržiūras
-    Use Fixed Tab Width: Horizontaliuoju režimu naudoti fiksuotą skirtukų plotį
     Use Custom Title Bar: Naudoti tinkintą pavadinimo juostą
     Tab Width: Skirtuko plotis
     Vertical Tab Height: Vertikalių skirtukų aukštis
@@ -1247,9 +1247,7 @@ Settings:
       Modern Formats: "Šiuolaikiniai formatai"
     Rotate Wide Videos to Landscape in Fullscreen: 'Pasukti plačius vaizdo įrašus gulsčiai visame ekrane'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Braukite aukštyn arba žemyn, kad įjungtumėte arba išjungtumėte visą ekraną'
-    Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
-    Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
     Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
     Keep Status Bar Hidden in Fullscreen: "Viso ekrano režimu laikyti būsenos juostą paslėptą"
     Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
@@ -1577,6 +1575,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Slėpti peržiūrėtus vaizdo įrašus paieškoje ir rekomendacijose"
     Hide Full Screen Video Title: Slėpti vaizdo įrašo pavadinimą viso lango arba viso ekrano režimu
+    Blocked Items:
+      Blocked Items: Užblokuoti elementai
+      Hide: Slėpti
+      Blur: Sulieti
+      Show: Rodyti
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
       Break Reminder Action: "Kai laikas padaryti pertrauką"
@@ -1603,7 +1606,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Miego metu nutildyti pranešimus apie naujus įkėlimus"
       Stop Autoplay at Bedtime and After the Daily Limit: "Sustabdyti automatinį atkūrimą miego metu ir pasiekus dienos limitą"
     Hide Popularity Graph: "Slėpti populiarumo grafiką"
-    Enable Block Lists: "Įjungti blokavimo sąrašus"
     AI Video Summaries: DI vaizdo įrašų santraukos
     Hide: Slėpti
     Collapsed: Suskleistos
@@ -1625,7 +1627,6 @@ Settings:
       Visible While Paused: Rodoma pristabdžius viso lango arba viso ekrano režimu
     Hide Channel Avatars: Slėpti kanalų pseudoportretus
     Shorten View Counts: Trumpinti peržiūrų, komentarų ir komentarų patiktukų skaičius
-    Hide Home: Slėpti pradžios puslapį
     Hide Live Chat Replay: Slėpti tiesioginio pokalbio įrašą
     Hide Profile Pictures in Comments: Slėpti profilio nuotraukas komentaruose
     Disable A-B Repeat: Išjungti A–B kartojimą
@@ -1655,7 +1656,6 @@ Settings:
     Paused Interface Hide Delay: Pristabdytos sąsajos slėpimo delsa
     Add: Pridėti
     Remove: Pašalinti
-    Blur Blocked Items: Sulieti užblokuotus elementus, užuot juos slėpus
   Data Settings:
     Backup separate profile data: "Šioje atsarginėje kopijoje taip pat yra {count} atskiro profilio duomenys, kurie atkuriami į tą profilį. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius."
     Subscription cache file: "Šiame faile talpinami tik jūsų prenumeratų vaizdo įrašai, o ne kanalai. Vietoj jo pasirinkite profiles.db arba prenumeratų eksportą."
@@ -2867,7 +2867,6 @@ Tooltips:
     Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
-    Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.
     Stream Extraction Method: |
       Pasirinkite, kaip OpenTubeX gauna vaizdo srautus. Pasirinkus yt-dlp, jis turi būti pasiekiamas.
       Naudojant yt-dlp vaizdo įrašai gali būti pradedami atkurti lėčiau.
@@ -2918,9 +2917,7 @@ Tooltips:
       Didesnės reikšmės gali padėti esant lėtam ar nestabiliam ryšiui, bet naudoja daugiau pralaidumo ir atminties.
       Dėl jų Auto taip pat gali nepakankamai įvertinti ryšio greitį ir pasirinkti prastesnę kokybę.
       Srautai, apriboti iki vienos užklausos vienu metu, nepaiso šio nustatymo.
-    Preload Upcoming Videos: "Gauna ir talpykloje išsaugo kitų vaizdo įrašų yt-dlp adresus. Eilė yra svarbesnė už grojaraščius ir rekomendacijas."
-    Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
-    Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
+    Upcoming Videos to Preload: "Gauna ir talpykloje išsaugo yt-dlp srautų adresus iki tiek vaizdo įrašų, kurie gali būti paleisti toliau. Žiūrėjimo eilė yra svarbesnė už grojaraščius ir rekomendacijas."
     Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
     Keep Status Bar Hidden in Fullscreen: "Rodyti būsenos juostą tik perbraukus nuo ekrano krašto ir po akimirkos vėl ją paslėpti. Bakstelėjimas grotuvą jos nebeparodo."
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
@@ -2959,6 +2956,7 @@ Tooltips:
     Take a Break Reminder: "Pristabdo vaizdo įrašą po tiek žiūrėjimo laiko. 10 minučių ar ilgesnė pertrauka pradeda skaičiavimą iš naujo."
     Bedtime Reminder: "Pristabdo vaizdo įrašą ir primena nustoti žiūrėti tarp pradžios ir pabaigos laiko."
     Shorten View Counts: Sutrumpintai rodo peržiūrų, komentarų ir komentarų teigiamų įvertinimų skaičius, kuriuos YouTube jau suapvalino, pvz., 14 tūkst. vietoje 14 000. Tikslūs skaičiai visada rodomi nesutrumpinti.
+    Blocked Items: Slėpti pašalina vaizdo įrašus, grojaraščius ir kanalus, atitinkančius toliau pateiktus sąrašus. Sulieti rodo juos suliestus, kol juos atskleisite. Rodyti nepaiso sąrašų.
     Hide Channels: Įveskite kanalo ID, kad visi vaizdo įrašai, grojaraščiai ir pats kanalas nebūtų rodomi paieškoje, tarp populiarėjančių, populiariausių ir rekomenduojamų elementų. Įvestas kanalo ID turi tiksliai sutapti, taip pat skiriamos didžiosios ir mažosios raidės.
     Hide Subscriptions Live: Šį nustatymą pakeičia visai programai taikomas nustatymas „{appWideSetting}“, esantis „{settingsSection}“ skiltyje „{subsection}“
     Hide Videos, Playlists and Channels Containing Text: Įveskite žodį, žodžio dalį arba frazę (didžiosios ir mažosios raidės neskiriamos), kad visoje OpenTubeX nebūtų rodomi vaizdo įrašai, grojaraščiai ir kanalai, kurių originaliuose pavadinimuose yra šis tekstas. Filtras netaikomas tik istorijai, jūsų grojaraščiams ir grojaraščiuose esantiems vaizdo įrašams.
@@ -2983,13 +2981,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Spustelėjus kortelės su leidžiamu ar pristabdytu vaizdo įrašu piktogramą, jis pristabdomas arba tęsiamas neperjungiant į tą kortelę.
     Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną, įskaitant tuos, kuriuose siūloma Anuliuoti. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, prašantys priimti sprendimą, pavyzdžiui, raginimai atnaujinti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
+    Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį. Automatiškai pritaiko kiekvienos kortelės plotį prie jos pavadinimo.
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     UI Density: "Keičia tarpus sąrašuose, meniu, šoninėje juostoje ir nustatymuose."
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
     Scroll Speed: Keičia, kiek paslenka pelės ratuko ir jutiklinio kilimėlio slinkimo gestai.
-    Use Fixed Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį, užuot pritaikius jį prie pavadinimo.
     Use Custom Title Bar: Pakeičia sistemos pavadinimo juostą kortelių juosta arba, kai kortelės nėra viršuje, viršutine naršymo juosta, kad būtų sutaupyta vertikalios vietos. Lango valdikliai rodomi tos juostos kampe.
     Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
     Modal Backdrop: "Nustato, kaip programa atrodo už dialogų ir meniu. Suliejimas gali veikti lėtai mažiau galinguose įrenginiuose."

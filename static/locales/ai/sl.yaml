@@ -88,6 +88,8 @@ Global:
     Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
     Watching Count: '{count} gledalec | {count} gledalca | {count} gledalci | {count} gledalcev'
   Show Blocked Item: Prikaži blokiran element
+  Auto: Samodejno
+  'Off': Izklopljeno
 Search Bar:
   Use Suggestion: Uporabi predlog
   Remove: Odstrani
@@ -695,7 +697,6 @@ Settings:
     Date Format: Oblika datuma
     Time Format: Oblika časa
     Language Default: Privzeto za jezik
-    Update Relative Timestamps: Posodabljaj relativne časovne oznake
     Stream Extraction Method:
       Stream Extraction Method: Način pridobivanja tokov
       yt-dlp: yt-dlp
@@ -862,7 +863,6 @@ Settings:
     Loaded Tab Icons: 'Naložena je {count} manjkajoča ikona zavihka | Naloženi sta {count} manjkajoči ikoni zavihkov | Naložene so {count} manjkajoče ikone zavihkov | Naloženih je {count} manjkajočih ikon zavihkov'
     Loaded Tab Icons With Failures: Naloženih je bilo {loaded} ikon zavihkov; {failed} jih ni bilo mogoče naložiti
     Show Tab Previews: Prikaži predoglede zavihkov
-    Use Fixed Tab Width: V vodoravnem načinu uporabi stalno širino zavihkov
     Use Custom Title Bar: Uporabi prilagojeno naslovno vrstico
     Tab Width: Širina zavihka
     Vertical Tab Height: Višina navpičnih zavihkov
@@ -1264,9 +1264,7 @@ Settings:
       Modern Formats: "Sodobni formati"
     Rotate Wide Videos to Landscape in Fullscreen: 'Zavrti široke videoposnetke ležeče v celozaslonskem načinu'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Podrsajte navzgor ali navzdol za vstop v celozaslonski način ali izhod iz njega'
-    Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"
     Upcoming Videos to Preload: "Število videov za prednalaganje"
-    Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
     Keep Status Bar Hidden in Fullscreen: "Ohrani vrstico stanja skrito v celozaslonskem načinu"
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
@@ -1596,6 +1594,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skrij gledane videoposnetke v iskanju in priporočilih"
     Hide Full Screen Video Title: Skrij naslov videoposnetka v celotnem oknu/celozaslonskem načinu
+    Blocked Items:
+      Blocked Items: Blokirani elementi
+      Hide: Skrij
+      Blur: Zamegli
+      Show: Prikaži
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
       Break Reminder Action: "Ko je čas za odmor"
@@ -1622,7 +1625,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Utišaj obvestila o novi vsebini med časom za spanje"
       Stop Autoplay at Bedtime and After the Daily Limit: "Ustavi samodejno predvajanje med časom za spanje in po dnevni omejitvi"
     Hide Popularity Graph: "Skrij graf priljubljenosti"
-    Enable Block Lists: "Omogoči sezname blokiranih"
     AI Video Summaries: Povzetki videoposnetkov z UI
     Hide: Skrij
     Collapsed: Strnjeni
@@ -1648,7 +1650,6 @@ Settings:
       Visible While Paused: Vidno med premorom v celotnem oknu/celozaslonskem načinu
     Hide Channel Avatars: Skrij slike kanalov
     Shorten View Counts: Skrajšaj število ogledov, komentarjev in všečkov komentarjev
-    Hide Home: Skrij domačo stran
     Hide Live Chat Replay: Skrij ponovitev klepeta v živo
     Hide Profile Pictures in Comments: Skrij profilne slike v komentarjih
     Display Titles Without Excessive Capitalisation: Prikaži naslove brez pretirane uporabe velikih črk in ločil
@@ -1683,7 +1684,6 @@ Settings:
     Paused Interface Hide Delay: Zakasnitev skrivanja vmesnika med premorom
     Add: Dodaj
     Remove: Odstrani
-    Blur Blocked Items: Zamegli blokirane elemente, namesto da bi jih skril
   Data Settings:
     Backup separate profile data: "Ta varnostna kopija vsebuje tudi podatke {count} ločenega profila, ki se obnovijo v ta profil. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v ta profila. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile."
     Subscription cache file: "Ta datoteka hrani v predpomnilniku samo videoposnetke iz vaših naročnin, ne kanalov. Namesto nje izberite profiles.db ali izvoz naročnin."
@@ -2947,7 +2947,6 @@ Tooltips:
     Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.
-    Update Relative Timestamps: Posodablja relativne časovne žige po vsej aplikaciji, dokler je stran odprta. Če je možnost izklopljena, se posodobijo šele po ponovnem nalaganju ali obisku strani.
     Stream Extraction Method: |
       Izberite, kako OpenTubeX pridobiva pretoke videoposnetkov. Če izberete yt-dlp, mora biti ta na voljo.
       Pri uporabi yt-dlp lahko traja dlje, da se videoposnetki začnejo predvajati.
@@ -3007,9 +3006,7 @@ Tooltips:
       Višje vrednosti lahko pomagajo pri počasnih ali nestabilnih povezavah, vendar porabijo več pasovne širine in pomnilnika.
       Lahko tudi povzročijo, da možnost »Samodejno« podceni hitrost povezave in izbere nižjo kakovost.
       Pretoki, omejeni na eno zahtevo naenkrat, to nastavitev prezrejo.
-    Preload Upcoming Videos: "Pridobi in predpomni naslove yt-dlp naslednjih videov. Čakalna vrsta ima prednost pred seznami in priporočili."
-    Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
-    Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
+    Upcoming Videos to Preload: "Pridobi in predpomni naslove tokov yt-dlp za največ toliko videov, ki se lahko predvajajo naslednji. Čakalna vrsta za ogled ima prednost pred seznami predvajanja in priporočili."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
     Keep Status Bar Hidden in Fullscreen: "Pokaži vrstico stanja samo, ko podrsate z roba zaslona, in jo čez trenutek znova skrij. Dotik predvajalnika je ne prikaže več."
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
@@ -3053,6 +3050,7 @@ Tooltips:
     Take a Break Reminder: "Po tolikšnem času gledanja začasno ustavi videoposnetek. Premor, dolg 10 minut ali več, začne štetje znova."
     Bedtime Reminder: "Med začetnim in končnim časom začasno ustavi videoposnetek in vas opomni, da prenehate gledati."
     Shorten View Counts: Prikaže število ogledov, komentarjev in všečkov komentarjev v skrajšani obliki, ki jo je YouTube že zaokrožil, npr. 14 tis. namesto 14.000. Natančno število je vedno prikazano v celoti.
+    Blocked Items: Skrij odstrani videe, sezname predvajanja in kanale, ki se ujemajo s spodnjimi seznami. Zamegli jih prikaže zamegljene, dokler jih ne razkrijete. Prikaži prezre sezname.
     Hide Channels: Vnesite ID kanala, da skrijete vse njegove videoposnetke in sezname predvajanja ter sam kanal iz iskanja, priljubljenih in najbolj gledanih vsebin ter priporočil. Vneseni ID kanala se mora popolnoma ujemati in razlikuje med velikimi in malimi črkami.
     Hide Subscriptions Live: To nastavitev preglasi nastavitev »{appWideSetting}« za celotno aplikacijo v podrazdelku »{subsection}« razdelka »{settingsSection}«
     Hide Videos, Playlists and Channels Containing Text: Vnesite besedo, del besede ali besedno zvezo ne glede na velikost črk, da po vsej aplikaciji OpenTubeX skrijete videoposnetke, sezname predvajanja in kanale, katerih izvirni naslovi jo vsebujejo. Izvzeti so le Zgodovina, Vaši seznami predvajanja in videoposnetki znotraj seznamov predvajanja.
@@ -3077,13 +3075,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Klik ikone zavihka s predvajanim ali začasno ustavljenim videoposnetkom ga začasno ustavi ali nadaljuje, ne da bi preklopili na ta zavihek.
     Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje, vključno s tistimi, ki ponujajo Razveljavi. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki zahtevajo odločitev, na primer pozivi k posodobitvi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
+    Tab Width: Vsi zavihki v vodoravni vrstici imajo enako širino. Samodejno prilagodi širino vsakega zavihka njegovemu naslovu.
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     Playlist Thumbnail Size: "Spremeni velikost sličic videoposnetkov na straneh seznamov predvajanja. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     UI Density: "Spremeni razmike na seznamih, v menijih, stranski vrstici in nastavitvah."
     Show Progress as Notification: Namesto splošne vrstice napredka prikaže trajno obvestilo s sprotnim napredkom opravil v ozadju, kot sta osveževanje naročnin in prenos upravljanih orodij.
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.
     Scroll Speed: Spremeni razdaljo pomikanja z gibi kolesca miške in sledilne ploščice.
-    Use Fixed Tab Width: Vsi zavihki v vodoravni vrstici imajo enako širino, namesto da bi se prilagajali naslovu.
     Use Custom Title Bar: Sistemsko naslovno vrstico nadomesti z vrstico z zavihki ali z zgornjo navigacijo, kadar zavihki niso na vrhu, da prihrani navpični prostor. Gumbi za upravljanje okna se prikažejo v kotu te vrstice.
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
     Modal Backdrop: "Določa, kako je videti aplikacija za pogovornimi okni in meniji. Zabrisanje je lahko na manj zmogljivih napravah počasno."

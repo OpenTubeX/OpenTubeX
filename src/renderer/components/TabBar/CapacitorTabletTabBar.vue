@@ -3,7 +3,7 @@
     v-bind="$attrs"
     class="capacitorTabletTabBar"
     data-tutorial="tabs"
-    :style="fixedTabWidthStyle"
+    :style="tabWidthStyle"
     :inert="$attrs.inert && !holding"
   >
     <div
@@ -177,7 +177,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { normalizeFixedTabWidth } from '../../constants/tabWidth'
+import { fixedTabWidthStyle } from '../../constants/tabWidth'
 import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
 import store from '../../store/index'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
@@ -199,9 +199,7 @@ const tabs = computed(() => store.getters.getTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
-const fixedTabWidthStyle = computed(() => store.getters.getUseFixedTabWidth
-  ? { '--fixed-tab-width': `${normalizeFixedTabWidth(store.getters.getFixedTabWidth)}px` }
-  : undefined)
+const tabWidthStyle = computed(() => fixedTabWidthStyle(store.getters.getFixedTabWidth))
 const {
   selecting,
   selectedTabIds,

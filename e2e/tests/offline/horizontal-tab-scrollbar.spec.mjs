@@ -222,7 +222,6 @@ test('horizontal scrollbar clamps shrinking content at top', { tag: '@scale' }, 
   const groupId = await page.evaluate(async () => {
     const store = window.$store
     store.commit('setTabBarPosition', 'top')
-    store.commit('setUseFixedTabWidth', true)
     store.commit('setFixedTabWidth', 200)
     const ids = []
     for (let index = 0; index < 12; index++) {
@@ -275,8 +274,7 @@ test('horizontal scrollbar clamps shrinking content at top', { tag: '@scale' }, 
   await page.evaluate(() => window.$store.commit('setFixedTabWidth', 100))
   await expectValidEnd()
   await page.evaluate(async () => {
-    const store = window.$store
-    store.commit('setUseFixedTabWidth', false)
+    window.$store.commit('setFixedTabWidth', 0)
     const { tabs } = await window.ftElectron.tabs.getState()
     for (const tab of tabs) window.ftElectron.tabs.updateTitle('A long history tab title that fills its maximum width', tab.id)
   })
@@ -290,7 +288,7 @@ test('horizontal scrollbar clamps shrinking content at top', { tag: '@scale' }, 
   })
   await expect(container.locator('.tabTitleText')).toHaveText(Array(13).fill('History'))
   await expectValidEnd()
-  await page.evaluate(() => window.$store.commit('setUseFixedTabWidth', true))
+  await page.evaluate(() => window.$store.commit('setFixedTabWidth', 100))
   await scrollToEnd()
   await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
   await expectValidEnd()
@@ -303,11 +301,7 @@ test('horizontal scrollbar clamps shrinking content at top', { tag: '@scale' }, 
   })
   await expectValidEnd()
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-  await page.evaluate(() => {
-    const store = window.$store
-    store.commit('setUseFixedTabWidth', true)
-    store.commit('setFixedTabWidth', 200)
-  })
+  await page.evaluate(() => window.$store.commit('setFixedTabWidth', 200))
   await scrollToEnd()
   await setWindowSize(app, page, { width: 1800, height: 900 })
   await expectValidEnd()

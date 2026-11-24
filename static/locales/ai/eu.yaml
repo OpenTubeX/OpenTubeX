@@ -74,6 +74,8 @@ Global:
   Loading More: Gehiago kargatzen
   New: Berria
   Show Blocked Item: Erakutsi blokeatutako elementua
+  Auto: Automatikoa
+  'Off': Desaktibatuta
 Search Listing:
   Label:
     Members Only: Kideentzat soilik
@@ -568,7 +570,6 @@ Settings:
     Date Format: Data-formatua
     Time Format: Ordu-formatua
     Language Default: Hizkuntzaren lehenetsia
-    Update Relative Timestamps: Mantendu denbora-marka erlatiboak eguneratuta
     Stream Extraction Method:
       Stream Extraction Method: Korronteak erauzteko metodoa
       yt-dlp: yt-dlp
@@ -744,7 +745,6 @@ Settings:
     Loaded Tab Icons: 'Falta zen fitxaren ikonoa kargatu da: {count} | Falta ziren fitxen ikonoak kargatu dira: {count}'
     Loaded Tab Icons With Failures: Fitxen {loaded} ikono kargatu dira; ezin izan dira {failed} kargatu
     Show Tab Previews: Erakutsi fitxen aurrebistak
-    Use Fixed Tab Width: Erabili fitxa-zabalera finkoa modu horizontalean
     Use Custom Title Bar: Erabili izenburu-barra pertsonalizatua
     Tab Width: Fitxen zabalera
     Vertical Tab Height: Fitxa bertikalen altuera
@@ -1044,9 +1044,7 @@ Settings:
     Parallel Segment Loading: Segmentuak paraleloan kargatzea
     Rotate Wide Videos to Landscape in Fullscreen: 'Biratu bideo zabalak horizontalera pantaila osoan'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Irristatu gora edo behera pantaila osoan sartzeko edo irteteko'
-    Preload Upcoming Videos: "Aurrekargatu hurrengo bideoak"
     Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
-    Concurrent Preloads: "Aldibereko aurrekargak"
     Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
     Keep Status Bar Hidden in Fullscreen: "Mantendu egoera-barra ezkutatuta pantaila osoan"
     Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
@@ -1359,6 +1357,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ezkutatu ikusitako bideoak bilaketan eta gomendioetan"
     Hide Full Screen Video Title: Ezkutatu bideoaren izenburua leiho osoan edo pantaila osoan
+    Blocked Items:
+      Blocked Items: Blokeatutako elementuak
+      Hide: Ezkutatu
+      Blur: Lausotu
+      Show: Erakutsi
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
       Break Reminder Action: "Atsedenaldia hartzeko ordua denean"
@@ -1385,7 +1388,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Isilarazi igoera berrien jakinarazpenak lotara joateko orduan"
       Stop Autoplay at Bedtime and After the Daily Limit: "Gelditu erreprodukzio automatikoa lotara joateko orduan eta eguneko muga gainditu ondoren"
     Hide Popularity Graph: "Ezkutatu ospearen grafikoa"
-    Enable Block Lists: "Gaitu blokeo-zerrendak"
     AI Video Summaries: AAren bideo-laburpenak
     Hide: Ezkutatu
     Collapsed: Tolestuta
@@ -1407,7 +1409,6 @@ Settings:
     Hide Channel Avatars: Ezkutatu kanalen abatarrak
     Shorten View Counts: Laburtu ikustaldien, iruzkinen eta iruzkinetako atsegiteen kopuruak
     Hide Live Chat Replay: Ezkutatu zuzeneko txataren errepikapena
-    Hide Home: Ezkutatu hasiera
     Disable A-B Repeat: Desgaitu A-B errepikapena
     Hide End-Screen Annotations: Ezkutatu amaierako pantailako oharpenak
     Hide End-Screen Recommendations: "Ezkutatu amaierako pantailako gomendioak"
@@ -1416,7 +1417,6 @@ Settings:
     Show Video Title: Erakutsi bideoaren izenburua
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
-    Blur Blocked Items: Lausotu blokeatutako elementuak ezkutatu beharrean
   Data Settings:
     Backup separate profile data: "Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horretan leheneratzen dira. | Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horietan leheneratzen dira."
     Subscription cache file: "Fitxategi honek zure harpidetzetako bideoak soilik gordetzen ditu cachean, ez kanalak. Aukeratu profiles.db edo harpidetzen esportazio bat."
@@ -2454,7 +2454,6 @@ Tooltips:
     Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
-    Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.
     Stream Extraction Method: |
       Aukeratu OpenTubeX aplikazioak bideo-korronteak nola eskuratuko dituen. yt-dlp erabilgarri egon behar da hautatuta dagoenean.
       Baliteke bideoek denbora gehiago behar izatea hasteko yt-dlp erabiltzean.
@@ -2503,9 +2502,7 @@ Tooltips:
       Balio handiagoek konexio motel edo ezegonkorretan lagun dezakete, baina banda-zabalera eta memoria gehiago erabiltzen dituzte.
       Baliteke Automatikoa aukerak konexioaren abiadura txikiagoa dela kalkulatzea eta kalitate txikiagoa hautatzea ere.
       Aldiko eskaera bakarrera mugatutako korronteek ezarpen hau baztertzen dute.
-    Preload Upcoming Videos: "Hurrengo bideoen yt-dlp URLak eskuratu eta cachean gordetzen ditu. Ilarak lehentasuna du zerrenden eta gomendioen aurretik."
-    Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
-    Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
+    Upcoming Videos to Preload: "Hurrengo erreproduzi daitezkeen gehienez horrenbeste bideoren yt-dlp korronte-URLak eskuratu eta cachean gordetzen ditu. Ikusteko ilarak lehentasuna du erreprodukzio-zerrenden eta gomendioen aurretik."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
     Keep Status Bar Hidden in Fullscreen: "Erakutsi egoera-barra pantailaren ertzetik irristatzean soilik, eta ezkutatu berriro une baten ondoren. Erreproduzitzailea ukitzeak ez du gehiago erakusten."
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
@@ -2542,6 +2539,7 @@ Tooltips:
     Take a Break Reminder: "Bideoa pausatzen du denbora hori ikusi ondoren. 10 minutuko edo gehiagoko etenaldi batek zenbaketa berriro hasten du."
     Bedtime Reminder: "Bideoa pausatzen du eta ikusteari uzteko gogorarazten dizu hasiera- eta amaiera-orduen artean."
     Shorten View Counts: YouTube-k dagoeneko biribildu dituen ikustaldi-, iruzkin- eta iruzkinetako atsegite-kopuruak modu laburtuan erakusten ditu; adibidez, 14K, 14.000 ordez. Kopuru zehatzak osorik erakusten dira beti.
+    Blocked Items: Ezkutatu aukerak behean dauden zerrendekin bat datozen bideoak, erreprodukzio-zerrendak eta kanalak kentzen ditu. Lausotu aukerak lausotuta erakusten ditu agerian jarri arte. Erakutsi aukerak zerrendei ez die jaramonik egiten.
   Subscription Settings:
     Refresh These Feeds Together: "Markatutako jarioetako bat freskatzean, markatutako beste jarioak berehala freskatzen dira haren ondoren. Freskatze automatikoek jario bakoitzaren tartea jarraitzen dute."
     Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
@@ -2562,13 +2560,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Erreproduzitzen ari den edo pausatuta dagoen bideo bat duen fitxa baten ikonoan klik eginez gero, pausatu edo berrekin egiten da fitxa horretara aldatu gabe.
     Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu, Desegin eskaintzen dutenak barne. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta erabaki bat eskatzen duten jakinarazpenak, eguneratze-eskaerak adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
+    Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die. Automatikoa aukerak fitxa bakoitza bere izenburuaren arabera tamainatzen du.
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     UI Density: "Zerrendetako, menuetako, alboko barrako eta Ezarpenetako tartea aldatzen du."
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
     Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
-    Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
     Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
     Modal Backdrop: "Aplikazioa elkarrizketa-koadroen eta menuen atzean nola ikusten den ezartzen du. Lausotzea motela izan daiteke gailu ez hain ahaltsuetan."

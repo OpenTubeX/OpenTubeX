@@ -74,6 +74,8 @@ Global:
   Loading More: Daha çox yüklənir
   New: Yeni
   Show Blocked Item: Bloklanmış elementi göstər
+  Auto: Avtomatik
+  'Off': Söndürülüb
 Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
@@ -572,7 +574,6 @@ Settings:
       Automatic: Avtomatik
       Phone: Telefon
       Tablet: Planşet
-    Update Relative Timestamps: Nisbi vaxt göstəricilərini yenilə
     Stream Extraction Method:
       Stream Extraction Method: Yayımın çıxarılması üsulu
       yt-dlp: yt-dlp
@@ -731,7 +732,6 @@ Settings:
     Loaded Tab Icons: 'Çatışmayan vərəq nişanı yükləndi: {count} | Çatışmayan vərəq nişanları yükləndi: {count}'
     Loaded Tab Icons With Failures: "{loaded} vərəq nişanı yükləndi; {failed} nişan yüklənə bilmədi"
     Show Tab Previews: Vərəq önizləmələrini göstər
-    Use Fixed Tab Width: Üfüqi rejimdə sabit vərəq enindən istifadə et
     Use Custom Title Bar: Fərdi başlıq zolağından istifadə et
     Tab Width: Vərəqin eni
     Vertical Tab Height: Şaquli vərəqlərin hündürlüyü
@@ -1009,9 +1009,7 @@ Settings:
     Show Playback Rate Adjusted Timestamp: Oynatma sürətinə uyğunlaşdırılmış vaxt göstəricisini göstər
     Use YouTube-style Shorts: YouTube üslubunda qısa videolardan istifadə et
     Loop Shorts: Qısa videoları təkrarla
-    Preload Upcoming Videos: Növbəti videoları əvvəlcədən yüklə
     Upcoming Videos to Preload: Əvvəlcədən yüklənəcək növbəti videolar
-    Concurrent Preloads: Eyni vaxtda əvvəlcədən yükləmələr
     Remember Volume: Səs səviyyəsini yadda saxla
     Skip Silence: Səssiz hissələri keç
     Show Skip Silence Toggle: Səssiz hissələri keçmə düyməsini göstər
@@ -1361,6 +1359,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Baxılmış videoları axtarışda və tövsiyələrdə gizlət"
     Hide Full Screen Video Title: Tam pəncərədə / tam ekranda video başlığını gizlət
+    Blocked Items:
+      Blocked Items: Bloklanmış elementlər
+      Hide: Gizlət
+      Blur: Bulanıqlaşdır
+      Show: Göstər
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
       Break Reminder Action: "Fasilə Vaxtı Gələndə"
@@ -1387,7 +1390,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Yatma Vaxtında Yeni Yükləmə Bildirişlərini Səssizləşdir"
       Stop Autoplay at Bedtime and After the Daily Limit: "Yatma Vaxtında və Gündəlik Limitdən Sonra Avtomatik Oynatmanı Dayandır"
     Hide Popularity Graph: "Populyarlıq qrafikini gizlət"
-    Enable Block Lists: "Blok siyahılarını aktivləşdir"
     AI Video Summaries: Süni intellekt video xülasələri
     Hide: Gizlət
     Collapsed: Yığılmış
@@ -1405,7 +1407,6 @@ Settings:
       Visible While Paused: Tam pəncərədə / tam ekranda fasilə zamanı görünənlər
     Hide Channel Avatars: Kanal avatarlarını gizlət
     Shorten View Counts: Baxış, şərh və şərh bəyənmə saylarını qısalt
-    Hide Home: Ana səhifəni gizlət
     Hide Live Chat Replay: Canlı söhbətin təkrarını gizlət
     Disable A-B Repeat: A-B təkrarını söndür
     Hide Repeat Stats: Təkrar statistikasını gizlət
@@ -1418,7 +1419,6 @@ Settings:
     Show Video Title: Video başlığını göstər
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
-    Blur Blocked Items: Bloklanmış elementləri gizlətmək əvəzinə bulanıqlaşdır
   Data Settings:
     Backup separate profile data: "Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profilə bərpa olunur. | Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profillərə bərpa olunur."
     Subscription cache file: "Bu fayl yalnız abunəliklərinizin videolarını keşləyir, kanalları yox. Bunun əvəzinə profiles.db və ya abunəlik ixracını seçin."
@@ -2456,7 +2456,6 @@ Tooltips:
     Enable Tabs: "Cari səhifə açıq qalır. Digər vərəqlər tətbiq yenidən başladılana qədər saxlanılır; onları bərpa etmək üçün vərəqləri yenidən aktivləşdirin."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
-    Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.
     Stream Extraction Method: |
       OpenTubeX-in video axınlarını necə əldə etdiyini seçin. yt-dlp seçildikdə əlçatan olmalıdır.
       yt-dlp istifadə edildikdə videoların başlaması daha uzun çəkə bilər.
@@ -2505,9 +2504,7 @@ Tooltips:
       Yüksək dəyərlər zəif və ya qeyri-sabit bağlantılarda kömək edə bilər, lakin daha çox trafik və yaddaş istifadə edir.
       Onlar həmçinin Avtomatik rejimin bağlantı sürətini olduğundan aşağı qiymətləndirib daha aşağı keyfiyyət seçməsinə səbəb ola bilər.
       Eyni anda yalnız bir sorğuya icazə verən axınlar bu tənzimləməni nəzərə almır.
-    Preload Upcoming Videos: Növbəti oynadıla biləcək videoların yt-dlp axın URL-lərini alır və keşdə saxlayır. Baxış növbəsinə pleylistlər və tövsiyələrdən daha çox üstünlük verilir.
-    Upcoming Videos to Preload: yt-dlp axın URL-ləri arxa planda alınan növbəti videoların maksimum sayı.
-    Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
+    Upcoming Videos to Preload: Növbəti oynadıla biləcək bu qədər videoya qədər yt-dlp axın URL-lərini alır və keşdə saxlayır. Baxış növbəsinə pleylistlər və tövsiyələrdən daha çox üstünlük verilir.
     Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
     Keep Status Bar Hidden in Fullscreen: "Status panelini yalnız ekranın kənarından sürüşdürdükdə göstər və bir azdan yenidən gizlət. Pleyerə toxunmaq onu artıq göstərmir."
     Ask Before Preloading Large Playlists: "{count} videodan çox olan pleylistin bütün videolarını əvvəlcədən yükləməzdən əvvəl təsdiq istəyir."
@@ -2544,6 +2541,7 @@ Tooltips:
     Take a Break Reminder: "Bu qədər baxışdan sonra videoya fasilə verir. 10 dəqiqə və ya daha uzun fasilə sayğacı yenidən başladır."
     Bedtime Reminder: "Başlanğıc və bitmə vaxtı arasında videoya fasilə verir və baxmağı dayandırmağı sizə xatırladır."
     Shorten View Counts: YouTube-un artıq yuvarlaqlaşdırdığı baxış, şərh və şərh bəyənmə saylarını qısaldılmış formada, məsələn 14.000 əvəzinə 14K göstərir. Dəqiq saylar həmişə tam göstərilir.
+    Blocked Items: Gizlət aşağıdakı siyahılara uyğun gələn videoları, pleylistləri və kanalları silir. Bulanıqlaşdır onları siz açana qədər bulanıq göstərir. Göstər siyahılara məhəl qoymur.
   Subscription Settings:
     Refresh These Feeds Together: "Seçilmiş axınlardan birini yenilədikdə, digər seçilmiş axınlar dərhal ondan sonra yenilənir. Avtomatik yeniləmələr hər axının öz intervalına uyğun davam edir."
     Fetch Feed on Startup: Aktivləşdirildikdə OpenTubeX başlanğıcda və yeni pəncərə açıldıqda abunəlik axınınızı avtomatik alır.
@@ -2564,13 +2562,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Oxudulan və ya fasilə verilmiş videosu olan vərəqin ikonuna klikləmək, həmin vərəqə keçmədən videonu fasiləyə verir və ya davam etdirir.
     Only Show Important Notifications: Yalnız əməliyyatı təsdiqləyən və ya vəziyyət bildirən tətbiqdaxili bildirişləri, o cümlədən Geri al təklif edənləri gizlədir. Xətalar, xəbərdarlıqlar, qurduğunuz xatırlatmalar və yeniləmə təklifləri kimi qərar tələb edən bildirişlər yenə də görünür. Abunəliklərin yenilənməsi kimi arxa fon əməliyyatlarının gedişatı bildiriş əvəzinə ümumi irəliləyiş zolağında göstərilir. Sistem bildirişlərinə təsir etmir.
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
+    Tab Width: Üfüqi vərəq zolağındakı bütün vərəqlərə eyni en verir. Avtomatik hər vərəqin enini başlığına uyğunlaşdırır.
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     UI Density: "Siyahılarda, menyularda, yan paneldə və Parametrlərdə boşluqları dəyişir."
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.
     Scroll Speed: Siçan çarxı və toxunma paneli jestlərinin səhifəni nə qədər sürüşdürdüyünü dəyişir.
-    Use Fixed Tab Width: Üfüqi vərəq zolağında bütün vərəqlərin enini başlıqlarına görə dəyişmək əvəzinə eyni edir.
     Use Custom Title Bar: Şaquli yerə qənaət etmək üçün sistemin başlıq zolağını vərəq paneli ilə, vərəqlər yuxarıda olmadıqda isə yuxarı naviqasiya ilə əvəz edir. Pəncərə idarəetmə düymələri həmin panelin küncündə görünür.
     Use Grid Player Menu: Video oynadıcısının tənzimləmələr menyusunu sətir siyahısı əvəzinə plitələr toru kimi düzür.
     Modal Backdrop: "Dialoqların və menyuların arxasında tətbiqin necə görünəcəyini təyin edir. Bulanıqlaşdırma zəif cihazlarda yavaş işləyə bilər."

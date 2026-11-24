@@ -1,6 +1,5 @@
 import { isYtDlpPlaybackSourceCacheable } from './ytDlpPlaybackCache.js'
 
-export const DEFAULT_YT_DLP_PRELOAD_COUNT = 2
 export const MAX_YT_DLP_PRELOAD_COUNT = 10
 export const DEFAULT_YT_DLP_PRELOAD_CONCURRENCY = 2
 export const MAX_YT_DLP_PRELOAD_CONCURRENCY = 32

@@ -2,6 +2,8 @@ import { areJsonValuesEqual } from './jsonValues.js'
 import { resolveBaseTheme, resolveSystemTheme } from '../../appearanceSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes } from '../../customTheme.js'
 import {
+  blockedItemsModeFromSwitches,
+  fixedTabWidthFromSwitch,
   hasReplacedSettingId,
   holdPlaybackRateMultiplierFromSwitch,
   keepPlayerVisibleOnScrollFromLegacy,
@@ -9,6 +11,7 @@ import {
   navigationBarLabelsFromCompactSwitch,
   thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
+  ytDlpPreloadCountFromSwitch,
 } from '../../datastores/settingsMigrations.js'
 
 export function areSyncSettingValuesEqual(key, left, right) {
@@ -76,6 +79,29 @@ export function migrateLegacySyncedSettings(remote) {
   if (compactNavigationLabels && !remote.navigationBarLabels) {
     migrated.navigationBarLabels = {
       ...compactNavigationLabels, key: 'navigationBarLabels', value: navigationBarLabelsFromCompactSwitch(compactNavigationLabels.value),
+    }
+  }
+  const enableBlockLists = remote.enableBlockLists
+  const blurBlockedItems = remote.blurBlockedItems
+  if ((enableBlockLists || blurBlockedItems) && !remote.blockedItemsMode) {
+    migrated.blockedItemsMode = {
+      key: 'blockedItemsMode',
+      value: blockedItemsModeFromSwitches(enableBlockLists?.value, blurBlockedItems?.value),
+      updatedAt: Math.max(enableBlockLists?.updatedAt ?? -Infinity, blurBlockedItems?.updatedAt ?? -Infinity),
+    }
+  }
+  // Older versions keep syncing the switches that turned these values on and
+  // off, so a switch edited after the value decides it.
+  for (const [switchKey, valueKey, fromSwitch] of [
+    ['useFixedTabWidth', 'fixedTabWidth', fixedTabWidthFromSwitch],
+    ['ytDlpPreloadEnabled', 'ytDlpPreloadCount', ytDlpPreloadCountFromSwitch],
+  ]) {
+    const formerSwitch = remote[switchKey]
+    const value = remote[valueKey]
+    if (formerSwitch && !(formerSwitch.updatedAt < value?.updatedAt)) {
+      migrated[valueKey] = {
+        key: valueKey, value: fromSwitch(formerSwitch.value, value?.value), updatedAt: formerSwitch.updatedAt,
+      }
     }
   }
   // Auto Load Next Page used to control comments too.

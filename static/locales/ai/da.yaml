@@ -76,6 +76,8 @@ Global:
   Loading More: Indlæser mere
   New: Ny
   Show Blocked Item: Vis blokeret element
+  Auto: Automatisk
+  'Off': Fra
 Search Listing:
   Label:
     Members Only: Kun for medlemmer
@@ -579,7 +581,6 @@ Settings:
     Date Format: Datoformat
     Time Format: Tidsformat
     Language Default: Baseret på sprog
-    Update Relative Timestamps: Hold relative tidsangivelser opdateret
     Stream Extraction Method:
       Stream Extraction Method: Metode til udtræk af streams
       yt-dlp: yt-dlp
@@ -741,7 +742,6 @@ Settings:
     Loaded Tab Icons: 'Manglende faneikon indlæst: {count} | Manglende faneikoner indlæst: {count}'
     Loaded Tab Icons With Failures: Indlæste {loaded} faneikoner. {failed} kunne ikke indlæses
     Show Tab Previews: Vis forhåndsvisninger af faner
-    Use Fixed Tab Width: Brug fast fanebredde i vandret tilstand
     Use Custom Title Bar: Brug tilpasset titellinje
     Tab Width: Fanebredde
     Vertical Tab Height: Højde på lodrette faner
@@ -1072,9 +1072,7 @@ Settings:
       Modern Formats: "Moderne formater"
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fuld skærm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Stryg op eller ned for at åbne eller forlade fuld skærm'
-    Preload Upcoming Videos: "Forudindlæs kommende videoer"
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
-    Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
     Keep Status Bar Hidden in Fullscreen: "Hold statuslinjen skjult i fuld skærm"
     Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
@@ -1385,6 +1383,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skjul sete videoer i søgning og anbefalinger"
     Hide Full Screen Video Title: Skjul videotitel i helt vindue eller fuld skærm
+    Blocked Items:
+      Blocked Items: Blokerede elementer
+      Hide: Skjul
+      Blur: Slør
+      Show: Vis
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
       Break Reminder Action: "Når det er tid til at holde pause"
@@ -1411,7 +1414,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Slå notifikationer om nye uploads fra ved sengetid"
       Stop Autoplay at Bedtime and After the Daily Limit: "Stop automatisk afspilning ved sengetid og efter den daglige grænse"
     Hide Popularity Graph: "Skjul popularitetsgraf"
-    Enable Block Lists: "Aktivér blokeringslister"
     AI Video Summaries: AI-videoresuméer
     Hide: Skjul
     Collapsed: Sammenfoldet
@@ -1432,7 +1434,6 @@ Settings:
       Visible While Paused: Synligt ved pause i helt vindue eller fuld skærm
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antal visninger, kommentarer og likes på kommentarer
-    Hide Home: Skjul startsiden
     Hide Live Chat Replay: Skjul genafspilning af livechat
     Disable A-B Repeat: Deaktivér A-B-gentagelse
     Hide End-Screen Annotations: Skjul annoteringer på slutskærmen
@@ -1445,7 +1446,6 @@ Settings:
     Add: Tilføj
     Remove: Fjern
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
-    Blur Blocked Items: Slør blokerede elementer i stedet for at skjule dem
   Data Settings:
     Backup separate profile data: "Denne sikkerhedskopi indeholder også data fra {count} adskilt profil, som gendannes i den profil. | Denne sikkerhedskopi indeholder også data fra {count} adskilte profiler, som gendannes i de profiler."
     Subscription cache file: "Denne fil gemmer kun videoerne fra dine abonnementer i cachen, ikke kanalerne. Vælg profiles.db eller en eksport af abonnementer i stedet."
@@ -2533,7 +2533,6 @@ Tooltips:
     Enable Tabs: "Holder den aktuelle side åben. Andre faner bevares, indtil appen genstartes; aktivér faner igen for at gendanne dem."
     Data Saver Thumbnails: "Brug miniaturebilleder med lavere opløsning for at reducere dataforbruget."
     Use AI Translation Completions: Udfyld huller i menneskelige oversættelser med AI-genereret tekst. Menneskelige oversættelser har altid forrang.
-    Update Relative Timestamps: Opdaterer relative tidsangivelser i hele appen, mens en side er åben. Når funktionen er slået fra, opdateres de kun, når siden genindlæses eller besøges igen.
     Stream Extraction Method: |
       Vælg, hvordan OpenTubeX henter videostreams. yt-dlp skal være tilgængeligt, hvis det vælges.
       Det kan tage længere tid at starte videoer med yt-dlp.
@@ -2582,9 +2581,7 @@ Tooltips:
       Højere værdier kan hjælpe på langsomme eller ustabile forbindelser, men bruger mere båndbredde og hukommelse.
       De kan også få Auto til at undervurdere forbindelseshastigheden og vælge en lavere kvalitet.
       Streams, der er begrænset til én anmodning ad gangen, ignorerer denne indstilling.
-    Preload Upcoming Videos: "Henter og gemmer yt-dlp-streamadresser for de næste videoer. Køen har prioritet over afspilningslister og anbefalinger."
-    Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
-    Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
+    Upcoming Videos to Preload: "Henter og gemmer yt-dlp-streamadresser for op til dette antal videoer, der kan afspilles som de næste. Afspilningskøen har prioritet over afspilningslister og anbefalinger."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
     Keep Status Bar Hidden in Fullscreen: "Vis kun statuslinjen, når du stryger fra skærmkanten, og skjul den igen efter et øjeblik. Et tryk på afspilleren viser den ikke længere."
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
@@ -2621,6 +2618,7 @@ Tooltips:
     Take a Break Reminder: "Sætter videoen på pause efter så lang tids visning. En pause på 10 minutter eller mere starter optællingen forfra."
     Bedtime Reminder: "Sætter videoen på pause og minder dig om at stoppe med at se mellem start- og sluttidspunktet."
     Shorten View Counts: Viser antal visninger, kommentarer og likes på kommentarer i den forkortede form, som YouTube allerede har afrundet, f.eks. 14 t. i stedet for 14.000. Nøjagtige tal vises altid fuldt ud.
+    Blocked Items: Skjul fjerner videoer, afspilningslister og kanaler, der matcher listerne nedenfor. Slør viser dem sløret, indtil du viser dem. Vis ignorerer listerne.
     Hide Videos on Watch: Skjuler sete videoer fra fanerne Videoer, Shorts og Live på abonnements- og kanalsiderne. Dette påvirker ikke fanen Start på kanalsider
   Subscription Settings:
     Refresh These Feeds Together: "Når du opdaterer et af de markerede feeds, opdateres de andre markerede feeds lige efter. Automatiske opdateringer følger stadig hvert feeds eget interval."
@@ -2642,13 +2640,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Et klik på ikonet for en fane med en video, der afspilles eller er sat på pause, sætter den på pause eller genoptager den uden at skifte til fanen.
     Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status, herunder dem, der tilbyder Fortryd. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer, der beder dig træffe et valg, såsom opdateringsforespørgsler, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
+    Tab Width: Giver alle faner i den vandrette fanelinje samme bredde. Automatisk tilpasser hver fane efter dens titel.
     Thumbnail Size: "Skalerer videominiaturer i gitre og lister. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiaturer på playlistesider. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     UI Density: "Ændrer afstanden i lister, menuer, sidebjælken og Indstillinger."
     Show Progress as Notification: Viser en vedvarende meddelelse med aktuel status for baggrundshandlinger, f.eks. opdatering af abonnementer og download af administrerede værktøjer, i stedet for den globale statuslinje.
     Always Show Scrollbars: Holder rullebjælkerne synlige hele tiden. Når funktionen er slået fra, toner de ud, kort efter at du holder op med at bevæge musen, og vises igen, så snart du bevæger den.
     Scroll Speed: Ændrer, hvor langt musehjulets og pegefeltets hjulbevægelser ruller.
-    Use Fixed Tab Width: Giver alle faner i den vandrette fanelinje samme bredde i stedet for at tilpasse dem efter titlen.
     Use Custom Title Bar: Erstatter systemets titellinje med fanelinjen eller med den øverste navigation, når fanerne ikke er øverst, for at spare lodret plads. Vinduesknapperne vises i hjørnet af den linje.
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
     Modal Backdrop: "Angiver, hvordan appen ser ud bag dialoger og menuer. Sløring kan være langsom på mindre kraftige enheder."

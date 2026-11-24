@@ -74,6 +74,8 @@ Global:
   Loading More: Wrthi'n llwytho rhagor
   New: Newydd
   Show Blocked Item: Dangos eitem wedi'i blocio
+  Auto: Awtomatig
+  'Off': I ffwrdd
 Search Listing:
   Label:
     Members Only: Aelodau yn unig
@@ -569,7 +571,6 @@ Settings:
     Date Format: Fformat dyddiad
     Time Format: Fformat amser
     Language Default: Rhagosodiad yr iaith
-    Update Relative Timestamps: Diweddaru stampiau amser cymharol
     Stream Extraction Method:
       Stream Extraction Method: Dull echdynnu ffrydiau
       yt-dlp: yt-dlp
@@ -745,7 +746,6 @@ Settings:
     Loaded Tab Icons: 'Wedi llwytho {count} o eiconau tabiau coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} o eiconau tabiau coll'
     Loaded Tab Icons With Failures: Wedi llwytho {loaded} o eiconau tabiau; nid oedd modd llwytho {failed}
     Show Tab Previews: Dangos rhagolygon tabiau
-    Use Fixed Tab Width: Defnyddio lled tab sefydlog yn y modd llorweddol
     Use Custom Title Bar: Defnyddio bar teitl personol
     Tab Width: Lled tabiau
     Vertical Tab Height: Uchder tabiau fertigol
@@ -1047,9 +1047,7 @@ Settings:
     Parallel Segment Loading: Llwytho segmentau ochr yn ochr
     Rotate Wide Videos to Landscape in Fullscreen: 'Cylchdroi fideos llydan i’r dirwedd yn y sgrin lawn'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llithro i fyny neu i lawr i fynd i mewn neu allan o’r sgrin lawn'
-    Preload Upcoming Videos: "Rhaglwytho fideos nesaf"
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
-    Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
     Keep Status Bar Hidden in Fullscreen: "Cadw'r bar statws yn gudd ar sgrin lawn"
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
@@ -1362,6 +1360,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Cuddio fideos a wyliwyd mewn chwiliadau ac argymhellion"
     Hide Full Screen Video Title: Cuddio teitl y fideo mewn ffenestr lawn / sgrin lawn
+    Blocked Items:
+      Blocked Items: Eitemau wedi'u blocio
+      Hide: Cuddio
+      Blur: Niwlio
+      Show: Dangos
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
       Break Reminder Action: "Pan Fydd Hi'n Amser am Seibiant"
@@ -1388,7 +1391,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Tawelu Hysbysiadau Cynnwys Newydd Amser Gwely"
       Stop Autoplay at Bedtime and After the Daily Limit: "Atal Awtochwarae Amser Gwely ac ar Ôl y Terfyn Dyddiol"
     Hide Popularity Graph: "Cuddio’r graff poblogrwydd"
-    Enable Block Lists: "Galluogi rhestrau blocio"
     AI Video Summaries: Crynodebau fideo AI
     Hide: Cuddio
     Collapsed: Wedi'u crebachu
@@ -1409,7 +1411,6 @@ Settings:
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
     Hide Channel Avatars: Cuddio afatarau sianeli
     Shorten View Counts: Byrhau cyfrif gwylwyr, sylwadau a hoffiadau sylwadau
-    Hide Home: Cuddio'r hafan
     Hide Live Chat Replay: Cuddio ailchwarae sgwrs fyw
     Disable A-B Repeat: Analluogi ailadrodd A-B
     Hide End-Screen Annotations: Cuddio anodiadau'r sgrin ddiwedd
@@ -1420,7 +1421,6 @@ Settings:
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
-    Blur Blocked Items: Niwlio eitemau wedi'u blocio yn lle eu cuddio
   Data Settings:
     Backup separate profile data: "Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffil hwnnw. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} broffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} phroffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny."
     Subscription cache file: "Mae'r ffeil hon ond yn storio fideos o'ch tanysgrifiadau, nid y sianeli. Dewiswch profiles.db neu allforiad tanysgrifiadau yn lle."
@@ -2481,7 +2481,6 @@ Tooltips:
     Enable Tabs: "Mae’r dudalen bresennol yn aros ar agor. Cedwir tabiau eraill nes i’r ap ailgychwyn; galluogwch dabiau eto i’w hadfer."
     Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."
     Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
-    Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.
     Stream Extraction Method: |
       Dewiswch sut mae OpenTubeX yn cael ffrydiau fideo. Rhaid i yt-dlp fod ar gael pan gaiff ei ddewis.
       Gall fideos gymryd mwy o amser i ddechrau wrth ddefnyddio yt-dlp.
@@ -2530,9 +2529,7 @@ Tooltips:
       Gall gwerthoedd uwch helpu ar gysylltiadau araf neu ansefydlog, ond maent yn defnyddio rhagor o led band a chof.
       Gallant hefyd beri i Awtomatig danamcangyfrif cyflymder y cysylltiad a dewis ansawdd is.
       Mae ffrydiau sydd wedi'u cyfyngu i un cais ar y tro yn anwybyddu'r gosodiad hwn.
-    Preload Upcoming Videos: "Mae’n nôl ac yn storio URLau yt-dlp y fideos nesaf. Mae’r ciw yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
-    Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
-    Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
+    Upcoming Videos to Preload: "Mae’n nôl ac yn storio URLau ffrydiau yt-dlp ar gyfer hyd at y nifer hwn o fideos a all chwarae nesaf. Mae’r ciw gwylio yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
     Keep Status Bar Hidden in Fullscreen: "Dangos y bar statws dim ond pan fyddwch yn llusgo o ymyl y sgrin, a'i guddio eto ar ôl ennyd. Nid yw tapio'r chwaraewr yn ei ddangos mwyach."
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
@@ -2569,6 +2566,7 @@ Tooltips:
     Take a Break Reminder: "Mae'n seibio'r fideo ar ôl gwylio am gymaint â hyn. Mae seibiant o 10 munud neu fwy yn ailddechrau'r cyfrif."
     Bedtime Reminder: "Mae'n seibio'r fideo ac yn eich atgoffa i roi'r gorau i wylio rhwng yr amser dechrau a'r amser gorffen."
     Shorten View Counts: Mae'n dangos cyfrif gwylwyr, sylwadau a hoffiadau sylwadau y mae YouTube eisoes wedi'u talgrynnu ar ffurf fer, e.e. 14K yn lle 14,000. Dangosir yr union gyfrifon yn llawn bob amser.
+    Blocked Items: Mae Cuddio yn tynnu fideos, rhestrau chwarae a sianeli sy'n cyfateb i'r rhestrau isod. Mae Niwlio yn eu dangos yn niwlog nes i chi eu datgelu. Mae Dangos yn anwybyddu'r rhestrau.
   Subscription Settings:
     Refresh These Feeds Together: "Pan fyddwch yn adnewyddu un o'r ffrydiau a dicwyd, mae'r ffrydiau eraill a dicwyd yn adnewyddu yn syth wedyn. Mae adnewyddiadau awtomatig yn dal i ddilyn cyfwng pob ffrwd ei hun."
     Fetch Feed on Startup: Pan fydd wedi'i alluogi, bydd OpenTubeX yn cyrchu eich ffrwd tanysgrifiadau'n awtomatig wrth gychwyn a phan agorir ffenestr newydd.
@@ -2589,13 +2587,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Mae clicio eicon tab sydd â fideo yn chwarae neu wedi’i seibio yn ei seibio neu’n ei ailgychwyn heb newid i’r tab hwnnw.
     Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws, gan gynnwys rhai sy'n cynnig Dadwneud. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n gofyn am benderfyniad, fel cynigion diweddaru, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
+    Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol. Mae Awtomatig yn meintio pob tab yn ôl ei deitl.
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     UI Density: "Yn newid y bylchau mewn rhestrau, dewislenni, y bar ochr a’r Gosodiadau."
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
     Scroll Speed: Newid pa mor bell mae ystumiau olwyn llygoden ac olwyn pad cyffwrdd yn sgrolio.
-    Use Fixed Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol yn lle eu meintio yn ôl eu teitl.
     Use Custom Title Bar: Mae'n disodli bar teitl y system â'r bar tabiau, neu â'r llywio uchaf pan nad yw'r tabiau ar y brig, i arbed lle fertigol. Mae rheolyddion y ffenestr yn ymddangos yng nghornel y bar hwnnw.
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
     Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."

@@ -49,14 +49,6 @@
           :tooltip="t('Tooltips.General Settings.Close Window With Last Tab')"
           @change="store.dispatch('updateCloseWindowWithLastTab', $event)"
         />
-        <FtToggleSwitch
-          :label="t('Settings.General Settings.Update Relative Timestamps')"
-          :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
-          :default-value="updateRelativeTimestamps"
-          setting-key="updateRelativeTimestamps"
-          :compact="true"
-          @change="updateRelativeTimestampsSetting"
-        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -500,15 +492,6 @@ const openDeepLinksInNewWindow = computed(() => store.getters.getOpenDeepLinksIn
  */
 function updateOpenDeepLinksInNewWindow(value) {
   store.dispatch('updateOpenDeepLinksInNewWindow', value)
-}
-
-const updateRelativeTimestamps = computed(() => store.getters.getUpdateRelativeTimestamps)
-
-/**
- * @param {boolean} value
- */
-function updateRelativeTimestampsSetting(value) {
-  store.dispatch('updateUpdateRelativeTimestamps', value)
 }
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */

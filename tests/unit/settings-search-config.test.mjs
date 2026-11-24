@@ -104,7 +104,7 @@ test('shared settings search index includes only settings available on this plat
   assert.ok(desktopValues.some(({ label }) => label === 'UI Scale'))
   assert.ok(!webValues.some(({ label }) => label === 'UI Scale'))
   assert.ok(mobileValues.some(({ label }) => label === 'Mobile layout'))
-  assert.ok(mobileValues.some(({ label }) => label === 'Use Fixed Tab Width in Horizontal Mode'))
+  assert.ok(mobileValues.some(({ label }) => label === 'Tab Width'))
   assert.ok(mobileValues.some(({ label }) => label === 'Show Tab Icons'))
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings'].Font['App Font']))
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings']['Move Settings to App Header']))

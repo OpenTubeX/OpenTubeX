@@ -286,7 +286,7 @@ test('restores blocked channel and title recommendations while block lists are o
   await expect(blockedChannel).toHaveCount(0)
   await expect(blockedTitle).toHaveCount(0)
 
-  await changeLayoutSetting(page, 'updateEnableBlockLists', false)
+  await changeLayoutSetting(page, 'updateBlockedItemsMode', 'show')
   await expect(blockedChannel.first()).toBeVisible()
   await expect(blockedTitle.first()).toBeVisible()
   await section.locator('.ft-list-video').filter({ hasText: 'Linux desktop panels' }).locator('.title').click({ button: 'right' })
@@ -294,7 +294,7 @@ test('restores blocked channel and title recommendations while block lists are o
   await expect(page.getByRole('menuitem', { name: 'Hide Channel', exact: true })).toHaveCount(0)
   await page.keyboard.press('Escape')
 
-  await changeLayoutSetting(page, 'updateEnableBlockLists', true)
+  await changeLayoutSetting(page, 'updateBlockedItemsMode', 'hide')
   await expect(blockedChannel).toHaveCount(0)
   await expect(blockedTitle).toHaveCount(0)
 })

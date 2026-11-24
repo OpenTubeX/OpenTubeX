@@ -74,6 +74,8 @@ Global:
   Loading More: Lastar inn meir
   New: Ny
   Show Blocked Item: Vis blokkert element
+  Auto: Automatisk
+  'Off': Av
 Search Listing:
   Label:
     Members Only: Berre for medlemmer
@@ -581,7 +583,6 @@ Settings:
     Date Format: Datoformat
     Time Format: Tidsformat
     Language Default: Språkstandard
-    Update Relative Timestamps: Hald relative tidsstempel oppdaterte
     Stream Extraction Method:
       Stream Extraction Method: Metode for uthenting av straum
       yt-dlp: yt-dlp
@@ -748,7 +749,6 @@ Settings:
     Loaded Tab Icons: 'Manglande faneikon lasta inn: {count} | Manglande faneikon lasta inn: {count}'
     Loaded Tab Icons With Failures: Lasta inn {loaded} faneikon; {failed} kunne ikkje lastast inn
     Show Tab Previews: Vis førehandsvisingar av faner
-    Use Fixed Tab Width: Bruk fast fanebreidd i vassrett modus
     Use Custom Title Bar: Bruk eigendefinert tittellinje
     Tab Width: Fanebreidd
     Vertical Tab Height: Høgd på loddrette faner
@@ -1145,9 +1145,7 @@ Settings:
       Modern Formats: "Moderne format"
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter breie videoar til liggjande format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å opne eller avslutte fullskjerm'
-    Preload Upcoming Videos: "Førehandslast komande videoar"
     Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
-    Concurrent Preloads: "Samstundes førehandslasting"
     Ignore System Rotation Lock for Fullscreen: Ignorer rotasjonslåsen i systemet for fullskjerm
     Keep Status Bar Hidden in Fullscreen: "Hald statuslinja gøymd i fullskjerm"
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
@@ -1476,6 +1474,11 @@ Settings:
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skjul sette videoar i søk og tilrådingar"
     Hide Full Screen Video Title: Skjul videotittel i fullt vindauge eller på fullskjerm
+    Blocked Items:
+      Blocked Items: Blokkerte element
+      Hide: Gøym
+      Blur: Gjer uskarp
+      Show: Vis
     Digital Wellbeing:
       Count Watch Time From: "Tel sjåtid frå"
       Break Reminder Action: "Når det er tid for pause"
@@ -1502,7 +1505,6 @@ Settings:
       Silence Upload Notifications at Bedtime: "Demp varsel om nye opplastingar ved leggjetid"
       Stop Autoplay at Bedtime and After the Daily Limit: "Stopp automatisk avspeling ved leggjetid og etter den daglege grensa"
     Hide Popularity Graph: "Gøym popularitetsgrafen"
-    Enable Block Lists: "Slå på blokkeringslister"
     AI Video Summaries: KI-videosamandrag
     Hide: Gøym
     Collapsed: Samanfalda
@@ -1528,7 +1530,6 @@ Settings:
       Visible While Paused: Synleg ved pause i fullt vindauge eller på fullskjerm
     Hide Channel Avatars: Gøym kanalavatarar
     Shorten View Counts: Forkort talet på visingar, kommentarar og likerklikk på kommentarar
-    Hide Home: Gøym heimesida
     Hide Live Chat Replay: Gøym opptak av direktepraten
     Hide Profile Pictures in Comments: Gøym profilbilete i kommentarar
     Disable A-B Repeat: Slå av A-B-gjentaking
@@ -1561,7 +1562,6 @@ Settings:
     Paused Interface Hide Delay: Forseinking før grensesnittet blir gøymt ved pause
     Add: Legg til
     Remove: Fjern
-    Blur Blocked Items: Gjer blokkerte element uskarpe i staden for å gøyma dei
   Data Settings:
     Backup separate profile data: "Denne tryggingskopien inneheld også dataa til {count} separat profil, som blir gjenoppretta i den profilen. | Denne tryggingskopien inneheld også dataa til {count} separate profilar, som blir gjenoppretta i desse profilane."
     Subscription cache file: "Denne fila mellomlagrar berre videoane frå abonnementa dine, ikkje kanalane. Vel profiles.db eller ein eksport av abonnement i staden."
@@ -2755,7 +2755,6 @@ Tooltips:
     Enable Tabs: "Held den gjeldande sida open. Andre faner vert tekne vare på til appen vert starta på nytt; slå på faner igjen for å gjenopprette dei."
     Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."
     Use AI Translation Completions: Fyll ut det som manglar i menneskelagde omsetjingar med KI-generert tekst. Menneskelagde omsetjingar vert alltid brukte fyrst.
-    Update Relative Timestamps: Oppdaterer relative tidsstempel i heile appen medan ei side er open. Når dette er slått av, vert dei berre oppdaterte når sida vert lasta inn på nytt eller opna att.
     Stream Extraction Method: |
       Vel korleis OpenTubeX hentar videostraumar. yt-dlp må vere tilgjengeleg når det er valt.
       Videoar kan bruke lengre tid på å starte med yt-dlp.
@@ -2805,9 +2804,7 @@ Tooltips:
       Høgare verdiar kan hjelpe på treige eller ustabile samband, men brukar meir bandbreidd og minne.
       Dei kan òg få Automatisk til å undervurdere tilkoplingsfarten og velje lågare kvalitet.
       Straumar som er avgrensa til éin førespurnad om gongen, ser bort frå denne innstillinga.
-    Preload Upcoming Videos: "Hentar og mellomlagrar yt-dlp-adresser for dei neste videoane. Køen har prioritet framfor spelelister og tilrådingar."
-    Upcoming Videos to Preload: "Det høgaste talet på komande videoar som får yt-dlp-adressene henta i bakgrunnen."
-    Concurrent Preloads: "Det høgaste talet på yt-dlp-prosessar som blir brukte til å førehandslaste videoar samstundes. Høgare verdiar bruker meir prosessorkraft, minne og nettverksbandbreidd."
+    Upcoming Videos to Preload: "Hentar og mellomlagrar yt-dlp-straumadresser for opptil så mange videoar som kan spelast av som neste. Sjåkøen har prioritet framfor spelelister og tilrådingar."
     Ignore System Rotation Lock for Fullscreen: Roter eininga fysisk for å opne og avslutte fullskjerm, sjølv når automatisk rotasjon er slått av i Android.
     Keep Status Bar Hidden in Fullscreen: "Vis statuslinja berre når du sveipar frå skjermkanten, og gøym ho igjen etter ei lita stund. Å trykkja på avspelaren viser ho ikkje lenger."
     Ask Before Preloading Large Playlists: "Ber om stadfesting før alle videoane i ei speleliste med meir enn {count} videoar vert førehandslasta."
@@ -2846,6 +2843,7 @@ Tooltips:
     Take a Break Reminder: "Set videoen på pause etter så lang sjåtid. Ein pause på 10 minutt eller meir startar teljinga på nytt."
     Bedtime Reminder: "Set videoen på pause og minner deg på å slutte å sjå mellom start- og sluttidspunktet."
     Shorten View Counts: Viser visingstal, kommentartal og tal på likarklikk for kommentarar i den avrunda kortforma frå YouTube, til dømes 14K i staden for 14,000. Nøyaktige tal vert alltid viste i full lengd.
+    Blocked Items: Gøym fjernar videoar, spelelister og kanalar som samsvarar med listene nedanfor. Gjer uskarp viser dei uskarpe til du avslører dei. Vis ignorerer listene.
     Hide Subscriptions Live: Denne innstillinga vert overstyrt av innstillinga "{appWideSetting}" for heile appen i underdelen "{subsection}" under "{settingsSection}"
     Hide Videos, Playlists and Channels Containing Text: Skriv inn eit ord, ein del av eit ord eller ei setning, utan skilnad på store og små bokstavar, for å gøyme alle videoar, spelelister og kanalar med ein originaltittel som inneheld teksten. Dette gjeld i heile OpenTubeX, bortsett frå Historikk, Dine spelelister og videoar i spelelister.
     Hide Videos on Watch: Gøymer videoar du har sett, frå fanene Videoar, Shorts og Direkte på abonnements- og kanalsidene. Dette påverkar ikkje Heim-fana på kanalsider
@@ -2869,13 +2867,13 @@ Tooltips:
     Toggle Playback With Tab Icon: Eit klikk på ikonet til ei fane med ein video som vert spelt av eller er sett på pause, set han på pause eller held fram utan å byte til fana.
     Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status, inkludert dei som tilbyr Angre. Feil, åtvaringar, påminningar du har sett opp, og varsel som ber deg ta eit val, som oppdateringsførespurnader, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
+    Tab Width: Gjev alle fanene i den vassrette fanelinja same breidd. Automatisk tilpassar breidda på kvar fane til tittelen.
     Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilete på spelelistesider. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     UI Density: "Endrar avstanden i lister, menyar, sidefeltet og Innstillingar."
     Show Progress as Notification: Viser eit vedvarande varsel med framdrift i sanntid for bakgrunnsoperasjonar, til dømes oppdatering av abonnementsstraumen og nedlasting av administrerte verktøy, i staden for den globale framdriftslinja.
     Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.
     Scroll Speed: Endrar kor langt musehjul- og styreflaterørsler rullar.
-    Use Fixed Tab Width: Gjev alle fanene i den vassrette fanelinja same breidd i staden for å tilpasse breidda til tittelen.
     Use Custom Title Bar: Byter ut tittellinja til systemet med fanelinja, eller med den øvste navigasjonen når fanene ikkje er øvst, for å spare loddrett plass. Vindaugsknappane blir viste i hjørnet av den linja.
     Use Grid Player Menu: Ordnar innstillingsmenyen til videospelaren som eit rutenett med felt i staden for ei liste med rader.
     Modal Backdrop: "Avgjer korleis appen ser ut bak dialogar og menyar. Uskarpleik kan vere tregt på mindre kraftige einingar."

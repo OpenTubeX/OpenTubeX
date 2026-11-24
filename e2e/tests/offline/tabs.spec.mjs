@@ -2625,7 +2625,7 @@ test.describe('closing the last tab with the window kept open', () => {
 })
 
 test.describe('fixed tab width', () => {
-  test.use({ seed: { settings: { useFixedTabWidth: true, fixedTabWidth: 140 } } })
+  test.use({ seed: { settings: { fixedTabWidth: 140 } } })
 
   test('gives every horizontal tab the configured width', async ({ page }) => {
     await page.keyboard.press('Control+t')
@@ -2759,7 +2759,7 @@ async function expectActiveTabInView(page) {
 
 for (const tabBarPosition of ['top', 'left']) {
   test.describe(`overflowing tabs at ${tabBarPosition}`, () => {
-    test.use({ seed: { settings: { tabBarPosition, useFixedTabWidth: true, fixedTabWidth: 200 } } })
+    test.use({ seed: { settings: { tabBarPosition, fixedTabWidth: 200 } } })
 
     test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
       let page = app.page

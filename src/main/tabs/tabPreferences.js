@@ -147,13 +147,12 @@ export async function getStoredLandingRoute(profileSettings = {}) {
     ? { value: profileSettings[settingId] }
     : baseHandlers.settings._findOne(settingId)
   try {
+    // Saved settings from older versions are converted on the first read.
+    await baseHandlers.settings.migrate()
     const [
       landingPageSetting,
       navigationItemsSetting,
-      hideHomeSetting,
       hidePlaylistsSetting,
-      hidePopularVideosSetting,
-      hideTrendingVideosSetting,
       backendPreferenceSetting,
       backendFallbackSetting,
       rememberHistorySetting,
@@ -162,10 +161,7 @@ export async function getStoredLandingRoute(profileSettings = {}) {
     ] = await Promise.all([
       findSetting('landingPage'),
       findSetting('navigationItems'),
-      findSetting('hideHome'),
       findSetting('hidePlaylists'),
-      findSetting('hidePopularVideos'),
-      findSetting('hideTrendingVideos'),
       findSetting('backendPreference'),
       findSetting('backendFallback'),
       findSetting('rememberHistory'),
@@ -185,12 +181,7 @@ export async function getStoredLandingRoute(profileSettings = {}) {
     }
 
     const configuredPages = navigationItemsSetting == null
-      ? navigationItemsFromLegacySettings({
-          hideHome: hideHomeSetting?.value,
-          hidePlaylists: hidePlaylistsSetting?.value,
-          hidePopularVideos: hidePopularVideosSetting?.value,
-          hideTrendingVideos: hideTrendingVideosSetting?.value,
-        })
+      ? navigationItemsFromLegacySettings({ hidePlaylists: hidePlaylistsSetting?.value })
       : normalizeNavigationItems(navigationItemsSetting.value)
     const supportsLocalApi = !!process.env.SUPPORTS_LOCAL_API
     const availablePages = filterAvailableNavigationItems(configuredPages, {

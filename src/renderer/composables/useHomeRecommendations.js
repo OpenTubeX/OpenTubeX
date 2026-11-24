@@ -144,7 +144,7 @@ export function useHomeRecommendations(visible) {
   }))
   const rankingContext = computed(() => JSON.stringify({
     exploration: exploration.value,
-    blockLists: store.getters.getEnableBlockLists,
+    blockLists: store.getters.getBlockListsActive,
     hideLiveStreams: store.getters.getHideLiveStreams,
     hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
     hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
@@ -357,7 +357,7 @@ export function useHomeRecommendations(visible) {
     else rerank()
   }
   watch(exploration, updateRanking)
-  watch(() => store.getters.getEnableBlockLists, updateRanking)
+  watch(() => store.getters.getBlockListsActive, updateRanking)
   watch([() => store.getters.getUseAiSlopList, () => store.getters.getAiSlopListFetchedAt], updateRanking)
   onBeforeUnmount(cancelRequest)
   return {

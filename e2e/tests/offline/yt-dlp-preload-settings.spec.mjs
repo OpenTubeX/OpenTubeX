@@ -6,10 +6,10 @@ async function openYtDlpStreamingSettings(page) {
   const ytDlpSection = heading.locator('xpath=../..')
   return {
     segmentSlider: ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ }),
-    toggle: ytDlpSection.getByRole('checkbox', { name: 'Preload Upcoming Videos' }),
-    toggleLabel: ytDlpSection.locator('label.switch-label').filter({ hasText: 'Preload Upcoming Videos' }),
     countSlider: ytDlpSection.getByRole('slider', { name: /Upcoming Videos to Preload/ }),
-    concurrencySlider: ytDlpSection.getByRole('slider', { name: /Concurrent Preloads/ })
+    countValue: ytDlpSection.locator('label.pure-material-slider')
+      .filter({ hasText: 'Upcoming Videos to Preload' })
+      .locator('.valueText')
   }
 }
 
@@ -20,37 +20,22 @@ test.describe('yt-dlp playback preloading', () => {
     }
   })
 
-  test('persists the switch, preload count, and concurrency', async ({ app }) => {
-    const { segmentSlider, toggle, toggleLabel, countSlider, concurrencySlider } = await openYtDlpStreamingSettings(app.page)
+  test('turns preloading on with a count and persists it', async ({ app }) => {
+    const { segmentSlider, countSlider, countValue } = await openYtDlpStreamingSettings(app.page)
 
-    await expect(toggle).not.toBeChecked()
-    await expect(toggle).toBeEnabled()
     await expect(segmentSlider).toBeEnabled()
-    await expect(countSlider).toBeDisabled()
-    await expect(concurrencySlider).toBeDisabled()
+    await expect(countSlider).toHaveValue('0')
+    await expect(countValue).toHaveText('Off')
 
-    await toggleLabel.click()
-    await expect(toggle).toBeChecked()
-    await expect(countSlider).toBeEnabled()
-    await expect(concurrencySlider).toBeEnabled()
-    await countSlider.fill('0')
-    await concurrencySlider.fill('32')
+    await countSlider.fill('3')
+    await expect(countValue).toHaveText('3')
 
-    await expect.poll(async () => {
-      const settings = latestSettings(
-        readDatastore(app.userDataDir, 'settings')
-      )
-      return {
-        enabled: settings.ytDlpPreloadEnabled,
-        count: settings.ytDlpPreloadCount,
-        concurrency: settings.ytDlpPreloadConcurrency
-      }
-    }).toEqual({ enabled: true, count: 0, concurrency: 32 })
+    await expect.poll(() => latestSettings(
+      readDatastore(app.userDataDir, 'settings')
+    ).ytDlpPreloadCount).toBe(3)
 
     const relaunched = await app.relaunch()
     const reloaded = await openYtDlpStreamingSettings(relaunched.page)
-    await expect(reloaded.toggle).toBeChecked()
-    await expect(reloaded.countSlider).toHaveValue('0')
-    await expect(reloaded.concurrencySlider).toHaveValue('32')
+    await expect(reloaded.countSlider).toHaveValue('3')
   })
 })

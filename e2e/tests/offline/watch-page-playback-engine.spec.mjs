@@ -919,7 +919,6 @@ test.describe('watch page', () => {
         { videoId: 'nextvideo03', title: 'Third recommendation' }
       ]
       await view.$store.dispatch('updateYtDlpPreloadCount', 2)
-      await view.$store.dispatch('updateYtDlpPreloadEnabled', true)
       await view.$store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
     })
 
