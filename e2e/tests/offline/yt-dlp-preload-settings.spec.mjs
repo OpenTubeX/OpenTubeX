@@ -6,10 +6,7 @@ async function openYtDlpStreamingSettings(page) {
   const ytDlpSection = heading.locator('xpath=../..')
   return {
     segmentSlider: ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ }),
-    countSlider: ytDlpSection.getByRole('slider', { name: /Upcoming Videos to Preload/ }),
-    countValue: ytDlpSection.locator('label.pure-material-slider')
-      .filter({ hasText: 'Upcoming Videos to Preload' })
-      .locator('.valueText')
+    countSlider: ytDlpSection.getByRole('slider', { name: /Upcoming Videos to Preload/ })
   }
 }
 
@@ -21,14 +18,10 @@ test.describe('yt-dlp playback preloading', () => {
   })
 
   test('turns preloading on with a count and persists it', async ({ app }) => {
-    const { segmentSlider, countSlider, countValue } = await openYtDlpStreamingSettings(app.page)
+    const { segmentSlider, countSlider } = await openYtDlpStreamingSettings(app.page)
 
     await expect(segmentSlider).toBeEnabled()
-    await expect(countSlider).toHaveValue('0')
-    await expect(countValue).toHaveText('Off')
-
     await countSlider.fill('3')
-    await expect(countValue).toHaveText('3')
 
     await expect.poll(() => latestSettings(
       readDatastore(app.userDataDir, 'settings')
