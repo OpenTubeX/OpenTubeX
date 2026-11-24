@@ -5783,7 +5783,7 @@ function handleControlsContainerWheel(event) {
   if (!(target instanceof Element)) return
 
   if (target.classList.contains('shaka-controls-container') || target.closest(
-    '.shaka-scrim-container, .shaka-fast-forward-container, .shaka-rewind-container, .shaka-play-button-container, .shaka-play-button, .shaka-spacer'
+    '.playerTouchSurface, .shaka-scrim-container, .shaka-fast-forward-container, .shaka-rewind-container, .shaka-play-button-container, .shaka-play-button, .shaka-spacer'
   )) {
     if (event.ctrlKey || event.metaKey) {
       if (videoPlaybackRateMouseScroll.value) {
@@ -5901,6 +5901,7 @@ function isPlayerSurfaceTarget(target) {
   // Seek feedback remains hit-testable while transparent, including its
   // text and SVG paths. Those descendants belong to the player surface.
   return target.closest('.shaka-fast-forward-container, .shaka-rewind-container') !== null || [
+    'playerTouchSurface',
     'shaka-scrim-container',
     'shaka-play-button-container',
     'shaka-controls-container',
@@ -6545,6 +6546,19 @@ function addUICustomizations() {
       controlsContainer.addEventListener('click', handleControlsContainerClick, true)
     }
   }
+
+  // Chromium moves a touch onto the nearest element within the finger's reach
+  // that responds to taps, unless the touched element responds itself. Over
+  // the video, the touched element is the controls container, which contains
+  // the seek bar, so a touch just above the seek bar of a short player seeked
+  // instead of starting a swipe. This surface below the controls responds to
+  // taps itself, which keeps such touches on the video. Its events bubble to
+  // the controls container like before.
+  controlsContainer.querySelector(':scope > .playerTouchSurface')?.remove()
+  const touchSurface = document.createElement('div')
+  touchSurface.className = 'playerTouchSurface'
+  touchSurface.addEventListener('click', () => {})
+  controlsContainer.prepend(touchSurface)
 
   // title overlay when the video fills the screen or window
   // placing this inside the controls container so that we can fade it in and out at the same time as the controls

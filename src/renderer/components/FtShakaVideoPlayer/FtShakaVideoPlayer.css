@@ -367,6 +367,12 @@
   opacity: 0.6;
 }
 
+/* Below every other control, since it comes first among the positioned ones. */
+:deep(.playerTouchSurface) {
+  position: absolute;
+  inset: 0;
+}
+
 :deep(.playerFullscreenTitleOverlay) {
   display: none;
   opacity: 0;

@@ -358,8 +358,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await expect(player).not.toHaveClass(/scrollMiniPlayer/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         const box = await player.boundingBox()
-        // The seek bar's touch area reaches the middle of the small player at 125%.
-        const start = { x: box.x + 12, y: box.y + 12 }
+        // The middle of the small player at 125% lies within a finger's reach of the seek bar.
+        const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
         for (const cancelled of [true, false]) {
           await touch('touchStart', start)
           for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...start, y: start.y + distance })
@@ -570,8 +570,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
       const full = await player.boundingBox()
-      // The seek bar's touch area reaches the middle of the small player at 125%.
-      const down = { x: full.x + 12, y: full.y + 12 }
+      // The middle of the small player at 125% lies within a finger's reach of the seek bar.
+      const down = { x: full.x + full.width / 2, y: full.y + full.height / 2 }
       await touch('touchStart', down)
       for (const distance of [30, 80, 150]) await touch('touchMove', { ...down, y: down.y + distance })
       await touch('touchEnd')
@@ -699,8 +699,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
             // Let the nav's own reveal/hide transition finish before sampling geometry.
             await expect.poll(() => nav.evaluate(element => element.getAnimations().length)).toBe(0)
             const box = await player.boundingBox()
-            // The seek bar's touch area reaches the middle of the small player at 125%.
-            const point = { x: box.x + 12, y: box.y + 12 }
+            // The middle of the small player at 125% lies within a finger's reach of the seek bar.
+            const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
             let endpoint
             try {
               await touch('touchStart', point)
