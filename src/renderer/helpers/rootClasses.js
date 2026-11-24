@@ -54,6 +54,9 @@ const APP_CLASSES = {
   bottomTabs: 'appBottomTabs',
 }
 
+// Modal backdrops, which stay in .app or <body> until their exit animation ends
+const MODAL_BACKDROP = ':scope > :is(.prompt, .tabOrganizerBackdrop, .commandPaletteBackdrop, .tutorialOverlay, .moreOptionBackdrop)'
+
 /**
  * Mirrors whether any mobile sheet is open on <html>. Sheets may be teleported
  * anywhere, so this checks the document rather than one component.
@@ -63,7 +66,8 @@ export function updateMobileSheetRootClass() {
 }
 
 /**
- * Mirrors the rendered .app layout and its open mobile sheets on <html>.
+ * Mirrors the rendered .app layout, its modal backdrops and open mobile sheets
+ * on <html>.
  * Observing the DOM keeps every way of changing them covered, as :has() did.
  * @param {Element} app
  * @returns {() => void} stop
@@ -73,18 +77,25 @@ export function mirrorAppState(app) {
   const updateApp = () => {
     for (const [name, rootName] of Object.entries(APP_CLASSES)) root.toggle(rootName, app.classList.contains(name))
     root.toggle('appProgressBar', app.querySelector(':scope > .progressBar') !== null)
+    updateModalBackdrop()
+  }
+  const updateModalBackdrop = () => {
+    root.toggle('appModalBackdrop', app.querySelector(MODAL_BACKDROP) !== null || document.body.querySelector(MODAL_BACKDROP) !== null)
   }
   // Sheets close before unmounting. KeepAlive moves them without closing and
   // calls updateMobileSheetRootClass(), so only `open` changes are observed.
   const appObserver = new MutationObserver(updateApp)
   appObserver.observe(app, { attributes: true, attributeFilter: ['class'], childList: true })
+  const bodyObserver = new MutationObserver(updateModalBackdrop)
+  bodyObserver.observe(document.body, { childList: true })
   const sheetObserver = new MutationObserver(updateMobileSheetRootClass)
   sheetObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] })
   updateApp()
   updateMobileSheetRootClass()
   return () => {
     appObserver.disconnect()
+    bodyObserver.disconnect()
     sheetObserver.disconnect()
-    for (const name of [...Object.values(APP_CLASSES), 'appProgressBar', 'appMobileSheetOpen']) root.remove(name)
+    for (const name of [...Object.values(APP_CLASSES), 'appProgressBar', 'appModalBackdrop', 'appMobileSheetOpen']) root.remove(name)
   }
 }

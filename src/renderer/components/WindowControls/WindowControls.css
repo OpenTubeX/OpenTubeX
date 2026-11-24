@@ -25,12 +25,13 @@
 
 /* Modal backdrops dim and blur the controls like the rest of the window, and
    take clicks on them. They stack from z-index 80 up, or above the full window
-   player's 1000 (where a tie goes to the later backdrop). */
-:global(body:has(:is(.prompt, .tabOrganizerBackdrop, .commandPaletteBackdrop, .tutorialOverlay, .moreOptionBackdrop)) .windowControls) {
+   player's 1000 (where a tie goes to the later backdrop). mirrorAppState()
+   marks open backdrops on <html>. */
+:global(:root.appModalBackdrop .windowControls) {
   z-index: 79;
 }
 
-:global(body.playerFullWindow:has(:is(.prompt, .tabOrganizerBackdrop, .commandPaletteBackdrop, .tutorialOverlay, .moreOptionBackdrop)) .windowControls) {
+:global(:root.appModalBackdrop .playerFullWindow .windowControls) {
   z-index: 1001;
 }
 
