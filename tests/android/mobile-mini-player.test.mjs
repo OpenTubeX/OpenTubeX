@@ -170,44 +170,49 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       }).toBe(true)
       await watch?.dispose()
       watch = await page.evaluateHandle(findWatchComponent)
-      await watch.evaluate((component, { media, audioOnly, posterOnly }) => {
-        const watch = component.proxy
-        watch.videoLoadGeneration++
-        Object.assign(watch, {
-          // Replace the player like a real load does. A Watch page kept from an
-          // earlier test would otherwise keep playing that test's fixture.
-          playerLoadGeneration: watch.videoLoadGeneration,
-          isLoading: false,
-          ytDlpStreamsPending: false,
-          errorMessage: null,
-          isUpcoming: false,
-          isLive: false,
-          localFilePlayback: true,
-          activeFormat: 'legacy',
-          videoTitle: 'A long mini-player title with more room after removing the expand arrow',
-          videoLengthSeconds: 60,
-          musicMediaType: audioOnly ? 'audioTrack' : 'unknown',
-          thumbnail: audioOnly
-            ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Cpath fill='lime' d='M0 0h320v180H0z'/%3E%3C/svg%3E"
-            : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#326b8a"/></svg>'),
-          legacyFormats: [{
-            itag: 0,
-            qualityLabel: 'Test',
-            mimeType: 'video/webm',
-            width: 320,
-            height: posterOnly ? 240 : 180,
-            bitrate: 0,
-            localFile: true,
-            url: `data:video/webm;base64,${media}`
-          }],
-        })
-      }, { media, audioOnly, posterOnly })
-      await expect(player).toBeVisible()
-      await page.evaluate(() => window.scrollTo(0, 0))
-      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-      // Wait for the new fixture rather than one an earlier player had loaded.
-      await expect.poll(() => video.evaluate(video => [video.readyState, video.videoWidth, video.videoHeight]))
-        .toEqual([4, ...(posterOnly ? [320, 240] : [640, 360])])
+      // The test blocks the Watch page's own requests, and under load the page
+      // can report that failure after the fixture replaced its video. Replace
+      // it again until the fixture plays.
+      await expect(async () => {
+        await watch.evaluate((component, { media, audioOnly, posterOnly }) => {
+          const watch = component.proxy
+          watch.videoLoadGeneration++
+          Object.assign(watch, {
+            // Replace the player like a real load does. A Watch page kept from an
+            // earlier test would otherwise keep playing that test's fixture.
+            playerLoadGeneration: watch.videoLoadGeneration,
+            isLoading: false,
+            ytDlpStreamsPending: false,
+            errorMessage: null,
+            isUpcoming: false,
+            isLive: false,
+            localFilePlayback: true,
+            activeFormat: 'legacy',
+            videoTitle: 'A long mini-player title with more room after removing the expand arrow',
+            videoLengthSeconds: 60,
+            musicMediaType: audioOnly ? 'audioTrack' : 'unknown',
+            thumbnail: audioOnly
+              ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Cpath fill='lime' d='M0 0h320v180H0z'/%3E%3C/svg%3E"
+              : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#326b8a"/></svg>'),
+            legacyFormats: [{
+              itag: 0,
+              qualityLabel: 'Test',
+              mimeType: 'video/webm',
+              width: 320,
+              height: posterOnly ? 240 : 180,
+              bitrate: 0,
+              localFile: true,
+              url: `data:video/webm;base64,${media}`
+            }],
+          })
+        }, { media, audioOnly, posterOnly })
+        await expect(player).toBeVisible({ timeout: 10000 })
+        await page.evaluate(() => window.scrollTo(0, 0))
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/, { timeout: 10000 })
+        // Wait for the new fixture rather than one an earlier player had loaded.
+        await expect.poll(() => video.evaluate(video => [video.readyState, video.videoWidth, video.videoHeight]), { timeout: 20000 })
+          .toEqual([4, ...(posterOnly ? [320, 240] : [640, 360])])
+      }).toPass({ timeout: 120000 })
       await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
       await video.evaluate(video => { video.loop = true; return video.play() })
     }
