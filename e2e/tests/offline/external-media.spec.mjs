@@ -2427,13 +2427,15 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
   const metadata = page.locator(`${activeTab} .externalMediaMainMetrics`)
   await expect(metadata.locator(':scope > *')).toHaveText([
+    'videos.example.test',
     'Jul 16, 2019',
     '7 years ago',
     '1,190 views',
     '42 watching',
     'People & Blogs'
   ])
-  await expect(metadata.locator(':scope > * > .statIcon:first-child')).toHaveCount(5)
+  await expect(metadata.locator(':scope > * > .statIcon:first-child')).toHaveCount(6)
+  await expect(metadata.getByRole('link', { name: 'videos.example.test' })).toHaveAttribute('href', mediaUrl)
   await expect(metadata.locator('.publishedDate')).toHaveAttribute('title', /^Published on Jul\s16,\s2019$/)
   await expect(metadata.getByRole('img', { name: 'Video Category:', exact: true })).toHaveCount(1)
   await page.evaluate(async () => {
