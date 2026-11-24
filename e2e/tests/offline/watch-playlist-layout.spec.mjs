@@ -701,11 +701,18 @@ test.describe('long watch playlist', () => {
       .filter(shell => shell.height > 0))
     await list.evaluate(element => { element.scrollTop = 0 })
     await expect(list.locator(':scope > .playlistItem').first().locator('.ft-list-video')).toBeVisible()
-    await expect.poll(() => list.evaluate((element, shells) => {
+    // Lists the rows whose shell height differs, so a failure shows whether
+    // their shells kept the tall layout, an intermediate one or the new one.
+    const shortRow = await rowHeight()
+    await expect.poll(() => list.evaluate((element, { shells, tallRow, shortRow }) => {
       const rows = element.querySelectorAll(':scope > .playlistItem')
       const mounted = shells.filter(shell => rows[shell.index].querySelector('.ft-list-video'))
-      return mounted.length > 0 && mounted.every(shell => Math.abs(rows[shell.index].getBoundingClientRect().height - shell.height) <= 1)
-    }, shells)).toBe(true)
+      if (mounted.length === 0) return 'no measured shell has mounted again'
+      const mismatched = mounted
+        .map(shell => ({ index: shell.index, shell: shell.height, mounted: rows[shell.index].getBoundingClientRect().height }))
+        .filter(row => Math.abs(row.mounted - row.shell) > 1)
+      return mismatched.length === 0 ? [] : { tallRow, shortRow, mismatched }
+    }, { shells, tallRow, shortRow })).toEqual([])
     await setPlayerFullscreen(page, false)
   })
 })
