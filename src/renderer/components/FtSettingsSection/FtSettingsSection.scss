@@ -215,7 +215,7 @@
     $rows: repeat($n - 1, auto) 1fr;
   }
 
-  $grid: '.switchColumnGrid:has(> .switchColumn:#{$short} > :nth-child(#{$n}):last-child):has(> .switchColumn:#{$long} > .switch-ctn:nth-child(#{$n + 1})):not(:has(> .switchColumn:#{$long} > :not(.switch-ctn)))';
+  $grid: '.switchColumnGrid:has(> .switchColumn:#{$short} > :nth-child(#{$n}):last-child):has(> .switchColumn:#{$long} > .switch-ctn:nth-child(#{$n + 1})):not(:has(> .switchColumn:#{$long} > :not(.switch-ctn))):not(:has(> .switchColumn:#{$short} > :not(.switch-ctn)))';
 
   .sectionBody :deep(#{$grid}) {
     grid-template-columns: $columns;
