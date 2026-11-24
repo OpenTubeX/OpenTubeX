@@ -70,7 +70,7 @@ for (const [theme, background, zoom] of [
               window.__startupReveal = {
                 presented: !!document.querySelector('.tabContent[aria-hidden="false"] > .routerView'),
                 // The splash opens a hole for the app instead of fading.
-                opening: splash.getAnimations().find(animation => animation.effect.getKeyframes().some(keyframe => keyframe.maskSize))?.effect.getTiming().duration
+                opening: splash.getAnimations().find(animation => animation.effect.getKeyframes().some(keyframe => keyframe.clipPath))?.effect.getTiming().duration
               }
             }
           }).observe(document.body, { attributes: true, childList: true, subtree: true })

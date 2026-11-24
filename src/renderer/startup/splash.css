@@ -13,8 +13,8 @@
   --splash-on-container: color-mix(in srgb, var(--splash-primary) 40%, var(--splash-foreground));
   --splash-shape-size: 160px;
 
-  /* _scripts/startupSplash.js defines --splash-cookie and --splash-cookie-mask
-     from the app's 9-sided cookie shape. */
+  /* _scripts/startupSplash.js defines --splash-cookie from the app's 9-sided
+     cookie shape. */
 
   position: fixed;
   z-index: 2147483647;
@@ -132,15 +132,6 @@
 @keyframes startup-wave {
   from { transform: translateX(-24px); }
   to { transform: translateX(0); }
-}
-
-/* The reveal grows a cookie-shaped hole from the logo until the app fills
-   the window; revealStartupSplash() animates its size. */
-@supports (mask-composite: exclude) {
-  .startupSplash[data-revealing] {
-    mask: var(--splash-cookie-mask) 50% 50% / 0 0 no-repeat, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-  }
 }
 
 /* The Reduced Motion setting resolves once the renderer bundle loads.

@@ -8,16 +8,12 @@ const { readFileSync } = require('fs')
 // the whole splash holds still on it.
 const STILL_SPLASH = '\n:root[data-first-launch] .startupSplash *, :root[data-first-launch] .startupSplash *::before { animation: none; }\n'
 
-// Reuse the app's 9-sided cookie for the logo's container and, as a mask
-// image, for the hole the reveal grows through the splash.
+// Reuse the app's 9-sided cookie for the logo's container and for the hole
+// the reveal grows through the splash.
 function cookieShape() {
   const themes = readFileSync(path.join(__dirname, '../src/renderer/themes.css'), 'utf8')
   const polygon = themes.match(/--shape-cookie-9: (polygon\([^;]+\));/)[1]
-  const points = polygon.slice('polygon('.length, -1).split(',')
-    .map(point => point.trim().split(/\s+/).map(value => parseFloat(value)).join(' '))
-    .join(' ')
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='${points}'/></svg>`
-  return `\n.startupSplash { --splash-cookie: ${polygon}; --splash-cookie-mask: url("data:image/svg+xml,${encodeURIComponent(svg)}"); }\n`
+  return `\n.startupSplash { --splash-cookie: ${polygon}; }\n`
 }
 
 // index.ejs loads it as boot.js; the page's Content-Security-Policy blocks inline scripts.

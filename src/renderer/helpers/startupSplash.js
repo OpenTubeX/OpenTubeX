@@ -58,14 +58,22 @@ export function revealStartupSplash() {
     progress.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' })
 
     let reveal
-    if (CSS.supports('mask-composite', 'exclude')) {
+    const cookie = [...getComputedStyle(splash).getPropertyValue('--splash-cookie')
+      .matchAll(/(-?[\d.]+)%\s+(-?[\d.]+)%/g)].map(([, x, y]) => [x / 100 - 0.5, y / 100 - 0.5])
+    if (cookie.length > 2 && CSS.supports('clip-path', 'path(evenodd, "M0 0")')) {
       // The hole and the logo share the splash's center. Grow the hole until
       // even its innermost points pass the corners.
       const size = Math.hypot(bounds.width, bounds.height) / 2 / COOKIE_INNER_RADIUS
-      reveal = splash.animate(
-        [{ maskSize: '0px 0px, 100% 100%' }, { maskSize: `${size}px ${size}px, 100% 100%` }],
-        { duration, easing, fill: 'forwards' }
-      )
+      const centerX = bounds.width / 2
+      const centerY = bounds.height / 2
+      // The outer edge leaves room for the window to grow during the reveal.
+      const outer = `M${-size} ${-size}H${bounds.width + size}V${bounds.height + size}H${-size}Z`
+      const clip = holeSize => `path(evenodd, "${outer}M${cookie.map(([x, y]) =>
+        `${(centerX + x * holeSize).toFixed(1)} ${(centerY + y * holeSize).toFixed(1)}`).join('L')}Z")`
+      // Chromium runs clip-path animations on the compositor, so the hole keeps
+      // growing while the app's first render holds the main thread. A mask
+      // animation stalled there while the logo faded, leaving an empty splash.
+      reveal = splash.animate([{ clipPath: clip(0) }, { clipPath: clip(size) }], { duration, easing, fill: 'forwards' })
       // The tonal cookie leads the hole's edge and fades as the app shows.
       shape.animate([{ scale: 1 }, { scale: size / shape.offsetWidth }], { duration, easing, fill: 'forwards' })
       shape.animate([{ opacity: 1 }, { opacity: 0 }], { duration: duration * 0.4, easing: 'ease-out', fill: 'forwards' })
