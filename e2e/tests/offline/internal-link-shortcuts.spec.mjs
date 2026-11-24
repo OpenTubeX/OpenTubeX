@@ -89,6 +89,24 @@ test.describe('unloaded YouTube video tabs', () => {
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
     await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Linked video')
   })
+
+  test('look up the name of a channel link that only shows its URL', async ({ page }) => {
+    const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+    await page.route(`${instanceUrl}/api/v1/channels/${channelId}*`, route => route.fulfill({
+      json: { author: 'Linked channel', authorId: channelId, authorThumbnails: [], tabs: [] }
+    }))
+    await goTo(page, 'subscriptions')
+    const url = `https://www.youtube.com/channel/${channelId}`
+    await page.locator('body').evaluate((body, url) => {
+      body.insertAdjacentHTML('beforeend', `<a href="${url}">${url}</a>`)
+    }, url)
+
+    await page.locator('body').getByRole('link', { name: url }).click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+    await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Linked channel')
+  })
 })
 
 test('Ctrl or Cmd-clicking an internal link opens it in an active tab', async ({ page }) => {

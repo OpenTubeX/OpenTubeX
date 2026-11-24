@@ -503,6 +503,7 @@ test.describe('tab bar', () => {
     expect(tabs.map(tab => tab.title)).toEqual([
       ...fixedRoutes.map(([, title]) => title),
       '/channel/channel-id',
+      // Stands for the landing page users choose, so it has no fixed title
       '/'
     ])
   })

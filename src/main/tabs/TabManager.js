@@ -668,7 +668,8 @@ export class TabManager {
       id,
       url: location.url,
       route: location.route,
-      title: title || formatDefaultTabTitle(location.url),
+      // Saved sessions and other devices can hold the route as the title
+      title: title && title !== location.route.fullPath ? title : formatDefaultTabTitle(location.url),
       avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
       avatarFileName: restoredAvatarFileName,
       lastActiveAt: Date.now(),

@@ -103,6 +103,10 @@ export const routes = [
     component: Home
   },
   {
+    // Stands for the landing page, which users choose. At startup, App.vue
+    // and the mobile tab service replace it with that page's route. The
+    // Subscriptions page and title below are only a fallback, so don't treat
+    // '/' as the Subscriptions page, e.g. when titling tabs.
     path: '/',
     name: 'default',
     meta: {

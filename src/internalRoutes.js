@@ -1,3 +1,5 @@
+// '/' is left out on purpose: it stands for the landing page, which users
+// choose, and the app replaces it with that page's route.
 const FIXED_INTERNAL_ROUTE_TITLES = Object.freeze({
   '/home': 'Home',
   '/subscriptions': 'Subscriptions',
