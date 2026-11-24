@@ -1984,6 +1984,9 @@ test.describe('scroll mini player', () => {
       await expect(page.locator('.tabBar .tab')).toHaveCount(2)
       await expect(player).toBeVisible()
       await expect(player).toHaveClass(/scrollMiniPlayer/)
+      // The play/pause button is measured below, so let the morph into the
+      // mini player finish first.
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
       const returnButton = player.locator('.scrollMiniScrollTop')
       await expect(returnButton).toHaveAttribute(
         'title',
