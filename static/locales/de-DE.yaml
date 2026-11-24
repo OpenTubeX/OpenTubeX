@@ -1326,6 +1326,7 @@ Settings:
     Show Playback Rate Adjusted Timestamp: Wiedergabegeschwindigkeitsangepasste Zeitstempel anzeigen
     Autoplay Interruption Timer: Abbruch-Timer für Automatische Wiedergabe
     Upcoming Videos to Preload: Anzahl vorzuladender Videos
+    Concurrent Preloads: Gleichzeitige Vorladungen
     Ask Before Preloading Large Playlists: Vor dem Vorladen großer Playlists fragen
     Default Viewing Mode:
       Theater: Kinomodus
@@ -3318,6 +3319,7 @@ Tooltips:
 
       Streams, die auf jeweils eine Anfrage beschränkt sind, ignorieren diese Einstellung.
     Upcoming Videos to Preload: Ruft die yt-dlp-Stream-URLs von bis zu so vielen Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
+    Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
     Ask Before Preloading Large Playlists: Fragt nach einer Bestätigung, bevor alle Videos einer Playlist mit mehr als {count} Videos vorgeladen werden.
     Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
     Keep Status Bar Hidden in Fullscreen: Die Statusleiste nur beim Wischen vom Bildschirmrand einblenden und nach kurzer Zeit wieder ausblenden. Tippen auf den Player blendet sie nicht mehr ein.

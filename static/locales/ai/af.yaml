@@ -1172,6 +1172,7 @@ Settings:
     Use YouTube-style Shorts: Gebruik kortvideo’s in YouTube-styl
     Loop Shorts: Herhaal kortvideo’s
     Upcoming Videos to Preload: Komende video’s om vooraf te laai
+    Concurrent Preloads: Gelyktydige voorlaaie
     Remember Volume: Onthou volume
     Mono Audio: Mono-oudio
     Normalize Loudness: 'Normaliseer luidheid'
@@ -2767,6 +2768,7 @@ Tooltips:
       Hulle kan ook veroorsaak dat Outomaties die verbindingspoed onderskat en ’n laer kwaliteit kies.
       Strome wat tot een versoek op ’n slag beperk is, ignoreer hierdie instelling.
     Upcoming Videos to Preload: Haal yt-dlp-stroom-URL’s op en kas dit vir tot soveel video’s wat volgende kan speel. Die kyktou kry voorrang bo afspeellyste en aanbevelings.
+    Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
     Keep Status Bar Hidden in Fullscreen: "Wys die statusbalk slegs wanneer jy van die skermrand af swiep, en versteek dit weer na 'n oomblik. Om op die speler te tik, wys dit nie meer nie."
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."

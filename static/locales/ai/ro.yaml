@@ -1051,6 +1051,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotește videoclipurile late în modul peisaj pe ecran complet'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Glisează în sus sau în jos pentru a intra sau a ieși din ecranul complet'
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
+    Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
     Keep Status Bar Hidden in Fullscreen: "Păstrează bara de stare ascunsă pe ecran complet"
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
@@ -2561,6 +2562,7 @@ Tooltips:
       De asemenea, pot determina modul Automat să subestimeze viteza conexiunii și să selecteze o calitate mai scăzută.
       Fluxurile limitate la o singură solicitare simultană ignoră această setare.
     Upcoming Videos to Preload: "Obține și memorează în cache adresele fluxurilor yt-dlp pentru cel mult atâtea videoclipuri care pot fi redate în continuare. Coada de vizionare are prioritate față de playlisturi și recomandări."
+    Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
     Keep Status Bar Hidden in Fullscreen: "Afișează bara de stare doar când glisezi de la marginea ecranului și ascunde-o din nou după un moment. Atingerea playerului nu o mai afișează."
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."

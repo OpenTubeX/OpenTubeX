@@ -450,6 +450,7 @@ export const SYNC_SETTING_LABELS = {
   ytDlpAutomaticDownloadConditions: 'Settings.Download Settings.Automatic Download Conditions.Download Automatically Only',
   ytDlpDownloadBandwidthLimit: 'Settings.Download Settings.Bandwidth Limit',
   ytDlpMaxConcurrentDownloads: 'Settings.Download Settings.Concurrent Downloads',
+  ytDlpPreloadConcurrency: 'Settings.Player Settings.Concurrent Preloads',
   ytDlpPreloadCount: 'Settings.Player Settings.Upcoming Videos to Preload',
   ytDlpSelectedTemplate: 'Settings.Download Settings.Template Source'
 }

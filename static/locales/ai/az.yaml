@@ -1014,6 +1014,7 @@ Settings:
     Use YouTube-style Shorts: YouTube üslubunda qısa videolardan istifadə et
     Loop Shorts: Qısa videoları təkrarla
     Upcoming Videos to Preload: Əvvəlcədən yüklənəcək növbəti videolar
+    Concurrent Preloads: Eyni vaxtda əvvəlcədən yükləmələr
     Remember Volume: Səs səviyyəsini yadda saxla
     Skip Silence: Səssiz hissələri keç
     Show Skip Silence Toggle: Səssiz hissələri keçmə düyməsini göstər
@@ -2519,6 +2520,7 @@ Tooltips:
       Onlar həmçinin Avtomatik rejimin bağlantı sürətini olduğundan aşağı qiymətləndirib daha aşağı keyfiyyət seçməsinə səbəb ola bilər.
       Eyni anda yalnız bir sorğuya icazə verən axınlar bu tənzimləməni nəzərə almır.
     Upcoming Videos to Preload: Növbəti oynadıla biləcək bu qədər videoya qədər yt-dlp axın URL-lərini alır və keşdə saxlayır. Baxış növbəsinə pleylistlər və tövsiyələrdən daha çox üstünlük verilir.
+    Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
     Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
     Keep Status Bar Hidden in Fullscreen: "Status panelini yalnız ekranın kənarından sürüşdürdükdə göstər və bir azdan yenidən gizlət. Pleyerə toxunmaq onu artıq göstərmir."
     Ask Before Preloading Large Playlists: "{count} videodan çox olan pleylistin bütün videolarını əvvəlcədən yükləməzdən əvvəl təsdiq istəyir."

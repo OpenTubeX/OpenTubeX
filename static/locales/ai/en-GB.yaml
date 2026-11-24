@@ -1034,6 +1034,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotate wide videos to landscape in fullscreen'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Swipe up or down to enter or exit fullscreen'
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
+    Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
     Keep Status Bar Hidden in Fullscreen: "Keep status bar hidden in fullscreen"
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
@@ -2502,6 +2503,7 @@ Tooltips:
       They may also make Auto underestimate the connection speed and select a lower quality.
       Streams limited to one request at a time ignore this setting.
     Upcoming Videos to Preload: "Fetches and caches yt-dlp stream URLs for up to this many videos that can play next. The watch queue takes priority over playlists and recommendations."
+    Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
     Keep Status Bar Hidden in Fullscreen: "Show the status bar only when you swipe from the screen edge, and hide it again after a moment. Tapping the player no longer shows it."
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."

@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Rodar vídeos largos para a orientação horizontal em ecrã inteiro'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslize para cima ou para baixo para entrar ou sair do ecrã inteiro'
     Upcoming Videos to Preload: "Número de vídeos a pré-carregar"
+    Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para ecrã inteiro
     Keep Status Bar Hidden in Fullscreen: "Manter a barra de estado oculta em ecrã inteiro"
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou recuar em ecrã inteiro
@@ -2507,6 +2508,7 @@ Tooltips:
       Também podem fazer com que o modo Automático subestime a velocidade da ligação e selecione uma qualidade inferior.
       As transmissões limitadas a um pedido de cada vez ignoram esta definição.
     Upcoming Videos to Preload: "Obtém e guarda em cache os URL de transmissão do yt-dlp de até este número de vídeos que podem ser reproduzidos a seguir. A fila de visualização tem prioridade sobre listas de reprodução e recomendações."
+    Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
     Keep Status Bar Hidden in Fullscreen: "Mostra a barra de estado apenas quando desliza a partir da margem do ecrã e volta a ocultá-la após um momento. Tocar no leitor já não a mostra."
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."

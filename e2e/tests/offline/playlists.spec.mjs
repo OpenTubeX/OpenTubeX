@@ -257,6 +257,7 @@ test.describe('seeded playlists', () => {
   })
 
   test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
     await app.electronApp.evaluate(({ ipcMain }, channel) => {
       globalThis.__ytDlpPreloadVideoIds = []
       globalThis.__ytDlpPreloadResolvers = []
@@ -277,10 +278,10 @@ test.describe('seeded playlists', () => {
     await page.getByText('My seeded playlist').click()
     await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
-    // Both videos preload at once.
+    // Concurrent Preloads is 1, so the second video waits for the first.
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
-    )).toEqual(['ccccccccccc', 'ddddddddddd'])
+    )).toEqual(['ccccccccccc'])
 
     await expect(page.getByRole('dialog', { name: 'Preload all videos?' })).toHaveCount(0)
     await expect(await openPlaylistMenuItem(page, 'Preloading all videos...')).toBeDisabled()
@@ -291,6 +292,9 @@ test.describe('seeded playlists', () => {
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 
     await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
     await expect(progressToast).toContainText('Preloading videos: 0 of 2')
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 

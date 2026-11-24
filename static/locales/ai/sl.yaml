@@ -1268,6 +1268,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Zavrti široke videoposnetke ležeče v celozaslonskem načinu'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Podrsajte navzgor ali navzdol za vstop v celozaslonski način ali izhod iz njega'
     Upcoming Videos to Preload: "Število videov za prednalaganje"
+    Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
     Keep Status Bar Hidden in Fullscreen: "Ohrani vrstico stanja skrito v celozaslonskem načinu"
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
@@ -3020,6 +3021,7 @@ Tooltips:
       Lahko tudi povzročijo, da možnost »Samodejno« podceni hitrost povezave in izbere nižjo kakovost.
       Pretoki, omejeni na eno zahtevo naenkrat, to nastavitev prezrejo.
     Upcoming Videos to Preload: "Pridobi in predpomni naslove tokov yt-dlp za največ toliko videov, ki se lahko predvajajo naslednji. Čakalna vrsta za ogled ima prednost pred seznami predvajanja in priporočili."
+    Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
     Keep Status Bar Hidden in Fullscreen: "Pokaži vrstico stanja samo, ko podrsate z roba zaslona, in jo čez trenutek znova skrij. Dotik predvajalnika je ne prikaže več."
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."

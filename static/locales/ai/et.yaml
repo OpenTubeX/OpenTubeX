@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Pööra laiad videod täisekraanil rõhtpaigutusse'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Täisekraanile minemiseks või sealt väljumiseks nipsa üles või alla'
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
+    Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
     Keep Status Bar Hidden in Fullscreen: "Hoia olekuriba täisekraanil peidus"
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
@@ -2509,6 +2510,7 @@ Tooltips:
       Samuti võivad need panna automaatvaliku ühenduse kiirust alahindama ja madalamat kvaliteeti valima.
       Vood, mida saab laadida ainult ühe päringu kaupa, eiravad seda seadet.
     Upcoming Videos to Preload: "Hangib ja salvestab vahemällu yt-dlp voogedastusaadressid kuni nii paljudele videotele, mida saab järgmisena esitada. Vaatamisjärjekord on esitusloenditest ja soovitustest tähtsam."
+    Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
     Keep Status Bar Hidden in Fullscreen: "Näita olekuriba ainult siis, kui pühid ekraani servast, ja peida see hetke pärast uuesti. Mängijale toksamine seda enam ei näita."
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."

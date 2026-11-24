@@ -37,7 +37,7 @@ export function listFromSwitches(listKey, switchValue) {
 }
 
 /** Former settings that are no longer configurable */
-export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps', 'ytDlpPreloadConcurrency'])
+export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps'])
 
 /**
  * The removed per-channel Enable switches, each with the automatic saving

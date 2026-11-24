@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Geniş videoları tam ekranda yatay konuma döndür'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Tam ekrana girmek veya çıkmak için yukarı ya da aşağı kaydır'
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
+    Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
     Keep Status Bar Hidden in Fullscreen: "Tam ekranda durum çubuğunu gizli tut"
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
@@ -2507,6 +2508,7 @@ Tooltips:
       Otomatik seçeneğinin bağlantı hızını düşük hesaplayıp daha düşük kalite seçmesine de neden olabilir.
       Aynı anda tek istekle sınırlı akışlar bu ayarı yok sayar.
     Upcoming Videos to Preload: "Sonra oynatılabilecek en fazla bu sayıda video için yt-dlp akış adreslerini alıp önbelleğe kaydeder. İzleme kuyruğu, oynatma listeleri ve önerilerden önce gelir."
+    Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
     Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
     Keep Status Bar Hidden in Fullscreen: "Durum çubuğunu yalnızca ekranın kenarından kaydırdığınızda göster ve kısa bir süre sonra yeniden gizle. Oynatıcıya dokunmak artık onu göstermez."
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."

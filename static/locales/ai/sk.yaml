@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Otočiť široké videá na šírku v režime celej obrazovky'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Potiahnutím nahor alebo nadol otvoriť či opustiť celú obrazovku'
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
+    Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
     Keep Status Bar Hidden in Fullscreen: "Ponechať stavový riadok skrytý na celej obrazovke"
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
@@ -2506,6 +2507,7 @@ Tooltips:
       Môžu tiež spôsobiť, že automatický režim podhodnotí rýchlosť pripojenia a vyberie nižšiu kvalitu.
       Streamy obmedzené na jednu požiadavku naraz toto nastavenie ignorujú.
     Upcoming Videos to Preload: "Načíta a uloží do vyrovnávacej pamäte adresy streamov yt-dlp až pre tento počet videí, ktoré sa môžu prehrať ako ďalšie. Front pozerania má prednosť pred zoznamami skladieb a odporúčaniami."
+    Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
     Keep Status Bar Hidden in Fullscreen: "Zobraziť stavový riadok len pri potiahnutí od okraja obrazovky a po chvíli ho znova skryť. Ťuknutie na prehrávač ho už nezobrazí."
     Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."

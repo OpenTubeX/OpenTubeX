@@ -1038,6 +1038,7 @@ Settings:
     Use YouTube-style Shorts: Uzi videaĵetojn laŭ stilo de YouTube
     Loop Shorts: Ripeti videaĵetojn
     Upcoming Videos to Preload: Venontaj videaĵoj antaŭŝargotaj
+    Concurrent Preloads: Samtempaj antaŭŝargoj
     Remember Volume: Memori laŭtecon
     Mono Audio: Monofonia sono
     Normalize Loudness: 'Normigi laŭtecon'
@@ -2561,6 +2562,7 @@ Tooltips:
       Ili ankaŭ povas igi la aŭtomatan reĝimon subtaksi la konektan rapidon kaj elekti pli malaltan kvaliton.
       Fluoj limigitaj al unu peto samtempe ignoras ĉi tiun agordon.
     Upcoming Videos to Preload: Venigas kaj kaŝmemorigas URL-ojn de yt-dlp-fluoj por ĝis tiom da videaĵoj, kiuj povas ludiĝi sekve. La spektovico havas prioritaton super ludlistoj kaj rekomendoj.
+    Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
     Keep Status Bar Hidden in Fullscreen: "Montri la statobreton nur kiam vi ŝovas de la ekranrando, kaj kaŝi ĝin denove post momento. Tuŝeti la ludilon ne plu montras ĝin."
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."

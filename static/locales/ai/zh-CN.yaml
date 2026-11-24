@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: '全屏时将宽屏视频旋转为横屏'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下滑动以进入或退出全屏'
     Upcoming Videos to Preload: "要预加载的视频数量"
+    Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
     Keep Status Bar Hidden in Fullscreen: "全屏时保持状态栏隐藏"
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
@@ -2506,6 +2507,7 @@ Tooltips:
       这也可能导致“自动”低估连接速度并选择较低的画质。
       对于限制为一次只能发出一个请求的流，此设置无效。
     Upcoming Videos to Preload: "为最多这么多个可接着播放的视频获取并缓存 yt-dlp 流地址。观看队列优先于播放列表和推荐。"
+    Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
     Keep Status Bar Hidden in Fullscreen: "仅在从屏幕边缘滑动时显示状态栏，并在片刻后再次隐藏。点按播放器不再显示状态栏。"
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"

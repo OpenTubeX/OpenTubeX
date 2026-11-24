@@ -1052,6 +1052,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Cylchdroi fideos llydan i’r dirwedd yn y sgrin lawn'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llithro i fyny neu i lawr i fynd i mewn neu allan o’r sgrin lawn'
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
+    Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
     Keep Status Bar Hidden in Fullscreen: "Cadw'r bar statws yn gudd ar sgrin lawn"
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
@@ -2544,6 +2545,7 @@ Tooltips:
       Gallant hefyd beri i Awtomatig danamcangyfrif cyflymder y cysylltiad a dewis ansawdd is.
       Mae ffrydiau sydd wedi'u cyfyngu i un cais ar y tro yn anwybyddu'r gosodiad hwn.
     Upcoming Videos to Preload: "Mae’n nôl ac yn storio URLau ffrydiau yt-dlp ar gyfer hyd at y nifer hwn o fideos a all chwarae nesaf. Mae’r ciw gwylio yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
+    Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
     Keep Status Bar Hidden in Fullscreen: "Dangos y bar statws dim ond pan fyddwch yn llusgo o ymyl y sgrin, a'i guddio eto ar ôl ennyd. Nid yw tapio'r chwaraewr yn ei ddangos mwyach."
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."

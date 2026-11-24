@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'C’hwelañ ar videoioù ledan d’ar mod gweledva er skramm leun'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
+    Concurrent Preloads: "Rakgargadennoù war un dro"
     Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
     Keep Status Bar Hidden in Fullscreen: "Kuzhat ar varrenn-stad atav e skramm a-bezh"
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
@@ -2517,6 +2518,7 @@ Tooltips:
       Gallout a reont ivez lakaat ar mod Emgefreek da briziañ tizh ar c'hennask re izel ha da zibab ur berzhded izeloc'h.
       Ar gwazhioù bevennet d'un azgoulenn war un dro ne zalc'hont ket kont eus an arventenn-mañ.
     Upcoming Videos to Preload: "Kargañ ha krubuilhañ a ra liammoù gwazhioù yt-dlp betek an niver-mañ a videoioù a c'hall bezañ lennet da-heul. Ar steudad sellet a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
+    Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
     Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
     Keep Status Bar Hidden in Fullscreen: "Diskouez ar varrenn-stad pa riklit eus bord ar skramm hepken, ha kuzhat anezhi en-dro goude ur pennadig. Stokañ al lenner ne ziskouez ket anezhi ken."
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."

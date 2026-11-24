@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'A széles videók elforgatása fekvő helyzetbe teljes képernyőn'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Húzd felfelé vagy lefelé a teljes képernyő megnyitásához vagy bezárásához'
     Upcoming Videos to Preload: "Előtöltendő videók száma"
+    Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
     Keep Status Bar Hidden in Fullscreen: "Állapotsor rejtve tartása teljes képernyőn"
     Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
@@ -2507,6 +2508,7 @@ Tooltips:
       Emiatt az Auto alábecsülheti a kapcsolat sebességét, és gyengébb minőséget választhat.
       Az egyszerre egy kérésre korlátozott adatfolyamok figyelmen kívül hagyják ezt a beállítást.
     Upcoming Videos to Preload: "Lekéri és gyorsítótárazza a yt-dlp adatfolyam-címeit legfeljebb ennyi következőként lejátszható videóhoz. A megtekintési várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
+    Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
     Keep Status Bar Hidden in Fullscreen: "Az állapotsor csak a képernyő széléről való húzáskor jelenjen meg, és egy pillanat múlva ismét rejtőzzön el. A lejátszó megérintése már nem jeleníti meg."
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
