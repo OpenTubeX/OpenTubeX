@@ -238,7 +238,7 @@
             :item-count="recommendations.length"
           >
             <div
-              v-for="video in recommendations"
+              v-for="video in mountedRecommendations"
               :key="video.videoId"
               v-observe-visibility="{
                 callback: (visible, entry) => recordRecommendationImpression(video, visible, entry),
@@ -809,6 +809,43 @@ const renderedSections = computed(() => {
 const hasVisibleActivity = computed(() => renderedSections.value.some(section => (
   section.id !== 'recommendations' || recommendations.value.length > 0
 )))
+// A card mounts about 60 elements, so mounting a whole feed in the frame that
+// reveals it blocks phones for over 100 ms. Mount the first screenful, then
+// a batch per frame.
+const RECOMMENDATION_MOUNT_BATCH = 6
+const recommendationMountLimit = ref(RECOMMENDATION_MOUNT_BATCH)
+let recommendationMountFrame = null
+const mountedRecommendations = computed(() => recommendations.value.slice(0, recommendationMountLimit.value))
+const recommendationsRendered = computed(() => renderedSections.value.some(section => section.id === 'recommendations'))
+
+function cancelRecommendationMount() {
+  cancelAnimationFrame(recommendationMountFrame)
+  recommendationMountFrame = null
+}
+
+// A new feed replaces the grid, and a hidden section mounts again when shown.
+watch([recommendationFeedVersion, recommendationsRendered], () => {
+  cancelRecommendationMount()
+  recommendationMountLimit.value = RECOMMENDATION_MOUNT_BATCH
+})
+
+watch([
+  recommendationFeedVersion,
+  recommendationsRendered,
+  () => recommendations.value.length,
+  recommendationMountLimit,
+], () => {
+  if (
+    recommendationMountFrame !== null ||
+    !recommendationsRendered.value ||
+    recommendationMountLimit.value >= recommendations.value.length
+  ) return
+  recommendationMountFrame = requestAnimationFrame(() => {
+    recommendationMountFrame = null
+    recommendationMountLimit.value += RECOMMENDATION_MOUNT_BATCH
+  })
+}, { flush: 'post' })
+
 const sectionLabel = sectionId => sectionDefinitions.value[sectionId]?.label ?? sectionId
 
 function videoThumbnail(video) {
@@ -1101,6 +1138,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(activityFrame)
+  cancelRecommendationMount()
   homeResizeObserver?.disconnect()
   reminderLoadGeneration++
   removeReminderListener?.()
