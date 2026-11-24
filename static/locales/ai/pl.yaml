@@ -1129,6 +1129,16 @@ Settings:
     Continue in Browser: 'Kontynuuj w przeglądarce. OpenTubeX wznowi działanie, gdy skończysz.'
     Connected with Single Sign-On: 'Połączono przez logowanie jednokrotne'
     Delete Single Sign-On Account Hint: 'Otworzy się przeglądarka, aby potwierdzić usunięcie u dostawcy logowania.'
+    Generate Recovery Phrase: Wygeneruj frazę odzyskiwania
+    Save Your Recovery Phrase: Zapisz frazę odzyskiwania
+    Recovery Phrase Warning: Zapisz te 12 słów w podanej kolejności i przechowuj je w bezpiecznym miejscu. Są one Twoim hasłem dostępu. Wpisz je na urządzeniach, których nie możesz sparować; bez nich nikt nie odzyska Twoich zaszyfrowanych danych synchronizacji.
+    Confirm Your Recovery Phrase: Potwierdź frazę odzyskiwania
+    Confirm Recovery Phrase Description: Wpisz te słowa z frazy odzyskiwania, aby potwierdzić, że ją zapisano.
+    Recovery Phrase Word: Słowo {number}
+    Recovery Phrase Mismatch: Te słowa nie pasują do frazy odzyskiwania. Sprawdź, co zostało zapisane.
+    Copy Recovery Phrase: Kopiuj frazę
+    Recovery Phrase Copied: Skopiowano frazę odzyskiwania
+    Use Recovery Phrase: Użyj frazy
   SponsorBlock Settings:
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor

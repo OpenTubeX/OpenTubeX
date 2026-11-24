@@ -1797,6 +1797,16 @@ Settings:
     Enable Sync: Įjungti sinchronizavimą
     Privacy Passphrase: Privatumo slaptafrazė
     Privacy Passphrase Hint: Naudokite kitą slaptafrazę nei paskyros slaptažodis. Ji niekada neperduodama iš šio įrenginio ir reikalinga kiekviename įrenginyje; ją praradus, užšifruotų sinchronizavimo duomenų atkurti nepavyks.
+    Generate Recovery Phrase: Sugeneruoti atkūrimo frazę
+    Save Your Recovery Phrase: Išsaugokite atkūrimo frazę
+    Recovery Phrase Warning: Užsirašykite šiuos 12 žodžių eilės tvarka ir laikykite saugioje vietoje. Tai jūsų privatumo slaptafrazė. Įveskite ją įrenginiuose, kurių negalite susieti; be jos niekas negalės atkurti jūsų šifruotų sinchronizavimo duomenų.
+    Confirm Your Recovery Phrase: Patvirtinkite atkūrimo frazę
+    Confirm Recovery Phrase Description: Įveskite šiuos atkūrimo frazės žodžius, kad patvirtintumėte, jog ją išsaugojote.
+    Recovery Phrase Word: '{number} žodis'
+    Recovery Phrase Mismatch: Šie žodžiai neatitinka jūsų atkūrimo frazės. Patikrinkite, ką užsirašėte.
+    Copy Recovery Phrase: Kopijuoti frazę
+    Recovery Phrase Copied: Atkūrimo frazė nukopijuota
+    Use Recovery Phrase: Naudoti frazę
     Privacy Policy: Šio serverio privatumo politika
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.

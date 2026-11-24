@@ -1547,6 +1547,16 @@ Settings:
     Enable Sync: Aktifkan Sinkronisasi
     Privacy Passphrase: Frasa sandi privasi
     Privacy Passphrase Hint: Gunakan frasa sandi yang berbeda dari kata sandi akun. Frasa ini tidak pernah meninggalkan perangkat dan diperlukan di setiap perangkat. Jika hilang, data sinkronisasi terenkripsi tidak dapat dipulihkan.
+    Generate Recovery Phrase: Buat frasa pemulihan
+    Save Your Recovery Phrase: Simpan frasa pemulihan Anda
+    Recovery Phrase Warning: Tuliskan 12 kata ini secara berurutan dan simpan di tempat yang aman. Kata-kata ini adalah frasa sandi privasi Anda. Masukkan di perangkat yang tidak dapat Anda pasangkan; tanpanya, tidak ada yang dapat memulihkan data sinkronisasi terenkripsi Anda.
+    Confirm Your Recovery Phrase: Konfirmasi frasa pemulihan Anda
+    Confirm Recovery Phrase Description: Masukkan kata-kata ini dari frasa pemulihan Anda untuk mengonfirmasi bahwa Anda telah menyimpannya.
+    Recovery Phrase Word: Kata {number}
+    Recovery Phrase Mismatch: Kata-kata ini tidak cocok dengan frasa pemulihan Anda. Periksa apa yang Anda tulis.
+    Copy Recovery Phrase: Salin frasa
+    Recovery Phrase Copied: Frasa pemulihan disalin
+    Use Recovery Phrase: Gunakan frasa
     Privacy Policy: Kebijakan privasi server ini
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
     Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'

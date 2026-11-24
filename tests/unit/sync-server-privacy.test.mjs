@@ -13,6 +13,12 @@ import {
   readSyncCollection,
 } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { applyRemoteHistoryChanges } from '../../src/renderer/helpers/sync-history-merge.js'
+import { encryptSyncDocument as encryptSyncDocumentInline } from '../../src/renderer/helpers/sync-server-privacy-crypto.js'
+import {
+  generateRecoveryPhrase,
+  preparePrivacyKeyFromPassphrase,
+  RECOVERY_PHRASE_TYPO_MESSAGE,
+} from '../../src/renderer/helpers/sync-server-recovery-phrase.js'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 
@@ -39,6 +45,44 @@ test('decrypts the original single-document encrypted sync format', async () => 
     () => decryptSyncDocument(payload, privacy.key),
     /corrupted sync data/
   )
+})
+
+async function encryptedPayload(passphrase) {
+  const privacy = await preparePrivacyKeyFromPassphrase(null, passphrase)
+  return {
+    privacy,
+    payload: await encryptSyncDocumentInline({ subscriptions: [] }, privacy.key, privacy.salt),
+  }
+}
+
+test('a recovery phrase unlocks its data with the case and spacing keyboards add', async () => {
+  const phrase = generateRecoveryPhrase()
+  assert.equal(phrase.split(' ').length, 12)
+  const { privacy, payload } = await encryptedPayload(phrase)
+
+  const typed = `  ${phrase[0].toUpperCase()}${phrase.slice(1).replaceAll(' ', '   ')}\n`
+  assert.equal((await preparePrivacyKeyFromPassphrase(payload, typed)).key, privacy.key)
+})
+
+test('a custom passphrase of word-list words still unlocks data saved with it as typed', async () => {
+  const passphrase = 'Abandon Ability Able About Above Absent Absorb Abstract Absurd Abuse Access Accident'
+  // An earlier version derived the key from the passphrase as typed.
+  const privacy = await preparePrivacyKey(null, passphrase)
+  const payload = await encryptSyncDocumentInline({ subscriptions: [] }, privacy.key, privacy.salt)
+
+  assert.equal((await preparePrivacyKeyFromPassphrase(payload, passphrase)).key, privacy.key)
+})
+
+test('names a typo in a recovery phrase that fails to unlock data, but accepts it for new data', async () => {
+  const words = generateRecoveryPhrase().split(' ')
+  const { payload } = await encryptedPayload(words.join(' '))
+  const mistyped = words.with(3, `${words[3]}x`).join(' ')
+
+  await assert.rejects(() => preparePrivacyKeyFromPassphrase(payload, mistyped), {
+    message: RECOVERY_PHRASE_TYPO_MESSAGE,
+  })
+  // Without data it may be a custom passphrase that only resembles a phrase.
+  assert.ok((await preparePrivacyKeyFromPassphrase(null, mistyped)).key)
 })
 
 test('moves legacy playback speeds into settings while preserving local values', () => {

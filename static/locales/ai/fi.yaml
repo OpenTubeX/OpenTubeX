@@ -1544,6 +1544,16 @@ Settings:
     Enable Sync: Ota synkronointi käyttöön
     Privacy Passphrase: Tietosuojan tunnuslause
     Privacy Passphrase Hint: Käytä eri tunnuslausetta kuin tilisi salasanaa. Tunnuslause ei koskaan poistu tältä laitteelta, ja sitä tarvitaan kaikilla laitteilla. Jos kadotat sen, salattuja synkronointitietoja ei voi palauttaa.
+    Generate Recovery Phrase: Luo palautuslause
+    Save Your Recovery Phrase: Tallenna palautuslauseesi
+    Recovery Phrase Warning: Kirjoita nämä 12 sanaa muistiin oikeassa järjestyksessä ja säilytä ne turvallisessa paikassa. Ne ovat tietosuojan tunnuslauseesi. Syötä ne laitteilla, joita et voi parittaa; ilman niitä kukaan ei voi palauttaa salattuja synkronointitietojasi.
+    Confirm Your Recovery Phrase: Vahvista palautuslauseesi
+    Confirm Recovery Phrase Description: Syötä nämä palautuslauseesi sanat vahvistaaksesi, että tallensit sen.
+    Recovery Phrase Word: Sana {number}
+    Recovery Phrase Mismatch: Nämä sanat eivät vastaa palautuslausettasi. Tarkista, mitä kirjoitit muistiin.
+    Copy Recovery Phrase: Kopioi lause
+    Recovery Phrase Copied: Palautuslause kopioitu
+    Use Recovery Phrase: Käytä lausetta
     Privacy Policy: Tämän palvelimen tietosuojakäytäntö
     Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
     Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.

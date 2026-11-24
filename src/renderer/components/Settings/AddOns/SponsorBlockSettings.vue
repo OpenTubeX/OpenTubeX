@@ -302,7 +302,8 @@ function handleShowGeneratedSponsorBlockUserId() {
 
 function handleCopyGeneratedSponsorBlockUserId() {
   copyToClipboard(sponsorBlockGeneratedUserId.value, {
-    messageOnSuccess: t('Settings.SponsorBlock Settings.Generated SponsorBlock User ID Copied')
+    messageOnSuccess: t('Settings.SponsorBlock Settings.Generated SponsorBlock User ID Copied'),
+    sensitive: true,
   })
 }
 

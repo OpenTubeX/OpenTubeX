@@ -1833,6 +1833,16 @@ Settings:
     Enable Sync: Omogoči sinhronizacijo
     Privacy Passphrase: Šifrirno geslo za zasebnost
     Privacy Passphrase Hint: Uporabite drugo šifrirno geslo kot za svoj račun. To geslo nikoli ne zapusti naprave in je potrebno v vsaki napravi. Če ga izgubite, šifriranih sinhroniziranih podatkov ne bo mogoče obnoviti.
+    Generate Recovery Phrase: Ustvari obnovitveno frazo
+    Save Your Recovery Phrase: Shranite obnovitveno frazo
+    Recovery Phrase Warning: Zapišite teh 12 besed po vrsti in jih shranite na varnem mestu. So vaše šifrirno geslo za zasebnost. Vnesite jih v naprave, ki jih ne morete seznaniti; brez njih nihče ne more obnoviti vaših šifriranih podatkov sinhronizacije.
+    Confirm Your Recovery Phrase: Potrdite obnovitveno frazo
+    Confirm Recovery Phrase Description: Vnesite te besede iz obnovitvene fraze, da potrdite, da ste jo shranili.
+    Recovery Phrase Word: Beseda {number}
+    Recovery Phrase Mismatch: Te besede se ne ujemajo z obnovitveno frazo. Preverite, kaj ste zapisali.
+    Copy Recovery Phrase: Kopiraj frazo
+    Recovery Phrase Copied: Obnovitvena fraza je kopirana
+    Use Recovery Phrase: Uporabi frazo
     Privacy Policy: Pravilnik o zasebnosti tega strežnika
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
     Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.

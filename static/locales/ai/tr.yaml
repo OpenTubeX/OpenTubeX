@@ -1543,6 +1543,16 @@ Settings:
     Enable Sync: Eşitlemeyi Etkinleştir
     Privacy Passphrase: Gizlilik parolası
     Privacy Passphrase Hint: Hesap parolanızdan farklı bir parola kullanın. Bu parola cihazdan ayrılmaz ve her cihazda gereklidir. Kaybederseniz şifrelenmiş eşitleme verileri kurtarılamaz.
+    Generate Recovery Phrase: Kurtarma ifadesi oluştur
+    Save Your Recovery Phrase: Kurtarma ifadenizi kaydedin
+    Recovery Phrase Warning: Bu 12 kelimeyi sırasıyla yazın ve güvenli bir yerde saklayın. Bunlar gizlilik parolanızdır. Eşleştiremediğiniz cihazlarda bunları girin; bunlar olmadan hiç kimse şifrelenmiş eşitleme verilerinizi kurtaramaz.
+    Confirm Your Recovery Phrase: Kurtarma ifadenizi onaylayın
+    Confirm Recovery Phrase Description: Kaydettiğinizi onaylamak için kurtarma ifadenizdeki bu kelimeleri girin.
+    Recovery Phrase Word: '{number}. kelime'
+    Recovery Phrase Mismatch: Bu kelimeler kurtarma ifadenizle eşleşmiyor. Yazdıklarınızı kontrol edin.
+    Copy Recovery Phrase: İfadeyi kopyala
+    Recovery Phrase Copied: Kurtarma ifadesi kopyalandı
+    Use Recovery Phrase: İfadeyi kullan
     Privacy Policy: Bu sunucunun gizlilik politikası
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'

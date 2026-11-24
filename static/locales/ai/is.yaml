@@ -1546,6 +1546,16 @@ Settings:
     Enable Sync: Virkja samstilling
     Privacy Passphrase: Persónuverndarleyndasetning
     Privacy Passphrase Hint: Notaðu aðra leynisetningu en aðgangsorð reikningsins. Hún fer aldrei úr þessu tæki og þarf að slá hana inn í öllum tækjum. Ef hún glatast er ekki hægt að endurheimta dulkóðuð samstillingargögn.
+    Generate Recovery Phrase: Búa til endurheimtarsetningu
+    Save Your Recovery Phrase: Vistaðu endurheimtarsetninguna
+    Recovery Phrase Warning: Skrifaðu þessi 12 orð niður í réttri röð og geymdu þau á öruggum stað. Þau eru persónuverndarleyndasetningin þín. Sláðu þau inn á tækjum sem þú getur ekki parað; án þeirra getur enginn endurheimt dulrituð samstillingargögn þín.
+    Confirm Your Recovery Phrase: Staðfestu endurheimtarsetninguna
+    Confirm Recovery Phrase Description: Sláðu inn þessi orð úr endurheimtarsetningunni til að staðfesta að þú hafir vistað hana.
+    Recovery Phrase Word: Orð {number}
+    Recovery Phrase Mismatch: Þessi orð passa ekki við endurheimtarsetninguna. Athugaðu það sem þú skrifaðir niður.
+    Copy Recovery Phrase: Afrita setningu
+    Recovery Phrase Copied: Endurheimtarsetning afrituð
+    Use Recovery Phrase: Nota setningu
     Privacy Policy: Persónuverndarstefna þessa þjóns
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
     Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.

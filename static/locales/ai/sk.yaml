@@ -1543,6 +1543,16 @@ Settings:
     Enable Sync: Zapnúť synchronizáciu
     Privacy Passphrase: Prístupová fráza na ochranu súkromia
     Privacy Passphrase Hint: Použite inú prístupovú frázu než heslo účtu. Táto fráza nikdy neopustí zariadenie a vyžaduje sa na každom zariadení. Ak ju stratíte, zašifrované synchronizované údaje nebude možné obnoviť.
+    Generate Recovery Phrase: Vygenerovať frázu na obnovenie
+    Save Your Recovery Phrase: Uložte si frázu na obnovenie
+    Recovery Phrase Warning: Zapíšte si týchto 12 slov v poradí a uložte ich na bezpečné miesto. Sú vašou prístupovou frázou na ochranu súkromia. Zadajte ich na zariadeniach, ktoré nemôžete spárovať; bez nich nikto nedokáže obnoviť vaše šifrované synchronizované údaje.
+    Confirm Your Recovery Phrase: Potvrďte frázu na obnovenie
+    Confirm Recovery Phrase Description: Zadajte tieto slová z frázy na obnovenie a potvrďte, že ste si ju uložili.
+    Recovery Phrase Word: Slovo {number}
+    Recovery Phrase Mismatch: Tieto slová nezodpovedajú vašej fráze na obnovenie. Skontrolujte, čo ste si zapísali.
+    Copy Recovery Phrase: Kopírovať frázu
+    Recovery Phrase Copied: Fráza na obnovenie bola skopírovaná
+    Use Recovery Phrase: Použiť frázu
     Privacy Policy: Zásady ochrany súkromia tohto servera
     Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
     Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'

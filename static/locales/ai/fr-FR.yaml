@@ -1542,6 +1542,16 @@ Settings:
     Enable Sync: Activer la synchronisation
     Privacy Passphrase: Phrase secrète de confidentialité
     Privacy Passphrase Hint: Utilisez une phrase secrète différente du mot de passe de votre compte. Elle ne quitte jamais cet appareil et doit être saisie sur chaque appareil ; si vous la perdez, les données synchronisées et chiffrées seront irrécupérables.
+    Generate Recovery Phrase: Générer une phrase de récupération
+    Save Your Recovery Phrase: Enregistrez votre phrase de récupération
+    Recovery Phrase Warning: Notez ces 12 mots dans l'ordre et conservez-les en lieu sûr. Ils constituent votre phrase secrète de confidentialité. Saisissez-les sur les appareils que vous ne pouvez pas associer ; sans eux, personne ne peut récupérer vos données de synchronisation chiffrées.
+    Confirm Your Recovery Phrase: Confirmez votre phrase de récupération
+    Confirm Recovery Phrase Description: Saisissez ces mots de votre phrase de récupération pour confirmer que vous l'avez enregistrée.
+    Recovery Phrase Word: Mot {number}
+    Recovery Phrase Mismatch: Ces mots ne correspondent pas à votre phrase de récupération. Vérifiez ce que vous avez noté.
+    Copy Recovery Phrase: Copier la phrase
+    Recovery Phrase Copied: Phrase de récupération copiée
+    Use Recovery Phrase: Utiliser la phrase
     Privacy Policy: Politique de confidentialité de ce serveur
     Enhanced Privacy Enabled: La confidentialité renforcée est activée. Le serveur ne stocke que des données de synchronisation chiffrées.
     Enhanced Privacy Unsupported: Avertissement — ce serveur ne prend pas en charge la confidentialité renforcée. Les données synchronisées sont visibles par son opérateur.

@@ -1542,6 +1542,16 @@ Settings:
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passordfrase for personvern
     Privacy Passphrase Hint: Bruk en annen passordfrase enn kontopassordet. Den forlater aldri denne enheten og må brukes på alle enheter. Hvis du mister den, kan ikke de krypterte synkroniseringsdataene gjenopprettes.
+    Generate Recovery Phrase: Generer gjenopprettingsfrase
+    Save Your Recovery Phrase: Lagre gjenopprettingsfrasen
+    Recovery Phrase Warning: Skriv ned disse 12 ordene i rekkefølge, og oppbevar dem på et trygt sted. De er passordfrasen din for personvern. Skriv dem inn på enheter du ikke kan koble sammen; uten dem kan ingen gjenopprette de krypterte synkroniseringsdataene dine.
+    Confirm Your Recovery Phrase: Bekreft gjenopprettingsfrasen
+    Confirm Recovery Phrase Description: Skriv inn disse ordene fra gjenopprettingsfrasen for å bekrefte at du har lagret den.
+    Recovery Phrase Word: Ord {number}
+    Recovery Phrase Mismatch: Disse ordene stemmer ikke med gjenopprettingsfrasen. Sjekk det du skrev ned.
+    Copy Recovery Phrase: Kopier frase
+    Recovery Phrase Copied: Gjenopprettingsfrasen er kopiert
+    Use Recovery Phrase: Bruk frase
     Privacy Policy: Personvernerklæring for denne serveren
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.

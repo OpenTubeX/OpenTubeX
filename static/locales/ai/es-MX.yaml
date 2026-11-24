@@ -1720,6 +1720,16 @@ Settings:
     Enable Sync: Activar sincronización
     Privacy Passphrase: Frase de contraseña de privacidad
     Privacy Passphrase Hint: Usa una frase de contraseña distinta de la contraseña de tu cuenta. Nunca sale de este dispositivo y se necesita en todos los dispositivos; si la pierdes, no podrás recuperar los datos de sincronización cifrados.
+    Generate Recovery Phrase: Generar frase de recuperación
+    Save Your Recovery Phrase: Guarda tu frase de recuperación
+    Recovery Phrase Warning: Anota estas 12 palabras en orden y guárdalas en un lugar seguro. Son tu frase de contraseña de privacidad. Ingrésalas en los dispositivos que no puedas vincular; sin ellas, nadie puede recuperar tus datos de sincronización cifrados.
+    Confirm Your Recovery Phrase: Confirma tu frase de recuperación
+    Confirm Recovery Phrase Description: Ingresa estas palabras de tu frase de recuperación para confirmar que la guardaste.
+    Recovery Phrase Word: Palabra {number}
+    Recovery Phrase Mismatch: Estas palabras no coinciden con tu frase de recuperación. Revisa lo que anotaste.
+    Copy Recovery Phrase: Copiar frase
+    Recovery Phrase Copied: Frase de recuperación copiada
+    Use Recovery Phrase: Usar frase
     Privacy Policy: Política de privacidad de este servidor
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'

@@ -1548,6 +1548,16 @@ Settings:
     Enable Sync: Bật đồng bộ
     Privacy Passphrase: Cụm mật khẩu riêng tư
     Privacy Passphrase Hint: Dùng cụm mật khẩu khác với mật khẩu tài khoản. Cụm này không bao giờ rời khỏi thiết bị và cần có trên mọi thiết bị; nếu mất, bạn không thể khôi phục dữ liệu đồng bộ đã mã hóa.
+    Generate Recovery Phrase: Tạo cụm từ khôi phục
+    Save Your Recovery Phrase: Lưu cụm từ khôi phục của bạn
+    Recovery Phrase Warning: Hãy ghi lại 12 từ này theo đúng thứ tự và cất giữ ở nơi an toàn. Đây là cụm mật khẩu riêng tư của bạn. Nhập chúng trên các thiết bị bạn không thể ghép nối; nếu không có chúng, không ai có thể khôi phục dữ liệu đồng bộ đã mã hóa của bạn.
+    Confirm Your Recovery Phrase: Xác nhận cụm từ khôi phục
+    Confirm Recovery Phrase Description: Nhập các từ này trong cụm từ khôi phục để xác nhận rằng bạn đã lưu nó.
+    Recovery Phrase Word: Từ {number}
+    Recovery Phrase Mismatch: Các từ này không khớp với cụm từ khôi phục của bạn. Hãy kiểm tra những gì bạn đã ghi lại.
+    Copy Recovery Phrase: Sao chép cụm từ
+    Recovery Phrase Copied: Đã sao chép cụm từ khôi phục
+    Use Recovery Phrase: Dùng cụm từ
     Privacy Policy: Chính sách riêng tư của máy chủ này
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
     Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.

@@ -54,7 +54,7 @@
           @keydown.enter="authenticate('login')"
         />
         <FtInput
-          v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
+          v-if="showPrivacyPassphrase"
           :icon="['fas', 'key']"
           :label="t('Settings.Sync Settings.Privacy Passphrase')"
           :placeholder="t('Form Inputs.Encryption Passphrase Hint')"
@@ -76,11 +76,22 @@
         </a>
       </p>
       <p
-        v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
+        v-if="showPrivacyPassphrase"
         class="privacyHint"
       >
         {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
       </p>
+      <FtButtonGroup
+        v-if="showPrivacyPassphrase"
+        class="recoveryPhraseActions"
+      >
+        <FtButton
+          :label="t('Settings.Sync Settings.Generate Recovery Phrase')"
+          :icon="['fas', 'list-ol']"
+          :disabled="serverCredentialsDisabled"
+          @click="openRecoveryPhrasePrompt(null)"
+        />
+      </FtButtonGroup>
       <p
         v-if="!connected && serverCheckStatus === 'checking'"
         class="serverCheckStatus"
@@ -337,7 +348,7 @@
           :icon="['fas', 'right-to-bracket']"
           background-color="var(--primary-color)"
           text-color="var(--text-with-main-color)"
-          :disabled="authenticationActionsDisabled"
+          :disabled="loginDisabled"
           @click="authenticate('login')"
         />
         <FtButton
@@ -369,6 +380,88 @@
       >
         {{ t('Settings.Sync Settings.Continue in Browser') }}
       </p>
+      <FtPrompt
+        v-if="recoveryPhrasePrompt"
+        :label="recoveryPhrasePrompt.confirming
+          ? t('Settings.Sync Settings.Confirm Your Recovery Phrase')
+          : t('Settings.Sync Settings.Save Your Recovery Phrase')"
+        theme="readable-width"
+        @click="recoveryPhrasePrompt = null"
+      >
+        <template v-if="!recoveryPhrasePrompt.confirming">
+          <p>{{ t('Settings.Sync Settings.Recovery Phrase Warning') }}</p>
+          <ol class="recoveryPhraseWords">
+            <li
+              v-for="(word, index) in recoveryPhrasePrompt.words"
+              :key="index"
+            >
+              {{ word }}
+            </li>
+          </ol>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Settings.Sync Settings.Copy Recovery Phrase')"
+              :icon="['fas', 'copy']"
+              @click="copyRecoveryPhrase"
+            />
+          </FtFlexBox>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
+              @click="recoveryPhrasePrompt = null"
+            />
+            <FtButton
+              :label="t('Tutorial.Next')"
+              :icon="['fas', 'arrow-right']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="startRecoveryPhraseConfirmation"
+            />
+          </FtFlexBox>
+        </template>
+        <template v-else>
+          <p>{{ t('Settings.Sync Settings.Confirm Recovery Phrase Description') }}</p>
+          <div class="recoveryPhraseConfirmation">
+            <FtInput
+              v-for="(position, index) in recoveryPhrasePrompt.positions"
+              :key="position"
+              ref="recoveryPhraseInputs"
+              :label="t('Settings.Sync Settings.Recovery Phrase Word', { number: position + 1 })"
+              :show-action-button="false"
+              :value="recoveryPhrasePrompt.answers[index]"
+              :invalid="recoveryPhrasePrompt.mismatch"
+              show-label
+              @input="recoveryPhrasePrompt.answers[index] = $event; recoveryPhrasePrompt.mismatch = false"
+              @keydown.enter="confirmRecoveryPhrase"
+            />
+          </div>
+          <p
+            v-if="recoveryPhrasePrompt.mismatch"
+            class="error"
+            role="alert"
+          >
+            {{ t('Settings.Sync Settings.Recovery Phrase Mismatch') }}
+          </p>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Back')"
+              :icon="['fas', 'arrow-left']"
+              @click="recoveryPhrasePrompt.confirming = false"
+            />
+            <FtButton
+              :label="recoveryPhrasePrompt.mode === 'register'
+                ? t('Settings.Sync Settings.Register')
+                : t('Settings.Sync Settings.Use Recovery Phrase')"
+              :icon="['fas', recoveryPhrasePrompt.mode === 'register' ? 'user-plus' : 'check']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              :disabled="recoveryPhrasePrompt.answers.some(answer => answer.trim() === '')"
+              @click="confirmRecoveryPhrase"
+            />
+          </FtFlexBox>
+        </template>
+      </FtPrompt>
       <FtPrompt
         v-if="showSharedTabsPrompt"
         :label="t('Settings.Sync Settings.Use Shared Tabs')"
@@ -566,7 +659,7 @@
 
 <script setup>
 import { syncProgressLabel as getSyncProgressLabel } from '../../../helpers/syncProgressLabel'
-import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
@@ -591,7 +684,7 @@ import {
   isSessionExpiredError,
   normalizeSyncServerUrl,
 } from '../../../helpers/sync-server'
-import { showToast } from '../../../helpers/utils'
+import { copyToClipboard, showToast } from '../../../helpers/utils'
 import { formatDateTime } from '../../../helpers/dateFormat'
 import {
   getCurrentSyncServerDeviceInfo,
@@ -600,6 +693,7 @@ import {
   resolveSyncServerDeviceName,
 } from '../../../helpers/sync-server-sessions'
 import { isSyncServerOidcUsername } from '../../../helpers/sync-server-oidc'
+import { generateRecoveryPhrase } from '../../../helpers/sync-server-recovery-phrase'
 
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
@@ -614,6 +708,8 @@ const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(editableUsername())
 const password = ref('')
 const privacyPassphrase = ref('')
+const recoveryPhrasePrompt = ref(null)
+const recoveryPhraseInputs = useTemplateRef('recoveryPhraseInputs')
 const serverPrivacySupported = ref(null)
 const serverPairingSupported = ref(false)
 const serverAccountSessionsSupported = ref(false)
@@ -672,12 +768,21 @@ const accountCredentialsReady = computed(() => (
 const pairingActionDisabled = computed(() => (
   serverCredentialsDisabled.value
 ))
+const showPrivacyPassphrase = computed(() => (
+  !connected.value && serverPrivacySupported.value !== false && serverCheckStatus.value !== 'error'
+))
+const privacyPassphraseMissing = computed(() => (
+  serverPrivacySupported.value === true && privacyPassphrase.value === ''
+))
+// Registering without a passphrase offers a generated recovery phrase.
 const authenticationActionsDisabled = computed(() => (
-  oidcLoginDisabled.value || !accountCredentialsReady.value
+  serverCredentialsDisabled.value || !accountCredentialsReady.value
+))
+const loginDisabled = computed(() => (
+  authenticationActionsDisabled.value || privacyPassphraseMissing.value
 ))
 const oidcLoginDisabled = computed(() => (
-  serverCredentialsDisabled.value ||
-  (serverPrivacySupported.value === true && privacyPassphrase.value === '')
+  serverCredentialsDisabled.value || privacyPassphraseMissing.value
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
@@ -812,7 +917,11 @@ async function saveServerUrl() {
 }
 
 async function authenticate(mode) {
-  if (busy.value || authenticationActionsDisabled.value) return
+  if (busy.value || (mode === 'login' ? loginDisabled : authenticationActionsDisabled).value) return
+  if (privacyPassphraseMissing.value) {
+    openRecoveryPhrasePrompt(mode)
+    return
+  }
   localError.value = ''
   authenticating.value = true
   try {
@@ -854,6 +963,55 @@ async function loginWithOidc() {
   } finally {
     authenticating.value = false
   }
+}
+
+const RECOVERY_PHRASE_CHECKED_WORDS = 3
+
+function openRecoveryPhrasePrompt(mode) {
+  recoveryPhrasePrompt.value = {
+    mode,
+    words: generateRecoveryPhrase().split(' '),
+    confirming: false,
+    positions: [],
+    answers: [],
+    mismatch: false,
+  }
+}
+
+function copyRecoveryPhrase() {
+  copyToClipboard(recoveryPhrasePrompt.value.words.join(' '), {
+    messageOnSuccess: t('Settings.Sync Settings.Recovery Phrase Copied'),
+    sensitive: true,
+  })
+}
+
+/** Asks for a few random words, so the phrase must have been saved, not just seen. */
+async function startRecoveryPhraseConfirmation() {
+  const prompt = recoveryPhrasePrompt.value
+  const positions = new Set()
+  while (positions.size < RECOVERY_PHRASE_CHECKED_WORDS) {
+    positions.add(Math.floor(Math.random() * prompt.words.length))
+  }
+  prompt.positions = [...positions].sort((a, b) => a - b)
+  prompt.answers = prompt.positions.map(() => '')
+  prompt.mismatch = false
+  prompt.confirming = true
+  await nextTick()
+  recoveryPhraseInputs.value?.[0]?.focus()
+}
+
+function confirmRecoveryPhrase() {
+  const prompt = recoveryPhrasePrompt.value
+  if (prompt.answers.some(answer => answer.trim() === '')) return
+  if (!prompt.positions.every((position, index) => (
+    prompt.answers[index].trim().toLowerCase() === prompt.words[position]
+  ))) {
+    prompt.mismatch = true
+    return
+  }
+  recoveryPhrasePrompt.value = null
+  privacyPassphrase.value = prompt.words.join(' ')
+  if (prompt.mode) authenticate(prompt.mode)
 }
 
 function authenticated() {

@@ -1542,6 +1542,16 @@ Settings:
     Enable Sync: 同期を有効化
     Privacy Passphrase: プライバシーパスフレーズ
     Privacy Passphrase Hint: アカウントのパスワードとは別のパスフレーズを使用してください。このデバイスの外へ送信されず、すべてのデバイスで必要です。紛失すると暗号化された同期データを復元できません。
+    Generate Recovery Phrase: リカバリーフレーズを生成
+    Save Your Recovery Phrase: リカバリーフレーズを保存してください
+    Recovery Phrase Warning: この 12 個の単語を順番どおりに書き留め、安全な場所に保管してください。これがプライバシーパスフレーズです。ペアリングできないデバイスではこれを入力します。これがないと、暗号化された同期データは誰にも復元できません。
+    Confirm Your Recovery Phrase: リカバリーフレーズを確認
+    Confirm Recovery Phrase Description: 保存したことを確認するため、リカバリーフレーズの次の単語を入力してください。
+    Recovery Phrase Word: '{number} 番目の単語'
+    Recovery Phrase Mismatch: 入力した単語がリカバリーフレーズと一致しません。書き留めた内容を確認してください。
+    Copy Recovery Phrase: フレーズをコピー
+    Recovery Phrase Copied: リカバリーフレーズをコピーしました
+    Use Recovery Phrase: フレーズを使用
     Privacy Policy: このサーバーのプライバシーポリシー
     Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
     Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'

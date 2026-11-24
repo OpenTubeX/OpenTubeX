@@ -1542,6 +1542,16 @@ Settings:
     Enable Sync: Szinkronizálás engedélyezése
     Privacy Passphrase: Adatvédelmi jelmondat
     Privacy Passphrase Hint: A fiók jelszavától eltérő jelmondatot használjon. Ez soha nem hagyja el az eszközt, és minden eszközön szükséges; elvesztése esetén a titkosított szinkronizálási adatok nem állíthatók vissza.
+    Generate Recovery Phrase: Helyreállítási kifejezés létrehozása
+    Save Your Recovery Phrase: Mentse el a helyreállítási kifejezést
+    Recovery Phrase Warning: Írja le ezt a 12 szót a megadott sorrendben, és tárolja biztonságos helyen. Ez az adatvédelmi jelmondata. Adja meg azokon az eszközökön, amelyeket nem tud párosítani; nélküle senki sem tudja helyreállítani a titkosított szinkronizálási adatait.
+    Confirm Your Recovery Phrase: Helyreállítási kifejezés megerősítése
+    Confirm Recovery Phrase Description: Adja meg ezeket a szavakat a helyreállítási kifejezésből, hogy megerősítse, hogy elmentette.
+    Recovery Phrase Word: '{number}. szó'
+    Recovery Phrase Mismatch: Ezek a szavak nem egyeznek a helyreállítási kifejezéssel. Ellenőrizze, mit írt le.
+    Copy Recovery Phrase: Kifejezés másolása
+    Recovery Phrase Copied: Helyreállítási kifejezés másolva
+    Use Recovery Phrase: Kifejezés használata
     Privacy Policy: A kiszolgáló adatvédelmi irányelvei
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
     Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.

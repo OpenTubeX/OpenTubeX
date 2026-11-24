@@ -1868,6 +1868,16 @@ Settings:
     Enable Sync: Activa la sincronització
     Privacy Passphrase: Frase de contrasenya de privadesa
     Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.
+    Generate Recovery Phrase: Genera una frase de recuperació
+    Save Your Recovery Phrase: Desa la frase de recuperació
+    Recovery Phrase Warning: Anota aquestes 12 paraules en ordre i guarda-les en un lloc segur. Són la teva frase de contrasenya de privadesa. Introdueix-les als dispositius que no puguis vincular; sense elles, ningú no pot recuperar les teves dades de sincronització xifrades.
+    Confirm Your Recovery Phrase: Confirma la frase de recuperació
+    Confirm Recovery Phrase Description: Introdueix aquestes paraules de la frase de recuperació per confirmar que l'has desat.
+    Recovery Phrase Word: Paraula {number}
+    Recovery Phrase Mismatch: Aquestes paraules no coincideixen amb la frase de recuperació. Comprova el que vas anotar.
+    Copy Recovery Phrase: Copia la frase
+    Recovery Phrase Copied: S'ha copiat la frase de recuperació
+    Use Recovery Phrase: Utilitza la frase
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
     Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'

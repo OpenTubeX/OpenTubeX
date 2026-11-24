@@ -2115,6 +2115,19 @@ Settings:
     Privacy Passphrase Hint: >-
       Verwende eine andere Passphrase als dein Kontopasswort. Sie verlässt dieses Gerät nie und wird auf jedem Gerät
       benötigt. Bei Verlust können verschlüsselte Synchronisierungsdaten nicht wiederhergestellt werden.
+    Generate Recovery Phrase: Wiederherstellungsphrase erstellen
+    Save Your Recovery Phrase: Wiederherstellungsphrase sichern
+    Recovery Phrase Warning: >-
+      Schreib dir diese 12 Wörter in der richtigen Reihenfolge auf und bewahre sie sicher auf. Sie sind deine
+      Datenschutz-Passphrase. Gib sie auf Geräten ein, die du nicht koppeln kannst. Ohne sie kann niemand deine
+      verschlüsselten Synchronisierungsdaten wiederherstellen.
+    Confirm Your Recovery Phrase: Wiederherstellungsphrase bestätigen
+    Confirm Recovery Phrase Description: Gib diese Wörter aus deiner Wiederherstellungsphrase ein, um zu bestätigen, dass du sie gesichert hast.
+    Recovery Phrase Word: Wort {number}
+    Recovery Phrase Mismatch: Diese Wörter stimmen nicht mit deiner Wiederherstellungsphrase überein. Prüfe, was du aufgeschrieben hast.
+    Copy Recovery Phrase: Phrase kopieren
+    Recovery Phrase Copied: Wiederherstellungsphrase kopiert
+    Use Recovery Phrase: Phrase verwenden
     Privacy Policy: Datenschutzerklärung dieses Servers
     Enhanced Privacy Enabled: Erweiterter Datenschutz ist aktiviert. Der Server speichert nur verschlüsselte Synchronisierungsdaten.
     Enhanced Privacy Unsupported: >-

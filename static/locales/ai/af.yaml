@@ -1723,6 +1723,16 @@ Settings:
     Enable Sync: Aktiveer sinkronisering
     Privacy Passphrase: Privaatheidswagfrase
     Privacy Passphrase Hint: Gebruik ’n ander wagfrase as u rekeningwagwoord. Dit verlaat nooit hierdie toestel nie en word op elke toestel benodig; as u dit verloor, kan geënkripteerde sinkroniseringsdata nie herwin word nie.
+    Generate Recovery Phrase: Genereer herstelfrase
+    Save Your Recovery Phrase: Stoor jou herstelfrase
+    Recovery Phrase Warning: Skryf hierdie 12 woorde in volgorde neer en bêre dit op ’n veilige plek. Dit is jou privaatheidswagfrase. Voer dit in op toestelle wat jy nie kan koppel nie; daarsonder kan niemand jou geënkripteerde sinkroniseringsdata herstel nie.
+    Confirm Your Recovery Phrase: Bevestig jou herstelfrase
+    Confirm Recovery Phrase Description: Voer hierdie woorde uit jou herstelfrase in om te bevestig dat jy dit gestoor het.
+    Recovery Phrase Word: Woord {number}
+    Recovery Phrase Mismatch: Hierdie woorde pas nie by jou herstelfrase nie. Kyk na wat jy neergeskryf het.
+    Copy Recovery Phrase: Kopieer frase
+    Recovery Phrase Copied: Herstelfrase gekopieer
+    Use Recovery Phrase: Gebruik frase
     Privacy Policy: Privaatheidsbeleid vir hierdie bediener
     Enhanced Privacy Enabled: Verbeterde privaatheid is geaktiveer. Die bediener stoor slegs geënkripteerde sinkroniseringsdata.
     Enhanced Privacy Unsupported: Waarskuwing — hierdie bediener ondersteun nie verbeterde privaatheid nie. Gesinkroniseerde data is sigbaar vir die operateur daarvan.

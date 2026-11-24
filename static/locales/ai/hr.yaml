@@ -1551,6 +1551,16 @@ Settings:
     Enable Sync: Omogući sinkronizaciju
     Privacy Passphrase: Pristupna fraza za privatnost
     Privacy Passphrase Hint: Upotrijebite pristupnu frazu koja se razlikuje od lozinke računa. Ona nikada ne napušta ovaj uređaj i potrebna je na svakom uređaju. Ako je izgubite, šifrirani podaci sinkronizacije neće se moći oporaviti.
+    Generate Recovery Phrase: Generiraj frazu za oporavak
+    Save Your Recovery Phrase: Spremite svoju frazu za oporavak
+    Recovery Phrase Warning: Zapišite ovih 12 riječi redom i čuvajte ih na sigurnom mjestu. One su vaša pristupna fraza za privatnost. Unesite ih na uređajima koje ne možete upariti; bez njih nitko ne može oporaviti vaše šifrirane podatke sinkronizacije.
+    Confirm Your Recovery Phrase: Potvrdite frazu za oporavak
+    Confirm Recovery Phrase Description: Unesite ove riječi iz fraze za oporavak kako biste potvrdili da ste je spremili.
+    Recovery Phrase Word: Riječ {number}
+    Recovery Phrase Mismatch: Ove riječi ne odgovaraju vašoj frazi za oporavak. Provjerite što ste zapisali.
+    Copy Recovery Phrase: Kopiraj frazu
+    Recovery Phrase Copied: Fraza za oporavak kopirana
+    Use Recovery Phrase: Koristi frazu
     Privacy Policy: Pravila o privatnosti ovog poslužitelja
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
     Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.

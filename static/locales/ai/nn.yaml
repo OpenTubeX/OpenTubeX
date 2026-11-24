@@ -1703,6 +1703,16 @@ Settings:
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passfrase for personvern
     Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.
+    Generate Recovery Phrase: Generer gjenopprettingsfrase
+    Save Your Recovery Phrase: Lagra gjenopprettingsfrasen
+    Recovery Phrase Warning: Skriv ned desse 12 orda i rekkjefølgje, og ta vare på dei på ein trygg stad. Dei er passfrasen din for personvern. Skriv dei inn på einingar du ikkje kan para; utan dei kan ingen gjenopprette dei krypterte synkroniseringsdataa dine.
+    Confirm Your Recovery Phrase: Stadfest gjenopprettingsfrasen
+    Confirm Recovery Phrase Description: Skriv inn desse orda frå gjenopprettingsfrasen for å stadfeste at du har lagra han.
+    Recovery Phrase Word: Ord {number}
+    Recovery Phrase Mismatch: Desse orda stemmer ikkje med gjenopprettingsfrasen. Sjå over det du skreiv ned.
+    Copy Recovery Phrase: Kopier frase
+    Recovery Phrase Copied: Gjenopprettingsfrasen er kopiert
+    Use Recovery Phrase: Bruk frase
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.

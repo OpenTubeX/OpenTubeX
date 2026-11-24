@@ -38,9 +38,12 @@ import {
   encryptSyncDocument,
   loadLegacySyncDocument,
   migrateLegacyPlaybackSpeedsToSettings,
-  preparePrivacyKey,
   readSyncCollection,
 } from '../../helpers/sync-server-privacy'
+import {
+  normalizeRecoveryPhrase,
+  preparePrivacyKeyFromPassphrase,
+} from '../../helpers/sync-server-recovery-phrase'
 import {
   encryptSyncServerDeviceInfo,
   loadSyncServerDevices,
@@ -415,7 +418,10 @@ function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
   if (privacyPassphrase.length < 12) {
     throw new Error('The privacy passphrase must be at least 12 characters')
   }
-  if (privacyPassphrase === password) {
+  // A recovery phrase derives the key in its canonical form, which anyone who
+  // knows the password could also compute from it.
+  const canonical = value => normalizeRecoveryPhrase(value ?? '') ?? value
+  if (canonical(privacyPassphrase) === canonical(password)) {
     throw new Error('The privacy passphrase must be different from the account password')
   }
 }
@@ -2034,7 +2040,7 @@ const actions = {
           : manifest.legacy_encrypted_data
             ? await client.getLegacyEncryptedSync()
             : null
-        const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
+        const privacy = await preparePrivacyKeyFromPassphrase(remote?.payload, privacyPassphrase)
         privacyKey = privacy.key
         privacySalt = privacy.salt
       }

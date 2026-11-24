@@ -1555,6 +1555,16 @@ Settings:
     Enable Sync: Ŝalti sinkronigon
     Privacy Passphrase: Privateca pasfrazo
     Privacy Passphrase Hint: Uzu pasfrazon apartan de via konta pasvorto. Ĝi neniam forlasas ĉi tiun aparaton kaj estas bezonata en ĉiu aparato; perdi ĝin igas ĉifritajn sinkronigajn datumojn nerestaŭreblaj.
+    Generate Recovery Phrase: Generi restaŭran frazon
+    Save Your Recovery Phrase: Konservu vian restaŭran frazon
+    Recovery Phrase Warning: Notu ĉi tiujn 12 vortojn laŭorde kaj konservu ilin en sekura loko. Ili estas via privateca pasfrazo. Enigu ilin en aparatoj, kiujn vi ne povas parigi; sen ili neniu povas restaŭri viajn ĉifritajn sinkronigajn datumojn.
+    Confirm Your Recovery Phrase: Konfirmu vian restaŭran frazon
+    Confirm Recovery Phrase Description: Enigu ĉi tiujn vortojn el via restaŭra frazo por konfirmi, ke vi konservis ĝin.
+    Recovery Phrase Word: Vorto {number}
+    Recovery Phrase Mismatch: Ĉi tiuj vortoj ne kongruas kun via restaŭra frazo. Kontrolu, kion vi notis.
+    Copy Recovery Phrase: Kopii frazon
+    Recovery Phrase Copied: Restaŭra frazo kopiita
+    Use Recovery Phrase: Uzi frazon
     Privacy Policy: Privateca politiko de ĉi tiu servilo
     Enhanced Privacy Enabled: Plibonigita privateco estas ŝaltita. La servilo konservas nur ĉifritajn sinkronigajn datumojn.
     Enhanced Privacy Unsupported: Averto — ĉi tiu servilo ne subtenas plibonigitan privatecon. Sinkronigitaj datumoj estas videblaj por ĝia operaciisto.

@@ -1547,6 +1547,16 @@ Settings:
     Enable Sync: Galluogi cysoni
     Privacy Passphrase: Cyfrinymadrodd preifatrwydd
     Privacy Passphrase Hint: Defnyddiwch gyfrinymadrodd ar wahân i gyfrinair eich cyfrif. Nid yw byth yn gadael y ddyfais hon ac mae ei angen ar bob dyfais; os collwch ef, ni ellir adfer y data cysoni wedi'u hamgryptio.
+    Generate Recovery Phrase: Cynhyrchu ymadrodd adfer
+    Save Your Recovery Phrase: Cadwch eich ymadrodd adfer
+    Recovery Phrase Warning: Ysgrifennwch y 12 gair hyn yn eu trefn a'u cadw yn rhywle diogel. Dyma eich cyfrinymadrodd preifatrwydd. Rhowch nhw ar ddyfeisiau na allwch eu paru; hebddyn nhw, ni all neb adfer eich data cysoni wedi'i amgryptio.
+    Confirm Your Recovery Phrase: Cadarnhewch eich ymadrodd adfer
+    Confirm Recovery Phrase Description: Rhowch y geiriau hyn o'ch ymadrodd adfer i gadarnhau eich bod wedi'i gadw.
+    Recovery Phrase Word: Gair {number}
+    Recovery Phrase Mismatch: Nid yw'r geiriau hyn yn cyfateb i'ch ymadrodd adfer. Gwiriwch yr hyn a ysgrifennoch.
+    Copy Recovery Phrase: Copïo'r ymadrodd
+    Recovery Phrase Copied: Copïwyd yr ymadrodd adfer
+    Use Recovery Phrase: Defnyddio'r ymadrodd
     Privacy Policy: Polisi preifatrwydd y gweinydd hwn
     Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
     Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'
