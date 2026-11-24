@@ -417,6 +417,13 @@ test('windows end with the same marks whatever order changes arrive in', () => {
     shown.push([...byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)))
   }
   for (const marks of shown) assert.deepEqual(marks, [kept, remarked])
+  // A merge's reply can arrive after a later merge's broadcast that evicts the
+  // mark it added. The delayed reply must not bring the mark back.
+  let marks = seenState.seenMarksState(seenData.SEEN_VIDEO_MARKS, [])
+  for (const index of [1, 0]) marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[index]))
+  assert.deepEqual([...marks.byId.values()], [kept])
+  marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[2]))
+  assert.deepEqual([...marks.byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)), [kept, remarked])
 })
 
 test('mark all records videos, Shorts, live streams and community posts', async () => {

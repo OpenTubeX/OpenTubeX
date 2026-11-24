@@ -13,7 +13,8 @@ import { applySeenMarkChanges, isSeenMarksState, mergeSeenMarks } from '../../se
 export function seenMarksState(kind, value) {
   if (isSeenMarksState(value)) return value
   return markRaw({
-    byId: shallowReactive(new Map(mergeSeenMarks(kind, value, []).map(entry => [entry[kind.idKey], entry])))
+    byId: shallowReactive(new Map(mergeSeenMarks(kind, value, []).map(entry => [entry[kind.idKey], entry]))),
+    dropped: new Map(),
   })
 }
 
@@ -25,5 +26,5 @@ export function seenMarksState(kind, value) {
  * @returns {import('../../seenMarks.js').SeenMarksState}
  */
 export function withSeenMarkChanges(kind, marks, changes) {
-  return applySeenMarkChanges(kind, marks.byId, changes) ? markRaw({ byId: marks.byId }) : marks
+  return applySeenMarkChanges(kind, marks.byId, changes, marks.dropped) ? markRaw({ byId: marks.byId, dropped: marks.dropped }) : marks
 }

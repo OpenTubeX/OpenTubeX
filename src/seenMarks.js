@@ -30,7 +30,7 @@
 
 /**
  * The marks the store keeps, see `seenMarksState`.
- * @typedef {{ byId: Map<string, any> }} SeenMarksState
+ * @typedef {{ byId: Map<string, any>, dropped?: Map<string, any> }} SeenMarksState
  */
 
 /**
@@ -169,6 +169,8 @@ export async function planSeenMarkChanges(kind, saved, incoming, keepFor = async
   return changes
 }
 
+const MAX_DROPPED_SEEN_MARKS = 1000
+
 /** @param {SeenMarkChanges<unknown> | null | undefined} changes */
 export function hasSeenMarkChanges(changes) {
   return (changes?.upserts?.length ?? 0) > 0 || (changes?.removals?.length ?? 0) > 0
@@ -183,20 +185,33 @@ export function hasSeenMarkChanges(changes) {
  * @param {SeenMarkKind<T>} kind
  * @param {Map<string, T>} byId
  * @param {SeenMarkChanges<unknown> | null | undefined} changes
+ * @param {Map<string, T>} [dropped] removals that arrived before their mark,
+ *   so a delayed change that adds the same mark does not bring it back
  * @returns {boolean} whether the marks changed
  */
-export function applySeenMarkChanges(kind, byId, changes) {
+export function applySeenMarkChanges(kind, byId, changes, dropped) {
   let changed = false
+  const isNoNewer = (entry, removed) => (entry.seenAt ?? 0) <= (removed.seenAt ?? 0) && (entry.unseenAt ?? 0) <= (removed.unseenAt ?? 0)
   for (const removed of parseSeenMarks(kind, changes?.removals)) {
     const id = /** @type {string} */ (removed[kind.idKey])
     const current = byId.get(id)
-    if (current && (current.seenAt ?? 0) <= (removed.seenAt ?? 0) && (current.unseenAt ?? 0) <= (removed.unseenAt ?? 0)) {
+    if (current && isNoNewer(current, removed)) {
       byId.delete(id)
       changed = true
+    } else if (!current && dropped) {
+      dropped.delete(id)
+      dropped.set(id, removed)
+      // Only reordered changes leave entries here, so a small bound suffices.
+      if (dropped.size > MAX_DROPPED_SEEN_MARKS) dropped.delete(/** @type {string} */ (dropped.keys().next().value))
     }
   }
   for (const entry of parseSeenMarks(kind, changes?.upserts)) {
     const id = /** @type {string} */ (entry[kind.idKey])
+    const removed = dropped?.get(id)
+    if (dropped && removed) {
+      dropped.delete(id)
+      if (isNoNewer(entry, removed)) continue
+    }
     const previous = byId.get(id)
     const merged = kind.merge(previous, entry)
     if (!previous || !isSameMark(previous, merged)) {
