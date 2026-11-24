@@ -1551,6 +1551,10 @@ Settings:
     Copy Recovery Phrase: Sao chép cụm từ
     Recovery Phrase Copied: Đã sao chép cụm từ khôi phục
     Use Recovery Phrase: Dùng cụm từ
+    Privacy Passphrase Login Hint: "Để đăng nhập, hãy nhập cụm từ khôi phục hoặc cụm mật khẩu riêng của bạn. Nó không bao giờ rời khỏi thiết bị này. Khi đăng ký, một cụm từ khôi phục mới sẽ được tạo cho bạn."
+    Use Custom Passphrase: "Dùng cụm mật khẩu riêng thay thế"
+    Choose a Custom Passphrase: "Chọn cụm mật khẩu riêng"
+    Use Generated Phrase: "Dùng cụm từ đã tạo thay thế"
     Privacy Policy: Chính sách riêng tư của máy chủ này
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
     Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.

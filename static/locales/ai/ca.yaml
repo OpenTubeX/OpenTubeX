@@ -1871,6 +1871,10 @@ Settings:
     Copy Recovery Phrase: Copia la frase
     Recovery Phrase Copied: S'ha copiat la frase de recuperació
     Use Recovery Phrase: Utilitza la frase
+    Privacy Passphrase Login Hint: "Per iniciar la sessió, introduïu la frase de recuperació o la vostra frase de contrasenya. Mai no surt d'aquest dispositiu. En registrar-vos, es crea una frase de recuperació nova."
+    Use Custom Passphrase: "Utilitza una frase de contrasenya pròpia"
+    Choose a Custom Passphrase: "Trieu una frase de contrasenya pròpia"
+    Use Generated Phrase: "Utilitza la frase generada"
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
     Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'

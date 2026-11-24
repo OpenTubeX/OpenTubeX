@@ -1706,6 +1706,10 @@ Settings:
     Copy Recovery Phrase: Kopier frase
     Recovery Phrase Copied: Gjenopprettingsfrasen er kopiert
     Use Recovery Phrase: Bruk frase
+    Privacy Passphrase Login Hint: "For å logge inn skriv du inn gjenopprettingsfrasen eller din eigen passfrase. Han forlèt aldri denne eininga. Når du registrerer deg, blir det laga ein ny gjenopprettingsfrase for deg."
+    Use Custom Passphrase: "Bruk ein eigen passfrase i staden"
+    Choose a Custom Passphrase: "Vel ein eigen passfrase"
+    Use Generated Phrase: "Bruk den genererte frasen i staden"
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.

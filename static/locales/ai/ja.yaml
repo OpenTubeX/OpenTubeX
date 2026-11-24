@@ -1545,6 +1545,10 @@ Settings:
     Copy Recovery Phrase: フレーズをコピー
     Recovery Phrase Copied: リカバリーフレーズをコピーしました
     Use Recovery Phrase: フレーズを使用
+    Privacy Passphrase Login Hint: "ログインするには、リカバリーフレーズまたは独自のパスフレーズを入力してください。このデバイスの外に送信されることはありません。登録すると、新しいリカバリーフレーズが作成されます。"
+    Use Custom Passphrase: "代わりに独自のパスフレーズを使用"
+    Choose a Custom Passphrase: "独自のパスフレーズを選択"
+    Use Generated Phrase: "代わりに生成されたフレーズを使用"
     Privacy Policy: このサーバーのプライバシーポリシー
     Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
     Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'

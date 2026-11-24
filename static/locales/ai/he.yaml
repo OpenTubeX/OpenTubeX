@@ -1573,6 +1573,10 @@ Settings:
     Copy Recovery Phrase: העתקת הביטוי
     Recovery Phrase Copied: ביטוי השחזור הועתק
     Use Recovery Phrase: שימוש בביטוי
+    Privacy Passphrase Login Hint: "כדי להיכנס, יש להזין את ביטוי השחזור או ביטוי סיסמה משלך. הוא אף פעם לא יוצא מהמכשיר הזה. ההרשמה יוצרת עבורך ביטוי שחזור חדש."
+    Use Custom Passphrase: "שימוש בביטוי סיסמה משלך במקום"
+    Choose a Custom Passphrase: "בחירת ביטוי סיסמה משלך"
+    Use Generated Phrase: "שימוש בביטוי שנוצר במקום"
     Privacy Policy: מדיניות הפרטיות של השרת
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
     Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.

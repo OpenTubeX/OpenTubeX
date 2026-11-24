@@ -2,7 +2,7 @@
 category: feature
 ---
 
-Signing up for sync now suggests a random 12-word recovery phrase as your privacy passphrase and asks you to confirm a few of its words, so your encrypted sync data is protected by a passphrase nobody can guess.
+Signing up for sync now gives you a random 12-word recovery phrase as your privacy passphrase and asks you to confirm a few of its words, so your encrypted sync data is protected by a passphrase nobody can guess. You can still choose your own passphrase with Use custom passphrase instead.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/6528a1a9-297f-4e5d-9ef7-4c41a79649ee">

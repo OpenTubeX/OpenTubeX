@@ -1594,6 +1594,10 @@ Settings:
     Copy Recovery Phrase: فقرہ کاپی کریں
     Recovery Phrase Copied: بحالی فقرہ کاپی ہو گیا
     Use Recovery Phrase: فقرہ استعمال کریں
+    Privacy Passphrase Login Hint: "لاگ ان کرنے کے لیے اپنا بحالی فقرہ یا اپنا پاس فریز درج کریں۔ یہ کبھی اس آلے سے باہر نہیں جاتا۔ رجسٹر کرنے پر آپ کے لیے نیا بحالی فقرہ بنایا جاتا ہے۔"
+    Use Custom Passphrase: "اس کے بجائے اپنا پاس فریز استعمال کریں"
+    Choose a Custom Passphrase: "اپنا پاس فریز منتخب کریں"
+    Use Generated Phrase: "اس کے بجائے بنایا گیا فقرہ استعمال کریں"
     Privacy Policy: اس سرور کی رازداری کی پالیسی
     Enhanced Privacy Enabled: بہتر رازداری فعال ہے۔ سرور صرف انکرپٹڈ سنک ڈیٹا محفوظ کرتا ہے۔
     Enhanced Privacy Unsupported: انتباہ — یہ سرور بہتر رازداری کو سپورٹ نہیں کرتا۔ سنک شدہ ڈیٹا اس کے آپریٹر کو نظر آتا ہے۔

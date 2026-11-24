@@ -1550,6 +1550,10 @@ Settings:
     Copy Recovery Phrase: Copïo'r ymadrodd
     Recovery Phrase Copied: Copïwyd yr ymadrodd adfer
     Use Recovery Phrase: Defnyddio'r ymadrodd
+    Privacy Passphrase Login Hint: "I fewngofnodi, rhowch eich ymadrodd adfer neu'ch cyfrinymadrodd eich hun. Nid yw byth yn gadael y ddyfais hon. Mae cofrestru yn creu ymadrodd adfer newydd i chi."
+    Use Custom Passphrase: "Defnyddio cyfrinymadrodd eich hun yn lle hynny"
+    Choose a Custom Passphrase: "Dewis cyfrinymadrodd eich hun"
+    Use Generated Phrase: "Defnyddio'r ymadrodd a gynhyrchwyd yn lle hynny"
     Privacy Policy: Polisi preifatrwydd y gweinydd hwn
     Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
     Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'

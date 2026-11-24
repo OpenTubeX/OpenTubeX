@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: 複製短語
     Recovery Phrase Copied: 已複製復原短語
     Use Recovery Phrase: 使用短語
+    Privacy Passphrase Login Hint: "若要登入，請輸入您的復原短語或自訂通關密語。它永遠不會離開這部裝置。註冊時會為您產生新的復原短語。"
+    Use Custom Passphrase: "改用自訂通關密語"
+    Choose a Custom Passphrase: "選擇自訂通關密語"
+    Use Generated Phrase: "改用產生的短語"
     Privacy Policy: 此伺服器的隱私權政策
     Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
     Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。

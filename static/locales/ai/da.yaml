@@ -1590,6 +1590,10 @@ Settings:
     Copy Recovery Phrase: Kopiér sætning
     Recovery Phrase Copied: Gendannelsessætning kopieret
     Use Recovery Phrase: Brug sætning
+    Privacy Passphrase Login Hint: "Indtast din gendannelsessætning eller egen adgangssætning for at logge ind. Den forlader aldrig denne enhed. Når du opretter en konto, får du en ny gendannelsessætning."
+    Use Custom Passphrase: "Brug en egen adgangssætning i stedet"
+    Choose a Custom Passphrase: "Vælg en egen adgangssætning"
+    Use Generated Phrase: "Brug den genererede sætning i stedet"
     Privacy Policy: Privatlivspolitik for denne server
     Enhanced Privacy Enabled: Udvidet beskyttelse af personlige oplysninger er slået til. Serveren gemmer kun krypterede synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne server understøtter ikke udvidet beskyttelse af personlige oplysninger. De synkroniserede data er synlige for serverens operatør.

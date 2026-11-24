@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: Kopírovať frázu
     Recovery Phrase Copied: Fráza na obnovenie bola skopírovaná
     Use Recovery Phrase: Použiť frázu
+    Privacy Passphrase Login Hint: "Na prihlásenie zadajte frázu na obnovenie alebo vlastnú prístupovú frázu. Nikdy neopustí toto zariadenie. Pri registrácii sa vám vytvorí nová fráza na obnovenie."
+    Use Custom Passphrase: "Použiť namiesto toho vlastnú prístupovú frázu"
+    Choose a Custom Passphrase: "Zvoľte si vlastnú prístupovú frázu"
+    Use Generated Phrase: "Použiť namiesto toho vygenerovanú frázu"
     Privacy Policy: Zásady ochrany súkromia tohto servera
     Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
     Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'

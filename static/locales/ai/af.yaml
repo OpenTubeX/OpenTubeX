@@ -1726,6 +1726,10 @@ Settings:
     Copy Recovery Phrase: Kopieer frase
     Recovery Phrase Copied: Herstelfrase gekopieer
     Use Recovery Phrase: Gebruik frase
+    Privacy Passphrase Login Hint: "Voer jou herstelfrase of eie wagfrase in om aan te meld. Dit verlaat nooit hierdie toestel nie. Registrasie skep 'n nuwe herstelfrase vir jou."
+    Use Custom Passphrase: "Gebruik eerder 'n eie wagfrase"
+    Choose a Custom Passphrase: "Kies 'n eie wagfrase"
+    Use Generated Phrase: "Gebruik eerder gegenereerde frase"
     Privacy Policy: Privaatheidsbeleid vir hierdie bediener
     Enhanced Privacy Enabled: Verbeterde privaatheid is geaktiveer. Die bediener stoor slegs geënkripteerde sinkroniseringsdata.
     Enhanced Privacy Unsupported: Waarskuwing — hierdie bediener ondersteun nie verbeterde privaatheid nie. Gesinkroniseerde data is sigbaar vir die operateur daarvan.

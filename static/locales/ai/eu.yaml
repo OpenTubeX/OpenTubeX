@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: Kopiatu esaldia
     Recovery Phrase Copied: Berreskuratze-esaldia kopiatu da
     Use Recovery Phrase: Erabili esaldia
+    Privacy Passphrase Login Hint: "Saioa hasteko, idatzi berreskuratze-esaldia edo zure pasaesaldia. Ez da inoiz gailu honetatik ateratzen. Erregistratzean, berreskuratze-esaldi berri bat sortzen da zuretzat."
+    Use Custom Passphrase: "Erabili zure pasaesaldia horren ordez"
+    Choose a Custom Passphrase: "Aukeratu zure pasaesaldia"
+    Use Generated Phrase: "Erabili sortutako esaldia horren ordez"
     Privacy Policy: Zerbitzari honen pribatutasun-politika
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.

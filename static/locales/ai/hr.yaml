@@ -1554,6 +1554,10 @@ Settings:
     Copy Recovery Phrase: Kopiraj frazu
     Recovery Phrase Copied: Fraza za oporavak kopirana
     Use Recovery Phrase: Koristi frazu
+    Privacy Passphrase Login Hint: "Za prijavu unesite frazu za oporavak ili vlastitu pristupnu frazu. Nikad ne napušta ovaj uređaj. Registracijom se za vas stvara nova fraza za oporavak."
+    Use Custom Passphrase: "Umjesto toga koristi vlastitu pristupnu frazu"
+    Choose a Custom Passphrase: "Odaberite vlastitu pristupnu frazu"
+    Use Generated Phrase: "Umjesto toga koristi generiranu frazu"
     Privacy Policy: Pravila o privatnosti ovog poslužitelja
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
     Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.

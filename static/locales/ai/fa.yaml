@@ -1601,6 +1601,10 @@ Settings:
     Copy Recovery Phrase: کپی عبارت
     Recovery Phrase Copied: عبارت بازیابی کپی شد
     Use Recovery Phrase: استفاده از عبارت
+    Privacy Passphrase Login Hint: "برای ورود، عبارت بازیابی یا عبارت عبور دلخواه خود را وارد کنید. این عبارت هرگز از این دستگاه خارج نمی‌شود. با ثبت‌نام، یک عبارت بازیابی جدید برای شما ایجاد می‌شود."
+    Use Custom Passphrase: "استفاده از عبارت عبور دلخواه به‌جای آن"
+    Choose a Custom Passphrase: "انتخاب عبارت عبور دلخواه"
+    Use Generated Phrase: "استفاده از عبارت ایجادشده به‌جای آن"
     Privacy Policy: سیاست حریم خصوصی این سرور
     Enhanced Privacy Enabled: حریم خصوصی پیشرفته فعال است. سرور فقط داده‌های رمزگذاری‌شدهٔ همگام‌سازی را نگه می‌دارد.
     Enhanced Privacy Unsupported: هشدار — این سرور از حریم خصوصی پیشرفته پشتیبانی نمی‌کند. گردانندهٔ سرور می‌تواند داده‌های همگام‌شده را ببیند.

@@ -1527,6 +1527,10 @@ Settings:
     Copy Recovery Phrase: Copy phrase
     Recovery Phrase Copied: Recovery phrase copied
     Use Recovery Phrase: Use phrase
+    Privacy Passphrase Login Hint: "To log in, enter your recovery phrase or custom passphrase. It never leaves this device. Registering creates a new recovery phrase for you."
+    Use Custom Passphrase: "Use custom passphrase instead"
+    Choose a Custom Passphrase: "Choose a custom passphrase"
+    Use Generated Phrase: "Use generated phrase instead"
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.

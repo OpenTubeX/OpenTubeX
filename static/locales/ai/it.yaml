@@ -1545,6 +1545,10 @@ Settings:
     Copy Recovery Phrase: Copia frase
     Recovery Phrase Copied: Frase di recupero copiata
     Use Recovery Phrase: Usa frase
+    Privacy Passphrase Login Hint: "Per accedere, inserisci la frase di recupero o la tua frase segreta personalizzata. Non lascia mai questo dispositivo. La registrazione crea una nuova frase di recupero per te."
+    Use Custom Passphrase: "Usa invece una frase segreta personalizzata"
+    Choose a Custom Passphrase: "Scegli una frase segreta personalizzata"
+    Use Generated Phrase: "Usa invece la frase generata"
     Privacy Policy: Informativa sulla privacy di questo server
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
     Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.

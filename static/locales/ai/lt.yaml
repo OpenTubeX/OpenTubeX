@@ -1800,6 +1800,10 @@ Settings:
     Copy Recovery Phrase: Kopijuoti frazę
     Recovery Phrase Copied: Atkūrimo frazė nukopijuota
     Use Recovery Phrase: Naudoti frazę
+    Privacy Passphrase Login Hint: "Norėdami prisijungti, įveskite atkūrimo frazę arba savo slaptafrazę. Ji niekada nepalieka šio įrenginio. Registruojantis jums sukuriama nauja atkūrimo frazė."
+    Use Custom Passphrase: "Naudoti savo slaptafrazę"
+    Choose a Custom Passphrase: "Pasirinkite savo slaptafrazę"
+    Use Generated Phrase: "Naudoti sugeneruotą frazę"
     Privacy Policy: Šio serverio privatumo politika
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.

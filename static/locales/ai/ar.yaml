@@ -1569,6 +1569,10 @@ Settings:
     Copy Recovery Phrase: نسخ العبارة
     Recovery Phrase Copied: تم نسخ عبارة الاسترداد
     Use Recovery Phrase: استخدام العبارة
+    Privacy Passphrase Login Hint: "لتسجيل الدخول، أدخل عبارة الاسترداد أو عبارة المرور المخصصة. لا تغادر هذا الجهاز أبدًا. يُنشئ إنشاء الحساب عبارة استرداد جديدة لك."
+    Use Custom Passphrase: "استخدام عبارة مرور مخصصة بدلًا من ذلك"
+    Choose a Custom Passphrase: "اختر عبارة مرور مخصصة"
+    Use Generated Phrase: "استخدام العبارة المُنشأة بدلًا من ذلك"
     Privacy Policy: سياسة الخصوصية لهذا الخادم
     Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
     Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.

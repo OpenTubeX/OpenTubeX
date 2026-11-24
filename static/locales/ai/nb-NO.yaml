@@ -1545,6 +1545,10 @@ Settings:
     Copy Recovery Phrase: Kopier frase
     Recovery Phrase Copied: Gjenopprettingsfrasen er kopiert
     Use Recovery Phrase: Bruk frase
+    Privacy Passphrase Login Hint: "For å logge inn skriver du inn gjenopprettingsfrasen eller din egen passordfrase. Den forlater aldri denne enheten. Når du registrerer deg, lages det en ny gjenopprettingsfrase for deg."
+    Use Custom Passphrase: "Bruk en egen passordfrase i stedet"
+    Choose a Custom Passphrase: "Velg en egen passordfrase"
+    Use Generated Phrase: "Bruk den genererte frasen i stedet"
     Privacy Policy: Personvernerklæring for denne serveren
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.

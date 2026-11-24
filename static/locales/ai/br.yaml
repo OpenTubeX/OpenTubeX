@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: Eilañ al lavarenn
     Recovery Phrase Copied: Lavarenn-adtapout eilet
     Use Recovery Phrase: Implijout al lavarenn
+    Privacy Passphrase Login Hint: "Evit kennaskañ, skrivit ho lavarenn-adtapout pe ho lavarenn-dremen deoc'h. Ne guitaio biken an trevnad-mañ. En ur en em enskrivañ e vo krouet ul lavarenn-adtapout nevez evidoc'h."
+    Use Custom Passphrase: "Implijout ul lavarenn-dremen personel kentoc'h"
+    Choose a Custom Passphrase: "Dibabit ul lavarenn-dremen personel"
+    Use Generated Phrase: "Implijout al lavarenn krouet kentoc'h"
     Privacy Policy: "Reolenn brevezded ar servijer-mañ"
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."

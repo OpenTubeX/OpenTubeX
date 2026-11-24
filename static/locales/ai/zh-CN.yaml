@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: 复制短语
     Recovery Phrase Copied: 已复制恢复短语
     Use Recovery Phrase: 使用短语
+    Privacy Passphrase Login Hint: "要登录，请输入你的恢复短语或自定义口令。它永远不会离开此设备。注册时会为你创建新的恢复短语。"
+    Use Custom Passphrase: "改用自定义口令"
+    Choose a Custom Passphrase: "选择自定义口令"
+    Use Generated Phrase: "改用生成的短语"
     Privacy Policy: 此服务器的隐私政策
     Enhanced Privacy Enabled: 已启用增强隐私保护。服务器仅存储加密的同步数据。
     Enhanced Privacy Unsupported: 警告：此服务器不支持增强隐私保护，服务器运营者可以查看同步的数据。
