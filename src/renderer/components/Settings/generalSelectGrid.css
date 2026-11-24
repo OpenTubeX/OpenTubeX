@@ -1,7 +1,16 @@
 .generalSelectGrid.generalSelectGrid {
-  grid-template-columns: repeat(2, minmax(0, max-content) max-content);
+  --general-select-indicator-track: calc(8px + 32px + 22px + 22px);
+
+  /* Both fields are as wide as the widest one, and every select keeps room
+     for all of its possible icons, so the two columns mirror each other and
+     a select without a partner can be centered between them. The first
+     column's icons also hold the 40px margin before the second column. */
+  grid-template-columns:
+    minmax(0, 1fr) calc(var(--general-select-indicator-track) + 40px)
+    minmax(0, 1fr) var(--general-select-indicator-track);
   justify-content: center;
   column-gap: 0;
+  inline-size: fit-content;
 
   /* Keeps the columns within 1000px while the block spans the section. */
   padding-inline: max(20px, calc((100% - 960px) / 2));
@@ -9,6 +18,20 @@
 
 .generalSelectGrid :deep(.select:nth-child(odd)) {
   margin-inline-end: 40px;
+}
+
+/* A select without a partner keeps the first column's field width, but its
+   field moves onto the center line, as a lone select's field does elsewhere:
+   half the select, half of the icons' room and the 40px margin, minus half
+   of the 12px marker gutter before the field. */
+.generalSelectGrid :deep(.select:nth-child(odd):last-child) {
+  --general-select-center-shift: calc(50% + var(--general-select-indicator-track) / 2 + 20px - 6px);
+
+  translate: var(--general-select-center-shift);
+}
+
+.generalSelectGrid :deep(.select:nth-child(odd):last-child:dir(rtl)) {
+  translate: calc(-1 * var(--general-select-center-shift));
 }
 
 .generalSelectGrid :deep(.select.contentSized) {
@@ -86,10 +109,16 @@
   .generalSelectGrid.generalSelectGrid {
     grid-template-columns: minmax(0, max-content) max-content;
     justify-content: center;
+    inline-size: auto;
     padding-inline: max(20px, calc((100% - 460px) / 2));
   }
 
   .generalSelectGrid :deep(.select:nth-child(odd)) {
     margin-inline-end: 0;
+  }
+
+  .generalSelectGrid :deep(.select:nth-child(odd):last-child),
+  .generalSelectGrid :deep(.select:nth-child(odd):last-child:dir(rtl)) {
+    translate: none;
   }
 }
