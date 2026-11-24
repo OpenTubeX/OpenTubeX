@@ -135,13 +135,11 @@ async function lookUpTitle(path, query) {
     case 'channel':
       return await fetchChannelName(id, usesInvidious)
     case 'post': {
-      // Like the post page, which leaves out an author it cannot find
+      // Without an author, the caller checks saved data again and then uses the fallback.
       const author = typeof query.authorId === 'string'
-        ? await fetchChannelName(query.authorId, usesInvidious).catch(error => {
-            console.warn('Failed to look up the author of an unloaded post tab', error)
-          })
+        ? await fetchChannelName(query.authorId, usesInvidious)
         : undefined
-      return getPostTabTitle(author)
+      return author ? getPostTabTitle(author) : undefined
     }
   }
 }
@@ -183,7 +181,9 @@ export async function resolveUnloadedTabTitle(tabId, path, query = {}) {
   } finally {
     pendingTabIds.delete(tabId)
   }
-  // Saved data can have loaded while the backend failed to answer.
+  // Saved data can have loaded while the backend failed to answer. A tab that
+  // already shows the fallback would not change, so the watcher would not run
+  // for it again.
   title ||= findSavedTitle(path, query) ?? getFallbackTitle(path)
   if (!title) return
 
