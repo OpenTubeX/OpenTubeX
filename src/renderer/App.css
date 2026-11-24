@@ -611,6 +611,19 @@
   z-index: 2;
 }
 
+@media only screen and (width <= 680px) {
+  /* Short landscape windows bring sticky page headers (z-index: 3) down to the
+     docked bar, which must stay above them to remain tappable. The bottom
+     navigation moves up one level, so a dismissing bar still slides behind it. */
+  .app.capacitorPhoneLayout .crossTabMiniPlayerLayer {
+    z-index: 4;
+  }
+
+  .app.capacitorPhoneLayout :deep(.sideNav) {
+    z-index: 5;
+  }
+}
+
 .flexBox {
   display: block;
   user-select: unset;
