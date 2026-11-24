@@ -3,7 +3,6 @@
   --tab-organizer-backdrop-color: rgb(0 0 0 / 52%);
 
   align-items: flex-start;
-  background: var(--tab-organizer-backdrop-color);
   backdrop-filter: var(--modal-backdrop-blur);
   display: flex;
   inset: 0;
@@ -18,6 +17,21 @@
 /* Above the full window player (z-index 1000), like prompts */
 .playerFullWindow .tabOrganizerBackdrop {
   z-index: 1001;
+}
+
+/* The dim fades on its own layer, see modalBackdropHandoff.js. */
+.tabOrganizerBackdrop::before {
+  --modal-backdrop-dim-layer: 1;
+
+  content: '';
+  display: var(--modal-backdrop-dim-display, block);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--tab-organizer-backdrop-color);
+  animation: tab-organizer-dim-enter var(--motion-default-effects);
+  pointer-events: none;
+  will-change: opacity;
 }
 
 /* Rows and fields sit on a container one step above the dialog surface;
@@ -957,20 +971,33 @@
   pointer-events: none;
 }
 
+.modal-leave-active::before {
+  animation: tab-organizer-dim-leave var(--motion-default-effects) forwards;
+}
+
 .modal-leave-active > .tabOrganizer {
   animation: tab-organizer-leave var(--motion-default-effects) forwards;
 }
 
-/* Animates the dim and blur rather than opacity, like FtPrompt. */
+/* Fades the dim layer and animates the blur rather than the backdrop's
+   opacity, like FtPrompt. */
 @keyframes tab-organizer-backdrop-enter {
   from {
-    background-color: var(--modal-backdrop-enter-color, transparent);
     backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
   }
 
   to {
-    background-color: var(--tab-organizer-backdrop-color);
     backdrop-filter: var(--modal-backdrop-blur);
+  }
+}
+
+@keyframes tab-organizer-dim-enter {
+  from {
+    opacity: var(--modal-backdrop-enter-opacity, 0);
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -983,13 +1010,21 @@
 
 @keyframes tab-organizer-backdrop-leave {
   from {
-    background-color: var(--tab-organizer-backdrop-color);
     backdrop-filter: var(--modal-backdrop-blur);
   }
 
   to {
-    background-color: transparent;
     backdrop-filter: blur(0);
+  }
+}
+
+@keyframes tab-organizer-dim-leave {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }
 

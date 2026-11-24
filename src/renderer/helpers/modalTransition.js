@@ -1,5 +1,5 @@
 import { Comment, setTransitionHooks } from 'vue'
-import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from './modalBackdropHandoff'
+import { getModalBackdropDimOpacity, takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from './modalBackdropHandoff'
 
 /** @type {WeakMap<Element, () => void>} */
 const afterLeaveCallbacks = new WeakMap()
@@ -58,7 +58,7 @@ function enter(element) {
   if (!(element instanceof HTMLElement)) return
   const from = takeOverLeavingModalBackdrop(element)
   if (!from) return
-  element.style.setProperty('--modal-backdrop-enter-color', from.backgroundColor)
+  element.style.setProperty('--modal-backdrop-enter-opacity', String(getModalBackdropDimOpacity(element, from.backgroundColor)))
   element.style.setProperty('--modal-backdrop-enter-filter', from.backdropFilter)
 }
 

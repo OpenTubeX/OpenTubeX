@@ -3,7 +3,6 @@
 
   align-items: flex-start;
   animation: command-palette-backdrop-enter var(--motion-fast-effects);
-  background: var(--command-palette-backdrop-color);
   backdrop-filter: var(--modal-backdrop-blur);
   block-size: 100%;
   box-sizing: border-box;
@@ -15,6 +14,21 @@
   padding-inline: 16px;
   position: fixed;
   z-index: 10002;
+}
+
+/* The dim fades on its own layer, see modalBackdropHandoff.js. */
+.commandPaletteBackdrop::before {
+  --modal-backdrop-dim-layer: 1;
+
+  content: '';
+  display: var(--modal-backdrop-dim-display, block);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--command-palette-backdrop-color);
+  animation: command-palette-dim-enter var(--motion-fast-effects);
+  pointer-events: none;
+  will-change: opacity;
 }
 
 .playerFullWindow .commandPaletteBackdrop {
@@ -267,16 +281,25 @@ kbd {
   white-space: nowrap;
 }
 
-/* Animates the dim and blur rather than opacity, like FtPrompt. */
+/* Fades the dim layer and animates the blur rather than the backdrop's
+   opacity, like FtPrompt. */
 @keyframes command-palette-backdrop-enter {
   from {
-    background-color: var(--modal-backdrop-enter-color, transparent);
     backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
   }
 
   to {
-    background-color: var(--command-palette-backdrop-color);
     backdrop-filter: var(--modal-backdrop-blur);
+  }
+}
+
+@keyframes command-palette-dim-enter {
+  from {
+    opacity: var(--modal-backdrop-enter-opacity, 0);
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -293,19 +316,31 @@ kbd {
   pointer-events: none;
 }
 
+.modal-leave-active::before {
+  animation: command-palette-dim-leave var(--motion-fast-effects) forwards;
+}
+
 .modal-leave-active > .commandPalette {
   animation: command-palette-leave var(--motion-fast-effects) forwards;
 }
 
 @keyframes command-palette-backdrop-leave {
   from {
-    background-color: var(--command-palette-backdrop-color);
     backdrop-filter: var(--modal-backdrop-blur);
   }
 
   to {
-    background-color: transparent;
     backdrop-filter: blur(0);
+  }
+}
+
+@keyframes command-palette-dim-leave {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }
 
