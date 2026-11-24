@@ -189,7 +189,7 @@ public class DlnaCastingTest {
                     window.__dlnaSetting = true;
                 })();
                 """);
-            await(webView, "window.__dlnaSetting && document.querySelector('.settingsWindow [data-setting-key=\"showDlnaCastButton\"]') !== null");
+            await(webView, "window.__dlnaSetting && document.querySelector('.settingsWindow [data-setting-key=\"castProtocols\"]') !== null");
             evaluate(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow');true");
             evaluate(webView, String.format(java.util.Locale.ROOT, """
                 window.__dlnaTest = null;
@@ -287,7 +287,7 @@ public class DlnaCastingTest {
             evaluate(webView, """
                 window.testStore = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
                 window.testRouter = document.querySelector('#app').__vue_app__.config.globalProperties.$router;
-                window.originalCastSetting = testStore.getters.getShowDlnaCastButton;
+                window.originalCastSetting = testStore.getters.getCastProtocols;
                 window.originalInstance = testStore.getters.getCurrentInvidiousInstance;
                 window.findWatch = vnode => {
                     if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy;
@@ -320,7 +320,7 @@ public class DlnaCastingTest {
                     Object.assign(watchFixture, {isLoading:false, ytDlpStreamsPending:false, errorMessage:null,
                         isUpcoming:false, videoTitle:'Local DLNA MP4', videoLengthSeconds:2, activeFormat:'legacy',
                         legacyFormats:[{itag:18,url:dlnaLocalUrl,mimeType:'video/mp4',width:1920,height:dlnaMergedUi?360:1080,qualityLabel:'1080p'}]});
-                    testStore.dispatch('updateShowDlnaCastButton', true); true;
+                    testStore.dispatch('updateCastProtocols', [...new Set([...originalCastSetting, 'dlna'])]); true;
                     """, java.util.Base64.getEncoder().encodeToString(video)));
                 await(webView, "!!document.querySelector('.dlnaCastControl button') && !!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded");
                 // Local playback uses the same bytes without WebView HTTP restrictions;
@@ -424,7 +424,7 @@ public class DlnaCastingTest {
                 }
                 System.out.println("DLNA UI " + (merged ? "streaming merge" : "complete MP4") + ": discovered renderer, Play/Stop, received " + receivedVideo.get().length + " MP4 bytes, decoded frame, resumed local playback, closed relay");
             } finally {
-                try { evaluate(webView, "document.querySelector('video')?.pause();testStore.commit('setCurrentInvidiousInstance',originalInstance);testRouter.push('/subscriptions');testStore.dispatch('updateShowDlnaCastButton', originalCastSetting);URL.revokeObjectURL(window.dlnaLocalUrl);window.Capacitor.nativePromise=dlnaOriginalNativePromise;true"); }
+                try { evaluate(webView, "document.querySelector('video')?.pause();testStore.commit('setCurrentInvidiousInstance',originalInstance);testRouter.push('/subscriptions');testStore.dispatch('updateCastProtocols', originalCastSetting);URL.revokeObjectURL(window.dlnaLocalUrl);window.Capacitor.nativePromise=dlnaOriginalNativePromise;true"); }
                 catch (AssertionError cleanupError) { System.err.println("DLNA fixture cleanup: " + cleanupError.getMessage()); }
             }
         } finally {

@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: 显示已屏蔽的项目
   Auto: 自动
   'Off': 关闭
+  None: 无
 Search Listing:
   Label:
     Members Only: 仅限会员
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: 网络中的 FCast 接收器应用
       DLNA: DLNA
       DLNA Description: 网络中的智能电视和媒体播放器
+      Cast To: 投屏到
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: 标题包含
     Title Excludes: 标题不包含
     Title Filter Hint: 多个标题关键词请用逗号分隔。视频必须至少匹配一个包含关键词，且不能匹配任何排除关键词。
-    Automatic Downloads Require Unmetered Network: "仅在不按流量计费的网络上"
     Automatic Downloads Require Charging: "仅在充电时"
+    Automatic Download Conditions:
+      Download Automatically Only: 仅在以下情况自动下载
+      On Unmetered Networks: 不按流量计费的网络
+      While Charging: 充电时
   External Software Settings:
     Create YouTube session: "创建 YouTube 会话"
     YouTube session hint: "如有需要，请登录并保存会话。在设置中选择是否将其用于下载、播放或字幕。"
-    Use cookies for downloads: "下载时使用 Cookie"
     YouTube session failed: "无法保存 YouTube 会话。"
     Checking FFmpeg and FFprobe: 正在检查 FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: 尚未下载 FFmpeg/FFprobe。点击下方按钮进行下载。
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: 配置文件名称或路径
     Browser Profile Invalid: "请输入配置文件名称，或使用文件夹按钮选择配置文件文件夹。"
     Select Browser: 选择浏览器
-    Always Use Cookies: 始终使用 Cookie
+    Cookie Uses:
+      Use Cookies For: Cookie 用于
+      Playback: 播放
+      Downloads: 下载
+      Subtitles: 字幕
     Restricted Playback Authentication Hint: 默认情况下，只有在受年龄限制或仅限会员观看的视频上选择“使用已配置的 Cookie 重试”后，OpenTubeX 才会将这些 Cookie 传递给 yt-dlp。
     Restricted Playback Authentication Warning: 通过 yt-dlp 使用 Google 账号可能导致账号受到临时或永久限制。
-    Use cookies for subtitles: "使用 Cookie 获取字幕"
   Privacy Settings:
     Internet Connectivity Checks: "互联网连接检查"
     Internet Connectivity Checks Tooltip: "向 GrapheneOS 托管的服务器发送小型请求以检查互联网连接。"
@@ -2517,9 +2524,8 @@ Tooltips:
     Cookie File: 选择用于身份验证播放的 Netscape 格式 Cookie 文件。
     Browser for Cookies: 从所选的 yt-dlp 可执行文件中读取浏览器支持信息。请求身份验证播放时，OpenTubeX 会让 yt-dlp 从此浏览器读取 Cookie。
     Browser Profile: 可选的浏览器配置文件名称或文件夹。留空则使用最近访问的配置文件。
-    Always Use Cookies: "将配置的 Cookie 用于下载、字幕以及 yt-dlp 提取流的过程。这不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。"
+    Use Cookies For: 选择 yt-dlp 将配置的 Cookie 用于哪些用途。播放会在 yt-dlp 每次提取流时使用它们，但不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。字幕也包括自动翻译。
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
-    Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "在搜索结果、播放页面的“接下来播放”和首页的 YouTube 推荐中隐藏已观看的视频。自动播放也会跳过这些视频。"
     Hide Playlist Stats: 在播放列表页面上隐藏视频数量、观看次数、最后更新日期和总时长。

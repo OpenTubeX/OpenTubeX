@@ -12,6 +12,7 @@ import { selectDlnaSource, selectDlnaTracks } from '../../helpers/player/dlnaSou
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 
 const props = defineProps({
   formats: { type: Array, required: true },
@@ -84,7 +85,7 @@ async function refreshSource() {
   sourceLoading = true
   mergedSource.value = null
   try {
-    const info = await ytDlp.ytDlpGetPlaybackInfo(props.videoId, true, store.getters.getYtDlpPlaybackAlwaysUseCookies && hasConfiguredRestrictedPlaybackAuthentication(store.getters), false)
+    const info = await ytDlp.ytDlpGetPlaybackInfo(props.videoId, true, usesYtDlpCookiesFor(store.getters.getYtDlpCookieUses, 'playback') && hasConfiguredRestrictedPlaybackAuthentication(store.getters), false)
     if (!disposed && !castId.value && info && !info.error && !info.isLive) mergedSource.value = selectDlnaTracks(info.formats)
   } catch { /* The existing combined MP4 remains available. */ } finally {
     sourceLoading = false

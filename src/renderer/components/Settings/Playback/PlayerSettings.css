@@ -287,3 +287,16 @@
   margin-inline-start: var(--nested-switch-indent);
   max-inline-size: calc(100% - var(--nested-switch-indent));
 }
+
+/* Fill the column like the switches above, which line up with the group title.
+   This outranks the narrow-layout cap on selects in switch columns. */
+.switchColumnGrid .switchColumn > .select.castProtocolsSelect {
+  align-self: stretch;
+  inline-size: auto;
+  margin-inline-start: calc(6px + var(--settings-marker-gutter, 0px));
+}
+
+/* The centered group in the second row keeps its distance from the groups above. */
+.playerControlsGrid > :nth-child(3) > .controlGroupTitle:first-child {
+  margin-block-start: 16px;
+}

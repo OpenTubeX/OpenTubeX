@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: ブロックした項目を表示
   Auto: 自動
   'Off': オフ
+  None: なし
 Search Listing:
   Label:
     Members Only: メンバー限定
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: ネットワーク上のFCastレシーバーアプリ
       DLNA: DLNA
       DLNA Description: ネットワーク上のスマートテレビやメディアプレーヤー
+      Cast To: キャスト先
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: タイトルに含む
     Title Excludes: タイトルから除外
     Title Filter Hint: 複数のタイトル条件はコンマで区切ってください。含める条件のいずれかに一致し、除外条件には一つも一致しない動画が対象になります。
-    Automatic Downloads Require Unmetered Network: "従量制ではないネットワークのみ"
     Automatic Downloads Require Charging: "充電中のみ"
+    Automatic Download Conditions:
+      Download Automatically Only: 次の場合のみ自動ダウンロード
+      On Unmetered Networks: 従量制ではないネットワーク
+      While Charging: 充電中
   External Software Settings:
     Create YouTube session: "YouTube セッションを作成"
     YouTube session hint: "必要に応じてログインし、セッションを保存してください。ダウンロード、再生、字幕のどれに使用するかは設定で選択できます。"
-    Use cookies for downloads: "ダウンロードに Cookie を使用"
     YouTube session failed: "YouTube セッションを保存できませんでした。"
     Checking FFmpeg and FFprobe: FFmpeg/FFprobeを確認中…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobeはまだダウンロードされていません。下のボタンをクリックしてダウンロードしてください。
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: プロフィール名またはパス
     Browser Profile Invalid: "プロファイル名を入力するか、フォルダーボタンでプロファイルフォルダーを選択してください。"
     Select Browser: ブラウザーを選択
-    Always Use Cookies: 常にCookieを使用
+    Cookie Uses:
+      Use Cookies For: Cookie の使用先
+      Playback: 再生
+      Downloads: ダウンロード
+      Subtitles: 字幕
     Restricted Playback Authentication Hint: 既定では、年齢制限またはメンバー限定の動画で「設定済みのCookieを使用して再試行」を選んだ後にのみ、これらのCookieをyt-dlpへ渡します。
     Restricted Playback Authentication Warning: Googleアカウントでyt-dlpを使用すると、アカウントが一時的または永久に制限される場合があります。
-    Use cookies for subtitles: "字幕に Cookie を使用"
   Privacy Settings:
     Internet Connectivity Checks: "インターネット接続の確認"
     Internet Connectivity Checks Tooltip: "GrapheneOS がホストするサーバーに小さなリクエストを送り、インターネット接続を確認します。"
@@ -2517,9 +2524,8 @@ Tooltips:
     Cookie File: 認証が必要な再生に使用するNetscape形式のCookieファイルを選択します。
     Browser for Cookies: 選択したyt-dlp実行ファイルからブラウザーの対応状況を取得します。認証が必要な再生を要求すると、OpenTubeXはyt-dlpにこのブラウザーのCookieを読み取るよう指示します。
     Browser Profile: ブラウザーのプロフィール名またはフォルダーを必要に応じて指定します。空欄にすると、最近使用したプロフィールを使います。
-    Always Use Cookies: "ダウンロード、字幕、および yt-dlp によるストリーム抽出に、設定済みの Cookie を使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。"
+    Use Cookies For: yt-dlp が設定済みの Cookie を何に使用するかを選択します。再生では、yt-dlp がストリームを抽出するたびに Cookie を使用しますが、ストリーム抽出方式は yt-dlp に切り替わりません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。字幕には自動翻訳も含まれます。
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
-    Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "検索結果、再生ページの「次の動画」、ホームの YouTube のおすすめから視聴済みの動画を非表示にします。自動再生でもスキップされます。"
     Hide Playlist Stats: 再生リストのページで動画数、視聴回数、最終更新日、合計再生時間を非表示にします。

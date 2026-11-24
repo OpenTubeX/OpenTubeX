@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: إظهار العنصر المحظور
   Auto: تلقائي
   'Off': إيقاف
+  None: لا شيء
 Search Listing:
   Label:
     Members Only: الأعضاء فقط
@@ -1104,6 +1105,7 @@ Settings:
       FCast Description: تطبيقات استقبال FCast على شبكتك
       DLNA: DLNA
       DLNA Description: أجهزة التلفاز الذكية ومشغلات الوسائط على شبكتك
+      Cast To: البث إلى
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1165,12 +1167,14 @@ Settings:
     Title Includes: يتضمن العنوان
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
-    Automatic Downloads Require Unmetered Network: "فقط على الشبكات غير المحدودة"
     Automatic Downloads Require Charging: "فقط أثناء الشحن"
+    Automatic Download Conditions:
+      Download Automatically Only: التنزيل التلقائي فقط
+      On Unmetered Networks: على الشبكات غير المحدودة
+      While Charging: أثناء الشحن
   External Software Settings:
     Create YouTube session: "إنشاء جلسة YouTube"
     YouTube session hint: "سجّل الدخول عند الحاجة، ثم احفظ الجلسة. اختر في الإعدادات استخدامها للتنزيلات أو التشغيل أو الترجمات."
-    Use cookies for downloads: "استخدام ملفات تعريف الارتباط للتنزيلات"
     YouTube session failed: "تعذّر حفظ جلسة YouTube."
     Checking FFmpeg and FFprobe: جارٍ التحقق من FFmpeg/FFprobe...
     FFmpeg and FFprobe Managed Not Downloaded: لم يتم تنزيل FFmpeg/FFprobe بعد. انقر على الزر أدناه لتنزيلهما.
@@ -1235,10 +1239,13 @@ Settings:
     Browser Profile Placeholder: اسم الملف الشخصي أو المسار
     Browser Profile Invalid: "أدخل اسم ملف تعريف، أو اختر مجلد ملف التعريف باستخدام زر المجلد."
     Select Browser: حدد متصفحًا
-    Always Use Cookies: استخدم ملفات تعريف الارتباط دائمًا
+    Cookie Uses:
+      Use Cookies For: استخدام ملفات تعريف الارتباط لـ
+      Playback: التشغيل
+      Downloads: التنزيلات
+      Subtitles: الترجمات
     Restricted Playback Authentication Hint: افتراضيًا، يقوم OpenTubeX بتمرير ملفات تعريف الارتباط هذه إلى yt-dlp فقط بعد اختيار "تجربة باستخدام ملفات تعريف الارتباط التي تم تكوينها" في مقطع فيديو مقيد بالفئة العمرية أو للأعضاء فقط.
     Restricted Playback Authentication Warning: يمكن أن يؤدي استخدام yt-dlp مع حساب Google إلى فرض قيود مؤقتة أو دائمة على الحساب.
-    Use cookies for subtitles: "استخدام ملفات تعريف الارتباط للترجمة"
   Privacy Settings:
     Internet Connectivity Checks: "التحقق من الاتصال بالإنترنت"
     Internet Connectivity Checks Tooltip: "يرسل طلبات صغيرة إلى خادم تستضيفه GrapheneOS للتحقق من الوصول إلى الإنترنت."
@@ -2555,9 +2562,8 @@ Tooltips:
     Cookie File: حدد ملف تعريف الارتباط بتنسيق Netscape للتشغيل المعتمد.
     Browser for Cookies: تتم قراءة دعم المتصفح من الملف القابل للتنفيذ yt-dlp المحدد. يطلب OpenTubeX من yt-dlp قراءة هذا المتصفح عند طلب التشغيل المعتمد.
     Browser Profile: اسم أو مجلد ملف تعريف المتصفح الاختياري. اتركه فارغًا لاستخدام أحدث ملف تعريف تم الوصول إليه.
-    Always Use Cookies: "استخدم ملفات تعريف الارتباط المُعدّة للتنزيلات والترجمات وكلما استخرج yt-dlp البث. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول."
+    Use Cookies For: اختر ما يستخدم yt-dlp ملفات تعريف الارتباط المُعدّة له. يستخدمها التشغيل كلما استخرج yt-dlp البث، دون تبديل طريقة استخراج البث إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول. تشمل الترجمات أيضًا الترجمات التلقائية.
     FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
-    Use cookies for subtitles: "استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. يُفعّل أيضًا عند تفعيل «استخدام ملفات تعريف الارتباط دائمًا»."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "يخفي الفيديوهات التي شاهدتها من نتائج البحث وقسم «التالي» في صفحة المشاهدة وتوصيات YouTube في الصفحة الرئيسية. ويتخطاها التشغيل التلقائي أيضًا."
     Hide Playlist Stats: يخفي عدد الفيديوهات وعدد المشاهدات وتاريخ آخر تحديث والمدة الإجمالية في صفحات قوائم التشغيل.

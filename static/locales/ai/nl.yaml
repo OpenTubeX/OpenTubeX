@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Geblokkeerd item tonen
   Auto: Automatisch
   'Off': Uit
+  None: Geen
 Search Listing:
   Label:
     Members Only: Alleen voor leden
@@ -1108,6 +1109,7 @@ Settings:
       FCast Description: FCast-ontvangerapps in je netwerk
       DLNA: DLNA
       DLNA Description: Smart-tv's en mediaspelers in je netwerk
+      Cast To: Casten naar
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1169,12 +1171,14 @@ Settings:
     Title Includes: Titel bevat
     Title Excludes: Titel bevat niet
     Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
-    Automatic Downloads Require Unmetered Network: "Alleen op netwerken zonder datalimiet"
     Automatic Downloads Require Charging: "Alleen tijdens opladen"
+    Automatic Download Conditions:
+      Download Automatically Only: Alleen automatisch downloaden
+      On Unmetered Networks: Op netwerken zonder datalimiet
+      While Charging: Tijdens opladen
   External Software Settings:
     Create YouTube session: "YouTube-sessie maken"
     YouTube session hint: "Log indien nodig in en sla de sessie op. Kies in de instellingen of je deze voor downloads, afspelen of ondertitels wilt gebruiken."
-    Use cookies for downloads: "Cookies gebruiken voor downloads"
     YouTube session failed: "De YouTube-sessie kon niet worden opgeslagen."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe controleren…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zijn nog niet gedownload. Klik op de knop hieronder om ze te downloaden.
@@ -1239,10 +1243,13 @@ Settings:
     Browser Profile Placeholder: Profielnaam of pad
     Browser Profile Invalid: "Voer een profielnaam in of kies een profielmap met de mapknop."
     Select Browser: Selecteer een browser
-    Always Use Cookies: Cookies altijd gebruiken
+    Cookie Uses:
+      Use Cookies For: Cookies gebruiken voor
+      Playback: Afspelen
+      Downloads: Downloads
+      Subtitles: Ondertitels
     Restricted Playback Authentication Hint: OpenTubeX geeft deze cookies standaard pas aan yt-dlp door nadat je bij een video met een leeftijdsbeperking of een video voor leden hebt gekozen voor "Proberen met ingestelde cookies".
     Restricted Playback Authentication Warning: Als je yt-dlp met een Google-account gebruikt, kan je account tijdelijk of permanent worden beperkt.
-    Use cookies for subtitles: "Cookies gebruiken voor ondertitels"
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbinding controleren"
     Internet Connectivity Checks Tooltip: "Stuurt kleine verzoeken naar een server gehost door GrapheneOS om internettoegang te controleren."
@@ -2585,9 +2592,8 @@ Tooltips:
     Cookie File: Selecteer een cookiebestand in Netscape-indeling voor geverifieerd afspelen.
     Browser for Cookies: Browserondersteuning wordt uit het geselecteerde uitvoerbare bestand van yt-dlp gelezen. OpenTubeX vraagt yt-dlp om deze browser te lezen wanneer geverifieerd afspelen wordt aangevraagd.
     Browser Profile: Optionele naam of map van het browserprofiel. Laat dit leeg om het laatst gebruikte profiel te gebruiken.
-    Always Use Cookies: "Gebruik de ingestelde cookies voor downloads, ondertitels en telkens wanneer yt-dlp streams ophaalt. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft."
+    Use Cookies For: Kies waarvoor yt-dlp de ingestelde cookies gebruikt. Afspelen gebruikt ze telkens wanneer yt-dlp streams ophaalt, zonder de methode voor stream-extractie te wijzigen in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft. Ondertitels omvatten ook automatische vertalingen.
     FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
-    Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Verbergt bekeken video’s in zoekresultaten, bij Volgende op de afspeelpagina en in YouTube-aanbevelingen op de startpagina. Automatisch afspelen slaat ze ook over."
     Hide Playlist Stats: Verbergt het aantal video’s, het aantal weergaven, de datum van de laatste update en de totale duur op afspeellijstpagina’s.

@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Hiện mục bị chặn
   Auto: Tự động
   'Off': Tắt
+  None: Không có
 Search Listing:
   Label:
     Members Only: Chỉ dành cho hội viên
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: Ứng dụng nhận FCast trong mạng của bạn
       DLNA: DLNA
       DLNA Description: TV thông minh và trình phát đa phương tiện trong mạng của bạn
+      Cast To: Truyền đến
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: Tiêu đề có chứa
     Title Excludes: Tiêu đề không chứa
     Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
-    Automatic Downloads Require Unmetered Network: "Chỉ trên mạng không đo lưu lượng"
     Automatic Downloads Require Charging: "Chỉ khi đang sạc"
+    Automatic Download Conditions:
+      Download Automatically Only: Chỉ tự động tải xuống
+      On Unmetered Networks: Trên mạng không đo lưu lượng
+      While Charging: Khi đang sạc
   External Software Settings:
     Create YouTube session: "Tạo phiên YouTube"
     YouTube session hint: "Đăng nhập nếu cần rồi lưu phiên. Chọn trong cài đặt để sử dụng phiên cho tải xuống, phát hoặc phụ đề."
-    Use cookies for downloads: "Sử dụng cookie để tải xuống"
     YouTube session failed: "Không thể lưu phiên YouTube."
     Checking FFmpeg and FFprobe: Đang kiểm tra FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Chưa tải FFmpeg/FFprobe. Nhấp vào nút bên dưới để tải.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: Tên hoặc đường dẫn hồ sơ
     Browser Profile Invalid: "Nhập tên hồ sơ hoặc chọn thư mục hồ sơ bằng nút thư mục."
     Select Browser: Chọn trình duyệt
-    Always Use Cookies: Luôn dùng cookie
+    Cookie Uses:
+      Use Cookies For: Dùng cookie cho
+      Playback: Phát
+      Downloads: Tải xuống
+      Subtitles: Phụ đề
     Restricted Playback Authentication Hint: Theo mặc định, OpenTubeX chỉ chuyển các cookie này cho yt-dlp sau khi bạn chọn "Thử bằng cookie đã thiết lập" trên video giới hạn độ tuổi hoặc chỉ dành cho hội viên.
     Restricted Playback Authentication Warning: Dùng yt-dlp với tài khoản Google có thể khiến tài khoản bị hạn chế tạm thời hoặc vĩnh viễn.
-    Use cookies for subtitles: "Dùng cookie cho phụ đề"
   Privacy Settings:
     Internet Connectivity Checks: "Kiểm tra kết nối internet"
     Internet Connectivity Checks Tooltip: "Gửi yêu cầu nhỏ đến máy chủ do GrapheneOS lưu trữ để kiểm tra khả năng truy cập internet."
@@ -2534,9 +2541,8 @@ Tooltips:
     Cookie File: Chọn tệp cookie định dạng Netscape để phát nội dung cần xác thực.
     Browser for Cookies: Khả năng hỗ trợ trình duyệt được đọc từ tệp thực thi yt-dlp đã chọn. OpenTubeX yêu cầu yt-dlp đọc trình duyệt này khi cần phát nội dung xác thực.
     Browser Profile: Tên hoặc thư mục hồ sơ trình duyệt không bắt buộc. Để trống để dùng hồ sơ được truy cập gần nhất.
-    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập."
+    Use Cookies For: Chọn những gì yt-dlp dùng cookie đã cấu hình. Phát dùng cookie mỗi khi yt-dlp trích xuất luồng, mà không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập. Phụ đề cũng bao gồm bản dịch tự động.
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
-    Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ẩn video đã xem khỏi kết quả tìm kiếm, mục Tiếp theo trên trang xem và các đề xuất của YouTube trên Trang chủ. Tự động phát cũng bỏ qua chúng."
     Hide Playlist Stats: Ẩn số lượng video, số lượt xem, ngày cập nhật gần nhất và tổng thời lượng trên các trang danh sách phát.

@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Afișează elementul blocat
   Auto: Automat
   'Off': Dezactivat
+  None: Niciuna
 Search Listing:
   Label:
     Members Only: Numai pentru membri
@@ -1095,6 +1096,7 @@ Settings:
       FCast Description: Aplicații receptor FCast din rețeaua locală
       DLNA: DLNA
       DLNA Description: Televizoare inteligente și playere media din rețeaua locală
+      Cast To: Transmite către
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1156,12 +1158,14 @@ Settings:
     Title Includes: Titlul include
     Title Excludes: Titlul exclude
     Title Filter Hint: Separați prin virgule mai mulți termeni pentru titlu. Un videoclip trebuie să corespundă cel puțin unui termen inclus și niciunui termen exclus.
-    Automatic Downloads Require Unmetered Network: "Doar în rețele necontorizate"
     Automatic Downloads Require Charging: "Doar în timpul încărcării"
+    Automatic Download Conditions:
+      Download Automatically Only: Descarcă automat doar
+      On Unmetered Networks: În rețele necontorizate
+      While Charging: În timpul încărcării
   External Software Settings:
     Create YouTube session: "Creează o sesiune YouTube"
     YouTube session hint: "Autentifică-te dacă este necesar și salvează sesiunea. Alege în setări dacă să o folosești pentru descărcări, redare sau subtitrări."
-    Use cookies for downloads: "Folosește cookie-uri pentru descărcări"
     YouTube session failed: "Sesiunea YouTube nu a putut fi salvată."
     Checking FFmpeg and FFprobe: Se verifică FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nu au fost descărcate încă. Apăsați butonul de mai jos pentru a le descărca.
@@ -1226,10 +1230,13 @@ Settings:
     Browser Profile Placeholder: Numele sau calea profilului
     Browser Profile Invalid: "Introdu un nume de profil sau alege un dosar de profil cu butonul de dosar."
     Select Browser: Selectați un browser
-    Always Use Cookies: Folosește întotdeauna cookie-urile
+    Cookie Uses:
+      Use Cookies For: Folosește cookie-uri pentru
+      Playback: Redare
+      Downloads: Descărcări
+      Subtitles: Subtitrări
     Restricted Playback Authentication Hint: În mod implicit, OpenTubeX transmite aceste cookie-uri către yt-dlp numai după ce alegeți „Încearcă folosind cookie-urile configurate” pentru un videoclip cu restricție de vârstă sau destinat exclusiv membrilor.
     Restricted Playback Authentication Warning: Folosirea yt-dlp cu un cont Google poate duce la restricționarea temporară sau permanentă a contului.
-    Use cookies for subtitles: "Folosește cookie-uri pentru subtitrări"
   Privacy Settings:
     Internet Connectivity Checks: "Verificări ale conexiunii la internet"
     Internet Connectivity Checks Tooltip: "Trimite cereri mici către un server găzduit de GrapheneOS pentru a verifica accesul la internet."
@@ -2572,9 +2579,8 @@ Tooltips:
     Cookie File: Selectați un fișier cookie în format Netscape pentru redarea autentificată.
     Browser for Cookies: Compatibilitatea cu browserele este citită din executabilul yt-dlp selectat. OpenTubeX solicită ca yt-dlp să citească acest browser atunci când este cerută redarea autentificată.
     Browser Profile: Numele sau folderul opțional al profilului de browser. Lăsați necompletat pentru a folosi profilul accesat cel mai recent.
-    Always Use Cookies: "Folosește cookie-urile configurate pentru descărcări, subtitrări și ori de câte ori yt-dlp extrage fluxuri. Această opțiune nu schimbă metoda de extragere a fluxului la yt-dlp. Când este selectat yt-dlp, pot deveni disponibile formate destinate exclusiv conturilor, inclusiv rata de biți îmbunătățită YouTube Premium dacă acel cont are acces."
+    Use Cookies For: Alege pentru ce folosește yt-dlp cookie-urile configurate. Redarea le folosește ori de câte ori yt-dlp extrage fluxuri, fără a schimba metoda de extragere a fluxului la yt-dlp. Când este selectat yt-dlp, pot deveni disponibile formate destinate exclusiv conturilor, inclusiv rata de biți îmbunătățită YouTube Premium dacă acel cont are acces. Subtitrările includ și traducerile automate.
     FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
-    Use cookies for subtitles: "Folosește cookie-urile configurate pentru subtitrări și traduceri automate. Se activează și prin „Folosește întotdeauna cookie-uri”."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ascunde videoclipurile vizionate din rezultatele căutării, din În continuare pe pagina de redare și din recomandările YouTube de pe pagina principală. Redarea automată le omite și ea."
     Hide Playlist Stats: Ascunde numărul de videoclipuri, numărul de vizionări, data ultimei actualizări și durata totală pe paginile listelor de redare.

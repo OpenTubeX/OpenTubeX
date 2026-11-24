@@ -78,6 +78,7 @@ Global:
   Show Blocked Item: 차단된 항목 표시
   Auto: 자동
   'Off': 끄기
+  None: 없음
 Search Listing:
   Label:
     Members Only: 회원 전용
@@ -1272,6 +1273,7 @@ Settings:
       FCast Description: 네트워크의 FCast 수신기 앱
       DLNA: DLNA
       DLNA Description: 네트워크의 스마트 TV 및 미디어 플레이어
+      Cast To: 전송 대상
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1335,12 +1337,14 @@ Settings:
     Title Includes: 제목에 포함
     Title Excludes: 제목에서 제외
     Title Filter Hint: 제목 검색어가 여러 개이면 쉼표로 구분하세요. 동영상은 포함 검색어 중 하나 이상과 일치하고 제외 검색어와는 모두 일치하지 않아야 합니다.
-    Automatic Downloads Require Unmetered Network: "종량제가 아닌 네트워크에서만"
     Automatic Downloads Require Charging: "충전 중일 때만"
+    Automatic Download Conditions:
+      Download Automatically Only: 다음 경우에만 자동 다운로드
+      On Unmetered Networks: 종량제가 아닌 네트워크
+      While Charging: 충전 중
   External Software Settings:
     Create YouTube session: "YouTube 세션 만들기"
     YouTube session hint: "필요한 경우 로그인한 다음 세션을 저장하세요. 설정에서 다운로드, 재생 또는 자막에 사용할지 선택하세요."
-    Use cookies for downloads: "다운로드에 쿠키 사용"
     YouTube session failed: "YouTube 세션을 저장할 수 없습니다."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe 확인 중…
     FFmpeg and FFprobe Managed Not Downloaded: 아직 FFmpeg/FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
@@ -1405,10 +1409,13 @@ Settings:
     Browser Profile Placeholder: 프로필 이름 또는 경로
     Browser Profile Invalid: "프로필 이름을 입력하거나 폴더 버튼으로 프로필 폴더를 선택하세요."
     Select Browser: 브라우저 선택
-    Always Use Cookies: 항상 쿠키 사용
+    Cookie Uses:
+      Use Cookies For: 쿠키 사용 대상
+      Playback: 재생
+      Downloads: 다운로드
+      Subtitles: 자막
     Restricted Playback Authentication Hint: 기본적으로 OpenTubeX는 연령 제한 또는 회원 전용 동영상에서 "설정된 쿠키로 시도"를 선택한 경우에만 이 쿠키를 yt-dlp에 전달합니다.
     Restricted Playback Authentication Warning: Google 계정과 함께 yt-dlp를 사용하면 계정이 일시적 또는 영구적으로 제한될 수 있습니다.
-    Use cookies for subtitles: "자막에 쿠키 사용"
   Privacy Settings:
     Internet Connectivity Checks: "인터넷 연결 확인"
     Internet Connectivity Checks Tooltip: "GrapheneOS가 호스팅하는 서버에 작은 요청을 보내 인터넷 연결을 확인합니다."
@@ -2908,9 +2915,8 @@ Tooltips:
     Cookie File: 인증된 재생에 사용할 Netscape 형식 쿠키 파일을 선택하세요.
     Browser for Cookies: 선택한 yt-dlp 실행 파일에서 지원하는 브라우저를 확인합니다. 인증된 재생을 요청하면 OpenTubeX가 yt-dlp에 이 브라우저의 쿠키를 읽도록 요청합니다.
     Browser Profile: 선택 사항인 브라우저 프로필 이름 또는 폴더입니다. 가장 최근에 사용한 프로필을 사용하려면 비워 두세요.
-    Always Use Cookies: "다운로드, 자막 및 yt-dlp가 스트림을 추출할 때 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다."
+    Use Cookies For: yt-dlp가 설정된 쿠키를 어디에 사용할지 선택합니다. 재생은 yt-dlp가 스트림을 추출할 때마다 쿠키를 사용하며, 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다. 자막에는 자동 번역도 포함됩니다.
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
-    Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "검색 결과, 시청 페이지의 다음 동영상, 홈의 YouTube 추천에서 시청한 동영상을 숨깁니다. 자동 재생도 이 동영상을 건너뜁니다."
     Hide Playlist Stats: 재생목록 페이지에서 동영상 수, 조회수, 마지막 업데이트 날짜, 총 재생 시간을 숨깁니다.

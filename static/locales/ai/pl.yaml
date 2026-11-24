@@ -8,6 +8,7 @@ Global:
   Show Blocked Item: Pokaż zablokowany element
   Auto: Automatycznie
   'Off': Wyłączone
+  None: Brak
 Search Listing:
   Label:
     Members Only: Tylko dla wspierających
@@ -713,6 +714,7 @@ Settings:
       FCast Description: Aplikacje odbiornika FCast w Twojej sieci
       DLNA: DLNA
       DLNA Description: Smart TV i odtwarzacze multimediów w Twojej sieci
+      Cast To: Przesyłaj do
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Changes: Automatycznie zapisuj zmiany
@@ -725,12 +727,14 @@ Settings:
     Managed Tools Update Source Notice: "OpenTubeX pobiera ją bezpośrednio z GitHuba, więc F-Droid ani inne sklepy z aplikacjami jej nie sprawdzają."
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s)
-    Automatic Downloads Require Unmetered Network: "Tylko w sieciach bez pomiaru użycia danych"
     Automatic Downloads Require Charging: "Tylko podczas ładowania"
+    Automatic Download Conditions:
+      Download Automatically Only: Pobieraj automatycznie tylko
+      On Unmetered Networks: W sieciach bez pomiaru użycia danych
+      While Charging: Podczas ładowania
   External Software Settings:
     Create YouTube session: "Utwórz sesję YouTube"
     YouTube session hint: "Zaloguj się w razie potrzeby i zapisz sesję. W ustawieniach wybierz, czy używać jej do pobierania, odtwarzania lub napisów."
-    Use cookies for downloads: "Używaj plików cookie do pobierania"
     YouTube session failed: "Nie udało się zapisać sesji YouTube."
     Checking FFmpeg and FFprobe: Sprawdzanie FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nie zostały jeszcze pobrane. Kliknij przycisk poniżej, aby je pobrać.
@@ -757,10 +761,13 @@ Settings:
     Browser Profile Placeholder: Nazwa profilu lub ścieżka
     Browser Profile Invalid: "Wpisz nazwę profilu lub wybierz folder profilu przyciskiem folderu."
     Select Browser: Wybierz przeglądarkę
-    Always Use Cookies: Zawsze używaj ciasteczek
+    Cookie Uses:
+      Use Cookies For: Używaj plików cookie do
+      Playback: Odtwarzanie
+      Downloads: Pobieranie
+      Subtitles: Napisy
     Restricted Playback Authentication Hint: Domyślnie OpenTubeX przekazuje te ciasteczka do yt-dlp dopiero po wybraniu opcji „Spróbuj ze skonfigurowanymi ciasteczkami” dla filmu z ograniczeniem wiekowym lub dostępnego tylko dla wspierających.
     Restricted Playback Authentication Warning: Używanie yt-dlp z kontem Google może spowodować jego tymczasowe lub trwałe ograniczenie.
-    Use cookies for subtitles: "Używaj plików cookie do napisów"
     Managed Tool Errors:
       Removed: 'Pobrany plik został usunięty, najprawdopodobniej przez oprogramowanie antywirusowe'
       Unusable: 'Nie udało się uruchomić pobranego programu. Może go blokować oprogramowanie antywirusowe lub nie obsługuje on tego systemu'
@@ -1749,8 +1756,7 @@ Tooltips:
     Cookie File: Wybierz plik ciasteczek w formacie Netscape na potrzeby uwierzytelnionego odtwarzania.
     Browser for Cookies: Obsługiwane przeglądarki są odczytywane z wybranego pliku wykonywalnego yt-dlp. Gdy potrzebne jest uwierzytelnione odtwarzanie, OpenTubeX zleca yt-dlp odczytanie ciasteczek z tej przeglądarki.
     Browser Profile: Opcjonalna nazwa lub folder profilu przeglądarki. Pozostaw puste pole, aby użyć ostatnio otwieranego profilu.
-    Always Use Cookies: "Używaj skonfigurowanych plików cookie do pobierania, napisów i za każdym razem, gdy yt-dlp pobiera informacje o strumieniach. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp."
-    Use cookies for subtitles: "Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych. Włącza się także przez „Zawsze używaj ciasteczek”."
+    Use Cookies For: Wybierz, do czego yt-dlp używa skonfigurowanych plików cookie. Odtwarzanie używa ich za każdym razem, gdy yt-dlp pobiera informacje o strumieniach, bez zmiany metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp. Napisy obejmują też automatyczne tłumaczenia.
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ukrywa obejrzane filmy w wynikach wyszukiwania, w sekcji Następne na stronie odtwarzania i w rekomendacjach YouTube na stronie głównej. Autoodtwarzanie również je pomija."
     Hide Playlist Stats: Ukrywa liczbę filmów, liczbę wyświetleń, datę ostatniej aktualizacji i łączny czas trwania na stronach playlist.

@@ -45,6 +45,7 @@ import PhoneQueueButton from '../../components/PhoneQueueButton/PhoneQueueButton
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import FtVerifiedBadge from '../../components/FtVerifiedBadge/FtVerifiedBadge.vue'
@@ -943,7 +944,7 @@ export default defineComponent({
       return hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters)
     },
     alwaysUseYtDlpPlaybackCookies: function () {
-      return this.$store.getters.getYtDlpPlaybackAlwaysUseCookies &&
+      return usesYtDlpCookiesFor(this.$store.getters.getYtDlpCookieUses, 'playback') &&
         this.hasConfiguredRestrictedPlaybackAuthentication
     },
     canTryRestrictedPlaybackWithCookies: function () {
@@ -1328,6 +1329,9 @@ export default defineComponent({
     },
     hideEndScreenAnnotations: function () {
       return this.$store.getters.getHideEndScreenAnnotations
+    },
+    castProtocols: function () {
+      return this.$store.getters.getCastProtocols
     },
     hidePaidPromotion: function () {
       return this.$store.getters.getHidePaidPromotion

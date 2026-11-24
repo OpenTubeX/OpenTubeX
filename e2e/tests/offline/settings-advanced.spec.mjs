@@ -154,9 +154,7 @@ test.describe('settings', () => {
       has: page.getByRole('heading', { name: 'yt-dlp Cookies', exact: true })
     })
     const cookieSource = authentication.locator('.restrictedPlaybackAuthSource select')
-    const alwaysUseCookies = authentication.getByRole('checkbox', { name: /^Always Use Cookies/ })
-    const subtitleCookies = authentication.getByRole('checkbox', { name: /^Use cookies for subtitles/ })
-    const downloadCookies = authentication.getByRole('checkbox', { name: /^Use cookies for downloads/ })
+    const cookieUses = authentication.getByRole('combobox', { name: 'Use Cookies For' })
     const authenticationHint = authentication.locator('.restrictedPlaybackAuthHint')
     const accountRestrictionWarning = authentication.locator(
       '.restrictedPlaybackAuthHint strong'
@@ -164,15 +162,8 @@ test.describe('settings', () => {
 
     await expect(cookieSource.locator('option')).toHaveText(['None', 'File', 'Browser'])
     await expect(cookieSource).toHaveValue('none')
-    await expect(downloadCookies).toBeChecked()
-    await expect(downloadCookies).toBeEnabled()
-    await downloadCookies.locator('..').locator('label.switch-label').click()
-    await expect(downloadCookies).not.toBeChecked()
-    await expect(alwaysUseCookies).not.toBeChecked()
-    await expect(subtitleCookies).not.toBeChecked()
-    await expect(subtitleCookies).toBeEnabled()
-    await subtitleCookies.locator('..').locator('label.switch-label').click()
-    await expect(subtitleCookies).toBeChecked()
+    // Without a cookie source, there is nothing to use the cookies for.
+    await expect(cookieUses).toHaveCount(0)
     await expect(authenticationHint).toHaveText(
       'By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video. Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.'
     )
@@ -180,13 +171,8 @@ test.describe('settings', () => {
       'Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.'
     )
 
-    await alwaysUseCookies.locator('..')
-      .locator('.selectTooltip button')
-      .focus()
-    await expect(page.locator('body > [role="tooltip"]:visible')).toHaveText(
-      "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
-    )
     await chooseSelectOption(cookieSource, 'browser')
+    await expect(cookieUses).toContainText('Downloads')
 
     const browser = authentication.locator('.restrictedPlaybackAuthDetail select')
     await expect(browser.locator('option')).toHaveText([
@@ -202,21 +188,12 @@ test.describe('settings', () => {
     await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toBeVisible()
     await profile.fill('default-release')
     await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toHaveCount(0)
-    await alwaysUseCookies.locator('..').locator('label.switch-label').click()
-    await expect(alwaysUseCookies).toBeChecked()
-    await expect(downloadCookies).toBeChecked()
-    await expect(downloadCookies).toBeDisabled()
-    await expect(subtitleCookies).toBeChecked()
-    await expect(subtitleCookies).toBeDisabled()
-    await alwaysUseCookies.locator('..').locator('label.switch-label').click()
-    await expect(downloadCookies).toBeEnabled()
-    await expect(downloadCookies).not.toBeChecked()
-    await expect(subtitleCookies).toBeEnabled()
-    await expect(subtitleCookies).toBeChecked()
-    await subtitleCookies.locator('..').locator('label.switch-label').click()
-    await alwaysUseCookies.locator('..').locator('label.switch-label').click()
-    await expect(subtitleCookies).toBeChecked()
-    await expect(subtitleCookies).toBeDisabled()
+    await cookieUses.click()
+    for (const use of ['Playback', 'Downloads', 'Subtitles']) {
+      await page.getByRole('option', { name: use, exact: true }).click()
+    }
+    await page.keyboard.press('Escape')
+    await expect(cookieUses).toContainText('Playback, Subtitles')
 
     for (const highlightChangedSettings of [false, true]) {
       await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
@@ -252,13 +229,13 @@ test.describe('settings', () => {
         mode: settings.ytDlpPlaybackAuthMode,
         browser: settings.ytDlpPlaybackCookiesBrowser,
         profile: settings.ytDlpPlaybackCookiesBrowserProfile,
-        alwaysUse: settings.ytDlpPlaybackAlwaysUseCookies
+        uses: settings.ytDlpCookieUses
       }
     }).toEqual({
       mode: 'browser',
       browser: 'firefox',
       profile: 'default-release',
-      alwaysUse: true
+      uses: ['playback', 'subtitles']
     })
     await attachScreenshot('subtitle cookie settings')
   })

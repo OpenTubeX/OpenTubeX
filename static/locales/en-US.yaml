@@ -135,6 +135,7 @@ Global:
   Show Blocked Item: Show blocked item
   Auto: Auto
   Off: 'Off'
+  None: None
   Counts:
     Video Count: 1 video | {count} videos
     Channel Count: 1 channel | {count} channels
@@ -1393,6 +1394,7 @@ Settings:
       FCast Description: FCast receiver apps on your network
       DLNA: DLNA
       DLNA Description: Smart TVs and media players on your network
+      Cast To: Cast To
     Lights Off: Lights Off
     Mirror Video: Mirror Video
     Show Lights Off Toggle: Show Lights Off Toggle
@@ -1680,8 +1682,11 @@ Settings:
     Automatic Downloads No Channels: Subscribe to a channel before configuring automatic downloads.
     No Matching Automatic Download Channels: No channels match your search.
     Automatic Downloads Livestreams: Livestreams
-    Automatic Downloads Require Unmetered Network: Only on unmetered networks
     Automatic Downloads Require Charging: Only while charging
+    Automatic Download Conditions:
+      Download Automatically Only: Download Automatically Only
+      On Unmetered Networks: On unmetered networks
+      While Charging: While charging
     Minimum Duration Seconds: Minimum duration (seconds)
     Maximum Duration Seconds: Maximum duration (seconds)
     Minimum File Size MB: Minimum file size (MB)
@@ -1693,7 +1698,6 @@ Settings:
   External Software Settings:
     Create YouTube session: "Create YouTube session"
     YouTube session hint: "Sign in if needed, then save. Choose in settings whether to use this session for downloads, playback or subtitles."
-    Use cookies for downloads: "Use cookies for downloads"
     YouTube session failed: "Unable to save the YouTube session."
     Checking FFmpeg and FFprobe: Checking FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.
@@ -1758,10 +1762,13 @@ Settings:
     Browser Profile Placeholder: Profile name or path
     Browser Profile Invalid: "Enter a profile name, or choose a profile folder with the folder button."
     Select Browser: Select a browser
-    Always Use Cookies: Always Use Cookies
+    Cookie Uses:
+      Use Cookies For: Use Cookies For
+      Playback: Playback
+      Downloads: Downloads
+      Subtitles: Subtitles
     Restricted Playback Authentication Hint: By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video.
     Restricted Playback Authentication Warning: Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.
-    Use cookies for subtitles: "Use cookies for subtitles"
   Privacy Settings:
     Internet Connectivity Checks: "Internet connectivity checks"
     Internet Connectivity Checks Tooltip: "Sends small requests to a server hosted by GrapheneOS to check internet access."
@@ -3648,11 +3655,10 @@ Tooltips:
     Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
     Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
     Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
-    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
+    Use Cookies For: "Choose what yt-dlp uses the configured cookies for. Playback uses them whenever yt-dlp extracts streams, without switching the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access. Subtitles also covers automatic translations."
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.
-    Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
     Count Watch Time From: "All devices counts every device that syncs watch statistics. This device counts only what you watch here."
     When a Limit Is Reached: "Pause Playback lets you add 15 minutes or ignore the limit for today. With a settings password, you can only raise a limit in Settings."

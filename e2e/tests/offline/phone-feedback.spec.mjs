@@ -197,7 +197,7 @@ test('expanded sheets clear Android status bars and animate on close', async ({ 
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['dlna']))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 1000, height: 480 })

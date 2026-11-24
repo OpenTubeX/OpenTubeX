@@ -68,9 +68,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpPlaybackCookiesPath',
   'ytDlpPlaybackCookiesBrowser',
   'ytDlpPlaybackCookiesBrowserProfile',
-  'ytDlpPlaybackAlwaysUseCookies',
-  'ytDlpSubtitleUseCookies',
-  'ytDlpDownloadUseCookies',
+  'ytDlpCookieUses',
   'ytDlpPlaybackCacheMaxEntrySize',
   'ytDlpFfmpegSource',
   'ytDlpFfmpegPath',
@@ -80,6 +78,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpDownloadCustomArgs',
   // Templates carry yt-dlp arguments and output paths, like the two above.
   'ytDlpDownloadTemplates',
+  // It can name a custom template, which only exists here.
+  'ytDlpSelectedTemplate',
   // Others
   'disableSmoothScrolling',
   'useTrayIcon',

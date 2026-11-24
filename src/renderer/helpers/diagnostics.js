@@ -28,7 +28,7 @@ const REPORTED_SETTINGS = [
   'ytDlpSource',
   'ytDlpChannel',
   'ytDlpPlaybackAuthMode',
-  'ytDlpPlaybackAlwaysUseCookies',
+  'ytDlpCookieUses',
 ]
 
 function record(level, args) {

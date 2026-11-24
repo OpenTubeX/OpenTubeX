@@ -434,8 +434,9 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   // Window coordinates are only valid for the display they were saved on.
   'scrollMiniPlayerSavedRect',
   'crossTabMiniPlayerSavedRect',
-  // Custom download templates stay on this device, so a selected one may not exist on peers.
-  'ytDlpSelectedTemplate',
+  // Each device downloads on its own, and its rules can name custom templates
+  // that stay on that device. Backups keep the rules for the same device.
+  'ytDlpAutomaticDownloadRules',
   // These choices describe one physical device, not the user's account.
   'mobileAutoPictureInPicture',
   'capacitorLayoutMode',

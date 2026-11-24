@@ -45,7 +45,7 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
 
   await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateYtDlpSubtitleUseCookies', true)
+    await store.dispatch('updateYtDlpCookieUses', ['subtitles'])
   })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBe(vtt)
   let args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
@@ -58,8 +58,6 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   await choosePickerPaths(app, page, { ytDlpPlaybackCookiesPath: '/tmp/test-cookies.txt' })
   await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateYtDlpSubtitleUseCookies', false)
-    await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
   })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBe(vtt)
@@ -89,7 +87,7 @@ test('uses cookies for player translations and transcripts', async ({ app, page 
   }, { vtt, srt })
   await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateYtDlpSubtitleUseCookies', true)
+    await store.dispatch('updateYtDlpCookieUses', ['subtitles'])
   })
   await openMockedVideo(page)
   const player = page.locator(`${activeTab} .ftVideoPlayer`)

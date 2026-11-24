@@ -37,6 +37,7 @@ import {
 } from './ytDlpBinaries'
 import { pushYtDlpPlaybackAuthenticationArguments } from './ytDlpPlayback'
 import { checkOutYtDlpCookies } from './ytDlpCookieFile'
+import { usesYtDlpCookiesFor } from '../ytDlpCookieUses'
 import { authorizeAutomaticDownload, showAutomaticDownloadNotification } from './ytDlpAutomaticDownloads'
 
 const execFileAsync = promisify(execFile)
@@ -337,8 +338,8 @@ async function getDownloadQueueSettings() {
  * @returns {Promise<'charging' | null>}
  */
 async function getAutomaticDownloadWaitingFor() {
-  const requireCharging = await settings._findOne('ytDlpAutomaticDownloadsRequireCharging')
-  return requireCharging?.value === true && powerMonitor.isOnBatteryPower() ? 'charging' : null
+  const conditions = (await settings._findOne('ytDlpAutomaticDownloadConditions'))?.value
+  return Array.isArray(conditions) && conditions.includes('charging') && powerMonitor.isOnBatteryPower() ? 'charging' : null
 }
 
 function watchPowerSource(waiting) {
@@ -664,9 +665,8 @@ async function startYtDlpDownload(
   // cannot take `--paths` as its value. Each process appends its own URLs.
   args.push('--paths', downloadFolder, ...splitDownloadArguments(payload, commandArgs, 1).shared)
 
-  if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
-    (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
-    (await settings._findOne('ytDlpPlaybackAuthMode'))?.value !== 'none') {
+  if (!isExternalMedia && usesYtDlpCookiesFor((await settings._findOne('ytDlpCookieUses'))?.value, 'downloads') &&
+    ((await settings._findOne('ytDlpPlaybackAuthMode'))?.value ?? 'none') !== 'none') {
     const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
     if (authenticationError !== null) return { error: authenticationError }
   }

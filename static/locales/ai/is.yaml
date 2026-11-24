@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Sýna útilokað atriði
   Auto: Sjálfvirkt
   'Off': Slökkt
+  None: Engar
 Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
@@ -1095,6 +1096,7 @@ Settings:
       FCast Description: FCast-móttökuforrit á netinu þínu
       DLNA: DLNA
       DLNA Description: Snjallsjónvörp og margmiðlunarspilarar á netinu þínu
+      Cast To: Streyma í
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1156,12 +1158,14 @@ Settings:
     Title Includes: Titill inniheldur
     Title Excludes: Titill inniheldur ekki
     Title Filter Hint: Aðgreindu fleiri en eitt leitarorð fyrir titil með kommum. Myndband verður að passa við minnst eitt leitarorð sem á að taka með en ekkert þeirra sem á að útiloka.
-    Automatic Downloads Require Unmetered Network: "Aðeins á ómældum netum"
     Automatic Downloads Require Charging: "Aðeins meðan verið er að hlaða"
+    Automatic Download Conditions:
+      Download Automatically Only: Sækja sjálfkrafa aðeins
+      On Unmetered Networks: Á ómældum netum
+      While Charging: Meðan verið er að hlaða
   External Software Settings:
     Create YouTube session: "Búa til YouTube-setu"
     YouTube session hint: "Skráðu þig inn ef þörf krefur og vistaðu setuna. Veldu í stillingum hvort nota eigi hana fyrir niðurhal, spilun eða skjátexta."
-    Use cookies for downloads: "Nota vafrakökur við niðurhal"
     YouTube session failed: "Ekki tókst að vista YouTube-setuna."
     Checking FFmpeg and FFprobe: Athuga FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg og FFprobe hafa ekki verið hlaðin niður enn. Smelltu á hnappinn fyrir neðan til að hlaða þeim niður.
@@ -1226,10 +1230,13 @@ Settings:
     Browser Profile Placeholder: Heiti eða slóð notandasniðs
     Browser Profile Invalid: "Sláðu inn heiti prófíls eða veldu prófílmöppu með möppuhnappnum."
     Select Browser: Velja vafra
-    Always Use Cookies: Nota alltaf vafrakökur
+    Cookie Uses:
+      Use Cookies For: Nota vafrakökur fyrir
+      Playback: Spilun
+      Downloads: Niðurhal
+      Subtitles: Skjátextar
     Restricted Playback Authentication Hint: Sjálfgefið sendir OpenTubeX þessar vafrakökur aðeins til yt-dlp eftir að þú velur "Reyna með stilltum vafrakökum" fyrir aldurstakmarkað myndband eða myndband sem aðeins er fyrir meðlimi.
     Restricted Playback Authentication Warning: Notkun yt-dlp með Google-reikningi getur leitt til tímabundinna eða varanlegra takmarkana á reikningnum.
-    Use cookies for subtitles: "Nota vafrakökur fyrir skjátexta"
   Privacy Settings:
     Internet Connectivity Checks: "Athuganir á nettengingu"
     Internet Connectivity Checks Tooltip: "Sendir litlar beiðnir til netþjóns sem GrapheneOS hýsir til að athuga netaðgang."
@@ -2533,9 +2540,8 @@ Tooltips:
     Cookie File: Veldu vefkökuskrá á Netscape-sniði fyrir auðkennda spilun.
     Browser for Cookies: Valda yt-dlp-keyrsluskráin ræður hvaða vafrar eru studdir. OpenTubeX biður yt-dlp um að lesa vefkökur úr þessum vafra þegar beðið er um auðkennda spilun.
     Browser Profile: Valfrjálst heiti eða mappa vafrasniðs. Skildu reitinn eftir auðan til að nota síðast opnaða sniðið.
-    Always Use Cookies: "Notar stilltar vafrakökur fyrir niðurhal, skjátexta og þegar yt-dlp sækir streymi. Þetta skiptir ekki yfir í yt-dlp til að draga út streymi. Þegar yt-dlp er valið kunna snið sem krefjast reiknings að verða tiltæk, þar á meðal aukinn bitahraði YouTube Premium ef reikningurinn hefur aðgang að honum."
+    Use Cookies For: Veldu til hvers yt-dlp notar stilltu vafrakökurnar. Spilun notar þær þegar yt-dlp sækir streymi, án þess að skipta yfir í yt-dlp til að draga út streymi. Þegar yt-dlp er valið kunna snið sem krefjast reiknings að verða tiltæk, þar á meðal aukinn bitahraði YouTube Premium ef reikningurinn hefur aðgang að honum. Skjátextar ná einnig yfir sjálfvirkar þýðingar.
     FFmpeg Executable Path: FFmpeg er nauðsynlegt til að sameina aðskilið mynd- og hljóðstreymi og til að umbreyta hljóði. Sjálfgefið gerir OpenTubeX ráð fyrir að FFmpeg finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
-    Use cookies for subtitles: "Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar. Virkjast einnig með „Nota alltaf vafrakökur“."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Felur áhorfð myndskeið í leitarniðurstöðum, Næst í spilun á áhorfssíðunni og YouTube-meðmælum á heimasíðunni. Sjálfvirk spilun sleppir þeim líka."
     Hide Playlist Stats: Felur fjölda myndskeiða, fjölda áhorfa, dagsetningu síðustu uppfærslu og heildarlengd á síðum spilunarlista.

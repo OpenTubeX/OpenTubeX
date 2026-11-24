@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Tampilkan item yang diblokir
   Auto: Otomatis
   'Off': Mati
+  None: Tidak Ada
 Search Listing:
   Label:
     Members Only: Khusus anggota
@@ -1096,6 +1097,7 @@ Settings:
       FCast Description: Aplikasi penerima FCast di jaringan Anda
       DLNA: DLNA
       DLNA Description: Smart TV dan pemutar media di jaringan Anda
+      Cast To: Transmisikan ke
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1157,12 +1159,14 @@ Settings:
     Title Includes: Judul memuat
     Title Excludes: Judul tidak memuat
     Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
-    Automatic Downloads Require Unmetered Network: "Hanya di jaringan tidak terukur"
     Automatic Downloads Require Charging: "Hanya saat mengisi daya"
+    Automatic Download Conditions:
+      Download Automatically Only: Unduh otomatis hanya
+      On Unmetered Networks: Di jaringan tidak terukur
+      While Charging: Saat mengisi daya
   External Software Settings:
     Create YouTube session: "Buat sesi YouTube"
     YouTube session hint: "Masuk jika diperlukan, lalu simpan sesi. Pilih di pengaturan apakah sesi digunakan untuk unduhan, pemutaran, atau subtitel."
-    Use cookies for downloads: "Gunakan kuki untuk unduhan"
     YouTube session failed: "Tidak dapat menyimpan sesi YouTube."
     Checking FFmpeg and FFprobe: Memeriksa FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe belum diunduh. Klik tombol di bawah untuk mengunduhnya.
@@ -1227,10 +1231,13 @@ Settings:
     Browser Profile Placeholder: Nama atau jalur profil
     Browser Profile Invalid: "Masukkan nama profil, atau pilih folder profil dengan tombol folder."
     Select Browser: Pilih peramban
-    Always Use Cookies: Selalu Gunakan Kuki
+    Cookie Uses:
+      Use Cookies For: Gunakan Kuki Untuk
+      Playback: Pemutaran
+      Downloads: Unduhan
+      Subtitles: Takarir
     Restricted Playback Authentication Hint: Secara bawaan, OpenTubeX hanya meneruskan kuki ini ke yt-dlp setelah Anda memilih "Coba dengan kuki yang telah dikonfigurasi" pada video dengan batasan usia atau khusus anggota.
     Restricted Playback Authentication Warning: Menggunakan yt-dlp dengan akun Google dapat menyebabkan pembatasan akun sementara atau permanen.
-    Use cookies for subtitles: "Gunakan kuki untuk takarir"
   Privacy Settings:
     Internet Connectivity Checks: "Pemeriksaan koneksi internet"
     Internet Connectivity Checks Tooltip: "Mengirim permintaan kecil ke server yang dihosting oleh GrapheneOS untuk memeriksa akses internet."
@@ -2544,9 +2551,8 @@ Tooltips:
     Cookie File: Pilih berkas kuki berformat Netscape untuk pemutaran terautentikasi.
     Browser for Cookies: Dukungan peramban dibaca dari program yt-dlp yang dipilih. OpenTubeX meminta yt-dlp membaca peramban ini saat pemutaran terautentikasi diminta.
     Browser Profile: Nama atau folder profil peramban opsional. Biarkan kosong untuk menggunakan profil yang terakhir diakses.
-    Always Use Cookies: "Gunakan kuki yang dikonfigurasi untuk unduhan, takarir, dan setiap kali yt-dlp mengekstrak stream. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses."
+    Use Cookies For: Pilih untuk apa yt-dlp menggunakan kuki yang dikonfigurasi. Pemutaran menggunakannya setiap kali yt-dlp mengekstrak stream, tanpa mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses. Takarir juga mencakup terjemahan otomatis.
     FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
-    Use cookies for subtitles: "Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis. Juga diaktifkan oleh \"Selalu Gunakan Kuki\"."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Menyembunyikan video yang sudah ditonton dari hasil pencarian, Akan Datang di halaman tonton, dan rekomendasi YouTube di Beranda. Putar otomatis juga melewatinya."
     Hide Playlist Stats: Menyembunyikan jumlah video, jumlah tayangan, tanggal terakhir diperbarui, dan total durasi di halaman daftar putar.

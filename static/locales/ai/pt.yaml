@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Mostrar item bloqueado
   Auto: Automático
   'Off': Desativado
+  None: Nenhuma
 Search Listing:
   Label:
     Members Only: Apenas para membros
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: Aplicações recetoras FCast na sua rede
       DLNA: DLNA
       DLNA Description: Smart TVs e leitores multimédia na sua rede
+      Cast To: Transmitir para
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: O título inclui
     Title Excludes: O título exclui
     Title Filter Hint: Separe vários termos do título com vírgulas. Um vídeo tem de corresponder a pelo menos um termo incluído e a nenhum termo excluído.
-    Automatic Downloads Require Unmetered Network: "Apenas em redes não limitadas"
     Automatic Downloads Require Charging: "Apenas durante o carregamento"
+    Automatic Download Conditions:
+      Download Automatically Only: Transferir automaticamente apenas
+      On Unmetered Networks: Em redes não limitadas
+      While Charging: Durante o carregamento
   External Software Settings:
     Create YouTube session: "Criar sessão do YouTube"
     YouTube session hint: "Inicie sessão se necessário e guarde-a. Escolha nas definições se pretende utilizá-la para transferências, reprodução ou legendas."
-    Use cookies for downloads: "Utilizar cookies nas transferências"
     YouTube session failed: "Não foi possível guardar a sessão do YouTube."
     Checking FFmpeg and FFprobe: A verificar o FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ainda não foram transferidos. Clique no botão abaixo para os transferir.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: Nome ou caminho do perfil
     Browser Profile Invalid: "Introduza um nome de perfil ou escolha uma pasta de perfil com o botão de pasta."
     Select Browser: Selecionar um navegador
-    Always Use Cookies: Usar sempre cookies
+    Cookie Uses:
+      Use Cookies For: Utilizar cookies para
+      Playback: Reprodução
+      Downloads: Transferências
+      Subtitles: Legendas
     Restricted Playback Authentication Hint: Por predefinição, o OpenTubeX só transmite estes cookies ao yt-dlp depois de escolher «Tentar com os cookies configurados» num vídeo com restrição de idade ou exclusivo para membros.
     Restricted Playback Authentication Warning: Usar o yt-dlp com uma conta Google pode causar restrições temporárias ou permanentes à conta.
-    Use cookies for subtitles: "Usar cookies para legendas"
   Privacy Settings:
     Internet Connectivity Checks: "Verificações da ligação à Internet"
     Internet Connectivity Checks Tooltip: "Envia pequenos pedidos a um servidor alojado pelo GrapheneOS para verificar o acesso à Internet."
@@ -2518,9 +2525,8 @@ Tooltips:
     Cookie File: Selecione um ficheiro de cookies no formato Netscape para a reprodução autenticada.
     Browser for Cookies: A compatibilidade com navegadores é obtida a partir do executável do yt-dlp selecionado. Quando é pedida a reprodução autenticada, o OpenTubeX solicita ao yt-dlp que leia os cookies deste navegador.
     Browser Profile: Nome ou pasta opcional do perfil do navegador. Deixe em branco para utilizar o perfil acedido mais recentemente.
-    Always Use Cookies: "Utilize os cookies configurados para transferências, legendas e sempre que o yt-dlp extrair transmissões. Isto não muda o método de extração da transmissão para o yt-dlp. Com o yt-dlp selecionado, podem ficar disponíveis formatos exclusivos de contas, incluindo a taxa de bits melhorada do YouTube Premium se a conta tiver acesso."
+    Use Cookies For: Escolha para que o yt-dlp utiliza os cookies configurados. A reprodução utiliza-os sempre que o yt-dlp extrair transmissões, sem mudar o método de extração da transmissão para o yt-dlp. Com o yt-dlp selecionado, podem ficar disponíveis formatos exclusivos de contas, incluindo a taxa de bits melhorada do YouTube Premium se a conta tiver acesso. As legendas também incluem as traduções automáticas.
     FFmpeg Executable Path: O FFmpeg é necessário para combinar transmissões separadas de vídeo e áudio e para converter áudio. Por predefinição, o OpenTubeX assume que o FFmpeg pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
-    Use cookies for subtitles: "Usar os cookies configurados para legendas e traduções automáticas. Também é ativado por «Usar sempre cookies»."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Oculta os vídeos assistidos dos resultados da pesquisa, de Próximo na página de reprodução e das recomendações do YouTube no Início. A reprodução automática também os ignora."
     Hide Playlist Stats: Oculta o número de vídeos, o número de visualizações, a data da última atualização e a duração total nas páginas das listas de reprodução.

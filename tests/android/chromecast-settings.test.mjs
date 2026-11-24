@@ -26,14 +26,13 @@ test('Android enables Google Cast from settings and opens the native device menu
         SystemLightTheme: 'light',
         MainColor: 'Red',
         SecColor: 'Blue',
-        ShowChromecastButton: false,
-        ShowDlnaCastButton: false,
+        CastProtocols: [],
         VideoPlaybackEngine: 'built-in',
         AutoplayVideos: false,
         UseSponsorBlock: false,
         UseReturnYouTubeDislikes: false
       }
-      const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
+      const saved = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__castSettingsFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
@@ -50,21 +49,23 @@ test('Android enables Google Cast from settings and opens the native device menu
       while (!await page.locator('.settingsMenu').isVisible()) await page.locator('.settingsBackButton').click()
     }
     await goToSettingsSection(page, 'player')
-    const toggle = page.locator('[data-setting-key="showChromecastButton"]')
+    const toggle = page.locator('[data-setting-key="castProtocols"]')
     await expect(toggle).toBeVisible()
-    await expect(toggle.locator('input')).toHaveAccessibleName((await toggle.locator('.switch-label-name').allTextContents()).join(''))
-    await expect(toggle.locator('input')).not.toBeChecked()
-    await toggle.locator('label').click()
-    await expect(toggle.locator('input')).toBeChecked()
+    await toggle.getByRole('combobox', { name: 'Cast To' }).click()
+    const googleCast = page.getByRole('option', { name: 'Google Cast', exact: true })
+    await expect(googleCast).toHaveAttribute('aria-selected', 'false')
+    await googleCast.click()
+    await expect(googleCast).toHaveAttribute('aria-selected', 'true')
     if (process.env.ANDROID_CAST_SCREENSHOT) {
       for (const scheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme: scheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
-        await toggle.screenshot({ path: process.env.ANDROID_CAST_SCREENSHOT.replace(/\.png$/, `-${scheme}.png`) })
+        await page.locator('.settingsWindow').screenshot({ path: process.env.ANDROID_CAST_SCREENSHOT.replace(/\.png$/, `-${scheme}.png`) })
       }
       await page.emulateMedia({ colorScheme: null })
     }
-    assert.equal(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getShowChromecastButton), true)
+    await page.keyboard.press('Escape')
+    assert.deepEqual(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getCastProtocols), ['googleCast'])
     await page.locator('.settingsCloseButton').click()
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
     await expect.poll(async () => {
@@ -116,7 +117,7 @@ test('Android enables Google Cast from settings and opens the native device menu
     await expect(refresh).toBeVisible({ timeout: 15_000 })
     await expect(refresh).toBeEnabled({ timeout: 15_000 })
     await button.press('Escape')
-    await watch.evaluate(component => component.proxy.$store.commit('setShowChromecastButton', false))
+    await watch.evaluate(component => component.proxy.$store.commit('setCastProtocols', []))
     await expect(button).toHaveCount(0)
   } finally {
     await watch?.evaluate(component => component?.proxy.$refs.player?.pause()).catch(() => {})

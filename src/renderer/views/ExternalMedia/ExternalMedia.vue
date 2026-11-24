@@ -560,6 +560,7 @@ import { useRootClass } from '../../helpers/rootClasses'
 import { getPreferredCaption } from '../../../captionLanguages'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import {
   CHANNEL_PREFERENCE_TYPES,
@@ -1578,7 +1579,7 @@ function withMediaFileMetadataFor(url, mediaInfo) {
   })
 }
 
-async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+async function loadMedia(url, useCookies = usesYtDlpCookiesFor(store.getters.getYtDlpCookieUses, 'playback')) {
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   showDownloadPrompt.value = false

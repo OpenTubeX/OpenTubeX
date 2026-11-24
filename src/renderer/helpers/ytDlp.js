@@ -14,6 +14,7 @@ import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
 import { isLiteBuild } from './ytDlpCapabilities'
+import { usesYtDlpCookiesFor } from '../../ytDlpCookieUses'
 import { removeDownloadNotifications } from './notificationHistory'
 
 const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
@@ -43,17 +44,19 @@ function configuration() {
       rules[channelId] = { rule, payload, args: buildYtDlpDownloadArguments(payload, store.getters.getYtDlpDownloadCustomArgs).args }
     } catch (error) { console.warn('Invalid automatic download options', error) }
   }
+  const conditions = store.getters.getYtDlpAutomaticDownloadConditions
+  const automaticDownloadConditions = Array.isArray(conditions) ? conditions : []
   return {
     rules,
-    useCookies: (store.getters.getYtDlpPlaybackAlwaysUseCookies || store.getters.getYtDlpDownloadUseCookies) && store.getters.getYtDlpPlaybackAuthMode === 'file',
+    useCookies: usesYtDlpCookiesFor(store.getters.getYtDlpCookieUses, 'downloads') && store.getters.getYtDlpPlaybackAuthMode === 'file',
     cookies: store.getters.getYtDlpPlaybackAuthMode === 'file' ? store.getters.getYtDlpPlaybackCookiesPath : '',
     concurrency: store.getters.getYtDlpMaxConcurrentDownloads,
     bandwidth: store.getters.getYtDlpDownloadBandwidthLimit,
     folder: store.getters.getYtDlpDownloadFolderPath,
     channel: store.getters.getYtDlpChannel,
     enabled: store.getters.getEnableDownloads,
-    automaticRequireUnmetered: store.getters.getYtDlpAutomaticDownloadsRequireUnmetered,
-    automaticRequireCharging: store.getters.getYtDlpAutomaticDownloadsRequireCharging,
+    automaticRequireUnmetered: automaticDownloadConditions.includes('unmetered'),
+    automaticRequireCharging: automaticDownloadConditions.includes('charging'),
   }
 }
 

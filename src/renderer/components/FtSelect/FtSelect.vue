@@ -2,6 +2,7 @@
   <div
     ref="selectRoot"
     class="select"
+    :data-setting-key="settingKey || undefined"
     :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
     @focusout="handleFocusOut"
   >
@@ -368,6 +369,11 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  // Shown while no option is selected, such as with an empty `multiple` value
+  emptyLabel: {
+    type: String,
+    default: ''
+  },
   tooltip: {
     type: String,
     default: ''
@@ -562,7 +568,7 @@ function isSelectedValue(value) {
 
 const selectedIndices = computed(() => props.selectValues.flatMap((value, index) => isSelectedValue(value) ? [index] : []))
 const selectedIndex = computed(() => selectedIndices.value[0] ?? -1)
-const selectedName = computed(() => selectedIndices.value.map(index => props.selectNames[index]).join(', '))
+const selectedName = computed(() => selectedIndices.value.map(index => props.selectNames[index]).join(', ') || props.emptyLabel)
 const hasOptionVisuals = computed(() =>
   props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
   props.optionIcons.some(icon => Array.isArray(icon))

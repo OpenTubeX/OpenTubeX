@@ -373,9 +373,9 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
     'Settings.Player Settings.Show Music Mode Toggle': 'showMusicModeToggle',
     'Settings.Player Settings.Show Skip Silence Toggle': 'showSkipSilenceButton',
     'Settings.Player Settings.Enable Skip Silence by Default': 'enableSkipSilenceByDefault',
-    'Settings.Player Settings.Enable Google Cast': 'showChromecastButton',
-    'Settings.Player Settings.Enable FCast': 'showFcastButton',
-    'Settings.Player Settings.Enable DLNA Casting': 'showDlnaCastButton',
+    'Settings.Player Settings.Enable Google Cast': 'castProtocols',
+    'Settings.Player Settings.Enable FCast': 'castProtocols',
+    'Settings.Player Settings.Enable DLNA Casting': 'castProtocols',
     'Settings.Player Settings.Show Lights Off Toggle': 'showLightsOffToggle',
     'Settings.Player Settings.Show Mirror Video Toggle': 'showMirrorVideoToggle',
     'Settings.Player Settings.Show Rotate Video Menu': 'showRotateVideoMenu',
@@ -524,7 +524,8 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   'external-software': {
     Sources: [],
     'Update Modes': [],
-    'Cookie Sources': []
+    'Cookie Sources': [],
+    'Cookie Uses': ['Use Cookies For']
   },
   distraction: { 'Blocked Items': ['Blocked Items'] },
   privacy: { 'Watched Progress Saving Mode.Modes': [] },

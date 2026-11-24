@@ -17,6 +17,7 @@ import { DEFAULT_SUBSCRIPTION_TABS } from './renderer/helpers/subscriptionTabs.j
 import { DEFAULT_CONTROL_BAR_BUTTONS } from './renderer/helpers/controlBarButtons.js'
 import { getDefaultPlayerMenuControls } from './renderer/helpers/playerMenuControls.js'
 import { DEFAULT_NAVIGATION_ITEMS } from './navigationItems.js'
+import { DEFAULT_YT_DLP_COOKIE_USES } from './ytDlpCookieUses.js'
 
 /** Preserve the landing-page default used before Home was introduced. */
 export function resolveDefaultLandingPage(isFreshInstallation) {
@@ -168,9 +169,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpPlaybackCookiesPath: '',
     ytDlpPlaybackCookiesBrowser: '',
     ytDlpPlaybackCookiesBrowserProfile: '',
-    ytDlpPlaybackAlwaysUseCookies: false,
-    ytDlpSubtitleUseCookies: false,
-    ytDlpDownloadUseCookies: true,
+    // What yt-dlp uses the configured cookies for besides restricted videos
+    ytDlpCookieUses: [...DEFAULT_YT_DLP_COOKIE_USES],
     ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
     // 0 turns preloading upcoming videos off.
     ytDlpPreloadCount: 0,
@@ -189,8 +189,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpDownloadTemplates: '[]',
     ytDlpSelectedTemplate: 'video:best',
     ytDlpAutomaticDownloadRules: '{}',
-    ytDlpAutomaticDownloadsRequireUnmetered: false,
-    ytDlpAutomaticDownloadsRequireCharging: false,
+    // When automatic downloads may run: 'unmetered' | 'charging'
+    ytDlpAutomaticDownloadConditions: [],
     disableAbRepeat: false,
     hideRepeatStats: false,
     expandSideBar: false,
@@ -469,9 +469,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     showMirrorVideoToggle: false,
     showRotateVideoMenu: false,
     showSkipSilenceButton: false,
-    showDlnaCastButton: false,
-    showChromecastButton: false,
-    showFcastButton: false,
+    // Casting protocols that look for receivers: 'googleCast' | 'fcast' | 'dlna'
+    castProtocols: [],
     enableSkipSilenceByDefault: false,
     useVoiceOverTranslation: false,
     voiceOverTranslationPrepareInBackground: false,

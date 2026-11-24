@@ -144,7 +144,7 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
 
     const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
     await expect(castButton).toHaveCount(0)
-    await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+    await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['dlna']))
     await expect(castButton).toBeVisible()
     await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
     await expect(page.locator('.ftVideoPlayer .dlnaCastControl')).toHaveCount(0)
@@ -215,7 +215,7 @@ test('hides the DLNA action while the playback source is pending', async ({ app,
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const view = await watchViewHandle(page)
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['dlna']))
   const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
   await expect(castButton).toBeVisible()
 

@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Diskouez an elfenn stanket
   Auto: Emgefreek
   'Off': Lazhet
+  None: Hini ebet
 Search Listing:
   Label:
     Members Only: "Evit an izili hepken"
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: Arloadoù resever FCast war ho rouedad
       DLNA: DLNA
       DLNA Description: Skinweleoù speredek ha lennerioù media war ho rouedad
+      Cast To: Skignañ war-zu
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: "An titl a endalc'h"
     Title Excludes: "An titl n'endalc'h ket"
     Title Filter Hint: "Dispartiit termenoù an titl gant skejoù. Ur video a rank klotañ gant un termen enkorfet da vihanañ ha gant termen ezkorfet ebet."
-    Automatic Downloads Require Unmetered Network: "War ar rouedadoù hep muzuliañ hepken"
     Automatic Downloads Require Charging: "E-pad ar c'hargañ hepken"
+    Automatic Download Conditions:
+      Download Automatically Only: Pellgargañ emgefreek hepken
+      On Unmetered Networks: War ar rouedadoù hep muzuliañ
+      While Charging: E-pad ar c'hargañ
   External Software Settings:
     Create YouTube session: "Krouiñ un estez YouTube"
     YouTube session hint: "Kevreit ma vez ezhomm ha saveteit an estez. Dibabit en arventennoù he implijout evit ar pellgargañ, al lenn pe an istitloù."
-    Use cookies for downloads: "Implijout toupinoù evit ar pellgargañ"
     YouTube session failed: "N'eus ket bet gallet saveteiñ an estez YouTube."
     Checking FFmpeg and FFprobe: O wiriañ FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: N'eo ket bet pellgarget FFmpeg/FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit o fellgargañ.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: "Anv pe hent ar profil"
     Browser Profile Invalid: "Enankit anv ur profil, pe dibabit un teuliad profil gant ar bouton teuliad."
     Select Browser: "Dibab ur merdeer"
-    Always Use Cookies: "Implijout an toupinoù bepred"
+    Cookie Uses:
+      Use Cookies For: Implijout an toupinoù evit
+      Playback: Lenn
+      Downloads: Pellgargadurioù
+      Subtitles: Istitloù
     Restricted Playback Authentication Hint: "Dre ziouer, OpenTubeX ne dremen an toupinoù-mañ da yt-dlp nemet goude ma tibabit «Klask gant an toupinoù kefluniet» war ur video bevennet diouzh an oad pe miret d'an izili."
     Restricted Playback Authentication Warning: "Implijout yt-dlp gant ur gont Google a c'hall degas bevennoù padennek pe da viken war ar gont."
-    Use cookies for subtitles: "Implijout toupinoù evit an istitloù"
   Privacy Settings:
     Internet Connectivity Checks: "Gwiriañ ar genrouedad"
     Internet Connectivity Checks Tooltip: "Kas a ra goulennoù bihan da ur servijer herberc’hiet gant GrapheneOS evit gwiriañ ar moned d’ar genrouedad."
@@ -2528,9 +2535,8 @@ Tooltips:
     Cookie File: "Dibabit ur restr toupinoù er mentrezh Netscape evit al lenn dilesaet."
     Browser for Cookies: "Lennet e vez skor ar merdeer diwar erounezadus yt-dlp diuzet. OpenTubeX a c'houlenn digant yt-dlp lenn ar merdeer-mañ pa vez goulennet al lenn dilesaet."
     Browser Profile: "Anv pe deuliad profil merdeer diret. Laoskit goullo evit implijout ar profil haeziñ diwezhañ."
-    Always Use Cookies: "Implijit an toupinoù kefluniet evit ar pellgargañ, an istitloù ha bep tro ma tenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont."
+    Use Cookies For: Dibabit evit petra e implij yt-dlp an toupinoù kefluniet. Al lenn a implij anezho bep tro ma tenn yt-dlp gwazhioù, hep cheñch an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont. An istitloù a ra ivez evit an troidigezhioù emgefreek.
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
-    Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Kuzhat a ra ar videoioù sellet outo diouzh disoc’hoù ar c’hlask, Da-heul war ar bajenn sellet hag erbedadennoù YouTube war an Degemer. Ar lenn emgefre a lamm dreist dezho ivez."
     Hide Playlist Stats: Kuzhat a ra niver ar videoioù, niver ar sellerezhioù, deiziad an hizivadur diwezhañ hag an amzer hollek war pajennoù ar rolloù-lenn.

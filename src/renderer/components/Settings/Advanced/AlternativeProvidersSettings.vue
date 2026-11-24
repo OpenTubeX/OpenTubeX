@@ -41,6 +41,7 @@
           :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
           :compact="true"
           :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
+          setting-key="proxyVideos"
           :disabled="showProxyVideosAsDisabled"
           :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
           @change="updateProxyVideos"

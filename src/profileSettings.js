@@ -63,10 +63,8 @@ export const SHARED_ONLY_SETTINGS = new Set([
   'enableClosedAppSubscriptionRefresh',
   'ytDlpMaxConcurrentDownloads',
   'ytDlpDownloadBandwidthLimit',
-  'ytDlpSelectedTemplate',
   'ytDlpAutomaticDownloadRules',
-  'ytDlpAutomaticDownloadsRequireUnmetered',
-  'ytDlpAutomaticDownloadsRequireCharging',
+  'ytDlpAutomaticDownloadConditions',
   // Retention deletes the history and searches that other profiles may share,
   // and the video metadata history, which the main process also records, is
   // one for all profiles.

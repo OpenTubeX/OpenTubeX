@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Vis blokkert element
   Auto: Automatisk
   'Off': Av
+  None: Ingen
 Search Listing:
   Label:
     Members Only: Berre for medlemmer
@@ -1191,6 +1192,7 @@ Settings:
       FCast Description: FCast-mottakarappar på nettverket ditt
       DLNA: DLNA
       DLNA Description: Smart-TV-ar og mediespelarar på nettverket ditt
+      Cast To: Kast til
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1254,12 +1256,14 @@ Settings:
     Title Includes: Tittelen inneheld
     Title Excludes: Tittelen inneheld ikkje
     Title Filter Hint: Skil fleire tittelord med komma. Ein video må samsvare med minst eitt inkludert ord og ingen ekskluderte ord.
-    Automatic Downloads Require Unmetered Network: "Berre på nettverk utan datamåling"
     Automatic Downloads Require Charging: "Berre under lading"
+    Automatic Download Conditions:
+      Download Automatically Only: Last ned automatisk berre
+      On Unmetered Networks: På nettverk utan datamåling
+      While Charging: Under lading
   External Software Settings:
     Create YouTube session: "Opprett YouTube-økt"
     YouTube session hint: "Logg inn om nødvendig, og lagra økta. Vel i innstillingane om ho skal brukast til nedlastingar, avspeling eller undertekstar."
-    Use cookies for downloads: "Bruk informasjonskapslar for nedlastingar"
     YouTube session failed: "Klarte ikkje å lagra YouTube-økta."
     Checking FFmpeg and FFprobe: Ser etter FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste dei ned.
@@ -1324,10 +1328,13 @@ Settings:
     Browser Profile Placeholder: Profilnamn eller stig
     Browser Profile Invalid: "Skriv inn eit profilnamn, eller vel ei profilmappe med mappeknappen."
     Select Browser: Vel ein nettlesar
-    Always Use Cookies: Bruk alltid informasjonskapslar
+    Cookie Uses:
+      Use Cookies For: Bruk informasjonskapslar for
+      Playback: Avspeling
+      Downloads: Nedlastingar
+      Subtitles: Undertekstar
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX berre desse informasjonskapslane til yt-dlp etter at du har valt "Prøv med dei valde informasjonskapslane" på ein aldersavgrensa video eller ein video berre for medlemer.
     Restricted Playback Authentication Warning: Bruk av yt-dlp med ein Google-konto kan føre til mellombelse eller varige avgrensingar på kontoen.
-    Use cookies for subtitles: "Bruk informasjonskapslar for undertekstar"
   Privacy Settings:
     Internet Connectivity Checks: "Kontroll av internettsamband"
     Internet Connectivity Checks Tooltip: "Sender små førespurnader til ein tenar drifta av GrapheneOS for å sjekke internettilgang."
@@ -2832,9 +2839,8 @@ Tooltips:
     Cookie File: Vel ei infokapselfil i Netscape-format for autentisert avspeling.
     Browser for Cookies: Nettlesarstøtta vert lesen frå den valde yt-dlp-programfila. OpenTubeX ber yt-dlp om å lese frå denne nettlesaren ved autentisert avspeling.
     Browser Profile: Valfritt namn på eller mappe til ein nettlesarprofil. La feltet stå tomt for å bruke profilen som sist vart opna.
-    Always Use Cookies: "Bruk dei konfigurerte informasjonskapslane for nedlastingar, undertekstar og kvar gong yt-dlp hentar straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang."
+    Use Cookies For: Vel kva yt-dlp brukar dei konfigurerte informasjonskapslane til. Avspeling brukar dei kvar gong yt-dlp hentar straumar, utan å byte metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang. Undertekstar omfattar også automatiske omsetjingar.
     FFmpeg Executable Path: FFmpeg trengst for å slå saman åtskilde video- og lydstraumar og for lydkonvertering. OpenTubeX går som standard ut frå at FFmpeg kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
-    Use cookies for subtitles: "Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar. Vert òg aktivert av «Bruk alltid informasjonskapslar»."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skjuler sette videoar frå søkjeresultat, Neste på avspelingssida og YouTube-tilrådingar på Heim. Automatisk avspeling hoppar òg over dei."
     Hide Playlist Stats: Skjuler talet på videoar, talet på visingar, datoen for siste oppdatering og total varigheit på spelelistesider.

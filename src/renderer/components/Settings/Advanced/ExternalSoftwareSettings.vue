@@ -310,31 +310,21 @@
         @click="ytDlp.ytDlpChooseBrowserProfile()"
       />
     </FtFlexBox>
-    <FtFlexBox>
-      <FtToggleSwitch
-        :label="t('Settings.External Software Settings.Always Use Cookies')"
-        :default-value="ytDlpPlaybackAlwaysUseCookies"
-        setting-key="ytDlpPlaybackAlwaysUseCookies"
-        :tooltip="t('Tooltips.External Software Settings.Always Use Cookies')"
-        compact
-        @change="updateYtDlpPlaybackAlwaysUseCookies"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.External Software Settings.Use cookies for downloads')"
-        :default-value="ytDlpPlaybackAlwaysUseCookies || ytDlpDownloadUseCookies"
-        :disabled="ytDlpPlaybackAlwaysUseCookies"
-        setting-key="ytDlpDownloadUseCookies"
-        compact
-        @change="store.dispatch('updateYtDlpDownloadUseCookies', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.External Software Settings.Use cookies for subtitles')"
-        :default-value="ytDlpPlaybackAlwaysUseCookies || ytDlpSubtitleUseCookies"
-        :disabled="ytDlpPlaybackAlwaysUseCookies"
-        setting-key="ytDlpSubtitleUseCookies"
-        :tooltip="t('Tooltips.External Software Settings.Use cookies for subtitles')"
-        compact
-        @change="store.dispatch('updateYtDlpSubtitleUseCookies', $event)"
+    <FtFlexBox
+      v-if="ytDlpPlaybackAuthMode !== 'none'"
+      class="restrictedPlaybackCookieUses"
+    >
+      <FtSelect
+        multiple
+        :placeholder="t('Settings.External Software Settings.Cookie Uses.Use Cookies For')"
+        :empty-label="t('Global.None')"
+        :value="ytDlpCookieUses"
+        setting-key="ytDlpCookieUses"
+        :select-names="cookieUseNames"
+        :select-values="YT_DLP_COOKIE_USES"
+        :icon="['fas', 'cookie']"
+        :tooltip="t('Tooltips.External Software Settings.Use Cookies For')"
+        @change="store.dispatch('updateYtDlpCookieUses', $event)"
       />
     </FtFlexBox>
     <p class="restrictedPlaybackAuthHint">
@@ -358,11 +348,11 @@ import FtInput from '../../FtInput/FtInput.vue'
 import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
-import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
 
 import { showToast } from '../../../helpers/utils'
+import { YT_DLP_COOKIE_USES } from '../../../../ytDlpCookieUses'
 
 const { t } = useI18n()
 
@@ -414,10 +404,13 @@ const ytDlpPlaybackCookiesBrowser = computed(() => store.getters.getYtDlpPlaybac
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpPlaybackCookiesBrowserProfile = computed(() => store.getters.getYtDlpPlaybackCookiesBrowserProfile)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const ytDlpPlaybackAlwaysUseCookies = computed(() => store.getters.getYtDlpPlaybackAlwaysUseCookies)
-const ytDlpSubtitleUseCookies = computed(() => store.getters.getYtDlpSubtitleUseCookies)
-const ytDlpDownloadUseCookies = computed(() => store.getters.getYtDlpDownloadUseCookies)
+/** @type {import('vue').ComputedRef<string[]>} */
+const ytDlpCookieUses = computed(() => store.getters.getYtDlpCookieUses)
+const cookieUseNames = computed(() => [
+  t('Settings.External Software Settings.Cookie Uses.Playback'),
+  t('Settings.External Software Settings.Cookie Uses.Downloads'),
+  t('Settings.External Software Settings.Cookie Uses.Subtitles'),
+])
 const creatingSession = ref(false)
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
@@ -684,13 +677,6 @@ function updateYtDlpPlaybackCookiesBrowserProfile(value) {
 }
 
 /**
- * @param {boolean} value
- */
-function updateYtDlpPlaybackAlwaysUseCookies(value) {
-  store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', value)
-}
-
-/**
  * @param {'system' | 'managed'} value
  */
 function updateYtDlpFfmpegSource(value) {
@@ -780,7 +766,10 @@ async function createYouTubeSession() {
     if (path) {
       await store.dispatch('updateYtDlpPlaybackCookiesPath', path)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpDownloadUseCookies', true)
+      if (!ytDlpCookieUses.value.includes('downloads')) {
+        await store.dispatch('updateYtDlpCookieUses', YT_DLP_COOKIE_USES.filter(use =>
+          use === 'downloads' || ytDlpCookieUses.value.includes(use)))
+      }
     }
   } catch {
     showToast({ message: t('Settings.External Software Settings.YouTube session failed'), icon: ['fas', 'circle-exclamation'] })
@@ -907,8 +896,17 @@ async function createYouTubeSession() {
   margin-inline-end: calc(70px - var(--select-indicator-space));
 }
 
-.restrictedPlaybackBrowserProfile {
+.restrictedPlaybackBrowserProfile,
+.restrictedPlaybackCookieUses {
   margin-block-start: 14px;
+}
+
+.restrictedPlaybackCookieUses > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: calc(340px + var(--select-indicator-space));
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px + var(--select-indicator-space));
+  margin-inline-end: calc(70px - var(--select-indicator-space));
 }
 
 .invalidBrowserProfile {
