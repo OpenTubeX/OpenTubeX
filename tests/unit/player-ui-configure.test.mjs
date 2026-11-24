@@ -84,7 +84,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     showSkipSilenceButton: ref(false),
     voiceOverTranslationAvailable: ref(false),
     disableAbRepeat: ref(false),
-    fullscreenOnRotationEnabled: ref(false),
+    shakaFullscreenOnRotationEnabled: ref(false),
     androidFullscreenHost: null,
     container: ref({ querySelector: () => null }),
     maxVideoPlaybackRate: ref(3),

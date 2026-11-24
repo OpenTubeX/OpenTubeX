@@ -4092,7 +4092,10 @@ const fullscreenOnRotationEnabled = computed(() => {
     (!process.env.IS_IOS || (mobileAdjustmentsVisible.value && !pictureInPictureActive.value))
 })
 
-watch(fullscreenOnRotationEnabled, (newValue) => {
+// iOS handles rotation in bindIosFullscreen, which keeps it in the full window.
+const shakaFullscreenOnRotationEnabled = computed(() => !process.env.IS_IOS && fullscreenOnRotationEnabled.value)
+
+watch(shakaFullscreenOnRotationEnabled, (newValue) => {
   configurePlayerControls(() => ui.configure({ enableFullscreenOnRotation: newValue }))
 }, { flush: 'sync' })
 
@@ -5677,7 +5680,7 @@ function applyUIConfiguration(firstTime) {
       },
 
       // these have their own watchers
-      enableFullscreenOnRotation: fullscreenOnRotationEnabled.value,
+      enableFullscreenOnRotation: shakaFullscreenOnRotationEnabled.value,
       fullScreenElement: androidFullscreenHost ?? container.value,
       // Android rotation is owned by the native orientation preference.
       // A second WebView lock races it and ignores portrait-only fullscreen.
@@ -12631,6 +12634,7 @@ onMounted(async () => {
     iosFullscreenCleanup = bindIosFullscreen(controls, {
       isEnabled: () => fullWindowEnabled.value,
       setEnabled: enabled => events.dispatchEvent(new CustomEvent('setFullWindow', { detail: enabled })),
+      canRotate: () => isActiveTab.value && fullscreenOnRotationEnabled.value && videoElement.readyState > 0,
     })
   }
   player = controls.getPlayer()
