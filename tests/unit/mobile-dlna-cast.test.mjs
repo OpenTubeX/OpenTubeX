@@ -116,9 +116,9 @@ test('the start position is sought again when the renderer ignored a Seek while 
   const actions = []
   let loaded = false
   let position = 0
-  const send = async action => {
+  const send = async (action, fields) => {
     actions.push(action)
-    if (action === 'Seek' && loaded) position = 65
+    if (action === 'Seek' && loaded) position = fields.Target.split(':').reduce((total, part) => total * 60 + Number(part), 0)
     if (action !== 'GetPositionInfo') return ''
     if (loaded) position++
     loaded = true
@@ -130,6 +130,7 @@ test('the start position is sought again when the renderer ignored a Seek while 
   for (let i = 0; i < 100 && position < 66; i++) await new Promise(resolve => setTimeout(resolve, 1))
   await new Promise(resolve => setTimeout(resolve, 10))
   assert.deepEqual(actions, ['Seek', 'GetPositionInfo', 'GetPositionInfo', 'Seek', 'GetPositionInfo'])
+  assert.equal(position, 66)
 })
 
 test('mobile discovery deduplicates responses and pins endpoints to their responding device', async () => {

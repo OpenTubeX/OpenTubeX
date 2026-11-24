@@ -80,14 +80,14 @@ export async function seekDlnaStart(send, seconds, isActive, { timeoutMs = 20_00
     let checksSinceSeek = 0
     while (seeks < MAX_START_SEEKS && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, intervalMs))
-      if (!isActive()) return
+      if (!isActive() || Date.now() >= deadline) return
       checksSinceSeek++
       let info
       try { info = parseDlnaPositionInfo(await send('GetPositionInfo', { InstanceID: 0 })) } catch { continue }
       if (info?.position === null || info?.position === undefined) continue
       if (info.position >= seconds - START_TOLERANCE_SECONDS) return
       // Only a renderer that has loaded the media and plays it can show that it ignored the Seek.
-      if (info.duration > 0 && info.position > 0 && checksSinceSeek >= 2 && isActive()) {
+      if (info.duration > 0 && info.position > 0 && checksSinceSeek >= 2 && isActive() && Date.now() < deadline) {
         await seek()
         seeks++
         checksSinceSeek = 0
