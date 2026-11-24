@@ -849,6 +849,7 @@ Settings:
     Add Custom Engine: Voeg ’n pasgemaakte enjin by
     Add Engine: Voeg enjin by
     Rename Engine: Hernoem {engine}
+    Edit Engine URL: Wysig soek-URL van {engine}
     Remove Engine: Verwyder {engine}
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.

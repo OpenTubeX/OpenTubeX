@@ -703,6 +703,7 @@ Settings:
     Add Custom Engine: افزودن موتور سفارشی
     Add Engine: افزودن موتور
     Rename Engine: تغییر نام {engine}
+    Edit Engine URL: ویرایش نشانی جستجوی {engine}
     Remove Engine: حذف {engine}
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.

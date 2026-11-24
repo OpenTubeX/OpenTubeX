@@ -812,6 +812,7 @@ Settings:
     Add Custom Engine: Dodaj iskalnik po meri
     Add Engine: Dodaj iskalnik
     Rename Engine: Preimenuj {engine}
+    Edit Engine URL: Uredi URL iskanja za {engine}
     Remove Engine: Odstrani {engine}
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.

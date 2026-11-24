@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Lisa kohandatud otsingumootor
     Add Engine: Lisa otsingumootor
     Rename Engine: Nimeta {engine} ümber
+    Edit Engine URL: Muuda {engine} otsingu URL-i
     Remove Engine: Eemalda {engine}
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.

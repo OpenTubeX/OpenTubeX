@@ -260,10 +260,19 @@ test('adds a custom search engine from settings', async ({ page }) => {
   await expect(removeButton).toBeVisible()
   expect(await section.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
 
-  const urlInput = customRow.getByLabel('Search URL')
+  const editUrlButton = customRow.getByRole('button', { name: 'Edit search URL of Example Search' })
+  await editUrlButton.click()
+  const urlInput = customRow.getByRole('textbox', { name: 'Search URL' })
+  await expect(urlInput).toBeFocused()
   await urlInput.fill('not a search URL')
   await urlInput.blur()
-  await expect(urlInput).toHaveValue('https://example.com/search?q=%s')
+  await expect(editUrlButton).toHaveText('https://example.com/search?q=%s')
+
+  await editUrlButton.click()
+  await urlInput.fill('https://example.org/find?q=%s')
+  await urlInput.press('Enter')
+  await expect(editUrlButton).toHaveText('https://example.org/find?q=%s')
+  await expect(editUrlButton).toBeFocused()
 
   await customRow.getByRole('button', { name: 'Rename Example Search' }).click()
   const nameInput = customRow.getByRole('textbox', { name: 'Engine name' })
@@ -367,12 +376,11 @@ test.describe('with the maximum custom search engines configured', () => {
   test('custom engine delete buttons identify and remove their own engine', async ({ page }) => {
     const section = await goToSettingsSection(page, 'context-menu-search')
     for (const index of [0, 1]) {
-      const button = section.locator('.removeEngine').nth(index)
-      await expect(button).toHaveText('Delete')
-      await expect(button).toHaveAccessibleName(`Remove Engine ${index}`)
+      const row = section.locator('.engineRow').filter({ hasText: `https://example${index}.com/` })
+      await expect(row.getByRole('button', { name: `Remove Engine ${index}`, exact: true })).toBeVisible()
     }
     await section.getByRole('button', { name: 'Remove Engine 0', exact: true }).click()
-    await expect(section.locator('.removeEngine')).toHaveCount(19)
+    await expect(section.getByRole('button', { name: /^Remove Engine / })).toHaveCount(19)
     await expect(section.getByRole('button', { name: 'Remove Engine 0', exact: true })).toHaveCount(0)
     await expect(section.getByRole('button', { name: 'Remove Engine 1', exact: true })).toBeVisible()
   })

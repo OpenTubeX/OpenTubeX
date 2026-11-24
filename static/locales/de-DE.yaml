@@ -2050,6 +2050,7 @@ Settings:
     Add Custom Engine: Benutzerdefinierte Suchmaschine hinzufügen
     Add Engine: Suchmaschine hinzufügen
     Rename Engine: '{engine} umbenennen'
+    Edit Engine URL: Such-URL von {engine} bearbeiten
     Remove Engine: '{engine} entfernen'
     Invalid Engine: Gib einen Namen und eine gültige HTTP- oder HTTPS-Such-URL ein, die %s enthält.
     Engine Limit: Du kannst bis zu {count} benutzerdefinierte Suchmaschinen hinzufügen.

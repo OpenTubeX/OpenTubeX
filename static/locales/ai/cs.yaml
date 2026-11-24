@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Přidat vlastní vyhledávač
     Add Engine: Přidat vyhledávač
     Rename Engine: Přejmenovat {engine}
+    Edit Engine URL: Upravit URL vyhledávání {engine}
     Remove Engine: Odebrat {engine}
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.

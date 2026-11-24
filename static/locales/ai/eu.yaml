@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Gehitu bilaketa-motor pertsonalizatua
     Add Engine: Gehitu motorra
     Rename Engine: Aldatu {engine} bilatzailearen izena
+    Edit Engine URL: Editatu {engine} bilatzailearen bilaketa-URLa
     Remove Engine: Kendu {engine}
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.

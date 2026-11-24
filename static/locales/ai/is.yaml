@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Bæta við sérsniðinni leitarvél
     Add Engine: Bæta við leitarvél
     Rename Engine: Endurnefna {engine}
+    Edit Engine URL: Breyta leitarslóð {engine}
     Remove Engine: Fjarlægja {engine}
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.

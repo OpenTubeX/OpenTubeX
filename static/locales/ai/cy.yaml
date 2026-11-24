@@ -680,6 +680,7 @@ Settings:
     Add Custom Engine: Ychwanegu peiriant personol
     Add Engine: Ychwanegu peiriant
     Rename Engine: Ailenwi {engine}
+    Edit Engine URL: Golygu URL chwilio {engine}
     Remove Engine: Tynnu {engine}
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.

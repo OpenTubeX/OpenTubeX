@@ -800,6 +800,7 @@ Settings:
     Add Custom Engine: Pridėti pasirinktinę paieškos sistemą
     Add Engine: Pridėti paieškos sistemą
     Rename Engine: Pervadinti {engine}
+    Edit Engine URL: Redaguoti {engine} paieškos URL
     Remove Engine: Pašalinti {engine}
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.

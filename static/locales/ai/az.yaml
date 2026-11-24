@@ -681,6 +681,7 @@ Settings:
     Add Custom Engine: Fərdi axtarış sistemi əlavə et
     Add Engine: Axtarış sistemi əlavə et
     Rename Engine: "{engine} axtarış sisteminin adını dəyiş"
+    Edit Engine URL: "{engine} axtarış URL-ni redaktə et"
     Remove Engine: "{engine} axtarış sistemini sil"
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.

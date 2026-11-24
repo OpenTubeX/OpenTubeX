@@ -44,8 +44,8 @@
           />
           <template v-if="isCustomEngine(engine)">
             <input
-              v-if="editingNameId === engine.id"
-              v-model="editingName"
+              v-if="isEditing(engine.id, 'name')"
+              v-model="editingValue"
               class="engineNameInput"
               type="text"
               maxlength="50"
@@ -53,17 +53,17 @@
               :aria-label="t('Settings.Context Menu Search Settings.Engine Name')"
               :data-engine-name-input="engine.id"
               data-settings-escape-scope
-              @blur="finishRename(engine.id)"
-              @keydown="handleRenameKeydown($event, engine.id)"
+              @blur="finishEdit(engine.id, 'name')"
+              @keydown="handleEditKeydown($event, engine.id, 'name')"
             >
             <button
               v-else
               type="button"
-              class="engineNameButton"
+              class="engineEditButton engineNameButton"
               :data-engine-name-button="engine.id"
               :aria-label="t('Settings.Context Menu Search Settings.Rename Engine', { engine: engine.name })"
               :title="t('Settings.Context Menu Search Settings.Rename Engine', { engine: engine.name })"
-              @click="startRename(engine)"
+              @click="startEdit(engine, 'name')"
             >
               <span>{{ engine.name }}</span>
               <FtIcon
@@ -74,23 +74,38 @@
           </template>
         </div>
         <template v-if="isCustomEngine(engine)">
-          <FtInput
-            :key="urlInputRevisions.get(engine.id) ?? 0"
-            input-type="url"
-            :label="t('Settings.Context Menu Search Settings.Search URL')"
-            :icon="['fas', 'link']"
-            placeholder="https://example.com/search?q=%s"
-            :value="engine.url"
-            :show-action-button="false"
-            @blur="updateCustomEngineUrl(engine.id, $event)"
-          />
-          <FtButton
+          <input
+            v-if="isEditing(engine.id, 'url')"
+            v-model="editingValue"
+            class="engineUrlInput"
+            type="url"
+            dir="ltr"
+            :aria-label="t('Settings.Context Menu Search Settings.Search URL')"
+            :data-engine-url-input="engine.id"
+            data-settings-escape-scope
+            @blur="finishEdit(engine.id, 'url')"
+            @keydown="handleEditKeydown($event, engine.id, 'url')"
+          >
+          <button
+            v-else
+            type="button"
+            class="engineEditButton engineUrlButton"
+            :data-engine-url-button="engine.id"
+            :aria-label="t('Settings.Context Menu Search Settings.Edit Engine URL', { engine: engine.name })"
+            :title="t('Settings.Context Menu Search Settings.Edit Engine URL', { engine: engine.name })"
+            @click="startEdit(engine, 'url')"
+          >
+            <code dir="ltr">{{ engine.url }}</code>
+            <FtIcon
+              :icon="['fas', 'edit']"
+              aria-hidden="true"
+            />
+          </button>
+          <FtIconButton
             class="removeEngine"
-            :label="t('Delete')"
-            theme="destructive"
-            :icon="['fas', 'trash']"
-            :aria-label="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             :title="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
+            :icon="['fas', 'trash']"
+            theme="destructive"
             @click="removeEngine(engine.id)"
           />
         </template>
@@ -139,6 +154,7 @@ import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
+import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -158,9 +174,9 @@ const customName = ref('')
 const customUrl = ref('')
 const failedFavicons = ref(new Set())
 const resolvedFavicons = ref(new Map())
-const urlInputRevisions = ref(new Map())
-const editingNameId = ref(null)
-const editingName = ref('')
+// The custom engine field being edited, as { id, field }.
+const editing = ref(null)
+const editingValue = ref('')
 const engineList = useTemplateRef('engineList')
 
 const configuredSearchEngines = computed(() => {
@@ -238,53 +254,55 @@ async function focusEngineElement(attribute, id) {
   return element
 }
 
-async function startRename(engine) {
-  editingNameId.value = engine.id
-  editingName.value = engine.name
-  const input = await focusEngineElement('data-engine-name-input', engine.id)
+function isEditing(id, field) {
+  return editing.value?.id === id && editing.value.field === field
+}
+
+async function startEdit(engine, field) {
+  editing.value = { id: engine.id, field }
+  editingValue.value = engine[field]
+  const input = await focusEngineElement(`data-engine-${field}-input`, engine.id)
   input?.select()
 }
 
-function finishRename(id, keepFocus = false) {
-  if (editingNameId.value !== id) return
-  const name = editingName.value.trim()
-  editingNameId.value = null
-  editingName.value = ''
-  // Like renaming a tab group, an empty name keeps the old one.
-  if (name.length > 0) updateCustomEngine(id, { name })
-  if (keepFocus) focusEngineElement('data-engine-name-button', id)
+function stopEdit(id, field, keepFocus) {
+  editing.value = null
+  editingValue.value = ''
+  if (keepFocus) focusEngineElement(`data-engine-${field}-button`, id)
 }
 
-function cancelRename(id) {
-  if (editingNameId.value !== id) return
-  editingNameId.value = null
-  editingName.value = ''
-  focusEngineElement('data-engine-name-button', id)
+function finishEdit(id, field, keepFocus = false) {
+  if (!isEditing(id, field)) return
+  const value = editingValue.value.trim()
+  stopEdit(id, field, keepFocus)
+
+  if (field === 'name') {
+    // Like renaming a tab group, an empty name keeps the old one.
+    if (value.length > 0) updateCustomEngine(id, { name: value })
+  } else if (isValidSearchUrlTemplate(value)) {
+    updateCustomEngine(id, { url: value })
+  } else {
+    // The saved address stays.
+    showInvalidEngineToast()
+  }
 }
 
-function handleRenameKeydown(event, id) {
+function cancelEdit(id, field) {
+  if (!isEditing(id, field)) return
+  stopEdit(id, field, true)
+}
+
+function handleEditKeydown(event, id, field) {
   // An IME confirms or cancels its composition with Enter and Escape.
   if (event.isComposing) return
   if (event.key === 'Enter') {
     event.preventDefault()
-    finishRename(id, true)
+    finishEdit(id, field, true)
   } else if (event.key === 'Escape') {
     event.preventDefault()
     event.stopPropagation()
-    cancelRename(id)
+    cancelEdit(id, field)
   }
-}
-
-function updateCustomEngineUrl(id, value) {
-  const url = value.trim()
-  if (!isValidSearchUrlTemplate(url)) {
-    showInvalidEngineToast()
-    // Remount the field, so it shows the saved address again.
-    urlInputRevisions.value = new Map([...urlInputRevisions.value, [id, (urlInputRevisions.value.get(id) ?? 0) + 1]])
-    return
-  }
-
-  updateCustomEngine(id, { url })
 }
 
 function addCustomEngine() {
