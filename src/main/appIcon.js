@@ -38,11 +38,11 @@ export function encodeIco(image) {
 }
 
 /**
- * @param {Buffer | null} a
- * @param {Buffer | null} b
+ * @param {Buffer | null | undefined} a
+ * @param {Buffer | null | undefined} b
  */
 function samePng(a, b) {
-  return a === null || b === null ? a === b : a.equals(b)
+  return a == null || b == null ? a === b : a.equals(b)
 }
 
 /**
@@ -64,8 +64,14 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   let image = nativeImage.createFromPath(cachePath)
   /** @type {Buffer | null} */
   let png = image.isEmpty() ? null : image.toPNG()
-  // The icon saved to the cache and shortcuts, which lags behind png until both succeed.
+  /**
+   * The icon the cache and every shortcut use, or undefined while that is unknown,
+   * such as after a failed or unfinished update.
+   * @type {Buffer | null | undefined}
+   */
   let appliedPng = png
+  /** @type {Buffer | null | undefined} */
+  let cachedPng = png
   const enqueue = createSerialQueue(error => console.error('Unable to save the app icon', error))
 
   /** @returns {Electron.NativeImage | string} */
@@ -171,6 +177,20 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
     return true
   }
 
+  /**
+   * @param {Buffer | null} data
+   * @param {boolean} save whether to update the cache
+   */
+  async function applyEverywhere(data, save) {
+    appliedPng = undefined
+    if (save) {
+      cachedPng = undefined
+      await (data === null ? asyncFs.rm(cachePath, { force: true }) : writeFileAtomic(cachePath, data))
+      cachedPng = data
+    }
+    if (await applyToShortcuts(data) && samePng(data, cachedPng)) appliedPng = data
+  }
+
   function applyToDock() {
     if (process.platform === 'darwin') {
       // An empty image restores the bundle's icon.
@@ -193,7 +213,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
         timer = setTimeout(() => {
           const data = png
           // The queue logs failures.
-          if (data !== null) enqueue(() => applyToShortcuts(data)).catch(() => {})
+          if (data !== null) enqueue(() => applyEverywhere(data, false)).catch(() => {})
         }, 1000)
       })
       watcher.on('error', () => watcher.close())
@@ -210,7 +230,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
   function restore() {
     if (png !== null) applyToDock()
     const data = png
-    enqueue(() => applyToShortcuts(data)).catch(() => {})
+    enqueue(() => applyEverywhere(data, false)).catch(() => {})
     if (process.platform === 'win32') watchPinnedShortcuts()
   }
 
@@ -236,10 +256,7 @@ export function createAppIconManager({ userDataPath, defaultIconPath, executable
       }
       applyToDock()
     }
-    await enqueue(async () => {
-      await (nextPng === null ? asyncFs.rm(cachePath, { force: true }) : writeFileAtomic(cachePath, nextPng))
-      if (await applyToShortcuts(nextPng)) appliedPng = nextPng
-    })
+    await enqueue(() => applyEverywhere(nextPng, true))
   }
 
   return { getWindowIcon, restore, set, flush: () => enqueue(() => {}) }
