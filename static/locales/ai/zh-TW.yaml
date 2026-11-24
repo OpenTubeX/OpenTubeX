@@ -552,8 +552,11 @@ Settings:
       Right: 在縮圖上向右滑動
       Description: 在影片縮圖上水平滑動並放開，即可執行所選操作。
     Data Saver Thumbnails: "節省流量的縮圖"
-    Use tray icon: "使用系統匣圖示"
-    Close to system tray: "關閉時縮小至系統匣"
+    System Tray:
+      System Tray: "系統匣"
+      Show Icon: "顯示圖示"
+      Close to Tray: "關閉時縮小至系統匣"
+      Minimize to Tray: "最小化至系統匣"
     Tray required for background refresh: "啟用背景重新整理訂閱時，必須顯示系統匣圖示。"
     Show Video Menu Button: 顯示影片選單按鈕
     Swipe to refresh: 下拉重新整理

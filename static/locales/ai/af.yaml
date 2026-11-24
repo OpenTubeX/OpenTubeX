@@ -716,8 +716,11 @@ Settings:
       Right: Swiep regs op duimnaels
       Description: Swiep ’n videoduimnael horisontaal en los dit om die gekose aksie uit te voer.
     Data Saver Thumbnails: Databesparende duimnaels
-    Use tray icon: Gebruik stelselbakikoon
-    Close to system tray: Sluit na stelselbak
+    System Tray:
+      System Tray: "Stelselbak"
+      Show Icon: "Wys ikoon"
+      Close to Tray: "Sluit na stelselbak"
+      Minimize to Tray: "Minimaliseer na stelselbak"
     Tray required for background refresh: Die stelselbakikoon word benodig terwyl agtergrondverfrissing van intekeninge geaktiveer is.
     Show Video Menu Button: Wys videokieslysknoppie
     Swipe to refresh: Swiep om te verfris
@@ -754,7 +757,6 @@ Settings:
       Refreshing All Feeds: Baie intekeninge verfris word
     Always Use Backup Media Server: Gebruik altyd rugsteunmediabediener
     Close Window With Last Tab: Sluit venster wanneer die laaste oortjie gesluit word
-    Minimize to system tray: Minimaliseer na stelselbak
     Remember Tab Navigation History: Onthou navigasiegeskiedenis van oortjies
     New Tab Position:
       New Tab Position: Posisie van nuwe oortjie

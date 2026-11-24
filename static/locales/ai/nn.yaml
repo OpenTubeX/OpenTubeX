@@ -565,8 +565,11 @@ Settings:
       Right: Sveip til høgre på miniatyrbilete
       Description: Sveip vassrett på eit videominiatyrbilete og slepp for å utføre den valde handlinga.
     Data Saver Thumbnails: "Datasparande miniatyrbilete"
-    Use tray icon: "Bruk ikon i systemtrauet"
-    Close to system tray: "Lukk til systemtrauet"
+    System Tray:
+      System Tray: "Systemtrau"
+      Show Icon: "Vis ikon"
+      Close to Tray: "Lukk til systemtrauet"
+      Minimize to Tray: "Minimer til systemtrauet"
     Tray required for background refresh: "Ikonet i systemtrauet er påkravd medan oppdatering av abonnement i bakgrunnen er aktivert."
     Show Video Menu Button: Vis videomenyknapp
     Swipe to refresh: Sveip for å oppdatere
@@ -597,7 +600,6 @@ Settings:
       Unloading Tabs: Utlasting av fleire faner
       Refreshing All Feeds: Oppdatering av mange abonnement
     Open Deep Links In New Window: Opne nettadresser sende til OpenTubeX i eit nytt vindauge
-    Minimize to system tray: Minimer til systemtrauet
     Remember Tab Navigation History: Hugs navigasjonshistorikken for faner
     Auto Load Next Page:
       Label: Last inn neste side automatisk

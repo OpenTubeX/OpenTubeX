@@ -557,8 +557,11 @@ Settings:
       Right: החלקה ימינה על תמונות ממוזערות
       Description: החליקו אופקית על תמונה ממוזערת של סרטון ושחררו לביצוע הפעולה שנבחרה.
     Data Saver Thumbnails: "תמונות ממוזערות לחיסכון בנתונים"
-    Use tray icon: "שימוש בסמל במגש המערכת"
-    Close to system tray: "סגירה למגש המערכת"
+    System Tray:
+      System Tray: "מגש המערכת"
+      Show Icon: "הצגת סמל"
+      Close to Tray: "סגירה למגש המערכת"
+      Minimize to Tray: "מזעור למגש המערכת"
     Tray required for background refresh: "סמל מגש המערכת נדרש כל עוד רענון המינויים ברקע מופעל."
     Show Video Menu Button: הצגת כפתור תפריט הסרטון
     Swipe to refresh: החלקה לרענון

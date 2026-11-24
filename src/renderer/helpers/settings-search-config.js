@@ -12,9 +12,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Enable Tabs',
   'Extra Thumbnail Action Button',
   'Locale Preference',
-  'Minimize to system tray',
-  'Use tray icon',
-  'Close to system tray',
+  'System Tray',
   'New Tab Position',
   'Open Deep Links In New Window',
   'Reduced Motion',
@@ -383,6 +381,10 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
   },
   'player-controls': {
     'Settings.Player Settings.Player Controls.Center Play Button': 'displayVideoPlayButton'
+  },
+  // The System Tray options only show in its menu.
+  general: {
+    'Settings.General Settings.System Tray': 'useTrayIcon'
   },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',

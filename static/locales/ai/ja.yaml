@@ -552,8 +552,11 @@ Settings:
       Right: サムネイルを右にスワイプ
       Description: 動画のサムネイルを横にスワイプして指を離すと、選択した操作を実行します。
     Data Saver Thumbnails: "データ節約用サムネイル"
-    Use tray icon: "トレイアイコンを使用"
-    Close to system tray: "閉じるときにトレイに格納"
+    System Tray:
+      System Tray: "システムトレイ"
+      Show Icon: "アイコンを表示"
+      Close to Tray: "閉じるときにトレイに格納"
+      Minimize to Tray: "最小化時にトレイに格納"
     Tray required for background refresh: "バックグラウンドでの登録チャンネルの更新が有効な間は、トレイアイコンが必要です。"
     Show Video Menu Button: 動画メニューボタンを表示
     Swipe to refresh: スワイプして更新

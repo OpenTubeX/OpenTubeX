@@ -553,8 +553,11 @@ Settings:
       Right: Llithro i'r dde ar fân-luniau
       Description: Llithrwch yn llorweddol ar fân-lun fideo a rhyddhewch i gyflawni'r weithred a ddewiswyd.
     Data Saver Thumbnails: "Mân-luniau arbed data"
-    Use tray icon: "Defnyddio eicon hambwrdd"
-    Close to system tray: "Cau i hambwrdd y system"
+    System Tray:
+      System Tray: "Hambwrdd y system"
+      Show Icon: "Dangos eicon"
+      Close to Tray: "Cau i'r hambwrdd"
+      Minimize to Tray: "Lleihau i'r hambwrdd"
     Tray required for background refresh: "Mae angen yr eicon hambwrdd tra bo diweddaru tanysgrifiadau yn y cefndir wedi’i alluogi."
     Show Video Menu Button: Dangos botwm dewislen fideo
     Swipe to refresh: Sychwch i adnewyddu

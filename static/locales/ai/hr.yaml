@@ -555,8 +555,11 @@ Settings:
       Right: Povlačenje udesno po sličicama
       Description: Povucite vodoravno po sličici videozapisa i otpustite za izvođenje odabrane radnje.
     Data Saver Thumbnails: "Sličice za uštedu podataka"
-    Use tray icon: "Koristi ikonu u sistemskoj traci"
-    Close to system tray: "Zatvori u sistemsku traku"
+    System Tray:
+      System Tray: "Sistemska traka"
+      Show Icon: "Prikaži ikonu"
+      Close to Tray: "Zatvori u sistemsku traku"
+      Minimize to Tray: "Smanji u sistemsku traku"
     Tray required for background refresh: "Ikona u sistemskoj traci potrebna je dok je omogućeno osvježavanje pretplata u pozadini."
     Show Video Menu Button: Prikaži gumb izbornika videozapisa
     Swipe to refresh: Povucite za osvježavanje

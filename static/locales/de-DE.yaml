@@ -617,8 +617,11 @@ Settings:
       On Hover: Links beim Darüberfahren unterstreichen
       Never: Links nie unterstreichen
       Always: Links immer unterstreichen
-    Use tray icon: "Symbol im Infobereich verwenden"
-    Close to system tray: "Beim Schließen in den Infobereich minimieren"
+    System Tray:
+      System Tray: Infobereich
+      Show Icon: Symbol anzeigen
+      Close to Tray: Beim Schließen dorthin ausblenden
+      Minimize to Tray: Beim Minimieren dorthin ausblenden
     Tray required for background refresh: "Das Symbol im Infobereich ist erforderlich, solange die Hintergrundaktualisierung von Abonnements aktiviert ist."
     Show Video Menu Button: Videomenü-Schaltfläche anzeigen
     Swipe to refresh: Zum Aktualisieren wischen
@@ -738,7 +741,6 @@ Settings:
       Tooltip: Kommentare beim Öffnen der Seite laden und beim Scrollen weitere Kommentare nachladen.
     Open Deep Links In New Window: An OpenTubeX übergebene URLs in einem neuen Fenster öffnen
     Close Window With Last Tab: Fenster beim Schließen des letzten Tabs schließen
-    Minimize to system tray: In die Systemleiste minimieren
     Remember Tab Navigation History: Tab-Navigationsverlauf merken
     Confirm Before Closing App: Bestätigen vor dem Beenden von OpenTubeX
     Reduced Motion:

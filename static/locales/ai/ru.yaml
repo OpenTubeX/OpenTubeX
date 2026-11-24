@@ -511,8 +511,11 @@ Settings:
       Right: Смахивание вправо по миниатюрам
       Description: Проведите горизонтально по миниатюре видео и отпустите, чтобы выполнить выбранное действие.
     Data Saver Thumbnails: "Миниатюры для экономии трафика"
-    Use tray icon: "Использовать значок в трее"
-    Close to system tray: "Сворачивать в трей при закрытии"
+    System Tray:
+      System Tray: "Системный трей"
+      Show Icon: "Показывать значок"
+      Close to Tray: "Скрывать в трей при закрытии"
+      Minimize to Tray: "Скрывать в трей при сворачивании"
     Tray required for background refresh: "Значок в трее необходим, пока включено фоновое обновление подписок."
     Show Video Menu Button: Показывать кнопку меню видео
     Swipe to refresh: Обновлять смахиванием

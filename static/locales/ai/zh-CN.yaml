@@ -552,8 +552,11 @@ Settings:
       Right: 在缩略图上向右滑动
       Description: 在视频缩略图上水平滑动并松开，即可执行所选操作。
     Data Saver Thumbnails: "省流量缩略图"
-    Use tray icon: "使用托盘图标"
-    Close to system tray: "关闭时最小化到系统托盘"
+    System Tray:
+      System Tray: "系统托盘"
+      Show Icon: "显示图标"
+      Close to Tray: "关闭时最小化到托盘"
+      Minimize to Tray: "最小化到托盘"
     Tray required for background refresh: "启用后台刷新订阅时，必须显示托盘图标。"
     Show Video Menu Button: 显示视频菜单按钮
     Swipe to refresh: 下拉刷新

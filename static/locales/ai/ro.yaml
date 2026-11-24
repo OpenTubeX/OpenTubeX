@@ -552,8 +552,11 @@ Settings:
       Right: Glisare la dreapta pe miniaturi
       Description: Glisați orizontal pe miniatura unui videoclip și eliberați pentru a efectua acțiunea selectată.
     Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
-    Use tray icon: "Folosește pictograma din zona de notificare"
-    Close to system tray: "Închide în zona de notificare"
+    System Tray:
+      System Tray: "Zona de notificare"
+      Show Icon: "Afișează pictograma"
+      Close to Tray: "Închide în zona de notificare"
+      Minimize to Tray: "Minimizează în zona de notificare"
     Tray required for background refresh: "Pictograma din zona de notificare este necesară cât timp actualizarea abonamentelor în fundal este activată."
     Show Video Menu Button: Afișează butonul meniului video
     Swipe to refresh: Glisează pentru a reîmprospăta

@@ -552,8 +552,11 @@ Settings:
       Right: Küçük resimlerde sağa kaydırma
       Description: Seçilen işlemi gerçekleştirmek için video küçük resmini yatay olarak kaydırıp bırakın.
     Data Saver Thumbnails: "Veri tasarruflu küçük resimler"
-    Use tray icon: "Tepsi simgesini kullan"
-    Close to system tray: "Sistem tepsisine kapat"
+    System Tray:
+      System Tray: "Sistem tepsisi"
+      Show Icon: "Simgeyi göster"
+      Close to Tray: "Sistem tepsisine kapat"
+      Minimize to Tray: "Sistem tepsisine küçült"
     Tray required for background refresh: "Arka planda abonelik yenileme etkinken tepsi simgesi gereklidir."
     Show Video Menu Button: Video menüsü düğmesini göster
     Swipe to refresh: Yenilemek için kaydır

@@ -554,8 +554,11 @@ Settings:
       Right: Miniatürlərdə sağa sürüşdürmə
       Description: Seçilmiş əməliyyatı yerinə yetirmək üçün video miniatürünü üfüqi sürüşdürüb buraxın.
     Data Saver Thumbnails: "Verilənlərə qənaət edən miniatürlər"
-    Use tray icon: "Sistem sahəsi nişanından istifadə et"
-    Close to system tray: "Sistem sahəsinə bağla"
+    System Tray:
+      System Tray: "Sistem sahəsi"
+      Show Icon: "Nişanı göstər"
+      Close to Tray: "Sistem sahəsinə bağla"
+      Minimize to Tray: "Sistem sahəsinə kiçilt"
     Tray required for background refresh: "Abunəliklərin arxa planda yenilənməsi aktiv olduqda sistem sahəsi nişanı tələb olunur."
     Show Video Menu Button: Video menyusu düyməsini göstər
     Swipe to refresh: Yeniləmək üçün sürüşdür

@@ -553,8 +553,11 @@ Settings:
       Right: Usap ke kanan pada gambar mini
       Description: Usap gambar mini video secara horizontal dan lepaskan untuk melakukan tindakan yang dipilih.
     Data Saver Thumbnails: "Thumbnail hemat data"
-    Use tray icon: "Gunakan ikon baki sistem"
-    Close to system tray: "Tutup ke baki sistem"
+    System Tray:
+      System Tray: "Baki sistem"
+      Show Icon: "Tampilkan ikon"
+      Close to Tray: "Tutup ke baki sistem"
+      Minimize to Tray: "Minimalkan ke baki sistem"
     Tray required for background refresh: "Ikon baki sistem diperlukan selama pembaruan langganan di latar belakang diaktifkan."
     Show Video Menu Button: Tampilkan tombol menu video
     Swipe to refresh: Geser untuk menyegarkan

@@ -101,10 +101,12 @@ test.describe('synced setting indicators', () => {
     await expect(toggle).toBeChecked()
 
     // Neither settings that never sync nor settings each device keeps for itself offer a sync toggle.
-    for (const localOnly of ['Check for Updates', 'Use tray icon']) {
-      const localOnlyLabel = page.locator('label').filter({ hasText: localOnly })
-      await expect(localOnlyLabel).toBeVisible()
-      await expect(localOnlyLabel.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
+    for (const localOnly of [
+      page.locator('label').filter({ hasText: 'Check for Updates' }),
+      page.locator('.select').filter({ hasText: 'System tray' })
+    ]) {
+      await expect(localOnly).toBeVisible()
+      await expect(localOnly.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
     }
   })
 

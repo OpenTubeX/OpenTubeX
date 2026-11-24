@@ -557,8 +557,11 @@ Settings:
       Right: Проведення праворуч по мініатюрах
       Description: Проведіть горизонтально по мініатюрі відео та відпустіть, щоб виконати вибрану дію.
     Data Saver Thumbnails: "Мініатюри для економії даних"
-    Use tray icon: "Використовувати значок у треї"
-    Close to system tray: "Згортати в трей при закритті"
+    System Tray:
+      System Tray: "Системний трей"
+      Show Icon: "Показувати значок"
+      Close to Tray: "Згортати в трей при закритті"
+      Minimize to Tray: "Згортати в трей"
     Tray required for background refresh: "Значок у треї потрібний, поки ввімкнено фонове оновлення підписок."
     Show Video Menu Button: Показувати кнопку меню відео
     Swipe to refresh: Проведіть, щоб оновити

@@ -575,8 +575,11 @@ Settings:
       Right: Deslizar a la derecha en las miniaturas
       Description: Deslizá horizontalmente sobre la miniatura de un video y soltá para realizar la acción seleccionada.
     Data Saver Thumbnails: "Miniaturas con ahorro de datos"
-    Use tray icon: "Usar icono de la bandeja"
-    Close to system tray: "Cerrar a la bandeja del sistema"
+    System Tray:
+      System Tray: "Bandeja del sistema"
+      Show Icon: "Mostrar icono"
+      Close to Tray: "Cerrar a la bandeja"
+      Minimize to Tray: "Minimizar a la bandeja"
     Tray required for background refresh: "El icono de la bandeja es necesario mientras la actualización de suscripciones en segundo plano esté activada."
     Show Video Menu Button: Mostrar botón del menú del video
     Swipe to refresh: Deslizar para actualizar
@@ -606,7 +609,6 @@ Settings:
       Loading Tabs: Cargar varias pestañas
       Unloading Tabs: Descargar varias pestañas de la memoria
       Refreshing All Feeds: Actualizar muchas suscripciones
-    Minimize to system tray: Minimizar a la bandeja del sistema
     Remember Tab Navigation History: Recordar el historial de navegación de las pestañas
     New Tab Position:
       New Tab Position: Posición de las pestañas nuevas

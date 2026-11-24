@@ -15,6 +15,15 @@
           @change="store.dispatch('updateEnableMobileTabs', $event)"
         />
         <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Open Deep Links In New Window')"
+          :default-value="openDeepLinksInNewWindow"
+          setting-key="openDeepLinksInNewWindow"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
+          @change="updateOpenDeepLinksInNewWindow"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
           compact
           :disabled="!rememberHistory"
@@ -32,14 +41,16 @@
           @change="updateCheckForUpdates"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Open Deep Links In New Window')"
-          :default-value="openDeepLinksInNewWindow"
-          setting-key="openDeepLinksInNewWindow"
+          v-if="IS_CAPACITOR && !IS_IOS"
+          :label="t('Settings.General Settings.Swipe to refresh')"
+          :default-value="enablePullToRefresh"
+          setting-key="enablePullToRefresh"
           :compact="true"
-          :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
-          @change="updateOpenDeepLinksInNewWindow"
+          @change="store.dispatch('updateEnablePullToRefresh', $event)"
         />
+      </div>
+      <!-- Each platform shows as many switches here as in the first column. -->
+      <div class="switchColumn">
         <FtToggleSwitch
           v-if="USING_ELECTRON"
           :label="t('Settings.General Settings.Close Window With Last Tab')"
@@ -49,8 +60,6 @@
           :tooltip="t('Tooltips.General Settings.Close Window With Last Tab')"
           @change="store.dispatch('updateCloseWindowWithLastTab', $event)"
         />
-      </div>
-      <div class="switchColumn">
         <FtToggleSwitch
           :label="t('Settings.General Settings.Auto Load Next Page.Label')"
           :default-value="generalAutoLoadMorePaginatedItemsEnabled"
@@ -58,42 +67,6 @@
           :compact="true"
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Lists Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Use tray icon')"
-          :default-value="trayEnabled"
-          :disabled="closedAppRefresh"
-          :tooltip="closedAppRefresh ? t('Settings.General Settings.Tray required for background refresh') : ''"
-          setting-key="useTrayIcon"
-          :compact="true"
-          @change="store.dispatch('updateUseTrayIcon', $event)"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Close to system tray')"
-          :default-value="store.getters.getHideToTrayOnClose"
-          :disabled="!trayEnabled"
-          setting-key="hideToTrayOnClose"
-          :compact="true"
-          @change="store.dispatch('updateHideToTrayOnClose', $event)"
-        />
-        <FtToggleSwitch
-          v-if="supportsAutoPictureInPictureMinimize && USING_ELECTRON"
-          :label="t('Settings.General Settings.Minimize to system tray')"
-          :default-value="hideToTrayOnMinimize"
-          :disabled="!trayEnabled"
-          setting-key="hideToTrayOnMinimize"
-          :compact="true"
-          @change="updateHideToTrayOnMinimize"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR && !IS_IOS"
-          :label="t('Settings.General Settings.Swipe to refresh')"
-          :default-value="enablePullToRefresh"
-          setting-key="enablePullToRefresh"
-          :compact="true"
-          @change="store.dispatch('updateEnablePullToRefresh', $event)"
         />
         <FtToggleSwitch
           v-if="IS_CAPACITOR"
@@ -181,6 +154,23 @@
         :tooltip="t('Tooltips.General Settings.Startup Behavior')"
         :icon="['fas', 'power-off']"
         @change="updateStartupBehavior"
+      />
+      <FtSelect
+        v-if="USING_ELECTRON"
+        multiple
+        size-to-content
+        :placeholder="t('Settings.General Settings.System Tray.System Tray')"
+        :empty-label="t('Global.Off')"
+        :value="systemTray"
+        setting-key="useTrayIcon"
+        :sync-setting-keys="TRAY_SETTING_KEYS"
+        :is-changed="systemTrayChanged"
+        :select-names="systemTrayOptions.map(({ name }) => name)"
+        :select-values="systemTrayOptions.map(({ value }) => value)"
+        :tooltip="closedAppRefresh ? t('Settings.General Settings.Tray required for background refresh') : ''"
+        :icon="['fas', 'display']"
+        @change="updateSystemTray"
+        @reset="resetSystemTray"
       />
       <FtSelect
         v-if="!IS_CAPACITOR && !phoneLayout"
@@ -475,13 +465,52 @@ function updateGeneralAutoLoadMorePaginatedItemsEnabled(value) {
 /** @type {import('vue').ComputedRef<boolean>} */
 const closedAppRefresh = computed(() => store.getters.getEnableClosedAppSubscriptionRefresh)
 const trayEnabled = computed(() => store.getters.getUseTrayIcon || closedAppRefresh.value)
-const hideToTrayOnMinimize = computed(() => store.getters.getHideToTrayOnMinimize)
+
+const TRAY_SETTING_KEYS = ['useTrayIcon', 'hideToTrayOnClose', 'hideToTrayOnMinimize']
+
+// The 'minimize' event doesn't fire on Wayland.
+const systemTrayOptions = computed(() => [
+  { value: 'icon', name: t('Settings.General Settings.System Tray.Show Icon') },
+  { value: 'close', name: t('Settings.General Settings.System Tray.Close to Tray') },
+  ...(supportsAutoPictureInPictureMinimize.value
+    ? [{ value: 'minimize', name: t('Settings.General Settings.System Tray.Minimize to Tray') }]
+    : []),
+])
+
+// Windows only hide to the tray while its icon is shown.
+const systemTray = computed(() => trayEnabled.value
+  ? [
+      'icon',
+      ...(store.getters.getHideToTrayOnClose ? ['close'] : []),
+      ...(store.getters.getHideToTrayOnMinimize && supportsAutoPictureInPictureMinimize.value ? ['minimize'] : []),
+    ]
+  : [])
 
 /**
- * @param {boolean} value
+ * Hiding windows to the tray turns its icon on, and turning the icon off stops
+ * hiding them. Background subscription refresh keeps the icon on.
+ * @param {string[]} values
  */
-function updateHideToTrayOnMinimize(value) {
-  store.dispatch('updateHideToTrayOnMinimize', value)
+function updateSystemTray(values) {
+  const iconRemoved = trayEnabled.value && !values.includes('icon')
+  if (iconRemoved && closedAppRefresh.value) return
+
+  const settings = {
+    useTrayIcon: !iconRemoved && values.length > 0,
+    hideToTrayOnClose: !iconRemoved && values.includes('close'),
+    // Keeps the stored value where this option isn't offered.
+    ...(supportsAutoPictureInPictureMinimize.value && { hideToTrayOnMinimize: !iconRemoved && values.includes('minimize') }),
+  }
+  for (const [key, value] of Object.entries(settings)) {
+    if (store.state.settings[key] !== value) store.dispatch(defaultUpdaterId(key), value)
+  }
+}
+
+const systemTrayChanged = computed(() => TRAY_SETTING_KEYS.some(key => store.state.settings[key] !== DEFAULT_SETTINGS[key]))
+function resetSystemTray() {
+  for (const key of TRAY_SETTING_KEYS) {
+    if (store.state.settings[key] !== DEFAULT_SETTINGS[key]) store.dispatch('resetSettingToDefault', key)
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

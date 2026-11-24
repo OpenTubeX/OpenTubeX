@@ -552,8 +552,11 @@ Settings:
       Right: Pisipiltidel paremale pühkimine
       Description: Valitud toimingu tegemiseks pühi video pisipildil horisontaalselt ja tõsta sõrm.
     Data Saver Thumbnails: "Andmesäästlikud pisipildid"
-    Use tray icon: "Kasuta süsteemisalve ikooni"
-    Close to system tray: "Sulge süsteemisalve"
+    System Tray:
+      System Tray: "Süsteemisalv"
+      Show Icon: "Kuva ikoon"
+      Close to Tray: "Sulge süsteemisalve"
+      Minimize to Tray: "Minimeeri süsteemisalve"
     Tray required for background refresh: "Süsteemisalve ikoon on vajalik, kui tellimuste taustal värskendamine on lubatud."
     Show Video Menu Button: Kuva videomenüü nupp
     Swipe to refresh: Värskendamiseks viipa

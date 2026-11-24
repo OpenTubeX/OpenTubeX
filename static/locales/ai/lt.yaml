@@ -667,8 +667,11 @@ Settings:
       Right: Braukti dešinėn per miniatiūras
       Description: Braukite horizontaliai per vaizdo įrašo miniatiūrą ir atleiskite, kad atliktumėte pasirinktą veiksmą.
     Data Saver Thumbnails: "Duomenis taupančios miniatiūros"
-    Use tray icon: "Naudoti sistemos dėklo piktogramą"
-    Close to system tray: "Uždaryti į sistemos dėklą"
+    System Tray:
+      System Tray: "Sistemos dėklas"
+      Show Icon: "Rodyti piktogramą"
+      Close to Tray: "Uždaryti į sistemos dėklą"
+      Minimize to Tray: "Sumažinti į sistemos dėklą"
     Tray required for background refresh: "Sistemos dėklo piktograma būtina, kol įjungtas prenumeratų atnaujinimas fone."
     Show Video Menu Button: Rodyti vaizdo įrašo meniu mygtuką
     Swipe to refresh: Perbraukite, kad atnaujintumėte
@@ -699,7 +702,6 @@ Settings:
       Unloading Tabs: Iškeliant kelis skirtukus
       Refreshing All Feeds: Atnaujinant daug prenumeratų
     Open Deep Links In New Window: „OpenTubeX“ perduotus URL atverti naujame lange
-    Minimize to system tray: Sumažinti į sistemos dėklą
     Remember Tab Navigation History: Įsiminti naršymo skirtukuose istoriją
     Auto Load Next Page:
       Label: Automatiškai įkelti kitą puslapį

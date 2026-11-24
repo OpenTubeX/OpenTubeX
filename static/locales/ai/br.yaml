@@ -552,8 +552,11 @@ Settings:
       Right: Riklañ a-zehou war ar skeudennigoù
       Description: Riklit a-blaen war skeudennig ur video ha laoskit evit seveniñ an ober dibabet.
     Data Saver Thumbnails: "Skeudennoù bihan evit espern roadennoù"
-    Use tray icon: "Implijout un arlun er maez reizhiad"
-    Close to system tray: "Serriñ er maez reizhiad"
+    System Tray:
+      System Tray: "Maez reizhiad"
+      Show Icon: "Diskouez an arlun"
+      Close to Tray: "Serriñ er maez reizhiad"
+      Minimize to Tray: "Bihanaat er maez reizhiad"
     Tray required for background refresh: "Ret eo an arlun er maez reizhiad pa vez gweredekaet hizivaat ar c’houmanantoù en drekleur."
     Show Video Menu Button: Diskouez afell lañser ar video
     Swipe to refresh: Riklañ evit freskaat

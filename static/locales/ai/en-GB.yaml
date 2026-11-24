@@ -549,8 +549,11 @@ Settings:
       Right: Swipe right on thumbnails
       Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
-    Use tray icon: "Use tray icon"
-    Close to system tray: "Close to system tray"
+    System Tray:
+      System Tray: "System tray"
+      Show Icon: "Show icon"
+      Close to Tray: "Close to tray"
+      Minimize to Tray: "Minimise to tray"
     Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
     Show Video Menu Button: Show video menu button
     Swipe to refresh: Swipe to refresh

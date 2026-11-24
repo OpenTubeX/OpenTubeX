@@ -557,8 +557,11 @@ Settings:
       Right: Deslizar á dereita nas miniaturas
       Description: Desliza horizontalmente sobre a miniatura dun vídeo e solta para realizar a acción seleccionada.
     Data Saver Thumbnails: "Miniaturas con aforro de datos"
-    Use tray icon: "Usar a icona da bandexa"
-    Close to system tray: "Pechar na bandexa do sistema"
+    System Tray:
+      System Tray: "Bandexa do sistema"
+      Show Icon: "Amosar a icona"
+      Close to Tray: "Pechar na bandexa"
+      Minimize to Tray: "Minimizar na bandexa"
     Tray required for background refresh: "A icona da bandexa é necesaria mentres a actualización das subscricións en segundo plano estea activada."
     Show Video Menu Button: Amosar o botón do menú do vídeo
     Swipe to refresh: Esvarar para actualizar
