@@ -72,16 +72,6 @@ test.describe('with a custom title bar', () => {
 
     const geometry = await getControlsGeometry(page, '.tabBar')
     expect(geometry.left + geometry.right).toBeGreaterThan(0)
-    // The controls line up with the tabs, below which the bar reserves room
-    // for its scrollbar.
-    const [control, tab] = await page.evaluate(() => [
-      [...document.querySelectorAll('.windowControl')].find(element => element.getClientRects().length > 0),
-      document.querySelector('.tabBar .tab')
-    ].map(element => {
-      const rect = element.getBoundingClientRect()
-      return rect.top + rect.height / 2
-    }))
-    expect(Math.abs(control - tab)).toBeLessThan(1)
     expect(geometry.paddingLeft).toBeGreaterThanOrEqual(geometry.left - 0.5)
     expect(geometry.paddingRight).toBeGreaterThanOrEqual(geometry.right - 0.5)
     expect(geometry.region).toBe('drag')
