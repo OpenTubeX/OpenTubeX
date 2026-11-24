@@ -790,7 +790,12 @@ async function filterHistory() {
   clampHistoryScroll()
 }
 
+// Clamping corrects an offset left past the end of results that became
+// shorter. A mounting page has none, and measuring it forced a layout of the
+// whole page before its first frame, which cost phones 30 to 70 ms per visit.
+let historyMounted = false
 function clampHistoryScroll() {
+  if (!historyMounted) return
   nextTick(() => {
     const content = historyContent.value?.closest('.app > .routerView')
     if (content instanceof HTMLElement) {
@@ -886,6 +891,7 @@ function keyboardShortcutHandler(event) {
 }
 
 onMounted(() => {
+  historyMounted = true
   document.addEventListener('keydown', keyboardShortcutHandler)
 })
 

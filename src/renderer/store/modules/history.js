@@ -117,7 +117,7 @@ const actions = {
     } else if (result.records.length > 1) {
       commit('applyHistorySyncChanges', { insertions: [], updates: result.records, deletions: [] })
     }
-    if (result.seenVideos != null) await dispatch('applySubscriptionSeenVideos', result.seenVideos)
+    if (result.seenVideos != null) await dispatch('applySeenMarkChanges', { setting: 'subscriptionSeenVideos', changes: result.seenVideos })
     return update.metadata
       ? { repaired: result.records.length, failed: result.failedCount }
       : result.records.length

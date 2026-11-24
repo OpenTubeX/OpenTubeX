@@ -174,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from './FtAutoGrid/FtAutoGrid.vue'
@@ -191,8 +191,7 @@ import { useFollowedRssFeedItems } from '../composables/useFollowedRssFeedItems'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
-import { getNewSubscriptionFeedEntries } from '../helpers/newSubscriptionFeed'
-import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restricted-playback'
+import { getNewSubscriptionFeedOptions, useSubscriptionsNewFeedContent } from '../helpers/sharedNewSubscriptionFeed'
 import { MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
@@ -281,29 +280,14 @@ const {
 } = useRefreshAllSubscriptionFeeds()
 const errorFeeds = computed(() => enabledFeeds.value.map(feed => feed.category))
 
-const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesToRemove)
 const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })
-const activeSubscriptions = computed(() => store.getters.getActiveGroupSubscriptions)
 const cachedContentDuringRefresh = shallowRef(null)
 let isLargeCachedFeed = false
-const contentOptions = computed(() => ({
-  activeSubscriptions: activeSubscriptions.value,
-  historyCacheById: store.getters.getHistoryCacheById,
-  hideLiveStreams: store.getters.getHideLiveStreams,
-  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: forbiddenTitles.value,
-  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
-  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
-  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-  showScheduledLiveStreamsFirst: store.getters.getShowScheduledLiveStreamsFirst,
-  sortBy: sortBy.value
-}))
-const getCurrentContentByCategory = () => getNewSubscriptionFeedEntries({
-  feeds: enabledFeeds.value,
-  ...contentOptions.value
-})
+// Shared with later mounts, so returning to the page reuses the built feed.
+const currentContent = useSubscriptionsNewFeedContent()
+const getCurrentContentByCategory = () => currentContent.value
 const newContentByCategory = computed(() => cachedContentDuringRefresh.value ?? getCurrentContentByCategory())
 
 watch([
@@ -340,7 +324,7 @@ for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
 // Cache updates are batched during large refreshes, but local filtering and
 // sort choices should affect the list immediately.
 watch([
-  contentOptions,
+  () => getNewSubscriptionFeedOptions(store.getters.getActiveGroupSubscriptions),
   () => store.getters.getSubscriptionSeenVideos,
   () => store.getters.getSubscriptionSeenPosts,
   () => [
@@ -364,12 +348,10 @@ watch(() => store.state.history.historyEntriesRevision, () => {
   }
 })
 
-// The feed builder tracks fields used for selection and ordering. Downstream
-// pagination should scan raw entries and make only rendered cards reactive.
-const newVideos = computed(() => newContentByCategory.value.videos.map(toRaw))
-const newShorts = computed(() => newContentByCategory.value.shorts.map(toRaw))
-const newLive = computed(() => newContentByCategory.value.live.map(toRaw))
-const newPosts = computed(() => newContentByCategory.value.posts.map(toRaw))
+const newVideos = computed(() => newContentByCategory.value.videos)
+const newShorts = computed(() => newContentByCategory.value.shorts)
+const newLive = computed(() => newContentByCategory.value.live)
+const newPosts = computed(() => newContentByCategory.value.posts)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 const showCombinedView = computed(() => props.activeCategory === null)
 const displayedEntries = computed(() => {

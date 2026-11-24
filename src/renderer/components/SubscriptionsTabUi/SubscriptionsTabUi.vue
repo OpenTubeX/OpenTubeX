@@ -315,14 +315,12 @@ const filteredVideoList = computed(() => {
     forbiddenTitles: forbiddenTitles.value
   }))
 
+  // The New feed already leaves out watched entries, and rebuilds its refresh
+  // snapshot when history changes. Looking each entry up again here tracked
+  // every key of the history cache whenever the feed mounted.
   if (props.onlyShowNew) {
-    videoList = videoList.filter(entry => {
-      return entry.isNewInSubscriptionFeed === true &&
-        (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
-    })
-  }
-
-  if (!props.isCommunity && hideWatchedSubs.value) {
+    videoList = videoList.filter(entry => entry.isNewInSubscriptionFeed === true)
+  } else if (!props.isCommunity && hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
       return video.videoId == null || !isHistoryEntryWatched(historyCacheById.value[video.videoId])
     })

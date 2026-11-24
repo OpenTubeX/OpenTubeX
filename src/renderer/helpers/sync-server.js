@@ -30,7 +30,7 @@ import {
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
-import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingsId } from '../../profileSettings.js'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -53,6 +53,7 @@ import {
   mergeSettingItemsEntry,
   mergeSettingListEntry,
   mergeProfileSettingsEntry,
+  profileSettingTimesOf,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
@@ -1685,10 +1686,10 @@ async function mergeSeparateProfiles(client, store, previous, options) {
 
 /**
  * A profile's own settings as merged on this device, with the settings of
- * `remoteEntry` that this device doesn't sync, so that its upload keeps them.
- * Turning the profile's own settings off drops them all.
- * @param {{ key: string, value: any, updatedAt: number }} entry the merged settings this device syncs
- * @param {{ value: unknown } | undefined} remoteEntry
+ * `remoteEntry` that this device doesn't sync, and when they were edited, so
+ * that its upload keeps them. Turning the profile's own settings off drops them all.
+ * @param {{ key: string, value: any, updatedAt: number, settingsUpdatedAt?: Record<string, number> }} entry the merged settings this device syncs
+ * @param {{ value: any, updatedAt: number } | undefined} remoteEntry
  * @param {Record<string, unknown> | null | undefined} syncedRemote the settings of `remoteEntry` this device syncs
  */
 function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
@@ -1696,7 +1697,8 @@ function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
   const elsewhere = Object.entries(remoteEntry.value).filter(([key]) => !Object.hasOwn(syncedRemote, key))
   if (elsewhere.length === 0) return entry
   const value = Object.fromEntries([...elsewhere, ...Object.entries(entry.value)].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
-  return { ...entry, value }
+  // An entry that replaced all settings has no times yet; its settings count as edited with it.
+  return { ...entry, value, settingsUpdatedAt: { ...profileSettingTimesOf(remoteEntry), ...profileSettingTimesOf(entry) } }
 }
 
 function settingUpdater(key) {
@@ -1973,6 +1975,11 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         old: profileSettingsKey ? syncedEntry(old) : old,
         remoteEntry: profileSettingsKey ? syncedEntry(remoteEntry) : remoteEntry,
         localUpdatedAt: localUpdatedAt[key],
+        localSettingUpdatedAt: settingId => localUpdatedAt[profileSettingEditTimeId(key, settingId)],
+        localSettingIds: profileSettingsKey
+          ? Object.keys(localUpdatedAt).filter(name => name.startsWith(profileSettingEditTimeId(key, ''))).map(name => name.slice(key.length + 1))
+          : [],
+        syncsSetting: isSynced,
         now,
       })
       if (profileSettingsKey) {

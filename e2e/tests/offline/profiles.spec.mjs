@@ -406,7 +406,7 @@ test.describe('separate default profile with seen marks', () => {
   })
 
   test('starts with its own seen marks instead of the shared ones', async ({ page }) => {
-    const marks = () => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos).map(mark => mark.videoId))
+    const marks = () => page.evaluate(() => [...window.$store.getters.getSubscriptionSeenVideos.byId.values()].map(mark => mark.videoId))
     await expect.poll(() => page.evaluate(() => window.$store.getters.getActiveDataScope)).toBe('e2eprofile')
     await expect.poll(marks).toEqual(['separSeen12'])
     await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'allChannels'))

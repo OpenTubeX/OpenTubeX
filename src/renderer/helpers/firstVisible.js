@@ -39,6 +39,14 @@ function update(element, callback) {
   callbacks.set(element, callback)
 }
 
+/** Calls the function bound to the element now, as if it had become visible. */
+export function revealFirstVisible(element) {
+  const callback = element && callbacks.get(element)
+  if (!callback) return
+  stop(element)
+  callback()
+}
+
 /** Calls the bound function once the element first intersects the viewport. Bind `false` to stop observing. */
 export const vFirstVisible = {
   mounted: (element, { value }) => update(element, value),

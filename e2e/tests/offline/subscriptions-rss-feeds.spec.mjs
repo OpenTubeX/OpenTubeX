@@ -1286,7 +1286,7 @@ test.describe('with new items', () => {
     // Other devices learn that it is no longer watched, and the fresh unseen
     // mark wins over older seen marks they haven't synced yet
     await expect.poll(() => page.evaluate(() => window.scheduledSyncs)).toContain('history')
-    expect(await page.evaluate(key => JSON.parse(window.$store.getters.getRssFeedSeenItems)
+    expect(await page.evaluate(key => [...window.$store.getters.getRssFeedSeenItems.byId.values()]
       .find(entry => entry.key === key), `${RSS_URL}\nvod-4`)).toEqual({ key: `${RSS_URL}\nvod-4`, unseenAt: expect.any(Number) })
   })
 

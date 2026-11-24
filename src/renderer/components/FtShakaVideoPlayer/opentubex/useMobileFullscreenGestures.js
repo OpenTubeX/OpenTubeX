@@ -10,6 +10,11 @@ const MOBILE_FULLSCREEN_SWIPE_OVERSHOOT = 60
 const MOBILE_FULLSCREEN_SWIPE_MAX_OFFSET = MOBILE_SWIPE_COMMIT_DISTANCE + MOBILE_FULLSCREEN_SWIPE_OVERSHOOT
 // How much the video grows toward fullscreen, or shrinks out of it, at the maximum offset.
 const MOBILE_FULLSCREEN_SWIPE_MAX_SCALE = 0.05
+// A tap on the mini-player bar restores the player despite this much finger drift.
+const MOBILE_RESTORE_TAP_SLOP = 28
+// The bar follows a downward drag to dismiss it, so once it has visibly moved
+// with the finger further than this, releasing cancels the dismissal instead.
+const MOBILE_DISMISS_TAP_SLOP = 16
 // Matches the spring that returns a cancelled swipe in App.css.
 const MOBILE_FULLSCREEN_SWIPE_SETTLE_MS = 400
 
@@ -294,7 +299,7 @@ export function useMobileFullscreenGestures({
     // A bar that cannot be dismissed keeps a drifting tap until it leaves the
     // tap tolerance, so its release can still restore the player.
     if (mobileFullscreenGesture.returnTarget) {
-      if (Math.hypot(deltaX, deltaY) >= 28) mobileFullscreenGesture = null
+      if (Math.hypot(deltaX, deltaY) >= MOBILE_RESTORE_TAP_SLOP) mobileFullscreenGesture = null
       return false
     }
     if (!mobileFullscreenGesture.fullscreenSwipeEnabled) {
@@ -391,7 +396,8 @@ export function useMobileFullscreenGestures({
     // drifts a few pixels starts a drag, and a tap that stops a page fling
     // reaches the bar without Chromium dispatching a click at all.
     const restoreTap = gesture.returnTarget && !swipeCommitted && elapsed <= 450 &&
-      Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY) < 28
+      Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY) <
+        (gesture.dismissing ? MOBILE_DISMISS_TAP_SLOP : MOBILE_RESTORE_TAP_SLOP)
     if (restoreTap) suppressNextClick()
     if (gesture.minimizing || gesture.dismissing) {
       const container = getContainer()

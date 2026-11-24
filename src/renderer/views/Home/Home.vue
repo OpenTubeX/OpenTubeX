@@ -238,7 +238,7 @@
             :item-count="recommendations.length"
           >
             <div
-              v-for="video in recommendations"
+              v-for="video in mountedRecommendations"
               :key="video.videoId"
               v-observe-visibility="{
                 callback: (visible, entry) => recordRecommendationImpression(video, visible, entry),
@@ -611,12 +611,7 @@ import {
 } from '../../helpers/homeSections'
 import { isBlurredByBlockLists } from '../../helpers/blockedItems'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
-import {
-  getEnabledSubscriptionFeedSources,
-  getNewSubscriptionEntryTimestamp,
-  getNewSubscriptionFeedEntries,
-} from '../../helpers/newSubscriptionFeed'
-import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { useHomeNewSubscriptionEntries } from '../../helpers/sharedNewSubscriptionFeed'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { getExternalMediaHistoryId, isExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
@@ -741,32 +736,7 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
 // Downloads without a playable file open the Downloads window instead.
 const recentDownloadEntries = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads)
   .map(download => ({ download, route: downloadRoute(download) })))
-const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
-const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
-const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
-  feeds: enabledSubscriptionFeeds.value,
-  activeSubscriptions: activeSubscriptions.value,
-  historyCacheById: store.getters.getHistoryCacheById,
-  hideLiveStreams: store.getters.getHideLiveStreams,
-  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getForbiddenTitlesToRemove,
-  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
-  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
-  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-  showScheduledLiveStreamsFirst: store.getters.getShowScheduledLiveStreamsFirst,
-  sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
-}))
-const newSubscriptionEntries = computed(() => {
-  const showScheduledLiveStreamsFirst = store.getters.getShowScheduledLiveStreamsFirst
-  const now = Date.now()
-  return Object.entries(newSubscriptionContent.value)
-    .flatMap(([category, entries]) => entries.map(entry => ({
-      category,
-      entry,
-      timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
-    })))
-    .toSorted((a, b) => b.timestamp - a.timestamp)
-})
+const newSubscriptionEntries = useHomeNewSubscriptionEntries()
 const newSubscriptionFeedRoute = Object.freeze({
   path: '/subscriptions',
   query: { tab: 'new' },
@@ -839,6 +809,43 @@ const renderedSections = computed(() => {
 const hasVisibleActivity = computed(() => renderedSections.value.some(section => (
   section.id !== 'recommendations' || recommendations.value.length > 0
 )))
+// A card mounts about 60 elements, so mounting a whole feed in the frame that
+// reveals it blocks phones for over 100 ms. Mount the first screenful, then
+// a batch per frame.
+const RECOMMENDATION_MOUNT_BATCH = 6
+const recommendationMountLimit = ref(RECOMMENDATION_MOUNT_BATCH)
+let recommendationMountFrame = null
+const mountedRecommendations = computed(() => recommendations.value.slice(0, recommendationMountLimit.value))
+const recommendationsRendered = computed(() => renderedSections.value.some(section => section.id === 'recommendations'))
+
+function cancelRecommendationMount() {
+  cancelAnimationFrame(recommendationMountFrame)
+  recommendationMountFrame = null
+}
+
+// A new feed replaces the grid, and a hidden section mounts again when shown.
+watch([recommendationFeedVersion, recommendationsRendered], () => {
+  cancelRecommendationMount()
+  recommendationMountLimit.value = RECOMMENDATION_MOUNT_BATCH
+})
+
+watch([
+  recommendationFeedVersion,
+  recommendationsRendered,
+  () => recommendations.value.length,
+  recommendationMountLimit,
+], () => {
+  if (
+    recommendationMountFrame !== null ||
+    !recommendationsRendered.value ||
+    recommendationMountLimit.value >= recommendations.value.length
+  ) return
+  recommendationMountFrame = requestAnimationFrame(() => {
+    recommendationMountFrame = null
+    recommendationMountLimit.value += RECOMMENDATION_MOUNT_BATCH
+  })
+}, { flush: 'post' })
+
 const sectionLabel = sectionId => sectionDefinitions.value[sectionId]?.label ?? sectionId
 
 function videoThumbnail(video) {
@@ -1131,6 +1138,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(activityFrame)
+  cancelRecommendationMount()
   homeResizeObserver?.disconnect()
   reminderLoadGeneration++
   removeReminderListener?.()

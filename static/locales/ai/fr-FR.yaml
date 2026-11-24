@@ -181,7 +181,7 @@ Home Page:
   All sections hidden description: Personnalisez l’accueil pour afficher à nouveau une section.
 Subscriptions:
   Channel Errors:
-    Summary: "1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées."
+    Summary: "{count} chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées."
     Toast: "Certains abonnements n’ont pas pu être actualisés. Cliquez pour les afficher."
     Retry Channel: "Réessayer {channel}"
     Retry All: "Tout réessayer"
@@ -203,7 +203,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualisation des publications des abonnements
   New Content: Nouveau contenu
   New Feed Refresh Warning Title: Actualiser tous les flux d’abonnements ?
-  New Feed Refresh Warning: L’actualisation de tous les types de contenu pour 1 abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
+  New Feed Refresh Warning: L’actualisation de tous les types de contenu pour {count} abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
   New Since Last Refresh: Nouveau depuis la dernière actualisation
   Mark As Seen: Marquer comme vu
   Mark All as Seen: Tout marquer comme vu
@@ -225,7 +225,7 @@ Subscriptions:
     Feed Already Followed: Vous suivez déjà ce flux.
     Feed Could Not Be Loaded: Le flux n’a pas pu être chargé. Vérifiez que l’adresse pointe vers un flux RSS ou Atom.
     Feed Requires Browser Check: Ce site exige une vérification du navigateur qu’OpenTubeX ne peut pas effectuer. Essayez une autre adresse ou une autre instance RSSHub pour ce flux.
-    Refresh Errors: 1 flux n’a pas pu être actualisé. | {count} flux n’ont pas pu être actualisés. | {count} flux n’ont pas pu être actualisés.
+    Refresh Errors: '{count} flux n’a pas pu être actualisé. | {count} flux n’ont pas pu être actualisés. | {count} flux n’ont pas pu être actualisés.'
     Description: Ajoutez un flux RSS ou Atom pour suivre des créateurs d’autres plateformes. Les instances {rssHub} fournissent des flux pour de nombreux sites, comme Twitch.
     Empty Items: Vos flux ne contiennent actuellement aucun élément.
     No Feeds: Vous ne suivez encore aucun flux RSS.
@@ -249,7 +249,7 @@ Subscriptions:
     OPML File: Fichier OPML
     Invalid OPML File: Ce fichier ne contient aucun flux.
     Feeds Could Not Be Saved: Impossible d'enregistrer les flux.
-    Feeds Imported: 1 nouveau flux importé. | {count} de nouveaux flux importés. | {count} nouveaux flux importés.
+    Feeds Imported: '{count} nouveau flux importé. | {count} de nouveaux flux importés. | {count} nouveaux flux importés.'
     All Feeds Already Followed: Vous suivez déjà tous les flux de ce fichier.
     YouTube Channels Skipped: Les chaînes YouTube ont été ignorées. Pour vous y abonner, importez le fichier dans Données et stockage.
     Feeds Exported: Vos flux RSS ont été exportés.
@@ -283,7 +283,7 @@ Subscriptions:
     Follow: Suivre
     Following: Suivi
     Clips: Clips
-    Refresh Errors: 1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées.
+    Refresh Errors: '{count} chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées.'
     Content Tabs: Onglets des contenus des plateformes
 Trending:
   Music: Musique
@@ -384,7 +384,7 @@ History:
   1 Year: 1 an
   All Time: Depuis toujours
   Custom: Personnalisé
-  History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
+  History Older Than Days Removed: L’historique de visionnage datant de plus de {days} jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
   Restart Required: 'Redémarrage requis'
   Experimental Badge: Expérimental
@@ -2390,10 +2390,10 @@ Comments:
   Stop Watching for Replies: "Ne plus suivre les réponses"
   Watch for Replies: "Suivre les réponses"
   Image unavailable: "Image indisponible"
-  Comment Count: 1 commentaire | {count} commentaires | {count} commentaires
+  Comment Count: '{count} commentaire | {count} commentaires | {count} commentaires'
   Show Comments: Afficher les commentaires
   Reload Comments: Recharger les commentaires
-  Reply Count: 1 réponse | {replyCount} réponses | {replyCount} réponses
+  Reply Count: '{replyCount} réponse | {replyCount} réponses | {replyCount} réponses'
   Comments are turned off: Les commentaires sont désactivés
   YouTube did not provide advertised replies: YouTube a indiqué que ce commentaire avait des réponses, mais ne les a pas fournies. Elles ont peut-être été supprimées ou masquées, le bouton de réponse a donc été retiré.
   Pinned by you: Épinglé par vous
@@ -2410,7 +2410,7 @@ Comments:
   Highlighted reply: Réponse mise en évidence
   Search loaded comments: Rechercher dans les commentaires chargés
   Close search: Fermer la recherche
-  Loaded comment search result count: 1 sur {total} commentaires chargés | {count} sur {total} commentaires chargés | {count} sur {total} commentaires chargés
+  Loaded comment search result count: '{count} sur {total} commentaires chargés | {count} sur {total} commentaires chargés | {count} sur {total} commentaires chargés'
   No loaded comments match your filters: Aucun commentaire chargé ne correspond à vos filtres
   YouTube comment link copied to clipboard: Lien du commentaire YouTube copié dans le presse-papiers
   Translate to {language}: Traduire en {language}
@@ -2701,7 +2701,7 @@ Downloads:
   File Not Found: Le fichier téléchargé est introuvable.
   Files Missing: Le fichier téléchargé n’est plus disponible dans le système de fichiers. | Les fichiers téléchargés ne sont plus disponibles dans le système de fichiers. | Les fichiers téléchargés ne sont plus disponibles dans le système de fichiers.
   Files Available: '{available} fichiers téléchargés sur {total} sont disponibles.'
-  More Files: 1 fichier supplémentaire | {count} fichiers supplémentaires | {count} fichiers supplémentaires
+  More Files: '{count} fichier supplémentaire | {count} fichiers supplémentaires | {count} fichiers supplémentaires'
   Template Used: 'Modèle : {name}'
   Template: Modèle
   Unsaved: Non enregistré
@@ -2997,7 +2997,7 @@ Notification Center:
 Platforms:
   Tracks: Titres
   Playlists: Playlists
-  Follower Count: 1 abonné | {count} d’abonnés | {count} abonnés
+  Follower Count: '{count} abonné | {count} d’abonnés | {count} abonnés'
   Open Website: Ouvrir sur {platform}
   Channel Not Found: Cette chaîne est introuvable.
   Playlist Not Found: Cette playlist est introuvable.

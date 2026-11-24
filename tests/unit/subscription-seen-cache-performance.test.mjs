@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRaw } from 'vue'
 import { applySubscriptionSeenVideosToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
+import { seenMarksState, withSeenMarkChanges } from '../../src/renderer/helpers/seenMarksState.js'
+import { SEEN_VIDEO_MARKS } from '../../src/subscriptionSeenVideos.js'
 
 test('looking up one cached channel does not scan every channel with seen marks', () => {
   let reads = 0
@@ -105,4 +107,40 @@ test('plain mutable cache and marks never reuse stale results', () => {
   assert.equal(applySubscriptionSeenVideosToCache(cache, marks).channel.videos[0].isNewInSubscriptionFeed, true)
   cache.channel.videos[0].title = 'Updated'
   assert.equal(applySubscriptionSeenVideosToCache(cache, marks).channel.videos[0].title, 'Updated')
+})
+
+test('applying a merge to the store marks reads only the changed video and its channel', () => {
+  let markReads = 0
+  let idReads = 0
+  const cache = reactive(Object.fromEntries(Array.from({ length: 300 }, (_, channel) => [channel, {
+    videos: Array.from({ length: 36 }, (_, video) => ({
+      get videoId() { idReads++; return `${channel}-${video}` },
+      isNewInSubscriptionFeed: true
+    }))
+  }])))
+  const store = { marks: seenMarksState(SEEN_VIDEO_MARKS, '[]') }
+  // A full list, whose marks count their reads
+  const byId = toRaw(store.marks.byId)
+  for (let index = 0; index < 10000; index++) {
+    const mark = { videoId: `${index % 300}-${index % 36}x${index}`, isMembersOnly: false }
+    Object.defineProperty(mark, 'seenAt', { enumerable: true, get() { markReads++; return 1000 + index } })
+    byId.set(mark.videoId, mark)
+  }
+  const marks = ref(store.marks)
+  const feed = computed(() => applySubscriptionSeenVideosToCache(cache, marks.value))
+  assert.equal(feed.value[1].videos[0].isNewInSubscriptionFeed, true)
+  const channels = Object.keys(cache).map(channel => feed.value[channel])
+  markReads = 0
+  idReads = 0
+  marks.value = withSeenMarkChanges(SEEN_VIDEO_MARKS, marks.value, {
+    upserts: [{ videoId: '2-0', seenAt: 20000, isMembersOnly: false }],
+    removals: [],
+  })
+  assert.notEqual(marks.value, store.marks)
+  assert.equal(feed.value[2].videos[0].isNewInSubscriptionFeed, false)
+  for (const [channel, previous] of channels.entries()) {
+    if (channel !== 2) assert.equal(feed.value[channel], previous)
+  }
+  assert.equal(markReads, 0, 'applying one mark must not read the other saved marks')
+  assert.ok(idReads <= 40, `applying one mark read ${idReads} video IDs`)
 })

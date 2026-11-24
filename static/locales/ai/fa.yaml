@@ -198,7 +198,7 @@ Home Page:
   All sections hidden description: صفحهٔ اصلی را سفارشی کنید تا بخشی دوباره نمایش داده شود.
 Subscriptions:
   Channel Errors:
-    Summary: "یک کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد."
+    Summary: "{count} کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد."
     Toast: "برخی از کانال‌های مشترک‌شده تازه‌سازی نشدند. برای دیدن آن‌ها کلیک کنید."
     Retry Channel: "تلاش دوباره برای {channel}"
     Retry All: "تلاش دوباره برای همه"
@@ -220,7 +220,7 @@ Subscriptions:
   Refreshing Subscription Posts: در حال تازه‌سازی پست‌های اشتراک‌ها
   New Content: محتوای جدید
   New Feed Refresh Warning Title: همه خوراک‌های اشتراک تازه‌سازی شوند؟
-  New Feed Refresh Warning: تازه‌سازی همه انواع محتوا برای 1 اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
+  New Feed Refresh Warning: تازه‌سازی همه انواع محتوا برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
   New Since Last Refresh: جدید از آخرین تازه‌سازی
   Mark As Seen: علامت‌گذاری به‌عنوان دیده‌شده
   Mark All as Seen: علامت‌گذاری همه به‌عنوان دیده‌شده
@@ -244,7 +244,7 @@ Subscriptions:
     Feed Already Followed: شما از قبل این خوراک را دنبال می‌کنید.
     Feed Could Not Be Loaded: خوراک بارگیری نشد. بررسی کنید که نشانی به یک خوراک RSS یا Atom اشاره کند.
     Feed Requires Browser Check: این سایت به بررسی مرورگر نیاز دارد که OpenTubeX نمی‌تواند آن را انجام دهد. برای این خوراک نشانی یا نمونهٔ RSSHub دیگری را امتحان کنید.
-    Refresh Errors: 1 خوراک تازه‌سازی نشد. | {count} خوراک تازه‌سازی نشد.
+    Refresh Errors: '{count} خوراک تازه‌سازی نشد. | {count} خوراک تازه‌سازی نشد.'
     Description: برای دنبال کردن سازندگان از پلتفرم‌های دیگر، یک خوراک RSS یا Atom اضافه کنید. نمونه‌های {rssHub} برای بسیاری از سایت‌ها، مانند Twitch، خوراک ارائه می‌کنند.
     Empty Items: خوراک‌های شما در حال حاضر هیچ موردی ندارند.
     No Feeds: هنوز هیچ خوراک RSS را دنبال نمی‌کنید.
@@ -268,7 +268,7 @@ Subscriptions:
     OPML File: پرونده OPML
     Invalid OPML File: این پرونده هیچ خوراکی ندارد.
     Feeds Could Not Be Saved: ذخیره خوراک‌ها ممکن نشد.
-    Feeds Imported: ۱ خوراک جدید درون‌ریزی شد. | {count} خوراک جدید درون‌ریزی شد.
+    Feeds Imported: '{count} خوراک جدید درون‌ریزی شد. | {count} خوراک جدید درون‌ریزی شد.'
     All Feeds Already Followed: شما همه خوراک‌های این پرونده را از قبل دنبال می‌کنید.
     YouTube Channels Skipped: کانال‌های YouTube نادیده گرفته شدند. برای اشتراک در آن‌ها، پرونده را در «داده و فضای ذخیره‌سازی» درون‌ریزی کنید.
     Feeds Exported: خوراک‌های RSS شما برون‌بری شدند.
@@ -302,7 +302,7 @@ Subscriptions:
     Follow: دنبال کردن
     Following: دنبال می‌کنید
     Clips: کلیپ‌ها
-    Refresh Errors: 1 کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد.
+    Refresh Errors: '{count} کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد.'
     Content Tabs: زبانه‌های محتوای پلتفرم‌ها
 Trending:
   Music: موسیقی
@@ -355,7 +355,7 @@ User Playlists:
     More videos could not be loaded.: ویدیوهای بیشتری بارگذاری نشدند.
   AddVideoPrompt:
     Toast:
-      Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
+      Video(s) added to {playlistCount} playlists: ویدیو به {playlistCount} فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
     And N more videos: 'و {count} ویدیوی دیگر | و {count} ویدیوی دیگر'
   Playlist Thumbnail: "تصویر بندانگشتی فهرست پخش"
   YouTube Invalid Characters: "YouTube اجازهٔ استفاده از {characters} را در نام و توضیحات فهرست‌های پخش نمی‌دهد."
@@ -408,7 +408,7 @@ History:
   1 Year: 1 سال
   All Time: همه زمان‌ها
   Custom: سفارشی
-  History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
+  History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
   Restart Required: 'راه‌اندازی مجدد لازم است'
   Experimental Badge: آزمایشی
@@ -1541,7 +1541,7 @@ Settings:
     Invalid channel playback speeds file: "هیچ سرعت پخش کانالی در این فایل پیدا نشد"
     Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
     Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
-    Playlists have been successfully imported: "1/{total} فهرست پخش با موفقیت وارد شد | {count}/{total} فهرست پخش با موفقیت وارد شد"
+    Playlists have been successfully imported: "{count}/{total} فهرست پخش با موفقیت وارد شد | {count}/{total} فهرست پخش با موفقیت وارد شد"
     Import subscription groups hint: برای مرتب کردن کانال‌ها در گروه‌ها، در فایل .csv پس از عنوان کانال ستونی شامل نام گروه‌ها که با نقطه‌ویرگول از هم جدا شده‌اند اضافه کنید، یا یک فایل .opml دارای پوشه درون‌ریزی کنید. گروه‌هایی که وجود ندارند ساخته می‌شوند.
   Sync Settings:
     Signed Out After Restore: 'همگام‌سازی از حساب خارج شد، چون این داده‌های برنامه از یک نسخهٔ پشتیبان یا دستگاهی دیگر بازیابی شده‌اند. برای همگام‌سازی این دستگاه دوباره وارد شوید.'
@@ -2265,7 +2265,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'
   Station: ایستگاه
   Playlist:
-    Unavailable videos are hidden: ۱ ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند
+    Unavailable videos are hidden: '{count} ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند'
   External Media:
     Open Local Network Link: "{url} باز شود؟ این پیوند به این رایانه یا شبکهٔ محلی شما اشاره دارد."
     Dislikes: "دیسلایک | دیسلایک‌ها"
@@ -2489,12 +2489,12 @@ Comments:
   Stop Watching for Replies: "توقف پیگیری پاسخ‌ها"
   Watch for Replies: "پیگیری پاسخ‌ها"
   Image unavailable: "تصویر در دسترس نیست"
-  Comment Count: 1 دیدگاه | {count} دیدگاه
+  Comment Count: '{count} دیدگاه | {count} دیدگاه'
   Show Comments: نمایش دیدگاه‌ها
   Getting comment replies, please wait: پاسخ‌های دیدگاه در حال دریافت‌اند، لطفاً صبر کنید
   Reload Comments: بارگیری دوبارهٔ دیدگاه‌ها
-  Reply Count: 1 پاسخ | {replyCount} پاسخ
-  Hide {replyCount} replies: پنهان کردن 1 پاسخ | پنهان کردن {replyCount} پاسخ
+  Reply Count: '{replyCount} پاسخ | {replyCount} پاسخ'
+  Hide {replyCount} replies: پنهان کردن {replyCount} پاسخ | پنهان کردن {replyCount} پاسخ
   View 1 reply from {channelName}: نمایش 1 پاسخ از {channelName}
   View {replyCount} replies from {channelName} and others: نمایش {replyCount} پاسخ از {channelName} و دیگران
   Comments are turned off: دیدگاه‌ها غیرفعال‌اند
@@ -2513,7 +2513,7 @@ Comments:
   Highlighted reply: پاسخ برجسته
   Search loaded comments: جست‌وجوی دیدگاه‌های بارگیری‌شده
   Close search: بستن جستجو
-  Loaded comment search result count: 1 از {total} دیدگاه بارگیری‌شده | {count} از {total} دیدگاه بارگیری‌شده
+  Loaded comment search result count: '{count} از {total} دیدگاه بارگیری‌شده | {count} از {total} دیدگاه بارگیری‌شده'
   No loaded comments match your filters: هیچ دیدگاه بارگیری‌شده‌ای با پالایه‌ها مطابقت ندارد
   YouTube comment link copied to clipboard: پیوند دیدگاه YouTube در بریده‌دان کپی شد
   Translate to {language}: ترجمه به {language}
@@ -2808,7 +2808,7 @@ Downloads:
   File Not Found: فایل بارگیری‌شده پیدا نشد.
   Files Missing: فایل بارگیری‌شده دیگر در فایل‌سیستم موجود نیست. | فایل‌های بارگیری‌شده دیگر در فایل‌سیستم موجود نیستند.
   Files Available: '{available} از {total} فایل بارگیری‌شده در دسترس است.'
-  More Files: 1 فایل دیگر | {count} فایل دیگر
+  More Files: '{count} فایل دیگر | {count} فایل دیگر'
   Template Used: 'الگو: {name}'
   Template: الگو
   Unsaved: ذخیره‌نشده
@@ -3096,7 +3096,7 @@ Notification Center:
 Platforms:
   Tracks: قطعه‌ها
   Playlists: فهرست‌های پخش
-  Follower Count: 1 دنبال‌کننده | {count} دنبال‌کننده
+  Follower Count: '{count} دنبال‌کننده | {count} دنبال‌کننده'
   Open Website: باز کردن در {platform}
   Channel Not Found: این کانال پیدا نشد.
   Playlist Not Found: این فهرست پخش پیدا نشد.

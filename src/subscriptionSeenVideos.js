@@ -1,50 +1,51 @@
 import { isHistoryEntryWatched } from './history.js'
+import { mergeSeenMarks, parseSeenMarks } from './seenMarks.js'
 
 export const MAX_SUBSCRIPTION_SEEN_VIDEOS = 10000
 
-export function parseSubscriptionSeenVideos(value) {
-  try {
-    const entries = typeof value === 'string' ? JSON.parse(value) : value
-    if (!Array.isArray(entries)) return []
-    return entries.filter(entry => (
-      typeof entry?.videoId === 'string' && entry.videoId.length > 0 &&
-      Number.isFinite(entry.seenAt) && entry.seenAt > 0
-    ))
-  } catch {
-    return []
-  }
-}
+/**
+ * @typedef {{ videoId: string, seenAt: number, unseenAt?: number, isMembersOnly: boolean }} SeenVideoMark
+ * `unseenAt` is the time of the latest reverse action, see {@link SEEN_VIDEO_MARKS}.
+ */
 
-export function mergeSubscriptionSeenVideos(local, remote, historyById = {}) {
-  const byId = new Map()
-  for (const entry of [...parseSubscriptionSeenVideos(local), ...parseSubscriptionSeenVideos(remote)]) {
-    const previous = byId.get(entry.videoId)
+/** @type {import('./seenMarks.js').SeenMarkKind<SeenVideoMark>} */
+export const SEEN_VIDEO_MARKS = {
+  idKey: 'videoId',
+  max: MAX_SUBSCRIPTION_SEEN_VIDEOS,
+  parse: entries => entries.filter(entry => (
+    typeof entry?.videoId === 'string' && entry.videoId.length > 0 &&
+    Number.isFinite(entry.seenAt) && entry.seenAt > 0
+  )),
+  merge(previous, entry) {
     // Retain the reverse action so an older synced seen mark cannot undo it.
     const unseenAt = Math.max(previous?.unseenAt ?? 0,
       Number.isFinite(entry.unseenAt) && entry.unseenAt > 0 ? entry.unseenAt : 0)
-    byId.set(entry.videoId, {
+    return {
       videoId: entry.videoId,
       seenAt: Math.max(previous?.seenAt ?? 0, entry.seenAt),
       ...(unseenAt > 0 ? { unseenAt } : {}),
       // Keep public marks even when a stale device saw the members-only upload.
       isMembersOnly: entry.isMembersOnly === true && previous?.isMembersOnly !== false,
-    })
-  }
-  const byVideoId = (a, b) => a.videoId < b.videoId ? -1 : a.videoId > b.videoId ? 1 : 0
-  // Evict oldest marks only after removing watched videos. Break timestamp ties
-  // by ID so devices retain the same set regardless of merge order.
-  return [...byId.values()]
-    // Merge both halves before pruning: a reverse mark still needs to clear
-    // older watched history on other devices, even after another seen action.
-    .filter(entry => entry.unseenAt > 0 || !isHistoryEntryWatched(historyById[entry.videoId]))
-    .sort((a, b) => Math.max(b.seenAt, b.unseenAt ?? 0) - Math.max(a.seenAt, a.unseenAt ?? 0) || byVideoId(a, b))
-    .slice(0, MAX_SUBSCRIPTION_SEEN_VIDEOS)
-    .sort(byVideoId)
+    }
+  },
+  latest: entry => Math.max(entry.seenAt, entry.unseenAt ?? 0),
 }
 
-// Keep consecutive menu actions ordered even within the same millisecond.
-export function nextSubscriptionSeenTimestamp(marks) {
-  return parseSubscriptionSeenVideos(marks).reduce((timestamp, entry) => (
-    Math.max(timestamp, entry.seenAt + 1, Number.isFinite(entry.unseenAt) ? entry.unseenAt + 1 : 0)
-  ), Date.now())
+export function parseSubscriptionSeenVideos(value) {
+  return parseSeenMarks(SEEN_VIDEO_MARKS, value)
+}
+
+/**
+ * Whether a mark stays in the list: watched videos leave it, but a reverse
+ * mark still needs to clear older watched history on other devices, even
+ * after another seen action.
+ * @param {Record<string, any>} historyById
+ */
+export function keepsSeenVideoMark(historyById) {
+  return entry => entry.unseenAt > 0 || !isHistoryEntryWatched(historyById[entry.videoId])
+}
+
+// Evict oldest marks only after removing watched videos.
+export function mergeSubscriptionSeenVideos(local, remote, historyById = {}) {
+  return mergeSeenMarks(SEEN_VIDEO_MARKS, local, remote, keepsSeenVideoMark(historyById))
 }

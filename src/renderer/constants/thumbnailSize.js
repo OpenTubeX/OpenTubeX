@@ -83,6 +83,49 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
 }
 
 /**
+ * The cards per row of a grid this wide with the track size that
+ * {@link getThumbnailGridStyles} sets. A narrower grid holds no more.
+ * @param {number} thumbnailSize
+ * @param {number} gridWidth
+ * @param {number} viewportWidth
+ * @param {number} columns as for {@link getThumbnailGridStyles}
+ * @param {number} densityScale
+ * @param {boolean} youtubeStyleShorts Shorts grids have their own track size in wider windows
+ */
+export function getThumbnailGridColumnCount(thumbnailSize, gridWidth, viewportWidth, columns, densityScale, youtubeStyleShorts) {
+  const gap = GRID_GAP * densityScale
+  const track = youtubeStyleShorts && viewportWidth > PHONE_THUMBNAIL_VIEWPORT_WIDTH
+    ? DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * thumbnailSize / DEFAULT_THUMBNAIL_SIZE
+    : Number.parseFloat(getThumbnailGridStyles(thumbnailSize, gridWidth, viewportWidth, gridWidth, columns, densityScale)['--thumbnail-grid-size'])
+  // A fixed column count divides the width exactly, so absorb rounding errors.
+  return Math.max(1, Math.floor((gridWidth + gap) / (Math.min(track, gridWidth) + gap) + 1e-6))
+}
+
+/**
+ * The narrowest card that a grid at least `minGridWidth` and at most
+ * `maxGridWidth` wide lays out with the track size that
+ * {@link getThumbnailGridStyles} sets. Cards widen with the grid until another
+ * one fits per row, which happens at whole pixel widths, so checking those and
+ * the smallest width finds it.
+ * @param {number} thumbnailSize
+ * @param {number} minGridWidth
+ * @param {number} maxGridWidth
+ * @param {number} viewportWidth
+ * @param {number} columns as for {@link getThumbnailGridStyles}
+ * @param {number} densityScale
+ */
+export function getNarrowestGridCardWidth(thumbnailSize, minGridWidth, maxGridWidth, viewportWidth, columns, densityScale) {
+  const getCardWidth = gridWidth => Math.min(gridWidth, Number.parseFloat(
+    getThumbnailGridStyles(thumbnailSize, gridWidth, viewportWidth, gridWidth, columns, densityScale)['--thumbnail-grid-size']
+  ))
+  let narrowest = getCardWidth(minGridWidth)
+  for (let gridWidth = Math.ceil(minGridWidth); gridWidth <= maxGridWidth; gridWidth++) {
+    narrowest = Math.min(narrowest, getCardWidth(gridWidth))
+  }
+  return narrowest
+}
+
+/**
  * List thumbnails scale off fixed values only. Set these on the document body
  * for general lists or on a playlist page for its independent preference.
  * @param {number} thumbnailSize

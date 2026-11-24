@@ -1094,7 +1094,7 @@ test.describe('OpenTubeX sync server', () => {
       await expect.poll(() => historyIds(other.page)).toEqual([separateVideoId])
       expect(await other.page.evaluate(id => window.$store.getters.getProfileList.find(profile => profile._id === id).subscriptions.map(channel => channel.id), separateId)).toEqual([channelId])
       await expect.poll(() => other.page.evaluate(() => window.$store.getters.getPlaylistBookmarks.map(bookmark => bookmark.playlist.id))).toEqual(['PLseparate'])
-      await expect.poll(() => other.page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos).map(mark => mark.videoId))).toEqual(['separateSeen'])
+      await expect.poll(() => other.page.evaluate(() => [...window.$store.getters.getSubscriptionSeenVideos.byId.values()].map(mark => mark.videoId))).toEqual(['separateSeen'])
       await expect.poll(() => other.page.evaluate(({ id, channelId }) => window.$store.getters.getProfileList
         .find(profile => profile._id === id).subscriptions.find(channel => channel.id === channelId).dailyVideoLimit, { id: separateId, channelId })).toBe(3)
     } finally {

@@ -4,9 +4,9 @@
     tag="div"
     name="feed"
     :appear="appear"
-    :duration="transitionDurations"
-    :move-class="moveClass"
-    :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
+    :duration="getTransitionDurations()"
+    :move-class="getMoveClass()"
+    :data-skip-move="getMoveClass() === 'feed-move-suppressed' ? '' : null"
     :data-feed-enter-together="appear && !reducedMotion ? '' : null"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
@@ -29,13 +29,13 @@ import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdat
 
 import store from '../../store/index'
 
-import { FULL_WIDTH_COLUMNS, getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
 import { getUiDensityScale } from '../../constants/uiDensity'
 import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
-import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
+import { GRID_COLUMNS_SETTINGS, getGridColumns, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
-import { measureStableGridWidth } from './gridWidth'
+import { getLastScrollY, getViewportWidth } from '../../helpers/viewport'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
 import { findAdjacentTileIndex, focusTile, getPageTiles, getTileDirection, isTileFocusable, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
@@ -91,7 +91,6 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // costs a layout pass over the whole feed. Dragging the thumbnail size slider
 // emits an event per step, which turned that into hundreds of forced layouts.
 let gridWidth = 0
-let renderedGridWidth = 0
 let active = true
 
 function updateGridSliderLimit() {
@@ -114,48 +113,47 @@ onDeactivated(() => {
 // just once, right after mount.
 const thumbnailSizeReady = ref(false)
 
-// While the container itself is being sized or resized (initial layout,
-// window resize, or a modal's
-// scrollbar compensation nudging the layout by a fraction of a pixel at
-// fractional display scales), the FLIP move transition must not run —
-// it should only animate actual list changes. 'feed-move-suppressed' has
-// no transition, so the TransitionGroup skips the move handling entirely.
-const suppressMoveTransition = ref(false)
+// While the container itself is being sized or resized (initial layout or
+// window resize), the FLIP move transition must not run — it should only
+// animate actual list changes. 'feed-move-suppressed' has no transition, so
+// the TransitionGroup skips the move handling entirely. Only renders during
+// the resize read this. Rendering again just to lift it would have
+// TransitionGroup measure every card, which ran 100 ms after each grid
+// mounted, such as while its page was still opening.
+let suppressMoveTransition = false
 let suppressResetTimeout = null
 
 const systemReducedMotion = usePhoneLayout('(prefers-reduced-motion: reduce)')
 const reducedMotion = computed(() => store.getters.getReducedMotion === 'on' ||
   (store.getters.getReducedMotion === 'system' && systemReducedMotion.value))
 
+// Only the New feed fades departing cards; other lists remove them immediately.
+// Cards only leave in later renders, so this is known by then. Reading the
+// template ref while rendering instead rendered every grid a second time once
+// it mounted, and TransitionGroup measures each card for that render.
+let inNewFeed = false
+
 // Vue otherwise infers timing with getComputedStyle for every entering card,
 // interleaving style reads with class writes across the whole incoming batch.
-const transitionDurations = computed(() => {
+function getTransitionDurations() {
   return {
     enter: reducedMotion.value ? 0 : 300 / animationSpeedMultiplier.value,
-    // Only the New feed fades departing cards; other lists remove them immediately.
-    leave: reducedMotion.value || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
+    leave: reducedMotion.value || !inNewFeed ? 0 : 200 / animationSpeedMultiplier.value
   }
-})
+}
 
 // 'feed-move-suppressed' has no transition, and data-skip-move tells the
 // patched TransitionGroup not to measure every child before each update.
-const moveClass = computed(() => {
-  const suppressed = suppressMoveTransition.value ||
+function getMoveClass() {
+  const suppressed = suppressMoveTransition ||
     props.disableMoveTransition ||
     reducedMotion.value ||
     props.itemCount > MOVE_TRANSITION_MAX_ITEMS
 
   return suppressed ? 'feed-move-suppressed' : undefined
-})
+}
 
 const fullWidth = computed(() => store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth')
-
-// Grids forced on a list preference, such as Shorts, keep automatic columns.
-function getGridColumns() {
-  const viewType = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
-  if (viewType === 'fullWidth') return FULL_WIDTH_COLUMNS
-  return viewType === 'grid' ? store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]] : 0
-}
 
 function applyThumbnailSizeStyles() {
   const element = gridElement.value?.$el
@@ -167,9 +165,9 @@ function applyThumbnailSizeStyles() {
   const styles = getThumbnailGridStyles(
     store.state.settings[thumbnailSizeSetting],
     gridWidth,
-    window.innerWidth,
-    renderedGridWidth,
-    getGridColumns(),
+    getViewportWidth(),
+    gridWidth,
+    getGridColumns(thumbnailSizeSetting),
     getUiDensityScale(store.state.settings.uiDensity)
   )
 
@@ -324,8 +322,6 @@ function handleBeforeLeave(element) {
 
 let resizeObserver = null
 let phoneWidthQuery = null
-let observedScrollbarWidth = 0
-let observedViewportWidth = null
 let pageAtBottom = false
 
 // A newer measurement, deactivation or unmount cancels pending settle frames.
@@ -349,6 +345,12 @@ function keepPageAtBottom(frames, generation) {
 }
 
 function updatePageAtBottom() {
+  // Only a scrolled page can be at its end, and reading whether it is lays out
+  // a page that has changed since the last layout, such as one mounting.
+  if (getLastScrollY() <= 0) {
+    pageAtBottom = false
+    return
+  }
   const root = document.documentElement
   pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
 }
@@ -360,36 +362,21 @@ function updatePageAtBottom() {
 function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
   const element = gridElement.value?.$el
   if (!element) return
-  const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
-    document.body.style.paddingInlineEnd !== ''
-  const measurement = measureStableGridWidth(
-    contentWidth,
-    observedScrollbarWidth,
-    observedViewportWidth,
-    window.innerWidth,
-    document.documentElement.clientWidth,
-    scrollbarCompensated
-  )
-  observedScrollbarWidth = measurement.scrollbarWidth
-  observedViewportWidth = measurement.viewportWidth
 
-  const widthAdjustmentChanged = contentWidth - measurement.gridWidth !== renderedGridWidth - gridWidth
-  renderedGridWidth = contentWidth
-
-  if (measurement.gridWidth !== gridWidth) {
+  if (contentWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
     // page that was scrolled to its end above the new end. This includes the
     // first measurement, when a grid replaces a list at the end of the page.
     // Resize observations run after layout and any restored scroll position.
     if (gridWidth === 0) updatePageAtBottom()
-    const keepBottom = pageAtBottom && measurement.gridWidth > 0 && !element.closest('[inert]')
-    suppressMoveTransition.value = true
+    const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert]')
+    suppressMoveTransition = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
-      suppressMoveTransition.value = false
+      suppressMoveTransition = false
     }, 100)
 
-    gridWidth = measurement.gridWidth
+    gridWidth = contentWidth
     updateGridSliderLimit()
     applyThumbnailSizeStyles()
     thumbnailSizeReady.value = gridWidth > 0
@@ -399,9 +386,12 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
       const generation = ++keepBottomGeneration
       nextTick(() => keepPageAtBottom(2, generation))
     }
-  } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
-    // Keeps the stretched size equal to the stable one under a transient
-    // scrollbar, and applies the phone column minimum to a constrained grid.
+    // The cards resize with the new width, and the observation for that
+    // updates whether the page is at its end.
+    return
+  }
+  if (viewportCrossedPhoneWidth) {
+    // Applies the phone column minimum to a constrained grid.
     applyThumbnailSizeStyles()
   }
   updatePageAtBottom()
@@ -419,6 +409,7 @@ function handlePhoneWidthChange() {
 }
 
 onMounted(() => {
+  inNewFeed = gridElement.value.$el.closest('.newFeed') !== null
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
 

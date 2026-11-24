@@ -40,6 +40,7 @@ for (const hidden of [false, true]) {
     const route = reactive({ fullPath: '/watch/video' })
     const preview = ref(null)
     const viewport = { scrollY: 0 }
+    let lastScrollY = 0
     const nav = { querySelector: () => null }
     const frames = new Map()
     const scope = effectScope()
@@ -55,6 +56,8 @@ for (const hidden of [false, true]) {
       useTemplateRef: () => ref({ closest: () => nav }),
       store: { getters: { getAlwaysShowNavigationBar: false } },
       createMobileNavigationScroll,
+      readScrollPosition: () => (lastScrollY = viewport.scrollY),
+      lastScrollPosition: () => lastScrollY,
       mobileNavigationMinimizePreview: preview,
       window: viewport,
       document: { scrollingElement: { scrollHeight: 3000, clientHeight: 800 } },

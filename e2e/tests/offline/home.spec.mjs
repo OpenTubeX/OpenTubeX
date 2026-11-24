@@ -274,6 +274,22 @@ test('opens the subscriptions New feed from its Home summary', async ({ page }) 
 
   await page.locator('[data-subscription-feed-tab="videos"]').click()
   await expect(page).toHaveURL(/#\/subscriptions\?tab=videos$/)
+
+  // Both pages reuse the feed built for earlier visits. Seen marks set while
+  // a page is closed must still reach it when it opens again.
+  await page.evaluate(() => window.$store.dispatch('markSubscriptionVideoAsSeen', 'homefeed001'))
+  await goTo(page, 'home')
+  await expect(section.getByText('New Home short', { exact: true })).toBeVisible()
+  await expect(section.getByText('New Home video', { exact: true })).toHaveCount(0)
+  await page.evaluate(() => window.$store.dispatch('markSubscriptionVideoAsSeen', 'homefeed002'))
+  await section.getByRole('link', { name: 'View all' }).click()
+  await expect(page.locator('[data-subscription-feed-tab="all"]')).toHaveAttribute('aria-selected', 'true')
+  await page.locator('[data-new-feed-tab="videos"]').click()
+  await expect(page.getByText('Older Home video 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('New Home video', { exact: true })).toHaveCount(0)
+  await page.locator('[data-new-feed-tab="shorts"]').click()
+  await expect(page.locator('[data-new-feed-tab="shorts"]')).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByText('New Home short', { exact: true })).toHaveCount(0)
 })
 
 test('activates an existing video tab from Continue watching', async ({ page }) => {

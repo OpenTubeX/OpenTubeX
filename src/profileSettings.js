@@ -9,7 +9,8 @@ import { areJsonValuesEqual } from './renderer/helpers/jsonValues.js'
  * the values that differ, in the setting `profileSettings-<hex profile ID>`,
  * which also syncs under that key. Every other setting uses the shared value.
  * The ID holds no dot, as it also names its edit time in
- * `syncServerSettingUpdatedAt`, whose field names can't.
+ * `syncServerSettingUpdatedAt`, whose field names can't, and with a setting's
+ * ID the edit time of that setting, see `profileSettingEditTimeId`.
  */
 
 const PROFILE_SETTINGS_PREFIX = 'profileSettings-'
@@ -118,6 +119,36 @@ export function canHaveOwnSettings(profileId) {
  */
 export function profileSettingsId(profileId) {
   return PROFILE_SETTINGS_PREFIX + profileDatastorePrefix(profileId).slice('profile-'.length)
+}
+
+/**
+ * The name under which `syncServerSettingUpdatedAt` saves when this device
+ * last edited a profile's own value of a setting, also when it went back to
+ * the shared value, so sync can tell which device's edit of it is newer.
+ * @param {string} id the ID of the profile's settings, see `profileSettingsId`
+ * @param {string} settingId
+ */
+export function profileSettingEditTimeId(id, settingId) {
+  return `${id}/${settingId}`
+}
+
+/**
+ * The edit time names, see `profileSettingEditTimeId`, of the settings that
+ * differ between two versions of a profile's own settings.
+ * @param {string} id the ID of the profile's settings
+ * @param {unknown} previous the saved settings, or null if the profile uses the shared ones
+ * @param {unknown} next
+ * @returns {string[]}
+ */
+export function changedProfileSettingEditTimeIds(id, previous, next) {
+  // Settings from another realm, such as a test's, have another prototype.
+  const settingsOf = value => value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {}
+  const before = settingsOf(previous)
+  const after = settingsOf(next)
+  const valueOf = (settings, settingId) => Object.hasOwn(settings, settingId) ? settings[settingId] : undefined
+  return [...new Set([...Object.keys(before), ...Object.keys(after)])]
+    .filter(settingId => !sameSettingValue(valueOf(before, settingId), valueOf(after, settingId)))
+    .map(settingId => profileSettingEditTimeId(id, settingId))
 }
 
 /**

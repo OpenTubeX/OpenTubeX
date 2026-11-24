@@ -6,6 +6,7 @@ import Datastore from '@seald-io/nedb'
 import { migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../src/search-history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
+import * as seenMarks from '../../src/seenMarks.js'
 import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
 import { isValidSeparateProfileId, profileDatastorePrefix } from '../../src/datastores/profileDatastoreNames.js'
@@ -55,6 +56,7 @@ function fixture() {
   const handlers = vm.runInNewContext(`${handlerSource}\n({ scopedHandlers, onScopeDataDeleted, Profiles, Settings })`, {
     db,
     ...seenVideos,
+    ...seenMarks,
     migrateLegacyHistoryRecord,
     newestUniqueHistoryRecords,
     mergeSearchHistoryEntries,

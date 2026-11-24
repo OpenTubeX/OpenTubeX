@@ -1,6 +1,6 @@
 // @ts-check
 import { ipcRenderer, webFrame } from 'electron/renderer'
-import { DBActions, IpcChannels } from '../constants.js'
+import { DBActions, IpcChannels, SyncEvents } from '../constants.js'
 import { tabs } from './tabs.js'
 
 /**
@@ -1482,7 +1482,8 @@ export default {
    */
   handleSyncSettings: (handler) => {
     listenForSync(IpcChannels.SYNC_SETTINGS, ({ event, data, revision }) => {
-      if (recordSettingRevision(data._id, revision)) handler(event, data)
+      // Seen-mark changes apply in any order, and never replace the setting.
+      if (event === SyncEvents.SETTINGS.MERGE_SEEN_MARKS || recordSettingRevision(data._id, revision)) handler(event, data)
     })
   },
 

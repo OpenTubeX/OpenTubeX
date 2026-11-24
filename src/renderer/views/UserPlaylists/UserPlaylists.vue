@@ -161,6 +161,7 @@
         :playlist-items-length="activeData.length"
         :is-video-dragging="draggedPlaylistId != null"
         :disable-move-transition="draggedPlaylistId != null"
+        :thumbnail-rows="getPlaylistGridRows"
         @pointerdown.capture="startPlaylistDrag"
         @move-video-up="id => movePlaylist(id, index => index - 1)"
         @move-video-down="id => movePlaylist(id, index => index + 1)"
@@ -300,6 +301,23 @@ const showLoadMoreButton = ref(false)
 const query = ref('')
 const doSearchPlaylistsWithMatchingVideos = ref(false)
 const activeData = ref([])
+
+/**
+ * Playlist cards have no row shell minimum (UserPlaylists.css), so the list
+ * sizes the rows it mounts up front by their thumbnails. The grid fills the
+ * page's card, which is at most 92dvw wide, inside FtCard's inline padding.
+ * The cards pad their thumbnails with _ft-list-item.scss's inline padding,
+ * and add at least their bottom padding from UserPlaylists.css, the
+ * thumbnail's own padding and one line of the title.
+ * @param {{ contentWidth: number, viewportWidth: number, densityScale: number }} layout
+ */
+function getPlaylistGridRows({ contentWidth, viewportWidth, densityScale }) {
+  return {
+    minGridWidth: Math.min(contentWidth, viewportWidth * 0.92) - 2 * 16 * densityScale,
+    thumbnailInset: 2 * 6 * densityScale,
+    textHeight: 6 + 12 * densityScale + 18 * store.getters.getFontSize / 100
+  }
+}
 
 const SORT_BY_VALUES = Object.values(SORT_BY_OPTIONS)
 

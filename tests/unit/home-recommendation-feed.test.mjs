@@ -8,6 +8,7 @@ import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
 import { isOnAiSlopList } from '../../src/renderer/helpers/aiSlopList.js'
+import { keepComputedLinked } from '../../src/renderer/helpers/keepComputedLinked.js'
 
 const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptionFilters.js', import.meta.url), 'utf8')
 const premiereStart = subscriptionsSource.indexOf('export function isUpcomingPremiere(')
@@ -23,7 +24,7 @@ const source = (await readFile(new URL('../../src/renderer/composables/useHomeRe
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function ', 'function ')
 
-function createFeed({ incognito = false, records = [], candidates = [], playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
+function createFeed({ incognito = false, records = [], candidates = [], failedSources = 0, playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
   const state = reactive({ recommendations: { recommendationRecords: Object.fromEntries(records.map(record => [record.videoId, record])) } })
   const getters = reactive({
     getEnableHomeRecommendations: true,
@@ -74,8 +75,9 @@ function createFeed({ incognito = false, records = [], candidates = [], playlist
       const keptIds = new Set(kept.map(video => video.videoId))
       return videos.filter(video => !keptIds.has(video.videoId)).slice(0, limit - kept.length).map(video => ({ video, reason: { type: 'topic', text: 'Linux' } }))
     },
-    collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources: 0 } },
+    collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources } },
     requestAnimationFrame: callback => setTimeout(callback, 0),
+    keepComputedLinked,
   }
   const useHomeRecommendations = compileFunction(`${source}\nreturn useHomeRecommendations`, Object.keys(dependencies))(...Object.values(dependencies))
   function mount() {
@@ -125,6 +127,29 @@ test('revisiting Home restores the completed feed immediately without fetching o
     second.stop()
   }
 })
+
+for (const { result, candidates } of [
+  { result: 'restores a feed that some sources failed to add to', candidates: [{ videoId: 'candidate-0' }] },
+  { result: 'retries when the failed sources left no feed', candidates: [] },
+]) {
+  test(`revisiting Home ${result}`, async () => {
+    const first = createFeed({ candidates, failedSources: 1 })
+    await waitForFeed(first.feed)
+    const previousWork = { ...first.work }
+    first.stop()
+
+    const second = first.mount()
+    try {
+      await waitForFeed(second.feed)
+      assert.deepEqual(second.work, candidates.length > 0
+        ? previousWork
+        : { profiles: previousWork.profiles + 1, rankings: previousWork.rankings + 1, requests: previousWork.requests + 1 })
+      assert.deepEqual(second.feed.recommendations.value.map(video => video.videoId), candidates.map(video => video.videoId))
+    } finally {
+      second.stop()
+    }
+  })
+}
 
 test('loading more appends below the shown feed and fills slots of shown videos watched or hidden since', async () => {
   const { feed, getters, state, stop } = createFeed({

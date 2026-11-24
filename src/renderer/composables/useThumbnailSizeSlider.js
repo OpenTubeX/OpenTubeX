@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, ref, shallowReactive } from 'vue'
 
 import store from '../store/index'
 import {
+  FULL_WIDTH_COLUMNS,
   MAX_THUMBNAIL_SIZE,
   PHONE_THUMBNAIL_MAX_SIZE,
   PHONE_THUMBNAIL_VIEWPORT_WIDTH
@@ -19,6 +20,17 @@ export const VIEW_TYPE_SETTINGS = {
 export const GRID_COLUMNS_SETTINGS = {
   thumbnailSize: 'gridColumns',
   playlistThumbnailSize: 'playlistGridColumns'
+}
+
+/**
+ * The `columns` value of getThumbnailGridStyles for a thumbnail size setting.
+ * Grids forced on a list preference, such as Shorts, keep automatic columns.
+ * @param {string} settingKey
+ */
+export function getGridColumns(settingKey) {
+  const viewType = store.state.settings[VIEW_TYPE_SETTINGS[settingKey]]
+  if (viewType === 'fullWidth') return FULL_WIDTH_COLUMNS
+  return viewType === 'grid' ? store.state.settings[GRID_COLUMNS_SETTINGS[settingKey]] : 0
 }
 
 const visibleGrids = shallowReactive(new Map())

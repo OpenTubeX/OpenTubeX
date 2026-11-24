@@ -1,7 +1,8 @@
 import { computed, isReactive, shallowRef } from 'vue'
-import { parseSubscriptionSeenVideos, mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
+import { mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
 import { isHistoryEntryWatched } from '../../history.js'
-import { parseSubscriptionSeenPosts, mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
+import { mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
+import { isSeenMarksState } from '../../seenMarks.js'
 import { feedEntryInScope } from '../../subscriptionFeedState.js'
 
 const cacheSelectors = new WeakMap()
@@ -26,10 +27,15 @@ export function applySubscriptionSeenPostsToCache(cache, seenPosts, scope = null
 }
 
 function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idKey, merge, scope) {
-  const indexSeenEntries = () => new Map(merge([], seenEntries).map(entry => [entry[idKey], entry]))
+  // The store's marks are indexed already, and reactive per video.
+  const index = entries => isSeenMarksState(entries)
+    ? entries.byId
+    : new Map(merge([], entries).map(entry => [entry[idKey], entry]))
+  const indexSeenEntries = () => index(seenEntries)
   // Plain mutable inputs cannot invalidate computed results. Keep those calls
   // uncached, as with the feed's entry snapshots.
-  const canCache = isReactive(cache) && (typeof seenEntries === 'string' || isReactive(seenEntries))
+  const canCache = isReactive(cache) && (typeof seenEntries === 'string' || isReactive(seenEntries) ||
+    isSeenMarksState(seenEntries))
   let selectors
   if (canCache) {
     selectors = cacheSelectors.get(cache)
@@ -39,7 +45,7 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
         source,
         entriesKey,
         scope,
-        index: computed(() => new Map(merge([], source.value).map(entry => [entry[idKey], entry]))),
+        index: computed(() => index(source.value)),
         channels: new WeakMap()
       }
       cacheSelectors.set(cache, selectors)
@@ -120,7 +126,9 @@ export async function syncSubscriptionSeenVideos(client, store, assertActive = (
   assertActive()
   await store.dispatch('mergeSubscriptionSeenVideos', remote)
   assertActive()
-  const merged = parseSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos)
+  // Like the merges, the upload leaves out videos watched since their marks.
+  const merged = mergeSubscriptionSeenVideos(store.state.settings.subscriptionSeenVideos,
+    [], store.state.history?.historyCacheById ?? {})
   const unseenById = new Map(merged.filter(entry => entry.unseenAt >= entry.seenAt)
     .map(entry => [entry.videoId, entry.unseenAt]))
   if (unseenById.size > 0) {
@@ -155,7 +163,7 @@ export async function syncSubscriptionSeenPosts(client, store, assertActive = ()
   assertActive()
   await store.dispatch('mergeSubscriptionSeenPosts', remote)
   assertActive()
-  const merged = parseSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts)
+  const merged = mergeSubscriptionSeenPosts(store.state.settings.subscriptionSeenPosts, [])
   await client.putSeenPosts(merged)
   return merged.length
 }

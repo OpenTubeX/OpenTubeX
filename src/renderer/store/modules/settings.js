@@ -38,9 +38,11 @@ import { normalizeSubscriptionTabs } from '../../helpers/subscriptionTabs.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
-import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
-import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
-import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
+import { seenMarksState, withSeenMarkChanges } from '../../helpers/seenMarksState.js'
+import { hasSeenMarkChanges } from '../../../seenMarks.js'
+import { SEEN_VIDEO_MARKS } from '../../../subscriptionSeenVideos.js'
+import { SEEN_POST_MARKS } from '../../../subscriptionSeenPosts.js'
+import { RSS_FEED_SEEN_ITEM_MARKS } from '../../helpers/rssFeedSeenItems.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
 import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
@@ -50,12 +52,14 @@ import { networkMetered } from '../../helpers/player/meteredNetworkQuality.js'
 import {
   SHARED_ONLY_SETTINGS,
   canHaveOwnSettings,
+  changedProfileSettingEditTimeIds,
   collectProfileSettings,
   isPlainObject,
   isProfileSettingsId,
   ownSettingsOf,
   planProfileSettingsOf,
   profileIdFromSettingsId,
+  profileSettingEditTimeId,
   profileSettingsId,
   profileSettingsOf,
   sameSettingValue,
@@ -484,23 +488,28 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 }
 
 /**
- * Saves the edit time `update` returns for `settingId`, for sync, or removes it
- * for `undefined`. Windows can edit different settings at once, so it reads the
- * saved times inside a lock they share.
+ * Saves the edit time `update` returns for each of `settingIds`, for sync, or
+ * removes it for `undefined`. Windows can edit different settings at once, so
+ * it reads the saved times inside a lock they share.
  * @param {Function} commit
- * @param {string} settingId
- * @param {(editedAt: number | undefined) => number | undefined} update
- * @returns {Promise<boolean>} whether the edit time was saved
+ * @param {string | string[]} settingIds
+ * @param {(editedAt: number | undefined, settingId: string) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit times were saved
  */
-function updateSettingSyncTimestamp(commit, settingId, update) {
+function updateSettingSyncTimestamp(commit, settingIds, update) {
   return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
     const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
-    const editedAt = update(updatedAt[settingId])
-    if (editedAt === updatedAt[settingId]) return
-    if (editedAt === undefined) delete updatedAt[settingId]
-    else updatedAt[settingId] = editedAt
+    let changed = false
+    for (const settingId of [settingIds].flat()) {
+      const editedAt = update(updatedAt[settingId], settingId)
+      if (editedAt === updatedAt[settingId]) continue
+      changed = true
+      if (editedAt === undefined) delete updatedAt[settingId]
+      else updatedAt[settingId] = editedAt
+    }
+    if (!changed) return
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
   })
@@ -519,15 +528,18 @@ function updateSettingSyncTimestamp(commit, settingId, update) {
  * @param {string} settingId
  * @param {() => Promise<T>} save
  * @param {number} [editedAt]
+ * @param {string[]} [editedParts] other edit times to save with it, such as
+ *   those of the settings a profile's own settings change, see `profileSettingEditTimeId`
  * @returns {Promise<T>}
  */
-function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now(), editedParts = []) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY && !isProfileSettingsId(settingId)) return save()
 
   return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
-    let previous
-    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
-      previous = saved
+    const ids = [settingId, ...editedParts]
+    const previous = new Map()
+    const recorded = await updateSettingSyncTimestamp(commit, ids, (saved, id) => {
+      previous.set(id, saved)
       return editedAt
     })
     if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
@@ -535,7 +547,7 @@ function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
       return await save()
     } catch (error) {
       // Keep an edit time that something else saved meanwhile.
-      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      await updateSettingSyncTimestamp(commit, ids, (saved, id) => saved === editedAt ? previous.get(id) : saved)
       throw error
     }
   })
@@ -723,7 +735,7 @@ function saveProfileSettingValue(commit, profileId, settingId, value) {
     const settings = { ...saved }
     if (value === undefined) delete settings[settingId]
     else settings[settingId] = value
-    await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+    await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings), Date.now(), [profileSettingEditTimeId(id, settingId)])
     commit('setProfileOwnSettings', { profileId, settings })
   })
 }
@@ -883,7 +895,17 @@ export function profileSettingsPlugin(store) {
 
 // #endregion profile settings
 
+/** The settings that hold seen marks, and their kinds */
+const SEEN_MARK_KINDS = {
+  subscriptionSeenVideos: SEEN_VIDEO_MARKS,
+  subscriptionSeenPosts: SEEN_POST_MARKS,
+  rssFeedSeenItems: RSS_FEED_SEEN_ITEM_MARKS,
+}
+
 const customState = {
+  // Parsed once, and changed per merged mark, see `applySeenMarkChanges`
+  ...Object.fromEntries(Object.entries(SEEN_MARK_KINDS)
+    .map(([setting, kind]) => [setting, seenMarksState(kind, DEFAULT_SETTINGS[setting])])),
   profileSettingsState: {
     /** The profile whose own settings show, or null for the shared settings */
     applied: null,
@@ -1073,6 +1095,14 @@ const customMutations = {
   setTabBarPosition: (state, value) => {
     assignSharedSetting(state, 'tabBarPosition', normalizeTabBarPosition(value))
   },
+  // Each takes a saved value, which replaces the marks.
+  ...Object.fromEntries(Object.entries(SEEN_MARK_KINDS).map(([setting, kind]) => [defaultMutationId(setting), (state, value) => {
+    state[setting] = seenMarksState(kind, value)
+  }])),
+  // Takes what a merge of the marks in `setting` changed, see `SeenMarkChanges`.
+  applySeenMarkChanges: (state, { setting, changes }) => {
+    state[setting] = withSeenMarkChanges(SEEN_MARK_KINDS[setting], state[setting], changes)
+  },
 
   // The own settings of each profile that has them, by profile ID
   setProfileSettingsList: (state, profiles) => {
@@ -1261,13 +1291,13 @@ const customActions = {
   // profile's own, or the shared ones.
   async mergeSubscriptionSeenVideos({ dispatch }, update) {
     const scope = getDataScope()
-    const saved = await DBSettingHandlers.mergeSeenVideos(update)
-    if (scope === getDataScope()) await dispatch('applySubscriptionSeenVideos', saved)
+    const changes = await DBSettingHandlers.mergeSeenVideos(update)
+    if (scope === getDataScope()) await dispatch('applySeenMarkChanges', { setting: 'subscriptionSeenVideos', changes })
   },
   async mergeSubscriptionSeenPosts({ dispatch }, update) {
     const scope = getDataScope()
-    const saved = await DBSettingHandlers.mergeSeenPosts(update)
-    if (scope === getDataScope()) await dispatch('applySubscriptionSeenPosts', saved)
+    const changes = await DBSettingHandlers.mergeSeenPosts(update)
+    if (scope === getDataScope()) await dispatch('applySeenMarkChanges', { setting: 'subscriptionSeenPosts', changes })
   },
   /**
    * Shows the seen marks of the data scope a profile switch shows, which
@@ -1281,25 +1311,14 @@ const customActions = {
     SCOPED_SEEN_MARK_SETTINGS.forEach((setting, index) => commit(defaultMutationId(setting), values[index] ?? '[]'))
     return true
   },
-  applySubscriptionSeenPosts({ commit, state }, saved) {
-    const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
-    if (value !== state.subscriptionSeenPosts) commit('setSubscriptionSeenPosts', value)
-  },
   async mergeRssFeedSeenItems({ dispatch }, update) {
-    const saved = await DBSettingHandlers.mergeSeenRssItems(update)
-    await dispatch('applyRssFeedSeenItems', saved)
+    const changes = await DBSettingHandlers.mergeSeenRssItems(update)
+    await dispatch('applySeenMarkChanges', { setting: 'rssFeedSeenItems', changes })
   },
-  applyRssFeedSeenItems({ commit, state }, saved) {
-    // Another window's newer update may arrive before this request's reply.
-    const value = JSON.stringify(mergeRssFeedSeenItems(state.rssFeedSeenItems, saved))
-    if (value !== state.rssFeedSeenItems) commit('setRssFeedSeenItems', value)
-  },
-  applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
-    // Another window's newer update may arrive before this request's reply.
-    const value = JSON.stringify(mergeSubscriptionSeenVideos(
-      state.subscriptionSeenVideos, saved, rootGetters.getHistoryCacheById
-    ))
-    if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
+  // Another window's newer update may arrive before this request's reply,
+  // which the changes allow.
+  applySeenMarkChanges({ commit }, { setting, changes }) {
+    if (hasSeenMarkChanges(changes)) commit('applySeenMarkChanges', { setting, changes })
   },
   // Saves an edit of a synced value that is not a setting, such as the custom themes.
   saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
@@ -1624,7 +1643,8 @@ const customActions = {
       // Turning them off saves null rather than deleting them, so other
       // windows and devices learn about it.
       const settings = enabled ? {} : null
-      await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings))
+      await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, settings), Date.now(),
+        changedProfileSettingEditTimeIds(id, saved, settings))
       commit('setProfileOwnSettings', { profileId, settings })
     }))
   },
@@ -1668,7 +1688,8 @@ const customActions = {
       const saved = await DBSettingHandlers.findValue(id)
       if (!isPlainObject(saved) && !await profileExists(profileId)) throw new Error('The profile no longer exists')
       if (!isPlainObject(saved) || !sameSettingValue(sanitizeProfileSettings(saved), restored)) {
-        await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored))
+        await saveSettingEdit(commit, id, () => DBSettingHandlers.upsert(id, restored), Date.now(),
+          changedProfileSettingEditTimeIds(id, sanitizeProfileSettings(saved), restored))
       }
       commit('setProfileOwnSettings', { profileId, settings: restored })
     }))
@@ -2130,6 +2151,14 @@ const customActions = {
 
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
+          case SyncEvents.SETTINGS.MERGE_SEEN_MARKS: {
+            // Other windows can show another profile's seen marks. RSS feeds
+            // are the same in every profile, so their marks are shared.
+            const setting = data._id === 'rssFeedSeenItems' ? data._id : shownSeenMarksSetting(data._id, getDataScope())
+            if (setting) commit('applySeenMarkChanges', { setting, changes: data.changes })
+            break
+          }
+
           case SyncEvents.GENERAL.UPSERT:
             // If this window is writing the setting too, either save can end
             // up last, so this window shows the saved value once its writes finish.

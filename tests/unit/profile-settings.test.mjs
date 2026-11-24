@@ -8,9 +8,9 @@ import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import * as profileSettings from '../../src/profileSettings.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, profileSettingTimesOf, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
-const { collectProfileSettings, planProfileSettingsOf, profileIdFromSettingsId, profileSettingsId } = profileSettings
+const { collectProfileSettings, planProfileSettingsOf, profileIdFromSettingsId, profileSettingsId, profileSettingEditTimeId } = profileSettings
 
 test('profile settings IDs name exactly one profile, also when the server sends malformed keys', () => {
   for (const profileId of ['A1b2C3d4E5f6G7h8', 'Профиль 🚗', '\uFEFFcar']) {
@@ -95,6 +95,7 @@ const context = vm.createContext({
   isListSetting,
   mergeSettingListEntry,
   mergeProfileSettingsEntry,
+  profileSettingTimesOf,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
   CUSTOM_THEMES_SYNC_KEY: 'customThemes',
@@ -203,7 +204,24 @@ test('an upload keeps the profile settings that only other devices sync', async 
   const previous = { [car]: { key: car, value: { hideComments: false, uiScale: 150 }, updatedAt: 1 } }
   await context.syncSettings(client, device, previous)
   assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === car))), {
-    key: car, value: { hideComments: true, uiScale: 150 }, updatedAt: 2,
+    key: car, value: { hideComments: true, uiScale: 150 }, updatedAt: 2, settingsUpdatedAt: { hideComments: 2, uiScale: 1 },
+  })
+})
+
+test('sync merges a profile\'s own settings by when this device edited each of them', async () => {
+  const car = profileSettingsId('car')
+  const old = { key: car, value: { hideComments: false, hideLiveChat: false }, updatedAt: 10 }
+  // The other device hid live chat at 30, and this device hid it at 20 and comments at 40.
+  const client = createClient([{
+    key: car, value: { hideComments: false, hideLiveChat: 'later' }, updatedAt: 30, settingsUpdatedAt: { hideComments: 10, hideLiveChat: 30 },
+  }])
+  const device = createDevice({ car: { hideComments: true, hideLiveChat: true } })
+  Object.assign(device.state.settings.syncServerSettingUpdatedAt, {
+    [car]: 40, [profileSettingEditTimeId(car, 'hideComments')]: 40, [profileSettingEditTimeId(car, 'hideLiveChat')]: 20,
+  })
+  await context.syncSettings(client, device, { [car]: old })
+  assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === car))), {
+    key: car, value: { hideComments: true, hideLiveChat: 'later' }, updatedAt: 40, settingsUpdatedAt: { hideComments: 40, hideLiveChat: 30 },
   })
 })
 
@@ -288,6 +306,7 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   const saved = new Map([[id, {}]])
   const releases = []
   const overrides = { car: {} }
+  const editedParts = []
   let unreadable = false
   let unwritable = false
   // Objects from the other context have another prototype.
@@ -308,7 +327,10 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
     createSettingUpdateQueue,
     settingWrites,
     runLocked: (_name, run) => run(),
-    saveSettingEdit: (_commit, _id, save) => save(),
+    saveSettingEdit: (_commit, _id, save, _editedAt, parts) => {
+      editedParts.push(...parts)
+      return save()
+    },
     DBSettingHandlers: {
       findValue: async key => {
         if (unreadable) throw new Error('The settings cannot be read')
@@ -353,6 +375,8 @@ test('a saved edit of a profile setting keeps the optimistic edits still saving'
   releases.shift()()
   assert.equal(await third, true)
   assert.deepEqual(JSON.parse(JSON.stringify([saved.get(id), overrides.car])), [{}, {}])
+  // Each edit, also back to the shared value, saves when it edited the setting, for sync.
+  assert.deepEqual(editedParts, Array(3).fill(profileSettingEditTimeId(id, 'quickSettings')))
 
   // A failed edit shows the saved value again, also when the settings can't be read to restore it.
   unreadable = true

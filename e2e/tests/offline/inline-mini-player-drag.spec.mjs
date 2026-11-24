@@ -1022,7 +1022,7 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
       await page.evaluate(() => window.removeEventListener('click', window.dropClick, true))
     }
-    for (const gesture of [...taps, { drift: 12 }]) {
+    for (const [index, gesture] of [...taps, { drift: 12 }].entries()) {
       const bounds = await player.boundingBox()
       const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
       await touch('touchStart', start)
@@ -1031,6 +1031,26 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
       }
       await touch('touchEnd')
       await expect(page).not.toHaveURL(/#\/watch\//)
+      if (index === 0) {
+        // The bar follows a downward drag to dismiss it. Releasing a short one
+        // cancels the dismissal and must keep the player docked. A restore
+        // would start on release by dragging the bar back to Watch.
+        await player.evaluate(element => {
+          window.miniRestoreStarted = false
+          window.miniRestoreObserver = new MutationObserver(() => {
+            if (element.hasAttribute('data-inline-mini-drag')) window.miniRestoreStarted = true
+          })
+          window.miniRestoreObserver.observe(element, { attributes: true })
+        })
+        await tap({ drift: 24 })
+        await expect.poll(() => player.evaluate(element => element.style.getPropertyValue('--mobile-mini-dismiss-offset'))).toBe('')
+        expect(await page.evaluate(() => {
+          window.miniRestoreObserver.disconnect()
+          return window.miniRestoreStarted
+        })).toBe(false)
+        await expect(page).not.toHaveURL(/#\/watch\//)
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+      }
       await tap(gesture)
       await expect(page, JSON.stringify(gesture)).toHaveURL(/#\/watch\//)
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)

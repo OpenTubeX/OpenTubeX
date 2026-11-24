@@ -594,7 +594,7 @@ test.describe('expressive bottom navigation', { tag: '@scale' }, () => {
         await expect(subscriptions).toHaveAttribute('aria-current', 'page')
         await expect.poll(() => items.evaluateAll(elements => elements.every(element => {
           const box = element.getBoundingClientRect()
-          const text = [...element.querySelectorAll('.navLabel span')].find(label => label.getClientRects().length > 0).getBoundingClientRect()
+          const text = [...element.querySelectorAll('.navLabel span')].find(label => label.checkVisibility({ visibilityProperty: true })).getBoundingClientRect()
           return text.left >= box.left && text.right <= box.right && Math.abs(text.left + text.right - box.left - box.right) < 1
         })), { message: 'bold active labels fit and remain centered' }).toBe(true)
         const activeWidths = await items.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().width))

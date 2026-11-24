@@ -153,6 +153,13 @@ test.describe('Home subscription processing', () => {
     expect(await page.evaluate(() => window.navigationCopies)).toBe(0)
     expect(await page.evaluate(() => window.navigationTimestampReads)).toBeLessThanOrEqual(3 * 300 * 36)
 
+    // Returning to Home reuses the feed built for the first visit.
+    await goTo(page, 'userplaylists')
+    await page.evaluate(() => { window.navigationTimestampReads = 0 })
+    await goTo(page, 'home')
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => window.navigationTimestampReads)).toBe(0)
+
     // The shelf keeps the source entries reactive after skipping decoration.
     await page.evaluate(() => {
       const store = window.$store
@@ -222,3 +229,90 @@ for (const limit of ['global', 'daily']) {
     })
   })
 }
+
+test.describe('opening a list', () => {
+  const now = Date.now()
+  test.use({
+    seed: {
+      history: Array.from({ length: 60 }, (_, index) => ({
+        _id: `firstscreen${String(index).padStart(2, '0')}`,
+        videoId: `firstscreen${String(index).padStart(2, '0')}`,
+        title: `First screen video ${index}`,
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        published: now - 86_400_000,
+        lengthSeconds: 60,
+        watchProgress: 10,
+        timeWatched: now - index,
+        type: 'video'
+      })),
+      playlists: Array.from({ length: 40 }, (_, index) => ({
+        _id: `firstscreenlist${String(index).padStart(2, '0')}`,
+        // Short names keep the cards to one title line, their least height.
+        playlistName: `Short list ${index}`,
+        protected: false,
+        description: '',
+        videos: [],
+        createdAt: now - index,
+        lastUpdatedAt: now - index
+      }))
+    }
+  })
+
+  const cases = [
+    { name: 'on a phone', size: { width: 412, height: 915 }, from: 'userplaylists', to: 'history', rowKey: 'video-firstscreen', firstRow: 'First screen video 0' },
+    // Desktop windows size lists by the space beside the side bar.
+    { name: 'in a desktop window', size: { width: 1920, height: 1080 }, from: 'userplaylists', to: 'history', rowKey: 'video-firstscreen', firstRow: 'First screen video 0' },
+    // Playlist cards are shorter than the row shells, so more rows fit. Their
+    // component loads lazily, with the page on its first visit.
+    { name: 'of playlists in a tall window', size: { width: 412, height: 1400 }, from: 'history', to: 'userplaylists', rowKey: 'playlist-firstscreenlist', firstRow: 'Short list 0' }
+  ]
+  for (const { name, size, from, to, rowKey, firstRow } of cases) {
+    test(`mounts the rows on screen in the first frame and no rows windowing unmounts again ${name}`, { tag: '@performance' }, async ({ page }) => {
+      await page.setViewportSize(size)
+      await goTo(page, from)
+      await page.evaluate((rowKey) => {
+        const rowSelector = `[data-feed-item-key^="${rowKey}"]`
+        const rows = () => [...document.querySelectorAll(`.tabContent[aria-hidden="false"] ${rowSelector}`)]
+        const stats = window.firstScreenStats = { firstFrame: null, unmounted: 0, quietFrames: 0 }
+        const observer = new MutationObserver(records => {
+          stats.quietFrames = 0
+          for (const record of records) {
+            if (record.target instanceof Element && record.target.matches(rowSelector)) {
+              stats.unmounted += [...record.removedNodes].filter(node => node instanceof Element).length
+            }
+          }
+          if (stats.firstFrame !== null || rows().length === 0) return
+          stats.firstFrame = false
+          // Rows the first render did not mount would appear a frame later.
+          // Check the first frame as it paints: after its layout and the
+          // grids' resize observers, which size their columns.
+          requestAnimationFrame(() => {
+            const paintedLayout = new ResizeObserver(() => {
+              paintedLayout.disconnect()
+              stats.firstFrame = rows().filter(row => {
+                const bounds = row.getBoundingClientRect()
+                return bounds.bottom > 0 && bounds.top < innerHeight
+              }).map(row => row.firstElementChild !== null)
+            })
+            paintedLayout.observe(document.documentElement)
+            const countQuietFrame = () => {
+              stats.quietFrames++
+              requestAnimationFrame(countQuietFrame)
+            }
+            requestAnimationFrame(countQuietFrame)
+          })
+        })
+        observer.observe(document.body, { childList: true, subtree: true })
+      }, rowKey)
+      await goTo(page, to)
+      await expect(page.getByText(firstRow, { exact: true })).toBeVisible()
+      await expect.poll(() => page.evaluate(() => window.firstScreenStats.firstFrame)).toContain(true)
+      expect(await page.evaluate(() => window.firstScreenStats.firstFrame)).not.toContain(false)
+      // Windowing unmounts rows outside its overscan region within a few frames.
+      // Mounting those up front wastes the page switch on discarded work.
+      await expect.poll(() => page.evaluate(() => window.firstScreenStats.quietFrames)).toBeGreaterThan(30)
+      expect(await page.evaluate(() => window.firstScreenStats.unmounted)).toBe(0)
+    })
+  }
+})

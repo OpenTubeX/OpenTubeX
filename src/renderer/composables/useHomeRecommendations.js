@@ -8,10 +8,77 @@ import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } f
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
+import { keepComputedLinked } from '../helpers/keepComputedLinked'
 import { useIncognitoTab, useTabContext } from '../tabs/TabContext'
 
 let cachedCandidates = null
 const CACHE_LIFETIME = 15 * 60 * 1000
+
+function recommendationExploration() {
+  return Math.max(0, Math.min(0.5, Number(store.getters.getRecommendationExploration) || 0))
+}
+
+function isVisible(video) {
+  return video != null && typeof video === 'object' &&
+    !isVideoHiddenByPreferences(video, {
+      hideLiveStreams: store.getters.getHideLiveStreams,
+      hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+      hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+      aiSlopChannels: store.getters.getAiSlopBlockedChannels,
+      forbiddenTitles: store.getters.getActiveForbiddenTitles,
+      membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
+    })
+}
+
+// The learning inputs and the contexts that identify a cached feed depend only
+// on the store. They outlive Home, so returning to it reuses them instead of
+// scanning and serializing the library again on every visit.
+const history = computed(() => store.getters.getHistoryCacheSorted)
+const eligibleHistory = computed(() => getRecommendationLearningEntries(history.value, isVisible))
+const favorites = computed(() => getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
+const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
+function * savedPlaylistVideos() {
+  for (const playlist of store.getters.getAllPlaylists) {
+    if (playlist._id !== 'favorites') yield * playlist.videos
+  }
+}
+const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
+const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
+const sourceIdentity = videos => videos.map(video => [video.videoId, video.timeWatched, video.title])
+// This identifies reusable candidates when opening Home, not a reason to
+// replace a feed that is already on screen. Home only reads it while the
+// section is visible and enabled.
+const context = computed(() => JSON.stringify({
+  rememberHistory: store.getters.getRememberHistory,
+  history: sourceIdentity(eligibleHistory.value),
+  favorites: sourceIdentity(favorites.value),
+  saved: sourceIdentity(saved.value),
+  subscriptions: subscriptions.value,
+  feedback: records.value.filter(record => record.feedback).map(record => [record.videoId, record.feedback, record.feedbackAt]),
+  epoch: store.getters.getRecommendationEpoch,
+  backend: store.getters.getBackendPreference,
+  fallback: store.getters.getBackendFallback,
+  instance: store.getters.getApiServerUrl,
+  authorization: store.getters.getApiServerAuthorization,
+  familyFriendly: store.getters.getShowFamilyFriendlyOnly,
+}))
+const rankingContext = computed(() => JSON.stringify({
+  exploration: recommendationExploration(),
+  blockLists: store.getters.getBlockListsActive,
+  hideLiveStreams: store.getters.getHideLiveStreams,
+  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+  hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
+  // The update time stands in for the list contents, which are too large to serialize
+  aiSlopList: [store.getters.getUseAiSlopList, store.getters.getAiSlopListFetchedAt],
+  forbiddenTitles: store.getters.getActiveForbiddenTitles,
+  membersOnlyChannels: [...store.getters.getMembersOnlyChannelIdSet],
+}))
+
+/** @param {import('vue').ComputedRef<string>} source */
+function readLinked(source) {
+  keepComputedLinked(source)
+  return source.value
+}
 
 /** @param {import('vue').ComputedRef<boolean>} visible */
 export function useHomeRecommendations(visible) {
@@ -33,18 +100,7 @@ export function useHomeRecommendations(visible) {
   const isIncognitoTab = useIncognitoTab()
   const presented = computed(() => isTabPresented?.value ?? true)
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
-  const history = computed(() => store.getters.getHistoryCacheSorted)
-  const eligibleHistory = computed(() => getRecommendationLearningEntries(history.value, isVisible))
-  const favorites = computed(() => getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
-  const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
-  function * savedPlaylistVideos() {
-    for (const playlist of store.getters.getAllPlaylists) {
-      if (playlist._id !== 'favorites') yield * playlist.videos
-    }
-  }
-  const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
-  const exploration = computed(() => Math.max(0, Math.min(0.5, Number(store.getters.getRecommendationExploration) || 0)))
-  const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
+  const exploration = computed(recommendationExploration)
   const hasSeeds = computed(() => store.getters.getRememberHistory && (
     history.value.some(isVisible) || favorites.value.length > 0 || saved.value.length > 0 ||
     records.value.some(record => record.feedback === 'positive') || subscriptions.value.length > 0
@@ -68,17 +124,6 @@ export function useHomeRecommendations(visible) {
   function isShown(video) {
     const record = store.state.recommendations.recommendationRecords[video.videoId]
     return isVisible(video) && record?.feedback !== 'blockChannel' && !blockedChannelIds.value.has(video.authorId)
-  }
-  function isVisible(video) {
-    return video != null && typeof video === 'object' &&
-      !isVideoHiddenByPreferences(video, {
-        hideLiveStreams: store.getters.getHideLiveStreams,
-        hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-        hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
-        aiSlopChannels: store.getters.getAiSlopBlockedChannels,
-        forbiddenTitles: store.getters.getActiveForbiddenTitles,
-        membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
-      })
   }
   async function makeProfile(isCancelled) {
     // Snapshot only the bounded learning inputs. Do not track every field of
@@ -123,36 +168,6 @@ export function useHomeRecommendations(visible) {
     ranked.value = [...kept, ...result.map(item => ({ ...item.video, recommendationReason: item.reason }))]
       .filter(video => !store.getters.getHistoryCacheById[video.videoId])
   }
-  const sourceIdentity = videos => videos.map(video => [video.videoId, video.timeWatched, video.title])
-  // This identifies reusable candidates when opening Home, not a reason to
-  // replace a feed that is already on screen.
-  const context = computed(() => JSON.stringify({
-    visible: visible.value,
-    enabled: enabled.value,
-    rememberHistory: store.getters.getRememberHistory,
-    history: sourceIdentity(eligibleHistory.value),
-    favorites: sourceIdentity(favorites.value),
-    saved: sourceIdentity(saved.value),
-    subscriptions: subscriptions.value,
-    feedback: records.value.filter(record => record.feedback).map(record => [record.videoId, record.feedback, record.feedbackAt]),
-    epoch: store.getters.getRecommendationEpoch,
-    backend: store.getters.getBackendPreference,
-    fallback: store.getters.getBackendFallback,
-    instance: store.getters.getApiServerUrl,
-    authorization: store.getters.getApiServerAuthorization,
-    familyFriendly: store.getters.getShowFamilyFriendlyOnly,
-  }))
-  const rankingContext = computed(() => JSON.stringify({
-    exploration: exploration.value,
-    blockLists: store.getters.getBlockListsActive,
-    hideLiveStreams: store.getters.getHideLiveStreams,
-    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-    hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
-    // The update time stands in for the list contents, which are too large to serialize
-    aiSlopList: [store.getters.getUseAiSlopList, store.getters.getAiSlopListFetchedAt],
-    forbiddenTitles: store.getters.getActiveForbiddenTitles,
-    membersOnlyChannels: [...store.getters.getMembersOnlyChannelIdSet],
-  }))
   function nextVisibilityChange() {
     if (!store.getters.getHideUpcomingPremieres) return Infinity
     const now = Date.now()
@@ -185,12 +200,12 @@ export function useHomeRecommendations(visible) {
     // Restore the completed feed before showing a loader. Reopening Home must
     // not rebuild the learning profile or rank the same candidates again.
     const cache = useCache && !append && cachedCandidates && Date.now() - cachedCandidates.at < CACHE_LIFETIME &&
-      cachedCandidates.context === context.value
+      cachedCandidates.context === readLinked(context)
       ? cachedCandidates
       : null
     if (cache) {
       candidates = cache.videos; feedId = cache.feedId; round = cache.round; limit = cache.limit
-      if (cache.rankingContext === rankingContext.value && Date.now() < cache.nextVisibilityChange) {
+      if (cache.rankingContext === readLinked(rankingContext) && Date.now() < cache.nextVisibilityChange) {
         ranked.value = cache.ranked
         initialized = true
         return
@@ -202,8 +217,8 @@ export function useHomeRecommendations(visible) {
     // preparing the learning inputs and starting the cooperative batches.
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
     if (requestGeneration !== generation) return
-    const requestContext = context.value
-    const requestRankingContext = rankingContext.value
+    const requestContext = readLinked(context)
+    const requestRankingContext = readLinked(rankingContext)
     if (cache) {
       // Candidate-only preference changes need a new ranking, not new requests.
       const visibilityChange = nextVisibilityChange()
@@ -263,7 +278,10 @@ export function useHomeRecommendations(visible) {
     initialized = true
     hasError.value = result.failedSources > 0
     isLoading.value = false
-    if (!hasError.value) {
+    // Keep a feed that some sources failed to add to. Otherwise each return to
+    // Home requests and ranks every source again and replaces the cards; Refresh
+    // retries the failed sources. Without results, the next visit retries.
+    if (!hasError.value || ranked.value.length > 0) {
       cachedCandidates = {
         context: requestContext,
         rankingContext: requestRankingContext,

@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
-import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, mergeProfileSettingsEntry, migrateLegacySyncedSettings, profileSettingTimesOf, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 const settingsSection = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end))
@@ -456,6 +456,7 @@ test('edit times stay with their values when windows edit settings at once or a 
     const saveSettingEdit = vm.runInNewContext(`${timestampSection}\nsaveSettingEdit`, {
       ...profileSettingsContext,
       isSettingSyncable: id => ['baseTheme', 'listType'].includes(id),
+      isProfileSettingsId: id => id.startsWith('profileSettings-'),
       CUSTOM_THEMES_SYNC_KEY: 'customThemes',
       // Every window shares the database and its locks.
       navigator: {
@@ -481,7 +482,7 @@ test('edit times stay with their values when windows edit settings at once or a 
     })
     return {
       settings,
-      save: (id, save, editedAt) => saveSettingEdit((mutation, value) => { settings.syncServerSettingUpdatedAt = value }, id, save, editedAt),
+      save: (id, save, editedAt, parts) => saveSettingEdit((mutation, value) => { settings.syncServerSettingUpdatedAt = value }, id, save, editedAt, parts),
     }
   }
   const first = createWindow()
@@ -498,6 +499,12 @@ test('edit times stay with their values when windows edit settings at once or a 
     .map(edit => assert.rejects(edit, /disk full/)))
   assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2 })
   assert.deepEqual({ ...first.settings.syncServerSettingUpdatedAt }, { baseTheme: 1, listType: 2 })
+
+  // A profile's own settings save when each setting was edited with them.
+  const car = 'profileSettings-636172'
+  await first.save(car, async () => {}, 6, [`${car}/hideComments`])
+  await assert.rejects(second.save(car, fail, 7, [`${car}/hideComments`, `${car}/hideLiveChat`]), /disk full/)
+  assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2, [car]: 6, [`${car}/hideComments`]: 6 })
 
   // Sync must not pair the new value with the previous edit time.
   failEditTimes = true
@@ -518,6 +525,7 @@ test('settings sync waits for an optimistic edit to save its edit time', async (
     isListSetting,
     mergeSettingListEntry,
     mergeProfileSettingsEntry,
+    profileSettingTimesOf,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
