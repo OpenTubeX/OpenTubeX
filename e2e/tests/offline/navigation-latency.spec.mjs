@@ -153,6 +153,13 @@ test.describe('Home subscription processing', () => {
     expect(await page.evaluate(() => window.navigationCopies)).toBe(0)
     expect(await page.evaluate(() => window.navigationTimestampReads)).toBeLessThanOrEqual(3 * 300 * 36)
 
+    // Returning to Home reuses the feed built for the first visit.
+    await goTo(page, 'userplaylists')
+    await page.evaluate(() => { window.navigationTimestampReads = 0 })
+    await goTo(page, 'home')
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => window.navigationTimestampReads)).toBe(0)
+
     // The shelf keeps the source entries reactive after skipping decoration.
     await page.evaluate(() => {
       const store = window.$store

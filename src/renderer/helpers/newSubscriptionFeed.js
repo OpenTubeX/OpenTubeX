@@ -5,7 +5,7 @@ import {
   isMembersOnlySubscriptionVideoVisible,
   isSubscriptionFeedTypeEnabled
 } from './subscription-channels'
-import { getSubscriptionVideoSortTimestamp } from './subscription-entries'
+import { getSubscriptionVideoSortTimestamp, getUpcomingPremiereTimestamp } from './subscription-entries'
 import { isVideoHiddenByPreferences } from './subscriptionFilters'
 import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot'
 
@@ -38,6 +38,10 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * Applies the New feed's seen, history, filtering, deduplication, per-channel,
  * and sorting rules to cached subscription entries.
  *
+ * Premieres and scheduled streams change how entries are hidden and sorted
+ * once they start. `stableUntil` is the earliest such start, so callers can
+ * reuse the result until then unless its reactive sources change.
+ *
  * @param {object} options
  * @param {{ category: string, cache: object, entriesKey: string, includeCollaborations?: boolean }[]} options.feeds
  * @param {unknown} options.activeSubscriptions
@@ -50,8 +54,9 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * @param {boolean} options.restrictedPlaybackConfigured
  * @param {boolean} options.showScheduledLiveStreamsFirst
  * @param {'newest' | 'oldest'} options.sortBy
+ * @returns {{ content: Record<'videos' | 'shorts' | 'live' | 'posts', object[]>, stableUntil: number }}
  */
-export function getNewSubscriptionFeedEntries({
+export function buildNewSubscriptionFeed({
   feeds,
   activeSubscriptions,
   historyCacheById,
@@ -65,6 +70,7 @@ export function getNewSubscriptionFeedEntries({
   sortBy,
 }) {
   const now = Date.now()
+  let stableUntil = Infinity
   const entries = {
     videos: [],
     shorts: [],
@@ -100,8 +106,11 @@ export function getNewSubscriptionFeedEntries({
 
         // Premiere history depends on the clock, so recheck it even when this
         // channel's entry snapshot has not changed.
-        if (entry.videoId != null && isHistoryEntryWatched(historyCacheById[entry.videoId])) {
-          return
+        const historyEntry = entry.videoId != null ? historyCacheById[entry.videoId] : undefined
+        if (historyEntry != null) {
+          const premiereStart = getUpcomingHistoryPremiereStart(historyEntry, now)
+          if (premiereStart < stableUntil) stableUntil = premiereStart
+          if (isHistoryEntryWatched(historyEntry)) return
         }
 
         const id = entry.videoId ?? entry.postId
@@ -116,11 +125,15 @@ export function getNewSubscriptionFeedEntries({
   })
 
   let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
-    return entries[category].map(entry => ({
-      category,
-      entry,
-      timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
-    }))
+    return entries[category].map(entry => {
+      const scheduledStart = getUpcomingPremiereTimestamp(entry)
+      if (scheduledStart > now && scheduledStart < stableUntil) stableUntil = scheduledStart
+      return {
+        category,
+        entry,
+        timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
+      }
+    })
   })
 
   mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
@@ -162,17 +175,31 @@ export function getNewSubscriptionFeedEntries({
   )
 
   return {
-    videos: applySortPreference(mediaByCategory.videos),
-    shorts: applySortPreference(mediaByCategory.shorts),
-    live: applySortPreference(mediaByCategory.live),
-    posts: applySortPreference(entries.posts
-      .sort((a, b) => getNewSubscriptionEntryTimestamp(b) - getNewSubscriptionEntryTimestamp(a))
-      .filter(entry => {
-        const lowerCaseAuthor = entry.author?.toLowerCase()
-        return entry.postId != null &&
-          !forbiddenTitles.some(text => lowerCaseAuthor?.includes(text))
-      })),
+    content: {
+      videos: applySortPreference(mediaByCategory.videos),
+      shorts: applySortPreference(mediaByCategory.shorts),
+      live: applySortPreference(mediaByCategory.live),
+      posts: applySortPreference(entries.posts
+        .sort((a, b) => getNewSubscriptionEntryTimestamp(b) - getNewSubscriptionEntryTimestamp(a))
+        .filter(entry => {
+          const lowerCaseAuthor = entry.author?.toLowerCase()
+          return entry.postId != null &&
+            !forbiddenTitles.some(text => lowerCaseAuthor?.includes(text))
+        })),
+    },
+    stableUntil,
   }
+}
+
+/**
+ * When a watched premiere's history entry starts counting as watched.
+ * @param {object} historyEntry
+ * @param {number} now
+ */
+function getUpcomingHistoryPremiereStart(historyEntry, now) {
+  if (historyEntry.isUpcoming !== true || historyEntry.isLive === true) return Infinity
+  const start = Number(historyEntry.premiereTimestamp) * 1000
+  return Number.isFinite(start) && start > now ? start : Infinity
 }
 
 /**

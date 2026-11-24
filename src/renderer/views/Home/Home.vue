@@ -611,12 +611,7 @@ import {
 } from '../../helpers/homeSections'
 import { isBlurredByBlockLists } from '../../helpers/blockedItems'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
-import {
-  getEnabledSubscriptionFeedSources,
-  getNewSubscriptionEntryTimestamp,
-  getNewSubscriptionFeedEntries,
-} from '../../helpers/newSubscriptionFeed'
-import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { useHomeNewSubscriptionEntries } from '../../helpers/sharedNewSubscriptionFeed'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { getExternalMediaHistoryId, isExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
@@ -741,32 +736,7 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
 // Downloads without a playable file open the Downloads window instead.
 const recentDownloadEntries = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads)
   .map(download => ({ download, route: downloadRoute(download) })))
-const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
-const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
-const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
-  feeds: enabledSubscriptionFeeds.value,
-  activeSubscriptions: activeSubscriptions.value,
-  historyCacheById: store.getters.getHistoryCacheById,
-  hideLiveStreams: store.getters.getHideLiveStreams,
-  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getForbiddenTitlesToRemove,
-  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
-  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
-  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-  showScheduledLiveStreamsFirst: store.getters.getShowScheduledLiveStreamsFirst,
-  sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
-}))
-const newSubscriptionEntries = computed(() => {
-  const showScheduledLiveStreamsFirst = store.getters.getShowScheduledLiveStreamsFirst
-  const now = Date.now()
-  return Object.entries(newSubscriptionContent.value)
-    .flatMap(([category, entries]) => entries.map(entry => ({
-      category,
-      entry,
-      timestamp: getNewSubscriptionEntryTimestamp(entry, showScheduledLiveStreamsFirst, now)
-    })))
-    .toSorted((a, b) => b.timestamp - a.timestamp)
-})
+const newSubscriptionEntries = useHomeNewSubscriptionEntries()
 const newSubscriptionFeedRoute = Object.freeze({
   path: '/subscriptions',
   query: { tab: 'new' },
