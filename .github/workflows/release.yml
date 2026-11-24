@@ -95,7 +95,8 @@ jobs:
         - runtime: win-arm64
           os: windows-latest
 
-    runs-on: ${{ matrix.os }}
+    # Hosted macOS arm64 runners are sometimes unavailable, so reruns build on Intel.
+    runs-on: ${{ startsWith(matrix.runtime, 'osx') && github.run_attempt > 1 && 'macos-26-intel' || matrix.os }}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
