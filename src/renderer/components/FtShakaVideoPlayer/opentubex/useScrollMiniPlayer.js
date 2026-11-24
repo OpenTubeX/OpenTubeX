@@ -111,8 +111,6 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const mobileMiniBarExpanded = ref(false)
   const mobileMiniBarCollapsed = computed(() => compactMobileMiniPlayer.value && !mobileMiniBarExpanded.value)
   const mobileMiniBarHeight = computed(() => compactMobileMiniPlayer.value ? (mobileMiniBarExpanded.value ? 112 : 64) : 108)
-  /** @type {import('vue').ComputedRef<'mini' | 'pin' | 'off'>} */
-  const scrollPlayerMode = computed(() => store.getters.getScrollPlayerMode)
   const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation)
   const autoPictureInPictureOnTabChange = computed(
     () => !store.getters.getKeepPlayingOnNavigation &&
@@ -253,8 +251,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
   // The Watch layout keeps a pinned player in view, so it never scrolls far
   // enough to dock. Where the layout cannot pin it, the player docks instead.
-  const scrollPinnedPlayer = computed(() => scrollPlayerMode.value === 'pin' &&
-    scrollPinnedPlayerFits.value &&
+  const scrollPinnedPlayer = computed(() => scrollPinnedPlayerFits.value &&
     isActiveTab.value &&
     !playerSuspended.value &&
     !fullWindowEnabled.value &&
@@ -710,7 +707,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!canUseScrollMiniPlayerBase()) return false
 
     if (isActiveTab.value) {
-      return scrollPlayerMode.value !== 'off' && !hasVisibleCrossTabMiniPlayer()
+      return !hasVisibleCrossTabMiniPlayer()
     }
 
     return !autoPictureInPictureOnTabChange.value &&
@@ -1235,7 +1232,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function updateScrollPinnedPlayerFit() {
     // The docked player's size says nothing about the inline one, and leaving
     // the old value keeps the page from pinning a player it just docked.
-    if (scrollPlayerMode.value !== 'pin' || !isActiveTab.value || scrollMiniPlayerActive.value) return
+    if (!isActiveTab.value || scrollMiniPlayerActive.value) return
     // The rendered height, since a wider than 16:9 player can fit when the estimate doesn't.
     const height = container.value?.offsetHeight ?? 0
     scrollPinnedPlayerFits.value = height >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT &&
@@ -1958,7 +1955,6 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   watch(compactMobileMiniPlayer, () => { mobileMiniBarExpanded.value = false })
   watch(mobileMiniBarHeight, () => nextTick(handleScrollMiniWindowResize))
 
-  watch(scrollPlayerMode, () => updateScrollMiniPlayer())
   // The pinned player covers the top of the page, so the page scrollbar starts below it.
   let pinnedAreaObservers = []
   /** @type {Element | null} */

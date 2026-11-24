@@ -134,19 +134,6 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     icon: ['fas', 'robot'],
   },
   {
-    id: 'scrollPlayerMode',
-    section: 'playback',
-    labelKey: 'Settings.Player Settings.Scroll Mini Player.Scroll Player Mode',
-    control: 'select',
-    values: ['mini', 'pin', 'off'],
-    optionLabelKeys: [
-      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Mini',
-      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Pin',
-      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Off',
-    ],
-    icon: ['fas', 'compress'],
-  },
-  {
     id: 'videoDescriptionMode',
     section: 'content',
     labelKey: 'Settings.Distraction Free Settings.Video Descriptions',

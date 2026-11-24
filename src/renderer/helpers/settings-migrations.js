@@ -7,7 +7,6 @@ import {
   holdPlaybackRateMultiplierFromSwitch,
   navigationBarLabelsFromCompactSwitch,
   migrateSettingIds,
-  scrollPlayerModeFromMiniPlayerSwitch,
   thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
 } from '../../datastores/settingsMigrations.js'
@@ -116,19 +115,13 @@ export function migrateLegacySettings(settings) {
         : null
     if (enabled !== null) migratedSettings.autoPictureInPictureTriggers = enabled ? ['tab', 'minimize'] : []
   }
-  if (!Object.hasOwn(migratedSettings, 'scrollMiniPlayerEnabled') && Object.hasOwn(migratedSettings, 'autoPictureInPictureMode')) {
-    migratedSettings.scrollMiniPlayerEnabled = migratedSettings.autoPictureInPictureMode !== 'never'
-  }
   delete migratedSettings.autoPictureInPictureMode
   delete migratedSettings.autoPictureInPictureOnTabChange
 
-  if (Object.hasOwn(migratedSettings, 'scrollMiniPlayerEnabled')) {
-    if (!Object.hasOwn(migratedSettings, 'scrollPlayerMode')) {
-      migratedSettings.scrollPlayerMode = scrollPlayerModeFromMiniPlayerSwitch(migratedSettings.scrollMiniPlayerEnabled)
-    }
-    delete migratedSettings.scrollMiniPlayerEnabled
-  }
+  // Scrolling past the player always pins it when there is room now.
+  delete migratedSettings.scrollMiniPlayerEnabled
   delete migratedSettings.scrollMiniPlayerOnAllTabs
+  delete migratedSettings.scrollPlayerMode
 
   if (Object.hasOwn(migratedSettings, 'holdToDoublePlaybackSpeed')) {
     if (!Object.hasOwn(migratedSettings, 'holdPlaybackRateMultiplier')) {

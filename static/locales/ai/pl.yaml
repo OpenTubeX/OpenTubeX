@@ -572,7 +572,7 @@ Settings:
       Hold to Speed Up: Przytrzymaj, aby przyspieszyć
       Off: Wyłączone
     Auto Picture in Picture:
-      On Tab Change Mini Player: Przełączanie kart wyświetla zamiast tego mini odtwarzacz. Aby z tego korzystać, ustaw „Po opuszczeniu filmu” na „Zatrzymaj odtwarzanie”.
+      On Tab Change Mini Player: Przełączanie kart wyświetla zamiast tego mini odtwarzacz. Aby z tego korzystać, wyłącz „Kontynuuj odtwarzanie po opuszczeniu filmu”.
     Rewind on Resume: "Przewiń wstecz przy wznowieniu"
     Minimum Pause Before Rewinding: "Minimalna pauza przed przewinięciem"
     Mono Audio: 'Dźwięk mono'
@@ -626,17 +626,7 @@ Settings:
     Switch to Audio in Background: 'Przełączaj na formaty audio w tle'
     Ignore Headphone Controls: 'Ignoruj sterowanie ze słuchawek'
     Music Visualizer: Wizualizator muzyki
-    Scroll Mini Player:
-      Scroll Player Mode: Podczas przewijania w dół
-      Scroll Player Mode Tooltip: Odtwarzacz jest przypinany tylko wtedy, gdy zajmuje najwyżej połowę wysokości okna. W przeciwnym razie, np. na telefonach w orientacji poziomej lub w szerokich oknach, zamiast tego wyświetlany jest miniodtwarzacz.
-      Scroll Player Modes:
-        Mini: Pokaż mini odtwarzacz
-        Pin: Przypnij odtwarzacz u góry, jeśli jest miejsce
-        Off: Przewijaj razem ze stroną
-      Leaving Video: Po opuszczeniu filmu
-      Leaving Video Modes:
-        Keep Playing: Kontynuuj odtwarzanie w mini odtwarzaczu
-        Stop: Zatrzymaj odtwarzanie
+    Keep Playing After Leaving Video: Kontynuuj odtwarzanie po opuszczeniu filmu
     Enable Skip Silence by Default: Domyślnie włącz pomijanie ciszy
     Voice-over Translation:
       Attribution: (obsługiwane przez Yandex)

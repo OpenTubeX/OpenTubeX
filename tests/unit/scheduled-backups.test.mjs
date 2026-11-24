@@ -160,7 +160,6 @@ for (const currentSettings of [false, true]) {
       aiVideoSummaryMode: 'expanded',
       navigationItems: ['history'],
       autoPictureInPictureTriggers: ['minimize'],
-      scrollPlayerMode: 'mini',
       playlistThumbnailSize: 180,
     }
     const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
@@ -183,7 +182,6 @@ for (const currentSettings of [false, true]) {
           aiVideoSummaryMode: 'hide',
           navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats', 'twitch'],
           autoPictureInPictureTriggers: ['tab', 'minimize'],
-          scrollPlayerMode: 'off',
           playlistThumbnailSize: 240,
         }
     for (const [key, value] of Object.entries(expected)) assert.deepEqual(backup.data.settings[key], value, key)
@@ -191,7 +189,8 @@ for (const currentSettings of [false, true]) {
       assert.equal(backup.data.settings[key], false, key)
     }
     for (const key of ['useVerticalTabBar', 'showSubscriptionRefreshToast', 'moveDownloadsToQuickSettings',
-      'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange', 'scrollMiniPlayerEnabled']) {
+      'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange', 'scrollMiniPlayerEnabled',
+      'scrollPlayerMode']) {
       assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
     }
   })

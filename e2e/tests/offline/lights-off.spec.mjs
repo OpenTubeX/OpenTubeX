@@ -87,31 +87,22 @@ test.describe('lights off', { tag: '@scale' }, () => {
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     await expectHoleMatchesPlayer()
 
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateScrollPlayerMode', 'off')
-      window.scrollTo(0, 120)
-    })
+    // And the pinned player, where the window has room for it. Only the
+    // inline player can measure whether it fits.
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await setWindowSize(app, page, { width: 480, height: 860 })
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     await expect.poll(async () => {
       const header = await page.locator('.topNav').boundingBox()
-      const hole = await overlay.locator('div').boundingBox()
-      return hole.y - (header.y + header.height)
-    }).toBeGreaterThanOrEqual(-1)
+      const box = await player.boundingBox()
+      return Math.abs(box.y - (header.y + header.height))
+    }).toBeLessThan(1)
+    await expectHoleMatchesPlayer()
 
-    await page.evaluate(() => {
-      window.scrollTo(0, document.documentElement.scrollHeight)
-    })
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => overlay.locator('div').evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      return rect.top === 0 && rect.height === 0
-    })).toBe(true)
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateScrollPlayerMode', 'mini')
-      window.scrollTo(0, 0)
-    })
+    await setWindowSize(app, page, { width: 1400, height: 850 })
+    await page.evaluate(() => window.scrollTo(0, 0))
     await expectHoleMatchesPlayer()
 
     const firstTab = page.locator('.tabBar .tab').first()

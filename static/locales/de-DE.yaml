@@ -1337,21 +1337,11 @@ Settings:
     Auto Picture in Picture:
       Auto Picture in Picture: Bild im Bild automatisch aktivieren
       On Tab Change: Beim Wechseln des Tabs
-      On Tab Change Mini Player: Beim Tabwechsel erscheint stattdessen der Mini-Player. Um dies zu nutzen, stelle „Beim Verlassen eines Videos“ auf „Wiedergabe beenden“.
+      On Tab Change Mini Player: Beim Tabwechsel erscheint stattdessen der Mini-Player. Um dies zu nutzen, schalte „Nach dem Verlassen eines Videos weiter abspielen“ aus.
       On Window Minimize: Beim Minimieren des Fensters
       On Window Hide: Wenn das Fenster den Fokus verliert oder gewechselt wird
       Wayland Minimize Unsupported: Wayland meldet das Minimieren von Fenstern nicht an Anwendungen, daher ist dieser Auslöser nicht verfügbar. Verwende stattdessen „Wenn das Fenster den Fokus verliert oder gewechselt wird“, was das Minimieren ebenfalls abdeckt.
-    Scroll Mini Player:
-      Scroll Player Mode: Beim Herunterscrollen
-      Scroll Player Mode Tooltip: Der Player wird nur angeheftet, solange er höchstens die Hälfte der Fensterhöhe einnimmt. Sonst, etwa auf Smartphones im Querformat oder in breiten Fenstern, wird stattdessen der Mini-Player angezeigt.
-      Scroll Player Modes:
-        Mini: Mini-Player anzeigen
-        Pin: Player oben anheften, wenn Platz ist
-        Off: Mit der Seite scrollen
-      Leaving Video: Beim Verlassen eines Videos
-      Leaving Video Modes:
-        Keep Playing: Im Mini-Player weiter abspielen
-        Stop: Wiedergabe beenden
+    Keep Playing After Leaving Video: Nach dem Verlassen eines Videos weiter abspielen
     Remember Volume: Lautstärke beibehalten
     Mono Audio: Mono-Audio
     Normalize Loudness: Lautstärke normalisieren

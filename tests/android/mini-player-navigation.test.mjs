@@ -39,7 +39,6 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         UseSponsorBlock: false,
         UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true,
-        ScrollPlayerMode: 'mini',
         CapacitorLayoutMode: 'phone',
         UiScale: 100,
         HideComments: false,

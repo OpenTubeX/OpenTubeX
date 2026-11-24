@@ -44,7 +44,6 @@ export function isFormerDefaultQuickSettings(value) {
 /** Former switches and the selects that replaced them. */
 const REPLACED_SETTING_IDS = new Map([
   ['hideVideoDescription', 'videoDescriptionMode'],
-  ['scrollMiniPlayerEnabled', 'scrollPlayerMode'],
   ['limitTitlesToTwoLines', 'titleLineLimit'],
   ['holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier'],
   ['thumbnailDataSaver', 'thumbnailDataSaverMode'],
@@ -65,14 +64,6 @@ export function migrateSettingIds(ids) {
 /** @param {unknown} ids */
 export function hasReplacedSettingId(ids) {
   return Array.isArray(ids) && ids.some(id => REPLACED_SETTING_IDS.has(id))
-}
-
-/**
- * The scroll player select that replaced the former mini player switch.
- * @param {unknown} enabled
- */
-export function scrollPlayerModeFromMiniPlayerSwitch(enabled) {
-  return enabled === false ? 'off' : 'mini'
 }
 
 /**
@@ -206,16 +197,6 @@ export async function migrateStoredSettings(datastore) {
     }
     await datastore.removeAsync({ _id: 'hideVideoDescription' })
   }
-  // The mini player switch became the select that can also pin the player.
-  const scrollMiniPlayerEnabled = stored.get('scrollMiniPlayerEnabled')
-  if (scrollMiniPlayerEnabled) {
-    // Always save the mapped mode, since startup only maps the older
-    // Picture-in-Picture mode when neither setting is saved.
-    if (!stored.has('scrollPlayerMode')) {
-      await save('scrollPlayerMode', scrollPlayerModeFromMiniPlayerSwitch(scrollMiniPlayerEnabled.value))
-    }
-    await datastore.removeAsync({ _id: 'scrollMiniPlayerEnabled' })
-  }
   // Limit Titles to Two Lines became the Title Lines select, two lines by default.
   const limitTitlesToTwoLines = stored.get('limitTitlesToTwoLines')
   if (limitTitlesToTwoLines) {
@@ -250,9 +231,10 @@ export async function migrateStoredSettings(datastore) {
     await datastore.removeAsync({ _id: 'compactNavigationLabels' })
   }
   // Keep Playing When Navigating Away now also decides whether switching tabs
-  // shows the mini player.
-  if (stored.has('scrollMiniPlayerOnAllTabs')) {
-    await datastore.removeAsync({ _id: 'scrollMiniPlayerOnAllTabs' })
+  // shows the mini player, and scrolling past the player always pins it when
+  // there is room.
+  for (const key of ['scrollMiniPlayerOnAllTabs', 'scrollMiniPlayerEnabled', 'scrollPlayerMode']) {
+    if (stored.has(key)) await datastore.removeAsync({ _id: key })
   }
   // Older versions saved an Invidious instance's credentials in its URL, which
   // exports and sync include. They are a secret setting now, which

@@ -259,15 +259,15 @@ test.describe('settings', () => {
 
   test('disables automatic PiP on tab change while videos keep playing in the mini player', async ({ page }) => {
     const playback = await goToSettingsSection(page, 'playback')
-    const leavingVideo = playback.getByRole('combobox', { name: 'When leaving a video' })
+    const keepPlaying = playback.getByRole('checkbox', { name: /^Keep playing after leaving a video/ })
     // Its tooltip explains why it is disabled and joins its name.
     const automaticPipToggle = playback.getByRole('checkbox', { name: /^When switching tabs/ })
 
-    await expect(leavingVideo).toHaveText('Keep playing in a mini player')
+    await expect(keepPlaying).toBeChecked()
     await expect(automaticPipToggle).toBeDisabled()
 
-    await leavingVideo.click()
-    await page.getByRole('option', { name: 'Stop playing', exact: true }).click()
+    await playback.locator('label.switch-label').filter({ hasText: 'Keep playing after leaving a video' }).click()
+    await expect(keepPlaying).not.toBeChecked()
     await expect(automaticPipToggle).toBeEnabled()
     await playback.locator('.pure-checkbox label')
       .filter({ hasText: 'When switching tabs' })

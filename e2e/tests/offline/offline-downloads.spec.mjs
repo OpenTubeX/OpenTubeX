@@ -386,7 +386,7 @@ test.describe('mobile downloaded audio mini player', { tag: '@scale' }, () => {
   })
   test.use({
     seed: {
-      settings: { landingPage: 'history', enableDownloads: true, scrollPlayerMode: 'mini', keepPlayingOnNavigation: true, enableMobileFullscreenSwipe: false },
+      settings: { landingPage: 'history', enableDownloads: true, keepPlayingOnNavigation: true, enableMobileFullscreenSwipe: false },
       downloads: [audioDownload(1, 'offline0001', 'Downloaded audio'), audioDownload(2, 'offline0002', 'Next audio')],
     },
   })

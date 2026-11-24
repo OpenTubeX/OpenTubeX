@@ -28,8 +28,13 @@ test.use({
   }
 })
 
-async function enableMobileTouch(app, page, phone = true, resize = true) {
-  if (resize) await setWindowSize(app, page, { width: 480, height: 850 })
+const PORTRAIT_PHONE = { width: 480, height: 850 }
+// Portrait phones pin the player while scrolling, so scrolling docks it only
+// where it takes up more than half of the window.
+const LANDSCAPE_PHONE = { width: 850, height: 480 }
+
+async function enableMobileTouch(app, page, phone = true, size = PORTRAIT_PHONE) {
+  if (size) await setWindowSize(app, page, size)
   await page.evaluate(phone => {
     Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
     const app = document.querySelector('.app')
@@ -50,11 +55,11 @@ async function enableMobileTouch(app, page, phone = true, resize = true) {
   }, phone)
 }
 
-async function openMobilePlayer(app, page, phone = true) {
+async function openMobilePlayer(app, page, phone = true, size = PORTRAIT_PHONE) {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
-  await enableMobileTouch(app, page, phone)
+  await enableMobileTouch(app, page, phone, size)
   return page.locator('.ftVideoPlayer')
 }
 
@@ -322,10 +327,7 @@ test.describe('browsing scroll during mobile minimize', () => {
   test('a short watch page excludes the retained history from its scroll range', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await setWindowSize(app, page, { width: 480, height: 850 })
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateHideRecommendedVideos', true)
-      await window.$store.dispatch('updateScrollPlayerMode', 'off')
-    })
+    await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
     const history = page.locator('.tabContent > .routerView').first()
     await expect(history.locator('.ft-list-video').first()).toBeVisible()
     await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
@@ -627,7 +629,7 @@ test('scroll docking follows the current player height after a wider layout', { 
 })
 
 test('disabled fullscreen and zoom gestures allow upward scrolling and downward docking', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   const bounds = await player.boundingBox()
   expect(bounds).not.toBeNull()
@@ -828,7 +830,7 @@ for (const swipe of [false, true]) {
 }
 
 test('swiping across the scroll-triggered bottom bar returns to the video', { tag: '@scale' }, async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   await page.evaluate(() => {
     const spacer = document.createElement('div')
     spacer.style.height = '2000px'
@@ -877,7 +879,7 @@ test('swiping across the scroll-triggered bottom bar returns to the video', { ta
 })
 
 test('tapping the scroll-triggered bottom bar expands it while the page scrolls up', { tag: '@scale' }, async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   const settledTop = await player.locator('video').evaluate(video => video.getBoundingClientRect().top)
   await page.evaluate(() => {
     const spacer = document.createElement('div')
@@ -963,7 +965,7 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
 })
 
 test('bottom bar taps restore despite finger drift or a dropped click, and short flicks restore it', { tag: '@scale' }, async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   await page.evaluate(() => {
     const spacer = document.createElement('div')
     spacer.style.height = '2000px'
@@ -1042,7 +1044,7 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
 })
 
 async function checkBottomBarPlaybackControls({ app, page, uiScale }, testInfo) {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   await page.evaluate(() => {
     const spacer = document.createElement('div')
     spacer.style.height = '2000px'
@@ -1146,7 +1148,7 @@ async function checkBottomBarPlaybackControls({ app, page, uiScale }, testInfo) 
 test('bottom bar playback controls work without reopening Watch', { tag: '@scale' }, checkBottomBarPlaybackControls)
 
 for (const { uiScale, size } of [
-  { uiScale: 125, size: { width: 375, height: 800 } },
+  { uiScale: 125, size: { width: 800, height: 375 } },
   { uiScale: 100, size: { width: 850, height: 480 } },
 ]) {
   test(`compact mobile strip expands controls and restores playback at ${uiScale}% in ${size.width}px`, async ({ app, page }, testInfo) => {
@@ -1164,8 +1166,8 @@ for (const { uiScale, size } of [
     await setWindowSize(app, page, size)
     await page.evaluate(async width => {
       const store = window.$store
-      await store.dispatch('updateIconPack', width === 375 ? 'material' : 'remix')
-      await store.dispatch('updateReducedMotion', width === 375 ? 'off' : 'on')
+      await store.dispatch('updateIconPack', width === 800 ? 'material' : 'remix')
+      await store.dispatch('updateReducedMotion', width === 800 ? 'off' : 'on')
     }, size.width)
     await page.evaluate(() => window.scrollTo(0, 1200))
     await expect(player).toHaveClass(/scrollMiniPlayer/)

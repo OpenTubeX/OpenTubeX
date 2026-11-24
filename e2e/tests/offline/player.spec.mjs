@@ -2193,8 +2193,7 @@ test.describe('scroll mini player', () => {
         .getByRole('button', { name: 'All settings' }).click()
       const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
       await settings.locator('.settingsMenu [data-section="playback"]').click()
-      await settings.getByRole('combobox', { name: 'When leaving a video' }).click()
-      await page.getByRole('option', { name: 'Stop playing', exact: true }).click()
+      await settings.locator('label.switch-label').filter({ hasText: 'Keep playing after leaving a video' }).click()
 
       await expect(player).toBeHidden()
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -2368,7 +2367,7 @@ test.describe('scroll mini player', () => {
 })
 
 test.describe('pinned player', () => {
-  test.use({ seed: { settings: { ...PLAYER_SEED, scrollPlayerMode: 'pin' } } })
+  test.use({ seed: { settings: PLAYER_SEED } })
 
   test('stays below the top navigation while scrolling and docks when it is too tall', async ({ app, page }) => {
     await openDemoVideo({ app, page })

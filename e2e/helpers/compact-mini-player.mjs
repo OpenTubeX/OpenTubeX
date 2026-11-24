@@ -47,8 +47,11 @@ export async function checkCompactMiniPlayer(page, player, capture = async () =>
   await expectLayout(true)
   await expect.poll(() => page.evaluate(() => {
     const scroller = document.scrollingElement
-    return Math.abs(window.scrollY - Math.max(0, scroller.scrollHeight - scroller.clientHeight))
-  })).toBeLessThanOrEqual(1)
+    const offset = Math.abs(window.scrollY - Math.max(0, scroller.scrollHeight - scroller.clientHeight))
+    // Android scales the visual viewport for fractional UI Scale, where the
+    // rounded scrollHeight and clientHeight can each be a pixel off.
+    return offset <= (window.visualViewport.scale === 1 ? 1 : 2)
+  })).toBe(true)
   await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeLessThan(expandedScrollHeight)
   await controls.getByRole('button', { name: 'Play', exact: true }).click()
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
