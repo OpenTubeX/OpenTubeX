@@ -1001,6 +1001,8 @@ Settings:
       Wayland Minimize Unsupported: Waylandek ez die aplikazioei jakinarazten leihoa minimizatzen denean; beraz, abiarazle hau ez dago erabilgarri. Erabili "Leihoak fokua galtzean edo beste leiho batera aldatzean" aukera, minimizatzea ere barne hartzen baitu.
       On Tab Change Mini Player: Fitxaz aldatzean minierreproduzigailua erakusten da horren ordez. Hau erabiltzeko, desaktibatu «Jarraitu erreproduzitzen bideo batetik irtetean».
     Keep Playing After Leaving Video: Jarraitu erreproduzitzen bideo batetik irtetean
+    Keep Player Visible When Scrolling: Mantendu erreproduzigailua ikusgai korritzean
+    Keep Player Visible When Scrolling Tooltip: Erreproduzigailua leihoaren altueraren erdia gehienez hartzen duen bitartean bakarrik ainguratzen da. Bestela, adibidez telefonoetan horizontalean edo leiho zabaletan, mini erreproduzigailua erakusten da horren ordez.
     Multiply Seek Interval by Playback Rate: Biderkatu bilaketa-tartea erreprodukzio-abiadurarekin
     Show Playback Rate Adjusted Timestamp: Erakutsi erreprodukzio-abiadurara doitutako denbora-marka
     Use YouTube-style Shorts: Erabili YouTube estiloko Shorts bideoak

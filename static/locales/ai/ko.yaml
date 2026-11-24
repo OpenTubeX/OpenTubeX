@@ -1175,6 +1175,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland는 앱에 창 최소화 상태를 알리지 않으므로 이 조건을 사용할 수 없습니다. 최소화도 감지하는 "창이 포커스를 잃거나 다른 창으로 전환할 때"를 대신 사용하세요.
       On Tab Change Mini Player: 탭을 전환하면 대신 미니 플레이어가 표시됩니다. 이 기능을 사용하려면 "동영상을 벗어난 후에도 계속 재생"을 끄세요.
     Keep Playing After Leaving Video: 동영상을 벗어난 후에도 계속 재생
+    Keep Player Visible When Scrolling: 스크롤할 때 플레이어 계속 표시
+    Keep Player Visible When Scrolling Tooltip: 플레이어는 창 높이의 절반 이하를 차지할 때만 고정됩니다. 그렇지 않으면, 예를 들어 가로 모드의 휴대폰이나 넓은 창에서는 대신 미니 플레이어가 표시됩니다.
     Multiply Seek Interval by Playback Rate: 탐색 간격에 재생 속도 곱하기
     Show Playback Rate Adjusted Timestamp: 재생 속도가 반영된 시간 표시
     Use YouTube-style Shorts: YouTube 스타일 Shorts 사용

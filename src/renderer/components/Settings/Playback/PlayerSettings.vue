@@ -613,6 +613,14 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Keep Player Visible When Scrolling')"
+          :tooltip="t('Settings.Player Settings.Keep Player Visible When Scrolling Tooltip')"
+          :compact="true"
+          :default-value="store.getters.getKeepPlayerVisibleOnScroll"
+          setting-key="keepPlayerVisibleOnScroll"
+          @change="store.dispatch('updateKeepPlayerVisibleOnScroll', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Enter Fullscreen on Display Rotate')"
           :compact="true"
           :default-value="enterFullscreenOnDisplayRotate"

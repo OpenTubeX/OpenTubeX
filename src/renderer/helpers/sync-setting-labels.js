@@ -187,6 +187,7 @@ export const SYNC_SETTING_LABELS = {
   iconPack: 'Settings.Theme Settings.Icon Pack.Icon Pack',
   includeSubscriptionCollaborations: 'Settings.Subscription Settings.Show Collaborations From Other Channels',
   internetConnectivityChecks: 'Settings.Privacy Settings.Internet Connectivity Checks',
+  keepPlayerVisibleOnScroll: 'Settings.Player Settings.Keep Player Visible When Scrolling',
   keepPlayingOnNavigation: 'Settings.Player Settings.Keep Playing After Leaving Video',
   keyboardShortcuts: 'KeyboardShortcutPrompt.Keyboard Shortcuts',
   landingPage: 'Settings.General Settings.Default Landing Page',

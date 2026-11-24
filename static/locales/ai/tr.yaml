@@ -1001,6 +1001,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland, pencerenin küçültüldüğünü uygulamalara bildirmediği için bu tetikleyici kullanılamaz. Bunun yerine küçültmeyi de kapsayan "Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde" seçeneğini kullanın.
       On Tab Change Mini Player: Sekme değiştirmek bunun yerine mini oynatıcıyı gösterir. Bunu kullanmak için "Bir videodan ayrıldıktan sonra oynatmaya devam et" ayarını kapatın.
     Keep Playing After Leaving Video: Bir videodan ayrıldıktan sonra oynatmaya devam et
+    Keep Player Visible When Scrolling: Kaydırırken oynatıcıyı görünür tut
+    Keep Player Visible When Scrolling Tooltip: Oynatıcı yalnızca pencere yüksekliğinin en fazla yarısını kapladığı sürece sabitlenir. Aksi takdirde, örneğin yatay moddaki telefonlarda veya geniş pencerelerde, bunun yerine mini oynatıcı gösterilir.
     Multiply Seek Interval by Playback Rate: Sarma Aralığını Oynatma Hızıyla Çarp
     Show Playback Rate Adjusted Timestamp: Oynatma Hızına Göre Ayarlanmış Zaman Damgasını Göster
     Use YouTube-style Shorts: YouTube Tarzı Kısa Videoları Kullan

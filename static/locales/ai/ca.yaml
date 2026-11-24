@@ -1232,6 +1232,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland no informa les aplicacions quan es minimitza una finestra, per tant aquest activador no està disponible. Utilitzeu "Quan la finestra perd el focus o se'n canvia a una altra", que també inclou la minimització.
       On Tab Change Mini Player: En canviar de pestanya es mostra el minireproductor. Per fer-ho servir, desactiveu «Continua la reproducció en sortir d'un vídeo».
     Keep Playing After Leaving Video: Continua la reproducció en sortir d'un vídeo
+    Keep Player Visible When Scrolling: Mantén el reproductor visible en desplaçar-se
+    Keep Player Visible When Scrolling Tooltip: "El reproductor només es fixa mentre ocupi com a màxim la meitat de l'alçada de la finestra. Si no, com ara en telèfons en horitzontal o en finestres amples, es mostra el minireproductor."
     Skip by Scrolling Over Video Player: Salta desplaçant la roda sobre el reproductor de vídeo
     Multiply Seek Interval by Playback Rate: Multiplica l'interval de salt per la velocitat de reproducció
     Enter Fullscreen on Display Rotate: Entra a pantalla completa quan la pantalla giri a horitzontal

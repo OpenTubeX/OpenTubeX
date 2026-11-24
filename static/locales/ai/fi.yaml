@@ -1001,6 +1001,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland ei ilmoita ikkunan pienentämisestä sovelluksille, joten tämä käynnistin ei ole käytettävissä. Käytä sen sijaan asetusta "Kun ikkuna menettää kohdistuksen tai siitä siirrytään pois", joka kattaa myös pienentämisen.
       On Tab Change Mini Player: Välilehteä vaihdettaessa näytetään sen sijaan minisoitin. Käytä tätä poistamalla käytöstä ”Jatka toistoa videosta poistumisen jälkeen”.
     Keep Playing After Leaving Video: Jatka toistoa videosta poistumisen jälkeen
+    Keep Player Visible When Scrolling: Pidä soitin näkyvissä vieritettäessä
+    Keep Player Visible When Scrolling Tooltip: Soitin kiinnitetään vain, kun se vie enintään puolet ikkunan korkeudesta. Muuten, esimerkiksi puhelimissa vaakasuunnassa tai leveissä ikkunoissa, näytetään sen sijaan minisoitin.
     Multiply Seek Interval by Playback Rate: Kerro siirtymisväli toistonopeudella
     Show Playback Rate Adjusted Timestamp: Näytä toistonopeuteen mukautettu aikaleima
     Use YouTube-style Shorts: Käytä YouTube-tyylisiä Shortseja

@@ -1004,6 +1004,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland tidak melaporkan jendela yang diminimalkan kepada aplikasi, jadi pemicu ini tidak tersedia. Gunakan "Saat jendela kehilangan fokus atau ditinggalkan", yang juga mencakup tindakan meminimalkan.
       On Tab Change Mini Player: Berganti tab akan menampilkan pemutar mini sebagai gantinya. Untuk menggunakan ini, nonaktifkan “Terus putar setelah meninggalkan video”.
     Keep Playing After Leaving Video: Terus putar setelah meninggalkan video
+    Keep Player Visible When Scrolling: Tetap tampilkan pemutar saat menggulir
+    Keep Player Visible When Scrolling Tooltip: Pemutar hanya disematkan selama tingginya paling banyak setengah tinggi jendela. Jika tidak, misalnya di ponsel dalam mode lanskap atau di jendela lebar, pemutar mini ditampilkan sebagai gantinya.
     Multiply Seek Interval by Playback Rate: Kalikan Interval Pencarian dengan Kecepatan Pemutaran
     Show Playback Rate Adjusted Timestamp: Tampilkan Stempel Waktu yang Disesuaikan dengan Kecepatan Pemutaran
     Use YouTube-style Shorts: Gunakan Shorts Bergaya YouTube

@@ -1849,6 +1849,7 @@ const customActions = {
         entry => entry._id === 'moveDownloadsToAppHeader'
       )
       const hasPipTriggersSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureTriggers')
+      const hasKeepPlayerVisibleSetting = userSettings.some(entry => entry._id === 'keepPlayerVisibleOnScroll')
       const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
       const legacyHideLiveChatEntry = userSettings.find(entry => entry._id === 'hideLiveChat')
@@ -1950,6 +1951,10 @@ const customActions = {
         if (tabChangeEnabled !== null) {
           await dispatch('updateAutoPictureInPictureTriggers', tabChangeEnabled ? ['tab', 'minimize'] : [])
         }
+      }
+
+      if (legacyAutoPipModeEntry && !hasKeepPlayerVisibleSetting) {
+        await dispatch('updateKeepPlayerVisibleOnScroll', legacyAutoPipModeEntry.value !== 'never')
       }
 
       // The chapters and screenshot buttons used to sit on the control bar

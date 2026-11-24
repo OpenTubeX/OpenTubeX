@@ -161,6 +161,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['skipUnavailablePlaylistVideos', 'Settings.Player Settings.Skip Unavailable Playlist Videos', 'playback', ['fas', 'forward-fast']],
   ['useCustomShortsPlayer', 'Settings.Player Settings.Use YouTube-style Shorts', 'playback', ['fas', 'smartphone']],
   ['loopShorts', 'Settings.Player Settings.Loop Shorts', 'playback', ['fas', 'replay'], { disabledWhen: settings => !settings.useCustomShortsPlayer }],
+  ['keepPlayerVisibleOnScroll', 'Settings.Player Settings.Keep Player Visible When Scrolling', 'playback', ['fas', 'compress']],
   ['rememberVolume', 'Settings.Player Settings.Remember Volume', 'playback', ['fas', 'volume-high'], { capacitorUnsupported: true }],
   ['enableSkipSilenceByDefault', 'Settings.Player Settings.Enable Skip Silence by Default', 'playback', ['fas', 'volume-mute'], { iosUnsupported: true, disabledWhen: settings => !settings.showSkipSilenceButton }],
   {

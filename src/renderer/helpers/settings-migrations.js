@@ -5,6 +5,7 @@ import {
   FORMER_CHANNEL_SETTING_SWITCHES,
   isFormerDefaultQuickSettings,
   holdPlaybackRateMultiplierFromSwitch,
+  keepPlayerVisibleOnScrollFromLegacy,
   navigationBarLabelsFromCompactSwitch,
   migrateSettingIds,
   thumbnailDataSaverModeFromSwitch,
@@ -115,10 +116,17 @@ export function migrateLegacySettings(settings) {
         : null
     if (enabled !== null) migratedSettings.autoPictureInPictureTriggers = enabled ? ['tab', 'minimize'] : []
   }
+  if (!Object.hasOwn(migratedSettings, 'keepPlayerVisibleOnScroll')) {
+    const legacy = ['scrollPlayerMode', 'scrollMiniPlayerEnabled'].find(key => Object.hasOwn(migratedSettings, key))
+    if (legacy) {
+      migratedSettings.keepPlayerVisibleOnScroll = keepPlayerVisibleOnScrollFromLegacy(migratedSettings[legacy])
+    } else if (Object.hasOwn(migratedSettings, 'autoPictureInPictureMode')) {
+      migratedSettings.keepPlayerVisibleOnScroll = migratedSettings.autoPictureInPictureMode !== 'never'
+    }
+  }
   delete migratedSettings.autoPictureInPictureMode
   delete migratedSettings.autoPictureInPictureOnTabChange
 
-  // Scrolling past the player always pins it when there is room now.
   delete migratedSettings.scrollMiniPlayerEnabled
   delete migratedSettings.scrollMiniPlayerOnAllTabs
   delete migratedSettings.scrollPlayerMode

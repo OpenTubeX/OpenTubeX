@@ -1003,6 +1003,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland tilkynnir forritum ekki þegar gluggi er lágmarkaður, svo þessi kveikja er ekki tiltæk. Notaðu "Þegar glugginn missir fókus eða skipt er frá honum" í staðinn. Sú stilling nær einnig yfir lágmörkun.
       On Tab Change Mini Player: Þegar skipt er um flipa birtist smáspilarinn í staðinn. Til að nota þetta skaltu slökkva á „Halda spilun áfram eftir að farið er úr myndskeiði“.
     Keep Playing After Leaving Video: Halda spilun áfram eftir að farið er úr myndskeiði
+    Keep Player Visible When Scrolling: Halda spilaranum sýnilegum þegar skrunað er
+    Keep Player Visible When Scrolling Tooltip: Spilarinn er aðeins festur á meðan hann tekur að hámarki helming af hæð gluggans. Annars, t.d. í símum í láréttri stöðu eða í breiðum gluggum, birtist smáspilarinn í staðinn.
     Multiply Seek Interval by Playback Rate: Margfalda spólunarskref með spilunarhraða
     Show Playback Rate Adjusted Timestamp: Sýna tímamerki aðlagað að spilunarhraða
     Use YouTube-style Shorts: Nota Shorts að hætti YouTube

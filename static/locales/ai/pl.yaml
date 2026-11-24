@@ -629,6 +629,8 @@ Settings:
     Ignore Headphone Controls: 'Ignoruj sterowanie ze słuchawek'
     Music Visualizer: Wizualizator muzyki
     Keep Playing After Leaving Video: Kontynuuj odtwarzanie po opuszczeniu filmu
+    Keep Player Visible When Scrolling: Pozostaw odtwarzacz widoczny podczas przewijania
+    Keep Player Visible When Scrolling Tooltip: Odtwarzacz jest przypinany tylko wtedy, gdy zajmuje najwyżej połowę wysokości okna. W przeciwnym razie, np. na telefonach w orientacji poziomej lub w szerokich oknach, zamiast tego wyświetlany jest miniodtwarzacz.
     Enable Skip Silence by Default: Domyślnie włącz pomijanie ciszy
     Voice-over Translation:
       Attribution: (obsługiwane przez Yandex)

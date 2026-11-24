@@ -1001,6 +1001,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland 不會向應用程式回報視窗最小化，因此無法使用這項觸發條件。請改用「視窗失去焦點或切換到其他視窗時」，這也涵蓋視窗最小化的情況。
       On Tab Change Mini Player: 切換頁籤時會改為顯示迷你播放器。若要使用此選項，請關閉「離開影片後繼續播放」。
     Keep Playing After Leaving Video: 離開影片後繼續播放
+    Keep Player Visible When Scrolling: 捲動時保持播放器可見
+    Keep Player Visible When Scrolling Tooltip: 僅當播放器高度不超過視窗高度的一半時才會固定。否則（例如橫向手機或寬視窗），將改為顯示迷你播放器。
     Multiply Seek Interval by Playback Rate: 依播放速度倍增跳轉間隔
     Show Playback Rate Adjusted Timestamp: 顯示依播放速度調整後的時間戳記
     Use YouTube-style Shorts: 使用 YouTube 樣式的 Shorts

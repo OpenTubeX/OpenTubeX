@@ -1022,6 +1022,8 @@ Settings:
       Wayland Minimize Unsupported: Wayland giver ikke apps besked, når et vindue minimeres, så denne udløser er ikke tilgængelig. Brug i stedet "Når vinduet mister fokus, eller der skiftes væk fra det", som også omfatter minimering.
       On Tab Change Mini Player: Når der skiftes fane, vises miniafspilleren i stedet. Slå “Fortsæt afspilning, når en video forlades” fra for at bruge dette.
     Keep Playing After Leaving Video: Fortsæt afspilning, når en video forlades
+    Keep Player Visible When Scrolling: Hold afspilleren synlig ved rulning
+    Keep Player Visible When Scrolling Tooltip: Afspilleren fastgøres kun, så længe den fylder højst halvdelen af vinduets højde. Ellers, f.eks. på telefoner i liggende format eller i brede vinduer, vises miniafspilleren i stedet.
     Multiply Seek Interval by Playback Rate: Gang spoleintervallet med afspilningshastigheden
     Show Playback Rate Adjusted Timestamp: Vis tidsangivelse justeret efter afspilningshastighed
     Use YouTube-style Shorts: Brug Shorts i YouTube-stil
