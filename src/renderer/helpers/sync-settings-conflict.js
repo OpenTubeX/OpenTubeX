@@ -239,20 +239,27 @@ export function mergeProfileSettingsEntry(options) {
   const base = old.value
   const merged = { ...remoteEntry.value }
   const times = profileSettingTimesOf(remoteEntry)
+  const baseTimes = profileSettingTimesOf(old)
+  // Only times that devices recorded for a setting show an edit that went
+  // back to the synced value; fallback times are those of the whole entry.
+  const remoteSettingTimes = isSettingsObject(remoteEntry.settingsUpdatedAt) ? remoteEntry.settingsUpdatedAt : {}
   for (const settingId of new Set([...Object.keys(base), ...Object.keys(value)])) {
     const local = Object.hasOwn(value, settingId) ? value[settingId] : undefined
     const synced = Object.hasOwn(base, settingId) ? base[settingId] : undefined
     const remote = Object.hasOwn(merged, settingId) ? merged[settingId] : undefined
-    if (areJsonValuesEqual(local, synced)) continue
-    const editedAt = localSettingUpdatedAt(settingId) ?? localUpdatedAt ?? now
+    const baseEditedAt = Object.hasOwn(baseTimes, settingId) ? baseTimes[settingId] : old.updatedAt
+    const localSettingEditedAt = localSettingUpdatedAt(settingId)
+    if (areJsonValuesEqual(local, synced) && !(localSettingEditedAt > baseEditedAt)) continue
+    const editedAt = localSettingEditedAt ?? localUpdatedAt ?? now
     const remoteEditedAt = Object.hasOwn(times, settingId) ? times[settingId] : remoteEntry.updatedAt
-    if (!areJsonValuesEqual(remote, synced) && editedAt < remoteEditedAt) continue
+    const remoteChanged = !areJsonValuesEqual(remote, synced) || remoteSettingTimes[settingId] > baseEditedAt
+    if (remoteChanged && editedAt < remoteEditedAt) continue
     if (local === undefined) delete merged[settingId]
     else merged[settingId] = local
     times[settingId] = editedAt
   }
 
-  if (areJsonValuesEqual(merged, remoteEntry.value)) return remoteEntry
+  if (areJsonValuesEqual(merged, remoteEntry.value) && areJsonValuesEqual(times, profileSettingTimesOf(remoteEntry))) return remoteEntry
   return {
     key,
     value: merged,

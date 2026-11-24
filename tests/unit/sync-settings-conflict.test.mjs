@@ -351,6 +351,31 @@ test('settings of one profile edited on two devices before they sync are all kep
   assert.equal(unchanged, remoteEntry, 'Unedited settings must take the server ones')
 })
 
+test('the later edit of a profile setting wins even when one device went back to the synced value', () => {
+  const key = 'profileSettings-636172'
+  const old = { key, value: { preferredCaptionLocale: 'en' }, updatedAt: 10, settingsUpdatedAt: { preferredCaptionLocale: 10 } }
+  const remote = (value, editedAt) => ({
+    key, value: { preferredCaptionLocale: value }, updatedAt: editedAt, settingsUpdatedAt: { preferredCaptionLocale: editedAt },
+  })
+  const local = (value, editedAt) => ({
+    key, value: { preferredCaptionLocale: value }, old, localUpdatedAt: editedAt, localSettingUpdatedAt: () => editedAt, now: 50,
+  })
+
+  // This device went from en to fr and back to en at 40; the other device chose de at 30.
+  const backHere = mergeProfileSettingsEntry({ ...local('en', 40), remoteEntry: remote('de', 30) })
+  assert.deepEqual(backHere.value, { preferredCaptionLocale: 'en' })
+  assert.deepEqual(backHere.settingsUpdatedAt, { preferredCaptionLocale: 40 })
+
+  // The other device went back to en at 30, after this device chose fr at 20.
+  const backThere = remote('en', 30)
+  assert.equal(mergeProfileSettingsEntry({ ...local('fr', 20), remoteEntry: backThere }), backThere)
+
+  // Both chose fr; the later edit time is kept so a third device's earlier edit loses.
+  const both = mergeProfileSettingsEntry({ ...local('fr', 40), remoteEntry: remote('fr', 20) })
+  assert.deepEqual(both.value, { preferredCaptionLocale: 'fr' })
+  assert.deepEqual(both.settingsUpdatedAt, { preferredCaptionLocale: 40 })
+})
+
 test('the later edit of a profile setting wins, whenever either device edited its other settings', () => {
   const key = 'profileSettings-636172'
   const old = { key, value: { hideComments: false, preferredCaptionLocale: 'en' }, updatedAt: 10 }

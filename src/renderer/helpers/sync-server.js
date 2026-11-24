@@ -1697,8 +1697,8 @@ function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
   const elsewhere = Object.entries(remoteEntry.value).filter(([key]) => !Object.hasOwn(syncedRemote, key))
   if (elsewhere.length === 0) return entry
   const value = Object.fromEntries([...elsewhere, ...Object.entries(entry.value)].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
-  if (!entry.settingsUpdatedAt) return { ...entry, value }
-  return { ...entry, value, settingsUpdatedAt: { ...profileSettingTimesOf(remoteEntry), ...entry.settingsUpdatedAt } }
+  // An entry that replaced all settings has no times yet; its settings count as edited with it.
+  return { ...entry, value, settingsUpdatedAt: { ...profileSettingTimesOf(remoteEntry), ...profileSettingTimesOf(entry) } }
 }
 
 function settingUpdater(key) {
