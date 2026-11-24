@@ -100,9 +100,25 @@ export function useVideoZoom({
   /** Whether a turn may still be animating */
   let videoRotationTurning = false
 
+  /**
+   * @param {number} angle in degrees
+   * @returns {number} the same turn between -180 (exclusive) and 180 degrees, so half turns go clockwise
+   */
+  function shortestTurn(angle) {
+    const clockwise = ((angle % 360) + 360) % 360
+    return clockwise > 180 ? clockwise - 360 : clockwise
+  }
+
   watch(rotation, (value) => {
-    const clockwise = (((value - renderedRotation.value) % 360) + 360) % 360
-    renderedRotation.value += clockwise > 180 ? clockwise - 360 : clockwise
+    let from = renderedRotation.value
+    // A selection during a turn continues from the angle on screen, which lies within half a
+    // turn of where that turn is heading.
+    const transform = videoRotationTurning && video.value ? getComputedStyle(video.value).transform : 'none'
+    if (transform !== 'none') {
+      const matrix = new DOMMatrix(transform)
+      from -= shortestTurn(from - Math.atan2(matrix.b, matrix.a) * 180 / Math.PI)
+    }
+    renderedRotation.value = Math.round(from + shortestTurn(value - from))
     videoRotationTurning = true
   })
 
