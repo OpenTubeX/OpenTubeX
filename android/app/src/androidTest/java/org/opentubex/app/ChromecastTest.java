@@ -396,7 +396,15 @@ public class ChromecastTest {
             JSObject template = resource(1, "https://8.8.8.8/", "video/mp4");
             template.getJSONArray("candidates").getJSONObject(0).put("template", true);
             resources.put(template);
+            // Receivers detect HLS segment formats from the extension the relay keeps.
+            JSObject segment = resource(2, "https://8.8.8.8/file/seg.ts", "video/mp2t");
+            segment.getJSONArray("candidates").getJSONObject(0).put("suffix", "media.ts");
+            resources.put(segment);
             server.register(resources);
+            assertEquals("", fetch(server.origin() + "/test-token/2/media", 502));
+            fetch(server.origin() + "/test-token/2/media.ts", 200);
+            assertEquals("/file/seg.ts?null", requests.poll(3, TimeUnit.SECONDS));
+            timeouts.poll(3, TimeUnit.SECONDS);
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200, 9000));
             assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", requests.poll(3, TimeUnit.SECONDS));
             assertEquals("Unknown timing allows blocking headers", 0, (int) timeouts.poll(3, TimeUnit.SECONDS));

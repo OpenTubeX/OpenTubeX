@@ -3,7 +3,7 @@ import { isIP } from 'node:net'
 import { randomBytes } from 'node:crypto'
 import { createMediaServer } from './dlnaMediaServer.js'
 import { createMuxedMediaServer } from './dlnaMux.js'
-import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../dlnaProtocol.js'
+import { createAvTransportBody, createDlnaMetadata, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation, seekDlnaStart } from '../dlnaProtocol.js'
 
 export { createMediaServer } from './dlnaMediaServer.js'
 export { parseDlnaDevice } from '../dlnaProtocol.js'
@@ -133,7 +133,7 @@ function chooseLocalAddress(remoteAddress) {
  * @param {number} ownerId
  * @param {{ deviceId: string, mediaUrl: string, title: string, audioUrl?: string, startSeconds?: number }} payload
  */
-export async function startDlnaCast(ownerId, payload, getHeaders = () => ({}), muxOptions = {}, resolveAddresses, resolveProxy) {
+export async function startDlnaCast(ownerId, payload, getHeaders = () => ({}), muxOptions = {}, resolveAddresses, resolveProxy, seekOptions) {
   const device = discoveredDevices.get(payload?.deviceId)
   let url
   try { url = new URL(payload?.mediaUrl) } catch { return { error: 'Invalid media URL' } }
@@ -186,13 +186,8 @@ export async function startDlnaCast(ownerId, payload, getHeaders = () => ({}), m
     const castId = randomBytes(16).toString('hex')
     activeCast = { ownerId, castId, device, server }
     if (!payload.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
-      try {
-        await sendAvTransport(device, 'Seek', {
-          InstanceID: 0,
-          Unit: 'REL_TIME',
-          Target: formatDlnaTime(payload.startSeconds)
-        })
-      } catch { /* Some renderers do not support seeking. */ }
+      await seekDlnaStart((action, fields) => sendAvTransport(device, action, fields), payload.startSeconds,
+        () => activeCast?.castId === castId, seekOptions)
     }
     return { castId, deviceName: device.name }
   } catch (error) {

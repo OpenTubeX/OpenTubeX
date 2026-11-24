@@ -4,7 +4,7 @@ import { setImmediate } from 'node:timers/promises'
 
 import { createMobileDlnaCast } from '../../src/renderer/helpers/player/dlnaCast.js'
 import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
-import { parseDlnaPosition, parseSsdpLocation } from '../../src/dlnaProtocol.js'
+import { formatDlnaTime, parseDlnaPosition, parseSsdpLocation, seekDlnaStart } from '../../src/dlnaProtocol.js'
 
 const location = 'http://192.168.1.7:8000/device.xml'
 const description = `<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
@@ -42,7 +42,8 @@ function fixture(screenWake) {
     async stopMediaServer(options) { calls.push({ stop: options }) }
   }
   return {
-    cast: createMobileDlnaCast(native, screenWake),
+    // Tests that need the background start-position check pass their own deadline.
+    cast: createMobileDlnaCast(native, screenWake, { timeoutMs: 0 }),
     calls,
     native,
     fail(action) { failure = action },
@@ -109,6 +110,28 @@ test('failed mobile cast startup and failed relay teardown leave sleep allowed',
 function actions(calls) {
   return calls.filter(call => call.method === 'POST').map(call => call.headers.SOAPACTION.split('#')[1].slice(0, -1))
 }
+
+test('the start position is sought again when the renderer ignored a Seek while loading', async () => {
+  // gmrender-resurrect accepts a Seek before GStreamer has loaded the media, then plays from 0.
+  const actions = []
+  let loaded = false
+  let position = 0
+  const send = async (action, fields) => {
+    actions.push(action)
+    if (action === 'Seek' && loaded) position = fields.Target.split(':').reduce((total, part) => total * 60 + Number(part), 0)
+    if (action !== 'GetPositionInfo') return ''
+    if (loaded) position++
+    loaded = true
+    return `<u:GetPositionInfoResponse><TrackDuration>${loaded && position > 0 ? '0:10:00' : 'NOT_IMPLEMENTED'}</TrackDuration>` +
+      `<RelTime>${formatDlnaTime(position)}</RelTime></u:GetPositionInfoResponse>`
+  }
+  await seekDlnaStart(send, 65.8, () => true, { intervalMs: 0 })
+  assert.deepEqual(actions, ['Seek'])
+  for (let i = 0; i < 100 && position < 66; i++) await new Promise(resolve => setTimeout(resolve, 1))
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.deepEqual(actions, ['Seek', 'GetPositionInfo', 'GetPositionInfo', 'Seek', 'GetPositionInfo'])
+  assert.equal(position, 66)
+})
 
 test('mobile discovery deduplicates responses and pins endpoints to their responding device', async () => {
   const { cast, calls } = fixture()

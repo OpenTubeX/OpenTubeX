@@ -2,11 +2,11 @@ import { registerPlugin } from '@capacitor/core'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { ChromecastSession } from '../../../chromecastSession.js'
 import { FcastSession } from '../../../fcastSession.js'
-import { rewriteCastDash, rewriteCastHls, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../../../castManifestRewrite.js'
+import { rewriteCastDash, rewriteCastHls, hlsExtension, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../../../castManifestRewrite.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 
 /** The native relay streams media; manifests come back here for shared rewriting. */
-function createMobileCastMedia(native) {
+function createMobileCastMedia(native, rewriteOptions = {}) {
   return ({ source, sender }) => {
     const resources = new Map()
     const ids = new Map()
@@ -56,7 +56,7 @@ function createMobileCastMedia(native) {
             ((dashContext === undefined && url.includes('$')) || parsed.pathname.endsWith('/'))
           return {
             url: template ? new URL(parsed.pathname.slice(0, end), parsed).href : url,
-            suffix: template ? parsed.pathname.slice(end) + parsed.search : 'media',
+            suffix: template ? parsed.pathname.slice(end) + parsed.search : `media${hlsExtension(url, hlsVariables)}`,
             template
           }
         })
@@ -114,7 +114,7 @@ function createMobileCastMedia(native) {
             const dash = event.contentType === 'application/dash+xml'
             let dashAttributes
             const body = dash
-              ? rewriteCastDash(event.body, event.url, registerResource, resource.dashContext, attributes => { dashAttributes = attributes })
+              ? rewriteCastDash(event.body, event.url, registerResource, resource.dashContext, attributes => { dashAttributes = attributes }, rewriteOptions)
               : rewriteCastHls(event.body, event.url, registerResource, resource.hlsVariables)
             const graceMs = dash
               ? resource.dashContext ? resource.graceMs : dashResourceGrace(dashAttributes)
@@ -294,7 +294,7 @@ export function createMobileFcast(native, screenWake = playbackScreenWake) {
       return (await native.discover({ protocol: 'fcast' })).devices
     },
     createConnection: (device, handlers) => new Connection(device, handlers),
-    createMedia: createMobileCastMedia(native),
+    createMedia: createMobileCastMedia(native, { singleVideoContainer: true }),
     randomId: () => crypto.randomUUID(),
     powerSaveBlocker: screenWakeBlocker(screenWake)
   }))

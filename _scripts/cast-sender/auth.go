@@ -114,7 +114,7 @@ func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *
 		}
 		reply := &authMessage{}
 		if err := proto.Unmarshal(message.GetPayloadBinary(), reply); err != nil {
-			return err
+			return fmt.Errorf("%w reply: %w", errInvalidCastAuthentication, err)
 		}
 		if reply.Error != nil || reply.Response == nil {
 			return errCastAuthenticationDeclined
@@ -132,7 +132,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	}
 	device, err := x509.ParseCertificate(response.ClientAuthCertificate)
 	if x509.IsFatal(err) {
-		return err
+		return fmt.Errorf("%w: device certificate: %w", errInvalidCastAuthentication, err)
 	}
 	key, ok := device.PublicKey.(*rsa.PublicKey)
 	if !ok || key.N.BitLen() < 2048 || device.IsCA || device.KeyUsage&x509.KeyUsageDigitalSignature == 0 {
@@ -142,7 +142,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	for _, der := range response.IntermediateCertificate {
 		certificate, err := x509.ParseCertificate(der)
 		if x509.IsFatal(err) {
-			return err
+			return fmt.Errorf("%w: intermediate certificate: %w", errInvalidCastAuthentication, err)
 		}
 		intermediates.AddCert(certificate)
 	}

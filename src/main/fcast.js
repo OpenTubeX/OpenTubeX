@@ -89,7 +89,7 @@ export class FcastManager extends FcastSession {
       discover: () => discoverCastDevices(executable, 'discover-fcast', options.discoveryTimeoutMs),
       createConnection: (device, handlers) => new FcastConnection(device, { ...handlers, connectTimeoutMs: options.connectTimeoutMs }),
       createMedia: ({ source, deviceAddress, token, getHeaders, isAllowedUrl, fetchMedia }) =>
-        createCastMediaServer(source, deviceAddress, token, getHeaders, isAllowedUrl, fetchMedia),
+        createCastMediaServer(source, deviceAddress, token, getHeaders, isAllowedUrl, fetchMedia, { singleVideoContainer: true }),
       randomId: () => randomBytes(24).toString('hex'),
       powerSaveBlocker,
       ...options

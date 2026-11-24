@@ -495,6 +495,24 @@ test('rewrites DASH resources using their original inherited base and preserves 
   assert.throws(() => rewriteCastDash('<html/>', undefined, () => ''), /Invalid/)
 })
 
+test('FCast DASH drops WebM video only from periods that also have MP4 video', () => {
+  // The GStreamer FCast desktop receiver never starts playback when a period mixes them.
+  const xml = `<MPD><Period id="mixed">
+    <AdaptationSet mimeType="audio/webm"><Representation><BaseURL>https://media.test/opus.webm</BaseURL></Representation></AdaptationSet>
+    <AdaptationSet><Representation mimeType="video/webm"><BaseURL>https://media.test/vp9.webm</BaseURL></Representation></AdaptationSet>
+    <AdaptationSet mimeType="video/mp4"><Representation><BaseURL>https://media.test/avc.mp4</BaseURL></Representation></AdaptationSet>
+  </Period><Period id="webm">
+    <AdaptationSet mimeType="video/webm"><Representation><BaseURL>https://media.test/only.webm</BaseURL></Representation></AdaptationSet>
+  </Period></MPD>`
+  const registered = []
+  const register = url => { registered.push(url); return `http://cast.test/${registered.length}` }
+  rewriteCastDash(xml, undefined, register, undefined, undefined, { singleVideoContainer: true })
+  assert.deepEqual(registered, ['https://media.test/opus.webm', 'https://media.test/avc.mp4', 'https://media.test/only.webm'])
+  registered.length = 0
+  rewriteCastDash(xml, undefined, register)
+  assert.ok(registered.includes('https://media.test/vp9.webm'))
+})
+
 test('rewriting DASH BaseURL text retains playback attributes and escaped values', () => {
   const xml = '<MPD><BaseURL byteRange="100-200" availabilityTimeOffset="1.5" availabilityTimeComplete="false" serviceLocation="A&amp;B">https://media.test/vod/</BaseURL><Period><BaseURL byteRange="10-20">video.mp4</BaseURL></Period></MPD>'
   const urls = []
@@ -625,8 +643,9 @@ test('HLS relay resources isolate import contexts and do not interpret substitut
   assert.notEqual(first, second)
   assert.equal(media.register('https://media.test/child.m3u8', undefined, { token: 'first' }), first)
   const literal = rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:IMPORT="literal"\n{$literal}\n', 'https://media.test/live/', media.register, { literal: 'segment-{$other}.ts' }).trim().split('\n').at(-1)
-  assert.ok(literal.endsWith('/media'))
-  assert.equal((await fetch(literal.replace('/media', '/different.ts'))).status, 502)
+  // Receivers detect HLS segment formats, such as packed audio named .ts, from the extension.
+  assert.ok(literal.endsWith('/media.ts'))
+  assert.equal((await fetch(literal.replace('/media.ts', '/different.ts'))).status, 502)
   assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:QUERYPARAM="absent"\n', 'https://media.test/live/', () => ''), /variable/)
   assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:IMPORT="absent"\n', 'https://media.test/live/', () => ''), /variable/)
   assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="1"\n#EXT-X-DEFINE:NAME="id",VALUE="2"\n', 'https://media.test/live/', () => ''), /variable/)
@@ -864,7 +883,7 @@ for (const upstreamQuery of ['', '?_HLS_msn=42']) {
     pending.release()
     const response = await pending.response
     assert.equal(response.status, 200)
-    assert.match(response.body, /URI="http:\/\/127\.0\.0\.1:\d+\/token\/\d+\/media"/)
+    assert.match(response.body, /URI="http:\/\/127\.0\.0\.1:\d+\/token\/\d+\/media\.ts"/)
   })
 }
 
