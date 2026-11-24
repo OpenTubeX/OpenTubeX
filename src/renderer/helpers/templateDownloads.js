@@ -39,6 +39,19 @@ export function findActiveDownload(downloads, target) {
   }).at(-1)
 }
 
+/** @type {Set<string>} keys of the targets whose template downloads are starting */
+const startingTargets = new Set()
+
+/**
+ * @param {DownloadTarget} target
+ * @returns {string | null} the same identity {@link findActiveDownload} matches on
+ */
+function targetKey(target) {
+  if (target.externalUrl) return `url:${target.externalUrl}`
+  if (!target.isPlaylist) return `video:${target.videoId}`
+  return target.playlistKey ? `playlist:${target.playlistKey}` : null
+}
+
 function openDownloadsButton(t) {
   return {
     label: t('Downloads.Open Downloads'),
@@ -54,7 +67,8 @@ function openDownloadsButton(t) {
  * @param {{ t: Function, locale: string }} i18n
  */
 export async function startTemplateDownload(templateValue, target, { t, locale }) {
-  if (findActiveDownload(store.getters.getYtDlpDownloads, target)) {
+  const key = targetKey(target)
+  if ((key !== null && startingTargets.has(key)) || findActiveDownload(store.getters.getYtDlpDownloads, target)) {
     showToast({
       message: t('Downloads.Already Downloading', { title: target.title }),
       icon: ['fas', 'download'],
@@ -63,6 +77,20 @@ export async function startTemplateDownload(templateValue, target, { t, locale }
     return
   }
 
+  if (key !== null) startingTargets.add(key)
+  try {
+    await requestTemplateDownload(templateValue, target, { t, locale })
+  } finally {
+    if (key !== null) startingTargets.delete(key)
+  }
+}
+
+/**
+ * @param {string} templateValue
+ * @param {DownloadTarget} target
+ * @param {{ t: Function, locale: string }} i18n
+ */
+async function requestTemplateDownload(templateValue, target, { t, locale }) {
   const folderRequired = (process.env.IS_CAPACITOR || window.ftElectron?.isFlatpak) &&
     store.getters.getYtDlpDownloadFolderPath === ''
   if (folderRequired) {
