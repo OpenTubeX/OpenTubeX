@@ -1547,6 +1547,10 @@ Settings:
     Copy Recovery Phrase: İfadeyi kopyala
     Recovery Phrase Copied: Kurtarma ifadesi kopyalandı
     Use Recovery Phrase: İfadeyi kullan
+    Privacy Passphrase Login Hint: "Oturum açmak için kurtarma ifadenizi veya kendi parolanızı girin. Bu cihazdan asla ayrılmaz. Kaydolduğunuzda sizin için yeni bir kurtarma ifadesi oluşturulur."
+    Use Custom Passphrase: "Bunun yerine kendi parolamı kullan"
+    Choose a Custom Passphrase: "Kendi parolanızı seçin"
+    Use Generated Phrase: "Bunun yerine oluşturulan ifadeyi kullan"
     Privacy Policy: Bu sunucunun gizlilik politikası
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'

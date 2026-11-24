@@ -19,6 +19,18 @@ async function getSyncCapabilities() {
   return health.capabilities ?? {}
 }
 
+/**
+ * Registering opens the recovery phrase dialog, whose custom passphrase
+ * step holds the passphrase typed into the form.
+ * @param {import('@playwright/test').Page} page
+ */
+async function registerWithCustomPassphrase(page) {
+  await page.getByRole('dialog', { name: 'Save your recovery phrase' })
+    .getByRole('button', { name: 'Use custom passphrase instead' }).click()
+  await page.getByRole('dialog', { name: 'Choose a custom passphrase' })
+    .getByRole('button', { name: 'Register' }).click()
+}
+
 function rateLimitClient(testInfo) {
   const title = `${testInfo.file}\0${testInfo.titlePath.join('\0')}\0${testInfo.retry}`
   let hash = 2166136261
@@ -136,6 +148,7 @@ test.describe('OpenTubeX sync server', () => {
       await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     }
     await syncSection.getByRole('button', { name: 'Register' }).click()
+    if (enhancedPrivacy) await registerWithCustomPassphrase(page)
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     if (enhancedPrivacy) {
@@ -504,6 +517,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByLabel('Password', { exact: true }).fill(password)
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
+    await registerWithCustomPassphrase(page)
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
 
     const currentCard = syncSection.locator('.sessionCard', { hasText: 'Current device' })
@@ -565,6 +579,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
+    await registerWithCustomPassphrase(page)
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     await expect.poll(async () => {
@@ -861,6 +876,7 @@ test.describe('OpenTubeX sync server', () => {
       await section.getByLabel('Password', { exact: true }).fill(password)
       await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
       await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+      if (mode === 'register') await registerWithCustomPassphrase(clientPage)
       await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
       await expect(section.getByText(/Last synced:/)).toBeVisible()
       await expect(section.locator('.syncProgress')).toBeHidden()
@@ -989,6 +1005,7 @@ test.describe('OpenTubeX sync server', () => {
       await section.getByLabel('Password', { exact: true }).fill(password)
       await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
       await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+      if (mode === 'register') await registerWithCustomPassphrase(clientPage)
       await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
       await expect(section.getByText(/Last synced:/)).toBeVisible()
       await expect(section.locator('.syncProgress')).toBeHidden()
@@ -1206,6 +1223,7 @@ test.describe('OpenTubeX sync server', () => {
         await section.getByLabel('Password', { exact: true }).fill(password)
         if (privacy === 'enhanced') await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
         await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+        if (mode === 'register' && privacy === 'enhanced') await registerWithCustomPassphrase(clientPage)
         await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
         await expect(section.getByText(/Last synced:/)).toBeVisible()
         await expect(section.locator('.syncProgress')).toBeHidden()
@@ -1447,6 +1465,7 @@ test.describe('OpenTubeX sync server', () => {
         await section.getByLabel('Password', { exact: true }).fill(password)
         await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
         await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+        if (mode === 'register') await registerWithCustomPassphrase(clientPage)
         await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
         await expect(section.getByText(/Last synced:/)).toBeVisible()
         await expect(section.locator('.syncProgress')).toBeHidden()
@@ -1606,6 +1625,7 @@ test.describe('OpenTubeX sync server', () => {
       await section.getByLabel('Password', { exact: true }).fill(password)
       await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
       await section.getByRole('button', { name: 'Register' }).click()
+      await registerWithCustomPassphrase(page)
       await expect(section.getByText(/Last synced:/)).toBeVisible()
       await expect(section.locator('.syncProgress')).toBeHidden()
 

@@ -1574,6 +1574,10 @@ Settings:
     Copy Recovery Phrase: Zin kopiëren
     Recovery Phrase Copied: Herstelzin gekopieerd
     Use Recovery Phrase: Zin gebruiken
+    Privacy Passphrase Login Hint: "Voer om in te loggen je herstelzin of eigen wachtzin in. Deze verlaat dit apparaat nooit. Bij het registreren wordt een nieuwe herstelzin voor je gemaakt."
+    Use Custom Passphrase: "In plaats daarvan een eigen wachtzin gebruiken"
+    Choose a Custom Passphrase: "Kies een eigen wachtzin"
+    Use Generated Phrase: "In plaats daarvan de gegenereerde zin gebruiken"
     Privacy Policy: Privacybeleid van deze server
     Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
     Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.

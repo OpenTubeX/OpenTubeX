@@ -34,6 +34,23 @@ export function normalizeRecoveryPhrase(passphrase) {
 }
 
 /**
+ * Throws when a privacy passphrase is too short or matches the account password.
+ * @param {string} passphrase
+ * @param {string} password
+ */
+export function assertValidPrivacyPassphrase(passphrase, password) {
+  if (passphrase.length < 12) {
+    throw new Error('The privacy passphrase must be at least 12 characters')
+  }
+  // A recovery phrase derives the key in its canonical form, which anyone who
+  // knows the password could also compute from it.
+  const canonical = (/** @type {string} */ value) => normalizeRecoveryPhrase(value) ?? value
+  if (canonical(passphrase) === canonical(password ?? '')) {
+    throw new Error('The privacy passphrase must be different from the account password')
+  }
+}
+
+/**
  * Whether the passphrase is a recovery phrase with a mistyped word: one that
  * is not in the word list or fails the phrase's checksum.
  * @param {string} passphrase

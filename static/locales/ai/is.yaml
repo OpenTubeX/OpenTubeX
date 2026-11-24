@@ -1550,6 +1550,10 @@ Settings:
     Copy Recovery Phrase: Afrita setningu
     Recovery Phrase Copied: Endurheimtarsetning afrituð
     Use Recovery Phrase: Nota setningu
+    Privacy Passphrase Login Hint: "Til að skrá þig inn skaltu slá inn endurheimtarsetninguna eða þína eigin leyndasetningu. Hún fer aldrei af þessu tæki. Við nýskráningu er búin til ný endurheimtarsetning fyrir þig."
+    Use Custom Passphrase: "Nota eigin leyndasetningu í staðinn"
+    Choose a Custom Passphrase: "Veldu eigin leyndasetningu"
+    Use Generated Phrase: "Nota myndaða setningu í staðinn"
     Privacy Policy: Persónuverndarstefna þessa þjóns
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
     Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.

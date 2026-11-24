@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: Kopeeri fraas
     Recovery Phrase Copied: Taastefraas kopeeriti
     Use Recovery Phrase: Kasuta fraasi
+    Privacy Passphrase Login Hint: "Sisselogimiseks sisesta oma taastefraas või enda valitud salafraas. See ei lahku kunagi sellest seadmest. Registreerumisel luuakse sulle uus taastefraas."
+    Use Custom Passphrase: "Kasuta selle asemel enda salafraasi"
+    Choose a Custom Passphrase: "Vali enda salafraas"
+    Use Generated Phrase: "Kasuta selle asemel loodud fraasi"
     Privacy Policy: Selle serveri privaatsuspoliitika
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.

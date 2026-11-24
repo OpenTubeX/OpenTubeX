@@ -1134,6 +1134,10 @@ Settings:
     Copy Recovery Phrase: Kopiuj frazę
     Recovery Phrase Copied: Skopiowano frazę odzyskiwania
     Use Recovery Phrase: Użyj frazy
+    Privacy Passphrase Login Hint: "Aby się zalogować, wpisz frazę odzyskiwania lub własne hasło dostępu. Nigdy nie opuszcza tego urządzenia. Podczas rejestracji zostanie utworzona nowa fraza odzyskiwania."
+    Use Custom Passphrase: "Użyj zamiast tego własnego hasła dostępu"
+    Choose a Custom Passphrase: "Wybierz własne hasło dostępu"
+    Use Generated Phrase: "Użyj zamiast tego wygenerowanej frazy"
   SponsorBlock Settings:
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor

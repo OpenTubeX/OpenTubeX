@@ -1560,6 +1560,10 @@ Settings:
     Copy Recovery Phrase: Copiază fraza
     Recovery Phrase Copied: Fraza de recuperare a fost copiată
     Use Recovery Phrase: Folosește fraza
+    Privacy Passphrase Login Hint: "Pentru autentificare, introdu fraza de recuperare sau propria frază secretă. Nu părăsește niciodată acest dispozitiv. La înregistrare se creează o nouă frază de recuperare pentru tine."
+    Use Custom Passphrase: "Folosește în schimb o frază secretă proprie"
+    Choose a Custom Passphrase: "Alege o frază secretă proprie"
+    Use Generated Phrase: "Folosește în schimb fraza generată"
     Privacy Policy: Politica de confidențialitate a acestui server
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.

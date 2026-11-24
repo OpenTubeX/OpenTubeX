@@ -41,7 +41,7 @@ import {
   readSyncCollection,
 } from '../../helpers/sync-server-privacy'
 import {
-  normalizeRecoveryPhrase,
+  assertValidPrivacyPassphrase,
   preparePrivacyKeyFromPassphrase,
 } from '../../helpers/sync-server-recovery-phrase'
 import {
@@ -415,15 +415,7 @@ function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
   if (!privacyPassphrase) {
     throw new Error('A privacy passphrase is required by this server')
   }
-  if (privacyPassphrase.length < 12) {
-    throw new Error('The privacy passphrase must be at least 12 characters')
-  }
-  // A recovery phrase derives the key in its canonical form, which anyone who
-  // knows the password could also compute from it.
-  const canonical = value => normalizeRecoveryPhrase(value ?? '') ?? value
-  if (canonical(privacyPassphrase) === canonical(password)) {
-    throw new Error('The privacy passphrase must be different from the account password')
-  }
+  assertValidPrivacyPassphrase(privacyPassphrase, password)
 }
 
 /**

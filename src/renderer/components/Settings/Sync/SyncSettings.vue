@@ -79,7 +79,7 @@
         v-if="showPrivacyPassphrase"
         class="privacyHint"
       >
-        {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
+        {{ t('Settings.Sync Settings.Privacy Passphrase Login Hint') }}
       </p>
       <FtButtonGroup
         v-if="showPrivacyPassphrase"
@@ -382,13 +382,15 @@
       </p>
       <FtPrompt
         v-if="recoveryPhrasePrompt"
-        :label="recoveryPhrasePrompt.confirming
-          ? t('Settings.Sync Settings.Confirm Your Recovery Phrase')
-          : t('Settings.Sync Settings.Save Your Recovery Phrase')"
+        :label="{
+          save: t('Settings.Sync Settings.Save Your Recovery Phrase'),
+          confirm: t('Settings.Sync Settings.Confirm Your Recovery Phrase'),
+          custom: t('Settings.Sync Settings.Choose a Custom Passphrase'),
+        }[recoveryPhrasePrompt.step]"
         theme="readable-width"
         @click="recoveryPhrasePrompt = null"
       >
-        <template v-if="!recoveryPhrasePrompt.confirming">
+        <template v-if="recoveryPhrasePrompt.step === 'save'">
           <p>{{ t('Settings.Sync Settings.Recovery Phrase Warning') }}</p>
           <ol class="recoveryPhraseWords">
             <li
@@ -404,6 +406,12 @@
               :icon="['fas', 'copy']"
               @click="copyRecoveryPhrase"
             />
+            <FtButton
+              v-if="recoveryPhrasePrompt.mode === 'register'"
+              :label="t('Settings.Sync Settings.Use Custom Passphrase')"
+              :icon="['fas', 'key']"
+              @click="showCustomPassphrase"
+            />
           </FtFlexBox>
           <FtFlexBox class="actions">
             <FtButton
@@ -417,6 +425,44 @@
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               @click="startRecoveryPhraseConfirmation"
+            />
+          </FtFlexBox>
+        </template>
+        <template v-else-if="recoveryPhrasePrompt.step === 'custom'">
+          <p>{{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}</p>
+          <FtInput
+            ref="customPassphraseInput"
+            class="customPassphraseInput"
+            :label="t('Settings.Sync Settings.Privacy Passphrase')"
+            :placeholder="t('Form Inputs.Encryption Passphrase Hint')"
+            :show-action-button="false"
+            :value="recoveryPhrasePrompt.customPassphrase"
+            :invalid="recoveryPhrasePrompt.customPassphraseError !== ''"
+            input-type="password"
+            show-label
+            @input="recoveryPhrasePrompt.customPassphrase = $event; recoveryPhrasePrompt.customPassphraseError = ''"
+            @keydown.enter="useCustomPassphrase"
+          />
+          <p
+            v-if="recoveryPhrasePrompt.customPassphraseError"
+            class="error"
+            role="alert"
+          >
+            {{ recoveryPhrasePrompt.customPassphraseError }}
+          </p>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Settings.Sync Settings.Use Generated Phrase')"
+              :icon="['fas', 'list-ol']"
+              @click="recoveryPhrasePrompt.step = 'save'"
+            />
+            <FtButton
+              :label="t('Settings.Sync Settings.Register')"
+              :icon="['fas', 'user-plus']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              :disabled="recoveryPhrasePrompt.customPassphrase === ''"
+              @click="useCustomPassphrase"
             />
           </FtFlexBox>
         </template>
@@ -447,7 +493,7 @@
             <FtButton
               :label="t('Back')"
               :icon="['fas', 'arrow-left']"
-              @click="recoveryPhrasePrompt.confirming = false"
+              @click="recoveryPhrasePrompt.step = 'save'"
             />
             <FtButton
               :label="recoveryPhrasePrompt.mode === 'register'
@@ -693,7 +739,10 @@ import {
   resolveSyncServerDeviceName,
 } from '../../../helpers/sync-server-sessions'
 import { isSyncServerOidcUsername } from '../../../helpers/sync-server-oidc'
-import { generateRecoveryPhrase } from '../../../helpers/sync-server-recovery-phrase'
+import {
+  assertValidPrivacyPassphrase,
+  generateRecoveryPhrase,
+} from '../../../helpers/sync-server-recovery-phrase'
 
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
@@ -710,6 +759,7 @@ const password = ref('')
 const privacyPassphrase = ref('')
 const recoveryPhrasePrompt = ref(null)
 const recoveryPhraseInputs = useTemplateRef('recoveryPhraseInputs')
+const customPassphraseInput = useTemplateRef('customPassphraseInput')
 const serverPrivacySupported = ref(null)
 const serverPairingSupported = ref(false)
 const serverAccountSessionsSupported = ref(false)
@@ -774,7 +824,7 @@ const showPrivacyPassphrase = computed(() => (
 const privacyPassphraseMissing = computed(() => (
   serverPrivacySupported.value === true && privacyPassphrase.value === ''
 ))
-// Registering without a passphrase offers a generated recovery phrase.
+// Registering opens the recovery phrase dialog, which also offers a custom passphrase.
 const authenticationActionsDisabled = computed(() => (
   serverCredentialsDisabled.value || !accountCredentialsReady.value
 ))
@@ -918,7 +968,12 @@ async function saveServerUrl() {
 
 async function authenticate(mode) {
   if (busy.value || (mode === 'login' ? loginDisabled : authenticationActionsDisabled).value) return
-  if (privacyPassphraseMissing.value) {
+  // New accounts get a recovery phrase unless the dialog's advanced section chose a custom one.
+  if (privacyPassphraseMissing.value || (
+    mode === 'register' &&
+    serverPrivacySupported.value === true &&
+    privacyPassphrase.value !== confirmedPassphrase
+  )) {
     openRecoveryPhrasePrompt(mode)
     return
   }
@@ -966,16 +1021,45 @@ async function loginWithOidc() {
 }
 
 const RECOVERY_PHRASE_CHECKED_WORDS = 3
+// The passphrase last confirmed in the recovery phrase dialog, so retrying a
+// failed registration doesn't ask again.
+let confirmedPassphrase = ''
 
 function openRecoveryPhrasePrompt(mode) {
+  // A passphrase typed into the form before registering waits in the custom passphrase step.
+  const customPassphrase = mode === 'register' ? privacyPassphrase.value : ''
   recoveryPhrasePrompt.value = {
     mode,
     words: generateRecoveryPhrase().split(' '),
-    confirming: false,
+    /** @type {'save' | 'confirm' | 'custom'} */
+    step: 'save',
     positions: [],
     answers: [],
     mismatch: false,
+    customPassphrase,
+    customPassphraseError: '',
   }
+}
+
+async function showCustomPassphrase() {
+  recoveryPhrasePrompt.value.step = 'custom'
+  await nextTick()
+  customPassphraseInput.value?.focus()
+}
+
+function useCustomPassphrase() {
+  const prompt = recoveryPhrasePrompt.value
+  if (prompt.customPassphrase === '') return
+  try {
+    assertValidPrivacyPassphrase(prompt.customPassphrase, password.value)
+  } catch (error) {
+    prompt.customPassphraseError = error.message
+    return
+  }
+  recoveryPhrasePrompt.value = null
+  confirmedPassphrase = prompt.customPassphrase
+  privacyPassphrase.value = prompt.customPassphrase
+  authenticate(prompt.mode)
 }
 
 function copyRecoveryPhrase() {
@@ -995,7 +1079,7 @@ async function startRecoveryPhraseConfirmation() {
   prompt.positions = [...positions].sort((a, b) => a - b)
   prompt.answers = prompt.positions.map(() => '')
   prompt.mismatch = false
-  prompt.confirming = true
+  prompt.step = 'confirm'
   await nextTick()
   recoveryPhraseInputs.value?.[0]?.focus()
 }
@@ -1010,7 +1094,8 @@ function confirmRecoveryPhrase() {
     return
   }
   recoveryPhrasePrompt.value = null
-  privacyPassphrase.value = prompt.words.join(' ')
+  confirmedPassphrase = prompt.words.join(' ')
+  privacyPassphrase.value = confirmedPassphrase
   if (prompt.mode) authenticate(prompt.mode)
 }
 

@@ -1788,6 +1788,10 @@ Settings:
     Copy Recovery Phrase: 문구 복사
     Recovery Phrase Copied: 복구 문구를 복사했습니다
     Use Recovery Phrase: 문구 사용
+    Privacy Passphrase Login Hint: "로그인하려면 복구 문구 또는 직접 정한 암호문을 입력하세요. 이 기기를 벗어나지 않습니다. 가입하면 새 복구 문구가 만들어집니다."
+    Use Custom Passphrase: "대신 직접 정한 암호문 사용"
+    Choose a Custom Passphrase: "직접 암호문 정하기"
+    Use Generated Phrase: "대신 생성된 문구 사용"
     Privacy Policy: 이 서버의 개인 정보 처리 방침
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
     Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.

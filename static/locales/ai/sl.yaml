@@ -1837,6 +1837,10 @@ Settings:
     Copy Recovery Phrase: Kopiraj frazo
     Recovery Phrase Copied: Obnovitvena fraza je kopirana
     Use Recovery Phrase: Uporabi frazo
+    Privacy Passphrase Login Hint: "Za prijavo vnesite obnovitveno frazo ali lastno šifrirno geslo. Nikoli ne zapusti te naprave. Ob registraciji se za vas ustvari nova obnovitvena fraza."
+    Use Custom Passphrase: "Namesto tega uporabi lastno šifrirno geslo"
+    Choose a Custom Passphrase: "Izberite lastno šifrirno geslo"
+    Use Generated Phrase: "Namesto tega uporabi ustvarjeno frazo"
     Privacy Policy: Pravilnik o zasebnosti tega strežnika
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
     Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.

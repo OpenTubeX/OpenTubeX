@@ -1546,6 +1546,10 @@ Settings:
     Copy Recovery Phrase: Kifejezés másolása
     Recovery Phrase Copied: Helyreállítási kifejezés másolva
     Use Recovery Phrase: Kifejezés használata
+    Privacy Passphrase Login Hint: "A bejelentkezéshez add meg a helyreállítási kifejezést vagy a saját jelmondatodat. Soha nem hagyja el ezt az eszközt. Regisztrációkor új helyreállítási kifejezés készül számodra."
+    Use Custom Passphrase: "Saját jelmondat használata helyette"
+    Choose a Custom Passphrase: "Saját jelmondat választása"
+    Use Generated Phrase: "Létrehozott kifejezés használata helyette"
     Privacy Policy: A kiszolgáló adatvédelmi irányelvei
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
     Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.

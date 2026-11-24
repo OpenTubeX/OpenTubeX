@@ -1548,6 +1548,10 @@ Settings:
     Copy Recovery Phrase: Kopioi lause
     Recovery Phrase Copied: Palautuslause kopioitu
     Use Recovery Phrase: Käytä lausetta
+    Privacy Passphrase Login Hint: "Kirjaudu sisään antamalla palautuslause tai oma tunnuslause. Se ei koskaan poistu tältä laitteelta. Rekisteröityessä sinulle luodaan uusi palautuslause."
+    Use Custom Passphrase: "Käytä sen sijaan omaa tunnuslausetta"
+    Choose a Custom Passphrase: "Valitse oma tunnuslause"
+    Use Generated Phrase: "Käytä sen sijaan luotua lausetta"
     Privacy Policy: Tämän palvelimen tietosuojakäytäntö
     Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
     Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.

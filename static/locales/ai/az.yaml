@@ -1519,6 +1519,10 @@ Settings:
     Copy Recovery Phrase: İfadəni kopyala
     Recovery Phrase Copied: Bərpa ifadəsi kopyalandı
     Use Recovery Phrase: İfadəni istifadə et
+    Privacy Passphrase Login Hint: "Daxil olmaq üçün bərpa ifadənizi və ya öz parol ifadənizi daxil edin. O, heç vaxt bu cihazı tərk etmir. Qeydiyyat sizin üçün yeni bərpa ifadəsi yaradır."
+    Use Custom Passphrase: "Bunun əvəzinə öz parol ifadəmi istifadə et"
+    Choose a Custom Passphrase: "Öz parol ifadənizi seçin"
+    Use Generated Phrase: "Bunun əvəzinə yaradılmış ifadəni istifadə et"
     Privacy Policy: Bu serverin məxfilik siyasəti
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
     Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.

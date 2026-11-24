@@ -2109,6 +2109,9 @@ Settings:
     Privacy Passphrase Hint: >-
       Verwende eine andere Passphrase als dein Kontopasswort. Sie verlässt dieses Gerät nie und wird auf jedem Gerät
       benötigt. Bei Verlust können verschlüsselte Synchronisierungsdaten nicht wiederhergestellt werden.
+    Privacy Passphrase Login Hint: >-
+      Gib zum Anmelden deine Wiederherstellungsphrase oder eigene Passphrase ein. Sie verlässt dieses Gerät nie. Bei der
+      Registrierung wird eine neue Wiederherstellungsphrase für dich erstellt.
     Generate Recovery Phrase: Wiederherstellungsphrase erstellen
     Save Your Recovery Phrase: Wiederherstellungsphrase sichern
     Recovery Phrase Warning: >-
@@ -2122,6 +2125,9 @@ Settings:
     Copy Recovery Phrase: Phrase kopieren
     Recovery Phrase Copied: Wiederherstellungsphrase kopiert
     Use Recovery Phrase: Phrase verwenden
+    Use Custom Passphrase: Stattdessen eigene Passphrase verwenden
+    Choose a Custom Passphrase: Eigene Passphrase festlegen
+    Use Generated Phrase: Stattdessen erstellte Phrase verwenden
     Privacy Policy: Datenschutzerklärung dieses Servers
     Enhanced Privacy Enabled: Erweiterter Datenschutz ist aktiviert. Der Server speichert nur verschlüsselte Synchronisierungsdaten.
     Enhanced Privacy Unsupported: >-

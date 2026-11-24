@@ -1559,6 +1559,10 @@ Settings:
     Copy Recovery Phrase: Kopii frazon
     Recovery Phrase Copied: Restaŭra frazo kopiita
     Use Recovery Phrase: Uzi frazon
+    Privacy Passphrase Login Hint: "Por ensaluti, enigu vian restaŭran frazon aŭ propran pasfrazon. Ĝi neniam forlasas ĉi tiun aparaton. Registriĝo kreas novan restaŭran frazon por vi."
+    Use Custom Passphrase: "Uzi propran pasfrazon anstataŭe"
+    Choose a Custom Passphrase: "Elektu propran pasfrazon"
+    Use Generated Phrase: "Uzi la generitan frazon anstataŭe"
     Privacy Policy: Privateca politiko de ĉi tiu servilo
     Enhanced Privacy Enabled: Plibonigita privateco estas ŝaltita. La servilo konservas nur ĉifritajn sinkronigajn datumojn.
     Enhanced Privacy Unsupported: Averto — ĉi tiu servilo ne subtenas plibonigitan privatecon. Sinkronigitaj datumoj estas videblaj por ĝia operaciisto.

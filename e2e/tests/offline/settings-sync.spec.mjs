@@ -88,7 +88,7 @@ test.describe('settings', () => {
     await expect(syncSection.locator('.error')).toHaveCount(0)
   })
 
-  test('registers with the recovery phrase it shows when no passphrase is entered', async ({ app, page }) => {
+  test('registers with the recovery phrase it shows, offering a typed passphrase only as a custom one', async ({ app, page }) => {
     const serverUrl = 'https://phrase.example'
     let registrations = 0
     await page.route(`${serverUrl}/**`, async (route) => {
@@ -118,10 +118,21 @@ test.describe('settings', () => {
     await syncSection.getByLabel('Username').fill('phrase-user')
     await syncSection.getByLabel('Password', { exact: true }).fill('phrase-password')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    // A passphrase typed into the form waits in the dialog's custom passphrase step.
+    await syncSection.getByLabel(/Privacy passphrase/).fill('too short')
     await syncSection.getByRole('button', { name: 'Register' }).click()
 
-    const words = (await page.getByRole('dialog', { name: 'Save your recovery phrase' })
-      .getByRole('listitem').allTextContents()).map(word => word.trim())
+    const saveDialog = page.getByRole('dialog', { name: 'Save your recovery phrase' })
+    await saveDialog.getByRole('button', { name: 'Use custom passphrase instead' }).click()
+    const customDialog = page.getByRole('dialog', { name: 'Choose a custom passphrase' })
+    await expect(customDialog.getByLabel(/Privacy passphrase/)).toHaveValue('too short')
+    await expect(customDialog.getByLabel(/Privacy passphrase/)).toBeFocused()
+    await customDialog.getByRole('button', { name: 'Register' }).click()
+    await expect(customDialog.getByRole('alert')).toHaveText(/at least 12 characters/)
+    expect(registrations).toBe(0)
+    await customDialog.getByRole('button', { name: 'Use generated phrase instead' }).click()
+
+    const words = (await saveDialog.getByRole('listitem').allTextContents()).map(word => word.trim())
     expect(words).toHaveLength(12)
     await page.getByRole('button', { name: 'Next' }).click()
 

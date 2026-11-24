@@ -1547,6 +1547,10 @@ Settings:
     Copy Recovery Phrase: Kopiera fras
     Recovery Phrase Copied: Återställningsfrasen har kopierats
     Use Recovery Phrase: Använd fras
+    Privacy Passphrase Login Hint: "Ange din återställningsfras eller egen lösenfras för att logga in. Den lämnar aldrig den här enheten. När du registrerar dig skapas en ny återställningsfras åt dig."
+    Use Custom Passphrase: "Använd en egen lösenfras i stället"
+    Choose a Custom Passphrase: "Välj en egen lösenfras"
+    Use Generated Phrase: "Använd den genererade frasen i stället"
     Privacy Policy: Integritetspolicy för den här servern
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.

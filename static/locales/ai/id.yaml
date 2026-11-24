@@ -1551,6 +1551,10 @@ Settings:
     Copy Recovery Phrase: Salin frasa
     Recovery Phrase Copied: Frasa pemulihan disalin
     Use Recovery Phrase: Gunakan frasa
+    Privacy Passphrase Login Hint: "Untuk masuk, masukkan frasa pemulihan atau frasa sandi kustom Anda. Frasa ini tidak pernah meninggalkan perangkat ini. Pendaftaran membuat frasa pemulihan baru untuk Anda."
+    Use Custom Passphrase: "Gunakan frasa sandi kustom"
+    Choose a Custom Passphrase: "Pilih frasa sandi kustom"
+    Use Generated Phrase: "Gunakan frasa yang dibuat"
     Privacy Policy: Kebijakan privasi server ini
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
     Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
