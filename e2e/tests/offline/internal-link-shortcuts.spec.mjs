@@ -107,6 +107,24 @@ test.describe('unloaded YouTube video tabs', () => {
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
     await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Linked channel')
   })
+
+  test('look up the author of a post link opened without a title', async ({ page }) => {
+    const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+    await page.route(`${instanceUrl}/api/v1/channels/${channelId}*`, route => route.fulfill({
+      json: { author: 'Post author', authorId: channelId, authorThumbnails: [], tabs: [] }
+    }))
+    await goTo(page, 'subscriptions')
+    await page.locator('body').evaluate((body, channelId) => {
+      body.insertAdjacentHTML('beforeend', `<a href="#/post/UgkxAAAA?authorId=${channelId}">Post link</a>`)
+    }, channelId)
+
+    await page.locator('body').getByRole('link', { name: 'Post link' }).click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+    // Saved data can give it the title without an author first
+    await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Community Post | Post author')
+  })
 })
 
 test('Ctrl or Cmd-clicking an internal link opens it in an active tab', async ({ page }) => {

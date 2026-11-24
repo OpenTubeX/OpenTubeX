@@ -154,6 +154,16 @@ function showsItsRoute(tab) {
 }
 
 /**
+ * The title of a page that the route alone gives, short of the one it shows
+ * once loaded
+ * @param {string} path
+ */
+function getFallbackTitle(path) {
+  // Without its author, like the post page
+  return path.startsWith('/post/') ? getPostTabTitle() : undefined
+}
+
+/**
  * Gives a tab that was opened unloaded without a title the title its page
  * would show, instead of leaving its route as the title until it loads.
  * @param {string} tabId
@@ -173,9 +183,11 @@ export async function resolveUnloadedTabTitle(tabId, path, query = {}) {
   if (!title) return
 
   // Leave tabs alone that have loaded and set their own title in the meantime.
-  // A tab that the store does not list yet has not loaded either.
+  // A tab that the store does not list yet has not loaded either. Saved data
+  // can have given it a fallback before this lookup started.
   const tab = store.getters.getTabById(tabId)
-  if (tab && !showsItsRoute(tab)) return
+  const showsFallback = tab?.isUnloaded === true && tab.title === getFallbackTitle(tab.route.path)
+  if (tab && !showsItsRoute(tab) && !showsFallback) return
   window.ftElectron.tabs.updateTitle(title, tabId)
 }
 
@@ -201,9 +213,7 @@ export function titleUnloadedTabsFromSavedData() {
       for (const tabId of tabIds.split('\n')) {
         const tab = store.getters.getTabById(tabId)
         if (pendingTabIds.has(tabId) || !showsItsRoute(tab)) continue
-        const title = findSavedTitle(tab.route.path, tab.route.query ?? {}) ??
-          // Without its author, like the post page
-          (tab.route.path.startsWith('/post/') ? getPostTabTitle() : undefined)
+        const title = findSavedTitle(tab.route.path, tab.route.query ?? {}) ?? getFallbackTitle(tab.route.path)
         if (title) window.ftElectron.tabs.updateTitle(title, tabId)
       }
     },
