@@ -193,11 +193,20 @@ export const SETTINGS_SEARCH_SOURCES = {
     exclude: new Set([
       'Proxy Videos Through Invidious',
       'Sections',
+      // Short labels, descriptions, and group titles that read well only in
+      // their group. Search lists the full labels below instead, which
+      // contain the short ones, except for the Center Play Button.
+      'Player Controls',
+      'Display Play Button In Video Player',
       'Voice-over Translation',
       'Buffering',
       ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS,
       ...YT_DLP_STREAMING_KEYS
     ])
+  }, {
+    type: 'player-controls',
+    key: 'Settings.Player Settings.Player Controls',
+    include: new Set(['Center Play Button'])
   }, {
     type: 'player',
     key: 'Settings.Player Settings',
@@ -361,6 +370,25 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
     'Settings.Subscription Settings.Shorts Auto Refresh Interval': 'subscriptionShortsAutoRefreshInterval',
     'Settings.Subscription Settings.Live Auto Refresh Interval': 'subscriptionLiveAutoRefreshInterval',
     'Settings.Subscription Settings.Posts Auto Refresh Interval': 'subscriptionPostsAutoRefreshInterval'
+  },
+  // The Player Controls switches show short labels, so their full labels
+  // find them by setting.
+  player: {
+    'Settings.Player Settings.Show Volume Boost Toggle': 'showVolumeBoostToggle',
+    'Settings.Player Settings.Show Mono Audio Toggle': 'showMonoAudioToggle',
+    'Settings.Player Settings.Show Music Mode Toggle': 'showMusicModeToggle',
+    'Settings.Player Settings.Show Skip Silence Toggle': 'showSkipSilenceButton',
+    'Settings.Player Settings.Enable Skip Silence by Default': 'enableSkipSilenceByDefault',
+    'Settings.Player Settings.Enable Google Cast': 'showChromecastButton',
+    'Settings.Player Settings.Enable FCast': 'showFcastButton',
+    'Settings.Player Settings.Enable DLNA Casting': 'showDlnaCastButton',
+    'Settings.Player Settings.Show Lights Off Toggle': 'showLightsOffToggle',
+    'Settings.Player Settings.Show Mirror Video Toggle': 'showMirrorVideoToggle',
+    'Settings.Player Settings.Show Rotate Video Menu': 'showRotateVideoMenu',
+    'Settings.Player Settings.Show Seek Bar Filmstrip': 'showSeekBarFilmstrip'
+  },
+  'player-controls': {
+    'Settings.Player Settings.Player Controls.Center Play Button': 'displayVideoPlayButton'
   },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',

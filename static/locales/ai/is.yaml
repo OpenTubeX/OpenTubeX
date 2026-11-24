@@ -1079,6 +1079,30 @@ Settings:
       Enable: "Virkja tímamerktar glósur"
       Obsidian Vault: Obsidian-hvelfing
     Double-Tap With Two Fingers to Skip Chapters: "Tvísmella með tveimur fingrum til að hoppa á milli kafla"
+    Player Controls:
+      Audio: Hljóð
+      Video: Myndskeið
+      Seek Bar and Overlay: Leitarstika og yfirlag
+      Casting: Streymi
+      Volume Boost Description: Hækkar hljóðið í lágværum myndskeiðum
+      Mono Audio Description: Spilar báðar hljóðrásir í hvoru eyra
+      Music Mode Description: Spilar á 1× og byrjar myndskeið frá upphafi
+      Skip Silence Description: Hoppar yfir þagnir
+      On by Default: Sjálfgefið kveikt
+      On by Default Description: Á við um nýja flipa
+      Lights Off Description: Dekkir síðuna umhverfis myndskeiðið
+      Mirror Video Description: Speglar myndskeiðið lárétt
+      Rotate Video Description: Snýr myndskeiðum sem tekin voru á hlið eða á hvolfi
+      Seek Bar Filmstrip: Myndræma leitarstiku
+      Seek Bar Filmstrip Description: Sýnir ramma í kringum sleðann meðan þú dregur hann
+      Center Play Button: Spilunarhnappur í miðju
+      Center Play Button Description: Sýnir stóra spilunarhnappa yfir myndskeiðinu
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast og sjónvörp með innbyggðu Google Cast
+      FCast: FCast
+      FCast Description: FCast-móttökuforrit á netinu þínu
+      DLNA: DLNA
+      DLNA Description: Snjallsjónvörp og margmiðlunarspilarar á netinu þínu
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1928,7 +1952,6 @@ Video:
     Precise seeking, drag down to exit: "Nákvæm spólun · Dragðu niður til að hætta"
     Cast: "Streyma"
     Music Mode: "Tónlistarhamur"
-    Music Mode Description: "Spilaðu myndskeið á 1× hraða og byrjaðu ný myndskeið frá upphafi á þessum flipa. Vistaðar sjálfgefnar spilunarstillingar haldast óbreyttar."
     DLNA:
       Cast: "Senda í DLNA-tæki"
       Stop: "Stöðva útsendingu"
@@ -2470,13 +2493,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Þegar þetta er virkt og spilunarhraðinn er ekki 1x sýnir spilarinn tímamerki leiðrétt eftir spilunarhraða í sviga á eftir venjulega tímamerkinu.
     Use YouTube-style Shorts: Sýnir Shorts í reitaneti með lóðréttum smámyndum á áskriftar- og rásarsíðum og notar Shorts-spilara að hætti YouTube.
     Loop Shorts: Þegar þetta er virkt hefjast Shorts sjálfkrafa aftur. Ef slökkt er á þessu stöðvast þau í lokin og hnappur til að spila aftur birtist.
-    Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
-    Show Mirror Video Toggle: "Sýnir rofa í stillingavalmynd spilarans sem speglar myndskeiðið lárétt, svo auðveldara sé að fylgja dans-, æfinga- og hljóðfærakennslu."
-    Show Rotate Video Menu: "Bætir Snúa myndskeiði við stillingavalmynd spilarans, til að snúa myndskeiðum sem voru tekin upp á hlið eða á hvolfi."
-    Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.
-    Show Seek Bar Filmstrip: "Þegar sleði leitarstikunnar er dreginn birtist ræma af römmum í kringum staðinn sem þú lendir á og ef þú dregur upp á hana spólarðu nákvæmlega. Þegar slökkt er á þessu sýnir dráttur eina smámynd, eins og þegar bendli er haldið yfir."
     Voice-over Translation: Sendir auðkenni og lengd myndbandsins ásamt völdu tungumáli til óopinberrar talsetningarþjónustu Yandex þegar beðið er um þýðingu. Sjálfgefið er slökkt á þessu.
     Hold to Speed Up: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að margfalda núverandi spilunarhraða tímabundið með völdu gildi.
     Ambient Mode: Blandar litum myndbandsins inn í svæðið umhverfis spilarann.

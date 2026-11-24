@@ -1077,6 +1077,30 @@ Settings:
       Enable: "Povoliť poznámky s časovými pečiatkami"
       Obsidian Vault: Trezor Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Dvojitým ťuknutím dvoma prstami preskakovať kapitoly"
+    Player Controls:
+      Audio: Zvuk
+      Video: Video
+      Seek Bar and Overlay: Posúvač a prekrytie
+      Casting: Vysielanie
+      Volume Boost Description: Zosilní tiché videá
+      Mono Audio Description: Prehráva oba zvukové kanály v každom uchu
+      Music Mode Description: Prehráva rýchlosťou 1× a spúšťa videá od začiatku
+      Skip Silence Description: Preskakuje tiché časti
+      On by Default: Predvolene zapnuté
+      On by Default Description: Platí pre nové karty
+      Lights Off Description: Stmaví stránku okolo videa
+      Mirror Video Description: Prevráti video vodorovne
+      Rotate Video Description: Otočí videá nahraté nabok alebo hore nohami
+      Seek Bar Filmstrip: Filmový pás posúvača
+      Seek Bar Filmstrip Description: Pri ťahaní jazdca zobrazí snímky okolo neho
+      Center Play Button: Tlačidlo prehrávania v strede
+      Center Play Button Description: Zobrazí veľké tlačidlá prehrávania nad videom
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast a televízory so vstavaným Google Cast
+      FCast: FCast
+      FCast Description: Prijímacie aplikácie FCast vo vašej sieti
+      DLNA: DLNA
+      DLNA Description: Smart TV a prehrávače médií vo vašej sieti
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1912,7 +1936,6 @@ Video:
     Precise seeking, drag down to exit: "Presné posúvanie · Na ukončenie potiahnite nadol"
     Cast: "Vysielať"
     Music Mode: "Hudobný režim"
-    Music Mode Description: "Prehrávajte videá rýchlosťou 1× a nové videá na tejto karte spúšťajte od začiatku. Uložené predvolené nastavenia prehrávania zostanú nezmenené."
     DLNA:
       Cast: "Preniesť do zariadenia DLNA"
       Stop: "Zastaviť prenos"
@@ -2454,13 +2477,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Ak je táto možnosť zapnutá a rýchlosť prehrávania sa líši od 1×, prehrávač za bežným časovým údajom zobrazí v zátvorkách čas upravený podľa rýchlosti prehrávania.
     Use YouTube-style Shorts: Na stránkach odberov a kanálov zobrazí krátke videá v mriežke na výšku a použije prehrávač v štýle YouTube Shorts.
     Loop Shorts: Po zapnutí sa krátke videá automaticky spustia odznova. Po vypnutí sa na konci zastavia a zobrazia tlačidlo opätovného prehrania.
-    Show Skip Silence Toggle: V ponuke nastavení prehrávača zobrazí prepínač preskakovania ticha.
-    Show Mirror Video Toggle: "V ponuke nastavení prehrávača zobrazí prepínač, ktorý video vodorovne zrkadlí, aby sa ľahšie dalo cvičiť podľa tanečných, cvičebných a hudobných návodov."
-    Show Rotate Video Menu: "Pridá do ponuky nastavení prehrávača položku Otočiť video, ktorá otočí videá nahraté bokom alebo hore nohami."
-    Enable Skip Silence by Default: Zapne preskakovanie ticha na nových kartách. Zmena na jednej karte neovplyvní ostatné karty.
     Enable Video Zoom: V ponuke nastavení prehrávača zobrazí ovládací prvok Priblíženie a zapne jeho klávesové skratky a ovládanie posúvania obrazu.
     Enable Seek History: Pamätá si, odkiaľ ste v každom videu preskočili, kým sa aplikácia nezavrie. Zobrazí zoznam histórie posunov v ponuke nastavení prehrávača a zapne jej klávesové skratky.
-    Show Seek Bar Filmstrip: "Ťahanie jazdca posúvača zobrazí pás snímok okolo miesta, kam sa presuniete, a potiahnutím nahor naň môžete posúvať presne. Ak je vypnuté, ťahanie zobrazí jedinú miniatúru ako pri prechode myšou."
     Voice-over Translation: Po vyžiadaní prekladu odošle ID videa, jeho trvanie a vybraný jazyk neoficiálnej službe Yandex na preklad hlasového komentára. Predvolene je táto možnosť vypnutá.
     Hold to Speed Up: Podržaním medzerníka alebo ľavého tlačidla myši nad prehrávačom dočasne vynásobíte aktuálnu rýchlosť prehrávania zvolenou hodnotou.
     Ambient Mode: Rozšíri farby videa do oblasti okolo prehrávača.

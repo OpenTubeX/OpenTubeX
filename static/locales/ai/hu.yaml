@@ -1077,6 +1077,30 @@ Settings:
       Enable: "Időbélyeges jegyzetek engedélyezése"
       Obsidian Vault: Obsidian-széf
     Double-Tap With Two Fingers to Skip Chapters: "Fejezetek léptetése két ujjal való dupla koppintással"
+    Player Controls:
+      Audio: Hang
+      Video: Videó
+      Seek Bar and Overlay: Tekerősáv és átfedés
+      Casting: Átküldés
+      Volume Boost Description: Hangosabbá teszi a halk videókat
+      Mono Audio Description: Mindkét hangcsatornát mindkét fülben lejátssza
+      Music Mode Description: 1×-es sebességgel játszik, és a videókat az elejéről indítja
+      Skip Silence Description: Átugorja a csendes részeket
+      On by Default: Alapértelmezetten bekapcsolva
+      On by Default Description: Az új lapokra vonatkozik
+      Lights Off Description: Elsötétíti az oldalt a videó körül
+      Mirror Video Description: Vízszintesen tükrözi a videót
+      Rotate Video Description: Elforgatja az oldalra fordítva vagy fejjel lefelé felvett videókat
+      Seek Bar Filmstrip: Tekerősáv filmszalagja
+      Seek Bar Filmstrip Description: Húzás közben képkockákat mutat a csúszka körül
+      Center Play Button: Középső lejátszás gomb
+      Center Play Button Description: Nagy lejátszásvezérlő gombokat jelenít meg a videón
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast és beépített Google Casttal rendelkező tévék
+      FCast: FCast
+      FCast Description: FCast-fogadóalkalmazások a hálózaton
+      DLNA: DLNA
+      DLNA Description: Okostévék és médialejátszók a hálózaton
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1912,7 +1936,6 @@ Video:
     Precise seeking, drag down to exit: "Pontos tekerés · A kilépéshez húzza lefelé"
     Cast: "Átküldés"
     Music Mode: "Zenei mód"
-    Music Mode Description: "A videók lejátszása 1× sebességgel, az új videók indítása az elejéről ezen a lapon. A mentett alapértelmezett lejátszási beállítások változatlanok maradnak."
     DLNA:
       Cast: "Átküldés DLNA-eszközre"
       Stop: "Átküldés leállítása"
@@ -2455,13 +2478,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Bekapcsolva, ha a lejátszási sebesség eltér az 1x értéktől, a lejátszó a szokásos időbélyeg után zárójelben megjeleníti a lejátszási sebességhez igazított időbélyeget.
     Use YouTube-style Shorts: A Shorts-videók álló tájolású rácsban jelennek meg a feliratkozások és a csatornák oldalain, és a YouTube-stílusú Shorts-lejátszót használják.
     Loop Shorts: Bekapcsolva a Shorts-videók automatikusan újraindulnak. Kikapcsolva a végükön megállnak, és megjelenik az újrajátszás gomb.
-    Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
-    Show Mirror Video Toggle: "Kapcsolót jelenít meg a lejátszó beállítási menüjében, amely vízszintesen tükrözi a videót, így könnyebb követni a tánc-, edzés- és hangszeres oktatóvideókat."
-    Show Rotate Video Menu: "Hozzáadja a Videó elforgatása lehetőséget a lejátszó beállítások menüjéhez, hogy elforgathassa az oldalra fordítva vagy fejjel lefelé rögzített videókat."
-    Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
     Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
     Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.
-    Show Seek Bar Filmstrip: "A tekerősáv csúszkájának húzásakor egy képkockasáv jelenik meg a célpont körül, és ha felfelé húzza rá, pontosan tekerhet. Kikapcsolva a húzás egyetlen bélyegképet mutat, mint az egérrel való rámutatáskor."
     Voice-over Translation: Fordítás kérésekor elküldi a videó azonosítóját, hosszát és a kiválasztott nyelvet a Yandex nem hivatalos szinkronfordítási szolgáltatásának. Alapértelmezés szerint ki van kapcsolva.
     Hold to Speed Up: Tartsa lenyomva a szóközbillentyűt vagy a bal egérgombot a lejátszó fölött az aktuális lejátszási sebesség ideiglenes megszorzásához a kiválasztott értékkel.
     Ambient Mode: A videó színeinek kiterjesztése a lejátszó körüli területre.

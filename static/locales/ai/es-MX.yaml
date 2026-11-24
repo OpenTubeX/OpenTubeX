@@ -1198,6 +1198,30 @@ Settings:
       Enable: "Activar notas con marca de tiempo"
       Obsidian Vault: Bóveda de Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Tocar dos veces con dos dedos para saltar capítulos"
+    Player Controls:
+      Audio: Audio
+      Video: Video
+      Seek Bar and Overlay: Barra de búsqueda y superposición
+      Casting: Transmisión
+      Volume Boost Description: Sube el volumen de los videos bajos
+      Mono Audio Description: Reproduce ambos canales de audio en cada oído
+      Music Mode Description: Reproduce a 1× y empieza los videos desde el principio
+      Skip Silence Description: Salta las partes en silencio
+      On by Default: Activado de forma predeterminada
+      On by Default Description: Se aplica a las pestañas nuevas
+      Lights Off Description: Oscurece la página alrededor del video
+      Mirror Video Description: Invierte el video horizontalmente
+      Rotate Video Description: Gira videos grabados de lado o al revés
+      Seek Bar Filmstrip: Tira de fotogramas de la barra de búsqueda
+      Seek Bar Filmstrip Description: Muestra fotogramas alrededor del control mientras lo arrastras
+      Center Play Button: Botón de reproducción central
+      Center Play Button Description: Muestra botones de reproducción grandes sobre el video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast y televisores con Google Cast integrado
+      FCast: FCast
+      FCast Description: Apps receptoras de FCast en tu red
+      DLNA: DLNA
+      DLNA Description: Smart TV y reproductores multimedia en tu red
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -2206,7 +2230,6 @@ Video:
     Precise seeking, drag down to exit: "Búsqueda precisa · Arrastra hacia abajo para salir"
     Cast: "Transmitir"
     Music Mode: "Modo música"
-    Music Mode Description: "Reproduce videos a 1× e inicia los videos nuevos desde el principio en esta pestaña. Tus ajustes de reproducción predeterminados guardados no cambian."
     DLNA:
       Cast: "Transmitir a un dispositivo DLNA"
       Stop: "Detener transmisión"
@@ -2816,13 +2839,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Al activarlo, si la velocidad de reproducción es distinta de 1x, el reproductor muestra entre paréntesis las marcas de tiempo ajustadas a la velocidad después de las normales.
     Use YouTube-style Shorts: Muestra los Shorts en una cuadrícula vertical en las páginas de suscripciones y canales y usa el reproductor de Shorts al estilo de YouTube.
     Loop Shorts: Al activarlo, los Shorts se reinician automáticamente. Si se desactiva, se detienen al final y muestran un botón para volver a reproducirlos.
-    Show Skip Silence Toggle: Muestra un interruptor para omitir silencios en el menú de ajustes del reproductor.
-    Show Mirror Video Toggle: "Muestra un interruptor en el menú de ajustes del reproductor que voltea el video horizontalmente, para que sea más fácil seguir tutoriales de baile, ejercicio e instrumentos."
-    Show Rotate Video Menu: "Agrega Girar video al menú de configuración del reproductor, para girar videos grabados de lado o al revés."
-    Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
     Enable Seek History: Recuerda desde dónde saltaste en cada video hasta que se cierre la aplicación. Muestra la lista del historial de saltos en el menú de configuración del reproductor y activa sus atajos de teclado.
-    Show Seek Bar Filmstrip: "Al arrastrar el control de la barra de búsqueda se muestra una tira de fotogramas alrededor de donde vas a llegar, y arrastrar hacia arriba sobre ella te permite buscar con precisión. Si está desactivado, al arrastrar se muestra una sola miniatura, como al pasar el cursor por encima."
     Voice-over Translation: Cuando solicitas una traducción, envía el ID, la duración y el idioma seleccionado del video al servicio no oficial de traducción por voz superpuesta de Yandex. Está desactivado de forma predeterminada.
     Hold to Speed Up: Mantén pulsada la barra espaciadora o el botón izquierdo del mouse sobre el reproductor para multiplicar temporalmente la velocidad de reproducción actual por el valor seleccionado.
     Ambient Mode: Mezcla los colores del video con el área que rodea al reproductor.

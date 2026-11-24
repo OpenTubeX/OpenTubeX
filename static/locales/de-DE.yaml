@@ -1126,6 +1126,30 @@ Settings:
       Shorts: Shorts
       Screenshots: Screenshots
       Timestamp Notes: Zeitstempel-Notizen
+    Player Controls:
+      Audio: Audio
+      Video: Video
+      Seek Bar and Overlay: Zeitleiste und Overlay
+      Casting: Übertragen
+      Volume Boost Description: Macht leise Videos lauter
+      Mono Audio Description: Spielt beide Audiokanäle auf beiden Ohren ab
+      Music Mode Description: Spielt mit 1× ab und startet Videos von vorn
+      Skip Silence Description: Springt über stille Stellen
+      On by Default: Standardmäßig an
+      On by Default Description: Gilt für neue Tabs
+      Lights Off Description: Dunkelt die Seite um das Video ab
+      Mirror Video Description: Spiegelt das Video horizontal
+      Rotate Video Description: Dreht seitlich oder kopfüber aufgenommene Videos
+      Seek Bar Filmstrip: Filmstreifen der Zeitleiste
+      Seek Bar Filmstrip Description: Zeigt beim Ziehen des Reglers Bilder rund um die Zielstelle
+      Center Play Button: Wiedergabetaste in der Mitte
+      Center Play Button Description: Zeigt große Wiedergabetasten über dem Video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast und Fernseher mit integriertem Google Cast
+      FCast: FCast
+      FCast Description: FCast-Empfänger-Apps in deinem Netzwerk
+      DLNA: DLNA
+      DLNA Description: Smart-TVs und Mediaplayer in deinem Netzwerk
     Lights Off: Licht aus
     Mirror Video: Video spiegeln
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
@@ -2536,7 +2560,6 @@ Video:
     Precise seeking, drag down to exit: Genaues Spulen · Zum Beenden nach unten ziehen
     Playing in Picture-in-Picture: Wird im Bild-im-Bild-Modus wiedergegeben
     Music Mode: Musikmodus
-    Music Mode Description: Videos in diesem Tab mit 1× abspielen und neue Videos von Anfang an starten. Deine gespeicherten Wiedergabeeinstellungen bleiben unverändert.
     DLNA:
       Cast: Auf ein DLNA-Gerät übertragen
       Stop: Übertragung beenden
@@ -3240,10 +3263,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
-    Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
-    Show Mirror Video Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter an, der das Video horizontal spiegelt. So kannst du Tanz-, Fitness- und Instrumenten-Tutorials leichter folgen.
-    Show Rotate Video Menu: Fügt dem Einstellungsmenü des Players „Video drehen“ hinzu, womit sich seitlich oder kopfüber aufgenommene Videos drehen lassen.
-    Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Speed Up: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend mit dem gewählten Wert zu multiplizieren.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Mono Audio: Spielt den linken und rechten Audiokanal auf beiden Ohren ab. Nutze dies, wenn der Ton eines Videos nur auf einer Seite deiner Kopfhörer zu hören ist.
@@ -3257,9 +3276,6 @@ Tooltips:
       Zeigt die Zoomsteuerung im Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel und
       Schwenksteuerungen.
     Double-Tap With Two Fingers to Skip Chapters: Tippe mit zwei Fingern doppelt auf die rechte Seite des Videos, um zum nächsten Kapitel zu springen, oder auf die linke Seite, um zum Anfang des aktuellen Kapitels zurückzukehren. In den ersten 3 Sekunden eines Kapitels springt die linke Seite stattdessen zum vorherigen Kapitel, sodass du durch Wiederholen kapitelweise zurückgehst.
-    Show Seek Bar Filmstrip: >-
-      Beim Ziehen des Reglers der Zeitleiste erscheint ein Streifen mit Bildern rund um die Zielstelle. Ziehst du nach oben auf
-      den Streifen, spulst du genauer. Wenn deaktiviert, zeigt das Ziehen ein einzelnes Vorschaubild wie beim Darüberfahren.
     Enable Seek History: >-
       Merkt sich bis zum Schließen der App, von wo du in jedem Video weggesprungen bist. Zeigt den Sprungverlauf im
       Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel.

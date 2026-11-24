@@ -1079,6 +1079,30 @@ Settings:
       Enable: "Zaman nişanlı qeydləri aktivləşdir"
       Obsidian Vault: Obsidian anbarı
     Double-Tap With Two Fingers to Skip Chapters: "Fəsilləri keçmək üçün iki barmaqla iki dəfə toxunun"
+    Player Controls:
+      Audio: Səs
+      Video: Video
+      Seek Bar and Overlay: İrəliləmə zolağı və örtük
+      Casting: Yayım
+      Volume Boost Description: Sakit videoları daha ucadan səsləndirir
+      Mono Audio Description: Hər iki səs kanalını hər qulaqda səsləndirir
+      Music Mode Description: 1× sürətlə oynadır və videoları əvvəldən başladır
+      Skip Silence Description: Səssiz hissələri ötürür
+      On by Default: Standart olaraq aktiv
+      On by Default Description: Yeni vərəqlərə aiddir
+      Lights Off Description: Videonun ətrafındakı səhifəni qaraldır
+      Mirror Video Description: Videonu üfüqi çevirir
+      Rotate Video Description: Yan və ya tərs çəkilmiş videoları döndərir
+      Seek Bar Filmstrip: İrəliləmə zolağı kadr lenti
+      Seek Bar Filmstrip Description: Düyməni sürüşdürərkən ətrafındakı kadrları göstərir
+      Center Play Button: Mərkəzi oynatma düyməsi
+      Center Play Button Description: Videonun üzərində böyük oynatma düymələri göstərir
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast və daxili Google Cast olan televizorlar
+      FCast: FCast
+      FCast Description: Şəbəkənizdəki FCast qəbuledici tətbiqləri
+      DLNA: DLNA
+      DLNA Description: Şəbəkənizdəki smart televizorlar və media pleyerlər
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1924,7 +1948,6 @@ Video:
     Precise seeking, drag down to exit: "Dəqiq keçid · Çıxmaq üçün aşağı çəkin"
     Cast: "Yayımla"
     Music Mode: "Musiqi rejimi"
-    Music Mode Description: "Bu vərəqdə videoları 1× sürətlə oynadın və yeni videoları əvvəldən başladın. Saxlanmış standart oxutma parametrləriniz dəyişmir."
     DLNA:
       Cast: "DLNA cihazına yayımla"
       Stop: "Yayımı dayandır"
@@ -2464,13 +2487,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Aktivləşdirildikdə və oynatma sürəti 1x-dən fərqli olduqda, oynadıcı adi vaxt göstəricisindən sonra mötərizədə oynatma sürətinə uyğunlaşdırılmış vaxt göstəricilərini göstərir.
     Use YouTube-style Shorts: Abunəlik və kanal səhifələrində Shorts videolarını şaquli torda göstərir və YouTube üslublu Shorts oynadıcısından istifadə edir.
     Loop Shorts: Aktivləşdirildikdə, Shorts videoları avtomatik yenidən başlayır. Bağlandıqda, Shorts videoları sonda dayanır və yenidən oynatma düyməsini göstərir.
-    Show Skip Silence Toggle: Oynadıcının tənzimləmələr menyusunda səssiz hissələri keçməyi açıb-bağlayan keçid göstərir.
-    Show Mirror Video Toggle: "Oynadıcının tənzimləmələr menyusunda videonu üfüqi olaraq güzgüləyən keçid göstərir ki, rəqs, idman və musiqi aləti dərslərini izləmək asan olsun."
-    Show Rotate Video Menu: "Pleyerin parametrlər menyusuna «Videonu döndər» əlavə edir; bu, yan və ya tərs çəkilmiş videoları döndərir."
-    Enable Skip Silence by Default: Yeni vərəqlərdə səssiz hissələrin keçilməsini aktivləşdirir. Bir vərəqdə dəyişdirilməsi digər vərəqlərə təsir etmir.
     Enable Video Zoom: Oynadıcının tənzimləmələr menyusunda miqyas idarəsini göstərir və onun klaviatura qısayollarını və görüntünü sürüşdürmə idarələrini aktivləşdirir.
     Enable Seek History: Tətbiq bağlanana qədər hər videoda haradan keçid etdiyinizi yadda saxlayır. Pleyerin parametrlər menyusunda keçid tarixçəsi siyahısını göstərir və onun klaviatura qısayollarını aktivləşdirir.
-    Show Seek Bar Filmstrip: "İrəliləmə zolağının düyməsini sürüşdürdükdə keçəcəyiniz yerin ətrafındakı kadrlardan ibarət lent göstərilir, onun üzərinə yuxarı çəkmək isə dəqiq keçid edir. Deaktiv edildikdə, sürüşdürmə üzərinə gəldikdə olduğu kimi tək miniatür göstərir."
     Continue Playback When Screen Is Locked: Səsi arxa planda oynatmağa davam edir və Android media idarələrini təmin edir. Tətbiq artıq görünmədikdə oynatmanı dayandırmaq üçün bunu bağlayın.
     Switch to Audio in Background: 'Tətbiq arxa fonda işlədikdə və ya ekran sönülü olduqda audio formatlarını oxudur, bu da məlumat və batareyaya qənaət edir. Şəkil içində şəkil rejimi videonu saxlayır. Tətbiqi yenidən açdıqda video qayıdır. Ekran kilidli olduqda oxutmanın davam etməsini tələb edir.'
     Ignore Headphone Controls: 'Bluetooth cihazlarından, simli qulaqlıqlardan və klaviaturaların media düymələrindən gələn oynatma, fasilə və keçmə əmrlərini nəzərə almır ki, qulaqcıqlara təsadüfi toxunuşlar oxutmanı dayandırmasın. Tətbiqdəki və media bildirişindəki idarəetmə vasitələri işləməyə davam edir.'

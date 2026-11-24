@@ -172,6 +172,16 @@ test.describe('settings', () => {
     expect(borderRadius).toBeCloseTo(4 * uiRoundness)
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
 
+    // Player Controls switches show short labels, so their full label finds them by setting.
+    await search.fill('Show Mirror Video Toggle')
+    await page.getByRole('button', { name: 'Show Mirror Video Toggle', exact: true }).click()
+    await expect(switchHighlight).toHaveAttribute('data-setting-key', 'showMirrorVideoToggle')
+
+    // No full label contains this short one, so search lists it directly.
+    await search.fill('Center Play Button')
+    await page.getByRole('button', { name: 'Center Play Button', exact: true }).click()
+    await expect(switchHighlight).toHaveAttribute('data-setting-key', 'displayVideoPlayButton')
+
     await search.fill('UI Scale')
     await page.getByRole('button', { name: 'UI Scale', exact: true }).click()
     await expect(page.locator('.pure-material-slider.settingsSearchTarget')).toContainText('UI Scale')

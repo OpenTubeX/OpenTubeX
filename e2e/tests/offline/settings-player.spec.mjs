@@ -2,10 +2,12 @@ import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore 
 
 test('DLNA, Google Cast and FCast casting are opt in from Player Settings', async ({ page }) => {
   const playback = await goToSettingsSection(page, 'playback')
-  for (const label of ['Enable DLNA casting', 'Enable Google Cast', 'Enable FCast']) {
-    const toggle = playback.getByRole('checkbox', { name: label })
+  for (const settingKey of ['showDlnaCastButton', 'showChromecastButton', 'showFcastButton']) {
+    const control = playback.locator(`[data-setting-key="${settingKey}"]`)
+    const toggle = control.getByRole('checkbox')
+    await expect(toggle).toHaveAccessibleName((await control.locator('.switch-label-name').allTextContents()).join(''))
     await expect(toggle).not.toBeChecked()
-    await playback.locator('label.switch-label').filter({ hasText: label }).click()
+    await control.locator('label').click()
     await expect(toggle).toBeChecked()
   }
 })

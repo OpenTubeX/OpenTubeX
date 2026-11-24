@@ -1080,6 +1080,30 @@ Settings:
       Enable: "Aktifkan Catatan Stempel Waktu"
       Obsidian Vault: Brankas Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Ketuk dua kali dengan dua jari untuk melompati bab"
+    Player Controls:
+      Audio: Audio
+      Video: Video
+      Seek Bar and Overlay: Bilah Progres dan Overlay
+      Casting: Transmisi
+      Volume Boost Description: Membuat video yang pelan lebih keras
+      Mono Audio Description: Memutar kedua saluran audio di setiap telinga
+      Music Mode Description: Memutar pada 1× dan memulai video dari awal
+      Skip Silence Description: Melompati bagian yang hening
+      On by Default: Aktif Secara Default
+      On by Default Description: Berlaku untuk tab baru
+      Lights Off Description: Meredupkan halaman di sekitar video
+      Mirror Video Description: Membalik video secara horizontal
+      Rotate Video Description: Memutar video yang direkam miring atau terbalik
+      Seek Bar Filmstrip: Strip Bingkai Bilah Progres
+      Seek Bar Filmstrip Description: Menampilkan bingkai di sekitar kenop saat Anda menyeretnya
+      Center Play Button: Tombol Putar di Tengah
+      Center Play Button Description: Menampilkan tombol pemutaran besar di atas video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast dan TV dengan Google Cast bawaan
+      FCast: FCast
+      FCast Description: Aplikasi penerima FCast di jaringan Anda
+      DLNA: DLNA
+      DLNA Description: Smart TV dan pemutar media di jaringan Anda
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1935,7 +1959,6 @@ Video:
     Precise seeking, drag down to exit: "Pencarian presisi · Tarik ke bawah untuk keluar"
     Cast: "Transmisikan"
     Music Mode: "Mode Musik"
-    Music Mode Description: "Putar video dengan kecepatan 1× dan mulai video baru dari awal di tab ini. Pengaturan pemutaran bawaan yang tersimpan tetap tidak berubah."
     DLNA:
       Cast: "Transmisikan ke perangkat DLNA"
       Stop: "Hentikan transmisi"
@@ -2481,13 +2504,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Jika diaktifkan dan kecepatan pemutaran bukan 1x, pemutar menampilkan stempel waktu yang disesuaikan dengan kecepatan pemutaran dalam tanda kurung setelah stempel waktu biasa.
     Use YouTube-style Shorts: Menampilkan Shorts dalam kisi potret pada halaman langganan dan saluran, serta menggunakan pemutar Shorts bergaya YouTube.
     Loop Shorts: Jika diaktifkan, Shorts dimulai ulang secara otomatis. Jika dinonaktifkan, Shorts berhenti di akhir dan menampilkan tombol putar ulang.
-    Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
-    Show Mirror Video Toggle: "Menampilkan tombol aktif/nonaktif dalam menu pengaturan pemutar yang membalik video secara horizontal, sehingga lebih mudah mengikuti tutorial tari, olahraga, dan alat musik."
-    Show Rotate Video Menu: "Menambahkan Rotasi Video ke menu pengaturan pemutar, untuk merotasi video yang direkam miring atau terbalik."
-    Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.
-    Show Seek Bar Filmstrip: "Menyeret kenop bilah progres menampilkan strip bingkai di sekitar tempat tujuan Anda, dan menarik ke atas ke strip tersebut memungkinkan pencarian secara presisi. Jika dinonaktifkan, menyeret hanya menampilkan satu gambar mini, seperti saat mengarahkan kursor."
     Voice-over Translation: Mengirim ID video, durasi, dan bahasa yang dipilih ke layanan tidak resmi terjemahan sulih suara Yandex saat Anda meminta terjemahan. Nonaktif secara bawaan.
     Hold to Speed Up: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk mengalikan sementara kecepatan pemutaran saat ini dengan nilai yang dipilih.
     Ambient Mode: Memadukan warna video dengan area di sekitar pemutar.

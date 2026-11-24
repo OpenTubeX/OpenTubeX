@@ -1077,6 +1077,30 @@ Settings:
       Enable: "タイムスタンプメモを有効にする"
       Obsidian Vault: Obsidian の保管庫
     Double-Tap With Two Fingers to Skip Chapters: "2本指でダブルタップしてチャプターを移動"
+    Player Controls:
+      Audio: 音声
+      Video: 動画
+      Seek Bar and Overlay: シークバーとオーバーレイ
+      Casting: キャスト
+      Volume Boost Description: 音量の小さい動画を大きくします
+      Mono Audio Description: 両方の音声チャンネルを左右の耳で再生します
+      Music Mode Description: 1× で再生し、動画を最初から開始します
+      Skip Silence Description: 無音部分を飛ばします
+      On by Default: 既定でオン
+      On by Default Description: 新しいタブに適用されます
+      Lights Off Description: 動画の周りのページを暗くします
+      Mirror Video Description: 動画を左右反転します
+      Rotate Video Description: 横向きや逆さまに撮影された動画を回転します
+      Seek Bar Filmstrip: シークバーのフィルムストリップ
+      Seek Bar Filmstrip Description: つまみのドラッグ中に周辺のフレームを表示します
+      Center Play Button: 中央の再生ボタン
+      Center Play Button Description: 動画の上に大きな再生ボタンを表示します
+      Google Cast: Google Cast
+      Google Cast Description: ChromecastとGoogle Cast内蔵のテレビ
+      FCast: FCast
+      FCast Description: ネットワーク上のFCastレシーバーアプリ
+      DLNA: DLNA
+      DLNA Description: ネットワーク上のスマートテレビやメディアプレーヤー
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1912,7 +1936,6 @@ Video:
     Precise seeking, drag down to exit: "精密シーク · 下にドラッグして終了"
     Cast: "キャスト"
     Music Mode: "音楽モード"
-    Music Mode Description: "このタブでは動画を1倍速で再生し、新しい動画を最初から開始します。保存済みの再生設定は変更されません。"
     DLNA:
       Cast: "DLNA デバイスにキャスト"
       Stop: "キャストを停止"
@@ -2454,13 +2477,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: 有効で再生速度が1倍以外の場合、通常の時刻表示の後に、再生速度を反映した時刻を括弧内に表示します。
     Use YouTube-style Shorts: 登録チャンネルとチャンネルのページでショート動画を縦長のグリッドに表示し、YouTube形式のショート動画プレーヤーを使用します。
     Loop Shorts: 有効にするとショート動画を自動的に最初から再生します。無効にすると最後で停止し、再生ボタンを表示します。
-    Show Skip Silence Toggle: プレーヤーの設定メニューに、無音スキップのオンとオフを切り替える項目を表示します。
-    Show Mirror Video Toggle: "プレーヤーの設定メニューに、動画を左右反転する切り替えを表示します。ダンス、トレーニング、楽器のチュートリアルをまねしやすくなります。"
-    Show Rotate Video Menu: "プレーヤーの設定メニューに「動画を回転」を追加し、横向きや上下逆さまに撮影された動画を回転できるようにします。"
-    Enable Skip Silence by Default: 新しいタブで無音スキップを有効にします。あるタブで変更しても、ほかのタブには影響しません。
     Enable Video Zoom: プレーヤーの設定メニューにズーム操作を表示し、キーボードショートカットとパン操作を有効にします。
     Enable Seek History: アプリを閉じるまで、各動画でどこからジャンプしたかを記憶します。プレーヤーの設定メニューにシーク履歴の一覧を表示し、キーボードショートカットを有効にします。
-    Show Seek Bar Filmstrip: "シークバーのつまみをドラッグすると、移動先付近のフレームが帯状に表示され、その上へ引き上げると細かくシークできます。無効にすると、ドラッグ中はホバー時と同じく 1 枚のサムネイルが表示されます。"
     Voice-over Translation: 翻訳を要求すると、動画ID、長さ、選択した言語を非公式のYandex吹き替え翻訳サービスへ送信します。既定では無効です。
     Hold to Speed Up: プレーヤー上でスペースキーまたはマウスの左ボタンを長押しすると、一時的に現在の再生速度に選択した倍率を掛けて再生します。
     Ambient Mode: 動画の色をプレーヤー周辺の領域になじませます。

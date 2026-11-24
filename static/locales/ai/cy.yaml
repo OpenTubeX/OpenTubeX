@@ -1080,6 +1080,30 @@ Settings:
       Enable: "Galluogi Nodiadau Stamp Amser"
       Obsidian Vault: Claddgell Obsidian
     Double-Tap With Two Fingers to Skip Chapters: "Tapio ddwywaith â dau fys i neidio rhwng penodau"
+    Player Controls:
+      Audio: Sain
+      Video: Fideo
+      Seek Bar and Overlay: Bar chwilio a throshaen
+      Casting: Castio
+      Volume Boost Description: Yn gwneud fideos tawel yn uwch
+      Mono Audio Description: Yn chwarae’r ddwy sianel sain ym mhob clust
+      Music Mode Description: Yn chwarae ar 1× ac yn dechrau fideos o’r dechrau
+      Skip Silence Description: Yn neidio dros rannau tawel
+      On by Default: Ymlaen yn ddiofyn
+      On by Default Description: Yn berthnasol i dabiau newydd
+      Lights Off Description: Yn pylu’r dudalen o amgylch y fideo
+      Mirror Video Description: Yn adlewyrchu’r fideo’n llorweddol
+      Rotate Video Description: Yn cylchdroi fideos a recordiwyd ar eu hochr neu ben i waered
+      Seek Bar Filmstrip: Stribed ffilm y bar chwilio
+      Seek Bar Filmstrip Description: Yn dangos fframiau o amgylch y bwlyn wrth i chi ei lusgo
+      Center Play Button: Botwm chwarae canol
+      Center Play Button Description: Yn dangos botymau chwarae mawr dros y fideo
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast a setiau teledu â Google Cast wedi’i ymgorffori
+      FCast: FCast
+      FCast Description: Apiau derbyn FCast ar eich rhwydwaith
+      DLNA: DLNA
+      DLNA Description: Setiau teledu clyfar a chwaraewyr cyfryngau ar eich rhwydwaith
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1944,7 +1968,6 @@ Video:
     Precise seeking, drag down to exit: "Chwilio manwl · Llusgwch i lawr i adael"
     Cast: "Castio"
     Music Mode: "Modd cerddoriaeth"
-    Music Mode Description: "Chwaraewch fideos ar gyflymder 1× a dechreuwch fideos newydd o’r dechrau yn y tab hwn. Bydd eich gosodiadau chwarae diofyn wedi’u cadw yn aros yr un fath."
     DLNA:
       Cast: "Darlledu i ddyfais DLNA"
       Stop: "Rhoi’r gorau i ddarlledu"
@@ -2492,13 +2515,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Pan fydd wedi'i alluogi a bod y cyflymder chwarae'n wahanol i 1x, mae'r chwaraewr yn dangos stampiau amser wedi'u haddasu yn ôl y gyfradd chwarae mewn cromfachau ar ôl y stamp amser arferol.
     Use YouTube-style Shorts: Mae'n dangos Byrion mewn grid portread ar dudalennau tanysgrifiadau a sianeli ac yn defnyddio'r chwaraewr Byrion yn arddull YouTube.
     Loop Shorts: Pan fydd wedi'i alluogi, mae Byrion yn ailgychwyn yn awtomatig. Pan fydd wedi'i analluogi, mae Byrion yn stopio ar y diwedd ac yn dangos botwm ailchwarae.
-    Show Skip Silence Toggle: Mae'n dangos togl ymlaen/i ffwrdd ar gyfer hepgor distawrwydd yn newislen gosodiadau'r chwaraewr.
-    Show Mirror Video Toggle: "Mae'n dangos togl ymlaen/i ffwrdd yn newislen gosodiadau'r chwaraewr sy'n troi'r fideo'n llorweddol, fel ei bod hi'n haws dilyn tiwtorialau dawns, ymarfer corff ac offerynnau."
-    Show Rotate Video Menu: "Yn ychwanegu Cylchdroi'r Fideo at ddewislen gosodiadau'r chwaraewr, i droi fideos a recordiwyd ar eu hochr neu ben i waered."
-    Enable Skip Silence by Default: Mae'n galluogi hepgor distawrwydd ar gyfer tabiau newydd. Nid yw ei newid mewn un tab yn effeithio ar dabiau eraill.
     Enable Video Zoom: Mae'n dangos y rheolydd Chwyddo yn newislen gosodiadau'r chwaraewr ac yn galluogi ei lwybrau byr bysellfwrdd a'i reolyddion padellu.
     Enable Seek History: Yn cofio o ble y neidioch chi ym mhob fideo nes i'r ap gau. Yn dangos y rhestr hanes neidio yn newislen gosodiadau'r chwaraewr ac yn galluogi ei llwybrau byr bysellfwrdd.
-    Show Seek Bar Filmstrip: "Mae llusgo bwlyn y bar chwilio’n dangos stribed o fframiau o amgylch lle byddwch chi’n glanio, ac mae tynnu i fyny arno’n chwilio’n fanwl. Pan fydd wedi’i analluogi, mae llusgo’n dangos un mân-lun, fel wrth hofran."
     Voice-over Translation: Mae'n anfon ID, hyd ac iaith ddewisol y fideo i wasanaeth cyfieithu troslais answyddogol Yandex pan fyddwch yn gofyn am gyfieithiad. Mae wedi'i analluogi yn ddiofyn.
     Hold to Speed Up: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i luosi'r cyflymder chwarae presennol â'r gwerth a ddewiswyd dros dro.
     Ambient Mode: Mae'n cyfuno lliwiau'r fideo â'r ardal o amgylch y chwaraewr.

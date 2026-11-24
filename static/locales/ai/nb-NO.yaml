@@ -1077,6 +1077,30 @@ Settings:
       Enable: "Slå på tidsstempelnotater"
       Obsidian Vault: Obsidian-hvelv
     Double-Tap With Two Fingers to Skip Chapters: "Dobbelttrykk med to fingre for å hoppe mellom kapitler"
+    Player Controls:
+      Audio: Lyd
+      Video: Video
+      Seek Bar and Overlay: Tidslinje og overlegg
+      Casting: Casting
+      Volume Boost Description: Gjør lavmælte videoer høyere
+      Mono Audio Description: Spiller begge lydkanalene i hvert øre
+      Music Mode Description: Spiller av i 1× og starter videoer fra begynnelsen
+      Skip Silence Description: Hopper over stille partier
+      On by Default: På som standard
+      On by Default Description: Gjelder nye faner
+      Lights Off Description: Demper siden rundt videoen
+      Mirror Video Description: Speilvender videoen horisontalt
+      Rotate Video Description: Snur videoer som er filmet på siden eller opp ned
+      Seek Bar Filmstrip: Filmstripe for tidslinjen
+      Seek Bar Filmstrip Description: Viser bilder rundt knappen mens du drar den
+      Center Play Button: Avspillingsknapp i midten
+      Center Play Button Description: Viser store avspillingsknapper over videoen
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast og TV-er med innebygd Google Cast
+      FCast: FCast
+      FCast Description: FCast-mottakerapper på nettverket ditt
+      DLNA: DLNA
+      DLNA Description: Smart-TV-er og mediespillere på nettverket ditt
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1917,7 +1941,6 @@ Video:
     Precise seeking, drag down to exit: "Nøyaktig spoling · Dra ned for å avslutte"
     Cast: "Cast"
     Music Mode: "Musikkmodus"
-    Music Mode Description: "Spill av videoer med 1× hastighet og start nye videoer fra begynnelsen i denne fanen. De lagrede standardinnstillingene for avspilling forblir uendret."
     DLNA:
       Cast: "Strøm til en DLNA-enhet"
       Stop: "Stopp strømming"
@@ -2459,13 +2482,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Når dette er slått på og avspillingshastigheten avviker fra 1x, viser spilleren hastighetsjusterte tidsstempler i parentes etter den vanlige tidsvisningen.
     Use YouTube-style Shorts: Viser Shorts i et stående rutenett på abonnements- og kanalsider og bruker Shorts-spilleren i YouTube-stil.
     Loop Shorts: Når dette er slått på, starter Shorts automatisk på nytt. Når det er slått av, stopper Shorts på slutten og viser en knapp for å spille av på nytt.
-    Show Skip Silence Toggle: Viser en bryter for å hoppe over stillhet i innstillingsmenyen til spilleren.
-    Show Mirror Video Toggle: "Viser en av/på-bryter i innstillingsmenyen til spilleren som speilvender videoen vannrett, slik at det blir lettere å følge danse-, trenings- og instrumentveiledninger."
-    Show Rotate Video Menu: "Legger til Roter video i avspillerens innstillingsmeny, slik at du kan rotere videoer som er tatt opp sidelengs eller opp ned."
-    Enable Skip Silence by Default: Hopper over stillhet som standard i nye faner. Endring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spilleren og slår på hurtigtastene og panoreringskontrollene.
     Enable Seek History: Husker hvor du hoppet fra i hver video til appen lukkes. Viser hopphistorikklisten i avspillerens innstillingsmeny og slår på hurtigtastene for den.
-    Show Seek Bar Filmstrip: "Når du drar knappen på tidslinjen, vises en stripe med bilder rundt stedet du havner, og drar du opp på den, spoler du nøyaktig. Når dette er av, viser dra ett enkelt miniatyrbilde, som når du holder pekeren over."
     Voice-over Translation: Sender video-ID-en, varigheten og valgt språk til Yandex' uoffisielle tjeneste for taleoversettelse når du ber om en oversettelse. Slått av som standard.
     Hold to Speed Up: Hold inne mellomromstasten eller venstre museknapp over spilleren for å gange avspillingshastigheten midlertidig med den valgte verdien.
     Ambient Mode: Blander fargene i videoen inn i området rundt spilleren.

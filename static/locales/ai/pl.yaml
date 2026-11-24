@@ -694,6 +694,30 @@ Settings:
       Enable: "Włącz notatki ze znacznikami czasu"
       Obsidian Vault: Sejf Obsidiana
     Double-Tap With Two Fingers to Skip Chapters: "Dwukrotne stuknięcie dwoma palcami przełącza rozdziały"
+    Player Controls:
+      Audio: Dźwięk
+      Video: Wideo
+      Seek Bar and Overlay: Pasek przewijania i nakładka
+      Casting: Przesyłanie
+      Volume Boost Description: Zwiększa głośność cichych filmów
+      Mono Audio Description: Odtwarza oba kanały dźwięku w każdym uchu
+      Music Mode Description: Odtwarza z prędkością 1× i zaczyna filmy od początku
+      Skip Silence Description: Pomija ciche fragmenty
+      On by Default: Domyślnie włączone
+      On by Default Description: Dotyczy nowych kart
+      Lights Off Description: Przyciemnia stronę wokół filmu
+      Mirror Video Description: Odbija film w poziomie
+      Rotate Video Description: Obraca filmy nagrane bokiem lub do góry nogami
+      Seek Bar Filmstrip: Pasek klatek paska przewijania
+      Seek Bar Filmstrip Description: Pokazuje klatki wokół suwaka podczas przeciągania
+      Center Play Button: Przycisk odtwarzania na środku
+      Center Play Button Description: Pokazuje duże przyciski odtwarzania na filmie
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast i telewizory z wbudowanym Google Cast
+      FCast: FCast
+      FCast Description: Aplikacje odbiornika FCast w Twojej sieci
+      DLNA: DLNA
+      DLNA Description: Smart TV i odtwarzacze multimediów w Twojej sieci
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Changes: Automatycznie zapisuj zmiany
@@ -1332,7 +1356,6 @@ Video:
     Precise seeking, drag down to exit: "Precyzyjne przewijanie · Przeciągnij w dół, aby wyjść"
     Cast: "Przesyłaj"
     Music Mode: "Tryb muzyczny"
-    Music Mode Description: "Odtwarzaj filmy z prędkością 1× i rozpoczynaj nowe filmy od początku w tej karcie. Zapisane domyślne ustawienia odtwarzania pozostają bez zmian."
     DLNA:
       Cast: "Przesyłaj na urządzenie DLNA"
       Stop: "Zatrzymaj przesyłanie"
@@ -1691,10 +1714,8 @@ Tooltips:
     Ignore Headphone Controls: 'Ignoruje polecenia odtwarzania, wstrzymania i pomijania z urządzeń Bluetooth, słuchawek przewodowych i klawiszy multimedialnych na klawiaturach, aby przypadkowe dotknięcia słuchawek nie przerywały odtwarzania. Elementy sterujące w aplikacji i w powiadomieniu multimedialnym nadal działają.'
     Use YouTube-style Shorts: Wyświetla Shorts w pionowej siatce na stronach subskrypcji i kanałów oraz używa odtwarzacza Shorts w stylu YouTube.
     Loop Shorts: Po włączeniu Shorts są automatycznie odtwarzane od początku. Po wyłączeniu zatrzymują się na końcu i wyświetlają przycisk ponownego odtwarzania.
-    Enable Skip Silence by Default: Włącza pomijanie ciszy na nowych kartach. Zmiana na jednej karcie nie wpływa na pozostałe.
     Enable Video Zoom: Wyświetla opcję powiększenia w menu ustawień odtwarzacza oraz włącza jej skróty klawiszowe i sterowanie przesuwaniem obrazu.
     Enable Seek History: Zapamiętuje, skąd przeskoczono w każdym filmie, do czasu zamknięcia aplikacji. Wyświetla listę historii przewijania w menu ustawień odtwarzacza i włącza jej skróty klawiszowe.
-    Show Seek Bar Filmstrip: "Przeciąganie suwaka paska przewijania pokazuje pasek klatek wokół miejsca docelowego, a przeciągnięcie w górę na niego pozwala precyzyjnie przewijać. Po wyłączeniu przeciąganie pokazuje jedną miniaturę, jak po najechaniu kursorem."
     Voice-over Translation: Po wybraniu tłumaczenia wysyła identyfikator i czas trwania filmu oraz wybrany język do nieoficjalnej usługi tłumaczenia lektorskiego Yandex. Funkcja jest domyślnie wyłączona.
     Parallel Segment Loading: |
       Liczba segmentów obrazu i dźwięku wczytywanych jednocześnie przed odtwarzaniem.
@@ -1710,8 +1731,6 @@ Tooltips:
     Enable Timestamp Notes: "Dodaje do odtwarzacza przycisk i skrót N, które wstrzymują film i otwierają notatkę z linkiem do bieżącego momentu. Notatki można skopiować jako Markdown lub na komputerze dodać do Obsidiana."
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
     Double-Tap With Two Fingers to Skip Chapters: "Stuknij dwukrotnie dwoma palcami w prawą stronę filmu, aby przejść do następnego rozdziału, lub w lewą stronę, aby wrócić do początku bieżącego rozdziału. W ciągu pierwszych 3 sekund rozdziału lewa strona przenosi zamiast tego do poprzedniego rozdziału, więc powtarzając gest, cofasz się kolejno przez rozdziały."
-    Show Mirror Video Toggle: "Pokazuje w menu ustawień odtwarzacza przełącznik, który odbija wideo w poziomie, aby łatwiej było ćwiczyć razem z poradnikami tanecznymi, treningowymi i muzycznymi."
-    Show Rotate Video Menu: "Dodaje opcję Obróć wideo do menu ustawień odtwarzacza, aby obracać filmy nagrane bokiem lub do góry nogami."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

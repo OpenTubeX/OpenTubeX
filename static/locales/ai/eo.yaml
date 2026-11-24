@@ -1119,6 +1119,30 @@ Settings:
       Enable: "Ŝalti tempomarkajn notojn"
       Obsidian Vault: Obsidian-trezorejo
     Double-Tap With Two Fingers to Skip Chapters: "Duoble tuŝeti per du fingroj por salti ĉapitrojn"
+    Player Controls:
+      Audio: Sono
+      Video: Video
+      Seek Bar and Overlay: Serĉbreto kaj surmetaĵo
+      Casting: Elsendado
+      Volume Boost Description: Plilaŭtigas mallaŭtajn videojn
+      Mono Audio Description: Ludas ambaŭ sonkanalojn en ĉiu orelo
+      Music Mode Description: Ludas je 1× kaj komencas videojn de la komenco
+      Skip Silence Description: Saltas super silentaj partoj
+      On by Default: Defaŭlte ŝaltita
+      On by Default Description: Validas por novaj langetoj
+      Lights Off Description: Malheligas la paĝon ĉirkaŭ la video
+      Mirror Video Description: Spegulas la videon horizontale
+      Rotate Video Description: Turnas videojn registritajn flanke aŭ renverse
+      Seek Bar Filmstrip: Filmstrio de la serĉbreto
+      Seek Bar Filmstrip Description: Montras kadrojn ĉirkaŭ la tenilo dum vi trenas ĝin
+      Center Play Button: Centra ludbutono
+      Center Play Button Description: Montras grandajn ludbutonojn super la video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast kaj televidiloj kun enkonstruita Google Cast
+      FCast: FCast
+      FCast Description: FCast-ricevilaj aplikaĵoj en via reto
+      DLNA: DLNA
+      DLNA Description: Inteligentaj televidiloj kaj aŭdvidaj ludiloj en via reto
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -1994,7 +2018,6 @@ Video:
     Precise seeking, drag down to exit: Preciza saltado · Trenu malsupren por eliri
     Playing in Picture-in-Picture: Ludado en bildenbilda reĝimo
     Music Mode: Muzika reĝimo
-    Music Mode Description: Ludi videaĵojn je 1× kaj komenci novajn videaĵojn de la komenco en ĉi tiu langeto. Viaj konservitaj ludaj defaŭltoj restas senŝanĝaj.
     DLNA:
       Cast: Elsendi al DLNA-aparato
       Stop: Ĉesi elsendi
@@ -2503,13 +2526,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Kiam ŝaltita kaj la ludrapido malsamas ol 1x, la ludilo montras tempindikojn alĝustigitajn laŭ ludrapido inter krampoj post la normala tempindiko.
     Use YouTube-style Shorts: Montras videaĵetojn en vertikala krado sur abonaj kaj kanalaj paĝoj kaj uzas ludilon de videaĵetoj laŭ stilo de YouTube.
     Loop Shorts: Kiam ŝaltita, videaĵetoj rekomenciĝas aŭtomate. Kiam malŝaltita, videaĵetoj haltas ĉe la fino kaj montras butonon por reludi.
-    Show Skip Silence Toggle: Montras ŝaltilon por salti silenton en la agorda menuo de la ludilo.
-    Show Mirror Video Toggle: "Montras ŝaltilon en la agorda menuo de la ludilo, kiu horizontale spegulas la videon, por ke estu pli facile sekvi lernilojn pri danco, ekzercado kaj muzikiloj."
-    Show Rotate Video Menu: "Aldonas Turni videon al la agorda menuo de la ludilo, por turni videojn registritajn flanke aŭ renverse."
-    Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
     Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
     Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.
-    Show Seek Bar Filmstrip: "Treni la tenilon de la serĉbreto montras strion de kadroj ĉirkaŭ la loko, kien vi saltos, kaj tiri supren sur ĝin ebligas precizan saltadon. Se malŝaltita, trenado montras unu bildeton, kiel dum ŝvebado."
     Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
     Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
     Switch to Audio in Background: 'Ludas sonformatojn dum la aplikaĵo estas en la fono aŭ la ekrano estas malŝaltita, kio ŝparas datumojn kaj baterion. Bildo-en-bildo konservas la videon. La video revenas kiam vi denove malfermas la aplikaĵon. Postulas daŭrigi la ludadon kiam la ekrano estas ŝlosita.'

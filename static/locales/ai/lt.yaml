@@ -1277,6 +1277,30 @@ Settings:
       Enable: "Įjungti laiko žymų pastabas"
       Obsidian Vault: Obsidian saugykla
     Double-Tap With Two Fingers to Skip Chapters: "Dukart bakstelėkite dviem pirštais, kad praleistumėte skyrius"
+    Player Controls:
+      Audio: Garsas
+      Video: Vaizdas
+      Seek Bar and Overlay: Persukimo juosta ir perdanga
+      Casting: Transliavimas
+      Volume Boost Description: Sustiprina tylių vaizdo įrašų garsą
+      Mono Audio Description: Leidžia abu garso kanalus į kiekvieną ausį
+      Music Mode Description: Leidžia 1× greičiu ir pradeda vaizdo įrašus nuo pradžios
+      Skip Silence Description: Praleidžia tylias vietas
+      On by Default: Įjungta pagal numatytuosius nustatymus
+      On by Default Description: Taikoma naujoms kortelėms
+      Lights Off Description: Pritemdo puslapį aplink vaizdo įrašą
+      Mirror Video Description: Apverčia vaizdo įrašą horizontaliai
+      Rotate Video Description: Pasuka šonu ar aukštyn kojomis įrašytus vaizdo įrašus
+      Seek Bar Filmstrip: Persukimo juostos kadrų juosta
+      Seek Bar Filmstrip Description: Tempiant rankenėlę rodo aplink ją esančius kadrus
+      Center Play Button: Centrinis paleidimo mygtukas
+      Center Play Button Description: Virš vaizdo įrašo rodo didelius atkūrimo mygtukus
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast ir televizoriai su integruota Google Cast
+      FCast: FCast
+      FCast Description: FCast imtuvo programos jūsų tinkle
+      DLNA: DLNA
+      DLNA Description: Išmanieji televizoriai ir medijos leistuvai jūsų tinkle
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -2275,7 +2299,6 @@ Video:
     Precise seeking, drag down to exit: "Tikslus persukimas · Vilkite žemyn, kad išeitumėte"
     Cast: "Transliuoti"
     Music Mode: "Muzikos režimas"
-    Music Mode Description: "Leiskite vaizdo įrašus 1× greičiu ir šiame skirtuke naujus vaizdo įrašus pradėkite nuo pradžių. Išsaugotos numatytosios atkūrimo nuostatos nesikeičia."
     DLNA:
       Cast: "Transliuoti į DLNA įrenginį"
       Stop: "Sustabdyti transliaciją"
@@ -2880,13 +2903,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Įjungus ir atkūrimo greičiui nesant 1x, leistuvas skliaustuose po įprasta laiko žyma rodo pagal atkūrimo greitį pakoreguotą laiko žymą.
     Use YouTube-style Shorts: Prenumeratų ir kanalų puslapiuose rodo Shorts vertikaliame tinklelyje ir naudoja YouTube stiliaus Shorts leistuvą.
     Loop Shorts: Įjungus Shorts automatiškai paleidžiami iš naujo. Išjungus Shorts pabaigoje sustoja ir rodomas pakartojimo mygtukas.
-    Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
-    Show Mirror Video Toggle: "Leistuvo nustatymų meniu rodo jungiklį, kuris horizontaliai apverčia vaizdo įrašą, kad būtų lengviau sekti šokių, treniruočių ir muzikos instrumentų pamokas."
-    Show Rotate Video Menu: "Prideda „Pasukti vaizdo įrašą“ į grotuvo nustatymų meniu, kad galėtumėte pasukti šonu ar aukštyn kojomis nufilmuotus vaizdo įrašus."
-    Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
     Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
     Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.
-    Show Seek Bar Filmstrip: "Tempiant persukimo juostos rankenėlę rodoma kadrų juosta aplink vietą, į kurią pateksite, o patraukus aukštyn ant jos galima tiksliai persukti. Kai išjungta, tempiant rodoma viena miniatiūra, kaip užvedus žymeklį."
     Voice-over Translation: Paprašius vertimo siunčia vaizdo įrašo ID, trukmę ir pasirinktą kalbą neoficialiai Yandex vertimo užkadriniu balsu paslaugai. Pagal numatymą išjungta.
     Hold to Speed Up: Laikykite tarpo klavišą arba kairįjį pelės mygtuką virš leistuvo, kad laikinai padaugintumėte dabartinį atkūrimo greitį iš pasirinktos vertės.
     Ambient Mode: Sulieja vaizdo įrašo spalvas su sritimi aplink leistuvą.

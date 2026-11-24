@@ -1092,6 +1092,30 @@ Settings:
       Enable: "Notities met tijdstempel inschakelen"
       Obsidian Vault: Obsidian-kluis
     Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers om hoofdstukken over te slaan"
+    Player Controls:
+      Audio: Audio
+      Video: Video
+      Seek Bar and Overlay: Zoekbalk en overlay
+      Casting: Casten
+      Volume Boost Description: Maakt zachte video's luider
+      Mono Audio Description: Speelt beide audiokanalen in elk oor af
+      Music Mode Description: Speelt af op 1× en start video's vanaf het begin
+      Skip Silence Description: Slaat stille delen over
+      On by Default: Standaard aan
+      On by Default Description: Geldt voor nieuwe tabbladen
+      Lights Off Description: Dimt de pagina rond de video
+      Mirror Video Description: Spiegelt de video horizontaal
+      Rotate Video Description: Draait video's die zijwaarts of ondersteboven zijn opgenomen
+      Seek Bar Filmstrip: Filmstrip van zoekbalk
+      Seek Bar Filmstrip Description: Toont frames rond de knop terwijl je die sleept
+      Center Play Button: Afspeelknop in het midden
+      Center Play Button Description: Toont grote afspeelknoppen over de video
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast en tv's met ingebouwde Google Cast
+      FCast: FCast
+      FCast Description: FCast-ontvangerapps in je netwerk
+      DLNA: DLNA
+      DLNA Description: Smart-tv's en mediaspelers in je netwerk
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1971,7 +1995,6 @@ Video:
     Precise seeking, drag down to exit: "Nauwkeurig zoeken · Sleep omlaag om te stoppen"
     Cast: "Casten"
     Music Mode: "Muziekmodus"
-    Music Mode Description: "Speel video’s af op 1× en start nieuwe video’s vanaf het begin in dit tabblad. Je opgeslagen standaardinstellingen voor afspelen blijven ongewijzigd."
     DLNA:
       Cast: "Casten naar een DLNA-apparaat"
       Stop: "Stoppen met casten"
@@ -2522,13 +2545,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Als dit is ingeschakeld en de afspeelsnelheid afwijkt van 1x, toont de speler na de normale tijdsaanduiding tussen haakjes een tijd die aan de afspeelsnelheid is aangepast.
     Use YouTube-style Shorts: Toont Shorts in een staand raster op abonnements- en kanaalpagina's en gebruikt de Shorts-speler in YouTube-stijl.
     Loop Shorts: Als dit is ingeschakeld, beginnen Shorts automatisch opnieuw. Als dit is uitgeschakeld, stoppen Shorts aan het einde en verschijnt een knop om ze opnieuw af te spelen.
-    Show Skip Silence Toggle: Toont in het instellingenmenu van de speler een aan-uitschakelaar om stiltes over te slaan.
-    Show Mirror Video Toggle: "Toont in het instellingenmenu van de speler een aan-uitschakelaar die de video horizontaal spiegelt, zodat je dans-, workout- en instrumentlessen makkelijker kunt volgen."
-    Show Rotate Video Menu: "Voegt Video draaien toe aan het instellingenmenu van de speler, om video’s te draaien die zijwaarts of ondersteboven zijn opgenomen."
-    Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
     Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
     Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
-    Show Seek Bar Filmstrip: "Als je de knop van de zoekbalk sleept, verschijnt een strook frames rond de plek waar je uitkomt, en als je omhoog op de strook sleept, zoek je nauwkeurig. Indien uitgeschakeld, toont slepen één miniatuur, zoals bij aanwijzen."
     Voice-over Translation: Stuurt de video-ID, duur en geselecteerde taal naar de onofficiële voice-oververtaaldienst van Yandex wanneer je om een vertaling vraagt. Standaard uitgeschakeld.
     Hold to Speed Up: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk met de gekozen waarde te vermenigvuldigen.
     Ambient Mode: Laat de kleuren van de video overvloeien in het gebied rond de speler.

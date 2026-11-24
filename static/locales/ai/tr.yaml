@@ -1077,6 +1077,30 @@ Settings:
       Enable: "Zaman Damgalı Notları Etkinleştir"
       Obsidian Vault: Obsidian Kasası
     Double-Tap With Two Fingers to Skip Chapters: "Bölümleri atlamak için iki parmakla çift dokunun"
+    Player Controls:
+      Audio: Ses
+      Video: Video
+      Seek Bar and Overlay: Sarma Çubuğu ve Katman
+      Casting: Yayınlama
+      Volume Boost Description: Kısık sesli videoların sesini yükseltir
+      Mono Audio Description: Her iki ses kanalını da her kulakta çalar
+      Music Mode Description: 1× hızda oynatır ve videoları baştan başlatır
+      Skip Silence Description: Sessiz kısımları atlar
+      On by Default: Varsayılan Olarak Açık
+      On by Default Description: Yeni sekmeler için geçerlidir
+      Lights Off Description: Videonun çevresindeki sayfayı karartır
+      Mirror Video Description: Videoyu yatay olarak çevirir
+      Rotate Video Description: Yan veya ters çekilmiş videoları döndürür
+      Seek Bar Filmstrip: Sarma Çubuğu Kare Şeridi
+      Seek Bar Filmstrip Description: Düğmeyi sürüklerken çevresindeki kareleri gösterir
+      Center Play Button: Ortada Oynatma Düğmesi
+      Center Play Button Description: Videonun üzerinde büyük oynatma düğmeleri gösterir
+      Google Cast: Google Cast
+      Google Cast Description: Chromecast ve yerleşik Google Cast özellikli TV'ler
+      FCast: FCast
+      FCast Description: Ağınızdaki FCast alıcı uygulamaları
+      DLNA: DLNA
+      DLNA Description: Ağınızdaki akıllı TV'ler ve medya oynatıcılar
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1912,7 +1936,6 @@ Video:
     Precise seeking, drag down to exit: "Hassas sarma · Çıkmak için aşağı çekin"
     Cast: "Yayınla"
     Music Mode: "Müzik modu"
-    Music Mode Description: "Bu sekmede videoları 1× hızında oynatın ve yeni videoları baştan başlatın. Kaydedilmiş varsayılan oynatma ayarlarınız değişmez."
     DLNA:
       Cast: "DLNA cihazına yayınla"
       Stop: "Yayını durdur"
@@ -2455,13 +2478,8 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Etkinleştirildiğinde ve oynatma hızı 1x'ten farklı olduğunda oynatıcı, normal zaman damgasından sonra parantez içinde oynatma hızına göre ayarlanmış zaman damgalarını gösterir.
     Use YouTube-style Shorts: Kısa Videoları abonelik ve kanal sayfalarında dikey bir ızgarada gösterir ve YouTube tarzı Kısa Video oynatıcısını kullanır.
     Loop Shorts: Etkinleştirildiğinde Kısa Videolar otomatik olarak yeniden başlar. Devre dışı bırakıldığında sonunda durur ve yeniden oynatma düğmesi gösterir.
-    Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
-    Show Mirror Video Toggle: "Oynatıcının ayarlar menüsünde videoyu yatay olarak aynalayan bir açma ve kapatma düğmesi gösterir; böylece dans, egzersiz ve enstrüman derslerini takip etmek kolaylaşır."
-    Show Rotate Video Menu: "Oynatıcının ayarlar menüsüne Videoyu döndür seçeneğini ekler; böylece yan veya baş aşağı kaydedilmiş videoları döndürebilirsiniz."
-    Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.
-    Show Seek Bar Filmstrip: "Sarma çubuğunun düğmesini sürüklemek, varacağınız yerin çevresindeki karelerden oluşan bir şerit gösterir; şeridin üzerine yukarı çekmek hassas sarma sağlar. Devre dışı bırakıldığında sürükleme, üzerine gelindiğinde olduğu gibi tek bir küçük resim gösterir."
     Voice-over Translation: Çeviri istediğinizde video kimliğini, süresini ve seçili dili resmî olmayan Yandex seslendirme çevirisi hizmetine gönderir. Varsayılan olarak devre dışıdır.
     Hold to Speed Up: Geçerli oynatma hızını geçici olarak seçilen değerle çarpmak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
     Ambient Mode: Videonun renklerini oynatıcının çevresindeki alana yayar.

@@ -409,9 +409,32 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     }
   }
 
+  // Player controls that iOS lacks, and casting, which needs the app.
+  if (sectionType === 'player' && isIos && [
+    'Show Volume Boost Toggle',
+    'Show Mono Audio Toggle',
+    'Show Skip Silence Toggle',
+    'Enable Skip Silence by Default',
+    'Enable Google Cast',
+    'Enable FCast',
+  ].includes(group)) {
+    return false
+  }
+
+  if (sectionType === 'player' && !usingElectron && !isCapacitor && [
+    'Enable Google Cast',
+    'Enable FCast',
+    'Enable DLNA Casting',
+  ].includes(group)) {
+    return false
+  }
+
+  if (sectionType === 'player-controls' && isCapacitor && group === 'Center Play Button') {
+    return false
+  }
+
   if (sectionType === 'player' && isCapacitor && [
     'Default Volume',
-    'Display Play Button In Video Player',
     'Remember Volume',
     'Scroll Volume Over Video Player',
   ].includes(group)) {
