@@ -185,7 +185,7 @@ export function hasSeenMarkChanges(changes) {
  * @param {SeenMarkKind<T>} kind
  * @param {Map<string, T>} byId
  * @param {SeenMarkChanges<unknown> | null | undefined} changes
- * @param {Map<string, T>} [dropped] removals that arrived before their mark,
+ * @param {Map<string, T>} [dropped] the latest removal of each absent mark,
  *   so a delayed change that adds the same mark does not bring it back
  * @returns {boolean} whether the marks changed
  */
@@ -198,10 +198,11 @@ export function applySeenMarkChanges(kind, byId, changes, dropped) {
     if (current && isNoNewer(current, removed)) {
       byId.delete(id)
       changed = true
-    } else if (!current && dropped) {
+    }
+    if (dropped && !byId.has(id)) {
       dropped.delete(id)
       dropped.set(id, removed)
-      // Only reordered changes leave entries here, so a small bound suffices.
+      // Only delayed changes need these, and they arrive soon, so a small bound suffices.
       if (dropped.size > MAX_DROPPED_SEEN_MARKS) dropped.delete(/** @type {string} */ (dropped.keys().next().value))
     }
   }
@@ -209,8 +210,8 @@ export function applySeenMarkChanges(kind, byId, changes, dropped) {
     const id = /** @type {string} */ (entry[kind.idKey])
     const removed = dropped?.get(id)
     if (dropped && removed) {
-      dropped.delete(id)
       if (isNoNewer(entry, removed)) continue
+      dropped.delete(id)
     }
     const previous = byId.get(id)
     const merged = kind.merge(previous, entry)

@@ -422,6 +422,9 @@ test('windows end with the same marks whatever order changes arrive in', () => {
   let marks = seenState.seenMarksState(seenData.SEEN_VIDEO_MARKS, [])
   for (const index of [1, 0]) marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[index]))
   assert.deepEqual([...marks.byId.values()], [kept])
+  // The same when the window had the mark already, and for a repeated reply.
+  for (const index of [0, 1, 0, 0]) marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[index]))
+  assert.deepEqual([...marks.byId.values()], [kept])
   marks = seenState.withSeenMarkChanges(seenData.SEEN_VIDEO_MARKS, marks, structuredClone(changes[2]))
   assert.deepEqual([...marks.byId.values()].sort((a, b) => a.videoId.localeCompare(b.videoId)), [kept, remarked])
 })
