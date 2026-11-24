@@ -385,11 +385,18 @@ public class AppIconTest {
         assertNull("Another window covers the tap target " + selector, cover);
         // While the system applies a component change, it can briefly route
         // touches to the activity's input sink instead of its window, which
-        // drops them. Tap again only when the page never saw the press.
-        evaluate(scenario, "window.__tapReceived = false; document.addEventListener('pointerdown'," +
+        // drops them, sometimes only the release after the page saw the press.
+        // Tap again only when the page never saw the click.
+        evaluate(scenario, "window.__tapReceived = false; document.addEventListener('click'," +
             " () => { window.__tapReceived = true }, { capture: true, once: true })");
         android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         for (int attempt = 0; attempt < 3; attempt++) {
+            // A late click may have closed the target in the meantime; tapping its
+            // old position again would reach whatever lies beneath it.
+            if (attempt > 0 && !"\"target\"".equals(evaluate(scenario,
+                "document.querySelector('" + selector + "') ? " + hit + " : 'gone'"))) {
+                break;
+            }
             // Queue the release right behind the press. Waiting for the press to be
             // handled first can outlast the long-press timeout on a slow emulator,
             // and a long press does not click.
@@ -407,7 +414,7 @@ public class AppIconTest {
                 Thread.sleep(100);
             }
         }
-        fail("The page receives the tap on " + selector);
+        assertEquals("The page receives the tap on " + selector, "true", evaluate(scenario, "window.__tapReceived"));
     }
 
     /** Returns the title of the topmost window at a screen point unless it belongs to this app. */
