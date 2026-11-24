@@ -3946,6 +3946,9 @@ Downloads:
   Download: Download
   Download Video: Download Video
   Download Playlist: Download Playlist
+  Customize Download: Customize…
+  Download Started: 'Started downloading "{title}"'
+  Already Downloading: '"{title}" is already downloading'
   Downloading: Downloading
   Queue: Queue
   Downloaded: Downloaded

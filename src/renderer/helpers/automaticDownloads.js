@@ -1,7 +1,7 @@
 import { ytDlp } from './ytDlp'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import store from '../store/index'
-import { getDownloadTemplateOptions } from './downloadTemplates'
+import { getDownloadTemplateOptions, parseCustomDownloadTemplates } from './downloadTemplates'
 import {
   matchesAutomaticDownloadRule,
   normalizeAutomaticDownloadRule,
@@ -58,15 +58,6 @@ export function includeAutomaticDownloadChannels(activeSubscriptions, source) {
   ]
 }
 
-function parseCustomTemplates() {
-  try {
-    const templates = JSON.parse(store.getters.getYtDlpDownloadTemplates || '[]')
-    return Array.isArray(templates) ? templates : []
-  } catch {
-    return []
-  }
-}
-
 function getThumbnail(video) {
   return video.thumbnailUrl ?? video.videoThumbnails?.at(-1)?.url ?? video.thumbnail ?? ''
 }
@@ -90,7 +81,7 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
   }
 
   const rule = normalizeAutomaticDownloadRule(rawRule)
-  const customTemplates = parseCustomTemplates()
+  const customTemplates = parseCustomDownloadTemplates(store.getters.getYtDlpDownloadTemplates)
   const templateOptions = getDownloadTemplateOptions(rule.template, customTemplates)
   if (templateOptions === null) {
     console.warn(`Automatic download template no longer exists for ${channel.id}: ${rule.template}`)

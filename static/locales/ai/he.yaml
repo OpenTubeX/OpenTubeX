@@ -2716,6 +2716,9 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  Customize Download: 'התאמה אישית…'
+  Download Started: 'ההורדה של "{title}" התחילה'
+  Already Downloading: '"{title}" כבר בהורדה'
   Stop Recording: "עצירת ההקלטה"
   Recording: "מקליט"
   File Name Template Invalid: 'יש להשתמש בנתיב יחסי בתוך תיקיית ההורדות ללא "..", "~", "$", "%" או קידומת כמו "thumbnail:".'

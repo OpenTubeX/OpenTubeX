@@ -2656,6 +2656,9 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  Customize Download: 'Personalizar…'
+  Download Started: 'Transferência de "{title}" iniciada'
+  Already Downloading: '"{title}" já está a ser transferido'
   Stop Recording: "Parar gravação"
   Recording: "A gravar"
   File Name Template Invalid: 'Utilize um caminho relativo dentro da pasta de transferências sem "..", "~", "$", "%" nem um prefixo como "thumbnail:".'

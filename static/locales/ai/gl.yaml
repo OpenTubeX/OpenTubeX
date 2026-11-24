@@ -2717,6 +2717,9 @@ CommandPalette:
     Download Finished: Esta descarga xa non está en curso
     Video: Abre primeiro un vídeo
 Downloads:
+  Customize Download: 'Personalizar…'
+  Download Started: 'Comezou a descarga de «{title}»'
+  Already Downloading: '«{title}» xa se está a descargar'
   Stop Recording: "Deter a gravación"
   Recording: "Gravando"
   File Name Template Invalid: 'Usa unha ruta relativa dentro do cartafol de descargas sen "..", "~", "$", "%" nin un prefixo como "thumbnail:".'

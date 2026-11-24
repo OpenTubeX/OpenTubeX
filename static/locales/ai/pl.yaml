@@ -1850,6 +1850,9 @@ CommandPalette:
     Download Finished: To pobieranie nie jest już uruchomione
     Video: Najpierw otwórz film
 Downloads:
+  Customize Download: 'Dostosuj…'
+  Download Started: 'Rozpoczęto pobieranie „{title}”'
+  Already Downloading: '„{title}” jest już pobierane'
   Stop Recording: "Zatrzymaj nagrywanie"
   Recording: "Nagrywanie"
   File Name Template Invalid: 'Użyj ścieżki względnej w folderze pobierania bez "..", "~", "$", "%" ani prefiksu takiego jak "thumbnail:".'

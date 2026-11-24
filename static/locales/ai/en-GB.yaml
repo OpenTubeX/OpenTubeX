@@ -2650,6 +2650,9 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  Customize Download: 'Customise…'
+  Download Started: 'Started downloading "{title}"'
+  Already Downloading: '"{title}" is already downloading'
   Stop Recording: "Stop recording"
   Recording: "Recording"
   File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'

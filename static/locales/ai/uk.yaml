@@ -2708,6 +2708,9 @@ CommandPalette:
     Download Finished: Це завантаження вже не виконується
     Video: Спочатку відкрийте відео
 Downloads:
+  Customize Download: 'Налаштувати…'
+  Download Started: 'Розпочато завантаження «{title}»'
+  Already Downloading: '«{title}» вже завантажується'
   Stop Recording: "Зупинити запис"
   Recording: "Триває запис"
   File Name Template Invalid: 'Використовуйте відносний шлях у теці завантажень без "..", "~", "$", "%" або префікса на кшталт "thumbnail:".'

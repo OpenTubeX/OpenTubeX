@@ -178,6 +178,7 @@
 <script setup>
 import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
+import { downloadMenuItem } from '../../helpers/templateDownloads'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -438,7 +439,13 @@ function addToWatchQueue(playNext) {
 }
 
 const downloadItem = computed(() => canDownload.value
-  ? { label: t('Downloads.Download Video'), icon: ['fas', 'download'], run: () => { showDownloadPrompt.value = true } }
+  ? downloadMenuItem({
+      label: t('Downloads.Download Video'),
+      target: () => ({ externalUrl: props.data.url, title: props.data.title, thumbnail: thumbnail.value }),
+      customize: () => { showDownloadPrompt.value = true },
+      t,
+      locale
+    })
   : null)
 
 const menuItems = computed(() => {

@@ -2693,6 +2693,9 @@ CommandPalette:
     Download Finished: Ovo preuzimanje više nije u tijeku
     Video: Najprije otvorite videozapis
 Downloads:
+  Customize Download: 'Prilagodi…'
+  Download Started: 'Započelo je preuzimanje „{title}”'
+  Already Downloading: '„{title}” se već preuzima'
   Stop Recording: "Zaustavi snimanje"
   Recording: "Snimanje"
   File Name Template Invalid: 'Koristite relativnu putanju unutar mape za preuzimanja bez "..", "~", "$", "%" ili prefiksa poput "thumbnail:".'

@@ -473,7 +473,17 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
-import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
+import {
+  baseDownloadOptions,
+  DEFAULT_DOWNLOAD_TEMPLATES,
+  DOWNLOAD_SPONSORBLOCK_CATEGORIES,
+  filterDownloadTimeInput,
+  getDownloadTemplateOptions,
+  normalizeDownloadOptions,
+  parseCustomDownloadTemplates,
+  replaceAutomaticDownloadTemplateReferences
+} from '../../helpers/downloadTemplates'
+import { findActiveDownload } from '../../helpers/templateDownloads'
 import { showToast } from '../../helpers/utils'
 import { canStopRecording, recordingStatusText } from '../../helpers/downloadRecording'
 import { downloadErrorMessage, suggestsYtDlpUpdate } from '../../helpers/downloadErrors'
@@ -509,34 +519,8 @@ const downloadLabel = computed(() => props.isPlaylist
   ? t('Downloads.Download Playlist')
   : t('Downloads.Download Video'))
 
-// YouTube offers a machine translation of every video into a few hundred languages,
-// and yt-dlp's "all" selector requests every single one of them, which its rate
-// limiting cuts short long before it finishes.
-const DEFAULT_SUBTITLE_LANGUAGES = [...new Set([locale.value.split('-')[0], 'en'])]
-  .map(language => `${language}.*`)
-  .join(',')
-
-const BASE_OPTIONS = Object.freeze({
-  mode: 'video',
-  quality: '',
-  videoFormat: '',
-  videoCodec: '',
-  audioFormat: '',
-  filenameTemplate: '{title} [{id}].{ext}',
-  startTime: '',
-  endTime: '',
-  splitChapters: false,
-  removeSponsorblock: false,
-  sponsorBlockCategories: ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler'],
-  includeSubtitles: false,
-  embedSubtitles: true,
-  subtitleLanguages: DEFAULT_SUBTITLE_LANGUAGES,
-  subtitleFormat: '',
-  embedThumbnail: false,
-  embedMetadata: false,
-  customArgs: ''
-})
-const customTemplates = computed(() => JSON.parse(store.getters.getYtDlpDownloadTemplates))
+const BASE_OPTIONS = Object.freeze(baseDownloadOptions(locale.value))
+const customTemplates = computed(() => parseCustomDownloadTemplates(store.getters.getYtDlpDownloadTemplates))
 const storedSelection = store.getters.getYtDlpSelectedTemplate
 const selectedTemplate = ref(storedSelection)
 const isDirty = ref(false)
@@ -545,7 +529,7 @@ const showSaveTemplatePrompt = ref(false)
 const templateNameInput = useTemplateRef('templateNameInput')
 const options = reactive({ ...BASE_OPTIONS })
 
-const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
+const SPONSORBLOCK_CATEGORIES = DOWNLOAD_SPONSORBLOCK_CATEGORIES
 const sponsorBlockCategories = computed({
   get: () => options.sponsorBlockCategories,
   set: value => setOption('sponsorBlockCategories', value)
@@ -596,19 +580,11 @@ const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help
 }))
 
 function getTemplateOptions(value) {
-  const defaultTemplate = DEFAULT_DOWNLOAD_TEMPLATES.find(template => template.value === value)
-  if (defaultTemplate) return defaultTemplate.options
-  const custom = customTemplates.value.find(template => `template:${template.name}` === value)
-  if (custom?.options) return custom.options
-  if (custom?.args) return { customArgs: custom.args }
-  return {}
+  return getDownloadTemplateOptions(value, customTemplates.value) ?? {}
 }
 
 function normalizeOptions(source) {
-  return Object.fromEntries(Object.keys(BASE_OPTIONS).map(key => {
-    const value = source[key] ?? BASE_OPTIONS[key]
-    return [key, Array.isArray(value) ? [...value].sort() : value]
-  }))
+  return normalizeDownloadOptions(source, BASE_OPTIONS)
 }
 
 function optionsMatchTemplate(value) {
@@ -749,16 +725,7 @@ function handleVideoSelectionToggle(event) {
   if (event.target.open) emit('select-videos')
 }
 
-function matchesDownload(download) {
-  if (props.externalUrl) return download.retryPayload?.externalUrl === props.externalUrl
-  if (!props.isPlaylist) return download.videoId === props.videoId
-  return props.playlistKey !== '' && download.playlistKey === props.playlistKey
-}
-
-const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
-  matchesDownload(download) &&
-  ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused'].includes(download.status)
-).at(-1)
+const runningDownload = findActiveDownload(store.getters.getYtDlpDownloads, props)
 const downloadId = ref(runningDownload?.id ?? null)
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
 const downloadFolderRequired = computed(() => (process.env.IS_CAPACITOR || window.ftElectron?.isFlatpak) && downloadFolderPath.value === '')

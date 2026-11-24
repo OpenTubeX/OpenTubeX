@@ -2666,6 +2666,9 @@ CommandPalette:
     Download Finished: Bu endirmə artıq davam etmir
     Video: Əvvəlcə video açın
 Downloads:
+  Customize Download: 'Fərdiləşdir…'
+  Download Started: '"{title}" endirilməyə başladı'
+  Already Downloading: '"{title}" artıq endirilir'
   Stop Recording: "Yazmanı dayandır"
   Recording: "Qeydə alınır"
   File Name Template Invalid: 'Endirmə qovluğunun daxilində "..", "~", "$", "%" və ya "thumbnail:" kimi prefiks olmadan nisbi yol istifadə edin.'

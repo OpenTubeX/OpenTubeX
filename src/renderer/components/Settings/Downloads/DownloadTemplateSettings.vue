@@ -256,9 +256,13 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
 import {
+  baseDownloadOptions,
   DEFAULT_DOWNLOAD_TEMPLATES,
+  DOWNLOAD_SPONSORBLOCK_CATEGORIES,
   filterDownloadTimeInput,
   getDownloadTemplateOptions,
+  normalizeDownloadOptions,
+  parseCustomDownloadTemplates,
   replaceAutomaticDownloadTemplateReferences
 } from '../../../helpers/downloadTemplates'
 import { showToast } from '../../../helpers/utils'
@@ -270,47 +274,15 @@ const selectedSourceValue = ref('')
 const selectedTemplateName = ref('')
 const draftName = ref('')
 
-const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
-
-function defaultSubtitleLanguages() {
-  return [...new Set([locale.value.split('-')[0], 'en'])]
-    .map(language => `${language}.*`)
-    .join(',')
-}
+const SPONSORBLOCK_CATEGORIES = DOWNLOAD_SPONSORBLOCK_CATEGORIES
 
 function baseOptions() {
-  return {
-    mode: 'video',
-    quality: '',
-    videoFormat: '',
-    videoCodec: '',
-    audioFormat: '',
-    filenameTemplate: '{title} [{id}].{ext}',
-    startTime: '',
-    endTime: '',
-    splitChapters: false,
-    removeSponsorblock: false,
-    sponsorBlockCategories: [...SPONSORBLOCK_CATEGORIES],
-    includeSubtitles: false,
-    embedSubtitles: true,
-    subtitleLanguages: defaultSubtitleLanguages(),
-    subtitleFormat: '',
-    embedThumbnail: false,
-    embedMetadata: false,
-    customArgs: ''
-  }
+  return baseDownloadOptions(locale.value)
 }
 
 const options = reactive(baseOptions())
 
-const customTemplates = computed(() => {
-  try {
-    const parsed = JSON.parse(store.getters.getYtDlpDownloadTemplates || '[]')
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-})
+const customTemplates = computed(() => parseCustomDownloadTemplates(store.getters.getYtDlpDownloadTemplates))
 const templateSelectionNames = computed(() => [
   t('Settings.Download Settings.New Template'),
   ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => t('Settings.Download Settings.Built-in Template', {
@@ -374,11 +346,7 @@ const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help
 }))
 
 function normalizedOptions(source) {
-  const defaults = baseOptions()
-  return Object.fromEntries(Object.keys(defaults).map(key => {
-    const value = source?.[key] ?? defaults[key]
-    return [key, Array.isArray(value) ? [...value].sort() : value]
-  }))
+  return normalizeDownloadOptions(source ?? {}, baseOptions())
 }
 
 function setOption(key, value) {

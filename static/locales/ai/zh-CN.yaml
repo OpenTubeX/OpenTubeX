@@ -2653,6 +2653,9 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Customize Download: '自定义…'
+  Download Started: '已开始下载“{title}”'
+  Already Downloading: '“{title}”已在下载中'
   Stop Recording: "停止录制"
   Recording: "正在录制"
   File Name Template Invalid: '请使用下载文件夹内的相对路径，不能包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前缀。'

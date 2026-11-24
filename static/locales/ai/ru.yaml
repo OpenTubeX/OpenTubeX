@@ -2621,6 +2621,9 @@ CommandPalette:
     Download Finished: Эта загрузка больше не выполняется
     Video: Сначала откройте видео
 Downloads:
+  Customize Download: 'Настроить…'
+  Download Started: 'Начато скачивание «{title}»'
+  Already Downloading: '«{title}» уже скачивается'
   Stop Recording: "Остановить запись"
   Recording: "Идёт запись"
   File Name Template Invalid: 'Используйте относительный путь внутри папки загрузок без "..", "~", "$", "%" или префикса вроде "thumbnail:".'

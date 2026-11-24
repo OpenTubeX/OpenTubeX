@@ -2653,6 +2653,9 @@ CommandPalette:
     Download Finished: Toto sťahovanie už neprebieha
     Video: Najprv otvorte video
 Downloads:
+  Customize Download: 'Prispôsobiť…'
+  Download Started: 'Začalo sa sťahovanie „{title}“'
+  Already Downloading: '„{title}“ sa už sťahuje'
   Stop Recording: "Zastaviť nahrávanie"
   Recording: "Nahráva sa"
   File Name Template Invalid: 'Použite relatívnu cestu v priečinku na sťahovanie bez "..", "~", "$", "%" alebo predpony ako "thumbnail:".'

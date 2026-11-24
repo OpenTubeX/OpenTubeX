@@ -2669,6 +2669,9 @@ CommandPalette:
     Download Finished: Þetta niðurhal er ekki lengur í gangi
     Video: Opnaðu myndband fyrst
 Downloads:
+  Customize Download: 'Sérsníða…'
+  Download Started: 'Byrjað að sækja „{title}“'
+  Already Downloading: 'Nú þegar er verið að sækja „{title}“'
   Stop Recording: "Stöðva upptöku"
   Recording: "Tekur upp"
   File Name Template Invalid: 'Notaðu afstæða slóð innan niðurhalsmöppunnar án "..", "~", "$", "%" eða forskeytis eins og "thumbnail:".'

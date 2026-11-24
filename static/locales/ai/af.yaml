@@ -2929,6 +2929,9 @@ CommandPalette:
     Download Finished: Hierdie aflaai loop nie meer nie
     Video: Maak eers ’n video oop
 Downloads:
+  Customize Download: 'Pas aan…'
+  Download Started: 'Begin om "{title}" af te laai'
+  Already Downloading: '"{title}" word reeds afgelaai'
   Stop Recording: "Stop opname"
   Recording: "Besig om op te neem"
   File Name Template Invalid: 'Gebruik ’n relatiewe pad binne die aflaaigids sonder "..", "~", "$", "%" of ’n voorvoegsel soos "thumbnail:".'

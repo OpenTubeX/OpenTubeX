@@ -2669,6 +2669,9 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  Customize Download: 'Προσαρμογή…'
+  Download Started: 'Ξεκίνησε η λήψη του «{title}»'
+  Already Downloading: 'Το «{title}» λαμβάνεται ήδη'
   Stop Recording: "Διακοπή εγγραφής"
   Recording: "Εγγραφή"
   File Name Template Invalid: 'Χρησιμοποιήστε μια σχετική διαδρομή μέσα στον φάκελο λήψεων χωρίς "..", "~", "$", "%" ή πρόθεμα όπως "thumbnail:".'

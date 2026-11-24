@@ -2658,6 +2658,9 @@ CommandPalette:
     Download Finished: Denne nedlastingen pågår ikke lenger
     Video: Åpne en video først
 Downloads:
+  Customize Download: 'Tilpass…'
+  Download Started: 'Begynte å laste ned «{title}»'
+  Already Downloading: '«{title}» lastes allerede ned'
   Stop Recording: "Stopp opptak"
   Recording: "Tar opp"
   File Name Template Invalid: 'Bruk en relativ sti i nedlastingsmappen uten "..", "~", "$", "%" eller et prefiks som "thumbnail:".'

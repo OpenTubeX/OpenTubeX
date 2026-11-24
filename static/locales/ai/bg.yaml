@@ -2689,6 +2689,9 @@ CommandPalette:
     Download Finished: Това изтегляне вече не се изпълнява
     Video: Първо отворете видеоклип
 Downloads:
+  Customize Download: 'Персонализиране…'
+  Download Started: 'Започна изтеглянето на „{title}“'
+  Already Downloading: '„{title}“ вече се изтегля'
   Stop Recording: "Спиране на записа"
   Recording: "Записване"
   File Name Template Invalid: 'Използвайте относителен път в папката за изтегляне без "..", "~", "$", "%" или префикс като "thumbnail:".'
