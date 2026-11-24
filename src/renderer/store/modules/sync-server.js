@@ -41,8 +41,7 @@ import {
   readSyncCollection,
 } from '../../helpers/sync-server-privacy'
 import {
-  RECOVERY_PHRASE_TYPO_MESSAGE,
-  isMistypedRecoveryPhrase,
+  normalizeRecoveryPhrase,
   preparePrivacyKeyFromPassphrase,
 } from '../../helpers/sync-server-recovery-phrase'
 import {
@@ -419,7 +418,8 @@ function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
   if (privacyPassphrase.length < 12) {
     throw new Error('The privacy passphrase must be at least 12 characters')
   }
-  if (privacyPassphrase === password) {
+  // A recovery phrase derives the key in its canonical form.
+  if (privacyPassphrase === password || normalizeRecoveryPhrase(privacyPassphrase) === password) {
     throw new Error('The privacy passphrase must be different from the account password')
   }
 }
@@ -2007,11 +2007,6 @@ const actions = {
       assertEncryptionSupported(privacySupported, Boolean(privacyPassphrase) ||
         (sameAccount && requiresEncryptedSync(rootState.settings)))
       assertPrivacyPassphrase(privacySupported, privacyPassphrase, password)
-      // A new account has no data to try the passphrase on, and registering
-      // first would leave the account behind when the phrase is rejected.
-      if (mode === 'register' && privacySupported && isMistypedRecoveryPhrase(privacyPassphrase)) {
-        throw new Error(RECOVERY_PHRASE_TYPO_MESSAGE)
-      }
       let token
       if (oidc) {
         token = oidcToken

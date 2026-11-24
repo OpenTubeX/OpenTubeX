@@ -981,6 +981,7 @@ function openRecoveryPhrasePrompt(mode) {
 function copyRecoveryPhrase() {
   copyToClipboard(recoveryPhrasePrompt.value.words.join(' '), {
     messageOnSuccess: t('Settings.Sync Settings.Recovery Phrase Copied'),
+    sensitive: true,
   })
 }
 

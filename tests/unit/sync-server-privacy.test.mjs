@@ -73,16 +73,16 @@ test('a custom passphrase of word-list words still unlocks data saved with it as
   assert.equal((await preparePrivacyKeyFromPassphrase(payload, passphrase)).key, privacy.key)
 })
 
-test('rejects a mistyped recovery phrase instead of deriving a different key', async () => {
+test('names a typo in a recovery phrase that fails to unlock data, but accepts it for new data', async () => {
   const words = generateRecoveryPhrase().split(' ')
   const { payload } = await encryptedPayload(words.join(' '))
   const mistyped = words.with(3, `${words[3]}x`).join(' ')
 
-  for (const remote of [payload, null]) {
-    await assert.rejects(() => preparePrivacyKeyFromPassphrase(remote, mistyped), {
-      message: RECOVERY_PHRASE_TYPO_MESSAGE,
-    })
-  }
+  await assert.rejects(() => preparePrivacyKeyFromPassphrase(payload, mistyped), {
+    message: RECOVERY_PHRASE_TYPO_MESSAGE,
+  })
+  // Without data it may be a custom passphrase that only resembles a phrase.
+  assert.ok((await preparePrivacyKeyFromPassphrase(null, mistyped)).key)
 })
 
 test('moves legacy playback speeds into settings while preserving local values', () => {

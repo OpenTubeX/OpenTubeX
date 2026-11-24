@@ -348,9 +348,10 @@ export async function readClipboard() {
  * @param {object} [options] - Optional settings for the copy operation.
  * @param {null|string} options.messageOnSuccess the message to be displayed as a toast when the copy succeeds (optional)
  * @param {null|string} options.messageOnError the message to be displayed as a toast when the copy fails (optional)
+ * @param {boolean} [options.sensitive] keep the content out of the error log, for secrets
  * @returns {Promise<boolean>} whether the content was copied
  */
-export async function copyToClipboard(content, { messageOnSuccess = null, messageOnError = null } = {}) {
+export async function copyToClipboard(content, { messageOnSuccess = null, messageOnError = null, sensitive = false } = {}) {
   const useCapacitorClipboard = process.env.IS_CAPACITOR
   if (useCapacitorClipboard || (navigator.clipboard !== undefined && window.isSecureContext)) {
     try {
@@ -378,6 +379,8 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
     } catch (error) {
       if (content instanceof Blob) {
         console.error('Failed to copy clipboard data of type', content.type, error)
+      } else if (sensitive) {
+        console.error('Failed to copy content to clipboard', error)
       } else {
         console.error('Failed to copy content to clipboard', content, error)
       }

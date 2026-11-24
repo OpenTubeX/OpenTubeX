@@ -38,7 +38,7 @@ export function normalizeRecoveryPhrase(passphrase) {
  * is not in the word list or fails the phrase's checksum.
  * @param {string} passphrase
  */
-export function isMistypedRecoveryPhrase(passphrase) {
+function isMistypedRecoveryPhrase(passphrase) {
   const words = phraseWords(passphrase)
   if (!PHRASE_LENGTHS.has(words.length) || !words.every(word => /^[a-z]+$/.test(word))) return false
   const unknown = words.filter(word => !WORDS.has(word)).length
@@ -50,17 +50,14 @@ export function isMistypedRecoveryPhrase(passphrase) {
  * Derives the privacy key from a passphrase or recovery phrase. An existing
  * passphrase made of word-list words may differ from its canonical phrase in
  * case or spacing, so it is tried as typed when the canonical phrase fails.
+ * A new key comes from the passphrase as given: it may be a custom passphrase
+ * that only resembles a recovery phrase.
  * @param {string | null | undefined} payload Encrypted data the key must decrypt, if the account has any
  * @param {string} passphrase
  */
 export async function preparePrivacyKeyFromPassphrase(payload, passphrase) {
   const phrase = normalizeRecoveryPhrase(passphrase)
-  const mistyped = isMistypedRecoveryPhrase(passphrase)
-  if (!payload) {
-    // A new key from a mistyped phrase would lock out every other device.
-    if (mistyped) throw new Error(RECOVERY_PHRASE_TYPO_MESSAGE)
-    return preparePrivacyKey(payload, phrase ?? passphrase)
-  }
+  if (!payload) return preparePrivacyKey(payload, phrase ?? passphrase)
 
   let lastError
   for (const candidate of new Set([phrase ?? passphrase, passphrase])) {
@@ -70,5 +67,5 @@ export async function preparePrivacyKeyFromPassphrase(payload, passphrase) {
       lastError = error
     }
   }
-  throw mistyped ? new Error(RECOVERY_PHRASE_TYPO_MESSAGE) : lastError
+  throw isMistypedRecoveryPhrase(passphrase) ? new Error(RECOVERY_PHRASE_TYPO_MESSAGE) : lastError
 }

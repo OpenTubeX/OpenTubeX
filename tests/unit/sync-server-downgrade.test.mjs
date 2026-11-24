@@ -980,15 +980,16 @@ test('a supplied privacy passphrase cannot silently select plaintext login', asy
   assert.ok(!f.requests.some(request => request.url.endsWith('/account/login')))
 })
 
-test('a mistyped recovery phrase is rejected before the account is registered', async () => {
+test('a recovery phrase that matches the password in another case is rejected before registering', async () => {
   const f = fixture({}, { encrypted: true })
-  const words = recoveryPhrase.generateRecoveryPhrase().split(' ')
+  const phrase = recoveryPhrase.generateRecoveryPhrase()
   await assert.rejects(f.actions.authenticateSyncServer(f.context, {
     ...credentials,
     mode: 'register',
     username: 'carol',
-    privacyPassphrase: words.with(5, `${words[5]}x`).join(' '),
-  }), { message: recoveryPhrase.RECOVERY_PHRASE_TYPO_MESSAGE })
+    password: phrase,
+    privacyPassphrase: phrase.toUpperCase(),
+  }), /different from the account password/)
   assert.ok(!f.requests.some(request => request.url.endsWith('/account/register')))
 })
 
