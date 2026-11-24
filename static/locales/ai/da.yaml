@@ -691,6 +691,7 @@ Settings:
     Add Custom Engine: Tilføj en brugerdefineret søgemaskine
     Add Engine: Tilføj søgemaskine
     Rename Engine: Omdøb {engine}
+    Edit Engine URL: Rediger søge-URL for {engine}
     Remove Engine: Fjern {engine}
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.

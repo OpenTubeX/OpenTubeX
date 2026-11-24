@@ -684,6 +684,7 @@ Settings:
     Add Custom Engine: إضافة محرك مخصص
     Add Engine: أضف المحرك
     Rename Engine: إعادة تسمية {engine}
+    Edit Engine URL: تعديل رابط البحث لـ {engine}
     Remove Engine: إزالة {engine}
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.

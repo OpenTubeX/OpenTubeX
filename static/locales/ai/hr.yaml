@@ -682,6 +682,7 @@ Settings:
     Add Custom Engine: Dodaj prilagođenu tražilicu
     Add Engine: Dodaj tražilicu
     Rename Engine: Preimenuj {engine}
+    Edit Engine URL: Uredi URL pretraživanja za {engine}
     Remove Engine: Ukloni {engine}
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.

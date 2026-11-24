@@ -434,6 +434,7 @@ Settings:
     Ignore System Haptics Setting: Ignoruj systemowe ustawienie haptyki
   Context Menu Search Settings:
     Rename Engine: Zmień nazwę wyszukiwarki {engine}
+    Edit Engine URL: Edytuj adres URL wyszukiwania wyszukiwarki {engine}
   Theme Settings:
     Toggle Playback With Tab Icon: Odtwarzaj i wstrzymuj ikoną karty
     Show New Tab Button Next to Tabs: Pokaż przycisk nowej karty obok kart

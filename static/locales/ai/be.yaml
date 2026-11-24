@@ -703,6 +703,7 @@ Settings:
     Add Custom Engine: Дадаць уласную пошукавую сістэму
     Add Engine: Дадаць пошукавую сістэму
     Rename Engine: Перайменаваць {engine}
+    Edit Engine URL: Змяніць URL-адрас пошуку {engine}
     Remove Engine: Выдаліць {engine}
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.

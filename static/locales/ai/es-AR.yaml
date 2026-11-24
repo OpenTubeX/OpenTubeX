@@ -703,6 +703,7 @@ Settings:
     Add Custom Engine: Agregar un motor personalizado
     Add Engine: Agregar motor
     Rename Engine: Cambiar nombre de {engine}
+    Edit Engine URL: Editar la URL de búsqueda de {engine}
     Remove Engine: Eliminar {engine}
     Invalid Engine: Ingresá un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Podés agregar hasta {count} motores de búsqueda personalizados.

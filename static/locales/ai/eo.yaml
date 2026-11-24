@@ -721,6 +721,7 @@ Settings:
     Add Custom Engine: Aldoni laŭmendan serĉilon
     Add Engine: Aldoni serĉilon
     Rename Engine: Renomi {engine}
+    Edit Engine URL: Redakti serĉan URL de {engine}
     Remove Engine: Forigi {engine}
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.

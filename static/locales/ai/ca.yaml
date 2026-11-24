@@ -820,6 +820,7 @@ Settings:
     Add Custom Engine: Afegeix un motor personalitzat
     Add Engine: Afegeix el motor
     Rename Engine: Canvia el nom de {engine}
+    Edit Engine URL: Edita l’URL de cerca de {engine}
     Remove Engine: Suprimeix {engine}
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.

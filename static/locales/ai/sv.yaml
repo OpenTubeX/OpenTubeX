@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Lägg till en egen sökmotor
     Add Engine: Lägg till sökmotor
     Rename Engine: Byt namn på {engine}
+    Edit Engine URL: Redigera sök-URL för {engine}
     Remove Engine: Ta bort {engine}
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.

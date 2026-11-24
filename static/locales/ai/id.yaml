@@ -680,6 +680,7 @@ Settings:
     Add Custom Engine: Tambahkan mesin pencari khusus
     Add Engine: Tambahkan mesin pencari
     Rename Engine: Ubah nama {engine}
+    Edit Engine URL: Edit URL pencarian {engine}
     Remove Engine: Hapus {engine}
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.

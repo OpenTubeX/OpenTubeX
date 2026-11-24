@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Thêm công cụ tùy chỉnh
     Add Engine: Thêm công cụ
     Rename Engine: Đổi tên {engine}
+    Edit Engine URL: Sửa URL tìm kiếm của {engine}
     Remove Engine: Xóa {engine}
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.

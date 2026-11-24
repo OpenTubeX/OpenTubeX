@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: Προσθήκη προσαρμοσμένης μηχανής
     Add Engine: Προσθήκη μηχανής
     Rename Engine: Μετονομασία {engine}
+    Edit Engine URL: Επεξεργασία URL αναζήτησης του {engine}
     Remove Engine: Αφαίρεση {engine}
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.

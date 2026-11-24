@@ -679,6 +679,7 @@ Settings:
     Add Custom Engine: カスタム検索エンジンを追加
     Add Engine: 検索エンジンを追加
     Rename Engine: '{engine}の名前を変更'
+    Edit Engine URL: '{engine}の検索URLを編集'
     Remove Engine: '{engine}を削除'
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。

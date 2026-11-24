@@ -684,6 +684,7 @@ Settings:
     Add Custom Engine: הוספת מנוע מותאם אישית
     Add Engine: הוספת מנוע
     Rename Engine: שינוי השם של {engine}
+    Edit Engine URL: עריכת כתובת החיפוש של {engine}
     Remove Engine: הסרת {engine}
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
