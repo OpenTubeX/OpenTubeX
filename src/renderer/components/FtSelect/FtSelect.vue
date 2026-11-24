@@ -63,15 +63,24 @@
         :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
         aria-hidden="true"
       />
-      <span
-        :id="`${id}-value`"
-        class="selectedValue"
-      >
-        <slot
-          name="option"
-          :label="selectedName"
-          :value="value"
-        >{{ selectedName }}</slot>
+      <span class="selectValueBox">
+        <!-- Sizes a content-sized select by a fixed name, so choosing another option never resizes it. -->
+        <span
+          v-if="sizerNames"
+          class="selectValueSizer"
+          :data-names="sizerNames"
+          aria-hidden="true"
+        />
+        <span
+          :id="`${id}-value`"
+          class="selectedValue"
+        >
+          <slot
+            name="option"
+            :label="selectedName"
+            :value="value"
+          >{{ selectedName }}</slot>
+        </span>
       </span>
     </button>
     <FtIcon
@@ -230,11 +239,13 @@
                 :class="{
                   active: index === activeIndex,
                   selected: isSelectedValue(selectValues[index]),
-                  hasOptionVisuals: hasOptionVisuals || multiple
+                  hasOptionVisuals: hasOptionVisuals || multiple,
+                  disabledOption: disabledValues.includes(selectValues[index])
                 }"
                 role="option"
                 :tabindex="phoneLayout ? 0 : -1"
                 :aria-selected="isSelectedValue(selectValues[index])"
+                :aria-disabled="disabledValues.includes(selectValues[index]) || null"
                 :aria-describedby="optionGroupLabels[optionGroups[index]] ? `${id}-group-${optionGroups[index]}` : null"
                 :dir="isLocaleSelector ? 'auto' : null"
                 :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
@@ -316,6 +327,7 @@ import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLa
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { getAnchoredPosition } from '../../helpers/anchoredPosition'
@@ -366,6 +378,11 @@ const props = defineProps({
     default: () => []
   },
   optionIcons: {
+    type: Array,
+    default: () => []
+  },
+  // Options that stay visible but can't be toggled
+  disabledValues: {
     type: Array,
     default: () => []
   },
@@ -569,6 +586,22 @@ function isSelectedValue(value) {
 const selectedIndices = computed(() => props.selectValues.flatMap((value, index) => isSelectedValue(value) ? [index] : []))
 const selectedIndex = computed(() => selectedIndices.value[0] ?? -1)
 const selectedName = computed(() => selectedIndices.value.map(index => props.selectNames[index]).join(', ') || props.emptyLabel)
+
+/**
+ * Content-sized selects take the width of their default option, so choosing
+ * another one never resizes them, and longer values truncate. Multi-selects
+ * and selects without a listed default reserve their longest option instead.
+ */
+const sizerNames = computed(() => {
+  if (!props.sizeToContent) return null
+  const defaultValue = !props.multiple && props.settingKey && Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)
+    ? String(DEFAULT_SETTINGS[props.settingKey])
+    : null
+  const index = defaultValue === null ? -1 : props.selectValues.findIndex(value => String(value) === defaultValue)
+  return index === -1
+    ? [...props.selectNames, props.emptyLabel].filter(Boolean).join('\n')
+    : props.selectNames[index]
+})
 const hasOptionVisuals = computed(() =>
   props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
   props.optionIcons.some(icon => Array.isArray(icon))
@@ -847,7 +880,8 @@ function handleButtonKeydown(event) {
     } else if (props.multiple) {
       openDropdown()
     } else {
-      selectOption(index)
+      const enabledIndex = enabledIndexFrom(index, event.key === 'Home' ? 1 : -1)
+      if (enabledIndex !== -1) selectOption(enabledIndex)
     }
     return
   }
@@ -925,8 +959,25 @@ function selectOffset(offset) {
     openDropdown()
     return
   }
-  const index = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
-  selectOption(index)
+  const target = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
+  const step = Math.sign(offset)
+  // Steps over disabled options, and at the end of the list falls back to the last one it can select
+  let index = enabledIndexFrom(target, step)
+  if (index === -1) index = enabledIndexFrom(target, -step)
+  if (index !== -1) selectOption(index)
+}
+
+/**
+ * The first option from `index` on, walking by `step`, that isn't in `disabledValues`.
+ * @param {number} index
+ * @param {number} step
+ * @returns {number} its index, or -1 if there is none
+ */
+function enabledIndexFrom(index, step) {
+  for (let i = index; i >= 0 && i < props.selectValues.length; i += step) {
+    if (!props.disabledValues.includes(props.selectValues[i])) return i
+  }
+  return -1
 }
 
 function selectOption(index) {
@@ -937,6 +988,7 @@ function selectOption(index) {
   }
 
   const selectedValue = props.selectValues[index]
+  if (props.disabledValues.includes(selectedValue)) return
   if (props.multiple) {
     activeIndex.value = index
     emit('change', props.selectValues.filter(value => value === selectedValue ? !isSelectedValue(value) : isSelectedValue(value)))

@@ -16,7 +16,9 @@
   padding-inline: max(20px, calc((100% - 960px) / 2));
 }
 
-.generalSelectGrid :deep(.select:nth-child(odd)) {
+/* Odd selects count only selects, since General puts its switches first. */
+/* stylelint-disable selector-max-compound-selectors -- the parser counts the "of .select" filter as compound selectors */
+.generalSelectGrid :deep(.select:nth-child(odd of .select)) {
   margin-inline-end: 40px;
 }
 
@@ -24,15 +26,16 @@
    field moves onto the center line, as a lone select's field does elsewhere:
    half the select, half of the icons' room and the 40px margin, minus half
    of the 12px marker gutter before the field. */
-.generalSelectGrid :deep(.select:nth-child(odd):last-child) {
+.generalSelectGrid :deep(.select:nth-child(odd of .select):last-child) {
   --general-select-center-shift: calc(50% + var(--general-select-indicator-track) / 2 + 20px - 6px);
 
   translate: var(--general-select-center-shift);
 }
 
-.generalSelectGrid :deep(.select:nth-child(odd):last-child:dir(rtl)) {
+.generalSelectGrid :deep(.select:nth-child(odd of .select):last-child:dir(rtl)) {
   translate: calc(-1 * var(--general-select-center-shift));
 }
+/* stylelint-enable selector-max-compound-selectors */
 
 .generalSelectGrid :deep(.select.contentSized) {
   grid-column: span 2;
@@ -45,7 +48,7 @@
 }
 
 /* Reserve the same marker gutter even when highlighting is switched off. */
-:where(.generalSelectGrid) :deep(.select) {
+:where(.generalSelectGrid) :deep(:is(.select, .switch-ctn)) {
   padding-inline-start: 12px;
 }
 
@@ -113,12 +116,14 @@
     padding-inline: max(20px, calc((100% - 460px) / 2));
   }
 
-  .generalSelectGrid :deep(.select:nth-child(odd)) {
+  /* stylelint-disable selector-max-compound-selectors -- the parser counts the "of .select" filter as compound selectors */
+  .generalSelectGrid :deep(.select:nth-child(odd of .select)) {
     margin-inline-end: 0;
   }
 
-  .generalSelectGrid :deep(.select:nth-child(odd):last-child),
-  .generalSelectGrid :deep(.select:nth-child(odd):last-child:dir(rtl)) {
+  .generalSelectGrid :deep(.select:nth-child(odd of .select):last-child),
+  .generalSelectGrid :deep(.select:nth-child(odd of .select):last-child:dir(rtl)) {
     translate: none;
   }
+  /* stylelint-enable selector-max-compound-selectors */
 }
