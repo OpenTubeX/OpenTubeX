@@ -23,8 +23,24 @@
 }
 /* stylelint-enable liberty/use-logical-spec */
 
-/* Controls over a tab bar take its height; over the top navigation, its own. */
-.app.topTabs .windowControls,
+/* Modal backdrops dim and blur the controls like the rest of the window, and
+   take clicks on them. They stack from z-index 80 up, or above the full window
+   player's 1000 (where a tie goes to the later backdrop). mirrorAppState()
+   marks open backdrops on <html>. */
+:global(:root.appModalBackdrop .windowControls) {
+  z-index: 79;
+}
+
+:global(:root.appModalBackdrop .playerFullWindow .windowControls) {
+  z-index: 1001;
+}
+
+/* Controls over a tab bar take its height; over the top navigation, its own.
+   The top bar reserves room for its scrollbar below 32px. */
+.app.topTabs .windowControls {
+  block-size: var(--top-tab-bar-height);
+}
+
 .app.verticalTabsLeft .windowControls.left,
 .app.verticalTabsRight .windowControls.right {
   block-size: 32px;

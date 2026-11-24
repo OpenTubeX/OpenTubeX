@@ -15,6 +15,11 @@
   animation: tab-organizer-backdrop-enter var(--motion-default-effects);
 }
 
+/* Above the full window player (z-index 1000), like prompts */
+.playerFullWindow .tabOrganizerBackdrop {
+  z-index: 1001;
+}
+
 /* Rows and fields sit on a container one step above the dialog surface;
    selected rows take a primary tint, like the current Sync session. */
 .tabOrganizer {

@@ -72,7 +72,6 @@ test.describe('with a custom title bar', () => {
 
     const geometry = await getControlsGeometry(page, '.tabBar')
     expect(geometry.left + geometry.right).toBeGreaterThan(0)
-    expect(geometry.height).toBeCloseTo(32, 0)
     expect(geometry.paddingLeft).toBeGreaterThanOrEqual(geometry.left - 0.5)
     expect(geometry.paddingRight).toBeGreaterThanOrEqual(geometry.right - 0.5)
     expect(geometry.region).toBe('drag')
