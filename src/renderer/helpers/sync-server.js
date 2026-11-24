@@ -1976,6 +1976,10 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         remoteEntry: profileSettingsKey ? syncedEntry(remoteEntry) : remoteEntry,
         localUpdatedAt: localUpdatedAt[key],
         localSettingUpdatedAt: settingId => localUpdatedAt[profileSettingEditTimeId(key, settingId)],
+        localSettingIds: profileSettingsKey
+          ? Object.keys(localUpdatedAt).filter(name => name.startsWith(profileSettingEditTimeId(key, ''))).map(name => name.slice(key.length + 1))
+          : [],
+        syncsSetting: isSynced,
         now,
       })
       if (profileSettingsKey) {

@@ -229,9 +229,15 @@ export function profileSettingTimesOf(entry) {
  * @param {object} options see `mergeSettingEntry`
  * @param {(settingId: string) => number | undefined} [options.localSettingUpdatedAt]
  *   when this device last edited a setting, if it saved that
+ * @param {Iterable<string>} [options.localSettingIds] the settings this device
+ *   saved edit times for, also those it reset to the shared value
+ * @param {(settingId: string) => boolean} [options.syncsSetting] whether this device syncs a setting
  */
 export function mergeProfileSettingsEntry(options) {
-  const { key, value, old, remoteEntry, localUpdatedAt, localSettingUpdatedAt = () => undefined, now } = options
+  const {
+    key, value, old, remoteEntry, localUpdatedAt, localSettingUpdatedAt = () => undefined,
+    localSettingIds = [], syncsSetting = () => true, now,
+  } = options
   if (!isSettingsObject(value) || !isSettingsObject(remoteEntry?.value) || !isSettingsObject(old?.value)) {
     return mergeSettingEntry(options)
   }
@@ -243,8 +249,14 @@ export function mergeProfileSettingsEntry(options) {
   // Only times that devices recorded for a setting show an edit that went
   // back to the synced value; fallback times are those of the whole entry.
   const remoteSettingTimes = isSettingsObject(remoteEntry.settingsUpdatedAt) ? remoteEntry.settingsUpdatedAt : {}
-  // Remote settings too, which this device may have set and reset since it last synced.
-  for (const settingId of new Set([...Object.keys(base), ...Object.keys(value), ...Object.keys(remoteEntry.value)])) {
+  // Also settings that only edit times name: those a device set and reset
+  // to the shared value since this device last synced.
+  const settingIds = new Set([
+    ...Object.keys(base), ...Object.keys(value), ...Object.keys(remoteEntry.value),
+    ...Object.keys(remoteSettingTimes), ...localSettingIds,
+  ])
+  for (const settingId of settingIds) {
+    if (!syncsSetting(settingId)) continue
     const local = Object.hasOwn(value, settingId) ? value[settingId] : undefined
     const synced = Object.hasOwn(base, settingId) ? base[settingId] : undefined
     const remote = Object.hasOwn(merged, settingId) ? merged[settingId] : undefined

@@ -383,6 +383,17 @@ test('the later edit of a profile setting wins even when one device went back to
   })
   assert.deepEqual(resetHere.value, {})
   assert.deepEqual(resetHere.settingsUpdatedAt, { preferredCaptionLocale: 40 })
+
+  // Resets that only edit times record reach the server with the later time.
+  const resetLater = { key, value: {}, old: unset, localUpdatedAt: 40, localSettingUpdatedAt: () => 40, now: 50 }
+  const resetThere = { key, value: {}, updatedAt: 25, settingsUpdatedAt: { preferredCaptionLocale: 25 } }
+  assert.deepEqual(mergeProfileSettingsEntry({ ...resetLater, remoteEntry: resetThere }).settingsUpdatedAt, { preferredCaptionLocale: 40 })
+  const nothingThere = { key, value: {}, updatedAt: 10, settingsUpdatedAt: {} }
+  const onlyHere = mergeProfileSettingsEntry({ ...resetLater, localSettingIds: ['preferredCaptionLocale'], remoteEntry: nothingThere })
+  assert.deepEqual(onlyHere.settingsUpdatedAt, { preferredCaptionLocale: 40 })
+  // A setting this device doesn't sync keeps the other devices' time.
+  const notSynced = mergeProfileSettingsEntry({ ...resetLater, syncsSetting: () => false, remoteEntry: resetThere })
+  assert.equal(notSynced, resetThere)
 })
 
 test('the later edit of a profile setting wins, whenever either device edited its other settings', () => {
