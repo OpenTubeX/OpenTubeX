@@ -1067,6 +1067,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
+    Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
     Keep Status Bar Hidden in Fullscreen: "Statusbalk verborgen houden in volledig scherm"
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
@@ -2574,6 +2575,7 @@ Tooltips:
       Hierdoor kan Automatisch de verbindingssnelheid ook onderschatten en een lagere kwaliteit kiezen.
       Streams die tot één aanvraag tegelijk zijn beperkt, negeren deze instelling.
     Upcoming Videos to Preload: "Haalt yt-dlp-stream-URL’s op voor maximaal dit aantal video’s die hierna kunnen worden afgespeeld en bewaart ze in de cache. De kijkwachtrij heeft voorrang op afspeellijsten en aanbevelingen."
+    Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
     Keep Status Bar Hidden in Fullscreen: "Toon de statusbalk alleen wanneer je vanaf de schermrand veegt en verberg deze na een moment weer. Tikken op de speler toont hem niet meer."
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."

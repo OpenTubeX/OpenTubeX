@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Xoay video rộng sang ngang khi ở chế độ toàn màn hình'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
     Upcoming Videos to Preload: "Số video cần tải trước"
+    Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
     Keep Status Bar Hidden in Fullscreen: "Giữ thanh trạng thái ẩn khi toàn màn hình"
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
@@ -2523,6 +2524,7 @@ Tooltips:
       Giá trị cao cũng có thể khiến chế độ Tự động đánh giá thấp tốc độ kết nối và chọn chất lượng thấp hơn.
       Luồng bị giới hạn ở một yêu cầu mỗi lần sẽ bỏ qua cài đặt này.
     Upcoming Videos to Preload: "Lấy và lưu đệm URL luồng yt-dlp cho tối đa số video này có thể phát tiếp theo. Hàng đợi xem được ưu tiên hơn danh sách phát và đề xuất."
+    Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
     Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
     Keep Status Bar Hidden in Fullscreen: "Chỉ hiển thị thanh trạng thái khi bạn vuốt từ cạnh màn hình, rồi ẩn lại sau một lát. Chạm vào trình phát sẽ không còn hiển thị nó nữa."
     Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."

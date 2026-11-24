@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: '全画面表示で横長の動画を横向きに回転する'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下にスワイプして全画面表示を開始または終了する'
     Upcoming Videos to Preload: "先読みする動画数"
+    Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
     Keep Status Bar Hidden in Fullscreen: "全画面表示でステータスバーを非表示のままにする"
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
@@ -2506,6 +2507,7 @@ Tooltips:
       また、「自動」が接続速度を実際より低く見積もり、低い品質を選ぶ場合があります。
       一度に1件の要求しか行えないストリームでは、この設定は無視されます。
     Upcoming Videos to Preload: "次に再生可能な動画のうち、この数までの yt-dlp ストリーム URL を取得してキャッシュします。視聴キューは再生リストやおすすめより優先されます。"
+    Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
     Keep Status Bar Hidden in Fullscreen: "画面の端からスワイプしたときだけステータスバーを表示し、少し経つと再び非表示にします。プレーヤーをタップしても表示されなくなります。"
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"

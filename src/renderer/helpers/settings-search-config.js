@@ -117,6 +117,7 @@ const YT_DLP_STREAMING_KEYS = new Set([
   'yt-dlp Streaming',
   'Parallel Segment Loading',
   'Upcoming Videos to Preload',
+  'Concurrent Preloads',
   'Ask Before Preloading Large Playlists'
 ])
 

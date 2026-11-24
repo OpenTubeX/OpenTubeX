@@ -1054,6 +1054,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Zakreni široke videozapise vodoravno preko cijelog zaslona'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Povucite gore ili dolje za ulazak u prikaz preko cijelog zaslona ili izlazak iz njega'
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
+    Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
     Keep Status Bar Hidden in Fullscreen: "Zadrži traku stanja skrivenom na cijelom zaslonu"
     Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
@@ -2544,6 +2545,7 @@ Tooltips:
       Zbog njih Automatski odabir također može podcijeniti brzinu veze i odabrati nižu kvalitetu.
       Tokovi ograničeni na jedan zahtjev istodobno zanemaruju ovu postavku.
     Upcoming Videos to Preload: "Dohvaća i sprema yt-dlp adrese streamova za najviše ovoliko videozapisa koji se mogu reproducirati sljedeći. Red gledanja ima prednost pred popisima za reprodukciju i preporukama."
+    Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
     Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
     Keep Status Bar Hidden in Fullscreen: "Prikaži traku stanja samo kada povučeš od ruba zaslona i ponovno je sakrij nakon trenutka. Dodir playera je više ne prikazuje."
     Ask Before Preloading Large Playlists: "Traži potvrdu prije predučitavanja svih videozapisa s popisa za reprodukciju s više od {count} videozapisa."

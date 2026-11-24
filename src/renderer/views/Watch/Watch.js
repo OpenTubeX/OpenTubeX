@@ -1971,6 +1971,7 @@ export default defineComponent({
       if (videoIds.length === 0) return
 
       preloadYtDlpPlaybackSources(videoIds, {
+        concurrency: this.$store.getters.getYtDlpPreloadConcurrency,
         loadSource: videoId => getYtDlpPlaybackSource(
           videoId,
           this.ytDlpPlaybackCacheKey,

@@ -35,6 +35,16 @@
         :tooltip="t('Tooltips.Player Settings.Upcoming Videos to Preload')"
         @change="updateYtDlpPreloadCount"
       />
+      <FtSlider
+        :label="t('Settings.Player Settings.Concurrent Preloads')"
+        :default-value="ytDlpPreloadConcurrency"
+        setting-key="ytDlpPreloadConcurrency"
+        :min-value="1"
+        :max-value="MAX_YT_DLP_PRELOAD_CONCURRENCY"
+        :step="1"
+        :tooltip="t('Tooltips.Player Settings.Concurrent Preloads')"
+        @change="updateYtDlpPreloadConcurrency"
+      />
     </FtSliderGrid>
   </FtSettingsSection>
 </template>
@@ -55,13 +65,17 @@ import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
   MAX_SEGMENT_PREFETCH_LIMIT,
 } from '../../../helpers/player/segmentPrefetch'
-import { MAX_YT_DLP_PRELOAD_COUNT } from '../../../helpers/player/ytDlpPlaybackPreload'
+import {
+  MAX_YT_DLP_PRELOAD_CONCURRENCY,
+  MAX_YT_DLP_PRELOAD_COUNT,
+} from '../../../helpers/player/ytDlpPlaybackPreload'
 
 const { t } = useI18n()
 
 const segmentPrefetchLimit = computed(() => store.getters.getSegmentPrefetchLimit)
 const confirmLargePlaylistPreload = computed(() => store.getters.getConfirmLargePlaylistPreload)
 const ytDlpPreloadCount = computed(() => store.getters.getYtDlpPreloadCount)
+const ytDlpPreloadConcurrency = computed(() => store.getters.getYtDlpPreloadConcurrency)
 
 function updateSegmentPrefetchLimit(value) {
   store.dispatch('updateSegmentPrefetchLimit', value)
@@ -69,5 +83,9 @@ function updateSegmentPrefetchLimit(value) {
 
 function updateYtDlpPreloadCount(value) {
   store.dispatch('updateYtDlpPreloadCount', value)
+}
+
+function updateYtDlpPreloadConcurrency(value) {
+  store.dispatch('updateYtDlpPreloadConcurrency', value)
 }
 </script>

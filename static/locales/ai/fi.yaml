@@ -1052,6 +1052,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
+    Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
     Keep Status Bar Hidden in Fullscreen: "Pidä tilarivi piilossa koko näytön tilassa"
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
@@ -2515,6 +2516,7 @@ Tooltips:
       Ne voivat myös saada automaattisen asetuksen aliarvioimaan yhteysnopeuden ja valitsemaan heikomman laadun.
       Tämä asetus ei vaikuta suoratoistovirtoihin, joissa sallitaan vain yksi pyyntö kerrallaan.
     Upcoming Videos to Preload: "Noutaa ja tallentaa välimuistiin yt-dlp-suoratoisto-osoitteet enintään näin monelle seuraavaksi toistettavalle videolle. Katselujono on etusijalla soittolistoihin ja suosituksiin nähden."
+    Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
     Keep Status Bar Hidden in Fullscreen: "Näytä tilarivi vain, kun pyyhkäiset näytön reunasta, ja piilota se taas hetken kuluttua. Soittimen napauttaminen ei enää näytä sitä."
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."

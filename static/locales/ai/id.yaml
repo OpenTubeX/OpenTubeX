@@ -1052,6 +1052,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Putar video lebar ke lanskap dalam layar penuh'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Geser ke atas atau bawah untuk masuk atau keluar dari layar penuh'
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
+    Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
     Keep Status Bar Hidden in Fullscreen: "Tetap sembunyikan bilah status dalam layar penuh"
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
@@ -2533,6 +2534,7 @@ Tooltips:
       Nilai tersebut juga dapat membuat Otomatis memperkirakan kecepatan koneksi terlalu rendah dan memilih kualitas yang lebih rendah.
       Stream yang dibatasi satu permintaan pada satu waktu mengabaikan pengaturan ini.
     Upcoming Videos to Preload: "Mengambil dan menyimpan URL stream yt-dlp untuk paling banyak sejumlah ini video yang dapat diputar berikutnya. Antrean tontonan didahulukan dari daftar putar dan rekomendasi."
+    Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
     Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
     Keep Status Bar Hidden in Fullscreen: "Tampilkan bilah status hanya saat Anda menggeser dari tepi layar, lalu sembunyikan lagi setelah beberapa saat. Mengetuk pemutar tidak lagi menampilkannya."
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."

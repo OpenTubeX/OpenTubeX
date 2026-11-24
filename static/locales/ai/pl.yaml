@@ -644,6 +644,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Obracaj szerokie filmy poziomo w trybie pełnoekranowym'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
+    Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
     Keep Status Bar Hidden in Fullscreen: "Ukrywaj pasek stanu na pełnym ekranie"
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
@@ -1743,6 +1744,7 @@ Tooltips:
       Mogą też sprawić, że tryb Auto zaniży prędkość połączenia i wybierze niższą jakość.
       To ustawienie nie wpływa na strumienie ograniczone do jednego żądania naraz.
     Upcoming Videos to Preload: "Pobiera i zapisuje w pamięci podręcznej adresy strumieni yt-dlp dla maksymalnie tylu filmów, które mogą zostać odtworzone jako następne. Kolejka oglądania ma pierwszeństwo przed playlistami i rekomendacjami."
+    Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
     Keep Status Bar Hidden in Fullscreen: "Pokazuj pasek stanu tylko po przesunięciu palcem od krawędzi ekranu i po chwili ukrywaj go ponownie. Dotknięcie odtwarzacza już go nie pokazuje."
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."

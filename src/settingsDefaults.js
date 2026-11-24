@@ -10,6 +10,7 @@ import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from './renderer/helpers/player/segmen
 import { BUFFER_PRESETS } from './renderer/helpers/player/buffering.js'
 import { DEFAULT_APP_FONT } from './renderer/helpers/appFont.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from './ytDlpPlaybackCacheSettings.js'
+import { DEFAULT_YT_DLP_PRELOAD_CONCURRENCY } from './renderer/helpers/player/ytDlpPlaybackPreload.js'
 import { DEFAULT_HOME_SECTION_LAYOUT } from './renderer/helpers/homeSections.js'
 import { DEFAULT_QUICK_SETTINGS } from './renderer/helpers/quickSettings.js'
 import { DEFAULT_FULLSCREEN_ACTIONS } from './renderer/helpers/fullscreenActions.js'
@@ -174,6 +175,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
     // 0 turns preloading upcoming videos off.
     ytDlpPreloadCount: 0,
+    ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
     confirmLargePlaylistPreload: true,
     ytDlpFfmpegSource: 'system',
     ytDlpFfmpegPath: '',

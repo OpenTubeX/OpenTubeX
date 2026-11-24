@@ -1051,6 +1051,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Snúa breiðum myndskeiðum lárétt á öllum skjánum'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Strjúktu upp eða niður til að opna eða loka öllum skjánum'
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
+    Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
     Keep Status Bar Hidden in Fullscreen: "Halda stöðustikunni falinni á öllum skjánum"
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
@@ -2522,6 +2523,7 @@ Tooltips:
       Þau geta einnig valdið því að Sjálfvirkt vanmeti tengingarhraðann og velji minni gæði.
       Streymi sem er takmarkað við eina beiðni í einu hunsar þessa stillingu.
     Upcoming Videos to Preload: "Sækir og vistar yt-dlp-streymisslóðir fyrir allt að þennan fjölda myndskeiða sem geta spilast næst. Áhorfsbiðröðin hefur forgang fram yfir spilunarlista og tillögur."
+    Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
     Keep Status Bar Hidden in Fullscreen: "Sýna stöðustikuna aðeins þegar þú strýkur frá skjábrúninni og fela hana aftur eftir smástund. Að ýta á spilarann sýnir hana ekki lengur."
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."

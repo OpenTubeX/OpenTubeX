@@ -787,6 +787,7 @@ test('replaces the switches that turned settings on and off in stored settings',
     fixedTabWidth: 120,
     // Enabled preloading kept the former default count.
     ytDlpPreloadCount: 2,
+    ytDlpPreloadConcurrency: 8,
     ytDlpCookieUses: ['subtitles'],
     // The width keeps the newer edit time of the switch that turned it off.
     syncServerSettingUpdatedAt: { enableBlockLists: 10, blurBlockedItems: 20, blockedItemsMode: 20, useFixedTabWidth: 30, fixedTabWidth: 30 },
@@ -832,6 +833,7 @@ test('imports the switches that turned settings on and off', () => {
     blockedItemsMode: 'hide',
     fixedTabWidth: 0,
     ytDlpPreloadCount: 4,
+    ytDlpPreloadConcurrency: 8,
     quickSettings: ['blockedItemsMode'],
   })
   // A count of 0 kept preloading off even with the switch on.

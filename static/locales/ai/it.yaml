@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Ruota i video larghi in orizzontale a schermo intero'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Scorri verso l’alto o il basso per aprire o chiudere lo schermo intero'
     Upcoming Videos to Preload: "Numero di video da precaricare"
+    Concurrent Preloads: "Precaricamenti simultanei"
     Ignore System Rotation Lock for Fullscreen: Ignora il blocco della rotazione del sistema per lo schermo intero
     Keep Status Bar Hidden in Fullscreen: "Mantieni nascosta la barra di stato a schermo intero"
     Swipe Left or Right to Seek in Fullscreen: Scorri a sinistra o a destra per avanzare o riavvolgere a schermo intero
@@ -2506,6 +2507,7 @@ Tooltips:
       Possono anche indurre la modalità Automatica a sottostimare la velocità della connessione e scegliere una qualità inferiore.
       I flussi limitati a una richiesta alla volta ignorano questa impostazione.
     Upcoming Videos to Preload: "Recupera e memorizza nella cache gli URL dei flussi yt-dlp fino a questo numero di video che possono essere riprodotti successivamente. La coda di visione ha la priorità su playlist e consigli."
+    Concurrent Preloads: "Il numero massimo di processi yt-dlp usati per precaricare più video contemporaneamente. Valori più alti usano più CPU, memoria e larghezza di banda di rete."
     Ignore System Rotation Lock for Fullscreen: Ruota fisicamente il dispositivo per entrare e uscire dallo schermo intero anche quando la rotazione automatica di Android è disattivata.
     Keep Status Bar Hidden in Fullscreen: "Mostra la barra di stato solo quando scorri dal bordo dello schermo e nascondila di nuovo dopo un istante. Toccare il lettore non la mostra più."
     Ask Before Preloading Large Playlists: "Chiede una conferma prima di precaricare tutti i video di una playlist con più di {count} video."

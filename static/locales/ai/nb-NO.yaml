@@ -1049,6 +1049,7 @@ Settings:
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å åpne eller avslutte fullskjerm'
     Upcoming Videos to Preload: "Antall videoer som skal forhåndslastes"
+    Concurrent Preloads: "Samtidige forhåndslastinger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotasjonslås for fullskjerm
     Keep Status Bar Hidden in Fullscreen: "Hold statuslinjen skjult i fullskjerm"
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høyre for å spole i fullskjerm
@@ -2511,6 +2512,7 @@ Tooltips:
       De kan også føre til at Automatisk undervurderer tilkoblingshastigheten og velger lavere kvalitet.
       Strømmer som er begrenset til én forespørsel om gangen, ignorerer denne innstillingen.
     Upcoming Videos to Preload: "Henter og mellomlagrer yt-dlp-strømadresser for opptil så mange videoer som kan spilles av som neste. Visningskøen prioriteres foran spillelister og anbefalinger."
+    Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Roter enheten fysisk for å åpne og avslutte fullskjerm, selv når automatisk rotasjon er slått av i Android.
     Keep Status Bar Hidden in Fullscreen: "Vis statuslinjen bare når du sveiper fra skjermkanten, og skjul den igjen etter et øyeblikk. Å trykke på avspilleren viser den ikke lenger."
     Ask Before Preloading Large Playlists: "Ber om bekreftelse før alle videoene i en spilleliste med mer enn {count} videoer forhåndslastes."
