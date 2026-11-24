@@ -83,6 +83,25 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
 }
 
 /**
+ * The cards per row of a grid this wide with the track size that
+ * {@link getThumbnailGridStyles} sets. A narrower grid holds no more.
+ * @param {number} thumbnailSize
+ * @param {number} gridWidth
+ * @param {number} viewportWidth
+ * @param {number} columns as for {@link getThumbnailGridStyles}
+ * @param {number} densityScale
+ * @param {boolean} youtubeStyleShorts Shorts grids have their own track size in wider windows
+ */
+export function getThumbnailGridColumnCount(thumbnailSize, gridWidth, viewportWidth, columns, densityScale, youtubeStyleShorts) {
+  const gap = GRID_GAP * densityScale
+  const track = youtubeStyleShorts && viewportWidth > PHONE_THUMBNAIL_VIEWPORT_WIDTH
+    ? DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * thumbnailSize / DEFAULT_THUMBNAIL_SIZE
+    : Number.parseFloat(getThumbnailGridStyles(thumbnailSize, gridWidth, viewportWidth, gridWidth, columns, densityScale)['--thumbnail-grid-size'])
+  // A fixed column count divides the width exactly, so absorb rounding errors.
+  return Math.max(1, Math.floor((gridWidth + gap) / (Math.min(track, gridWidth) + gap) + 1e-6))
+}
+
+/**
  * List thumbnails scale off fixed values only. Set these on the document body
  * for general lists or on a playlist page for its independent preference.
  * @param {number} thumbnailSize

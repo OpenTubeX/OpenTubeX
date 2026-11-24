@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { FULL_WIDTH_COLUMNS, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
+import { FULL_WIDTH_COLUMNS, getThumbnailGridColumnCount, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
 
 test('phone grids fit two columns at the default thumbnail size', () => {
   for (const width of [240, 313, 343, 380, 428.8]) {
@@ -61,4 +61,23 @@ test('full width cards fill phone rows and stay capped in wider windows', () => 
   assert.ok(capped(60) < capped(100) && capped(100) < capped(180))
   // A desktop grid narrower than the cap still fills its row.
   assert.equal(Number.parseFloat(getThumbnailGridStyles(100, 500, 800, 500, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size']), 500)
+})
+
+// Lists mount the cards a viewport-wide grid row holds before their grid is
+// measured. Holding fewer in a narrower grid leaves placeholders on screen.
+test('a grid narrower than the viewport holds no more cards per row', () => {
+  for (const youtubeStyleShorts of [false, true]) {
+    for (const size of [60, 100, 140, 180]) {
+      for (const viewportWidth of [360, 412, 681, 1280, 1920]) {
+        const estimate = getThumbnailGridColumnCount(size, viewportWidth, viewportWidth, 0, 1, youtubeStyleShorts)
+        for (let width = 240; width <= viewportWidth; width += 3) {
+          assert.ok(getThumbnailGridColumnCount(size, width, viewportWidth, 0, 1, youtubeStyleShorts) <= estimate)
+        }
+      }
+    }
+  }
+  assert.equal(getThumbnailGridColumnCount(100, 1280, 1280, 0, 1, false), 4)
+  assert.equal(getThumbnailGridColumnCount(100, 400, 412, 0, 1, false), 2)
+  assert.equal(getThumbnailGridColumnCount(100, 1000, 1280, 7, 1, false), 7)
+  assert.equal(getThumbnailGridColumnCount(100, 1000, 1280, FULL_WIDTH_COLUMNS, 1, false), 1)
 })

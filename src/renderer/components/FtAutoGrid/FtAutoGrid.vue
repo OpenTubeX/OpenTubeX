@@ -29,10 +29,10 @@ import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdat
 
 import store from '../../store/index'
 
-import { FULL_WIDTH_COLUMNS, getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
 import { getUiDensityScale } from '../../constants/uiDensity'
 import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
-import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
+import { GRID_COLUMNS_SETTINGS, getGridColumns, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { measureStableGridWidth } from './gridWidth'
@@ -150,13 +150,6 @@ const moveClass = computed(() => {
 
 const fullWidth = computed(() => store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth')
 
-// Grids forced on a list preference, such as Shorts, keep automatic columns.
-function getGridColumns() {
-  const viewType = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
-  if (viewType === 'fullWidth') return FULL_WIDTH_COLUMNS
-  return viewType === 'grid' ? store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]] : 0
-}
-
 function applyThumbnailSizeStyles() {
   const element = gridElement.value?.$el
 
@@ -169,7 +162,7 @@ function applyThumbnailSizeStyles() {
     gridWidth,
     window.innerWidth,
     renderedGridWidth,
-    getGridColumns(),
+    getGridColumns(thumbnailSizeSetting),
     getUiDensityScale(store.state.settings.uiDensity)
   )
 

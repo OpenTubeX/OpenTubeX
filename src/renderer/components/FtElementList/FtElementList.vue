@@ -15,7 +15,7 @@
       :data="reactive(result)"
       :data-overrides="dataOverrides"
       :data-type="dataType || result.type"
-      :first-screen="!renderAllItemsLazily && index < 16"
+      :first-screen="index < firstScreenItemCount"
       :layout="effectiveDisplayValue"
       :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
       :show-watched-style-in-history="showWatchedStyleInHistory"
@@ -44,8 +44,11 @@
 </template>
 
 <script setup>
-import { computed, provide, reactive } from 'vue'
+import { computed, inject, onBeforeUpdate, provide, reactive } from 'vue'
 import { subscriptionFeedTypeKey } from '../../composables/useHideSubscriptionFeedType'
+import { getGridColumns, thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
+import { getUiDensityScale } from '../../constants/uiDensity'
+import { getFirstScreenItemCount } from '../../helpers/listFirstScreen'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
 import FtListLazyWrapper from '../FtListLazyWrapper/FtListLazyWrapper.vue'
@@ -190,6 +193,26 @@ const displayValue = computed(() => {
 const effectiveDisplayValue = computed(() => {
   return props.youtubeStyleShorts || displayValue.value !== 'list' ? 'grid' : 'list'
 })
+
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+
+// Rows mount right away while they can be on screen, later rows once they come
+// near it. Only rows that mount read this, so it is computed for each render
+// instead of re-rendering the whole list on resizes and setting changes.
+let firstScreenItemCount = 0
+function updateFirstScreenItemCount() {
+  firstScreenItemCount = props.renderAllItemsLazily
+    ? 0
+    : getFirstScreenItemCount({
+        grid: effectiveDisplayValue.value !== 'list',
+        youtubeStyleShorts: props.youtubeStyleShorts,
+        thumbnailSize: store.state.settings[thumbnailSizeSetting],
+        columns: getGridColumns(thumbnailSizeSetting),
+        densityScale: getUiDensityScale(store.state.settings.uiDensity),
+      })
+}
+updateFirstScreenItemCount()
+onBeforeUpdate(updateFirstScreenItemCount)
 
 function getResultKey(result, index) {
   const type = props.dataType || result.type

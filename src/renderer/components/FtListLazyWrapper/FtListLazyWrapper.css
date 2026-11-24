@@ -1,3 +1,4 @@
+/* helpers/listFirstScreen.js sizes the rows a list mounts up front with these. */
 .grid {
   min-block-size: 264px;
 }
