@@ -147,13 +147,6 @@ async function lookUpTitle(path, query) {
 }
 
 /**
- * @param {{ isUnloaded?: boolean, title?: string, route?: { fullPath?: string } } | null} tab
- */
-function showsItsRoute(tab) {
-  return tab != null && tab.isUnloaded === true && tab.title === tab.route?.fullPath
-}
-
-/**
  * The title of a page that the route alone gives, short of the one it shows
  * once loaded
  * @param {string} path
@@ -161,6 +154,16 @@ function showsItsRoute(tab) {
 function getFallbackTitle(path) {
   // Without its author, like the post page
   return path.startsWith('/post/') ? getPostTabTitle() : undefined
+}
+
+/**
+ * Whether an unloaded tab shows its route or the fallback title, which a
+ * lookup can still replace.
+ * @param {{ isUnloaded?: boolean, title?: string, route?: { path: string, fullPath: string } } | null} tab
+ */
+function showsPlaceholder(tab) {
+  return tab?.isUnloaded === true &&
+    (tab.title === tab.route.fullPath || tab.title === getFallbackTitle(tab.route.path))
 }
 
 /**
@@ -186,22 +189,21 @@ export async function resolveUnloadedTabTitle(tabId, path, query = {}) {
   // A tab that the store does not list yet has not loaded either. Saved data
   // can have given it a fallback before this lookup started.
   const tab = store.getters.getTabById(tabId)
-  const showsFallback = tab?.isUnloaded === true && tab.title === getFallbackTitle(tab.route.path)
-  if (tab && !showsItsRoute(tab) && !showsFallback) return
+  if (tab && !showsPlaceholder(tab)) return
   window.ftElectron.tabs.updateTitle(title, tabId)
 }
 
 /**
- * Titles unloaded tabs that still show their route, such as restored tabs
- * whose title lookup failed or that came from another device, from saved
- * data once it loads. Never contacts a backend, so restoring many tabs
+ * Titles unloaded tabs that still show their route or fallback title, such as
+ * restored tabs whose title lookup failed or that came from another device,
+ * from saved data as it loads. Never contacts a backend, so restoring many tabs
  * sends no requests.
  * @returns {() => void} stops watching
  */
 export function titleUnloadedTabsFromSavedData() {
   return watch(
     () => [
-      store.getters.getTabs.filter(showsItsRoute).map(tab => tab.id).join('\n'),
+      store.getters.getTabs.filter(showsPlaceholder).map(tab => tab.id).join('\n'),
       // Saved data that loads after the tabs
       store.getters.getHistoryCacheSorted.length,
       store.getters.getPlaylistsReady,
@@ -212,9 +214,9 @@ export function titleUnloadedTabsFromSavedData() {
       if (!tabIds) return
       for (const tabId of tabIds.split('\n')) {
         const tab = store.getters.getTabById(tabId)
-        if (pendingTabIds.has(tabId) || !showsItsRoute(tab)) continue
+        if (pendingTabIds.has(tabId) || !showsPlaceholder(tab)) continue
         const title = findSavedTitle(tab.route.path, tab.route.query ?? {}) ?? getFallbackTitle(tab.route.path)
-        if (title) window.ftElectron.tabs.updateTitle(title, tabId)
+        if (title && title !== tab.title) window.ftElectron.tabs.updateTitle(title, tabId)
       }
     },
     { immediate: true }

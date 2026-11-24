@@ -432,6 +432,7 @@ test.describe('restored unloaded tabs that show their route', () => {
   const routes = {
     video: `/watch/${VIDEO_ID}`,
     channel: `/channel/${CHANNEL_ID}`,
+    post: `/post/UgkxAAAA?authorId=${CHANNEL_ID}`,
     search: '/search/saved%20query'
   }
 
@@ -475,7 +476,40 @@ test.describe('restored unloaded tabs that show their route', () => {
     })).toEqual({
       video: 'Watched video',
       channel: 'Watched channel',
+      post: 'Community Post | Watched channel',
       search: 'saved query'
     })
+  })
+
+  test('replace a post\'s title without its author once saved data has the author', async ({ page }) => {
+    const authorId = 'UCcccccccccccccccccccccc'
+    const tabId = await page.evaluate(async authorId => {
+      const tab = await window.ftElectron.tabs.create({ route: 'post/UgkxBBBB', query: { authorId }, makeActive: false, lazyLoad: true })
+      return tab.id
+    }, authorId)
+    const readTitle = () => page.evaluate(async tabId => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id === tabId)?.title
+    }, tabId)
+    await expect.poll(readTitle).toBe('Community Post')
+
+    await page.evaluate(async authorId => {
+      await window.$store.dispatch('updateHistory', {
+        videoId: 'zzzzzzzzzzz',
+        title: 'Later video',
+        author: 'Later channel',
+        authorId,
+        published: Date.now(),
+        description: '',
+        viewCount: 1,
+        lengthSeconds: 60,
+        watchProgress: 0,
+        timeWatched: Date.now(),
+        isLive: false,
+        type: 'video'
+      })
+    }, authorId)
+
+    await expect.poll(readTitle).toBe('Community Post | Later channel')
   })
 })
