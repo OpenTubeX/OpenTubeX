@@ -7,7 +7,9 @@ import {
   FORMER_CHANNEL_SETTING_SWITCHES,
   FORMER_NAVIGATION_SWITCHES,
   isFormerDefaultQuickSettings,
+  listFromSwitches,
   REMOVED_SETTINGS,
+  SWITCH_LISTS,
   ytDlpPreloadCountFromSwitch,
   holdPlaybackRateMultiplierFromSwitch,
   keepPlayerVisibleOnScrollFromLegacy,
@@ -95,6 +97,14 @@ export function migrateLegacySettings(settings) {
   if (Object.hasOwn(migratedSettings, 'ytDlpPreloadEnabled')) {
     migratedSettings.ytDlpPreloadCount = ytDlpPreloadCountFromSwitch(migratedSettings.ytDlpPreloadEnabled, migratedSettings.ytDlpPreloadCount)
     delete migratedSettings.ytDlpPreloadEnabled
+  }
+  for (const [listKey, switches] of Object.entries(SWITCH_LISTS)) {
+    const switchKeys = Object.keys(switches)
+    if (!switchKeys.some(key => Object.hasOwn(migratedSettings, key))) continue
+    if (!Object.hasOwn(migratedSettings, listKey)) {
+      migratedSettings[listKey] = listFromSwitches(listKey, key => migratedSettings[key])
+    }
+    for (const key of switchKeys) delete migratedSettings[key]
   }
   for (const key of REMOVED_SETTINGS) delete migratedSettings[key]
 

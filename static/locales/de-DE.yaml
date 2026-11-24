@@ -55,6 +55,7 @@ Global:
   Show Blocked Item: Blockierten Inhalt anzeigen
   Auto: Automatisch
   Off: Aus
+  None: Nichts
 
 # Search Bar
   Counts:
@@ -1150,6 +1151,7 @@ Settings:
       FCast Description: FCast-Empfänger-Apps in deinem Netzwerk
       DLNA: DLNA
       DLNA Description: Smart-TVs und Mediaplayer in deinem Netzwerk
+      Cast To: Übertragen an
     Lights Off: Licht aus
     Mirror Video: Video spiegeln
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
@@ -1868,8 +1870,11 @@ Settings:
     Automatic Downloads No Channels: Abonniere einen Kanal, bevor du automatische Downloads einrichtest.
     No Matching Automatic Download Channels: Keine Kanäle entsprechen deiner Suche.
     Automatic Downloads Livestreams: Livestreams
-    Automatic Downloads Require Unmetered Network: Nur in ungetakteten Netzwerken
     Automatic Downloads Require Charging: Nur beim Laden
+    Automatic Download Conditions:
+      Download Automatically Only: Automatisch nur herunterladen
+      On Unmetered Networks: In ungetakteten Netzwerken
+      While Charging: Beim Laden
     Minimum Duration Seconds: Mindestdauer (Sekunden)
     Maximum Duration Seconds: Höchstdauer (Sekunden)
     Minimum File Size MB: Mindestdateigröße (MB)
@@ -1883,7 +1888,6 @@ Settings:
   External Software Settings:
     Create YouTube session: "YouTube-Sitzung erstellen"
     YouTube session hint: "Melde dich bei Bedarf an und speichere die Sitzung. Wähle in den Einstellungen, ob sie für Downloads, Wiedergabe oder Untertitel verwendet wird."
-    Use cookies for downloads: "Cookies für Downloads verwenden"
     YouTube session failed: "Die YouTube-Sitzung konnte nicht gespeichert werden."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe werden überprüft…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe wurden noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um sie herunterzuladen.
@@ -1939,7 +1943,11 @@ Settings:
     Browser Profile Placeholder: Profilname oder -pfad
     Browser Profile Invalid: "Gib einen Profilnamen ein oder wähle mit der Ordner-Schaltfläche einen Profilordner aus."
     Select Browser: Browser auswählen
-    Always Use Cookies: Cookies immer verwenden
+    Cookie Uses:
+      Use Cookies For: Cookies verwenden für
+      Playback: Wiedergabe
+      Downloads: Downloads
+      Subtitles: Untertitel
     Restricted Playback Authentication Hint: Standardmäßig übergibt OpenTubeX diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast.
     Restricted Playback Authentication Warning: Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
     Detected FFprobe Version Template: 'Erkannte FFprobe-Version: {version}'
@@ -1955,7 +1963,6 @@ Settings:
     Downloading FFmpeg and FFprobe: FFmpeg und FFprobe werden heruntergeladen…
     FFmpeg and FFprobe Downloaded Template: FFmpeg und FFprobe {version} wurden heruntergeladen
     FFmpeg and FFprobe Download Error Template: 'Herunterladen von FFmpeg und FFprobe fehlgeschlagen: {error}'
-    Use cookies for subtitles: "Cookies für Untertitel verwenden"
   Parental Control Settings:
     Parental Control Settings: Kindersicherung
     Hide Unsubscribe Button: Schaltfläche „Deabonnieren“ ausblenden
@@ -3334,9 +3341,8 @@ Tooltips:
     Cookie File: Wähle eine Cookie-Datei im Netscape-Format für die authentifizierte Wiedergabe aus.
     Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp an, Cookies aus diesem Browser zu lesen, wenn eine authentifizierte Wiedergabe angefordert wird.
     Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
-    Always Use Cookies: "Verwendet die konfigurierten Cookies für Downloads, Untertitel und bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat."
+    Use Cookies For: "Wähle, wofür yt-dlp die konfigurierten Cookies verwendet. Wiedergabe verwendet sie bei jeder Stream-Extraktion mit yt-dlp, ohne die Methode zur Stream-Extraktion zu yt-dlp zu wechseln. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat. Untertitel umfasst auch automatische Übersetzungen."
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
-    Use cookies for subtitles: "Die konfigurierten Cookies für Untertitel und automatische Übersetzungen verwenden. Auch durch „Cookies immer verwenden“ aktiviert."
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
     Disable Hardware Acceleration: Deaktiviert die GPU-Hardwarebeschleunigung. Dies kann Grafikprobleme beheben, führt jedoch wahrscheinlich zu einer geringeren Leistung.

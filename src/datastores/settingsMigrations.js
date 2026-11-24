@@ -1,8 +1,40 @@
 import { splitInvidiousInstanceCredentials } from '../apiBackends.js'
 import { navigationItemsFromLegacySettings } from '../navigationItems.js'
+import { ytDlpCookieUsesFromSwitches } from '../ytDlpCookieUses.js'
 
 /** The former navigation switches that the navigation list replaced */
 export const FORMER_NAVIGATION_SWITCHES = Object.freeze(['hideHome', 'hidePopularVideos', 'hideTrendingVideos'])
+
+/** The former switches that the Use Cookies For select replaced */
+const FORMER_COOKIE_SWITCHES = Object.freeze(['ytDlpPlaybackAlwaysUseCookies', 'ytDlpDownloadUseCookies', 'ytDlpSubtitleUseCookies'])
+
+/**
+ * Lists of choices that replaced a switch for each choice, by list setting,
+ * with the former switches and the choices they turned on.
+ */
+export const SWITCH_LISTS = Object.freeze({
+  castProtocols: Object.freeze({
+    showChromecastButton: 'googleCast',
+    showFcastButton: 'fcast',
+    showDlnaCastButton: 'dlna',
+  }),
+  ytDlpAutomaticDownloadConditions: Object.freeze({
+    ytDlpAutomaticDownloadsRequireUnmetered: 'unmetered',
+    ytDlpAutomaticDownloadsRequireCharging: 'charging',
+  }),
+})
+
+/**
+ * The list that replaced a switch for each choice, with the choices whose
+ * switch was on.
+ * @param {string} listKey a key of `SWITCH_LISTS`
+ * @param {(switchKey: string) => unknown} switchValue
+ */
+export function listFromSwitches(listKey, switchValue) {
+  return Object.entries(SWITCH_LISTS[listKey])
+    .filter(([switchKey]) => switchValue(switchKey) === true)
+    .map(([, choice]) => choice)
+}
 
 /** Former settings that are no longer configurable */
 export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps', 'ytDlpPreloadConcurrency'])
@@ -61,6 +93,8 @@ const REPLACED_SETTING_IDS = new Map([
   ['blurBlockedItems', 'blockedItemsMode'],
   ['useFixedTabWidth', 'fixedTabWidth'],
   ['ytDlpPreloadEnabled', 'ytDlpPreloadCount'],
+  ...Object.entries(SWITCH_LISTS).flatMap(([listKey, switches]) =>
+    Object.keys(switches).map(switchKey => [switchKey, listKey])),
 ])
 
 /**
@@ -176,7 +210,8 @@ export async function migrateStoredSettings(datastore) {
         ...FORMER_NAVIGATION_SWITCHES, 'hidePlaylists', 'navigationItems',
         'enableBlockLists', 'blurBlockedItems', 'blockedItemsMode',
         'useFixedTabWidth', 'fixedTabWidth', 'ytDlpPreloadEnabled', 'ytDlpPreloadCount',
-        ...REMOVED_SETTINGS,
+        ...FORMER_COOKIE_SWITCHES, 'ytDlpCookieUses', ...REMOVED_SETTINGS,
+        ...Object.entries(SWITCH_LISTS).flatMap(([listKey, switches]) => [listKey, ...Object.keys(switches)]),
       ]
     }
   })).map(setting => [setting._id, setting]))
@@ -334,6 +369,28 @@ export async function migrateStoredSettings(datastore) {
     const value = fromSwitch(formerSwitch.value, stored.get(valueKey)?.value)
     if (value !== (stored.get(valueKey)?.value ?? 0)) await save(valueKey, value)
     await datastore.removeAsync({ _id: switchKey })
+  }
+  // The Use Cookies For select replaced the switches for each use.
+  if (FORMER_COOKIE_SWITCHES.some(key => stored.has(key))) {
+    if (!stored.has('ytDlpCookieUses')) {
+      await save('ytDlpCookieUses', ytDlpCookieUsesFromSwitches({
+        always: stored.get('ytDlpPlaybackAlwaysUseCookies')?.value,
+        downloads: stored.get('ytDlpDownloadUseCookies')?.value,
+        subtitles: stored.get('ytDlpSubtitleUseCookies')?.value,
+      }))
+    }
+    for (const key of FORMER_COOKIE_SWITCHES) {
+      if (stored.has(key)) await datastore.removeAsync({ _id: key })
+    }
+  }
+  // Lists of choices replaced a switch for each choice.
+  for (const [listKey, switches] of Object.entries(SWITCH_LISTS)) {
+    const formerSwitches = Object.keys(switches).filter(key => stored.has(key))
+    if (formerSwitches.length === 0) continue
+    if (!stored.has(listKey)) {
+      await save(listKey, listFromSwitches(listKey, key => stored.get(key)?.value))
+    }
+    for (const key of formerSwitches) await datastore.removeAsync({ _id: key })
   }
   for (const key of REMOVED_SETTINGS) {
     if (stored.has(key)) await datastore.removeAsync({ _id: key })

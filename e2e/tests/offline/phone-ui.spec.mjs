@@ -172,7 +172,7 @@ test.describe('phone UI', () => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
-      await window.$store.dispatch('updateShowDlnaCastButton', true)
+      await window.$store.dispatch('updateCastProtocols', ['dlna'])
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
@@ -218,7 +218,7 @@ test.describe('phone UI', () => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
-      await window.$store.dispatch('updateShowDlnaCastButton', true)
+      await window.$store.dispatch('updateCastProtocols', ['dlna'])
     })
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
@@ -281,7 +281,7 @@ test.describe('phone UI', () => {
       await page.evaluate(async () => {
         await window.$store.dispatch('updateUseSponsorBlock', true)
         await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
-        await window.$store.dispatch('updateShowDlnaCastButton', true)
+        await window.$store.dispatch('updateCastProtocols', ['dlna'])
       })
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       await openMockedVideo(page)

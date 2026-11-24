@@ -540,7 +540,7 @@ test('checks destination space before starting a download', async ({ app, page }
   await writeFile(path.join(app.userDataDir, 'release-hhhhhhhhhhh'), '')
 })
 
-test('honors the download cookie preference and Always override', async ({ app, page }) => {
+test('uses cookies for downloads only when Downloads is chosen', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
   const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
   const cookies = path.join(app.userDataDir, 'session.txt')
@@ -563,19 +563,20 @@ test('honors the download cookie preference and Always override', async ({ app, 
     ytDlpPlaybackAuthMode: 'file',
     ytDlpPlaybackCookiesPath: cookies
   })
-  for (const [enabled, always, mode] of [[false, false, 'file'], [false, true, 'file'], [false, false, 'file'], [true, false, 'file'], [true, true, 'none']]) {
-    await configureQueue(app, page, { ytDlpDownloadUseCookies: enabled, ytDlpPlaybackAlwaysUseCookies: always, ytDlpPlaybackAuthMode: mode })
+  for (const [uses, mode] of [[[], 'file'], [['playback', 'subtitles'], 'file'], [['downloads'], 'file'], [['downloads'], 'none']]) {
+    const enabled = uses.includes('downloads')
+    await configureQueue(app, page, { ytDlpCookieUses: uses, ytDlpPlaybackAuthMode: mode })
     await writeFile(argumentsFile, '')
     await submitDownloads(page, [{ videoId: 'iiiiiiiiiii', title: 'Cookie download', mode: 'video' }])
     await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
-    expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
-    if ((enabled || always) && mode === 'file') {
+    expect(args.includes('--cookies')).toBe(enabled && mode === 'file')
+    if (enabled && mode === 'file') {
       expect(args[args.indexOf('--cookies') + 1]).not.toBe(cookies)
       expect(await readFile(passedCookies, 'utf8')).toBe(session)
     }
   }
-  await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: true })
+  await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'file', ytDlpCookieUses: ['downloads'] })
   await writeFile(argumentsFile, '')
   await submitDownloads(page, [{ externalUrl: 'http://example.org/video.mp4', title: 'External download', mode: 'video' }])
   await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('http://example.org/video.mp4')).toBe(true)

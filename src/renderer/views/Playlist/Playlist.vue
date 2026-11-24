@@ -288,6 +288,7 @@ import {
 } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 import {
   getYtDlpPlaybackSource,
   getYtDlpPlaybackSourcesUsableUntil,
@@ -411,7 +412,7 @@ const playlistPreloadRequiresConfirmation = computed(() => {
 const playlistPreloadVideoIdsKey = computed(() => playlistPreloadVideoIds.value.join('\0'))
 const ytDlpPlaybackCacheKey = computed(() => buildYtDlpPlaybackCacheKey(store.getters))
 const ytDlpPlaybackUseAuthentication = computed(() =>
-  store.getters.getYtDlpPlaybackAlwaysUseCookies &&
+  usesYtDlpCookiesFor(store.getters.getYtDlpCookieUses, 'playback') &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters)
 )
 

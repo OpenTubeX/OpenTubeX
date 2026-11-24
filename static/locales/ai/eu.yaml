@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Erakutsi blokeatutako elementua
   Auto: Automatikoa
   'Off': Desaktibatuta
+  None: Bat ere ez
 Search Listing:
   Label:
     Members Only: Kideentzat soilik
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: Zure sareko FCast hartzaile-aplikazioak
       DLNA: DLNA
       DLNA Description: Zure sareko telebista adimendunak eta multimedia-erreproduzitzaileak
+      Cast To: Igorri hona
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: Izenburuak hau du
     Title Excludes: Izenburuak ez du hau
     Title Filter Hint: Bereizi izenburuko terminoak komaz. Bideoak sartutako terminoetako batekin bat etorri behar du gutxienez, eta baztertutako terminoekin ez.
-    Automatic Downloads Require Unmetered Network: "Neurtu gabeko sareetan soilik"
     Automatic Downloads Require Charging: "Kargatzen ari denean soilik"
+    Automatic Download Conditions:
+      Download Automatically Only: Deskargatu automatikoki soilik
+      On Unmetered Networks: Neurtu gabeko sareetan
+      While Charging: Kargatzen ari denean
   External Software Settings:
     Create YouTube session: "Sortu YouTube saioa"
     YouTube session hint: "Hasi saioa beharrezkoa bada eta gorde. Aukeratu ezarpenetan deskargetarako, erreprodukziorako edo azpitituluetarako erabiltzea."
-    Use cookies for downloads: "Erabili cookieak deskargetarako"
     YouTube session failed: "Ezin izan da YouTube saioa gorde."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe egiaztatzen…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ez dira deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: Profilaren izena edo bide-izena
     Browser Profile Invalid: "Idatzi profil-izen bat, edo aukeratu profil-karpeta bat karpeta-botoiarekin."
     Select Browser: Hautatu arakatzailea
-    Always Use Cookies: Erabili beti cookieak
+    Cookie Uses:
+      Use Cookies For: Erabili cookieak hauetarako
+      Playback: Erreprodukzioa
+      Downloads: Deskargak
+      Subtitles: Azpitituluak
     Restricted Playback Authentication Hint: Modu lehenetsian, OpenTubeX aplikazioak cookie hauek yt-dlp-ri ematen dizkio soilik adin-muga duen edo kideentzat den bideo batean "Saiatu konfiguratutako cookieekin" aukeratu ondoren.
     Restricted Playback Authentication Warning: yt-dlp Google kontu batekin erabiltzeak kontua aldi baterako edo behin betiko mugatzea eragin dezake.
-    Use cookies for subtitles: "Erabili cookieak azpitituluetarako"
   Privacy Settings:
     Internet Connectivity Checks: "Interneteko konexioaren egiaztapenak"
     Internet Connectivity Checks Tooltip: "Eskaera txikiak bidaltzen dizkio GrapheneOSek ostatatutako zerbitzari bati Interneterako sarbidea egiaztatzeko."
@@ -2528,9 +2535,8 @@ Tooltips:
     Cookie File: Hautatu Netscape formatuko cookie-fitxategi bat autentifikatutako erreprodukziorako.
     Browser for Cookies: Hautatutako yt-dlp exekutagarriak adierazten du zein arakatzaile onartzen diren. Autentifikatutako erreprodukzioa eskatzean, OpenTubeX aplikazioak arakatzaile hau irakurtzeko eskatzen dio yt-dlp-ri.
     Browser Profile: Arakatzailearen aukerako profil-izena edo karpeta. Utzi hutsik azkena erabilitako profila erabiltzeko.
-    Always Use Cookies: "Erabili konfiguratutako cookieak deskargetarako, azpitituluetarako eta yt-dlp-k korronteak ateratzen dituen bakoitzean. Honek ez du korronteak erauzteko metodoa yt-dlp aukerara aldatzen. yt-dlp hautatuta dagoenean, kontuarekin soilik erabil daitezkeen formatuak egon daitezke erabilgarri, YouTube Premium-en bit-tasa hobetua barne kontuak sarbidea badu."
+    Use Cookies For: Aukeratu zertarako erabiltzen dituen yt-dlp-k konfiguratutako cookieak. Erreprodukzioak yt-dlp-k korronteak ateratzen dituen bakoitzean erabiltzen ditu, korronteak erauzteko metodoa yt-dlp aukerara aldatu gabe. yt-dlp hautatuta dagoenean, kontuarekin soilik erabil daitezkeen formatuak egon daitezke erabilgarri, YouTube Premium-en bit-tasa hobetua barne kontuak sarbidea badu. Azpitituluek itzulpen automatikoak ere hartzen dituzte.
     FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
-    Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Ikusitako bideoak ezkutatzen ditu bilaketa-emaitzetatik, ikusteko orriko Hurrengoa ataletik eta Hasierako YouTube gomendioetatik. Erreprodukzio automatikoak ere saltatu egiten ditu."
     Hide Playlist Stats: Erreprodukzio-zerrenden orrietan bideo kopurua, ikustaldi kopurua, azken eguneratzearen data eta iraupen osoa ezkutatzen ditu.

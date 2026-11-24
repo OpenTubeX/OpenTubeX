@@ -1,15 +1,19 @@
 import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
-test('DLNA, Google Cast and FCast casting are opt in from Player Settings', async ({ page }) => {
+test('DLNA, Google Cast and FCast casting are opt in from Player Settings', async ({ app, page }) => {
   const playback = await goToSettingsSection(page, 'playback')
-  for (const settingKey of ['showDlnaCastButton', 'showChromecastButton', 'showFcastButton']) {
-    const control = playback.locator(`[data-setting-key="${settingKey}"]`)
-    const toggle = control.getByRole('checkbox')
-    await expect(toggle).toHaveAccessibleName((await control.locator('.switch-label-name').allTextContents()).join(''))
-    await expect(toggle).not.toBeChecked()
-    await control.locator('label').click()
-    await expect(toggle).toBeChecked()
+  const castTo = playback.getByRole('combobox', { name: 'Cast To' })
+  await expect(castTo).toHaveText('Off')
+  await castTo.click()
+  for (const protocol of ['Google Cast', 'FCast', 'DLNA']) {
+    const option = page.getByRole('option', { name: protocol, exact: true })
+    await expect(option).toHaveAttribute('aria-selected', 'false')
+    await option.click()
+    await expect(option).toHaveAttribute('aria-selected', 'true')
   }
+  await page.keyboard.press('Escape')
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).castProtocols)
+    .toEqual(['googleCast', 'fcast', 'dlna'])
 })
 
 test.describe('settings', () => {

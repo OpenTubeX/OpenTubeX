@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Bloklanmış elementi göstər
   Auto: Avtomatik
   'Off': Söndürülüb
+  None: Heç biri
 Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
@@ -1095,6 +1096,7 @@ Settings:
       FCast Description: Şəbəkənizdəki FCast qəbuledici tətbiqləri
       DLNA: DLNA
       DLNA Description: Şəbəkənizdəki smart televizorlar və media pleyerlər
+      Cast To: Yayım hədəfi
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1156,12 +1158,14 @@ Settings:
     Title Includes: Başlıqda olan sözlər
     Title Excludes: Başlıqda olmayan sözlər
     Title Filter Hint: Başlıq üçün bir neçə ifadəni vergüllə ayırın. Video daxil edilən ifadələrdən ən azı birinə uyğun gəlməli və istisna edilən ifadələrin heç birini ehtiva etməməlidir.
-    Automatic Downloads Require Unmetered Network: "Yalnız limitsiz şəbəkələrdə"
     Automatic Downloads Require Charging: "Yalnız şarj olunarkən"
+    Automatic Download Conditions:
+      Download Automatically Only: Yalnız bu hallarda avtomatik endir
+      On Unmetered Networks: Limitsiz şəbəkələrdə
+      While Charging: Şarj olunarkən
   External Software Settings:
     Create YouTube session: "YouTube sessiyası yarat"
     YouTube session hint: "Lazım gələrsə daxil olun və sessiyanı yadda saxlayın. Ayarlarda sessiyanın endirmələr, oxutma və ya subtitrlər üçün istifadəsini seçin."
-    Use cookies for downloads: "Endirmələr üçün kukilərdən istifadə et"
     YouTube session failed: "YouTube sessiyasını yadda saxlamaq mümkün olmadı."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe yoxlanılır…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe hələ endirilməyib. Endirmək üçün aşağıdakı düyməni klikləyin.
@@ -1226,10 +1230,13 @@ Settings:
     Browser Profile Placeholder: Profil adı və ya yolu
     Browser Profile Invalid: "Profil adını daxil edin və ya qovluq düyməsi ilə profil qovluğunu seçin."
     Select Browser: Brauzer seçin
-    Always Use Cookies: Həmişə kukilərdən istifadə et
+    Cookie Uses:
+      Use Cookies For: Kukilərdən istifadə yeri
+      Playback: Oynatma
+      Downloads: Endirmələr
+      Subtitles: Subtitrlər
     Restricted Playback Authentication Hint: Varsayılan olaraq, OpenTubeX bu kukiləri yalnız yaş məhdudiyyətli və ya üzvlərə məxsus videoda “Tənzimlənmiş kukilərlə sına” seçdikdən sonra yt-dlp proqramına ötürür.
     Restricted Playback Authentication Warning: yt-dlp proqramını Google hesabı ilə istifadə etmək hesabın müvəqqəti və ya daimi məhdudlaşdırılmasına səbəb ola bilər.
-    Use cookies for subtitles: Titrlər üçün kukilərdən istifadə et
   Privacy Settings:
     Internet Connectivity Checks: "İnternet bağlantısının yoxlanılması"
     Internet Connectivity Checks Tooltip: "İnternetə çıxışı yoxlamaq üçün GrapheneOS tərəfindən yerləşdirilən serverə kiçik sorğular göndərir."
@@ -2530,9 +2537,8 @@ Tooltips:
     Cookie File: Hesabla oynatma üçün Netscape formatında kuki faylı seçin.
     Browser for Cookies: Brauzer dəstəyi seçilmiş yt-dlp icra faylından oxunur. Hesabla oynatma tələb olunduqda OpenTubeX yt-dlp-dən bu brauzeri oxumağı istəyir.
     Browser Profile: İstəyə bağlı brauzer profilinin adı və ya qovluğu. Son istifadə olunmuş profili istifadə etmək üçün boş buraxın.
-    Always Use Cookies: "Təyin edilmiş kukiləri endirmələr, subtitrlər və yt-dlp axınları əldə edərkən istifadə edin. Bu, axın əldə etmə üsulunu yt-dlp-yə dəyişmir. yt-dlp seçildikdə, hesabın giriş icazəsi varsa YouTube Premium-un artırılmış bitreytli formatı da daxil olmaqla yalnız hesablar üçün formatlar əlçatan ola bilər."
+    Use Cookies For: yt-dlp-nin təyin edilmiş kukiləri nə üçün istifadə edəcəyini seçin. Oynatma onları yt-dlp axınları əldə etdikdə, axın əldə etmə üsulunu yt-dlp-yə dəyişmədən istifadə edir. yt-dlp seçildikdə, hesabın giriş icazəsi varsa YouTube Premium-un artırılmış bitreytli formatı da daxil olmaqla yalnız hesablar üçün formatlar əlçatan ola bilər. Subtitrlər avtomatik tərcümələri də əhatə edir.
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
-    Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Baxılmış videoları axtarış nəticələrindən, baxış səhifəsindəki Növbəti bölməsindən və Ana səhifədəki YouTube tövsiyələrindən gizlədir. Avtomatik oxutma da onları ötürür."
     Hide Playlist Stats: Pleylist səhifələrində video sayını, baxış sayını, son yenilənmə tarixini və ümumi müddəti gizlədir.

@@ -3055,7 +3055,7 @@ function runApp() {
         break
       case 'ytDlpMaxConcurrentDownloads':
       case 'ytDlpDownloadBandwidthLimit':
-      case 'ytDlpAutomaticDownloadsRequireCharging':
+      case 'ytDlpAutomaticDownloadConditions':
         await refreshYtDlpDownloadQueue()
         break
       case 'ytDlpPlaybackCacheMaxEntrySize':

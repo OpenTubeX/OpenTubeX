@@ -78,6 +78,7 @@ Global:
   Show Blocked Item: Vis blokeret element
   Auto: Automatisk
   'Off': Fra
+  None: Ingen
 Search Listing:
   Label:
     Members Only: Kun for medlemmer
@@ -1118,6 +1119,7 @@ Settings:
       FCast Description: FCast-modtagerapps på dit netværk
       DLNA: DLNA
       DLNA Description: Smart-tv’er og medieafspillere på dit netværk
+      Cast To: Cast til
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1179,12 +1181,14 @@ Settings:
     Title Includes: Titlen indeholder
     Title Excludes: Titlen indeholder ikke
     Title Filter Hint: Adskil flere titelord med kommaer. En video skal matche mindst ét inkluderet ord og ingen af de ekskluderede ord.
-    Automatic Downloads Require Unmetered Network: "Kun på netværk uden datamåling"
     Automatic Downloads Require Charging: "Kun under opladning"
+    Automatic Download Conditions:
+      Download Automatically Only: Download automatisk kun
+      On Unmetered Networks: På netværk uden datamåling
+      While Charging: Under opladning
   External Software Settings:
     Create YouTube session: "Opret YouTube-session"
     YouTube session hint: "Log ind om nødvendigt, og gem sessionen. Vælg i indstillingerne, om den skal bruges til downloads, afspilning eller undertekster."
-    Use cookies for downloads: "Brug cookies til downloads"
     YouTube session failed: "YouTube-sessionen kunne ikke gemmes."
     Checking FFmpeg and FFprobe: Kontrollerer FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikke downloadet endnu. Klik på knappen nedenfor for at downloade dem.
@@ -1249,10 +1253,13 @@ Settings:
     Browser Profile Placeholder: Profilnavn eller sti
     Browser Profile Invalid: "Angiv et profilnavn, eller vælg en profilmappe med mappeknappen."
     Select Browser: Vælg en browser
-    Always Use Cookies: Brug altid cookies
+    Cookie Uses:
+      Use Cookies For: Brug cookies til
+      Playback: Afspilning
+      Downloads: Downloads
+      Subtitles: Undertekster
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX først disse cookies til yt-dlp, når du vælger "Prøv med konfigurerede cookies" på en aldersbegrænset video eller en video kun for medlemmer.
     Restricted Playback Authentication Warning: Brug af yt-dlp med en Google-konto kan medføre midlertidige eller permanente begrænsninger af kontoen.
-    Use cookies for subtitles: "Brug cookies til undertekster"
   Privacy Settings:
     Internet Connectivity Checks: "Kontrol af internetforbindelse"
     Internet Connectivity Checks Tooltip: "Sender små forespørgsler til en server hostet af GrapheneOS for at kontrollere internetadgang."
@@ -2607,9 +2614,8 @@ Tooltips:
     Cookie File: Vælg en cookiefil i Netscape-format til godkendt afspilning.
     Browser for Cookies: Browserunderstøttelse aflæses fra den valgte eksekverbare yt-dlp-fil. OpenTubeX beder yt-dlp om at læse denne browser, når der anmodes om godkendt afspilning.
     Browser Profile: Valgfrit browserprofilnavn eller mappe. Lad feltet stå tomt for at bruge den senest åbnede profil.
-    Always Use Cookies: "Brug de konfigurerede cookies til downloads, undertekster og hver gang yt-dlp henter streams. Dette ændrer ikke metoden til udtræk af streams til yt-dlp. Når yt-dlp er valgt, kan formater, der kræver en konto, blive tilgængelige, herunder YouTube Premiums forbedrede bithastighed, hvis kontoen har adgang."
+    Use Cookies For: Vælg, hvad yt-dlp bruger de konfigurerede cookies til. Afspilning bruger dem, hver gang yt-dlp henter streams, uden at metoden til udtræk af streams skiftes til yt-dlp. Når yt-dlp er valgt, kan formater, der kræver en konto, blive tilgængelige, herunder YouTube Premiums forbedrede bithastighed, hvis kontoen har adgang. Undertekster omfatter også automatiske oversættelser.
     FFmpeg Executable Path: FFmpeg kræves for at flette separate video- og lydstreams og konvertere lyd. OpenTubeX antager som standard, at FFmpeg kan findes via miljøvariablen PATH. Du kan om nødvendigt angive en brugerdefineret sti her.
-    Use cookies for subtitles: "Brug de konfigurerede cookies til undertekster og automatiske oversættelser. Aktiveres også af \"Brug altid cookies\"."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skjuler sete videoer fra søgeresultater, Næste på afspilningssiden og YouTube-anbefalinger på Start. Automatisk afspilning springer dem også over."
     Hide Playlist Stats: Skjuler antallet af videoer, antallet af visninger, datoen for seneste opdatering og den samlede varighed på playlistesider.

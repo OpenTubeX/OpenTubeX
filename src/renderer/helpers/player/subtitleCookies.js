@@ -1,10 +1,11 @@
 import { isYouTubeSubtitleUrl } from '../../../youtubeSubtitle.js'
 import { isLiteBuild } from '../ytDlpCapabilities.js'
+import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses.js'
 
 export function shouldUseSubtitleCookies(url, getters) {
   // Lite Android builds cannot fetch subtitles through yt-dlp.
   return Boolean(!isLiteBuild &&
-    (getters.getYtDlpPlaybackAlwaysUseCookies || getters.getYtDlpSubtitleUseCookies) && isYouTubeSubtitleUrl(url))
+    usesYtDlpCookiesFor(getters.getYtDlpCookieUses, 'subtitles') && isYouTubeSubtitleUrl(url))
 }
 
 /**

@@ -44,6 +44,7 @@ Global:
   Show Blocked Item: Показать заблокированный элемент
   Auto: Автоматически
   'Off': Выкл.
+  None: Нет
 Search Listing:
   Label:
     Members Only: Только для участников
@@ -1052,6 +1053,7 @@ Settings:
       FCast Description: Приложения-приёмники FCast в вашей сети
       DLNA: DLNA
       DLNA Description: Смарт-телевизоры и медиаплееры в вашей сети
+      Cast To: Транслировать на
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
@@ -1113,12 +1115,14 @@ Settings:
     Title Includes: Заголовок содержит
     Title Excludes: Заголовок не содержит
     Title Filter Hint: Разделяйте условия для заголовка запятыми. Видео должно соответствовать хотя бы одному включённому условию и не соответствовать ни одному исключённому.
-    Automatic Downloads Require Unmetered Network: "Только в безлимитных сетях"
     Automatic Downloads Require Charging: "Только во время зарядки"
+    Automatic Download Conditions:
+      Download Automatically Only: Скачивать автоматически только
+      On Unmetered Networks: В безлимитных сетях
+      While Charging: Во время зарядки
   External Software Settings:
     Create YouTube session: "Создать сеанс YouTube"
     YouTube session hint: "При необходимости войдите в аккаунт и сохраните сеанс. В настройках выберите, использовать ли его для скачивания, воспроизведения или субтитров."
-    Use cookies for downloads: "Использовать файлы cookie для скачивания"
     YouTube session failed: "Не удалось сохранить сеанс YouTube."
     Checking FFmpeg and FFprobe: Проверка FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ещё не загружены. Нажмите кнопку ниже, чтобы загрузить их.
@@ -1183,10 +1187,13 @@ Settings:
     Browser Profile Placeholder: Название профиля или путь
     Browser Profile Invalid: "Введите имя профиля или выберите папку профиля кнопкой папки."
     Select Browser: Выберите браузер
-    Always Use Cookies: Всегда использовать файлы cookie
+    Cookie Uses:
+      Use Cookies For: Использовать файлы cookie для
+      Playback: Воспроизведение
+      Downloads: Скачивание
+      Subtitles: Субтитры
     Restricted Playback Authentication Hint: По умолчанию OpenTubeX передаёт эти файлы cookie в yt-dlp только после выбора действия «Повторить с настроенными файлами cookie» для видео с возрастным ограничением или доступного только спонсорам канала.
     Restricted Playback Authentication Warning: Использование yt-dlp с аккаунтом Google может привести к временным или постоянным ограничениям аккаунта.
-    Use cookies for subtitles: "Использовать файлы cookie для субтитров"
   Privacy Settings:
     Internet Connectivity Checks: "Проверка подключения к интернету"
     Internet Connectivity Checks Tooltip: "Отправляет небольшие запросы на сервер, размещённый GrapheneOS, для проверки доступа к интернету."
@@ -2485,9 +2492,8 @@ Tooltips:
     Cookie File: Выберите файл cookie в формате Netscape для воспроизведения с авторизацией.
     Browser for Cookies: Список поддерживаемых браузеров предоставляется выбранным исполняемым файлом yt-dlp. При запросе воспроизведения с авторизацией OpenTubeX поручает yt-dlp прочитать файлы cookie из этого браузера.
     Browser Profile: Необязательное имя профиля браузера или папка. Оставьте поле пустым, чтобы использовать последний открытый профиль.
-    Always Use Cookies: "Используйте настроенные файлы cookie для скачивания, субтитров и при каждом извлечении потоков через yt-dlp. Это не переключает способ извлечения потоков на yt-dlp. Если выбран yt-dlp, могут стать доступны форматы только для учётной записи, включая повышенный битрейт YouTube Premium при наличии доступа."
+    Use Cookies For: Выберите, для чего yt-dlp использует настроенные файлы cookie. Воспроизведение использует их при каждом извлечении потоков через yt-dlp, не переключая способ извлечения потоков на yt-dlp. Если выбран yt-dlp, могут стать доступны форматы только для учётной записи, включая повышенный битрейт YouTube Premium при наличии доступа. Субтитры также охватывают автоматические переводы.
     FFmpeg Executable Path: FFmpeg необходим для объединения отдельных потоков видео и аудио, а также преобразования аудио. По умолчанию OpenTubeX предполагает, что FFmpeg доступен через переменную среды PATH. При необходимости здесь можно указать другой путь.
-    Use cookies for subtitles: "Использовать настроенные cookie для субтитров и автоматических переводов. Также включается параметром «Всегда использовать cookie»."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Скрывает просмотренные видео в результатах поиска, в блоке «Следующий» на странице просмотра и в рекомендациях YouTube на главной странице. Автовоспроизведение также их пропускает."
     Hide Playlist Stats: Скрывает количество видео, количество просмотров, дату последнего обновления и общую продолжительность на страницах плейлистов.

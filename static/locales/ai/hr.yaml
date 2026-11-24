@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Prikaži blokiranu stavku
   Auto: Automatski
   'Off': Isključeno
+  None: Nijedan
 Search Listing:
   Label:
     Members Only: Samo za članove
@@ -1098,6 +1099,7 @@ Settings:
       FCast Description: Aplikacije prijamnika FCast na vašoj mreži
       DLNA: DLNA
       DLNA Description: Pametni televizori i medijski reproduktori na vašoj mreži
+      Cast To: Emitiraj na
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1159,12 +1161,14 @@ Settings:
     Title Includes: Naslov sadržava
     Title Excludes: Naslov ne sadržava
     Title Filter Hint: Više pojmova za naslov odvojite zarezima. Videozapis mora sadržavati barem jedan uključeni pojam i ne smije sadržavati nijedan isključeni pojam.
-    Automatic Downloads Require Unmetered Network: "Samo na mrežama bez ograničenja podataka"
     Automatic Downloads Require Charging: "Samo tijekom punjenja"
+    Automatic Download Conditions:
+      Download Automatically Only: Automatski preuzimaj samo
+      On Unmetered Networks: Na mrežama bez ograničenja podataka
+      While Charging: Tijekom punjenja
   External Software Settings:
     Create YouTube session: "Stvori YouTube sesiju"
     YouTube session hint: "Prijavite se po potrebi i spremite sesiju. U postavkama odaberite hoće li se koristiti za preuzimanja, reprodukciju ili titlove."
-    Use cookies for downloads: "Koristi kolačiće za preuzimanja"
     YouTube session failed: "Nije moguće spremiti YouTube sesiju."
     Checking FFmpeg and FFprobe: Provjera alata FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe još nisu preuzeti. Kliknite gumb u nastavku da biste ih preuzeli.
@@ -1229,10 +1233,13 @@ Settings:
     Browser Profile Placeholder: Naziv profila ili putanja
     Browser Profile Invalid: "Unesite naziv profila ili odaberite mapu profila gumbom za mapu."
     Select Browser: Odaberi preglednik
-    Always Use Cookies: Uvijek upotrebljavaj kolačiće
+    Cookie Uses:
+      Use Cookies For: Koristi kolačiće za
+      Playback: Reprodukcija
+      Downloads: Preuzimanja
+      Subtitles: Titlovi
     Restricted Playback Authentication Hint: OpenTubeX prema zadanim postavkama prosljeđuje ove kolačiće alatu yt-dlp tek nakon što odaberete "Pokušaj s postavljenim kolačićima" na videozapisu s dobnim ograničenjem ili samo za članove.
     Restricted Playback Authentication Warning: Uporaba alata yt-dlp s Google računom može dovesti do privremenih ili trajnih ograničenja računa.
-    Use cookies for subtitles: "Koristi kolačiće za titlove"
   Privacy Settings:
     Internet Connectivity Checks: "Provjere internetske veze"
     Internet Connectivity Checks Tooltip: "Šalje male zahtjeve poslužitelju kojim upravlja GrapheneOS radi provjere pristupa internetu."
@@ -2555,9 +2562,8 @@ Tooltips:
     Cookie File: Odaberite datoteku kolačića u formatu Netscape za reprodukciju uz prijavu.
     Browser for Cookies: Podrška za preglednike očitava se iz odabrane izvršne datoteke alata yt-dlp. Pri zahtjevu za reprodukciju uz prijavu OpenTubeX traži od alata yt-dlp da čita podatke iz ovog preglednika.
     Browser Profile: Neobavezan naziv ili mapa profila preglednika. Ostavite prazno za upotrebu posljednjeg korištenog profila.
-    Always Use Cookies: "Koristite konfigurirane kolačiće za preuzimanja, titlove i kad god yt-dlp dohvaća streamove. Time se način izdvajanja tokova ne prebacuje na yt-dlp. Kada je yt-dlp odabran, mogu postati dostupni formati samo za prijavljene račune, uključujući poboljšanu brzinu prijenosa usluge YouTube Premium ako račun ima pristup toj usluzi."
+    Use Cookies For: Odaberite za što yt-dlp koristi konfigurirane kolačiće. Reprodukcija ih koristi kad god yt-dlp dohvaća streamove, bez prebacivanja načina izdvajanja tokova na yt-dlp. Kada je yt-dlp odabran, mogu postati dostupni formati samo za prijavljene račune, uključujući poboljšanu brzinu prijenosa usluge YouTube Premium ako račun ima pristup toj usluzi. Titlovi obuhvaćaju i automatske prijevode.
     FFmpeg Executable Path: FFmpeg je potreban za spajanje odvojenih tokova videozapisa i zvuka te za pretvorbu zvuka. OpenTubeX prema zadanim postavkama pretpostavlja da se FFmpeg može pronaći putem varijable okruženja PATH. Ovdje po potrebi možete postaviti prilagođenu putanju.
-    Use cookies for subtitles: "Koristi postavljene kolačiće za titlove i automatske prijevode. Uključuje se i opcijom „Uvijek koristi kolačiće”."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skriva pogledane videozapise iz rezultata pretraživanja, odjeljka Sljedeći na stranici gledanja i YouTube preporuka na početnoj stranici. Automatska reprodukcija ih također preskače."
     Hide Playlist Stats: Skriva broj videozapisa, broj pregleda, datum zadnjeg ažuriranja i ukupno trajanje na stranicama popisa za reprodukciju.

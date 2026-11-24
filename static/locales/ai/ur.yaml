@@ -90,6 +90,7 @@ Global:
   Show Blocked Item: بلاک شدہ آئٹم دکھائیں
   Auto: خودکار
   'Off': بند
+  None: کوئی نہیں
 Search Bar:
   Use Suggestion: تجویز استعمال کریں
   Open Search Container: تلاش کا خانہ کھولیں
@@ -1159,6 +1160,7 @@ Settings:
       FCast Description: آپ کے نیٹ ورک پر FCast ریسیور ایپس
       DLNA: DLNA
       DLNA Description: آپ کے نیٹ ورک پر اسمارٹ ٹی وی اور میڈیا پلیئرز
+      Cast To: اس پر کاسٹ کریں
   Channel Settings:
     Channel Settings: چینل سیٹنگز
     Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
@@ -1212,8 +1214,11 @@ Settings:
     Automatic Downloads No Channels: خودکار ڈاؤن لوڈز ترتیب دینے سے پہلے کسی چینل کو سبسکرائب کریں۔
     No Matching Automatic Download Channels: کوئی چینل آپ کی تلاش سے مماثل نہیں۔
     Automatic Downloads Livestreams: لائیو اسٹریمز
-    Automatic Downloads Require Unmetered Network: صرف ان میٹرڈ نیٹ ورکس پر
     Automatic Downloads Require Charging: صرف چارجنگ کے دوران
+    Automatic Download Conditions:
+      Download Automatically Only: صرف ان صورتوں میں خودکار ڈاؤن لوڈ کریں
+      On Unmetered Networks: ان میٹرڈ نیٹ ورکس پر
+      While Charging: چارجنگ کے دوران
     Minimum Duration Seconds: کم از کم دورانیہ (سیکنڈ)
     Maximum Duration Seconds: زیادہ سے زیادہ دورانیہ (سیکنڈ)
     Minimum File Size MB: کم از کم فائل سائز (MB)
@@ -1225,7 +1230,6 @@ Settings:
   External Software Settings:
     Create YouTube session: YouTube سیشن بنائیں
     YouTube session hint: ضرورت ہو تو سائن ان کریں، پھر محفوظ کریں۔ سیٹنگز میں منتخب کریں کہ یہ سیشن ڈاؤن لوڈز، پلے بیک یا سب ٹائٹلز کے لیے استعمال ہو یا نہیں۔
-    Use cookies for downloads: ڈاؤن لوڈز کے لیے کوکیز استعمال کریں
     YouTube session failed: YouTube سیشن محفوظ نہیں ہو سکا۔
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe چیک ہو رہے ہیں…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ابھی ڈاؤن لوڈ نہیں ہوئے۔ انہیں ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
@@ -1290,10 +1294,13 @@ Settings:
     Browser Profile Placeholder: پروفائل کا نام یا راستہ
     Browser Profile Invalid: "پروفائل کا نام درج کریں، یا فولڈر بٹن سے پروفائل فولڈر منتخب کریں۔"
     Select Browser: براؤزر منتخب کریں
-    Always Use Cookies: ہمیشہ کوکیز استعمال کریں
+    Cookie Uses:
+      Use Cookies For: کوکیز کا استعمال
+      Playback: پلے بیک
+      Downloads: ڈاؤن لوڈز
+      Subtitles: سب ٹائٹلز
     Restricted Playback Authentication Hint: ڈیفالٹ کے طور پر، OpenTubeX یہ کوکیز yt-dlp کو صرف تب دیتا ہے جب آپ عمر کی پابندی والی یا صرف ممبران کے لیے ویڈیو پر "ترتیب دی گئی کوکیز کے ساتھ آزمائیں" منتخب کرتے ہیں۔
     Restricted Playback Authentication Warning: Google اکاؤنٹ کے ساتھ yt-dlp استعمال کرنے سے اکاؤنٹ پر عارضی یا مستقل پابندیاں لگ سکتی ہیں۔
-    Use cookies for subtitles: سب ٹائٹلز کے لیے کوکیز استعمال کریں
   Privacy Settings:
     Internet Connectivity Checks: انٹرنیٹ کنیکٹیویٹی چیکس
     Internet Connectivity Checks Tooltip: انٹرنیٹ تک رسائی چیک کرنے کے لیے GrapheneOS کے ہوسٹ کردہ سرور کو چھوٹی درخواستیں بھیجتا ہے۔
@@ -2638,9 +2645,8 @@ Tooltips:
     Cookie File: تصدیق شدہ پلے بیک کے لیے Netscape فارمیٹ والی کوکی فائل منتخب کریں۔
     Browser for Cookies: براؤزر کی سپورٹ منتخب yt-dlp ایگزیکیوٹیبل سے پڑھی جاتی ہے۔ تصدیق شدہ پلے بیک کی درخواست ہونے پر OpenTubeX yt-dlp سے یہ براؤزر پڑھنے کو کہتا ہے۔
     Browser Profile: اختیاری براؤزر پروفائل کا نام یا فولڈر۔ حال ہی میں استعمال شدہ پروفائل استعمال کرنے کے لیے خالی چھوڑیں۔
-    Always Use Cookies: ڈاؤن لوڈز، سب ٹائٹلز اور جب بھی yt-dlp اسٹریمز نکالے، ترتیب دی گئی کوکیز استعمال کریں۔ اس سے اسٹریم نکالنے کا طریقہ yt-dlp پر تبدیل نہیں ہوتا۔ yt-dlp منتخب ہونے پر صرف اکاؤنٹ والے فارمیٹس دستیاب ہو سکتے ہیں، بشمول YouTube Premium کا بہتر بٹ ریٹ اگر اکاؤنٹ کو رسائی حاصل ہو۔
+    Use Cookies For: منتخب کریں کہ yt-dlp ترتیب دی گئی کوکیز کو کس کام کے لیے استعمال کرے۔ پلے بیک انہیں ہر بار استعمال کرتا ہے جب yt-dlp اسٹریمز نکالے، اسٹریم نکالنے کا طریقہ yt-dlp پر تبدیل کیے بغیر۔ yt-dlp منتخب ہونے پر صرف اکاؤنٹ والے فارمیٹس دستیاب ہو سکتے ہیں، بشمول YouTube Premium کا بہتر بٹ ریٹ اگر اکاؤنٹ کو رسائی حاصل ہو۔ سب ٹائٹلز میں خودکار تراجم بھی شامل ہیں۔
     FFmpeg Executable Path: الگ ویڈیو اور آڈیو اسٹریمز کو ملانے اور آڈیو کنورژن کے لیے FFmpeg ضروری ہے۔ ڈیفالٹ کے طور پر OpenTubeX فرض کرتا ہے کہ FFmpeg کو PATH ماحولیاتی متغیر کے ذریعے تلاش کیا جا سکتا ہے۔ ضرورت ہو تو یہاں حسب ضرورت راستہ سیٹ کیا جا سکتا ہے۔
-    Use cookies for subtitles: سب ٹائٹلز اور خودکار ترجموں کے لیے ترتیب دی گئی کوکیز استعمال کریں۔ "ہمیشہ کوکیز استعمال کریں" سے بھی فعال ہوتا ہے۔
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "تلاش کے نتائج، واچ پیج پر اگلا، اور ہوم پر YouTube کی تجاویز سے دیکھی گئی ویڈیوز چھپاتا ہے۔ آٹو پلے بھی انہیں چھوڑ دیتا ہے۔"
     Hide Playlist Stats: پلے لسٹ کے صفحات پر ویڈیوز کی تعداد، ویوز کی تعداد، آخری اپ ڈیٹ کی تاریخ اور کل دورانیہ چھپاتا ہے۔

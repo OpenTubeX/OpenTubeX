@@ -350,7 +350,7 @@
     <h4 class="groupTitle">
       {{ t('Settings.Player Settings.Sections.Player Controls') }}
     </h4>
-    <div class="switchColumnGrid">
+    <div class="switchColumnGrid playerControlsGrid">
       <div class="switchColumn">
         <h5 class="controlGroupTitle">
           {{ t('Settings.Player Settings.Player Controls.Audio') }}
@@ -405,28 +405,6 @@
           setting-key="enableSkipSilenceByDefault"
           @change="updateEnableSkipSilenceByDefault"
         />
-        <h5 class="controlGroupTitle">
-          {{ t('Settings.Player Settings.Player Controls.Seek Bar and Overlay') }}
-        </h5>
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip')"
-          :description="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip Description')"
-          :icon="['fas', 'film']"
-          :compact="true"
-          :default-value="store.getters.getShowSeekBarFilmstrip"
-          setting-key="showSeekBarFilmstrip"
-          @change="store.dispatch('updateShowSeekBarFilmstrip', $event)"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Player Controls.Center Play Button')"
-          :description="t('Settings.Player Settings.Player Controls.Center Play Button Description')"
-          :icon="['fas', 'circle-play']"
-          :compact="true"
-          :default-value="displayVideoPlayButton"
-          setting-key="displayVideoPlayButton"
-          @change="updateDisplayVideoPlayButton"
-        />
       </div>
       <div class="switchColumn">
         <h5 class="controlGroupTitle">
@@ -463,36 +441,46 @@
           <h5 class="controlGroupTitle">
             {{ t('Settings.Player Settings.Player Controls.Casting') }}
           </h5>
-          <FtToggleSwitch
-            v-if="USING_ELECTRON || !IS_IOS"
-            :label="t('Settings.Player Settings.Player Controls.Google Cast')"
-            :description="t('Settings.Player Settings.Player Controls.Google Cast Description')"
+          <FtSelect
+            multiple
+            class="castProtocolsSelect"
+            :placeholder="t('Settings.Player Settings.Player Controls.Cast To')"
+            :empty-label="t('Global.Off')"
+            :value="store.getters.getCastProtocols"
+            setting-key="castProtocols"
+            :select-names="castProtocolOptions.map(({ name }) => name)"
+            :select-values="castProtocolOptions.map(({ value }) => value)"
             :icon="['fas', 'cast']"
-            :compact="true"
-            :default-value="store.getters.getShowChromecastButton"
-            setting-key="showChromecastButton"
-            @change="store.dispatch('updateShowChromecastButton', $event)"
-          />
-          <FtToggleSwitch
-            v-if="USING_ELECTRON || !IS_IOS"
-            :label="t('Settings.Player Settings.Player Controls.FCast')"
-            :description="t('Settings.Player Settings.Player Controls.FCast Description')"
-            :icon="['fas', 'devices']"
-            :compact="true"
-            :default-value="store.getters.getShowFcastButton"
-            setting-key="showFcastButton"
-            @change="store.dispatch('updateShowFcastButton', $event)"
-          />
-          <FtToggleSwitch
-            :label="t('Settings.Player Settings.Player Controls.DLNA')"
-            :description="t('Settings.Player Settings.Player Controls.DLNA Description')"
-            :icon="['fas', 'tv']"
-            :compact="true"
-            :default-value="showDlnaCastButton"
-            setting-key="showDlnaCastButton"
-            @change="store.dispatch('updateShowDlnaCastButton', $event)"
+            :tooltip="castProtocolsTooltip"
+            tooltip-allow-newlines
+            @change="updateCastProtocols"
           />
         </template>
+      </div>
+      <!-- Alone in its row, this group is centered below the two above. -->
+      <div class="switchColumn">
+        <h5 class="controlGroupTitle">
+          {{ t('Settings.Player Settings.Player Controls.Seek Bar and Overlay') }}
+        </h5>
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip')"
+          :description="t('Settings.Player Settings.Player Controls.Seek Bar Filmstrip Description')"
+          :icon="['fas', 'film']"
+          :compact="true"
+          :default-value="store.getters.getShowSeekBarFilmstrip"
+          setting-key="showSeekBarFilmstrip"
+          @change="store.dispatch('updateShowSeekBarFilmstrip', $event)"
+        />
+        <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Player Controls.Center Play Button')"
+          :description="t('Settings.Player Settings.Player Controls.Center Play Button Description')"
+          :icon="['fas', 'circle-play']"
+          :compact="true"
+          :default-value="displayVideoPlayButton"
+          setting-key="displayVideoPlayButton"
+          @change="updateDisplayVideoPlayButton"
+        />
       </div>
     </div>
     <h4 class="groupTitle">
@@ -1078,7 +1066,42 @@ function updateRememberVolume(value) {
 const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
 
 const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceButton)
-const showDlnaCastButton = computed(() => store.getters.getShowDlnaCastButton)
+
+// iOS can only cast with DLNA.
+const castProtocolOptions = computed(() => [
+  {
+    value: 'googleCast',
+    name: t('Settings.Player Settings.Player Controls.Google Cast'),
+    description: t('Settings.Player Settings.Player Controls.Google Cast Description'),
+  },
+  {
+    value: 'fcast',
+    name: t('Settings.Player Settings.Player Controls.FCast'),
+    description: t('Settings.Player Settings.Player Controls.FCast Description'),
+  },
+  {
+    value: 'dlna',
+    name: t('Settings.Player Settings.Player Controls.DLNA'),
+    description: t('Settings.Player Settings.Player Controls.DLNA Description'),
+  },
+].filter(({ value }) => value === 'dlna' || USING_ELECTRON || !IS_IOS))
+
+/**
+ * Keeps protocols that this platform doesn't offer, which synced settings can
+ * hold for other devices.
+ * @param {string[]} protocols
+ */
+function updateCastProtocols(protocols) {
+  const offered = castProtocolOptions.value.map(({ value }) => value)
+  store.dispatch('updateCastProtocols', [
+    ...protocols,
+    ...store.getters.getCastProtocols.filter(protocol => !offered.includes(protocol)),
+  ])
+}
+
+const castProtocolsTooltip = computed(() => castProtocolOptions.value
+  .map(({ name, description }) => `${name}: ${description}`)
+  .join('\n'))
 
 /**
  * @param {boolean} value

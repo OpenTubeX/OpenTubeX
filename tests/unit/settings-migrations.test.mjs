@@ -770,6 +770,8 @@ test('replaces the switches that turned settings on and off in stored settings',
     { _id: 'ytDlpPreloadEnabled', value: true },
     { _id: 'ytDlpPreloadConcurrency', value: 8 },
     { _id: 'updateRelativeTimestamps', value: false },
+    { _id: 'ytDlpDownloadUseCookies', value: false },
+    { _id: 'ytDlpSubtitleUseCookies', value: true },
     { _id: 'syncServerSettingUpdatedAt', value: { enableBlockLists: 10, blurBlockedItems: 20, useFixedTabWidth: 30, fixedTabWidth: 15 } },
   ])
 
@@ -785,12 +787,13 @@ test('replaces the switches that turned settings on and off in stored settings',
     fixedTabWidth: 120,
     // Enabled preloading kept the former default count.
     ytDlpPreloadCount: 2,
+    ytDlpCookieUses: ['subtitles'],
     // The width keeps the newer edit time of the switch that turned it off.
     syncServerSettingUpdatedAt: { enableBlockLists: 10, blurBlockedItems: 20, blockedItemsMode: 20, useFixedTabWidth: 30, fixedTabWidth: 30 },
   })
 })
 
-test('turns off preloading and fixed tab widths whose switch was off', async () => {
+test('turns off preloading and fixed tab widths whose switch was off, and Always Use Cookies covers every use', async () => {
   const settings = new Datastore()
   await settings.insertAsync([
     { _id: 'enableBlockLists', value: false },
@@ -798,6 +801,8 @@ test('turns off preloading and fixed tab widths whose switch was off', async () 
     { _id: 'useFixedTabWidth', value: true },
     { _id: 'ytDlpPreloadEnabled', value: false },
     { _id: 'ytDlpPreloadCount', value: 5 },
+    { _id: 'ytDlpPlaybackAlwaysUseCookies', value: true },
+    { _id: 'ytDlpDownloadUseCookies', value: false },
   ])
 
   await migrateStoredSettings(settings)
@@ -808,6 +813,7 @@ test('turns off preloading and fixed tab widths whose switch was off', async () 
     // Fixed widths kept the former default width.
     fixedTabWidth: 180,
     ytDlpPreloadCount: 0,
+    ytDlpCookieUses: ['playback', 'downloads', 'subtitles'],
   })
 })
 
@@ -853,4 +859,42 @@ test('reads synced switches from older versions until a newer value is synced', 
     enableBlockLists: { key: 'enableBlockLists', value: true, updatedAt: 10 },
     blockedItemsMode: current,
   }).blockedItemsMode, current)
+})
+
+test('replaces the switch for each choice with a list of the choices that were on', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'showChromecastButton', value: true },
+    { _id: 'showFcastButton', value: false },
+    { _id: 'showDlnaCastButton', value: true },
+    { _id: 'ytDlpAutomaticDownloadsRequireCharging', value: false },
+    { _id: 'syncServerSettingUpdatedAt', value: { showChromecastButton: 10, showDlnaCastButton: 30 } },
+  ])
+
+  await migrateStoredSettings(settings)
+  // A second run must not change choices made after the upgrade.
+  await settings.updateAsync({ _id: 'castProtocols' }, { _id: 'castProtocols', value: ['fcast'] })
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    castProtocols: ['fcast'],
+    ytDlpAutomaticDownloadConditions: [],
+    syncServerSettingUpdatedAt: { showChromecastButton: 10, showDlnaCastButton: 30, castProtocols: 30 },
+  })
+
+  assert.deepEqual(migrateLegacySettings({
+    ytDlpAutomaticDownloadsRequireUnmetered: true,
+    ytDlpAutomaticDownloadsRequireCharging: true,
+  }), {
+    ytDlpAutomaticDownloadConditions: ['unmetered', 'charging'],
+  })
+
+  const migrated = migrateLegacySyncedSettings({
+    showFcastButton: { key: 'showFcastButton', value: true, updatedAt: 10 },
+    showDlnaCastButton: { key: 'showDlnaCastButton', value: false, updatedAt: 20 },
+  })
+  assert.deepEqual(migrated.castProtocols, { key: 'castProtocols', value: ['fcast'], updatedAt: 20 })
+  const current = { key: 'castProtocols', value: ['dlna'], updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ ...migrated, castProtocols: current }).castProtocols, current)
 })

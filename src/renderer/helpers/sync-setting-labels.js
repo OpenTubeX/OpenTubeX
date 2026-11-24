@@ -3,6 +3,7 @@ import { BUILTIN_BASE_THEME_VALUES, BUILTIN_BASE_THEME_TRANSLATION_KEYS } from '
 // Stable setting keys map to the same translation keys used by their controls.
 export const SYNC_SETTING_LABELS = {
   autoUnloadTabs: 'Settings.Tab Unloading.Automatically unload tabs',
+  castProtocols: 'Settings.Player Settings.Player Controls.Cast To',
   autoUnloadMemoryThreshold: 'Settings.Tab Unloading.Memory threshold',
   autoUnloadTabPercentage: 'Settings.Tab Unloading.Tabs to unload',
   aiVideoSummaryMode: 'Settings.Distraction Free Settings.AI Video Summaries',
@@ -446,8 +447,7 @@ export const SYNC_SETTING_LABELS = {
   watchedPercentageThreshold: 'Settings.Privacy Settings.Watched Percentage Threshold',
   watchedProgressSavingMode: 'Settings.Privacy Settings.Save Watched Progress',
   ytDlpAutomaticDownloadRules: 'Settings.Download Settings.Automatic Downloads',
-  ytDlpAutomaticDownloadsRequireCharging: 'Settings.Download Settings.Automatic Downloads Require Charging',
-  ytDlpAutomaticDownloadsRequireUnmetered: 'Settings.Download Settings.Automatic Downloads Require Unmetered Network',
+  ytDlpAutomaticDownloadConditions: 'Settings.Download Settings.Automatic Download Conditions.Download Automatically Only',
   ytDlpDownloadBandwidthLimit: 'Settings.Download Settings.Bandwidth Limit',
   ytDlpMaxConcurrentDownloads: 'Settings.Download Settings.Concurrent Downloads',
   ytDlpPreloadCount: 'Settings.Player Settings.Upcoming Videos to Preload',

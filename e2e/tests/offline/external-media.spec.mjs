@@ -3075,7 +3075,7 @@ test('uses configured playback cookies for external streams', async ({ app, page
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      await store.dispatch('updateYtDlpCookieUses', ['playback'])
     })
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
@@ -3185,7 +3185,7 @@ test('decodes and deduplicates format cookies for browser-authenticated external
       await store.dispatch('updateYtDlpSource', 'system')
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-      await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      await store.dispatch('updateYtDlpCookieUses', ['playback'])
     })
 
     await page.evaluate(async () => {

@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: הצגת הפריט החסום
   Auto: אוטומטי
   'Off': כבוי
+  None: ללא
 Search Listing:
   Label:
     Members Only: לחברים בלבד
@@ -1108,6 +1109,7 @@ Settings:
       FCast Description: אפליקציות מקלט FCast ברשת שלך
       DLNA: DLNA
       DLNA Description: טלוויזיות חכמות ונגני מדיה ברשת שלך
+      Cast To: שידור אל
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1169,12 +1171,14 @@ Settings:
     Title Includes: הכותרת כוללת
     Title Excludes: הכותרת אינה כוללת
     Title Filter Hint: הפרידו מונחי כותרת בפסיקים. סרטון חייב להתאים לפחות למונח אחד שנכלל ולא להתאים לאף מונח שהוחרג.
-    Automatic Downloads Require Unmetered Network: "רק ברשתות ללא הגבלת נתונים"
     Automatic Downloads Require Charging: "רק בזמן טעינה"
+    Automatic Download Conditions:
+      Download Automatically Only: הורדה אוטומטית רק
+      On Unmetered Networks: ברשתות ללא הגבלת נתונים
+      While Charging: בזמן טעינה
   External Software Settings:
     Create YouTube session: "יצירת הפעלת YouTube"
     YouTube session hint: "יש להתחבר במידת הצורך ולשמור את ההפעלה. בהגדרות אפשר לבחור אם להשתמש בה להורדות, לניגון או לכתוביות."
-    Use cookies for downloads: "שימוש בעוגיות להורדות"
     YouTube session failed: "לא ניתן לשמור את הפעלת YouTube."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe נבדקים…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe עדיין לא הורדו. לחצו על הכפתור למטה כדי להוריד אותם.
@@ -1239,10 +1243,13 @@ Settings:
     Browser Profile Placeholder: שם הפרופיל או הנתיב
     Browser Profile Invalid: "יש להזין שם פרופיל, או לבחור תיקיית פרופיל באמצעות כפתור התיקייה."
     Select Browser: בחירת דפדפן
-    Always Use Cookies: להשתמש תמיד בעוגיות
+    Cookie Uses:
+      Use Cookies For: שימוש בעוגיות עבור
+      Playback: הפעלה
+      Downloads: הורדות
+      Subtitles: כתוביות
     Restricted Playback Authentication Hint: כברירת מחדל, OpenTubeX מעביר את העוגיות האלה ל-yt-dlp רק לאחר בחירה באפשרות "לנסות עם העוגיות שהוגדרו" בסרטון שמוגבל לפי גיל או לחברים בלבד.
     Restricted Playback Authentication Warning: שימוש ב-yt-dlp עם חשבון Google עלול להוביל להגבלות זמניות או קבועות על החשבון.
-    Use cookies for subtitles: "שימוש בעוגיות לכתוביות"
   Privacy Settings:
     Internet Connectivity Checks: "בדיקות חיבור לאינטרנט"
     Internet Connectivity Checks Tooltip: "שולח בקשות קטנות לשרת המתארח אצל GrapheneOS כדי לבדוק גישה לאינטרנט."
@@ -2576,9 +2583,8 @@ Tooltips:
     Cookie File: בחרו קובץ עוגיות בתבנית Netscape לצורך הפעלה מאומתת.
     Browser for Cookies: רשימת הדפדפנים הנתמכים מתקבלת מקובץ ההפעלה הנבחר של yt-dlp. כשנדרשת הפעלה מאומתת, OpenTubeX מורה ל-yt-dlp לקרוא את העוגיות מדפדפן זה.
     Browser Profile: שם או תיקייה אופציונליים של פרופיל דפדפן. השאירו ריק כדי להשתמש בפרופיל שנפתח לאחרונה.
-    Always Use Cookies: "יש להשתמש בעוגיות שהוגדרו להורדות, לכתוביות ובכל פעם ש־yt-dlp מחלץ זרמים. אפשרות זו אינה משנה את שיטת חילוץ הזרמים ל-yt-dlp. כש-yt-dlp נבחר, ייתכן שיופיעו פורמטים הזמינים לחשבון בלבד, כולל קצב הסיביות המשופר של YouTube Premium אם החשבון זכאי לכך."
+    Use Cookies For: יש לבחור לאילו מטרות yt-dlp ישתמש בעוגיות שהוגדרו. ההפעלה משתמשת בהן בכל פעם ש־yt-dlp מחלץ זרמים, בלי לשנות את שיטת חילוץ הזרמים ל-yt-dlp. כש-yt-dlp נבחר, ייתכן שיופיעו פורמטים הזמינים לחשבון בלבד, כולל קצב הסיביות המשופר של YouTube Premium אם החשבון זכאי לכך. הכתוביות כוללות גם תרגומים אוטומטיים.
     FFmpeg Executable Path: FFmpeg נדרש למיזוג זרמי וידאו ושמע נפרדים ולהמרת שמע. כברירת מחדל, OpenTubeX מניחה שאפשר למצוא את FFmpeg דרך משתנה הסביבה PATH. במידת הצורך אפשר להגדיר כאן נתיב מותאם אישית.
-    Use cookies for subtitles: "שימוש בעוגיות שהוגדרו עבור כתוביות ותרגומים אוטומטיים. מופעל גם דרך „השתמש תמיד בעוגיות”."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "מסתיר סרטונים שנצפו מתוצאות החיפוש, מ„הסרטון הבא” בדף הצפייה ומהמלצות YouTube בדף הבית. גם ההפעלה האוטומטית מדלגת עליהם."
     Hide Playlist Stats: מסתיר את מספר הסרטונים, מספר הצפיות, תאריך העדכון האחרון ומשך הזמן הכולל בדפי הפלייליסטים.

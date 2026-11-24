@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Zobrazit blokovanou položku
   Auto: Automaticky
   'Off': Vypnuto
+  None: Žádný
 Search Listing:
   Label:
     Members Only: Pouze pro členy
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: Přijímací aplikace FCast ve vaší síti
       DLNA: DLNA
       DLNA Description: Chytré televizory a přehrávače médií ve vaší síti
+      Cast To: Vysílat do
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: Název obsahuje
     Title Excludes: Název neobsahuje
     Title Filter Hint: Více výrazů v názvu oddělte čárkami. Video musí odpovídat alespoň jednomu zahrnutému výrazu a žádnému vyloučenému výrazu.
-    Automatic Downloads Require Unmetered Network: "Pouze v neměřených sítích"
     Automatic Downloads Require Charging: "Pouze během nabíjení"
+    Automatic Download Conditions:
+      Download Automatically Only: Automaticky stahovat pouze
+      On Unmetered Networks: V neměřených sítích
+      While Charging: Během nabíjení
   External Software Settings:
     Create YouTube session: "Vytvořit relaci YouTube"
     YouTube session hint: "V případě potřeby se přihlaste a uložte relaci. V nastavení zvolte, zda ji používat pro stahování, přehrávání nebo titulky."
-    Use cookies for downloads: "Používat cookies pro stahování"
     YouTube session failed: "Relaci YouTube se nepodařilo uložit."
     Checking FFmpeg and FFprobe: Kontrola FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zatím nejsou staženy. Stáhnete je kliknutím na tlačítko níže.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: Název profilu nebo cesta
     Browser Profile Invalid: "Zadejte název profilu nebo vyberte složku profilu tlačítkem složky."
     Select Browser: Vyberte prohlížeč
-    Always Use Cookies: Vždy používat cookies
+    Cookie Uses:
+      Use Cookies For: Používat cookies pro
+      Playback: Přehrávání
+      Downloads: Stahování
+      Subtitles: Titulky
     Restricted Playback Authentication Hint: OpenTubeX ve výchozím nastavení předá tyto cookies nástroji yt-dlp až poté, co u videa s věkovým omezením nebo pouze pro členy zvolíte „Zkusit s nastavenými cookies“.
     Restricted Playback Authentication Warning: Použití nástroje yt-dlp s účtem Google může vést k dočasnému nebo trvalému omezení účtu.
-    Use cookies for subtitles: "Používat cookies pro titulky"
   Privacy Settings:
     Internet Connectivity Checks: "Kontroly připojení k internetu"
     Internet Connectivity Checks Tooltip: "Odesílá malé požadavky na server hostovaný GrapheneOS pro ověření přístupu k internetu."
@@ -2517,9 +2524,8 @@ Tooltips:
     Cookie File: Vyberte soubor cookies ve formátu Netscape pro ověřené přehrávání.
     Browser for Cookies: Podpora prohlížečů se načítá z vybraného spustitelného souboru yt-dlp. Při požadavku na ověřené přehrávání OpenTubeX požádá yt-dlp o načtení tohoto prohlížeče.
     Browser Profile: Volitelný název nebo složka profilu prohlížeče. Chcete-li použít naposledy otevřený profil, ponechte pole prázdné.
-    Always Use Cookies: "Používejte nastavené cookies pro stahování, titulky a vždy, když yt-dlp získává streamy. Způsob získávání streamu se tím nepřepne na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup."
+    Use Cookies For: Vyberte, k čemu yt-dlp používá nastavené cookies. Přehrávání je používá vždy, když yt-dlp získává streamy, aniž by se způsob získávání streamu přepnul na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup. Titulky zahrnují i automatické překlady.
     FFmpeg Executable Path: FFmpeg je nutný ke slučování samostatných streamů obrazu a zvuku a k převodu zvuku. OpenTubeX ve výchozím nastavení předpokládá, že nástroj FFmpeg lze najít pomocí proměnné prostředí PATH. V případě potřeby zde můžete nastavit vlastní cestu.
-    Use cookies for subtitles: "Používat nastavené cookies pro titulky a automatické překlady. Zapne se také volbou „Vždy používat cookies“."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skryje zhlédnutá videa z výsledků vyhledávání, z části Další na stránce přehrávání a z doporučení YouTube na domovské stránce. Automatické přehrávání je také přeskočí."
     Hide Playlist Stats: Skryje počet videí, počet zhlédnutí, datum poslední aktualizace a celkovou délku na stránkách playlistů.

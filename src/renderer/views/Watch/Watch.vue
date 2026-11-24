@@ -974,16 +974,16 @@
           @toggle-live-chat="toggleLiveChat"
         >
           <template
-            v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (supportsChromecast && $store.getters.getShowChromecastButton) || (supportsChromecast && $store.getters.getShowFcastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            v-if="playerReady && (isElectron || isCapacitor) && (castProtocols.includes('dlna') || (supportsChromecast && (castProtocols.includes('googleCast') || castProtocols.includes('fcast')))) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
             <WatchCast
               ref="chromecast"
               :key="`cast-${videoId}`"
               :video-id="videoId"
-              :google-cast-enabled="supportsChromecast && $store.getters.getShowChromecastButton"
-              :fcast-enabled="supportsChromecast && $store.getters.getShowFcastButton"
-              :dlna-enabled="$store.getters.getShowDlnaCastButton"
+              :google-cast-enabled="supportsChromecast && castProtocols.includes('googleCast')"
+              :fcast-enabled="supportsChromecast && castProtocols.includes('fcast')"
+              :dlna-enabled="castProtocols.includes('dlna')"
               :formats="legacyFormats"
               :manifest-url="manifestSrc"
               :manifest-type="manifestMimeType"

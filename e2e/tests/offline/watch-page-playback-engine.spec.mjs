@@ -403,7 +403,7 @@ test('uses configured cookies for every yt-dlp extraction when enabled', async (
     const store = window.$store
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-    await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+    await store.dispatch('updateYtDlpCookieUses', ['playback'])
   })
   await app.electronApp.evaluate(({ ipcMain }) => {
     globalThis.__alwaysUseCookiesCalls = []
@@ -1058,7 +1058,7 @@ test.describe('watch page', () => {
         const store = window.$store
         await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
         await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+        await store.dispatch('updateYtDlpCookieUses', ['playback'])
       })
       await app.electronApp.evaluate(({ ipcMain }, scenario) => {
         globalThis.__premiereAuthenticationCalls = []
@@ -1109,7 +1109,7 @@ test.describe('watch page', () => {
         const store = window.$store
         await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
         await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+        await store.dispatch('updateYtDlpCookieUses', ['playback'])
       })
       await app.electronApp.evaluate(({ ipcMain }, incompletePreferredSource) => {
         globalThis.__limitedSourceAuthenticationCalls = []

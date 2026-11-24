@@ -12,7 +12,7 @@ import { promisify } from 'node:util'
 test.use({
   seed: {
     settings: {
-      showChromecastButton: true,
+      castProtocols: ['googleCast'],
       animationSpeed: 0,
       keepPlayingOnNavigation: false,
       videoPlaybackEngine: 'built-in',
@@ -214,7 +214,7 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
 test('both casting protocols share one button and one device list', async ({ app, page }) => {
   await openCastVideo(app, page)
   await mockDlna(app)
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['googleCast', 'dlna']))
   const castButtons = page.locator('.videoOptions .chromecastControl > button, .videoOptions .dlnaCastControl > button')
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
@@ -224,20 +224,20 @@ test('both casting protocols share one button and one device list', async ({ app
   await expect(googleDevice).toHaveAccessibleDescription('Google Cast')
   await expect(dlnaDevice).toHaveAccessibleDescription('DLNA')
   await page.keyboard.press('Escape')
-  await page.evaluate(() => window.$store.dispatch('updateShowChromecastButton', false))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['dlna']))
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
   await expect(googleDevice).toHaveCount(0)
   // A single protocol needs no caption.
   await expect(dlnaDevice).toHaveAccessibleDescription('')
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', false))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', []))
   await expect(castButtons).toHaveCount(0)
 })
 
 test('phones pick casting protocols and devices from the context menu sheet', async ({ app, page }) => {
   await openCastVideo(app, page)
   await mockDlna(app)
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['googleCast', 'dlna']))
   await setWindowSize(app, page, { width: 480, height: 850 })
   const sheet = page.locator('.mobileLinkActions')
   await page.locator('.castControl > button').click()
@@ -264,8 +264,7 @@ test('FCast casts from the shared device list without subtitles and blocks the o
   const watch = await openCastVideo(app, page)
   await mockDlna(app)
   await page.evaluate(async () => {
-    await window.$store.dispatch('updateShowFcastButton', true)
-    await window.$store.dispatch('updateShowDlnaCastButton', true)
+    await window.$store.dispatch('updateCastProtocols', ['googleCast', 'fcast', 'dlna'])
   })
   await selectLocalEnglishCaption(page, watch)
   await watch.evaluate(vm => { vm.$refs.player.setCurrentTime(5); vm.$refs.player.play() })
@@ -302,8 +301,7 @@ test('FCast alone uses the casting button with FCast labels', async ({ app, page
     ipcMain.handle('cast-discover', () => [])
   })
   await page.evaluate(async () => {
-    await window.$store.dispatch('updateShowChromecastButton', false)
-    await window.$store.dispatch('updateShowFcastButton', true)
+    await window.$store.dispatch('updateCastProtocols', ['fcast'])
   })
   const castButton = page.locator('.videoOptions .fcastControl > button')
   await expect(castButton).toHaveAttribute('title', 'Cast to an FCast receiver')
@@ -311,7 +309,7 @@ test('FCast alone uses the casting button with FCast labels', async ({ app, page
   await expect(page.getByRole('tab')).toHaveCount(0)
   await expect(castMenu(page).getByRole('button', { name: 'No FCast receivers found', exact: true })).toBeVisible()
   await page.keyboard.press('Escape')
-  await page.evaluate(() => window.$store.dispatch('updateShowFcastButton', false))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', []))
   await expect(page.locator('.castControl')).toHaveCount(0)
 })
 
@@ -329,7 +327,7 @@ test('reopening the casting menu refreshes each receiver list once per opening',
       })
     }
   })
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['googleCast', 'dlna']))
   for (const round of [1, 2]) {
     await app.electronApp.evaluate((_, value) => { globalThis.discoveryRound = value }, round)
     await page.locator('.castControl > button').click()
@@ -351,7 +349,7 @@ test('the casting device list clamps themed scrolling', { tag: '@scale' }, async
   })
   // Keep the window above the phone layout's 600 CSS pixels at every UI scale, so the menu stays a dropdown.
   await setWindowSize(app, page, { width: Math.round(800 * uiScale / 100), height: Math.round(650 * uiScale / 100) })
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['googleCast', 'dlna']))
   await page.locator('.castControl > button').click()
   const scroller = page.locator('.castControl .iconDropdownContent')
   const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
@@ -515,7 +513,7 @@ for (const outcome of ['playing', 'paused', 'stop failure']) {
       globalThis.castTest.failStop = outcome === 'stop failure'
     }, outcome)
     await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus.currentTime)).toBe(18)
-    await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+    await watch.evaluate(vm => vm.$store.dispatch('updateCastProtocols', []))
     await expect(page.locator('.chromecastControl')).toHaveCount(0)
     await expect(page.locator('.castProgress')).toHaveCount(0)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(18)
@@ -598,7 +596,7 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
     globalThis.dlnaTest.holdStop = true
     globalThis.castTest.holdStart = true
   })
-  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateCastProtocols', ['googleCast', 'dlna']))
   await watch.evaluate(vm => vm.$refs.player.play())
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   const castButton = page.locator('.castControl > button')
@@ -731,7 +729,7 @@ for (const outcome of ['success', 'reported failure', 'thrown failure', 'stop fa
     await choice(page, 'Test TV')
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
-    await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+    await watch.evaluate(vm => vm.$store.dispatch('updateCastProtocols', []))
     await expect(page.locator('.chromecastControl')).toHaveCount(0)
     expect(await app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(0)
     await app.electronApp.evaluate(() => globalThis.castTest.finishStart())
@@ -764,7 +762,7 @@ for (const teardown of ['paused playback', 'navigation']) {
       await watch.evaluate(vm => vm.tabRouter.push('/history'))
       await expect(page).toHaveURL(/#\/history$/)
     } else {
-      await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+      await watch.evaluate(vm => vm.$store.dispatch('updateCastProtocols', []))
       await expect(page.locator('.chromecastControl')).toHaveCount(0)
     }
     expect(await app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(0)
@@ -900,8 +898,7 @@ test('packaged helper discovers and plays on the selected FCast receiver', async
     })
     await page.evaluate(async url => {
       await window.$store.dispatch('updateDefaultInvidiousInstance', url)
-      await window.$store.dispatch('updateShowChromecastButton', false)
-      await window.$store.dispatch('updateShowFcastButton', true)
+      await window.$store.dispatch('updateCastProtocols', ['fcast'])
     }, instanceUrl)
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -1045,31 +1042,29 @@ test('preserves the active subtitle identity when Watch and player track order d
   expect(started.captions[started.captionIndex].language).toBe('en')
 })
 
-for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies']) {
-  test(`casts cookie-backed captions through the authenticated subtitle download with ${setting}`, async ({ app, page }) => {
-    const watch = await openCastVideo(app, page)
-    const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
-    const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
-    await page.route(url, route => route.fulfill({ status: 403, body: 'Cookies required' }))
-    await app.electronApp.evaluate(({ ipcMain }, text) => {
-      globalThis.castSubtitleRequests = []
-      ipcMain.removeHandler('yt-dlp-get-subtitle')
-      ipcMain.handle('yt-dlp-get-subtitle', (_, url) => {
-        globalThis.castSubtitleRequests.push(url)
-        return text
-      })
-    }, text)
-    await page.evaluate(setting => window.$store.dispatch(`update${setting}`, true), setting)
-    await watch.evaluate((vm, url) => { vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }] }, url)
-    await selectLocalEnglishCaption(page, watch)
-    await choice(page, 'Test TV')
-    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
-    const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
-    expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
-    expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests)).toContain(url)
-    await choice(page, 'Return to local playback')
-  })
-}
+test('casts cookie-backed captions through the authenticated subtitle download', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
+  const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
+  await page.route(url, route => route.fulfill({ status: 403, body: 'Cookies required' }))
+  await app.electronApp.evaluate(({ ipcMain }, text) => {
+    globalThis.castSubtitleRequests = []
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', (_, url) => {
+      globalThis.castSubtitleRequests.push(url)
+      return text
+    })
+  }, text)
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
+  await watch.evaluate((vm, url) => { vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }] }, url)
+  await selectLocalEnglishCaption(page, watch)
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
+  expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests)).toContain(url)
+  await choice(page, 'Return to local playback')
+})
 
 for (const selected of [false, true]) {
   test(`Cast starts without downloading stalled optional captions ${selected ? 'with' : 'without'} a selected track`, async ({ app, page }) => {
@@ -1083,7 +1078,7 @@ for (const selected of [false, true]) {
         return new Promise(() => {})
       })
     })
-    await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
     await watch.evaluate((vm, selected) => {
       vm.captions = Array.from({ length: 40 }, (_, index) => ({
         url: `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=optional-${index}&fmt=vtt`,
@@ -1124,7 +1119,7 @@ test('Cast prepares selected authenticated captions and retains public optional 
       return new URL(url).searchParams.get('lang') === 'de' ? { error: 'Optional caption unavailable' } : text
     })
   }, text)
-  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
   await watch.evaluate(vm => {
     vm.captions = [['de', 'German'], ['en', 'English'], ['ja', 'Japanese']].map(([language, label]) => ({
       url: language === 'ja' ? 'https://cast-media.test/ja.vtt' : `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=${language}&fmt=vtt`, language, label, mimeType: 'text/vtt'
@@ -1162,7 +1157,7 @@ test('Cast starts without captions when all failed tracks were unselected', asyn
     ipcMain.removeHandler('yt-dlp-get-subtitle')
     ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Optional caption unavailable' }))
   })
-  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
   await watch.evaluate(vm => {
     vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
     vm.currentSubtitlesState = false
@@ -1183,7 +1178,7 @@ test('an active authenticated Cast caption failure leaves local playback running
     ipcMain.removeHandler('yt-dlp-get-subtitle')
     ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Unable to load subtitle with configured cookies' }))
   })
-  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
   await watch.evaluate(vm => {
     vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
     vm.currentSubtitlesState = true
@@ -1213,7 +1208,7 @@ for (const loseFocus of [false, true]) {
       ipcMain.removeHandler('yt-dlp-get-subtitle')
       ipcMain.handle('yt-dlp-get-subtitle', () => new Promise(resolve => { globalThis.finishCastSubtitle = resolve }))
     })
-    await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpCookieUses', ['subtitles']))
     await watch.evaluate((vm, url) => {
       vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
       vm.$refs.player.play()

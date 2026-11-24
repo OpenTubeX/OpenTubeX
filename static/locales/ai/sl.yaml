@@ -90,6 +90,7 @@ Global:
   Show Blocked Item: Prikaži blokiran element
   Auto: Samodejno
   'Off': Izklopljeno
+  None: Brez
 Search Bar:
   Use Suggestion: Uporabi predlog
   Remove: Odstrani
@@ -1310,6 +1311,7 @@ Settings:
       FCast Description: Sprejemniške aplikacije FCast v vašem omrežju
       DLNA: DLNA
       DLNA Description: Pametni televizorji in predvajalniki v vašem omrežju
+      Cast To: Predvajaj v
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1375,12 +1377,14 @@ Settings:
     Title Includes: Naslov vključuje
     Title Excludes: Naslov ne vključuje
     Title Filter Hint: Več izrazov za naslov ločite z vejicami. Videoposnetek se mora ujemati z vsaj enim vključenim izrazom in z nobenim izključenim izrazom.
-    Automatic Downloads Require Unmetered Network: "Samo v omrežjih brez omejitve prenosa"
     Automatic Downloads Require Charging: "Samo med polnjenjem"
+    Automatic Download Conditions:
+      Download Automatically Only: Samodejno prenesi samo
+      On Unmetered Networks: V omrežjih brez omejitve prenosa
+      While Charging: Med polnjenjem
   External Software Settings:
     Create YouTube session: "Ustvari sejo YouTube"
     YouTube session hint: "Po potrebi se prijavite in shranite sejo. V nastavitvah izberite, ali naj se uporablja za prenose, predvajanje ali podnapise."
-    Use cookies for downloads: "Uporabi piškotke za prenose"
     YouTube session failed: "Seje YouTube ni bilo mogoče shraniti."
     Checking FFmpeg and FFprobe: Preverjanje FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg in FFprobe še nista prenesena. Za prenos kliknite spodnji gumb.
@@ -1445,10 +1449,13 @@ Settings:
     Browser Profile Placeholder: Ime profila ali pot
     Browser Profile Invalid: "Vnesite ime profila ali z gumbom za mapo izberite mapo profila."
     Select Browser: Izberi brskalnik
-    Always Use Cookies: Vedno uporabi piškotke
+    Cookie Uses:
+      Use Cookies For: Uporabi piškotke za
+      Playback: Predvajanje
+      Downloads: Prenosi
+      Subtitles: Podnapisi
     Restricted Playback Authentication Hint: OpenTubeX te piškotke privzeto posreduje orodju yt-dlp šele, ko pri starostno omejenem videoposnetku ali videoposnetku samo za člane izberete »Poskusi z nastavljenimi piškotki«.
     Restricted Playback Authentication Warning: Uporaba orodja yt-dlp z računom Google lahko privede do začasnih ali trajnih omejitev računa.
-    Use cookies for subtitles: "Uporabi piškotke za podnapise"
   Privacy Settings:
     Internet Connectivity Checks: "Preverjanje internetne povezave"
     Internet Connectivity Checks Tooltip: "Pošilja majhne zahteve strežniku, ki ga gosti GrapheneOS, za preverjanje dostopa do interneta."
@@ -3039,9 +3046,8 @@ Tooltips:
     Cookie File: Izberite datoteko s piškotki v obliki Netscape za overjeno predvajanje.
     Browser for Cookies: Podpora za brskalnike se prebere iz izbrane izvedljive datoteke yt-dlp. OpenTubeX ob zahtevanem overjenem predvajanju naroči yt-dlp, naj prebere podatke tega brskalnika.
     Browser Profile: Izbirno ime ali mapa profila brskalnika. Če želite uporabiti nazadnje uporabljeni profil, pustite prazno.
-    Always Use Cookies: "Uporabite nastavljene piškotke za prenose, podnapise in kadar yt-dlp pridobiva tokove. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop."
+    Use Cookies For: Izberite, za kaj yt-dlp uporablja nastavljene piškotke. Predvajanje jih uporablja vsakič, ko yt-dlp pridobiva tokove, ne da bi se način pridobivanja pretoka preklopil na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop. Podnapisi zajemajo tudi samodejne prevode.
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
-    Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Skrije gledane videoposnetke iz rezultatov iskanja, razdelka Naslednje na sporedu na strani za ogled in priporočil YouTube na domači strani. Samodejno predvajanje jih prav tako preskoči."
     Hide Playlist Stats: Na straneh seznamov predvajanja skrije število videoposnetkov, število ogledov, datum zadnje posodobitve in skupno trajanje.

@@ -17,6 +17,7 @@ import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSe
 import { downloadManagedYtDlp, getYtDlpVersion, pushProxyArgument, resolveExecutable, ytDlpEnvironment } from './ytDlpBinaries'
 import { registerExternalStreamCookies, registerExternalStreamHeaders } from './ytDlpExternalStreams'
 import { withYtDlpCookies } from './ytDlpCookieFile'
+import { usesYtDlpCookiesFor } from '../ytDlpCookieUses'
 
 const execFileAsync = promisify(execFile)
 
@@ -176,9 +177,7 @@ const subtitleRequests = new Map()
 export async function handleYtDlpGetSubtitle(event, url) {
   if (!isTrustedSender(event) || !isYouTubeSubtitleUrl(url)) return null
 
-  const alwaysUseCookies = (await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true
-  const subtitleUseCookies = (await settings._findOne('ytDlpSubtitleUseCookies'))?.value === true
-  if (!alwaysUseCookies && !subtitleUseCookies) return null
+  if (!usesYtDlpCookiesFor((await settings._findOne('ytDlpCookieUses'))?.value, 'subtitles')) return null
 
   const args = []
   if (await pushYtDlpPlaybackAuthenticationArguments(args) !== null) return null

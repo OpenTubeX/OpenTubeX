@@ -90,6 +90,7 @@ Global:
   Show Blocked Item: Montri blokitan eron
   Auto: Aŭtomata
   'Off': Malŝaltita
+  None: Neniu
 Search Bar:
   Use Suggestion: Uzi proponon
   Video Link: "Video: {title}"
@@ -1135,6 +1136,7 @@ Settings:
       FCast Description: FCast-ricevilaj aplikaĵoj en via reto
       DLNA: DLNA
       DLNA Description: Inteligentaj televidiloj kaj aŭdvidaj ludiloj en via reto
+      Cast To: Elsendi al
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -1188,8 +1190,11 @@ Settings:
     Automatic Downloads No Channels: Abonu kanalon antaŭ ol agordi aŭtomatajn elŝutojn.
     No Matching Automatic Download Channels: Neniu kanalo kongruas kun via serĉo.
     Automatic Downloads Livestreams: Tujelsendoj
-    Automatic Downloads Require Unmetered Network: Nur ĉe nemezurataj retoj
     Automatic Downloads Require Charging: Nur dum ŝargado
+    Automatic Download Conditions:
+      Download Automatically Only: Aŭtomate elŝuti nur
+      On Unmetered Networks: Ĉe nemezurataj retoj
+      While Charging: Dum ŝargado
     Minimum Duration Seconds: Minimuma daŭro (sekundoj)
     Maximum Duration Seconds: Maksimuma daŭro (sekundoj)
     Minimum File Size MB: Minimuma dosiergrandeco (MB)
@@ -1201,7 +1206,6 @@ Settings:
   External Software Settings:
     Create YouTube session: Krei YouTube-seancon
     YouTube session hint: Ensalutu se necese, poste konservu. Elektu en la agordoj ĉu uzi ĉi tiun seancon por elŝutoj, ludado aŭ subtekstoj.
-    Use cookies for downloads: Uzi kuketojn por elŝutoj
     YouTube session failed: Ne eblas konservi la YouTube-seancon.
     Checking FFmpeg and FFprobe: Kontrolado de FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ankoraŭ ne estas elŝutitaj. Alklaku la suban butonon por elŝuti ilin.
@@ -1266,10 +1270,13 @@ Settings:
     Browser Profile Placeholder: Profilnomo aŭ vojo
     Browser Profile Invalid: "Enigu profilan nomon, aŭ elektu profilan dosierujon per la dosieruja butono."
     Select Browser: Elektu retumilon
-    Always Use Cookies: Ĉiam uzi kuketojn
+    Cookie Uses:
+      Use Cookies For: Uzi kuketojn por
+      Playback: Ludado
+      Downloads: Elŝutoj
+      Subtitles: Subtekstoj
     Restricted Playback Authentication Hint: Defaŭlte, OpenTubeX nur donas ĉi tiujn kuketojn al yt-dlp post kiam vi elektas "Provi kun agorditaj kuketoj" ĉe aĝolimigita aŭ nur-membra videaĵo.
     Restricted Playback Authentication Warning: Uzi yt-dlp kun Google-konto povas konduki al provizoraj aŭ daŭraj kontolimigoj.
-    Use cookies for subtitles: Uzi kuketojn por subtekstoj
   Privacy Settings:
     Internet Connectivity Checks: Kontroloj de interreta konekteco
     Internet Connectivity Checks Tooltip: Sendas malgrandajn petojn al servilo gastigita de GrapheneOS por kontroli interretan aliron.
@@ -2572,9 +2579,8 @@ Tooltips:
     Cookie File: Elektu kuketan dosieron en Netscape-formo por aŭtentigita ludado.
     Browser for Cookies: Retumila subteno estas legata el la elektita plenumeblo de yt-dlp. OpenTubeX petas yt-dlp legi ĉi tiun retumilon kiam aŭtentigita ludado estas petata.
     Browser Profile: Nedeviga nomo aŭ dosierujo de retumila profilo. Lasu malplena por uzi la plej lastatempe aliritan profilon.
-    Always Use Cookies: Uzi la agorditajn kuketojn por elŝutoj, subtekstoj kaj ĉiam kiam yt-dlp elĉerpas fluojn. Tio ĉi ne ŝanĝas la metodon de fluelĉerpado al yt-dlp. Kun yt-dlp elektita, formoj nur por kontoj eble disponebliĝos, inkluzive de la plibonigita bitrapido de YouTube Premium kiam la konto havas aliron.
+    Use Cookies For: Elektu, por kio yt-dlp uzas la agorditajn kuketojn. Ludado uzas ilin ĉiam kiam yt-dlp elĉerpas fluojn, sen ŝanĝi la metodon de fluelĉerpado al yt-dlp. Kun yt-dlp elektita, formoj nur por kontoj eble disponebliĝos, inkluzive de la plibonigita bitrapido de YouTube Premium kiam la konto havas aliron. Subtekstoj ankaŭ inkluzivas aŭtomatajn tradukojn.
     FFmpeg Executable Path: FFmpeg necesas por kunfandi apartajn video- kaj sonfluojn kaj por sonkonvertado. Defaŭlte, OpenTubeX supozas, ke FFmpeg troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
-    Use cookies for subtitles: Uzi la agorditajn kuketojn por subtekstoj kaj aŭtomataj tradukoj. Ankaŭ ŝaltita per "Ĉiam uzi kuketojn".
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Kaŝas spektitajn videaĵojn el serĉrezultoj, el Sekve en la spekta paĝo kaj el YouTube-rekomendoj en la Hejmo. Aŭtomata ludado ankaŭ preterlasas ilin."
     Hide Playlist Stats: Kaŝas la nombron de videoj, la nombron de spektoj, la daton de la lasta ĝisdatigo kaj la tutan daŭron en ludlistaj paĝoj.

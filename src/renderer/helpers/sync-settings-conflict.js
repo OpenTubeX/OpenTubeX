@@ -5,6 +5,8 @@ import {
   blockedItemsModeFromSwitches,
   fixedTabWidthFromSwitch,
   hasReplacedSettingId,
+  listFromSwitches,
+  SWITCH_LISTS,
   holdPlaybackRateMultiplierFromSwitch,
   keepPlayerVisibleOnScrollFromLegacy,
   migrateSettingIds,
@@ -88,6 +90,15 @@ export function migrateLegacySyncedSettings(remote) {
       key: 'blockedItemsMode',
       value: blockedItemsModeFromSwitches(enableBlockLists?.value, blurBlockedItems?.value),
       updatedAt: Math.max(enableBlockLists?.updatedAt ?? -Infinity, blurBlockedItems?.updatedAt ?? -Infinity),
+    }
+  }
+  for (const [listKey, switches] of Object.entries(SWITCH_LISTS)) {
+    const entries = Object.keys(switches).map(key => remote[key]).filter(Boolean)
+    if (entries.length === 0 || remote[listKey]) continue
+    migrated[listKey] = {
+      key: listKey,
+      value: listFromSwitches(listKey, key => remote[key]?.value),
+      updatedAt: Math.max(...entries.map(entry => entry.updatedAt)),
     }
   }
   // Older versions keep syncing the switches that turned these values on and

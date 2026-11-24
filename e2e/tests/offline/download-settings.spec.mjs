@@ -527,7 +527,7 @@ test.describe('automatic download authorization', () => {
     await choosePickerPaths(app, page, { ytDlpPath: executable })
     await page.evaluate(async () => {
       const store = window.$store
-      await store.dispatch('updateYtDlpAutomaticDownloadsRequireCharging', true)
+      await store.dispatch('updateYtDlpAutomaticDownloadConditions', ['charging'])
     })
 
     if ((await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.isInProgress())).inProgress) {

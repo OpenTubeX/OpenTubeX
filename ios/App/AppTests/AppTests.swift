@@ -598,7 +598,7 @@ final class AppTests: XCTestCase {
         var localRequest = URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/real.mp4")))
         if privateInstance { localRequest.setValue("Basic Zml4dHVyZTpzZWNyZXQ=", forHTTPHeaderField: "Authorization") }
         let id = IOSNetwork.shared.prepareExternal(localRequest)
-        let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
+        _ = try await evaluate("window.originalCastProtocols = [...testStore.getters.getCastProtocols]; true")
         let originalInstance = try await evaluate("testStore.getters.getCurrentInvidiousInstance") as? String ?? ""
         _ = try await evaluate("""
         window.findWatch = vnode => {
@@ -643,7 +643,7 @@ final class AppTests: XCTestCase {
         """, arguments: ["merged": merged, "startupFailure": startupFailure, "keyframeRecovery": keyframeRecovery, "videoSource": "capacitor://localhost/_opentubex_media/\(videoId)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
         // Navigation preserves cached Watch state. Discard the fixture source
         // too, so neither the cached page nor its cast control retains it.
-        let cleanup = "document.querySelector('video')?.pause(); if (dlnaKeyframeRecovery && window.dlnaOriginalCurrentTime) watchFixture.$refs.player.getCurrentTime=dlnaOriginalCurrentTime; watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
+        let cleanup = "document.querySelector('video')?.pause(); if (dlnaKeyframeRecovery && window.dlnaOriginalCurrentTime) watchFixture.$refs.player.getCurrentTime=dlnaOriginalCurrentTime; watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateCastProtocols', originalCastProtocols); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
         do {
             // Cancelling metadata during teardown can retain a destroyed player.
             let preparationReady = "(() => { const watch = findWatch(document.querySelector('#app').__vue_app__._container._vnode); return watch?.videoId === 'DlnaTest001' && watch.preparingVideoLoadGeneration === null && !watch.playerTeardownInProgress; })()"
@@ -655,7 +655,7 @@ final class AppTests: XCTestCase {
             Object.assign(watchFixture, {isLoading:false, ytDlpStreamsPending:false, errorMessage:null,
                 isUpcoming:false, videoTitle:'Local DLNA MP4', videoLengthSeconds:2, activeFormat:'legacy',
                 legacyFormats:[{itag:18,url,mimeType:'video/mp4',height:dlnaMergedUi?360:1080,qualityLabel:'1080p'}]});
-            await testStore.dispatch('updateShowDlnaCastButton', false);
+            await testStore.dispatch('updateCastProtocols', originalCastProtocols.filter(protocol => protocol !== 'dlna'));
             """
             let sourceArguments = ["url": "capacitor://localhost/_opentubex_media/\(id)"]
             if delayedTeardown {
@@ -693,7 +693,7 @@ final class AppTests: XCTestCase {
                 window.dlnaExtractionFormats=dlnaExtractionFormats.map(format=>({...format,url:format.acodec==='none'?videoSource:audioSource}));
                 """, arguments: ["instance": "http://127.0.0.1:\(port)", "videoSource": "http://127.0.0.1:\(port)/real.mp4", "audioSource": "http://127.0.0.1:\(port)/audio.m4a"], in: nil, contentWorld: .page)
             }
-            _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', true)", arguments: [:], in: nil, contentWorld: .page)
+            _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateCastProtocols', [...new Set([...originalCastProtocols, 'dlna'])])", arguments: [:], in: nil, contentWorld: .page)
             try await wait("!!document.querySelector('.dlnaCastControl button')")
             // Begin waiting only once the player is ready; CI startup can exceed the UDP timeout.
             DispatchQueue.global().async {
@@ -792,9 +792,8 @@ final class AppTests: XCTestCase {
         let available = try await evaluate("Capacitor.isPluginAvailable('Dlna')") as? Bool
         XCTAssertEqual(available, true)
         _ = try await webView.callAsyncJavaScript("testStore.commit('setSettingsWindowSection', 'player'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
-        try await wait("Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Enable DLNA casting'))")
-        let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
-        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', !original); await testStore.dispatch('updateShowDlnaCastButton', original); await testStore.dispatch('hideSettingsWindow')", arguments: ["original": original], in: nil, contentWorld: .page)
+        try await wait("!!document.querySelector('.settingsWindow [data-setting-key=\"castProtocols\"]')")
+        _ = try await webView.callAsyncJavaScript("const original = [...testStore.getters.getCastProtocols]; await testStore.dispatch('updateCastProtocols', original.includes('dlna') ? [] : ['dlna']); await testStore.dispatch('updateCastProtocols', original); await testStore.dispatch('hideSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
     }
 
     func testExternalMediaOutlivesSabrResourceTimeout() async throws {

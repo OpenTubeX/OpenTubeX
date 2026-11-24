@@ -60,8 +60,8 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
     })
     original = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const values = { CurrentLocale: 'en-US', ShowChromecastButton: true, ShowDlnaCastButton: false, VideoPlaybackEngine: 'built-in', AutoplayVideos: false, UseSponsorBlock: false, UseReturnYouTubeDislikes: false }
-      const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
+      const values = { CurrentLocale: 'en-US', CastProtocols: ['googleCast'], VideoPlaybackEngine: 'built-in', AutoplayVideos: false, UseSponsorBlock: false, UseReturnYouTubeDislikes: false }
+      const saved = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
       for (const [key, value] of Object.entries(values))store.commit('set' + key, value)
       window.__testCastFetch = window.fetch
       window.fetch = (url, opts) => String(url).startsWith('https://localhost/') ? window.__testCastFetch(url, opts) : Promise.reject(Error('Offline receiver fixture'))

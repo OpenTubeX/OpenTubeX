@@ -92,6 +92,7 @@ Global:
   Show Blocked Item: Wys geblokkeerde item
   Auto: Outomaties
   'Off': Af
+  None: Geen
 Search Bar:
   Use Suggestion: Gebruik voorstel
   Open Search Container: Maak soekhouer oop
@@ -1276,6 +1277,7 @@ Settings:
       FCast Description: FCast-ontvangerprogramme op u netwerk
       DLNA: DLNA
       DLNA Description: Slim-TV’s en mediaspelers op u netwerk
+      Cast To: Saai uit na
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -1329,8 +1331,11 @@ Settings:
     Automatic Downloads No Channels: Teken op ’n kanaal in voordat u outomatiese aflaaie opstel.
     No Matching Automatic Download Channels: Geen kanale pas by u soektog nie.
     Automatic Downloads Livestreams: Regstreekse uitsendings
-    Automatic Downloads Require Unmetered Network: Slegs op ongemeterde netwerke
     Automatic Downloads Require Charging: Slegs tydens laai
+    Automatic Download Conditions:
+      Download Automatically Only: Laai slegs outomaties af
+      On Unmetered Networks: Op ongemeterde netwerke
+      While Charging: Tydens laai
     Minimum Duration Seconds: Minimum duur (sekondes)
     Maximum Duration Seconds: Maksimum duur (sekondes)
     Minimum File Size MB: Minimum lêergrootte (MB)
@@ -1342,7 +1347,6 @@ Settings:
   External Software Settings:
     Create YouTube session: Skep YouTube-sessie
     YouTube session hint: Meld aan indien nodig en stoor dan. Kies in die instellings of hierdie sessie vir aflaaie, afspeel of onderskrifte gebruik moet word.
-    Use cookies for downloads: Gebruik koekies vir aflaaie
     YouTube session failed: Kan nie die YouTube-sessie stoor nie.
     Checking FFmpeg and FFprobe: Gaan FFmpeg/FFprobe na…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe is nog nie afgelaai nie. Klik op die knoppie hieronder om hulle af te laai.
@@ -1407,10 +1411,13 @@ Settings:
     Browser Profile Placeholder: Profielnaam of pad
     Browser Profile Invalid: "Voer ’n profielnaam in, of kies ’n profielgids met die gidsknoppie."
     Select Browser: Kies ’n blaaier
-    Always Use Cookies: Gebruik altyd koekies
+    Cookie Uses:
+      Use Cookies For: Gebruik koekies vir
+      Playback: Afspeel
+      Downloads: Aflaaie
+      Subtitles: Onderskrifte
     Restricted Playback Authentication Hint: By verstek gee OpenTubeX hierdie koekies slegs aan yt-dlp deur nadat u "Probeer met opgestelde koekies" op ’n video met ouderdomsbeperking of vir slegs lede kies.
     Restricted Playback Authentication Warning: Om yt-dlp met ’n Google-rekening te gebruik, kan tot tydelike of permanente rekeningbeperkings lei.
-    Use cookies for subtitles: Gebruik koekies vir onderskrifte
   Privacy Settings:
     Internet Connectivity Checks: Internetverbindingskontroles
     Internet Connectivity Checks Tooltip: Stuur klein versoeke na ’n bediener wat deur GrapheneOS gehuisves word om internettoegang na te gaan.
@@ -2779,9 +2786,8 @@ Tooltips:
     Cookie File: Kies ’n koekielêer in Netscape-formaat vir geverifieerde afspeel.
     Browser for Cookies: Blaaierondersteuning word van die gekose uitvoerbare yt-dlp-lêer gelees. OpenTubeX vra yt-dlp om hierdie blaaier te lees wanneer geverifieerde afspeel versoek word.
     Browser Profile: Opsionele blaaierprofielnaam of -vouer. Laat leeg om die mees onlangs gebruikte profiel te gebruik.
-    Always Use Cookies: Gebruik die opgestelde koekies vir aflaaie, onderskrifte en wanneer yt-dlp strome onttrek. Dit skakel nie die stroomonttrekkingsmetode na yt-dlp oor nie. Met yt-dlp gekies, kan formate wat slegs vir rekeninge is beskikbaar word, insluitend YouTube Premium se verbeterde bitsnelheid wanneer die rekening toegang het.
+    Use Cookies For: Kies waarvoor yt-dlp die opgestelde koekies gebruik. Afspeel gebruik hulle wanneer yt-dlp strome onttrek, sonder om die stroomonttrekkingsmetode na yt-dlp oor te skakel. Met yt-dlp gekies, kan formate wat slegs vir rekeninge is beskikbaar word, insluitend YouTube Premium se verbeterde bitsnelheid wanneer die rekening toegang het. Onderskrifte dek ook outomatiese vertalings.
     FFmpeg Executable Path: FFmpeg word benodig om afsonderlike video- en oudiostrome saam te voeg en vir oudio-omskakeling. By verstek sal OpenTubeX aanvaar dat FFmpeg via die PATH-omgewingsveranderlike gevind kan word. Indien nodig, kan ’n pasgemaakte pad hier gestel word.
-    Use cookies for subtitles: Gebruik die opgestelde koekies vir onderskrifte en outomatiese vertalings. Ook geaktiveer deur "Gebruik altyd koekies".
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Versteek gekykte video’s uit soekresultate, Volgende op die kykblad en YouTube-aanbevelings op die tuisblad. Outospeel slaan hulle ook oor."
     Hide Playlist Stats: Versteek die aantal video’s, die aantal kyke, die datum van die laaste opdatering en die totale duur op snitlysbladsye.

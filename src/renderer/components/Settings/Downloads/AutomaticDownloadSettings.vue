@@ -24,20 +24,28 @@
         </p>
       </div>
       <div class="automaticDownloadRequirements">
-        <FtToggleSwitch
+        <FtSelect
           v-if="isAndroid"
-          :label="t('Settings.Download Settings.Automatic Downloads Require Unmetered Network')"
-          :compact="true"
-          :default-value="requireUnmetered"
-          setting-key="ytDlpAutomaticDownloadsRequireUnmetered"
-          @change="value => store.dispatch('updateYtDlpAutomaticDownloadsRequireUnmetered', value)"
+          multiple
+          :placeholder="t('Settings.Download Settings.Automatic Download Conditions.Download Automatically Only')"
+          :empty-label="t('Global.None')"
+          :value="conditions"
+          setting-key="ytDlpAutomaticDownloadConditions"
+          :select-names="[
+            t('Settings.Download Settings.Automatic Download Conditions.On Unmetered Networks'),
+            t('Settings.Download Settings.Automatic Download Conditions.While Charging'),
+          ]"
+          :select-values="['unmetered', 'charging']"
+          :icon="['fas', 'clock']"
+          @change="value => store.dispatch('updateYtDlpAutomaticDownloadConditions', value)"
         />
         <FtToggleSwitch
+          v-else
           :label="t('Settings.Download Settings.Automatic Downloads Require Charging')"
           :compact="true"
-          :default-value="requireCharging"
-          setting-key="ytDlpAutomaticDownloadsRequireCharging"
-          @change="value => store.dispatch('updateYtDlpAutomaticDownloadsRequireCharging', value)"
+          :default-value="conditions.includes('charging')"
+          setting-key="ytDlpAutomaticDownloadConditions"
+          @change="updateRequireCharging"
         />
       </div>
       <FtInput
@@ -270,8 +278,20 @@ import { useListPagination } from '../../../composables/useListPagination'
 const { locale, t } = useI18n()
 // Electron cannot detect metered connections; Android exposes both states.
 const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
-const requireUnmetered = computed(() => store.getters.getYtDlpAutomaticDownloadsRequireUnmetered)
-const requireCharging = computed(() => store.getters.getYtDlpAutomaticDownloadsRequireCharging)
+/** @type {import('vue').ComputedRef<string[]>} */
+const conditions = computed(() => store.getters.getYtDlpAutomaticDownloadConditions)
+
+/**
+ * Only charging can be detected on desktop. Keeps the unmetered network
+ * condition, which synced settings can hold for Android.
+ * @param {boolean} value
+ */
+function updateRequireCharging(value) {
+  store.dispatch('updateYtDlpAutomaticDownloadConditions', [
+    ...conditions.value.filter(condition => condition !== 'charging'),
+    ...(value ? ['charging'] : []),
+  ])
+}
 const showManager = ref(false)
 const searchQuery = ref('')
 // Mount rule editors in batches so large subscription lists open quickly.

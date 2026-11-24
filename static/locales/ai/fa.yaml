@@ -78,6 +78,7 @@ Global:
   Show Blocked Item: نمایش مورد مسدودشده
   Auto: خودکار
   'Off': خاموش
+  None: هیچ‌کدام
 Search Listing:
   Label:
     Members Only: فقط اعضا
@@ -1130,6 +1131,7 @@ Settings:
       FCast Description: برنامه‌های گیرندهٔ FCast در شبکهٔ شما
       DLNA: DLNA
       DLNA Description: تلویزیون‌های هوشمند و پخش‌کننده‌های رسانه در شبکهٔ شما
+      Cast To: پخش روی
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1191,12 +1193,14 @@ Settings:
     Title Includes: عنوان شامل باشد
     Title Excludes: عنوان شامل نباشد
     Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
-    Automatic Downloads Require Unmetered Network: "فقط در شبکه‌های بدون محدودیت"
     Automatic Downloads Require Charging: "فقط هنگام شارژ"
+    Automatic Download Conditions:
+      Download Automatically Only: بارگیری خودکار فقط
+      On Unmetered Networks: در شبکه‌های بدون محدودیت
+      While Charging: هنگام شارژ
   External Software Settings:
     Create YouTube session: "ایجاد نشست YouTube"
     YouTube session hint: "در صورت نیاز وارد شوید و نشست را ذخیره کنید. در تنظیمات انتخاب کنید که برای بارگیری، پخش یا زیرنویس استفاده شود."
-    Use cookies for downloads: "استفاده از کوکی‌ها برای بارگیری"
     YouTube session failed: "ذخیرهٔ نشست YouTube ممکن نشد."
     Checking FFmpeg and FFprobe: در حال بررسی FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
@@ -1261,10 +1265,13 @@ Settings:
     Browser Profile Placeholder: نام یا مسیر نمایه
     Browser Profile Invalid: "نام نمایه را وارد کنید یا با دکمهٔ پوشه، پوشهٔ نمایه را انتخاب کنید."
     Select Browser: انتخاب مرورگر
-    Always Use Cookies: همیشه از کوکی‌ها استفاده شود
+    Cookie Uses:
+      Use Cookies For: استفاده از کوکی‌ها برای
+      Playback: پخش
+      Downloads: بارگیری‌ها
+      Subtitles: زیرنویس‌ها
     Restricted Playback Authentication Hint: OpenTubeX به‌طور پیش‌فرض تنها پس از انتخاب «تلاش با کوکی‌های تنظیم‌شده» برای ویدیوی دارای محدودیت سنی یا ویژهٔ اعضا، این کوکی‌ها را به yt-dlp می‌فرستد.
     Restricted Playback Authentication Warning: استفاده از yt-dlp با حساب Google ممکن است حساب را موقت یا دائم محدود کند.
-    Use cookies for subtitles: "استفاده از کوکی‌ها برای زیرنویس"
   Privacy Settings:
     Internet Connectivity Checks: "بررسی اتصال اینترنت"
     Internet Connectivity Checks Tooltip: "برای بررسی دسترسی به اینترنت، درخواست‌های کوچکی به سروری با میزبانی GrapheneOS ارسال می‌کند."
@@ -2619,9 +2626,8 @@ Tooltips:
     Cookie File: یک فایل کوکی با قالب Netscape برای پخش با احراز هویت انتخاب کنید.
     Browser for Cookies: پشتیبانی از مرورگر از فایل اجرایی yt-dlp انتخاب‌شده خوانده می‌شود. هنگام درخواست پخش با احراز هویت، OpenTubeX از yt-dlp می‌خواهد کوکی‌های این مرورگر را بخواند.
     Browser Profile: نام یا پوشه نمایه مرورگر، اختیاری است. برای استفاده از آخرین نمایه‌ای که به آن دسترسی داشته‌اید، خالی بگذارید.
-    Always Use Cookies: "از کوکی‌های پیکربندی‌شده برای بارگیری‌ها، زیرنویس‌ها و هر بار که yt-dlp جریان‌ها را استخراج می‌کند استفاده کنید. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد."
+    Use Cookies For: انتخاب کنید yt-dlp از کوکی‌های پیکربندی‌شده برای چه چیزهایی استفاده کند. پخش هر بار که yt-dlp جریان‌ها را استخراج می‌کند از آن‌ها استفاده می‌کند، بدون اینکه روش استخراج جریان به yt-dlp تغییر کند. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد. زیرنویس‌ها شامل ترجمه‌های خودکار نیز می‌شوند.
     FFmpeg Executable Path: برای ادغام جریان‌های جداگانه ویدیو و صدا و نیز تبدیل صدا، FFmpeg لازم است. OpenTubeX به‌طور پیش‌فرض فرض می‌کند FFmpeg از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
-    Use cookies for subtitles: "از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود. گزینهٔ «همیشه از کوکی‌ها استفاده شود» نیز این قابلیت را فعال می‌کند."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "ویدیوهای تماشاشده را از نتایج جستجو، بخش «تا بعدی» در صفحه تماشا و پیشنهادهای YouTube در صفحه اصلی پنهان می‌کند. پخش خودکار نیز از آن‌ها رد می‌شود."
     Hide Playlist Stats: تعداد ویدیوها، تعداد بازدیدها، تاریخ آخرین به‌روزرسانی و مدت کل را در صفحه‌های فهرست پخش پنهان می‌کند.

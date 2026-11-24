@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Näita blokeeritud üksust
   Auto: Automaatne
   'Off': Väljas
+  None: Puudub
 Search Listing:
   Label:
     Members Only: Ainult liikmetele
@@ -1093,6 +1094,7 @@ Settings:
       FCast Description: FCasti vastuvõtjarakendused sinu võrgus
       DLNA: DLNA
       DLNA Description: Nutitelerid ja meediamängijad sinu võrgus
+      Cast To: Edasta seadmesse
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1154,12 +1156,14 @@ Settings:
     Title Includes: Pealkiri sisaldab
     Title Excludes: Pealkiri ei sisalda
     Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
-    Automatic Downloads Require Unmetered Network: "Ainult mahupiiranguta võrkudes"
     Automatic Downloads Require Charging: "Ainult laadimise ajal"
+    Automatic Download Conditions:
+      Download Automatically Only: Laadi automaatselt alla ainult
+      On Unmetered Networks: Mahupiiranguta võrkudes
+      While Charging: Laadimise ajal
   External Software Settings:
     Create YouTube session: "Loo YouTube’i seanss"
     YouTube session hint: "Vajadusel logi sisse ja salvesta seanss. Vali seadetes, kas kasutada seda allalaadimiseks, esitamiseks või subtiitrite jaoks."
-    Use cookies for downloads: "Kasuta allalaadimisel küpsiseid"
     YouTube session failed: "YouTube’i seansi salvestamine ebaõnnestus."
     Checking FFmpeg and FFprobe: FFmpegi ja FFprobe’i kontrollimine…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
@@ -1224,10 +1228,13 @@ Settings:
     Browser Profile Placeholder: Profiili nimi või asukoht
     Browser Profile Invalid: "Sisesta profiili nimi või vali kaustanupuga profiilikaust."
     Select Browser: Vali brauser
-    Always Use Cookies: Kasuta alati küpsiseid
+    Cookie Uses:
+      Use Cookies For: Kasuta küpsiseid
+      Playback: Esitus
+      Downloads: Allalaadimised
+      Subtitles: Subtiitrid
     Restricted Playback Authentication Hint: Vaikimisi edastab OpenTubeX need küpsised yt-dlp-le alles siis, kui valid vanusepiiranguga või ainult liikmetele mõeldud video juures "Proovi seadistatud küpsistega".
     Restricted Playback Authentication Warning: yt-dlp kasutamine Google’i kontoga võib kaasa tuua ajutised või püsivad kontopiirangud.
-    Use cookies for subtitles: "Kasuta subtiitrite jaoks küpsiseid"
   Privacy Settings:
     Internet Connectivity Checks: "Internetiühenduse kontrollid"
     Internet Connectivity Checks Tooltip: "Saadab väikeseid päringuid GrapheneOS-i majutatud serverisse internetiühenduse kontrollimiseks."
@@ -2520,9 +2527,8 @@ Tooltips:
     Cookie File: Vali autentitud esitamiseks Netscape'i vormingus küpsisefail.
     Browser for Cookies: Brauseritugi tuvastatakse valitud yt-dlp täitmisfailist. Autenditud esituse taotlemisel käsib OpenTubeX yt-dlp-l sellest brauserist küpsiseid lugeda.
     Browser Profile: Valikuline brauseriprofiili nimi või kaust. Viimati kasutatud profiili valimiseks jäta väli tühjaks.
-    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs."
+    Use Cookies For: Vali, milleks yt-dlp seadistatud küpsiseid kasutab. Esitus kasutab neid alati, kui yt-dlp voogusid hangib, ilma et voo eraldamise meetodiks muutuks yt-dlp. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs. Subtiitrid hõlmavad ka automaatseid tõlkeid.
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
-    Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Peidab vaadatud videod otsingutulemustest, vaatamislehe jaotisest Järgmisena ja avalehe YouTube’i soovitustest. Automaatesitus jätab need samuti vahele."
     Hide Playlist Stats: Peidab esitusloendite lehtedel videote arvu, vaatamiste arvu, viimase uuendamise kuupäeva ja kogukestuse.

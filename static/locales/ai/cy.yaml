@@ -76,6 +76,7 @@ Global:
   Show Blocked Item: Dangos eitem wedi'i blocio
   Auto: Awtomatig
   'Off': I ffwrdd
+  None: Dim
 Search Listing:
   Label:
     Members Only: Aelodau yn unig
@@ -1096,6 +1097,7 @@ Settings:
       FCast Description: Apiau derbyn FCast ar eich rhwydwaith
       DLNA: DLNA
       DLNA Description: Setiau teledu clyfar a chwaraewyr cyfryngau ar eich rhwydwaith
+      Cast To: Castio i
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1157,12 +1159,14 @@ Settings:
     Title Includes: Mae'r teitl yn cynnwys
     Title Excludes: Nid yw'r teitl yn cynnwys
     Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
-    Automatic Downloads Require Unmetered Network: "Ar rwydweithiau heb fesurydd yn unig"
     Automatic Downloads Require Charging: "Wrth wefru yn unig"
+    Automatic Download Conditions:
+      Download Automatically Only: Lawrlwytho'n awtomatig dim ond
+      On Unmetered Networks: Ar rwydweithiau heb fesurydd
+      While Charging: Wrth wefru
   External Software Settings:
     Create YouTube session: "Creu sesiwn YouTube"
     YouTube session hint: "Mewngofnodwch os oes angen, yna cadwch y sesiwn. Dewiswch yn y gosodiadau a ddylid ei defnyddio ar gyfer lawrlwythiadau, chwarae neu isdeitlau."
-    Use cookies for downloads: "Defnyddio cwcis ar gyfer lawrlwythiadau"
     YouTube session failed: "Methu cadw'r sesiwn YouTube."
     Checking FFmpeg and FFprobe: Wrthi'n gwirio FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Nid yw FFmpeg/FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
@@ -1227,10 +1231,13 @@ Settings:
     Browser Profile Placeholder: Enw neu lwybr proffil
     Browser Profile Invalid: "Rhowch enw proffil, neu dewiswch ffolder proffil gyda’r botwm ffolder."
     Select Browser: Dewis porwr
-    Always Use Cookies: Defnyddio cwcis bob amser
+    Cookie Uses:
+      Use Cookies For: Defnyddio cwcis ar gyfer
+      Playback: Chwarae
+      Downloads: Lawrlwythiadau
+      Subtitles: Isdeitlau
     Restricted Playback Authentication Hint: Yn ddiofyn, dim ond ar ôl i chi ddewis "Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu" ar fideo sydd â chyfyngiad oedran neu sydd i aelodau yn unig y bydd OpenTubeX yn trosglwyddo'r cwcis hyn i yt-dlp.
     Restricted Playback Authentication Warning: Gall defnyddio yt-dlp gyda chyfrif Google arwain at gyfyngiadau dros dro neu barhaol ar y cyfrif.
-    Use cookies for subtitles: "Defnyddio cwcis ar gyfer isdeitlau"
   Privacy Settings:
     Internet Connectivity Checks: "Gwiriadau cysylltiad rhyngrwyd"
     Internet Connectivity Checks Tooltip: "Yn anfon ceisiadau bach at weinydd a gynhelir gan GrapheneOS i wirio mynediad i’r rhyngrwyd."
@@ -2555,9 +2562,8 @@ Tooltips:
     Cookie File: Dewiswch ffeil cwcis wedi'i fformatio ar gyfer Netscape er mwyn chwarae wedi'i ddilysu.
     Browser for Cookies: Darllenir cynhaliaeth porwyr o'r ffeil weithredadwy yt-dlp a ddewiswyd. Mae OpenTubeX yn gofyn i yt-dlp ddarllen y porwr hwn pan ofynnir am chwarae wedi'i ddilysu.
     Browser Profile: Enw neu ffolder proffil porwr dewisol. Gadewch yn wag i ddefnyddio'r proffil y cyrchwyd ato ddiwethaf.
-    Always Use Cookies: "Defnyddiwch y cwcis wedi'u ffurfweddu ar gyfer lawrlwythiadau, isdeitlau a phryd bynnag y mae yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati."
+    Use Cookies For: Dewiswch ar gyfer beth y mae yt-dlp yn defnyddio'r cwcis wedi'u ffurfweddu. Mae Chwarae yn eu defnyddio pryd bynnag y mae yt-dlp yn echdynnu ffrydiau, heb newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati. Mae Isdeitlau hefyd yn cynnwys cyfieithiadau awtomatig.
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
-    Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:
     Hide Watched in Search and Recommendations: "Yn cuddio fideos rydych wedi’u gwylio o ganlyniadau chwilio, Nesaf ar y dudalen wylio, ac argymhellion YouTube ar y Cartref. Mae chwarae awtomatig yn eu hepgor hefyd."
     Hide Playlist Stats: Yn cuddio nifer y fideos, nifer y gwyliadau, dyddiad y diweddariad diwethaf a’r hyd cyfan ar dudalennau rhestrau chwarae.

@@ -23,32 +23,27 @@ test('accepts only HTTPS YouTube WebVTT and SRT requests for cookie authenticati
   ]) assert.equal(isYouTubeSubtitleUrl(invalid), false, String(invalid))
 })
 
-test('both cookie switches authenticate the exact selected translation', async () => {
-  for (const getters of [
-    { getYtDlpSubtitleUseCookies: true },
-    { getYtDlpPlaybackAlwaysUseCookies: true },
-    { getYtDlpPlaybackAlwaysUseCookies: true, getYtDlpSubtitleUseCookies: true },
-  ]) {
-    const authenticatedUrl = await getSubtitleRequestUrl(url, getters, {
-      ytDlpGetSubtitle: async requestedUrl => {
-        assert.equal(requestedUrl, url)
-        return vtt
-      }
-    })
-    assert.equal(await (await fetch(authenticatedUrl)).text(), vtt)
-  }
+test('the subtitles cookie use authenticates the exact selected translation', async () => {
+  const authenticatedUrl = await getSubtitleRequestUrl(url, { getYtDlpCookieUses: ['subtitles'] }, {
+    ytDlpGetSubtitle: async requestedUrl => {
+      assert.equal(requestedUrl, url)
+      return vtt
+    }
+  })
+  assert.equal(await (await fetch(authenticatedUrl)).text(), vtt)
 })
 
 test('does not send other requests or disabled requests through yt-dlp', async () => {
   const electron = { ytDlpGetSubtitle: () => assert.fail('Unexpected cookie request') }
   assert.equal(await getSubtitleRequestUrl(url, {}, electron), url)
+  assert.equal(await getSubtitleRequestUrl(url, { getYtDlpCookieUses: ['playback', 'downloads'] }, electron), url)
   const otherUrl = 'https://invidious.example/api/v1/captions/eeeeeeeeeee'
-  assert.equal(await getSubtitleRequestUrl(otherUrl, { getYtDlpSubtitleUseCookies: true }, electron), otherUrl)
-  assert.equal(await getSubtitleRequestUrl(url, { getYtDlpSubtitleUseCookies: true }, null), url)
+  assert.equal(await getSubtitleRequestUrl(otherUrl, { getYtDlpCookieUses: ['subtitles'] }, electron), otherUrl)
+  assert.equal(await getSubtitleRequestUrl(url, { getYtDlpCookieUses: ['subtitles'] }, null), url)
 })
 
 test('uses normal fetching when no cookie source is configured and reports download errors', async () => {
-  const getters = { getYtDlpSubtitleUseCookies: true }
+  const getters = { getYtDlpCookieUses: ['subtitles'] }
   assert.equal(await getSubtitleRequestUrl(url, getters, { ytDlpGetSubtitle: async () => null }), url)
   await assert.rejects(getSubtitleRequestUrl(url, getters, {
     ytDlpGetSubtitle: async () => ({ error: 'Unable to load subtitle with configured cookies' })
@@ -57,7 +52,7 @@ test('uses normal fetching when no cookie source is configured and reports downl
 
 test('preserves the SRT format used by automatic caption translations', async () => {
   const srt = '1\n00:00:00,000 --> 00:00:01,000\nÜbersetzung\n'
-  const result = await getSubtitleRequestUrl(url.replace('fmt=vtt', 'fmt=srt'), { getYtDlpSubtitleUseCookies: true }, {
+  const result = await getSubtitleRequestUrl(url.replace('fmt=vtt', 'fmt=srt'), { getYtDlpCookieUses: ['subtitles'] }, {
     ytDlpGetSubtitle: async () => srt
   })
   assert.match(result, /^data:text\/srt;/)
@@ -67,13 +62,13 @@ test('preserves the SRT format used by automatic caption translations', async ()
 test('keeps authenticated automatic captions centered instead of forcing position:0%', async () => {
   const caption = vtt.replace('00:00:01.000', '00:00:01.000 align:start position:0%')
   const authenticatedUrl = await getSubtitleRequestUrl(`${url}&caps=asr&kind=asr`, {
-    getYtDlpSubtitleUseCookies: true
+    getYtDlpCookieUses: ['subtitles']
   }, { ytDlpGetSubtitle: async () => caption })
   assert.equal(await (await fetch(authenticatedUrl)).text(), vtt)
 
   // Uploaded captions retain the author's positioning.
   const uploadedUrl = await getSubtitleRequestUrl(url, {
-    getYtDlpSubtitleUseCookies: true
+    getYtDlpCookieUses: ['subtitles']
   }, { ytDlpGetSubtitle: async () => caption })
   assert.equal(await (await fetch(uploadedUrl)).text(), caption)
 })
