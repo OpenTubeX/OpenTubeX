@@ -1744,10 +1744,14 @@ function observeHeaderRow() {
     headerResizeObserver.observe(child)
   }
 
+  // Every candidate for groupBarItems, as filtering them would lay out the page
   const groupBar = subscriptionGroupsRef.value?.$el
   if (groupBar instanceof HTMLElement) {
-    for (const item of groupBarItems(groupBar)) {
-      headerResizeObserver.observe(item)
+    for (const child of groupBar.children) {
+      headerResizeObserver.observe(child)
+      for (const item of child.children) {
+        headerResizeObserver.observe(item)
+      }
     }
   }
 }
@@ -1768,8 +1772,9 @@ watch([
 ], () => {
   const restoreFocus = headerRowRef.value?.querySelector('.markAllSeenButton') === document.activeElement
   nextTick(() => {
+    // Observing the elements again measures them once the page is laid out.
     observeHeaderRow()
-    updateHeaderLayout()
+    if (headerResizeObserver === null) updateHeaderLayout()
     // Moving the button between rows must preserve keyboard focus.
     if (restoreFocus) {
       headerRowRef.value?.querySelector('.markAllSeenButton')?.focus({ preventScroll: true })
@@ -1782,20 +1787,23 @@ const tabsContainerRef = useTemplateRef('tabsContainerRef')
 // Other tabs need measuring at their full size again
 watch(visibleTabs, () => {
   compactTabs.value = false
-  nextTick(updateHeaderLayout)
+  nextTick(() => {
+    if (headerResizeObserver === null) updateHeaderLayout()
+    else observeHeaderRow()
+  })
 })
 
 onMounted(() => {
+  // The observer's first report measures the header once the page is laid
+  // out. Measuring now would lay out the page while it mounts.
   if (typeof ResizeObserver === 'function') {
     headerResizeObserver = new ResizeObserver(() => {
       updateHeaderLayout()
     })
     observeHeaderRow()
+  } else {
+    nextTick(updateHeaderLayout)
   }
-
-  nextTick(() => {
-    updateHeaderLayout()
-  })
 })
 
 onBeforeUnmount(() => {
