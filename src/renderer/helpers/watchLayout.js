@@ -195,6 +195,12 @@ export function createWatchLayoutAnimator() {
       ], ANIMATION_OPTIONS)))
     })
 
+    // Nothing moved, so no finished animation would restore the overflow.
+    if (animations.length === 0) {
+      cleanUp()
+      return
+    }
+
     if (insetElements.size > 0) {
       placeFixedBackgrounds()
       document.addEventListener('scroll', placeFixedBackgrounds, { capture: true, passive: true })
