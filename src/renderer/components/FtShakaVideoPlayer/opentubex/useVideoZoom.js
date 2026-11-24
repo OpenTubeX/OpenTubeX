@@ -91,16 +91,49 @@ export function useVideoZoom({
 
   const quarterTurned = computed(() => rotation.value % 180 !== 0)
 
+  /**
+   * The angle the transform turns the video by. It follows the selected rotation the shortest
+   * way around, so a turn can end outside 0 to 270 degrees, and it returns there once the turn
+   * has finished animating (settleVideoRotation).
+   */
+  const renderedRotation = ref(rotation.value)
+  /** Whether a turn may still be animating */
+  let videoRotationTurning = false
+
+  /**
+   * @param {number} angle in degrees
+   * @returns {number} the same turn between -180 (exclusive) and 180 degrees, so half turns go clockwise
+   */
+  function shortestTurn(angle) {
+    const clockwise = ((angle % 360) + 360) % 360
+    return clockwise > 180 ? clockwise - 360 : clockwise
+  }
+
+  watch(rotation, (value) => {
+    let from = renderedRotation.value
+    // A selection during a turn continues from the angle on screen, which lies within half a
+    // turn of where that turn is heading.
+    const transform = videoRotationTurning && video.value ? getComputedStyle(video.value).transform : 'none'
+    if (transform !== 'none') {
+      const matrix = new DOMMatrix(transform)
+      from -= shortestTurn(from - Math.atan2(matrix.b, matrix.a) * 180 / Math.PI)
+    }
+    renderedRotation.value = Math.round(from + shortestTurn(value - from))
+    videoRotationTurning = true
+  })
+
+  /** Whether the next transform applies without animating */
+  const videoTransformJumping = ref(false)
+
   const videoZoomStyle = computed(() => {
-    const transforms = []
+    // Part of the binding, which Vue drops as a whole once it is empty.
+    const transition = videoTransformJumping.value ? { transition: 'none' } : undefined
 
-    if (rotation.value !== 0) {
-      transforms.push(`rotate(${rotation.value}deg)`)
-    }
+    if (renderedRotation.value === 0 && rotationFit.value === 1 && !videoZoomPannable.value) return transition
 
-    if (rotationFit.value !== 1) {
-      transforms.push(`scale(${rotationFit.value})`)
-    }
+    // Every transform starts with the same functions, so that a turn interpolates its angle
+    // instead of the matrix, whose interpolation picks its own direction.
+    const transforms = [`rotate(${renderedRotation.value}deg)`, `scale(${rotationFit.value})`]
 
     if (videoZoomPannable.value) {
       // The translation is applied in the video's own coordinate system, which
@@ -114,25 +147,34 @@ export function useVideoZoom({
       transforms.push(`scale(${videoZoom.value}) translate(${offset.x * limit}%, ${offset.y * limit}%)`)
     }
 
-    if (transforms.length === 0) return undefined
-
     // For the layouts that replace this transform but keep the rotation.
-    return { transform: transforms.join(' '), '--video-rotation': `${rotation.value}deg` }
+    return { ...transition, transform: transforms.join(' '), '--video-rotation': `${rotation.value}deg` }
   })
 
-  // The transform animates in fullscreen. Turning the video, or a resize that changes how a
-  // turned video fits, jumps instead, so that a pinch can always divide the fit out of the
-  // rendered scale to get the zoom.
-  watch([rotation, rotationFit], () => {
-    if (video.value) video.value.style.transition = 'none'
+  // Turning the video animates. A resize that changes how a turned video fits jumps
+  // instead, because the animation would lag behind the resize.
+  watch([rotation, rotationFit], ([newRotation], [oldRotation]) => {
+    if (newRotation === oldRotation) videoTransformJumping.value = true
   })
-  watch([rotation, rotationFit], () => {
-    const videoElement = video.value
-    if (!videoElement) return
+  watch(videoTransformJumping, (jumping) => {
+    if (!jumping) return
     // Applies the new transform before the transition comes back.
-    videoElement.getBoundingClientRect()
-    videoElement.style.transition = ''
+    video.value?.getBoundingClientRect()
+    videoTransformJumping.value = false
   }, { flush: 'post' })
+
+  /**
+   * Brings the angle back to the selected rotation once a turn has finished, which looks
+   * the same but keeps later turns short and drops the transform when the video is upright.
+   * @param {TransitionEvent} event
+   */
+  function settleVideoRotation(event) {
+    if (event.target !== video.value || event.propertyName !== 'transform') return
+    videoRotationTurning = false
+    if (renderedRotation.value === rotation.value) return
+    videoTransformJumping.value = true
+    renderedRotation.value = rotation.value
+  }
 
   watch(videoZoomPannable, (pannable) => {
     if (!pannable) {
@@ -216,6 +258,14 @@ export function useVideoZoom({
   function getVideoZoomGestureGeometry() {
     const videoElement = video.value
     if (!videoElement) return null
+
+    // A pinch divides the fit of the new rotation out of the rendered scale, so a turn that
+    // is still animating finishes first.
+    if (videoRotationTurning) {
+      for (const animation of videoElement.getAnimations()) {
+        if (animation instanceof CSSTransition && animation.transitionProperty === 'transform') animation.finish()
+      }
+    }
 
     const bounds = videoElement.getBoundingClientRect()
     const transform = getComputedStyle(videoElement).transform
@@ -637,6 +687,7 @@ export function useVideoZoom({
     handleVideoZoomPointerLeave,
     moveVideoZoomPan,
     moveVideoZoomPinch,
+    settleVideoRotation,
     startVideoZoomGesture,
     suppressVideoZoomClick,
     updateVideoZoom,
