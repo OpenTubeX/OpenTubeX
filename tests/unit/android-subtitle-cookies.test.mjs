@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { isYouTubeSubtitleUrl } from '../../src/youtubeSubtitle.js'
 import { usesYtDlpCookiesFor } from '../../src/ytDlpCookieUses.js'
+import { getCaptionTranslationLanguage } from '../../src/renderer/helpers/player/captionTranslation.js'
 
 const url = 'https://www.youtube.com/api/timedtext?v=eeeeeeeeeee&lang=en&tlang=de&fmt=vtt&pot=test-token'
 const vtt = 'WEBVTT\n\n00:00:00.000 --> 00:00:01.000\nÜbersetzung\n'
@@ -37,11 +38,14 @@ test('subtitle helper selects the Android bridge without an Electron global', as
     .replace(/^export /gm, '')
     .replace(/import\('\.\.\/ytDlp(?:\.js)?'\)/g, 'Promise.resolve({ ytDlp: androidBridge })')
   const bridge = { ytDlpGetSubtitle: async requested => { assert.equal(requested, url); return vtt } }
-  const helper = isLiteBuild => new Function('process', 'globalThis', 'isYouTubeSubtitleUrl', 'usesYtDlpCookiesFor', 'androidBridge', 'isLiteBuild', `${source}\nreturn getSubtitleRequestUrl`)(
-    { env: { IS_CAPACITOR: true } }, { window: {} }, isYouTubeSubtitleUrl, usesYtDlpCookiesFor, bridge, isLiteBuild)
+  const getTranslatedCaptionUrl = async (requested, language) => `translated:${language}`
+  const helper = isLiteBuild => new Function('process', 'globalThis', 'isYouTubeSubtitleUrl', 'usesYtDlpCookiesFor', 'androidBridge', 'isLiteBuild',
+    'getCaptionTranslationLanguage', 'getTranslatedCaptionUrl', `${source}\nreturn getSubtitleRequestUrl`)(
+    { env: { IS_CAPACITOR: true } }, { window: {} }, isYouTubeSubtitleUrl, usesYtDlpCookiesFor, bridge, isLiteBuild,
+    getCaptionTranslationLanguage, getTranslatedCaptionUrl)
   const result = await helper(false)(url, { getYtDlpCookieUses: ['subtitles'] })
   assert.match(result, /^data:text\/vtt;/)
   assert.equal(await (await fetch(result)).text(), vtt)
-  // Lite Android builds omit yt-dlp, so subtitles load directly.
-  assert.equal(await helper(true)(url, { getYtDlpCookieUses: ['subtitles'] }), url)
+  // Lite Android builds omit yt-dlp, so they translate the original track instead.
+  assert.equal(await helper(true)(url, { getYtDlpCookieUses: ['subtitles'] }), 'translated:de')
 })

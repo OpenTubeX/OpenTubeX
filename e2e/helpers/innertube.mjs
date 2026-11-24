@@ -99,6 +99,66 @@ function slugify(text) {
   return text.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-').replaceAll(/^-|-$/g, '').slice(0, 80)
 }
 
+/**
+ * @param {Buffer} buffer a protobuf message
+ * @returns {Map<number, Buffer>} its length-delimited fields
+ */
+function readProtobufFields(buffer) {
+  const fields = new Map()
+  let offset = 0
+  const readVarint = () => {
+    let value = 0
+    let shift = 0
+    let byte
+    do {
+      byte = buffer[offset++]
+      value += (byte & 0x7f) * 2 ** shift
+      shift += 7
+    } while (byte & 0x80)
+    return value
+  }
+  while (offset < buffer.length) {
+    const key = readVarint()
+    const wireType = key & 7
+    if (wireType === 0) readVarint()
+    else if (wireType === 1) offset += 8
+    else if (wireType === 5) offset += 4
+    else if (wireType === 2) {
+      const length = readVarint()
+      fields.set(Math.floor(key / 8), buffer.subarray(offset, offset + length))
+      offset += length
+    } else throw new Error(`Unsupported protobuf wire type ${wireType}`)
+  }
+  return fields
+}
+
+/**
+ * Reads a translation request to /comment/perform_comment_action, which captions use as well.
+ * @param {string} postData
+ * @returns {{ text: string, targetLanguage: string } | null} `null` for other comment actions
+ */
+export function decodeCommentTranslationAction(postData) {
+  const action = Buffer.from(JSON.parse(postData).actions[0], 'base64')
+  const translation = readProtobufFields(action).get(31)
+  if (!translation) return null
+  const translationFields = readProtobufFields(translation)
+  const comment = readProtobufFields(translationFields.get(3)).get(1)
+  return {
+    text: readProtobufFields(comment).get(1).toString(),
+    targetLanguage: translationFields.get(4).toString()
+  }
+}
+
+/**
+ * @param {string} content
+ * @returns {string} a /comment/perform_comment_action response with the translation
+ */
+export function commentTranslationResponse(content) {
+  return JSON.stringify({
+    frameworkUpdates: { entityBatchUpdate: { mutations: [{ payload: { commentEntityPayload: { translatedContent: { content } } } }] } }
+  })
+}
+
 export function fixtureDirFor(testInfo) {
   return path.join(fixturesRoot, slugify(path.basename(testInfo.file, '.spec.mjs')), slugify(testInfo.title))
 }

@@ -2,6 +2,7 @@ import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../
 import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
+import { decodeCommentTranslationAction } from '../../helpers/innertube.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -1186,24 +1187,31 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect.poll(() => translations.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await attachScreenshot('auto-translate language grid')
 
-  const isFrenchCaptions = url => url.pathname === '/api/timedtext' && url.searchParams.get('tlang') === 'fr'
-  const frenchResponse = page.waitForResponse(response => isFrenchCaptions(new URL(response.url())))
+  // Signed out, the original captions are translated with the comment translation service
+  const isTranslationInto = (request, language) => request.url().includes('/comment/perform_comment_action') &&
+    decodeCommentTranslationAction(request.postData())?.targetLanguage === language
+  const frenchResponse = page.waitForResponse(response => isTranslationInto(response.request(), 'fr'))
+  const germanResponse = page.waitForResponse(response => isTranslationInto(response.request(), 'de'))
   // Selecting a language closes the menu once its captions load. Hold French
-  // until German is chosen, so the later choice always overtakes the earlier one.
+  // until German has loaded, so the later choice always overtakes the earlier one.
   let releaseFrench
   const frenchHeld = new Promise(resolve => { releaseFrench = resolve })
-  await page.route(isFrenchCaptions, async route => {
-    await frenchHeld
+  await page.route(/\/comment\/perform_comment_action/, async (route, request) => {
+    if (isTranslationInto(request, 'fr')) await frenchHeld
     await route.fallback()
   })
   await translations.getByRole('button', { name: 'French' }).click()
   await translations.getByRole('button', { name: 'German' }).click()
-  releaseFrench()
+  await germanResponse
   await expect(player.locator('.shaka-text-languages')).toBeVisible()
   expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  releaseFrench()
   await frenchResponse
-  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  // The late French track is still added, but German stays selected
+  const captionLanguages = player.locator('.shaka-text-languages')
+  await expect(captionLanguages.getByRole('menuitemradio', { name: /^French/ })).toHaveCount(1)
+  await expect(captionLanguages.getByRole('menuitemradio', { name: /^German/ })).toHaveAttribute('aria-checked', 'true')
 
   const watchComponent = await page.evaluateHandle(findWatchComponent)
   await watchComponent.evaluate(async (component) => {
@@ -1249,14 +1257,19 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await openPlayerOptions(player)
   await openCaptionLanguages(player)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
-  const nextVideoTranslationRequest = page.waitForRequest(request => {
+  const nextVideoOriginalRequest = page.waitForRequest(request => {
     const url = new URL(request.url())
     return url.pathname === '/api/timedtext' &&
       url.searchParams.get('v') === nextVideoId &&
-      url.searchParams.get('tlang') === 'de'
+      url.searchParams.get('fmt') === 'srt' &&
+      !url.searchParams.has('tlang')
   })
+  const nextVideoTranslationRequest = page.waitForRequest(request => isTranslationInto(request, 'de'))
   await translations.getByRole('button', { name: 'German' }).click()
+  await nextVideoOriginalRequest
   await nextVideoTranslationRequest
+  await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getTextTracks()
+    .some(track => track.active && track.language === 'de'))).toBe(true)
   await watchComponent.dispose()
 })
 

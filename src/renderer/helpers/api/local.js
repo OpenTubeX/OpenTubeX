@@ -18,7 +18,8 @@ import { loadSearchContinuation } from '../search-continuation'
 import { disableSearchSpellCorrection, parseSearchCorrection } from '../search-correction'
 import {
   getCommentTranslationSource,
-  requestCommentTranslation
+  requestCommentTranslation,
+  sanitizeCommentTranslationSource
 } from '../comment-translations'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
@@ -182,6 +183,30 @@ export async function translateCommentText(text, targetLanguage) {
     const innertube = await createInnertube()
     return await innertube.interact.translate(source, language)
   })
+}
+
+/**
+ * Translates caption lines with the comment translation service, which, unlike
+ * YouTube's caption translations, needs no signed-in account.
+ * @param {string} text newline-separated lines
+ * @param {string} targetLanguage
+ * @returns {Promise<string>} the translated lines
+ */
+export async function translateCaptionText(text, targetLanguage) {
+  const innertube = await createInnertube()
+  let response
+  try {
+    response = await innertube.interact.translate(text, targetLanguage)
+  } catch (error) {
+    // The service can reject emoji and other symbols. Music notes translate
+    // fine, so they are only dropped after a rejection.
+    const sanitized = text.split('\n').map(sanitizeCommentTranslationSource).join('\n')
+    if (sanitized === text) throw error
+    response = await innertube.interact.translate(sanitized, targetLanguage)
+  }
+  const { translated_content: translatedContent } = response
+  if (typeof translatedContent !== 'string') throw new Error('YouTube did not return a caption translation')
+  return translatedContent
 }
 
 export async function getLocalPlaylist(id, signal) {

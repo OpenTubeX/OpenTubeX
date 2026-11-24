@@ -6,7 +6,7 @@ import { gunzipSync } from 'node:zlib'
 import { expect } from '@playwright/test'
 
 import { abortUnmockedRequest, repoRoot } from './app.mjs'
-import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
+import { commentTranslationResponse, decodeCommentTranslationAction, fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
 import { DEMO_MEDIA_DURATION_SECONDS, demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
 export const emptyCommentsResponse = JSON.stringify({
@@ -271,9 +271,7 @@ export async function mockWatchPage(app, page, {
         contentType: format === 'srt' ? 'application/x-subrip' : 'text/vtt',
         body
       })
-      return format === 'srt' && searchParams.get('tlang') === 'fr'
-        ? new Promise(resolve => setTimeout(resolve, 250)).then(fulfill)
-        : fulfill()
+      return fulfill()
     })
   }
 
@@ -477,6 +475,16 @@ export async function mockWatchPage(app, page, {
 
     return route.fallback()
   })
+
+  if (captionTranslations) {
+    // Signed out, the app translates the original captions with the comment translation service
+    await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, (route, request) => {
+      const translation = decodeCommentTranslationAction(request.postData())
+      if (!translation) return route.fallback()
+      const content = translation.text.split('\n').map(line => `[${translation.targetLanguage}] ${line}`).join('\n')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: commentTranslationResponse(content) })
+    })
+  }
 }
 
 /** @see mockWatchPage */
