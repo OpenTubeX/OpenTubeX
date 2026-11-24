@@ -132,7 +132,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         : Promise.reject(new Error('Offline mini-player test'))
       const style = document.createElement('style')
       style.id = 'mini-player-test-style'
-      style.textContent = '.tutorialOverlay { display: none !important; }'
+      // Toasts, such as an available yt-dlp update, can cover the docked bar.
+      style.textContent = '.tutorialOverlay, .toast-holder { display: none !important; }'
       document.head.append(style)
       location.hash = '#/watch/jNQXAC9IVRw'
       return saved
@@ -544,6 +545,10 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
       await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(64, 1)
       await player.locator('.mobileMiniBarExpand').click()
+      // Measure the expanded bar, not a frame of its expansion.
+      await expect(player.locator('.mobileMiniBarExpand')).toHaveAttribute('aria-expanded', 'true')
+      await expect.poll(() => player.evaluate(element =>
+        element.getAnimations({ subtree: true }).every(animation => animation.playState !== 'running'))).toBe(true)
       const bar = await player.boundingBox()
       const up = { x: bar.x + 30, y: bar.y + 20 }
       await touch('touchStart', up)
@@ -955,6 +960,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
     await loadTestVideo()
     await page.evaluate(() => { location.hash = '#/subscriptions' })
     await expect(close).toBeEnabled()
+    // A busy emulator can skip every frame of the 140ms close motion.
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
     await trackDismissal()
     const closeBox = await close.boundingBox()
     await touch('touchStart', { x: closeBox.x + closeBox.width / 2, y: closeBox.y + closeBox.height / 2 })
