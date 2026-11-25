@@ -119,6 +119,7 @@
         vrMode: useVrMode,
         playerPaused: playerPaused && hasLoaded,
         bufferingSpinnerShown,
+        autoplayPending: autoplayLoading,
         endedScreenShown: showEndedScreen && endedRecommendations.length > 0,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
@@ -3404,14 +3405,43 @@ let resumeAutoplayAfterSeek = false
 let initialAutoplayCanceled = false
 
 /**
+ * Autoplay starts once the browser has enough data, not when Shaka stops
+ * buffering, and startup seeks (saved progress, SponsorBlock) restart that wait.
+ * @param {HTMLVideoElement} mediaElement
+ */
+function isAwaitingAutoplay(mediaElement) {
+  return mediaElement.paused && mediaElement.autoplay && mediaElement.played.length === 0 &&
+    !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
+}
+
+/**
  * A video still waiting for autoplay counts as playing.
  * @param {HTMLVideoElement} mediaElement
  */
 function isPausedByUser(mediaElement) {
-  const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
-    !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
-  return mediaElement.paused && !awaitingAutoplay
+  return mediaElement.paused && !isAwaitingAutoplay(mediaElement)
 }
+
+// Shows the spinner instead of the play button until autoplay starts, so a
+// video that is about to play never looks paused while it loads.
+const autoplayPending = ref(false)
+function updateAutoplayPending() {
+  autoplayPending.value = !!video.value && isAwaitingAutoplay(video.value)
+}
+// Every change to the inputs above comes with one of these events or an
+// autoplay attribute change, as canceling autoplay before it starts fires no pause.
+const AUTOPLAY_PENDING_EVENTS = ['loadstart', 'emptied', 'loadedmetadata', 'loadeddata', 'canplay',
+  'canplaythrough', 'play', 'pause', 'seeking', 'seeked', 'waiting']
+/** @type {MutationObserver|undefined} */
+let autoplayAttributeObserver
+onMounted(() => {
+  const mediaElement = video.value
+  for (const type of AUTOPLAY_PENDING_EVENTS) mediaElement.addEventListener(type, updateAutoplayPending)
+  autoplayAttributeObserver = new MutationObserver(updateAutoplayPending)
+  autoplayAttributeObserver.observe(mediaElement, { attributeFilter: ['autoplay'] })
+  updateAutoplayPending()
+})
+onBeforeUnmount(() => autoplayAttributeObserver?.disconnect())
 
 // When the viewer paused playback, consumed by the next play.
 /** @type {number|null} */
@@ -7465,6 +7495,8 @@ function handlePause() {
   if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
     initialAutoplayCanceled = true
   }
+  // Also called directly, without a pause event.
+  updateAutoplayPending()
   const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
   if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
   // Only a pause during playback rewinds on resume. Ending, scrubbing,
@@ -8544,6 +8576,8 @@ let preRollIntervalId = null
 const countdownRemainingMs = computed(() => sabrBackoffRemainingMs.value || preRollRemainingMs.value)
 const countdownDurationMs = computed(() => sabrBackoffRemainingMs.value > 0 ? sabrBackoffDurationMs.value : preRollDurationMs.value)
 const showCountdownOverlay = computed(() => countdownRemainingMs.value > 0)
+// A countdown shows the wait itself and keeps the play button to cancel autoplay.
+const autoplayLoading = computed(() => autoplayPending.value && !showCountdownOverlay.value)
 const countdownTimeSeconds = computed(() => +(countdownRemainingMs.value / 1000).toFixed(1))
 const countdownTimeLabel = computed(() => `${countdownTimeSeconds.value}s`)
 const countdownAriaLabel = computed(() => {
@@ -12203,9 +12237,9 @@ const mediaWaiting = ref(false)
 // the same delay as in bufferSpinner.css, so short buffers while seeking keep it.
 const bufferingSpinnerShown = ref(false)
 let bufferingSpinnerTimeout
-watch(isBuffering, (buffering) => {
+watch(() => isBuffering.value || autoplayLoading.value, (loading) => {
   clearTimeout(bufferingSpinnerTimeout)
-  if (buffering) {
+  if (loading) {
     bufferingSpinnerTimeout = setTimeout(() => { bufferingSpinnerShown.value = true }, 400)
   } else {
     bufferingSpinnerShown.value = false
@@ -13108,7 +13142,7 @@ async function handleLoaded() {
   // Seeks already applied in that interval must not survive to a later rebuffer.
   if (videoLayoutReady.value && player.getManifestType() === null && mediaElement.readyState >= 3) pendingMetadataSeek = null
   // Background tabs may finish loading without emitting play or pause.
-  shortsPaused.value = mediaElement.paused
+  shortsPaused.value = isPausedByUser(mediaElement)
   if (process.env.IS_ELECTRON && !mediaElement.autoplay && mediaElement.paused) {
     window.ftElectron?.tabs?.setPlaybackState('paused', tabId)
   }

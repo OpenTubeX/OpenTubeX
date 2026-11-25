@@ -49,7 +49,9 @@ for (const pauseDuringLoad of [false, true]) {
     const { readFile } = await import('node:fs/promises')
     const { runInNewContext } = await import('node:vm')
     const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
-    const helper = source.match(/^function isPausedByUser\([\s\S]*?^}/m)[0]
+    const helper = ['isAwaitingAutoplay', 'isPausedByUser']
+      .map(name => source.match(new RegExp(`^function ${name}\\([\\s\\S]*?^}`, 'm'))[0])
+      .join('\n')
     const start = source.indexOf('  async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
     const watcher = source.slice(start, source.indexOf('\n  }\n)', start) + '\n  }'.length)
     const calls = []
