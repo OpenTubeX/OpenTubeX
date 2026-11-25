@@ -112,6 +112,12 @@ test('keeps translated text that follows a URL directly', async () => {
     async () => 'https://example.com/helpをご覧ください。'
   )
   assert.equal(translated, 'https://example.com/hilfeをご覧ください。')
+
+  const withPeriod = await translateTextKeepingLayout(
+    'Siehe https://example.com/hilfe.',
+    async () => 'https://example.com/helpをご覧ください。'
+  )
+  assert.equal(withPeriod, 'https://example.com/hilfeをご覧ください。')
 })
 
 test('keeps merged translated lines and only restores links it can match', async () => {

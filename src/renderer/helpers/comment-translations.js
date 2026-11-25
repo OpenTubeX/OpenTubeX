@@ -162,7 +162,8 @@ export function formatCommentTranslation(translatedText) {
 // translates the words in them too, which would break their links. URLs end at
 // the first character a URL can't contain unencoded, as languages such as
 // Japanese continue the sentence right after them.
-const PROTECTED_TOKEN_PATTERN = /\bhttps?:\/\/[\w!#$%&'()*+,\-./:;=?@[\]~]+|\bwww\.[\w!#$%&'()*+,\-./:;=?@[\]~]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
+// Sentence punctuation after a URL stays outside of it, as the translation may change it.
+const PROTECTED_TOKEN_PATTERN = /\b(?:https?:\/\/|www\.)[\w!#$%&'()*+,\-./:;=?@[\]~]*[\w#$%&()*+\-/=@[\]~]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
 
 /**
  * Put the source's URLs, hashtags and handles back into its translation, as
@@ -190,8 +191,9 @@ function restoreProtectedTokens(source, translated) {
 }
 
 /**
- * Translate multiline text, such as a description, keeping its blank lines,
- * which the translation service adds and drops at will, and its links.
+ * Translate multiline text, such as a description, keeping its links and,
+ * unless the translation merges or splits lines, its blank lines, which the
+ * translation service adds and drops at will.
  * @param {string} text
  * @param {(text: string) => Promise<string>} translate translates newline-separated lines
  * @returns {Promise<string>} plain text
