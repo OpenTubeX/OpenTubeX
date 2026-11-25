@@ -1354,7 +1354,7 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
       register(name, handler)
     }
   })
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
   const view = await watchViewHandle(page)
   await view.evaluate(component => {
     component.recommendedVideos = [{ videoId: '9bZkp7q19f0', title: 'Recommended', type: 'video' }]
@@ -1370,9 +1370,13 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
   await expect.poll(mediaActions).toEqual({ next: false, previous: false })
   await expect(skipButtons).toHaveCount(0)
 
-  await view.evaluate(component => component.toggleAutoplay())
+  // The new skip button rebuilds the controls while the click still bubbles,
+  // which must not reach the player surface and pause playback.
+  await player.hover()
+  await player.locator('.shaka-controls-button-panel > .autoplay-toggle').click()
   await expect.poll(mediaActions).toEqual({ next: true, previous: false })
   await expect(skipButtons).toHaveCount(1)
+  expect(await video.evaluate(element => element.paused)).toBe(false)
 
   await page.evaluate(() => window.mediaActions.nexttrack({ action: 'nexttrack' }))
   await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0$/)

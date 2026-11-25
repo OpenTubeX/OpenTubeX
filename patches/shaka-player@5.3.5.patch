@@ -12,7 +12,7 @@ index 6aff7bc5a52c14fd685158b75ec11a1c619ee367..a0c4ac6916cc2021a7a1edb56f6ee96e
  // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
  declare namespace shaka.extern {
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index a3596c9aa5af1236ec90588617fcf18685064397..860e58f82c25ac7c60b72cce0270914dcb7ae2b8 100644
+index a3596c9aa5af1236ec90588617fcf18685064397..633842cdf977ac277c1d2f83bbd35b614ac05005 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -520,7 +520,7 @@ function zo(a,b=!1){var c=f=>{if(f.fullMimeTypes&&f.fullMimeTypes.size>1&&a.i.ha
@@ -141,7 +141,7 @@ index a3596c9aa5af1236ec90588617fcf18685064397..860e58f82c25ac7c60b72cce0270914d
  this.Qd()&&!f&&this.Mc(),this.I.length&&(this.I=[],this.dispatchEvent(new D("chaptersupdated"))))});this.sa=new IO(this)}async destroy(a=!1){document.pictureInPictureElement==this.u&&await document.exitPictureInPicture();this.N?.release();this.N=null;this.xc?.disconnect();this.xc=null;this.l?.release();this.l=null;this.$?.stop();this.$=null;this.jb?.stop();this.jb=null;this.V?.stop();this.V=null;this.qa?.stop();this.qa=null;this.vc?.stop();this.vc=null;this.yc?.stop();this.yc=null;this.D?.release();
  this.D=null;hQ(this);this.i&&(this.j.removeChild(this.i),this.i=null);this.F&&(await this.F.destroy(a),this.F=null);this.K&&(this.j.removeChild(this.K),this.K=null);this.G&&(this.j.removeChild(this.G),this.G=null);this.H&&(this.j.removeChild(this.H),this.H=null);this.Ma&&(await this.Ma.destroy(),this.Ma=null);this.T=this.C=this.u=this.m=null;this.ba.clear();this.sa&&(this.sa.release(),this.sa=null);super.release()}hk(a){this.Na=a;bQ(this)}Yl(){aQ(this)}configure(a){this.h=a;this.N?.j();this.F.Mi(a.castReceiverAppId,
 -a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.va&&(this.va=null);this.D&&this.D.configure(a);this.i?(Nl(this.i),hQ(this),this.Ua=null):(iQ(this),jQ(this),this.D=new LP(this.i,this.Cd,this.u,this.m,this.h,this));this.j.classList.add("shaka-video-container");this.j.hasAttribute("tabindex")||(this.j.tabIndex=-1);this.u.classList.add("shaka-video");uQ(this);this.h.bigButtons.length&&vQ(this);this.h.showBufferingSpinner?this.K||wQ(this):this.K&&(this.j.removeChild(this.K),this.K=null);this.h.seekOnTaps&&
-+a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.va&&(this.va=null);this.D&&this.D.configure(a);this.i?((()=>{for(const b of this.j.getElementsByClassName("shaka-no-propagation"))for(const c of ["click","dblclick","touchend"])this.l.Ra(b,c)})(),Nl(this.i),hQ(this),this.Ua=null):(iQ(this),jQ(this),this.D=new LP(this.i,this.Cd,this.u,this.m,this.h,this));this.j.classList.add("shaka-video-container");this.j.hasAttribute("tabindex")||(this.j.tabIndex=-1);this.u.classList.add("shaka-video");uQ(this);this.h.bigButtons.length&&vQ(this);this.h.showBufferingSpinner?this.K||wQ(this):this.K&&(this.j.removeChild(this.K),this.K=null);this.h.seekOnTaps&&
++a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.va&&(this.va=null);this.D&&this.D.configure(a);this.i?((()=>{const b=Array.from(this.j.getElementsByClassName("shaka-no-propagation"));Nl(this.i);const c=d=>{for(const e of d)for(const f of ["click","dblclick","touchend"])this.l?.Ra(e,f)};c(b.filter(d=>this.j.contains(d)));const g=b.filter(e=>!this.j.contains(e));g.length&&setTimeout(()=>c(g))})(),hQ(this),this.Ua=null):(iQ(this),jQ(this),this.D=new LP(this.i,this.Cd,this.u,this.m,this.h,this));this.j.classList.add("shaka-video-container");this.j.hasAttribute("tabindex")||(this.j.tabIndex=-1);this.u.classList.add("shaka-video");uQ(this);this.h.bigButtons.length&&vQ(this);this.h.showBufferingSpinner?this.K||wQ(this):this.K&&(this.j.removeChild(this.K),this.K=null);this.h.seekOnTaps&&
  (xQ(this),yQ(this));zQ(this);this.h.customContextMenu&&(this.va=new rO(this.J,this),this.L.push(this.va));this.M=Array.from(this.j.getElementsByClassName("shaka-settings-menu"));this.M.push(...Array.from(this.j.getElementsByClassName("shaka-overflow-menu")));this.M.push(...Array.from(this.j.getElementsByClassName("shaka-sub-menu")));this.Lb=Array.from(this.j.getElementsByClassName("shaka-context-menu"));this.Pc=Array.from(this.j.getElementsByClassName("shaka-show-controls-on-mouse-over"));aQ(this);
  a=this.j.getElementsByClassName("shaka-no-propagation");for(let b of a)this.l.ia(b,["click","dblclick"],c=>c.stopPropagation()),navigator.maxTouchPoints>0&&this.l.B(b,"touchend",c=>{this.Fa()&&(SP(this,c),c.stopPropagation())});this.sa&&this.sa.configure(this.h)}di(a){(this.Da=a)?(this.j.setAttribute("shaka-controls","true"),this.u.tabIndex=-1,this.u.controls=!1):this.j.removeAttribute("shaka-controls");aQ(this)}Lj(a){this.u.controls=a;this.u.tabIndex=a?0:-1;a&&this.di(!1)}Lm(a){this.ma=a}getAd(){return this.o}Lk(){return this.xa}Uk(){return this.I}Sk(){return this.F}Tk(){return this.ma}ol(){return this.T}Ld(){return this.j}Kd(){return this.C}ll(){return this.u}yb(){return this.m}kl(){return this.Ma}ec(){return this.R}Vb(){return this.Oc}vl(){return this.sa}Zk(){return this.i}Cl(){return this.H}Vk(){return this.G}Wk(){return this.h}Ul(){return this.O}gi(a){(this.O=
 -a)?this.$.stop():this.$.aa(3)}Pl(){return this.Na}Ec(){return this.A?this.A.getValue():this.C.currentTime}Om(){Zf("setLastTouchEventTime","This method is no longer used.")}wb(){return this.M.some(a=>!a.classList.contains("shaka-hidden"))}mc(){this.V.Ja()}ug(){return this.Lb.some(a=>!a.classList.contains("shaka-hidden"))}we(){for(let a of this.Lb)Y(a,!1);this.N?.j()}Od(){return this.F.Wa()?!1:gQ(this)||(!this.o||!this.o.isUsingAnotherMediaElement())&&this.u.webkitSupportsFullscreen?!0:!1}ib(){if(gQ(this))return document.fullscreenElement?
@@ -315,7 +315,7 @@ index 798c012e026a9955ff1055238aa972b141c6872e..07861beff58164550ca586bff8a52908
   *   True indicates that the stream has encountered an error and has stopped
   *   updating.
 diff --git a/ui/controls.js b/ui/controls.js
-index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244f4fd593e 100644
+index 8c8241b87db20ecd644649e3522f475533390db0..25f5ff2a9859ff5da0a0683d021447b2be51c44c 100644
 --- a/ui/controls.js
 +++ b/ui/controls.js
 @@ -270,7 +270,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
@@ -348,23 +348,35 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
        this.hideTextStylePreview();
        if (this.config_.enableTooltips) {
          this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
-@@ -705,6 +711,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -705,7 +711,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      }
  
      if (this.controlsContainer_) {
 +      // These bindings belong to the current layout, not the controls lifetime.
-+      // Release them before replacing the DOM so old menu trees can be collected.
-+      const oldElements = this.videoContainer_.getElementsByClassName(
-+          'shaka-no-propagation');
-+      for (const element of oldElements) {
-+        for (const type of ['click', 'dblclick', 'touchend']) {
-+          this.eventManager_.unlisten(element, type);
-+        }
-+      }
++      // Release them when replacing the DOM so old menu trees can be collected.
++      const oldElements = Array.from(this.videoContainer_.getElementsByClassName(
++          'shaka-no-propagation'));
        shaka.util.Dom.removeAllChildren(this.controlsContainer_);
++      const unlisten = (elements) => {
++        for (const element of elements) {
++          for (const type of ['click', 'dblclick', 'touchend']) {
++            this.eventManager_?.unlisten(element, type);
++          }
++        }
++      };
++      // Elements that stay are bound again below.  A control can rebuild the
++      // layout while its own click still bubbles, so removed elements keep
++      // stopping it until that event has finished.
++      unlisten(oldElements.filter((e) => this.videoContainer_.contains(e)));
++      const removedElements =
++          oldElements.filter((e) => !this.videoContainer_.contains(e));
++      if (removedElements.length) {
++        setTimeout(() => unlisten(removedElements));
++      }
        this.releaseChildElements_();
        this.bigButtonsContainer_ = null;
-@@ -979,7 +994,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     } else {
+@@ -979,7 +1005,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      if (seeking) {
        this.mouseStillTimer_.stop();
      } else {
@@ -374,7 +386,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
      }
    }
  
-@@ -1834,6 +1850,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -1834,6 +1861,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
      this.bottomControls_.classList.add('shaka-bottom-controls');
      this.bottomControls_.classList.add('shaka-no-propagation');
@@ -384,7 +396,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
      this.controlsContainer_.appendChild(this.bottomControls_);
  
      // Overflow menus are supposed to hide once you click elsewhere
-@@ -2114,7 +2133,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2114,7 +2144,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      // Disable blue outline for focused elements for mouse navigation.
      if (event.type == 'mousemove') {
        this.controlsContainer_.classList.remove('shaka-keyboard-navigation');
@@ -392,7 +404,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
      }
      if (event.type == 'touchstart' || event.type == 'touchmove' ||
          event.type == 'touchend' || event.type == 'keyup') {
-@@ -2147,8 +2165,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2147,8 +2176,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        // seek bar will be updated much more rapidly during mouse movement.  Do
        // this right before making it visible.
        this.updateTimeAndSeekRange_();
@@ -404,7 +416,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
  
      // Hide the cursor when the mouse stops moving.
      // Only applies while the cursor is over the video container.
-@@ -2159,7 +2179,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2159,7 +2190,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      if (event.type == 'touchend' ||
          event.type == 'wheel' ||
          event.type == 'keyup'|| !this.lastTouchEventTime_) {
@@ -414,7 +426,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
      }
    }
  
-@@ -2189,8 +2210,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2189,8 +2221,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      if (this.shouldShowUIAlways_()) {
        return;
      }
@@ -427,7 +439,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
      this.recentMouseMovement_ = false;
      this.computeOpacity();
    }
-@@ -2200,7 +2223,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2200,7 +2234,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     * @private
     */
    isHovered_() {
@@ -436,7 +448,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
        // This is primarily a touch-screen device, so the :hover query below
        // doesn't make sense.  In spite of this, the :hover query on an element
        // can still return true on such a device after a touch ends.
-@@ -2208,9 +2231,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2208,9 +2242,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        return false;
      }
  
@@ -450,7 +462,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244
    }
  
    /**
-@@ -2869,22 +2893,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2869,22 +2904,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        this.seekBar_.setValue(this.video_.currentTime);
        this.seekBar_.update();
  
