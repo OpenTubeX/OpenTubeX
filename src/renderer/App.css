@@ -100,8 +100,10 @@
   /* stylelint-disable-next-line length-zero-no-unit */
   --mobile-progress-bar-space: 0px;
 
-  /* Focus and scrollIntoView keep their target clear of the fixed bars. */
-  scroll-padding-block: var(--page-scrollbar-block-start) var(--page-footer-block-size, 0);
+  /* Focus and scrollIntoView keep their target clear of the fixed bars at the
+     bottom. The bars at the top are sticky, and padding there would make focus
+     inside them scroll the page. */
+  scroll-padding-block-end: var(--page-footer-block-size, 0);
 }
 
 .app {
