@@ -1,24 +1,24 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
 test('fullscreen swipe controls respect the idle delay and subsequent surface taps', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -35,10 +35,6 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__fullscreenControlsFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenControlsFetch(url, options)
-        : Promise.reject(new Error('Offline fullscreen test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-controls-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -86,9 +82,17 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
 
-    const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
-      type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+    const touch = (type, x, y, timestamp) => session.send('Input.dispatchTouchEvent', {
+      type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }], timestamp,
     })
+    // The player tells taps from holds by their event times. A slow device
+    // can take longer than a tap between two DevTools calls, so date the
+    // release like a finger would.
+    const tap = async (x, y) => {
+      const start = Date.now() / 1000
+      await touch('touchStart', x, y, start)
+      await touch('touchEnd', undefined, undefined, start + 0.08)
+    }
     const swipe = async direction => {
       const bounds = await player.boundingBox()
       const x = bounds.x + bounds.width / 2
@@ -100,40 +104,62 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       }
       await touch('touchEnd')
     }
+    // Shaka's idle timer starts at the last touchend with the hide delay of
+    // the player's data-playing-interface-hide-delay. Record the timers that
+    // touchend schedules, since on a slow device the fullscreen change settles
+    // seconds later and the time until the hide says little.
+    await page.evaluate(() => {
+      const timing = { delays: [], setTimeout: window.setTimeout, abort: new AbortController() }
+      window.__fullscreenControlsTiming = timing
+      window.addEventListener('touchend', () => { timing.delays = [] }, { capture: true, signal: timing.abort.signal })
+      window.setTimeout = function (handler, delay, ...args) {
+        if (window.event?.type === 'touchend') timing.delays.push(delay)
+        return timing.setTimeout.call(this, handler, delay, ...args)
+      }
+    })
     await swipe(-1)
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null), { timeout: 15000 }).toBe(true)
     assert.equal(await player.getAttribute('data-playing-interface-hide-delay'), '5')
     await expect(controls).toHaveAttribute('shown', 'true')
-    // The inline default is three seconds. Staying visible past that default
-    // distinguishes the fullscreen preference from merely restarting a timer.
-    await page.waitForTimeout(4000)
-    await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(controls).not.toHaveAttribute('shown', { timeout: 6000 })
+    const delays = await page.evaluate(() => {
+      const timing = window.__fullscreenControlsTiming
+      window.setTimeout = timing.setTimeout
+      timing.abort.abort()
+      delete window.__fullscreenControlsTiming
+      return timing.delays
+    })
+    // The inline default is three seconds, so the swipe's touchend must start
+    // the five second fullscreen delay rather than merely restart a timer.
+    assert.ok(delays.includes(5000) && !delays.includes(3000),
+      `The swipe's touchend must schedule the 5 s hide, not the 3 s default: ${JSON.stringify(delays)}`)
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
     await expect(controls.locator('.shaka-controls-button-panel')).toBeHidden()
     await expect(controls.locator('.shaka-seek-bar-container')).toHaveCSS('opacity', '0')
 
     // A fresh tap must reveal controls once and still allow them to hide.
     const bounds = await player.boundingBox()
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).toHaveAttribute('shown', 'true')
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).not.toHaveAttribute('shown', { timeout: 1000 })
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(controls).not.toHaveAttribute('shown', { timeout: 6000 })
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
     await swipe(1)
     await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
     assert.equal(await video.evaluate(video => video.paused), false, 'Swipes must not toggle playback')
   } finally {
     await page.evaluate(async ({ settings, originalRoute }) => {
+      const timing = window.__fullscreenControlsTiming
+      if (timing) {
+        window.setTimeout = timing.setTimeout
+        timing.abort.abort()
+        delete window.__fullscreenControlsTiming
+      }
       if (document.fullscreenElement) await document.exitFullscreen()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (window.__fullscreenControlsFetch) window.fetch = window.__fullscreenControlsFetch
-      delete window.__fullscreenControlsFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#fullscreen-controls-test-style')?.remove()
       location.hash = originalRoute
     }, { settings, originalRoute })

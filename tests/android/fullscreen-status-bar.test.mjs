@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> and ANDROID_SERIAL.
@@ -12,15 +12,15 @@ test('fullscreen hides the status bar again after closing the notification shade
   skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL,
 }, async () => {
   assert.match(process.env.ANDROID_SERIAL, /^emulator-\d+$/)
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -37,10 +37,6 @@ test('fullscreen hides the status bar again after closing the notification shade
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__fullscreenStatusBarFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenStatusBarFetch(url, options)
-        : Promise.reject(new Error('Offline fullscreen test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-status-bar-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -158,8 +154,7 @@ test('fullscreen hides the status bar again after closing the notification shade
       if (document.fullscreenElement) await document.exitFullscreen()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (window.__fullscreenStatusBarFetch) window.fetch = window.__fullscreenStatusBarFetch
-      delete window.__fullscreenStatusBarFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#fullscreen-status-bar-test-style')?.remove()
       location.hash = originalRoute
     }, { settings, originalRoute })

@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView
 // socket forwarded to ANDROID_CDP_URL.
 test('audio surface taps toggle controls without interrupting playback', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
@@ -25,6 +24,7 @@ test('audio surface taps toggle controls without interrupting playback', {
       await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
       await expect(tutorial).toBeHidden()
     }
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -38,10 +38,6 @@ test('audio surface taps toggle controls without interrupting playback', {
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__audioTapFetch = window.fetch
-      window.fetch = (url, options) => /^(https:\/\/localhost\/|data:|blob:)/.test(String(url))
-        ? window.__audioTapFetch(url, options)
-        : Promise.reject(new Error('Offline audio tap test'))
       const style = document.createElement('style')
       style.id = 'audio-tap-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -118,10 +114,7 @@ test('audio surface taps toggle controls without interrupting playback', {
     await page.evaluate(async ({ settings, originalRoute }) => {
       if (document.fullscreenElement) await document.exitFullscreen()
       document.querySelectorAll('.ftVideoPlayer video').forEach(video => video.pause())
-      if (window.__audioTapFetch) {
-        window.fetch = window.__audioTapFetch
-        delete window.__audioTapFetch
-      }
+      window.__androidTestNetwork?.restore()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
       document.querySelector('#audio-tap-test-style')?.remove()

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, with its WebView
 // socket forwarded to ANDROID_CDP_URL. ANDROID_OFFLINE_MEDIA_PATH must select
@@ -12,9 +12,8 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
   skip: !process.env.ANDROID_CDP_URL,
 }, async t => {
   assert.ok(process.env.ANDROID_OFFLINE_MEDIA_PATH, 'Set ANDROID_OFFLINE_MEDIA_PATH to an app-local MP3')
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
@@ -40,6 +39,7 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
       findTutorial(document.querySelector('#app').__vue_app__._container._vnode)?.proxy.$emit('close')
     })
     await expect(page.locator('#cross-tab-mini-player-layer')).not.toHaveAttribute('inert')
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -57,24 +57,23 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
         EnterFullscreenOnDisplayRotate: false,
         MobileLeftSwipeAction: 'disabled',
         MobileRightSwipeAction: 'disabled',
+        CompactMobileMiniPlayer: false,
+        // A slow load would otherwise fall back to yt-dlp, which replaces the download.
+        PlaybackEngineFallback: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       store.dispatch('updateReducedMotion', 'off')
-      window.__offlineMiniFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__offlineMiniFetch(url, options)
-        : Promise.reject(new Error('Offline mini-player test'))
       location.hash = '#/watch/jNQXAC9IVRw'
       return saved
     })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
       try {
-        return await handle.evaluate(component => !!component && component.proxy.onMountedRun &&
+        return await handle.evaluate(component => !!component && component.proxy.onMountedRun && !component.proxy.isLoading &&
           component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented())
       } finally { await handle.dispose() }
-    }).toBe(true)
+    }, { timeout: 60_000 }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const thumbnail = (await readFile(new URL('../../e2e/fixtures/media/video-thumbnail.svg', import.meta.url))).toString('base64')
     downloadId = await page.evaluate(() => {
@@ -83,36 +82,41 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
       while (Object.hasOwn(downloads, id)) id++
       return id
     })
-    await watch.evaluate((component, { thumbnail, mediaPath, downloadId }) => {
-      const watch = component.proxy
-      watch.videoLoadGeneration++
-      Object.assign(watch, {
-        isLoading: false,
-        ytDlpStreamsPending: false,
-        errorMessage: null,
-        isUpcoming: false,
-        isLive: false,
-        videoTitle: 'Downloaded audio mini-player regression',
-        channelName: 'Offline test channel',
-        videoLengthSeconds: 60,
-        thumbnail: `data:image/svg+xml;base64,${thumbnail}`,
-        // Online metadata can still carry a future preroll deadline for a download.
-        adEndTimeUnixMs: Date.now() + 60000,
-      })
-      watch.$store.commit('upsertYtDlpDownload', {
-        id: downloadId,
-        videoId: watch.videoId,
-        title: watch.videoTitle,
-        mode: 'audio',
-        status: 'completed',
-        files: [{ videoId: watch.videoId, path: mediaPath, extension: 'mp3' }],
-      })
-      watch.applyDownloadedPlaybackSource(downloadId)
-    }, { thumbnail, mediaPath: process.env.ANDROID_OFFLINE_MEDIA_PATH, downloadId })
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
-    await expect(player).toBeVisible()
-    await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
+    // The test blocks the Watch page's own requests, and under load the page
+    // can report that failure after the download replaced its video. Apply
+    // the download again until it plays.
+    await expect(async () => {
+      await watch.evaluate((component, { thumbnail, mediaPath, downloadId }) => {
+        const watch = component.proxy
+        watch.videoLoadGeneration++
+        Object.assign(watch, {
+          isLoading: false,
+          ytDlpStreamsPending: false,
+          errorMessage: null,
+          isUpcoming: false,
+          isLive: false,
+          videoTitle: 'Downloaded audio mini-player regression',
+          channelName: 'Offline test channel',
+          videoLengthSeconds: 60,
+          thumbnail: `data:image/svg+xml;base64,${thumbnail}`,
+          // Online metadata can still carry a future preroll deadline for a download.
+          adEndTimeUnixMs: Date.now() + 60000,
+        })
+        watch.$store.commit('upsertYtDlpDownload', {
+          id: downloadId,
+          videoId: watch.videoId,
+          title: watch.videoTitle,
+          mode: 'audio',
+          status: 'completed',
+          files: [{ videoId: watch.videoId, path: mediaPath, extension: 'mp3' }],
+        })
+        watch.applyDownloadedPlaybackSource(downloadId)
+      }, { thumbnail, mediaPath: process.env.ANDROID_OFFLINE_MEDIA_PATH, downloadId })
+      await expect(player).toBeVisible()
+      await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
+    }).toPass({ timeout: 120_000 })
     await expect(player.locator('.countdownOverlay')).toHaveCount(0)
     await video.evaluate(element => { element.loop = true; return element.play() })
     const originalVideo = await video.elementHandle()
@@ -130,7 +134,9 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
         const spacer = document.createElement('div')
         spacer.id = 'offline-mini-test-spacer'
         spacer.style.height = '2000px'
-        document.querySelector('.app > .routerView').append(spacer)
+        // The player stays pinned while its Watch page is in view, so lengthen
+        // the page itself rather than whatever follows it.
+        document.querySelector('.videoLayout').append(spacer)
         window.scrollTo(0, 0)
       }, scale)
       // Portrait phones have room to pin the player, so scrolling keeps it inline.
@@ -186,17 +192,17 @@ test('downloaded audio stays pinned on scroll and docks on navigation and swipe 
     await originalVideo.dispose()
   } finally {
     await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
-    await page.evaluate(({ settings, originalRoute, downloadId }) => {
+    await page.evaluate(async ({ settings, originalRoute, downloadId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       document.querySelector('.ftVideoPlayer video')?.pause()
       store.commit('setKeepPlayingOnNavigation', false)
       if (downloadId !== undefined) store.commit('removeYtDlpDownload', downloadId)
       location.hash = originalRoute
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (settings) store.dispatch('updateReducedMotion', settings.ReducedMotion)
-      if (window.__offlineMiniFetch) window.fetch = window.__offlineMiniFetch
-      delete window.__offlineMiniFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#offline-mini-test-spacer')?.remove()
+      // Wait for the saved setting, as the next script restarts the app.
+      if (settings) await store.dispatch('updateReducedMotion', settings.ReducedMotion)
     }, { settings, originalRoute, downloadId })
     await watch?.dispose()
     await session.detach()

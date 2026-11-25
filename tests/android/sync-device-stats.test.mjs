@@ -1,17 +1,16 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView forwarded.
 // Only the native HTTP transport is replaced; pairing, encryption and the UI are real.
 test('Android repairs duplicate stats and reuses its identity when creating another pairing code', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const currentId = Buffer.alloc(16, 3).toString('base64url')
@@ -119,6 +118,9 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
       await tutorial.locator('.tutorialSkip button').click()
       await expect(tutorial).toBeHidden()
     }
+    // An earlier test can leave Settings open over the Statistics page.
+    if (await page.locator('.settingsWindow').isVisible()) await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
     const picker = page.getByRole('group', { name: 'Devices' })
     await expect(picker.getByRole('button')).toHaveCount(3)
     await picker.getByRole('button', { name: 'Pixel (old)', exact: true }).click()

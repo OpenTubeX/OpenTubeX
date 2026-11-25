@@ -1208,8 +1208,10 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       }
     } finally {
       await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
-      await page.evaluate(({ settings, originalRoute, compactOnly, seekingOnly, savedHistory }) => {
+      await page.evaluate(async ({ settings, originalRoute, compactOnly, seekingOnly, savedHistory }) => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        // Wait for the saved settings, as the next script restarts the app.
+        const saving = []
         document.querySelector('.ftVideoPlayer video')?.pause()
         store.commit('setKeepPlayingOnNavigation', false)
         location.hash = originalRoute
@@ -1220,11 +1222,11 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         }
         if ((compactOnly || seekingOnly) && settings) {
           store.dispatch('hideSettingsWindow')
-          store.dispatch('updateCompactMobileMiniPlayer', settings.CompactMobileMiniPlayer)
-          store.dispatch('updateIconPack', settings.IconPack)
+          saving.push(store.dispatch('updateCompactMobileMiniPlayer', settings.CompactMobileMiniPlayer))
+          saving.push(store.dispatch('updateIconPack', settings.IconPack))
         }
-        if (settings) store.dispatch('updateReducedMotion', settings.ReducedMotion)
-        if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
+        if (settings) saving.push(store.dispatch('updateReducedMotion', settings.ReducedMotion))
+        if (settings) saving.push(store.dispatch('updateAnimationSpeed', settings.AnimationSpeed))
         if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
         delete window.__miniPlayerFetch
         if (window.__miniPlayerNativePromise) window.Capacitor.nativePromise = window.__miniPlayerNativePromise
@@ -1236,6 +1238,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         delete window.__miniDismissFrames
         document.querySelector('#mini-player-test-style')?.remove()
         document.querySelector('#mini-player-test-spacer')?.remove()
+        await Promise.allSettled(saving)
       }, { settings, originalRoute, compactOnly, seekingOnly, savedHistory })
     }
     await watch?.dispose()

@@ -73,14 +73,17 @@ for (const mode of ['minimize drag', 'restore drag', 'mini bar', 'picture-in-pic
       assert.notEqual(painted.display, 'none', 'audio artwork must not disappear while video is transparent')
       assert.equal(painted.visibility, 'visible', 'native PiP must reveal the audio surface')
       assert.ok(painted.width > 10 && painted.height > 10 && painted.inSurface, JSON.stringify(painted))
+      // Fractional device pixel ratios, such as 1.75 at 280 dpi, round
+      // layout to device pixels, so allow subpixel differences.
+      const assertClose = (actual, expected, message) => assert.ok(Math.abs(actual - expected) < 0.01, `${message}: ${actual} != ${expected}`)
       if (mode === 'mini bar') {
-        assert.equal(painted.surface.width, 80, 'audio must occupy the thumbnail slot')
-        assert.equal(painted.surface.height, 45)
+        assertClose(painted.surface.width, 80, 'audio must occupy the thumbnail slot')
+        assertClose(painted.surface.height, 45, 'audio must occupy the thumbnail slot')
       }
       if (mode === 'picture-in-picture') {
-        assert.equal(painted.surface.y, 60, 'audio must occupy the same native PiP source rect as video')
-        assert.equal(painted.surface.width, 400)
-        assert.equal(painted.surface.height, 225)
+        assertClose(painted.surface.y, 60, 'audio must occupy the same native PiP source rect as video')
+        assertClose(painted.surface.width, 400, 'audio must occupy the same native PiP source rect as video')
+        assertClose(painted.surface.height, 225, 'audio must occupy the same native PiP source rect as video')
       }
     } finally { await handle.evaluate(frame => frame.remove()) }
   })

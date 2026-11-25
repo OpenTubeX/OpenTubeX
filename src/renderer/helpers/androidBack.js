@@ -18,10 +18,12 @@ export async function initializeAndroidBack({ getPreview, back, shouldIntercept 
       console.error('Unable to update Android back handler', error)
     })
   }
-  // Replace App's always-enabled callback so Android can preview Home at root.
+  // capacitor.config.json turns off App's always-enabled Back callback, so
+  // Android can preview Home at root. Turning it off here ran on Capacitor's
+  // plugin thread, and racing this plugin's callback on the main thread, it
+  // could leave Android without the app's callback while that was enabled.
   let listener = null
   let failed = false
-  let appBackDisabled = false
   try {
     await Promise.all([
       AndroidBack.addListener('backGesture', event => {
@@ -34,22 +36,15 @@ export async function initializeAndroidBack({ getPreview, back, shouldIntercept 
         listener = handle
       }),
       AndroidBack.setEnabled({ enabled: shouldIntercept() }),
-      App.toggleBackButtonHandler({ enabled: false }).then(() => {
-        appBackDisabled = true
-        if (failed) {
-          return App.toggleBackButtonHandler({ enabled: true }).catch(() => {})
-        }
-      }),
     ])
   } catch (error) {
     failed = true
     if (listener) {
       Promise.resolve(listener.remove()).catch(() => {})
     }
-    await Promise.all([
-      AndroidBack.setEnabled({ enabled: false }).catch(() => {}),
-      appBackDisabled ? App.toggleBackButtonHandler({ enabled: true }).catch(() => {}) : Promise.resolve(),
-    ])
+    // Fall back to App's handler, after this plugin's callback is off.
+    await AndroidBack.setEnabled({ enabled: false }).catch(() => {})
+    await App.toggleBackButtonHandler({ enabled: true }).catch(() => {})
     throw error
   }
   const stop = watchEffect(update)

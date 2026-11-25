@@ -156,6 +156,28 @@ test('a tap still shows controls and does not call native adjustments', t => {
   assert.deepEqual(calls, ['show'])
 })
 
+test('a tap that hides the controls keeps its touchend from showing them again', t => {
+  const config = { tapSeekDistance: 0, fadeDelay: 1 }
+  const calls = []
+  const controls = {
+    getControlsContainer: () => ({ hasAttribute: name => name === 'shown', getBoundingClientRect: () => ({ left: 10, width: 400, height: 200.5 }) }),
+    anySettingsMenusAreOpen: () => false,
+    getConfig: () => config,
+    hideUI: () => calls.push(['hide', config.fadeDelay]),
+  }
+  const { gestures: g, event, container } = fixture(t, { controls, fullscreen: () => true })
+  let touchEnds = 0
+  container.addEventListener('touchend', () => touchEnds++)
+  g.startMobileFullscreenGesture(event(210))
+  g.finishMobileFullscreenGesture(event(210))
+  assert.deepEqual(calls, [['hide', 0]])
+  // Shaka shows the controls for any touchend on the player, which would cancel their fade
+  const touchEnd = event(210, 150, { timeStamp: performance.now() })
+  g.handleMobilePlayerTouchEnd(touchEnd)
+  assert.equal(touchEnd.prevented, true)
+  assert.equal(touchEnds, 0)
+})
+
 for (const fullscreenSwipe of [true, false]) {
   test(`a drag whose touchend the player stops still lets the controls hide (fullscreen swipe ${fullscreenSwipe})`, t => {
     const { gestures: g, event, container } = fixture(t, { fullscreenSwipe, fullscreen: () => true })

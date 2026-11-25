@@ -5,12 +5,12 @@ import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { CompositeBuffer, UmpWriter } from 'googlevideo/ump'
 import { MediaHeader, NextRequestPolicy, UMPPartId, VideoPlaybackAbrRequest } from 'googlevideo/protos'
 import { concatenateChunks } from 'googlevideo/utils'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Requires a locked emulator, a current debug APK and ffmpeg. SABR receives
 // UMP fixtures through native HTTP; the Android media service and lifecycle
@@ -104,8 +104,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
         return Boolean(pid && adb('shell', 'cat', '/proc/net/unix').includes(socket))
       }, { timeout: 15000 }).toBe(true)
       adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:${socket}`)
-      browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = appPage(browser)
+      ;({ browser, page } = await connectAndroidApp())
       server = createServer(async (request, response) => {
         const chunks = []
         for await (const chunk of request) chunks.push(chunk)
@@ -297,8 +296,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
           adb('shell', 'cmd', 'statusbar', 'collapse')
         }
       }
-      browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = appPage(browser)
+      ;({ browser, page } = await connectAndroidApp())
       const state = await page.locator('.ftVideoPlayer video').evaluate(video => ({ paused: video.paused, time: video.currentTime }))
       assert.equal(state.paused, !continuePlayback, 'respect the background playback preference')
       if (continuePlayback) assert.ok(state.time > 0, 'background playback must advance')
@@ -307,8 +305,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       releaseBackoff?.()
       launch()
       if (!browser && page) {
-        browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = appPage(browser)
+        ;({ browser, page } = await connectAndroidApp())
       }
       if (page && settings) {
         await page.evaluate(({ settings, route }) => {

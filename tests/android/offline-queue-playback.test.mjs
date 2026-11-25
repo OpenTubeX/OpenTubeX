@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Requires an owned emulator, current debug APK, app-local demo-audio.mp3
 // and an app-local MP3 at least 20 seconds long for the initial track.
@@ -12,7 +12,7 @@ const sameDownload = Boolean(process.env.ANDROID_QUEUE_SAME_DOWNLOAD)
 const sameVideo = sameDownload || Boolean(process.env.ANDROID_QUEUE_SAME_VIDEO)
 const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIAL?.startsWith('emulator-'))
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
-const launch = () => adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
+const launch = () => adb('shell', 'am', 'start', '-W', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
 
 for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
   test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browse ? ' in the mini player' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
@@ -32,12 +32,12 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       launch()
       let pid
       await expect.poll(() => {
-        pid = adb('shell', 'pidof', 'org.opentubex.app.dev').trim()
+        // pidof fails until the restarted app's process exists.
+        pid = adb('shell', 'pidof org.opentubex.app.dev || true').trim()
         return Boolean(pid && adb('shell', 'cat', '/proc/net/unix').includes(`webview_devtools_remote_${pid}`))
       }, { timeout: 15000 }).toBe(true)
       adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:webview_devtools_remote_${pid}`)
-      browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = appPage(browser)
+      ;({ browser, page } = await connectAndroidApp())
       await page.locator('.profileTrigger').waitFor()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
@@ -146,8 +146,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
       adb('shell', 'wm', 'dismiss-keyguard')
       launch()
-      browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-      page = appPage(browser)
+      ;({ browser, page } = await connectAndroidApp())
       assert.deepEqual(await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return {
@@ -163,8 +162,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
     // Reconnect only after the locked-screen verdict to retain diagnostics
     // without letting debugger activity make a failing queue advance.
       if (saved && !browser) {
-        browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = appPage(browser)
+        ;({ browser, page } = await connectAndroidApp())
         console.error('Offline queue failure state:', await page.evaluate(() => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
           const video = document.querySelector('video')
@@ -185,8 +183,7 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       adb('shell', 'wm', 'dismiss-keyguard')
       launch()
       if (!browser && page) {
-        browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-        page = appPage(browser)
+        ;({ browser, page } = await connectAndroidApp())
       }
       if (saved) {
         await page.evaluate(({ saved, ids }) => {

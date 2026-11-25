@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { mockWatchPage } from '../../e2e/helpers/watch.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run with a current debug APK on an exclusively locked emulator, forwarding
 // its WebView socket to ANDROID_CDP_URL.
@@ -11,8 +11,7 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
   skip: !process.env.ANDROID_CDP_URL,
   timeout: 180_000,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const errors = []
   const recordError = message => {
     if (message.type() === 'error' && message.text().includes('failed to render')) errors.push(message.text())
@@ -24,6 +23,9 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
     saved = await page.evaluate(async () => {
+      // A Watch page that failed offline in an earlier test makes the app
+      // read the home page instead of the mocked watch page for the session.
+      sessionStorage.removeItem('playerHtmlHomepageFallback')
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         StartupBehavior: 'loadLastActiveTab',

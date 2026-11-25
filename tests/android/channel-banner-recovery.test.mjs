@@ -1,16 +1,15 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView socket
 // forwarded to ANDROID_CDP_URL. Only the native transport response is mocked.
 test('Android Invidious banners recover through the selected proxy after WebView failure', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const instance = 'https://invidious.test'
   const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
   const bannerUrl = `${instance}/ggpht/banner`

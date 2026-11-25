@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView
 // socket forwarded to ANDROID_CDP_URL.
@@ -16,8 +16,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
   let saved
   let watch
   try {
-    browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-    page = appPage(browser)
+    ;({ browser, page } = await connectAndroidApp())
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) await tutorial.locator('.tutorialSkip button').click()
@@ -37,17 +36,14 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
       const downloads = structuredClone(Object.values(store.getters.getYtDlpDownloads).map(download => JSON.parse(JSON.stringify(download))))
       const queue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
       window.__offlineRecommendationsOnline = Object.getOwnPropertyDescriptor(navigator, 'onLine')
-      window.__offlineRecommendationsFetch = window.fetch
       return { route: location.hash, settings, downloads, queue, values }
     })
+    await blockAppNetwork(page)
     await page.evaluate(({ downloads, values }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('clearWatchQueue')
       for (const download of downloads) store.commit('removeYtDlpDownload', download.id)
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__offlineRecommendationsFetch(url, options)
-        : Promise.reject(new Error('Offline recommendations test'))
       location.hash = '#/watch/jNQXAC9IVRw'
     }, saved)
     await expect.poll(async () => {
@@ -129,11 +125,10 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     try {
       if (saved) {
         await page.evaluate(() => {
-          window.fetch = window.__offlineRecommendationsFetch
+          window.__androidTestNetwork?.restore()
           if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
           else delete navigator.onLine
           delete window.__offlineRecommendationsOnline
-          delete window.__offlineRecommendationsFetch
         })
       }
       if (saved) {

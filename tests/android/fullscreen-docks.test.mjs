@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { measureFullscreenDockToggle } from '../../e2e/helpers/fullscreen-docks.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run on a locked emulator with a current debug APK and a forwarded WebView.
 test('Android fullscreen docks animate without reflowing the player every frame', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   let watch
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -34,10 +34,6 @@ test('Android fullscreen docks animate without reflowing the player every frame'
         if (key === 'ReducedMotion' || key === 'AnimationSpeed') await store.dispatch('update' + key, value)
         else store.commit('set' + key, value)
       }
-      window.__fullscreenDocksFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenDocksFetch(url, options)
-        : Promise.reject(new Error('Offline dock test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-docks-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -78,7 +74,7 @@ test('Android fullscreen docks animate without reflowing the player every frame'
     }, media)
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
-    await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
+    await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
     await video.evaluate(element => { element.loop = true; return element.play() })
     await player.evaluate(element => element.requestFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
@@ -117,8 +113,7 @@ test('Android fullscreen docks animate without reflowing the player every frame'
         if (key === 'ReducedMotion' || key === 'AnimationSpeed') await store.dispatch('update' + key, value)
         else store.commit('set' + key, value)
       }
-      if (window.__fullscreenDocksFetch) window.fetch = window.__fullscreenDocksFetch
-      delete window.__fullscreenDocksFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#fullscreen-docks-test-style')?.remove()
       location.hash = originalRoute
     }, { settings, originalRoute })

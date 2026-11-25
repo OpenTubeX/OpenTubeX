@@ -383,6 +383,33 @@ test('keeps watch metadata and comment filters inside a narrow viewport', async 
   expect(menuBounds.right).toBeLessThanOrEqual(menuBounds.viewportRight)
 })
 
+test('keeps keyboard focus clear of the sticky header and pinned player', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setWindowSize(app, page, { width: 700, height: 800 })
+  await openMockedVideo(page)
+  const layout = page.locator(`${activeTab} .videoLayout`)
+  await expect(layout).toHaveAttribute('data-pinned-player', '')
+  const videoArea = layout.locator('.videoArea')
+  const subscribe = layout.locator('.infoArea').getByRole('button', { name: /Subscribe/ })
+
+  // From the button after it, with the button above the window, then with it
+  // inside the window under the player, where focus doesn't scroll at all.
+  for (const offset of ['above', 'under']) {
+    await subscribe.evaluate(element => element.focus({ preventScroll: true }))
+    await page.keyboard.press('Tab')
+    await subscribe.evaluate((element, position) => {
+      const { top, bottom } = element.getBoundingClientRect()
+      window.scrollBy({ top: position === 'above' ? bottom + 40 : top - 300, behavior: 'instant' })
+    }, offset)
+    await page.keyboard.press('Shift+Tab')
+    await expect(subscribe).toBeFocused()
+    await expect.poll(async () => {
+      const [button, player] = await Promise.all([subscribe.boundingBox(), videoArea.boundingBox()])
+      return button && player ? button.y - (player.y + player.height) : null
+    }, { message: offset }).toBeGreaterThanOrEqual(0)
+  }
+})
+
 test('shows transcript actions with captions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
   await openMockedVideo(page)

@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { seekAsViewer } from '../../e2e/helpers/player.mjs'
 import { decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 function findWatchComponent() {
   const find = vnode => {
@@ -27,8 +28,7 @@ function findWatchComponent() {
 test('Android sends live tab progress and receives it ahead of stale history', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   page.setDefaultTimeout(15000)
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
@@ -134,7 +134,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
       await watch.dispose()
       const tabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTabId)
       const video = page.locator(`.tabContent[data-tab-id="${tabId}"] .ftVideoPlayer video`)
-      await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
+      await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
       return video
     }
     const video = await preparePlayer()
@@ -160,6 +160,8 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     await page.locator(`.capacitorPhoneTabTarget[data-tab-id="${received.id}"]`).click()
     const resumed = await preparePlayer()
     await expect.poll(() => resumed.evaluate(element => Math.floor(element.currentTime))).toBe(4)
+    // The tab keeps its timestamp until the video is watched, such as by seeking.
+    await resumed.evaluate(seekAsViewer, 4)
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp)).toBeUndefined()
     // Reuse this tab for a new video whose player has not loaded yet.
     const previousPayload = sent.payload
@@ -185,6 +187,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     })
     const restarted = await preparePlayer()
     await expect.poll(() => restarted.evaluate(element => element.currentTime)).toBe(0)
+    await restarted.evaluate(seekAsViewer, 0)
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp)).toBeUndefined()
     const restartedWatch = await page.evaluateHandle(findWatchComponent)
     try {

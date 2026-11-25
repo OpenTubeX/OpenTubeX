@@ -2,13 +2,14 @@ import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import test from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { connectAndroidApp, measureNativeTouchOrigin } from '../helpers/android-webview.mjs'
 
 // Run against an already installed debug APK on a locked device. Unlike CDP
 // touch injection, Android's native input reproduces the Pixel's missing click.
-// ANDROID_ADB_HOST optionally routes ADB through an SSH host. Set
-// ANDROID_WEBVIEW_TOP to the WebView's physical top inset (0 for edge-to-edge).
+// ANDROID_ADB_HOST optionally routes ADB through an SSH host.
+// ANDROID_WEBVIEW_TOP overrides the WebView's physical top inset, which the
+// test otherwise measures with a canceled native touch.
 const enabled = process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIAL
 const exec = promisify(execFile)
 
@@ -17,17 +18,30 @@ test('the first native Android tap after pulling the organizer selects its card'
   assert.match(serial, /^[\w.:-]+$/)
   const host = process.env.ANDROID_ADB_HOST
   if (host) assert.match(host, /^[\w.-]+$/)
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const keepAlive = setTimeout(() => {}, 120_000)
   const dialog = page.locator('#capacitor-phone-tab-dialog')
   const close = dialog.getByRole('button', { name: 'Close', exact: true })
   const wasOpen = await dialog.count() > 0
   const traceName = '__organizerNativeTapTest'
+  let savedTabs
+  const shell = async command => host
+    ? (await exec('ssh', ['-o', 'BatchMode=yes', host, `adb -s ${serial} shell '${command}'`])).stdout
+    : (await exec('adb', ['-s', serial, 'shell', command])).stdout
   try {
     if (wasOpen) await close.click()
+    // Tabs left by earlier tests can push the active card under the
+    // organizer's bottom actions, where a tap cannot reach it.
+    savedTabs = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tabs = JSON.parse(JSON.stringify(store.state.tabs))
+      store.commit('setTabsState', { ...store.state.tabs, tabs: [store.getters.getPresentedTab] })
+      return tabs
+    })
     const ratio = await page.evaluate(() => devicePixelRatio)
-    const inset = Number(process.env.ANDROID_WEBVIEW_TOP || 0)
+    const inset = process.env.ANDROID_WEBVIEW_TOP
+      ? Number(process.env.ANDROID_WEBVIEW_TOP)
+      : (await measureNativeTouchOrigin(page, shell)).y
     const center = async selector => {
       const rect = await page.locator(selector).boundingBox()
       assert.ok(rect)
@@ -56,8 +70,7 @@ test('the first native Android tap after pulling the organizer selects its card'
       const start = await center('.capacitorPhoneTabSwitcherButton')
       await page.evaluate(name => { window[name].events = [] }, traceName)
       const command = `input swipe ${start.x} ${start.y} ${start.x - Math.round(45 * ratio)} ${start.y + Math.round(225 * ratio)} 180; input tap ${card.x} ${card.y}`
-      if (host) await exec('ssh', ['-o', 'BatchMode=yes', host, `adb -s ${serial} shell '${command}'`])
-      else await exec('adb', ['-s', serial, 'shell', command])
+      await shell(command)
       const events = await page.evaluate(name => window[name].events, traceName)
       assert.ok(events.some(event => event.type === 'pointerdown' && event.card && event.moving),
         `native tap must reach the card during settlement: ${JSON.stringify(events)}`)
@@ -71,6 +84,13 @@ test('the first native Android tap after pulling the organizer selects its card'
       delete window[name]
     }, traceName)
     if (await close.isVisible()) await close.click()
+    if (savedTabs) {
+      await page.evaluate(tabs => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabsState', tabs)
+        store.commit('setPresentedTab', tabs.presentedTabId)
+      }, savedTabs)
+    }
     if (wasOpen) await page.locator('.capacitorPhoneTabSwitcherButton').click()
     await browser.close()
     clearTimeout(keepAlive)

@@ -62,22 +62,27 @@ public class SettingsSearchTest {
                     """);
                 // Lets a failure say whether the app replaced the field while composing.
                 evaluate(view, "document.querySelector('.settingsSearch input').__composingTestInput = true");
-                tapSearch(scenario, view);
+                tapSearch(view);
                 awaitCondition(view, "document.activeElement === document.querySelector('.settingsSearch input')");
                 // This test acts as the IME. Hide the system keyboard so it
                 // cannot commit or replace the test's composing region.
                 // A slow keyboard can show itself again after hiding, and its
                 // next hide commits the composing text, so wait until it stays hidden.
+                // Animations, such as the keyboard's, can keep a slow device's
+                // main thread from going idle for longer than this wait, so the
+                // checks don't wait for idle like ActivityScenario.onActivity.
                 AtomicBoolean keyboardVisible = new AtomicBoolean(true);
                 long keyboardDeadline = SystemClock.uptimeMillis() + 15000;
                 long hiddenSince = -1;
                 boolean keyboardSettled = false;
+                int keyboardChecks = 0;
                 while (SystemClock.uptimeMillis() < keyboardDeadline) {
-                    scenario.onActivity(activity -> {
+                    keyboardChecks++;
+                    onMain(() -> {
                         WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
                         keyboardVisible.set(insets == null || insets.isVisible(WindowInsetsCompat.Type.ime()));
                         if (keyboardVisible.get()) {
-                            activity.getSystemService(InputMethodManager.class).hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            view.getContext().getSystemService(InputMethodManager.class).hideSoftInputFromWindow(view.getWindowToken(), 0);
                         }
                     });
                     if (keyboardVisible.get()) hiddenSince = -1;
@@ -88,17 +93,18 @@ public class SettingsSearchTest {
                     }
                     Thread.sleep(100);
                 }
-                assertTrue("System keyboard stays hidden before simulating composing input", keyboardSettled);
+                assertTrue("System keyboard stays hidden before simulating composing input (" + keyboardChecks +
+                    " checks, visible at the last: " + keyboardVisible.get() + ")", keyboardSettled);
                 AtomicReference<InputConnection> connection = new AtomicReference<>();
                 long deadline = SystemClock.uptimeMillis() + 5000;
                 while (connection.get() == null && SystemClock.uptimeMillis() < deadline) {
-                    scenario.onActivity(activity -> connection.set(view.onCreateInputConnection(new EditorInfo())));
+                    onMain(() -> connection.set(view.onCreateInputConnection(new EditorInfo())));
                     if (connection.get() == null) Thread.sleep(100);
                 }
                 assertNotNull("Search exposes a native keyboard input connection", connection.get());
 
                 for (String text : new String[] {"roundn", "roundness", "roundnes"}) {
-                    compose(scenario, view, connection.get(), text);
+                    compose(view, connection.get(), text);
                     awaitCondition(view, "document.querySelector('.settingsSearch input').value === '" + text + "'");
                     awaitCondition(view, "[...document.querySelectorAll('.settingsSearchResultMatch')].some(" +
                         "match => match.textContent.trim() === 'UI Roundness')");
@@ -107,12 +113,12 @@ public class SettingsSearchTest {
                     assertEquals("Filtering keeps keyboard focus", "true", evaluate(view,
                         "document.activeElement === document.querySelector('.settingsSearch input')"));
                 }
-                compose(scenario, view, connection.get(), "zzzzzz");
+                compose(view, connection.get(), "zzzzzz");
                 awaitCondition(view, "!!document.querySelector('.settingsNoResults')");
-                compose(scenario, view, connection.get(), "");
+                compose(view, connection.get(), "");
                 awaitCondition(view, "!document.querySelector('.settingsSearchResults') && " +
                     "document.querySelector('.settingsMenu').getBoundingClientRect().height > 0");
-                scenario.onActivity(activity -> {
+                onMain(() -> {
                     assertTrue(connection.get().finishComposingText());
                     assertTrue(connection.get().commitText("ui scale", 1));
                 });
@@ -146,15 +152,15 @@ public class SettingsSearchTest {
      * bound to the field. A real keyboard then marks its word as composing
      * again, so this does too before typing.
      */
-    private static void compose(ActivityScenario<MainActivity> scenario, WebView view, InputConnection connection, String text) throws Exception {
+    private static void compose(WebView view, InputConnection connection, String text) throws Exception {
         int length = Integer.parseInt(evaluate(view, "document.querySelector('.settingsSearch input').value.length"));
-        scenario.onActivity(activity -> {
+        onMain(() -> {
             assertTrue(connection.setComposingRegion(0, length));
             assertTrue(connection.setComposingText(text, 1));
         });
     }
 
-    private static void tapSearch(ActivityScenario<MainActivity> scenario, WebView view) throws Exception {
+    private static void tapSearch(WebView view) throws Exception {
         JSONArray bounds = new JSONArray(evaluate(view, """
             (() => {
                 const bounds = document.querySelector('.settingsSearch input').getBoundingClientRect();
@@ -162,7 +168,7 @@ public class SettingsSearchTest {
             })()
             """));
         float[] point = new float[2];
-        scenario.onActivity(activity -> {
+        onMain(() -> {
             int[] origin = new int[2];
             view.getLocationOnScreen(origin);
             double scale = view.getWidth() / bounds.optDouble(2);
@@ -177,6 +183,23 @@ public class SettingsSearchTest {
             event.recycle();
             if (action == MotionEvent.ACTION_DOWN) Thread.sleep(50);
         }
+    }
+
+    /** Runs on the main thread, and fails the test with what the action throws. */
+    private static void onMain(Runnable action) {
+        AtomicReference<RuntimeException> exception = new AtomicReference<>();
+        AtomicReference<Error> error = new AtomicReference<>();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            try {
+                action.run();
+            } catch (RuntimeException thrown) {
+                exception.set(thrown);
+            } catch (Error thrown) {
+                error.set(thrown);
+            }
+        });
+        if (error.get() != null) throw error.get();
+        if (exception.get() != null) throw exception.get();
     }
 
     private static String evaluate(WebView view, String script) throws Exception {

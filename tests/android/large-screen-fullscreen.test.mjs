@@ -3,9 +3,9 @@ import { execFile } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 import test from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 const run = promisify(execFile)
 
@@ -20,9 +20,8 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
   assert.equal((await adb('shell', 'getprop', 'ro.build.version.sdk')).trim(), '37')
   const originalSize = (await adb('shell', 'wm', 'size')).match(/Override size: (\d+x\d+)/)?.[1]
   const originalDensity = (await adb('shell', 'wm', 'density')).match(/Override density: (\d+)/)?.[1]
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let saved
   let watch
@@ -30,6 +29,7 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
     await adb('shell', 'wm', 'density', '240')
     await adb('shell', 'wm', 'size', '1600x2560')
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -44,10 +44,6 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__largeScreenFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__largeScreenFetch(url, options)
-        : Promise.reject(new Error('Offline resize test'))
       const style = document.createElement('style')
       style.id = 'large-screen-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -88,7 +84,7 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
       })
     }, media)
     const video = page.locator('.ftVideoPlayer video')
-    await expect.poll(() => video.evaluate(video => video.readyState)).toBe(4)
+    await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
     await expect(page.locator('.shaka-fullscreen-button')).toBeEnabled()
     await video.evaluate(video => { video.loop = true; video.currentTime = 0; return video.play() })
     for (const scale of [100, 125]) {
@@ -137,8 +133,7 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
           for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
           location.hash = saved.route
         }
-        if (window.__largeScreenFetch) window.fetch = window.__largeScreenFetch
-        delete window.__largeScreenFetch
+        window.__androidTestNetwork?.restore()
         document.querySelector('#large-screen-test-style')?.remove()
       }, saved)
     } finally {

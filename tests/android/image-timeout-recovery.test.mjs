@@ -1,16 +1,15 @@
 import assert from 'node:assert/strict'
 import { mkdir, readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run with a current debug APK on a locked emulator and its WebView forwarded
 // to ANDROID_CDP_URL. Native HTTP responses use a deterministic transport fixture.
 test('Android stalled avatars use native recovery before the bounded browser retry', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const avatarPattern = 'https://yt3.ggpht.com/opentubex-timeout-avatar*'
   const data = (await readFile(new URL('../../e2e/fixtures/images/opentubex-playlist.jpg', import.meta.url))).toString('base64')
   const pending = []
@@ -69,7 +68,12 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       const image = avatar.locator('img:not(.retryImagePlaceholder)')
       await expect.poll(() => pending.length).toBe(1)
       await expect(placeholder).toHaveClass(/ft-shimmer/)
-      const bounds = await placeholder.boundingBox()
+      // Relative to the avatar link, as the results can still move while the image loads.
+      const boundsIn = async (element, container) => {
+        const [box, origin] = await Promise.all([element.boundingBox(), container.boundingBox()])
+        return { ...box, x: box.x - origin.x, y: box.y - origin.y }
+      }
+      const bounds = await boundsIn(placeholder, avatar)
       await page.clock.fastForward(10_001)
       await expect.poll(() => nativeRequests.length).toBe(1)
       assert.equal(nativeRequests[0].responseType, 'blob')
@@ -84,7 +88,7 @@ test('Android stalled avatars use native recovery before the bounded browser ret
         await expect(image).toHaveAttribute('src', /^data:image\/jpeg;base64,/)
         await expect(placeholder).toHaveCount(0)
         await expect(image).toBeVisible()
-        const loadedBounds = await image.boundingBox()
+        const loadedBounds = await boundsIn(image, avatar)
         for (const [key, value] of Object.entries(bounds)) expect(loadedBounds[key]).toBeCloseTo(value, 1)
         expect(pending).toHaveLength(1)
         const output = process.env.ANDROID_IMAGE_EVIDENCE_DIR ?? '/tmp/opentubex-native-avatar-evidence'

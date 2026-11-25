@@ -669,7 +669,14 @@ function fitNavigationLabels() {
     }
     if (fits.size === 0) return
     const smallest = Math.min(...[...fits.values()].map(fit => fit.size))
-    const size = `${Math.max(10, Math.floor(smallest * 100) / 100)}px`
+    const fitted = Math.max(10, Math.floor(smallest * 100) / 100)
+    // Text doesn't scale exactly with its font size. Measured at 11.99px, a
+    // label can seem to have room for 12px and overflow there, so the labels
+    // would shrink and grow again on every frame. Grow them only for a
+    // visible gain.
+    const current = parseFloat(nav.style.getPropertyValue('--fitted-nav-label-size'))
+    if (fitted > current && fitted - current < current * 0.01) return
+    const size = `${fitted}px`
     if (nav.style.getPropertyValue('--fitted-nav-label-size') !== size) {
       nav.style.setProperty('--fitted-nav-label-size', size)
     }

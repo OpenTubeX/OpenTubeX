@@ -1,7 +1,6 @@
 import { test } from 'node:test'
-import { chromium } from '@playwright/test'
 import { verifySyncDeviceRemoval } from '../../e2e/helpers/sync-device-removal.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { current: true, reconnectDuringCleanup: true }]) {
   let behavior = 'cleans up synced tabs and orphaned sets can be deleted'
@@ -10,16 +9,18 @@ for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { curre
   test(`Android device removal ${behavior}`, {
     skip: !process.env.ANDROID_CDP_URL,
   }, async () => {
-    const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+    const { browser, page } = await connectAndroidApp()
     const keepAlive = setTimeout(() => {}, 120_000)
     try {
-      const page = appPage(browser)
       await page.reload()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
+      // The restored tabs must not reach YouTube; the fixture serves sync.
+      await blockAppNetwork(page)
       await verifySyncDeviceRemoval(page, { phone: true, ...options })
     } finally {
       clearTimeout(keepAlive)
+      await page.evaluate(() => window.__androidTestNetwork?.restore()).catch(() => {})
       await browser.close()
     }
   })
@@ -30,14 +31,15 @@ for (const { conflict, intentionalDeletion, olderLogin, pendingRevocation, aband
     skip: !process.env.ANDROID_CDP_URL,
   }, async () => {
     const { verifySyncDeviceReconnection } = await import('../../e2e/helpers/sync-device-reconnection.mjs')
-    const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+    const { browser, page } = await connectAndroidApp()
     const keepAlive = setTimeout(() => {}, 120_000)
     try {
-      const page = appPage(browser)
       await page.reload()
+      await blockAppNetwork(page)
       await verifySyncDeviceReconnection(page, { conflict, intentionalDeletion, olderLogin, pendingRevocation, abandonRevocation, phone: true })
     } finally {
       clearTimeout(keepAlive)
+      await page.evaluate(() => window.__androidTestNetwork?.restore()).catch(() => {})
       await browser.close()
     }
   })
