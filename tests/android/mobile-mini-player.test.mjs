@@ -10,9 +10,11 @@ import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoin
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
 import { watchHistoryEntry } from '../../e2e/helpers/watch.mjs'
 import { appPage } from '../helpers/android-app-page.mjs'
+import { androidAppId, forwardAndroidWebView } from '../helpers/android-webview.mjs'
 
-// Run against a current debug APK on a locked emulator, forwarding its WebView
-// socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
+// Run against a current debug APK on a locked emulator with
+// _scripts/androidScriptTests.mjs, or forward its WebView socket and set
+// ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> and ANDROID_SERIAL.
 // ANDROID_CPU_THROTTLE=4 slows the WebView down like a busy CI emulator.
 
 // A busy or software-rendered emulator can take longer than Playwright's 5 s
@@ -84,6 +86,8 @@ for (const [audioOnly, landscape] of [[false, false], [true, true]]) {
 }
 
 async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, compactOnly = false, seekingOnly = false, feedbackOnly = false } = {}) {
+  // An earlier test may have ended with a restarted app or adb server.
+  await forwardAndroidWebView()
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = appPage(browser)
@@ -140,6 +144,14 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
         ? window.__miniPlayerFetch(url, options)
         : Promise.reject(new Error('Offline mini-player test'))
+      // The app requests through native plugins on Android, which the fetch
+      // stub does not reach. Without this, the Watch page waits on the
+      // network, and its native timeout matches the wait for it below.
+      window.__miniPlayerNativePromise = window.Capacitor.nativePromise
+      window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
+        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') return Promise.reject(new Error('Offline mini-player test'))
+        return window.__miniPlayerNativePromise.call(this, plugin, method, options, ...rest)
+      }
       const style = document.createElement('style')
       style.id = 'mini-player-test-style'
       // Toasts, such as an available yt-dlp update, can cover the docked bar.
@@ -452,6 +464,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await touch('touchMove', { ...up, y: up.y - 30 })
         await touch('touchMove', { ...up, y: up.y - Math.abs(bar.y - full.y) })
         await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+        // The morph can show the first move's frame until the next animation
+        // frame renders the last one. Measuring across those frames pairs the
+        // media of one with the player of the other.
+        await expect.poll(async () => {
+          const box = await player.boundingBox()
+          return box !== null && ['x', 'y', 'width', 'height'].every(side => Math.abs(box[side] - full[side]) < 1)
+        }, { message: 'the restore drag must reach the inline player' }).toBe(true)
         await capture(`restoring-${scale}`)
         await t.test(`restore reaches the inline media layout before release at ${scale}%`, async () => {
           const moving = await media.boundingBox()
@@ -637,6 +656,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       // alone cannot prove that Android painted the artwork on the launcher.
       await player.locator('.shaka-pip-button').first().evaluate(button => button.click())
       await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
+      let checkError = null
       try {
         await expect.poll(() => {
           const tasks = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'dumpsys', 'activity', 'activities'], { encoding: 'utf8' })
@@ -648,10 +668,23 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
           const painted = await page.evaluate(sampleAudioArtwork, { png: png.toString('base64'), cropToSurface: false })
           return painted.green
         }).toBeGreaterThan(100)
-      } finally {
-        execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity'])
-        await expect(page.locator('body')).not.toHaveClass(/androidPictureInPicture(?:\s|$)/)
+      } catch (error) {
+        checkError = error
       }
+      // SystemUI ignores the launch's request to expand picture-in-picture
+      // while the window is still animating into it, so launch again until
+      // the app has left it.
+      try {
+        await expect(async () => {
+          adb('am', 'start', '-n', `${androidAppId()}/org.opentubex.app.MainActivity`)
+          await expect(page.locator('body')).not.toHaveClass(/androidPictureInPicture(?:\s|$)/, { timeout: 5000 })
+        }).toPass({ timeout: 60000 })
+      } catch (error) {
+        // Keep a failed check's own error rather than replacing it with this one.
+        if (!checkError) throw error
+        console.error('Could not leave picture-in-picture after a failed check:', error)
+      }
+      if (checkError) throw checkError
       return
     }
     if (navigationOnly) {
@@ -1050,6 +1083,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
         if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
         delete window.__miniPlayerFetch
+        if (window.__miniPlayerNativePromise) window.Capacitor.nativePromise = window.__miniPlayerNativePromise
+        delete window.__miniPlayerNativePromise
         window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
         delete window.__miniDismissPointerUp
         delete window.__miniDismissRegression

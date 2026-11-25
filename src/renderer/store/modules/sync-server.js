@@ -56,7 +56,7 @@ import {
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
 import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
-import { isSettingSyncEnabled, whenSyncServerSnapshotLoaded } from './settings'
+import { isSettingSyncEnabled, readSavedSettingEditTimes, whenSyncServerSnapshotLoaded } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, savedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
@@ -567,6 +567,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       ? dispatchRemoteSyncAction(dispatch, ...args)
       : Promise.reject(new SyncServerCancelledError()),
     assertActive: assertSyncStillActive,
+    readSavedSettingEditTimes,
     async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
       // Encrypted adapter mutations are only published in the final upload.
       if (encrypted) {

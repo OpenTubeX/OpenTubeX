@@ -215,6 +215,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
+    readSavedSettingEditTimes: async () => ({}),
     whenSyncServerSnapshotLoaded: async () => {},
     settingWritesSettled: () => null,
     ...profileSettings,

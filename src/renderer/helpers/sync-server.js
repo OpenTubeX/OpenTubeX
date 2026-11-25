@@ -30,7 +30,7 @@ import {
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
-import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId } from '../../profileSettings.js'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId, settingEditedBetween } from '../../profileSettings.js'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -1870,6 +1870,8 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 // received.
 // `store.persistSettingsSyncBaseline` receives the server entries this sync
 // merged and applied, so a failed upload cannot make them look like local edits.
+// `store.readSavedSettingEditTimes` returns the saved edit times, which include
+// edits other windows saved but this window hasn't received yet.
 // `options.dataScope` is the separate profile whose data the store shows, whose
 // channel settings sync under their own key. Those of the deleted separate
 // profiles in `options.removedProfileIds` are removed.
@@ -1888,11 +1890,16 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Reordering unchanged settings would create revisions that wake each other.
   const merged = { ...remote }
   const now = Date.now()
-  const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
-    typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
-    !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
-    ? store.state.settings.syncServerSettingUpdatedAt
-    : {}
+  // Edits save a new object, so this holds the times as this sync read them.
+  const editTimes = () => {
+    const times = store.state.settings.syncServerSettingUpdatedAt
+    return times !== null && typeof times === 'object' && !Array.isArray(times) ? times : {}
+  }
+  const localUpdatedAt = editTimes()
+  const savedEditTimeChanged = async key => {
+    const saved = await store.readSavedSettingEditTimes?.() ?? {}
+    return Object.hasOwn(saved, key) && saved[key] !== localUpdatedAt[key]
+  }
   const local = Object.fromEntries([
     [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
     // A profile with its own settings may show other values, which sync with that profile.
@@ -2005,14 +2012,22 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
         ? areSyncSettingValuesEqual(key, currentValue, entry.value)
         : metadataEquals(currentValue, profileSettingsKey ? syncedProfileSettings(entry.value, isSynced) : entry.value)
-      // Edited while this sync saved an earlier setting. Applying the merge would
-      // undo the edit, so the server keeps its entry and the next sync merges it.
+      // Edited while this sync saved an earlier setting, also back to the value
+      // it read. Applying the merge would undo the edit, so the server keeps its
+      // entry and the next sync merges it.
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
         if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
-      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
+      const editedHere = () => !metadataEquals(profileSettingsKey ? currentValue : sharedSettingValue(store.state.settings, key), value) ||
+        settingEditedBetween(localUpdatedAt, editTimes(), key)
+      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY &&
+          (editedHere() ||
+            // Another window saves an edit's time before this one receives the
+            // edit. This window can edit too while the times load. Saving a
+            // profile's own settings checks the saved times itself.
+            (!profileSettingsKey && (await savedEditTimeChanged(key) || editedHere())))) {
         skip()
         continue
       }
@@ -2020,9 +2035,9 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         if (channelSettingsProfiles.has(key)) {
           await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
         } else if (profileSettingsProfiles.has(key)) {
-          // Changed meanwhile: the next sync merges the edit.
+          // Edited meanwhile: the next sync merges the edit.
           if (!await store.dispatch('saveSyncedProfileSettings', {
-            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, isSynced,
+            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, updatedAt: localUpdatedAt, isSynced,
           })) {
             skip()
             continue

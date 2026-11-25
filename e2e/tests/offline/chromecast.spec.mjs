@@ -191,9 +191,7 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
   await openCastVideo(app, page)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
-  // Tall enough that the Cast button clears the phone navigation bar, which
-  // would otherwise cover it, and slide away or back as the click scrolls the page.
-  await setWindowSize(app, page, { width: 600, height: 1000 })
+  await setWindowSize(app, page, { width: 600, height: 850 })
   await app.electronApp.evaluate(() => { globalThis.castTest.holdStart = true })
   await choice(page, 'Test TV')
   const progress = page.locator('.castProgress')
@@ -782,9 +780,7 @@ for (const teardown of ['paused playback', 'navigation']) {
 test('Cast controls fit a narrow window at fractional UI scale and stop on navigation', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
-  // Tall enough that the Cast button clears the phone navigation bar, which
-  // would otherwise cover it, and slide away or back as the click scrolls the page.
-  await setWindowSize(app, page, { width: 600, height: 1000 })
+  await setWindowSize(app, page, { width: 600, height: 850 })
   await choice(page, 'Test TV')
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   await page.locator('.chromecastControl > button').click()

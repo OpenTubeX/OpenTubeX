@@ -13,7 +13,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, animationSpeed = 1, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }), chapterTaps = false } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, animationSpeed = 1, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }), chapterTaps = false, dragDistance = 400 } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element, requestAnimationFrame: globalThis.requestAnimationFrame }
   const frames = []
@@ -69,6 +69,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
             return minimize
           },
           move: (x, y) => calls.push(['drag-move', x, y]),
+          distance: () => dragDistance,
           finish: commit => calls.push(['drag-finish', commit]),
           cancel() {},
         },
@@ -391,13 +392,16 @@ for (const x of [50]) {
   })
 }
 
-for (const distance of [24, 120]) {
-  test(`upward mini-player swipe ${distance}px restores or cancels`, t => {
-    const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
-    g.startMobileFullscreenGesture(event(210, 400))
-    assert.equal(g.moveMobileFullscreenGesture(event(210, 400 - distance)), true)
-    assert.equal(g.finishMobileFullscreenGesture(event(210, 400 - distance)), true)
-    assert.deepEqual(calls, ['drag-begin', ['drag-move', 0, -distance], ['drag-finish', distance >= 64]])
+// A short landscape window at 125% UI Scale leaves the player less than the
+// usual commit distance between the mini bar and its inline position.
+for (const [distance, dragDistance, restores] of [[24, 400, false], [120, 400, true], [30, 63.4, false], [40, 63.4, true]]) {
+  test(`upward mini-player swipe ${distance}px along a ${dragDistance}px path ${restores ? 'restores' : 'cancels'}`, t => {
+    const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true, dragDistance })
+    g.startMobileFullscreenGesture(event(210, 400, { timeStamp: 0 }))
+    assert.equal(g.moveMobileFullscreenGesture(event(210, 400 - distance, { timeStamp: 16 })), true)
+    // Held before release, so only the distance decides.
+    assert.equal(g.finishMobileFullscreenGesture(event(210, 400 - distance, { timeStamp: 1000 })), true)
+    assert.deepEqual(calls, ['drag-begin', ['drag-move', 0, -distance], ['drag-finish', restores]])
   })
 }
 

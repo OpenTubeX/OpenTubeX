@@ -63,6 +63,7 @@ import {
   profileSettingsId,
   profileSettingsOf,
   sameSettingValue,
+  settingEditedBetween,
   sharedSettingValue,
   syncedProfileSettingsOf,
 } from '../../../profileSettings.js'
@@ -554,6 +555,16 @@ function saveSettingEdit(commit, settingId, save, editedAt = Date.now(), editedP
 }
 
 const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
+
+/**
+ * The edit times saved for sync. Another window saves an edit's time before
+ * this window receives it, so these can be newer than the ones it shows.
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function readSavedSettingEditTimes() {
+  const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
+  return isPlainObject(saved) ? saved : {}
+}
 
 /**
  * Optimistic edits show their value before their edit time is saved, so sync
@@ -1696,19 +1707,23 @@ const customActions = {
   },
 
   /**
-   * Saves the own settings of a profile from sync, unless they changed since
-   * sync read them. Settings this device doesn't sync keep their own value.
-   * @param {{ profileId: string, settings: Record<string, unknown> | null, previous: Record<string, unknown> | null, isSynced: (settingId: string) => boolean }} payload
-   *   `previous` holds the synced settings as sync read them, null if the profile used the shared settings
-   * @returns {Promise<boolean>} false if they changed meanwhile
+   * Saves the own settings of a profile from sync, unless they were edited
+   * since sync read them, also back to the same value. Settings this device
+   * doesn't sync keep their own value.
+   * @param {{ profileId: string, settings: Record<string, unknown> | null, previous: Record<string, unknown> | null, updatedAt: Record<string, unknown>, isSynced: (settingId: string) => boolean }} payload
+   *   `previous` holds the synced settings as sync read them, null if the profile used the shared settings,
+   *   and `updatedAt` the edit times sync read with them, see `syncServerSettingUpdatedAt`
+   * @returns {Promise<boolean>} false if they were edited meanwhile
    */
-  saveSyncedProfileSettings: ({ commit }, { profileId, settings, previous, isSynced }) => {
+  saveSyncedProfileSettings: ({ commit }, { profileId, settings, previous, updatedAt, isSynced }) => {
     if (!canHaveOwnSettings(profileId)) return Promise.resolve(false)
     const id = profileSettingsId(profileId)
     let saved = false
     return settingWrites.track(id, () => runLockedSettingUpdate(id, async () => {
       const current = await DBSettingHandlers.findValue(id)
       if (!sameSettingValue(syncedProfileSettings(current, isSynced), previous)) return
+      // Edits save their edit times before their value, inside the lock this holds.
+      if (settingEditedBetween(updatedAt, await readSavedSettingEditTimes(), id)) return
       if (!isPlainObject(current) && !await profileExists(profileId)) return
       const next = isPlainObject(settings)
         ? {
