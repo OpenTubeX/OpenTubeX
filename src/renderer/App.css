@@ -102,7 +102,7 @@
 
   /* Focus and scrollIntoView keep their target clear of the fixed bars at the
      bottom. The bars at the top are sticky, and padding there would make focus
-     inside them scroll the page. */
+     inside them scroll the page, so focusClearance.js keeps focus clear of them. */
   scroll-padding-block-end: var(--page-footer-block-size, 0);
 }
 

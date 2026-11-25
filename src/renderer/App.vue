@@ -809,6 +809,7 @@ import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
+import { installFocusClearance } from './helpers/focusClearance'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
 import { initializeHapticFeedback } from './helpers/mobileHaptics'
@@ -1412,6 +1413,7 @@ let removeLibraryNoticesListener = null
 let removeOpenUrlListener = null
 let stopTitlingUnloadedTabs = null
 let removeRoutePreloadIntent = null
+let removeFocusClearance = null
 let removeCapacitorIntegrationListeners = null
 let removeAndroidIncomingShare = null
 let capacitorPullToRefreshSetup = null
@@ -1843,6 +1845,7 @@ onMounted(async () => {
   // video, channel, playlist or hashtag in it.
   document.addEventListener('click', handleClick)
   document.addEventListener('auxclick', handleAuxClick)
+  removeFocusClearance = installFocusClearance(document)
   removeRoutePreloadIntent = installRoutePreloadIntent({
     preload: path => preloadResolvedRoute(router.resolve(path))
   })
@@ -2231,6 +2234,7 @@ onBeforeUnmount(() => {
   removeOpenUrlListener?.()
   stopTitlingUnloadedTabs?.()
   removeRoutePreloadIntent?.()
+  removeFocusClearance?.()
   removeCapacitorIntegrationListeners?.()
   removeAndroidIncomingShare?.()
   capacitorPullToRefreshSetup?.then(remove => remove?.())
