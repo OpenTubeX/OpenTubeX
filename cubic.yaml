@@ -2,7 +2,7 @@
 
 version: 1
 reviews:
-  # Review only on request (`@cubic-dev-ai review`); see AGENTS.md for when to ask
+  # Review only on request (`@cubic-dev-ai review`); see .github/MAINTAINER_AGENT_INSTRUCTIONS.md for when to ask
   incremental_commits: false
   ultrareview: manual
   ignore:
