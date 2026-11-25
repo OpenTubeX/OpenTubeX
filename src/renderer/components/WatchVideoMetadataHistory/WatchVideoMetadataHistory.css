@@ -1,8 +1,27 @@
+/* Size the card to its sections, so a lone title history does not stretch
+   across the window while thumbnails and descriptions get columns. */
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout) {
+  --history-columns: 1;
+  --history-column-gap: 24px;
+
+  max-inline-size: calc(var(--history-columns) * 40rem + (var(--history-columns) - 1) * var(--history-column-gap) + 2 * var(--prompt-padding-inline));
+  margin-inline: auto;
+  inset-inline: 0;
+}
+
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout:has(.historySection:nth-child(2))) {
+  --history-columns: 2;
+}
+
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout:has(.historySection:nth-child(3))) {
+  --history-columns: 3;
+}
+
 .historySections {
   display: grid;
-  gap: 24px;
+  gap: var(--history-column-gap);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  margin-block-end: 24px;
+  margin-block-end: 12px;
 }
 
 .historySection {
