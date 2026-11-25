@@ -644,7 +644,9 @@ public class PredictiveBackTest {
                     !activity.getOnBackPressedDispatcher().hasEnabledCallbacks()));
             } finally {
                 // Release any pointer if an assertion failed during the swipe.
-                MotionEvent release = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, 320, 600, 0);
+                // Canceling keeps a system Back gesture from leaving the app,
+                // which would stop its JavaScript and hide the failure.
+                MotionEvent release = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 320, 600, 0);
                 release.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                 try { InstrumentationRegistry.getInstrumentation().getUiAutomation().injectInputEvent(release, true); }
                 finally { release.recycle(); }

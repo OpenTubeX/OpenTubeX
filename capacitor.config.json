@@ -4,6 +4,9 @@
   "webDir": "dist/capacitor",
   "loggingBehavior": "none",
   "plugins": {
+    "App": {
+      "disableBackButtonHandler": true
+    },
     "LocalNotifications": {
       "smallIcon": "ic_stat_opentubex",
       "iconColor": "#FF3B30"
