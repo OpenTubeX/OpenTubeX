@@ -616,11 +616,16 @@ Settings:
       Force On: Примусово ввімкнути
       Force Off: Примусово вимкнути
     Comment Translation:
+      Translation: Переклад
+      Offer Translations For: Пропонувати переклад для
+      Descriptions: Описи
       Enable: Увімкнути переклад коментарів
-      Never Translate: Не перекладати коментарі мовою
+      Enable Description Translations: Увімкнути переклад описів
+      Enable Post Translations: Увімкнути переклад дописів
+      Never Translate: Не перекладати текст мовою
       Choose Language: Вибрати мову
-      Description: Коментарі мовою програми вже не перекладаються. Додайте інші мови, які ви розумієте.
-      Remove Language: Знову перекладати коментарі мовою {language}
+      Description: Текст мовою програми вже не перекладається. Додайте інші мови, які ви розумієте.
+      Remove Language: Знову перекладати текст мовою {language}
     Avoid translation:
       Avoid translation: Надавати перевагу неперекладеному тексту відео
       Disabled: Вимкнено
@@ -3130,3 +3135,6 @@ Twitch Page:
   Search Placeholder: "Категорії та канали"
 New Incognito Tab: Нова вкладка в режимі анонімного перегляду
 Incognito Tab: Вкладка в режимі анонімного перегляду
+Text Translation:
+  Translating, please wait: Перекладаємо, зачекайте
+  Translation failed: Не вдалося перекласти

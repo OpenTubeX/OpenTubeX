@@ -92,11 +92,18 @@
   margin-inline-end: 4px;
 }
 
-.descriptionCopyButton {
+.descriptionActions {
   position: absolute;
   z-index: 2;
   inset-block-start: 8px;
   inset-inline-end: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+/* Keep the text clear of the second button. */
+.videoDescription:has(.descriptionTranslationButton) .description {
+  padding-inline-end: 84px;
 }
 
 .videoDescription.short {

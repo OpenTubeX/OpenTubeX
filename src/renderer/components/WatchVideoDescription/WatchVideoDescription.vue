@@ -9,14 +9,28 @@
     }"
     @click="expandDescriptionWithClick"
   >
-    <FtIconButton
+    <div
       v-if="shownDescription.length > 0"
-      class="descriptionCopyButton"
-      :title="t('Description.Copy Description')"
-      :icon="['fas', 'copy']"
-      theme="base"
-      @click="copyDescription"
-    />
+      class="descriptionActions"
+    >
+      <FtIconButton
+        v-if="translationAvailable"
+        class="descriptionTranslationButton"
+        :title="translationButtonTitle"
+        :icon="['fas', translationLoading ? 'sync' : 'language']"
+        :spin="translationLoading"
+        :disabled="translationLoading"
+        :theme="translatedText === null ? 'base' : 'primary'"
+        @click="toggleTranslation"
+      />
+      <FtIconButton
+        class="descriptionCopyButton"
+        :title="t('Description.Copy Description')"
+        :icon="['fas', 'copy']"
+        theme="base"
+        @click="copyDescription"
+      />
+    </div>
     <div
       ref="descriptionScroll"
       v-overlay-scrollbars="!alwaysExpanded"
@@ -251,11 +265,13 @@ import { FtIcon } from '@opentubex/icons'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
-import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
+import { getDescriptionText, linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { copyToClipboard } from '../../helpers/utils'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getDescriptionLinkIconHtml } from '../../helpers/descriptionLinkIcons'
+import { escapeHTML } from '../../helpers/feed-metadata'
 import { useTabContext } from '../../tabs/TabContext'
+import { useTextTranslation } from '../../composables/useTextTranslation'
 
 import store from '../../store/index'
 
@@ -318,7 +334,7 @@ const descriptionFadeTop = ref(false)
 const descriptionFadeBottom = ref(false)
 const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
 
-const descriptionContent = computed(() => {
+const originalDescriptionContent = computed(() => {
   let shownDescription = ''
   let descriptionText = props.description
   if (props.descriptionHtml !== '') {
@@ -339,6 +355,22 @@ const descriptionContent = computed(() => {
     descriptionText = getDescriptionText(props.description)
   }
   return { html: shownDescription, text: descriptionText }
+})
+const {
+  available: translationAvailable,
+  loading: translationLoading,
+  translatedText,
+  targetLanguageName: translationLanguageName,
+  toggleTranslation
+} = useTextTranslation(() => originalDescriptionContent.value.text, 'getEnableDescriptionTranslations')
+const translationButtonTitle = computed(() => {
+  if (translationLoading.value) return t('Text Translation.Translating, please wait')
+  if (translatedText.value !== null) return t('Comments.Show original')
+  return t('Comments.Translate to {language}', { language: translationLanguageName.value })
+})
+const descriptionContent = computed(() => {
+  if (translatedText.value === null) return originalDescriptionContent.value
+  return { html: linkifyDescription(escapeHTML(translatedText.value)), text: translatedText.value }
 })
 const shownDescription = computed(() => descriptionContent.value.html)
 
@@ -531,8 +563,9 @@ onBeforeUnmount(() => {
 })
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.sections, () => props.license, () => props.contentDisclosures], async () => {
-  // Metadata can arrive or disappear after the card has mounted.
+watch([shownDescription, translationAvailable, () => props.tags, () => props.games, () => props.musicTracks, () => props.sections, () => props.license, () => props.contentDisclosures], async () => {
+  // Metadata can arrive or disappear after the card has mounted, and the translate
+  // button narrows the text once language detection offers it.
   // Control visibility follows the content, independently of the user's expansion choice.
   hasMeasured = false
   await nextTick()
@@ -606,22 +639,6 @@ function processDescriptionHtml(descriptionText, tabIndex) {
     // Reruns when the icon pack changes, as the icons come from it
     // `FtTimestampCatcher` needs the marker to leave times in their label alone
     .replaceAll(/ data-link-icon="([a-z\d]+)">/g, (marker, name) => `${marker}${getDescriptionLinkIconHtml(name)}`)
-}
-
-/**
- * The text of an HTML description, e.g. formatted text runs from the local API.
- * @param {string} description
- * @returns {string}
- */
-function getDescriptionText(description) {
-  // Template contents stay inert while extracting text from remote HTML.
-  const template = document.createElement('template')
-  template.innerHTML = description
-  // Links shown as an icon and a label copy as their URL, as YouTube may shorten the label.
-  for (const link of template.content.querySelectorAll('a[data-link-icon]')) {
-    link.replaceWith(link.getAttribute('href') ?? link.textContent ?? '')
-  }
-  return template.content.textContent ?? ''
 }
 </script>
 

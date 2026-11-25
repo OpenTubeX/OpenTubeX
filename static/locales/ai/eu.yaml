@@ -611,11 +611,16 @@ Settings:
       Force On: Behartu gaituta
       Force Off: Behartu desgaituta
     Comment Translation:
+      Translation: Itzulpena
+      Offer Translations For: Eskaini itzulpenak hauetarako
+      Descriptions: Deskribapenak
       Enable: Gaitu iruzkinen itzulpena
-      Never Translate: Ez itzuli hizkuntza honetako iruzkinak
+      Enable Description Translations: Gaitu deskribapenen itzulpena
+      Enable Post Translations: Gaitu argitalpenen itzulpena
+      Never Translate: Ez itzuli hizkuntza honetako testua
       Choose Language: Aukeratu hizkuntza
-      Description: Aplikazioaren hizkuntzako iruzkinak baztertuta daude dagoeneko. Gehitu irakur ditzakezun gainerako hizkuntzak.
-      Remove Language: Itzuli berriro {language} hizkuntzako iruzkinak
+      Description: Aplikazioaren hizkuntzako testua baztertuta dago dagoeneko. Gehitu irakur ditzakezun gainerako hizkuntzak.
+      Remove Language: Itzuli berriro {language} hizkuntzako testua
     Avoid translation:
       Avoid translation: Hobetsi itzuli gabeko bideo-testua
       Disabled: Desgaituta
@@ -3085,3 +3090,6 @@ Twitch Page:
   Search Placeholder: "Kategoriak eta kanalak"
 New Incognito Tab: Ezkutuko fitxa berria
 Incognito Tab: Ezkutuko fitxa
+Text Translation:
+  Translating, please wait: Itzultzen; itxaron
+  Translation failed: Ezin izan da itzuli

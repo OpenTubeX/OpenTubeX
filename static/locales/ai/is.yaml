@@ -611,11 +611,16 @@ Settings:
       Force On: Alltaf á
       Force Off: Alltaf af
     Comment Translation:
+      Translation: Þýðing
+      Offer Translations For: Bjóða þýðingar fyrir
+      Descriptions: Lýsingar
       Enable: Virkja þýðingar ummæla
-      Never Translate: Aldrei þýða ummæli á
+      Enable Description Translations: Virkja þýðingar lýsinga
+      Enable Post Translations: Virkja þýðingar færslna
+      Never Translate: Aldrei þýða texta á
       Choose Language: Veldu tungumál
-      Description: Ummæli á tungumáli forritsins eru þegar undanskilin. Bættu við öðrum tungumálum sem þú getur lesið.
-      Remove Language: Þýða ummæli á {language} aftur
+      Description: Texti á tungumáli forritsins er þegar undanskilinn. Bættu við öðrum tungumálum sem þú getur lesið.
+      Remove Language: Þýða texta á {language} aftur
     Avoid translation:
       Avoid translation: Kjósa óþýddan myndbandstexta
       Disabled: Óvirkt
@@ -3090,3 +3095,6 @@ Twitch Page:
   Search Placeholder: "Flokkar og rásir"
 New Incognito Tab: Nýr huliðsflipi
 Incognito Tab: Huliðsflipi
+Text Translation:
+  Translating, please wait: Þýði, bíddu aðeins
+  Translation failed: Ekki tókst að þýða

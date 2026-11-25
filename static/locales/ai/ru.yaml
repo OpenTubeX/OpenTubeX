@@ -570,11 +570,16 @@ Settings:
       Force On: Всегда включать
       Force Off: Всегда отключать
     Comment Translation:
+      Translation: Перевод
+      Offer Translations For: Предлагать перевод для
+      Descriptions: Описания
       Enable: Включить перевод комментариев
-      Never Translate: Не переводить комментарии на языках
+      Enable Description Translations: Включить перевод описаний
+      Enable Post Translations: Включить перевод записей
+      Never Translate: Не переводить текст на языках
       Choose Language: Выберите язык
-      Description: Комментарии на языке приложения уже исключены. Добавьте другие языки, которые вы понимаете.
-      Remove Language: Снова переводить комментарии на языке {language}
+      Description: Текст на языке приложения уже не переводится. Добавьте другие языки, которые вы понимаете.
+      Remove Language: Снова переводить текст на языке {language}
     Avoid translation:
       Avoid translation: Предпочитать исходный текст видео
       Disabled: Отключено
@@ -3058,3 +3063,6 @@ Twitch Page:
   Search Placeholder: "Категории и каналы"
 New Incognito Tab: Новая вкладка инкогнито
 Incognito Tab: Вкладка инкогнито
+Text Translation:
+  Translating, please wait: Перевод…
+  Translation failed: Не удалось перевести

@@ -45,3 +45,39 @@ export function linkifyHashtagsAndHandles(html) {
     phone: false
   })
 }
+
+/**
+ * @param {string} label
+ * @param {string} href
+ */
+function isShortenedUrl(label, href) {
+  const withoutScheme = url => url.replace(/^(?:https?:\/\/)?(?:www\.)?/, '')
+  const shortened = withoutScheme(label.trim().replace(/(?:\.\.\.|…)$/, ''))
+  // A label without a dot, such as `youtube`, is a word rather than a host.
+  return /^https?:\/\//.test(href) && shortened.includes('.') && withoutScheme(href).startsWith(shortened)
+}
+
+/**
+ * The text of an HTML description, e.g. formatted text runs from the local API.
+ * @param {string} description
+ * @returns {string}
+ */
+export function getDescriptionText(description) {
+  // Template contents stay inert while extracting text from remote HTML.
+  const template = document.createElement('template')
+  template.innerHTML = description
+  // Links shown as an icon and a label, or as a shortened URL like Invidious
+  // shows them, copy as their URL.
+  for (const link of template.content.querySelectorAll('a[href]')) {
+    // Invidious posts link YouTube pages relative to the app, see `parseInvidiousCommunityData`.
+    const href = link.getAttribute('href').replace(/^#?\//, 'https://www.youtube.com/')
+    if (link.hasAttribute('data-link-icon') || isShortenedUrl(link.textContent ?? '', href)) {
+      link.replaceWith(href)
+    }
+  }
+  // Invidious separates lines with `<br>`, which has no text of its own.
+  for (const lineBreak of template.content.querySelectorAll('br')) {
+    lineBreak.replaceWith('\n')
+  }
+  return template.content.textContent ?? ''
+}

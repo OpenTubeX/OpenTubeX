@@ -611,11 +611,16 @@ Settings:
       Force On: 強制開啟
       Force Off: 強制關閉
     Comment Translation:
+      Translation: 翻譯
+      Offer Translations For: 為以下內容提供翻譯
+      Descriptions: 說明
       Enable: 啟用留言翻譯
-      Never Translate: 一律不翻譯以下語言的留言
+      Enable Description Translations: 啟用說明翻譯
+      Enable Post Translations: 啟用貼文翻譯
+      Never Translate: 一律不翻譯以下語言的文字
       Choose Language: 選擇語言
-      Description: 系統已排除使用應用程式語言的留言。請加入其他您看得懂的語言。
-      Remove Language: 恢復翻譯 {language} 的留言
+      Description: 系統已排除使用應用程式語言的文字。請加入其他您看得懂的語言。
+      Remove Language: 恢復翻譯 {language} 的文字
     Avoid translation:
       Avoid translation: 優先顯示未翻譯的影片文字
       Disabled: 停用
@@ -3077,3 +3082,6 @@ Twitch Page:
   Search Placeholder: "分類和頻道"
 New Incognito Tab: 新增無痕分頁
 Incognito Tab: 無痕分頁
+Text Translation:
+  Translating, please wait: 正在翻譯，請稍候
+  Translation failed: 翻譯失敗

@@ -19,7 +19,8 @@ import { disableSearchSpellCorrection, parseSearchCorrection } from '../search-c
 import {
   getCommentTranslationSource,
   requestCommentTranslation,
-  sanitizeCommentTranslationSource
+  sanitizeCommentTranslationSource,
+  translateTextKeepingLayout
 } from '../comment-translations'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
@@ -186,13 +187,13 @@ export async function translateCommentText(text, targetLanguage) {
 }
 
 /**
- * Translates caption lines with the comment translation service, which, unlike
- * YouTube's caption translations, needs no signed-in account.
+ * Translates newline-separated lines with the comment translation service,
+ * which, unlike YouTube's caption translations, needs no signed-in account.
  * @param {string} text newline-separated lines
  * @param {string} targetLanguage
  * @returns {Promise<string>} the translated lines
  */
-export async function translateCaptionText(text, targetLanguage) {
+export async function translateLines(text, targetLanguage) {
   const innertube = await createInnertube()
   let response
   try {
@@ -205,8 +206,18 @@ export async function translateCaptionText(text, targetLanguage) {
     response = await innertube.interact.translate(sanitized, targetLanguage)
   }
   const { translated_content: translatedContent } = response
-  if (typeof translatedContent !== 'string') throw new Error('YouTube did not return a caption translation')
+  if (typeof translatedContent !== 'string') throw new Error('YouTube did not return a translation')
   return translatedContent
+}
+
+/**
+ * Translates a description or post, keeping its blank lines and links.
+ * @param {string} text
+ * @param {string} targetLanguage
+ * @returns {Promise<string>} plain text
+ */
+export async function translateDescriptionText(text, targetLanguage) {
+  return await translateTextKeepingLayout(text, lines => translateLines(lines, targetLanguage))
 }
 
 export async function getLocalPlaylist(id, signal) {

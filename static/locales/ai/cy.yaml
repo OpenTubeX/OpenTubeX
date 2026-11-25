@@ -612,11 +612,16 @@ Settings:
       Force On: Gorfodi ymlaen
       Force Off: Gorfodi i ffwrdd
     Comment Translation:
+      Translation: Cyfieithu
+      Offer Translations For: Cynnig cyfieithiadau ar gyfer
+      Descriptions: Disgrifiadau
       Enable: Galluogi cyfieithiadau sylwadau
-      Never Translate: Peidio byth â chyfieithu sylwadau yn
+      Enable Description Translations: Galluogi cyfieithiadau disgrifiadau
+      Enable Post Translations: Galluogi cyfieithiadau postiadau
+      Never Translate: Peidio byth â chyfieithu testun yn
       Choose Language: Dewis iaith
-      Description: Mae sylwadau yn iaith yr ap eisoes wedi'u hepgor. Ychwanegwch unrhyw ieithoedd eraill rydych yn gallu eu darllen.
-      Remove Language: Cyfieithu sylwadau {language} eto
+      Description: Mae testun yn iaith yr ap eisoes wedi'i hepgor. Ychwanegwch unrhyw ieithoedd eraill rydych yn gallu eu darllen.
+      Remove Language: Cyfieithu testun {language} eto
     Avoid translation:
       Avoid translation: Rhoi blaenoriaeth i destun fideo heb ei gyfieithu
       Disabled: Analluog
@@ -3113,3 +3118,6 @@ Twitch Page:
   Search Placeholder: "Categorïau a sianeli"
 New Incognito Tab: Tab incognito newydd
 Incognito Tab: Tab incognito
+Text Translation:
+  Translating, please wait: Wrthi'n cyfieithu; arhoswch
+  Translation failed: Methodd y cyfieithu

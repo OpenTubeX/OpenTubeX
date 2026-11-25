@@ -745,6 +745,7 @@ import { getWatchedComments } from '../../helpers/commentReplyNotifications'
 
 import { debounce, formatDurationAsTimestamp, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { useTextTranslationSettings } from '../../composables/useTextTranslation'
 import {
   getCommentReplyAccessibleLabel,
   getCommentReplyCount,
@@ -774,7 +775,6 @@ import {
   parseLocalSubscriberCount,
   translateCommentText
 } from '../../helpers/api/local'
-import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import {
   getInvidiousCommunityPostCommentReplies,
   getInvidiousCommunityPostComments,
@@ -1898,27 +1898,12 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
-const translationEnabled = computed(() => (
-  process.env.SUPPORTS_LOCAL_API && store.getters.getEnableCommentTranslations
-))
-
-const translationLanguage = computed(() => {
-  return normalizeYouTubeCaptionLanguageCode(locale.value)
-})
-
-const translationLanguageName = computed(() => {
-  const language = translationLanguage.value
-  if (!language) {
-    return locale.value
-  }
-
-  return new Intl.DisplayNames([locale.value, 'en'], { type: 'language' }).of(language) ?? language
-})
-
-const commentTranslationIgnoredLanguages = computed(() => {
-  const languages = store.getters.getCommentTranslationIgnoredLanguages
-  return Array.isArray(languages) ? languages : []
-})
+const {
+  enabled: translationEnabled,
+  targetLanguage: translationLanguage,
+  targetLanguageName: translationLanguageName,
+  ignoredLanguages: commentTranslationIgnoredLanguages
+} = useTextTranslationSettings('getEnableCommentTranslations')
 
 /**
  * @param {Comment} comment

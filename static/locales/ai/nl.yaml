@@ -616,11 +616,16 @@ Settings:
       Force On: Altijd aan
       Force Off: Altijd uit
     Comment Translation:
+      Translation: Vertaling
+      Offer Translations For: Vertalingen aanbieden voor
+      Descriptions: Beschrijvingen
       Enable: Vertaling van reacties inschakelen
-      Never Translate: Reacties nooit vertalen uit het
+      Enable Description Translations: Vertaling van beschrijvingen inschakelen
+      Enable Post Translations: Vertaling van posts inschakelen
+      Never Translate: Tekst nooit vertalen uit het
       Choose Language: Kies een taal
-      Description: Reacties in de taal van de app zijn al uitgesloten. Voeg andere talen toe die je kunt lezen.
-      Remove Language: Reacties in het {language} weer vertalen
+      Description: Tekst in de taal van de app is al uitgesloten. Voeg andere talen toe die je kunt lezen.
+      Remove Language: Tekst in het {language} weer vertalen
     Avoid translation:
       Avoid translation: Onvertaalde videotekst verkiezen
       Disabled: Uitgeschakeld
@@ -3147,3 +3152,6 @@ Twitch Page:
   Search Placeholder: "Categorieën en kanalen"
 New Incognito Tab: Nieuw incognitotabblad
 Incognito Tab: Incognitotabblad
+Text Translation:
+  Translating, please wait: Vertalen, even geduld
+  Translation failed: Vertalen mislukt

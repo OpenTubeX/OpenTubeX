@@ -730,11 +730,16 @@ Settings:
       Force On: Visada įjungta
       Force Off: Visada išjungta
     Comment Translation:
+      Translation: Vertimas
+      Offer Translations For: Siūlyti vertimą
+      Descriptions: Aprašymai
       Enable: Įjungti komentarų vertimą
-      Never Translate: Niekada neversti komentarų šiomis kalbomis
+      Enable Description Translations: Įjungti aprašymų vertimą
+      Enable Post Translations: Įjungti įrašų vertimą
+      Never Translate: Niekada neversti teksto šiomis kalbomis
       Choose Language: Pasirinkti kalbą
-      Description: Komentarai programos kalba jau neverčiami. Pridėkite kitas kalbas, kurias suprantate.
-      Remove Language: Vėl versti komentarus {language} kalba
+      Description: Tekstas programos kalba jau neverčiamas. Pridėkite kitas kalbas, kurias suprantate.
+      Remove Language: Vėl versti tekstą {language} kalba
     Avoid translation:
       Avoid translation: Teikti pirmenybę neverstam vaizdo įrašo tekstui
       Disabled: Išjungta
@@ -3577,3 +3582,6 @@ Twitch Page:
   Search Placeholder: "Kategorijos ir kanalai"
 New Incognito Tab: Nauja inkognito kortelė
 Incognito Tab: Inkognito kortelė
+Text Translation:
+  Translating, please wait: Verčiama, palaukite
+  Translation failed: Nepavyko išversti

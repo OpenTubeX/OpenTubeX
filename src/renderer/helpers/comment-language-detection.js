@@ -1,5 +1,14 @@
 const MIN_LANGUAGE_SCORE_MARGIN = 0.3
 
+const CJK_CHARACTERS = String.raw`\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}\p{scx=Hangul}\u3000-\u303F\uFF00-\uFFEF`
+/**
+ * A URL in text, without sentence punctuation after it. URLs may contain
+ * letters like `ü`, but end at CJK text, which these languages write right
+ * after a URL and which URLs usually percent-encode.
+ */
+export const URL_PATTERN_SOURCE = String.raw`\b(?:https?:\/\/|www\.)[^\s${CJK_CHARACTERS}]*[^\s.,;:!?'")\]${CJK_CHARACTERS}]`
+const URL_OR_MENTION_PATTERN = new RegExp(String.raw`(?:^|\s)@\S+|${URL_PATTERN_SOURCE}`, 'gu')
+
 // Languages included in eld's extrasmall (XS60) detector. Keeping the list
 // here lets Settings offer only languages that comment detection can identify.
 export const COMMENT_TRANSLATION_LANGUAGE_CODES = Object.freeze([
@@ -56,7 +65,7 @@ export function detectCommentTranslationAvailability(
     return false
   }
 
-  const result = detector.detect(text.replaceAll(/(?:^|\s)@\S+/g, ' '))
+  const result = detector.detect(text.replaceAll(URL_OR_MENTION_PATTERN, ' '))
   const normalizedIgnoredLanguages = new Set(
     ignoredLanguages.map(normalizeCommentTranslationLanguageCode)
   )

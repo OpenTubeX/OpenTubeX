@@ -28,6 +28,19 @@ function descriptionComponent({ laidOut = false } = {}) {
   ])
   let copied
   const stops = []
+  const document = {
+    createElement: tag => {
+      assert.equal(tag, 'template')
+      return {
+        innerHTML: '',
+        get content() {
+          const isText = !this.innerHTML.includes('<')
+          assert.ok(isText || htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
+          return { textContent: isText ? this.innerHTML : htmlTextFixtures.get(this.innerHTML), querySelectorAll: () => [] }
+        },
+      }
+    },
+  }
   const context = vm.createContext({
     defineProps: () => props,
     defineEmits: () => () => {},
@@ -51,19 +64,14 @@ function descriptionComponent({ laidOut = false } = {}) {
     clampOverlayScrollTop() {},
     restoreOverlayScrollTop() {},
     getDescriptionLinkIconHtml: () => '',
-    document: {
-      createElement: tag => {
-        assert.equal(tag, 'template')
-        return {
-          innerHTML: '',
-          get content() {
-            const isText = !this.innerHTML.includes('<')
-            assert.ok(isText || htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
-            return { textContent: isText ? this.innerHTML : htmlTextFixtures.get(this.innerHTML), querySelectorAll: () => [] }
-          },
-        }
-      },
+    document,
+    getDescriptionText(description) {
+      const template = document.createElement('template')
+      template.innerHTML = description
+      return template.content.textContent
     },
+    escapeHTML: text => text,
+    useTextTranslation: () => ({ available: ref(false), loading: ref(false), translatedText: ref(null), targetLanguageName: ref(''), toggleTranslation() {} }),
   })
   vm.runInContext(setup, context)
   return {

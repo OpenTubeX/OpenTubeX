@@ -785,11 +785,16 @@ Settings:
       Force On: Dwing aan
       Force Off: Dwing af
     Comment Translation:
+      Translation: Vertaling
+      Offer Translations For: Bied vertalings aan vir
+      Descriptions: Beskrywings
       Enable: Aktiveer kommentaarvertalings
-      Never Translate: Moet nooit kommentaar vertaal in
+      Enable Description Translations: Aktiveer beskrywingvertalings
+      Enable Post Translations: Aktiveer plasingvertalings
+      Never Translate: Moet nooit teks vertaal in
       Choose Language: Kies ’n taal
-      Description: Kommentaar in die toeptaal word reeds uitgesluit. Voeg enige ander tale by wat u kan lees.
-      Remove Language: Vertaal {language}-kommentaar weer
+      Description: Teks in die toeptaal word reeds uitgesluit. Voeg enige ander tale by wat u kan lees.
+      Remove Language: Vertaal {language}-teks weer
     Avoid translation:
       Avoid translation: Verkies onvertaalde videoteks
       Disabled: Gedeaktiveer
@@ -3285,3 +3290,6 @@ Twitch Page:
   Search Placeholder: "Kategorieë en kanale"
 New Incognito Tab: Nuwe incognito-oortjie
 Incognito Tab: Incognito-oortjie
+Text Translation:
+  Translating, please wait: Vertaal tans, wag asseblief
+  Translation failed: Vertaling het misluk

@@ -672,11 +672,16 @@ Settings:
       Force On: ہمیشہ آن
       Force Off: ہمیشہ آف
     Comment Translation:
+      Translation: ترجمہ
+      Offer Translations For: ان کے لیے ترجمے پیش کریں
+      Descriptions: تفصیلات
       Enable: کمنٹس کے ترجمے فعال کریں
-      Never Translate: ان زبانوں کے کمنٹس کا کبھی ترجمہ نہ کریں
+      Enable Description Translations: تفصیل کے ترجمے فعال کریں
+      Enable Post Translations: پوسٹس کے ترجمے فعال کریں
+      Never Translate: ان زبانوں کے متن کا کبھی ترجمہ نہ کریں
       Choose Language: زبان منتخب کریں
-      Description: ایپ کی زبان کے کمنٹس پہلے ہی خارج ہیں۔ کوئی دوسری زبانیں شامل کریں جو آپ پڑھ سکتے ہیں۔
-      Remove Language: '{language} کمنٹس کا دوبارہ ترجمہ کریں'
+      Description: ایپ کی زبان کا متن پہلے ہی خارج ہے۔ کوئی دوسری زبانیں شامل کریں جو آپ پڑھ سکتے ہیں۔
+      Remove Language: '{language} متن کا دوبارہ ترجمہ کریں'
     Avoid translation:
       Avoid translation: ویڈیو کے غیر ترجمہ شدہ متن کو ترجیح دیں
       Disabled: غیر فعال
@@ -3145,3 +3150,6 @@ Twitch Page:
   Search Placeholder: "زمرے اور چینلز"
 New Incognito Tab: نیا پوشیدگی ٹیب
 Incognito Tab: پوشیدگی ٹیب
+Text Translation:
+  Translating, please wait: ترجمہ ہو رہا ہے، براہ کرم انتظار کریں
+  Translation failed: ترجمہ ناکام ہو گیا

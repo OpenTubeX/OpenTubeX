@@ -611,11 +611,16 @@ Settings:
       Force On: Vždy zapnuto
       Force Off: Vždy vypnuto
     Comment Translation:
+      Translation: Překlad
+      Offer Translations For: Nabízet překlad pro
+      Descriptions: Popisy
       Enable: Povolit překlad komentářů
-      Never Translate: Nepřekládat komentáře v jazyce
+      Enable Description Translations: Povolit překlad popisů
+      Enable Post Translations: Povolit překlad příspěvků
+      Never Translate: Nepřekládat text v jazyce
       Choose Language: Vyberte jazyk
-      Description: Komentáře v jazyce aplikace jsou již vyloučené. Přidejte další jazyky, kterým rozumíte.
-      Remove Language: Znovu překládat komentáře v jazyce {language}
+      Description: Text v jazyce aplikace je již vyloučen. Přidejte další jazyky, kterým rozumíte.
+      Remove Language: Znovu překládat text v jazyce {language}
     Avoid translation:
       Avoid translation: Upřednostňovat nepřeložený text videa
       Disabled: Vypnuto
@@ -3074,3 +3079,6 @@ Twitch Page:
   Search Placeholder: "Kategorie a kanály"
 New Incognito Tab: Nová anonymní karta
 Incognito Tab: Anonymní karta
+Text Translation:
+  Translating, please wait: Překládání, čekejte
+  Translation failed: Překlad se nezdařil

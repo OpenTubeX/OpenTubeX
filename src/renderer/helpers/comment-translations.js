@@ -2,6 +2,7 @@ import Autolinker from 'autolinker'
 
 import {
   detectCommentTranslationAvailability,
+  URL_PATTERN_SOURCE,
 } from './comment-language-detection.js'
 
 export {
@@ -156,4 +157,65 @@ export function formatCommentTranslation(translatedText) {
     .replaceAll("'", '&apos;')
 
   return Autolinker.link(escapedText)
+}
+
+// URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
+// translates the words in them too, which would break their links. Sentence
+// punctuation after a handle stays outside of it.
+const PROTECTED_TOKEN_PATTERN = new RegExp([
+  URL_PATTERN_SOURCE,
+  String.raw`[\w.+-]+@[\w-]+(?:\.[\w-]+)+`,
+  String.raw`(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_](?:[\p{L}\p{N}_.-]*[\p{L}\p{N}_])?`,
+].join('|'), 'gu')
+// The service keeps numbered placeholders like `{0}` in place, even when it reorders the sentence.
+const PLACEHOLDER_PATTERN = /\{(\d+)\}/g
+
+/**
+ * Translate multiline text, such as a description, keeping its links and,
+ * unless the translation merges or splits lines, its blank lines, which the
+ * translation service adds and drops at will.
+ * @param {string} text
+ * @param {(text: string) => Promise<string>} translate translates newline-separated lines
+ * @returns {Promise<string>} plain text
+ */
+export async function translateTextKeepingLayout(text, translate) {
+  const lines = text.split(/\r?\n/)
+  const lineIndexes = lines.flatMap((line, index) => line.trim() === '' ? [] : [index])
+  if (lineIndexes.length === 0) return text
+
+  // Text that already contains placeholders is sent as is.
+  const tokens = []
+  const protect = !/\{\d+\}/.test(text)
+  const sources = lineIndexes.map((index) => {
+    const line = lines[index].trim()
+    return protect ? line.replaceAll(PROTECTED_TOKEN_PATTERN, token => `{${tokens.push(token) - 1}}`) : line
+  })
+
+  const translated = (await translate(sources.join('\n'))).trim()
+  if (translated === '') throw new Error('YouTube did not return a translation')
+
+  const translatedLines = translated.split('\n').map(line => line.trim()).filter(line => line !== '')
+  let result
+  if (translatedLines.length === sources.length) {
+    lineIndexes.forEach((lineIndex, index) => {
+      lines[lineIndex] = /^\s*/.exec(lines[lineIndex])[0] + translatedLines[index]
+    })
+    result = lines.join('\n')
+  } else {
+    // Merged or split lines can no longer be matched to their source lines.
+    result = translated
+  }
+  if (!protect) return result
+
+  const restored = new Set()
+  result = result.replaceAll(PLACEHOLDER_PATTERN, (placeholder, index, offset, string) => {
+    const token = tokens[index]
+    if (token === undefined) return placeholder
+    restored.add(Number(index))
+    // Keep words the translation attached directly, as in Japanese, out of the link.
+    return /^[\p{L}\p{N}_]/u.test(string.slice(offset + placeholder.length)) ? `${token} ` : token
+  })
+  // Links the translation dropped are added at the end rather than lost.
+  const dropped = tokens.filter((_token, index) => !restored.has(index))
+  return dropped.length > 0 ? `${result} ${dropped.join(' ')}` : result
 }

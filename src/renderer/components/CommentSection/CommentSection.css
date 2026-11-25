@@ -648,46 +648,8 @@
   margin-inline-start: 60px;
 }
 
-.commentTranslationButton {
-  display: inline-flex;
-  min-block-size: 32px;
+.commentTranslation .commentTranslationButton {
   max-inline-size: calc(100% - 60px);
-  align-items: center;
-  gap: 6px;
-  padding-block: 4px;
-  padding-inline: 10px;
-  color: var(--title-color);
-  background-color: transparent;
-  border: 0;
-
-  /* Half the minimum height rather than full, so the press morph is smooth. */
-  border-radius: calc(16px * var(--ui-roundness));
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: start;
-  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-}
-
-.commentTranslationButton:hover,
-.commentTranslationButton:focus-visible {
-  color: var(--side-nav-hover-text-color);
-  background-color: var(--side-nav-hover-color);
-}
-
-.commentTranslationButton:disabled {
-  cursor: default;
-  opacity: 0.65;
-}
-
-.commentTranslationButton:disabled:hover {
-  color: var(--title-color);
-  background-color: transparent;
-}
-
-.commentTranslationButton:not(:disabled):active {
-  border-radius: var(--shape-corner-medium);
 }
 
 /* stylelint-disable liberty/use-logical-spec */

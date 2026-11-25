@@ -621,11 +621,16 @@ Settings:
       Force On: Увек укључено
       Force Off: Увек искључено
     Comment Translation:
+      Translation: Превод
+      Offer Translations For: Нуди превођење за
+      Descriptions: Описи
       Enable: Укључи превођење коментара
-      Never Translate: Никада не преводи коментаре на
+      Enable Description Translations: Укључи превођење описа
+      Enable Post Translations: Укључи превођење постова
+      Never Translate: Никада не преводи текст на
       Choose Language: Изаберите језик
-      Description: Коментари на језику апликације већ су изузети. Додајте све остале језике које разумете.
-      Remove Language: Поново преводи коментаре на језику {language}
+      Description: Текст на језику апликације већ је изузет. Додајте све остале језике које разумете.
+      Remove Language: Поново преводи текст на језику {language}
     Avoid translation:
       Avoid translation: Дај предност непреведеном тексту видео-снимака
       Disabled: Искључено
@@ -3163,3 +3168,6 @@ Twitch Page:
   Search Placeholder: "Категорије и канали"
 New Incognito Tab: Нова картица без архивирања
 Incognito Tab: Картица без архивирања
+Text Translation:
+  Translating, please wait: Превођење, сачекајте
+  Translation failed: Превођење није успело

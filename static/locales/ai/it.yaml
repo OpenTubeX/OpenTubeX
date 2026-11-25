@@ -611,11 +611,16 @@ Settings:
       Force On: Attiva sempre
       Force Off: Disattiva sempre
     Comment Translation:
+      Translation: Traduzione
+      Offer Translations For: Offri traduzioni per
+      Descriptions: Descrizioni
       Enable: Abilita traduzione dei commenti
-      Never Translate: Non tradurre mai i commenti in
+      Enable Description Translations: Abilita traduzione delle descrizioni
+      Enable Post Translations: Abilita traduzione dei post
+      Never Translate: Non tradurre mai il testo in
       Choose Language: Scegli una lingua
-      Description: I commenti nella lingua dell'app sono già esclusi. Aggiungi le altre lingue che sai leggere.
-      Remove Language: Traduci di nuovo i commenti in {language}
+      Description: Il testo nella lingua dell'app è già escluso. Aggiungi le altre lingue che sai leggere.
+      Remove Language: Traduci di nuovo il testo in {language}
     Avoid translation:
       Avoid translation: Preferisci il testo non tradotto dei video
       Disabled: Disabilitato
@@ -3074,3 +3079,6 @@ Twitch Page:
   Search Placeholder: "Categorie e canali"
 New Incognito Tab: Nuova scheda in incognito
 Incognito Tab: Scheda in incognito
+Text Translation:
+  Translating, please wait: Traduzione in corso, attendi
+  Translation failed: Traduzione non riuscita

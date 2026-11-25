@@ -618,11 +618,16 @@ Settings:
       Force On: Məcburi aktivləşdir
       Force Off: Məcburi söndür
     Comment Translation:
+      Translation: Tərcümə
+      Offer Translations For: Bunlar üçün tərcümə təklif et
+      Descriptions: Təsvirlər
       Enable: Şərh tərcümələrini aktivləşdir
-      Never Translate: Bu dillərdəki şərhləri heç vaxt tərcümə etmə
+      Enable Description Translations: Təsvir tərcümələrini aktivləşdir
+      Enable Post Translations: Post tərcümələrini aktivləşdir
+      Never Translate: Bu dillərdəki mətnləri heç vaxt tərcümə etmə
       Choose Language: Dil seçin
-      Description: Tətbiq dilindəki şərhlər artıq istisna edilib. Oxuya bildiyiniz digər dilləri əlavə edin.
-      Remove Language: "{language} dilindəki şərhləri yenidən tərcümə et"
+      Description: Tətbiq dilindəki mətnlər artıq istisna edilib. Oxuya bildiyiniz digər dilləri əlavə edin.
+      Remove Language: '{language} dilindəki mətnləri yenidən tərcümə et'
     Avoid translation:
       Avoid translation: Tərcümə edilməmiş video mətninə üstünlük ver
       Disabled: Qapalı
@@ -3084,3 +3089,6 @@ Twitch Page:
   Search Placeholder: "Kateqoriyalar və kanallar"
 New Incognito Tab: Yeni gizli vərəq
 Incognito Tab: Gizli vərəq
+Text Translation:
+  Translating, please wait: Tərcümə edilir, zəhmət olmasa gözləyin
+  Translation failed: Tərcümə alınmadı

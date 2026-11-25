@@ -441,7 +441,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Startup Behavior': ['Startup Behavior'],
     'Reduced Motion': ['Reduced Motion'],
     'Avoid translation': ['Avoid translation'],
-    'Comment Translation': ['Enable', 'Never Translate'],
+    'Comment Translation': ['Translation', 'Offer Translations For', 'Never Translate'],
     'Preferred API Backend': ['Preferred API Backend'],
     'Yattee Server': ['Server URL', 'Username', 'Password', 'Proxy Videos', 'Test Connection'],
     'Playlist View Type': ['Playlist View Type'],

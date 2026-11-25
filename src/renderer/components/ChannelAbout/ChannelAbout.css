@@ -27,6 +27,12 @@
   white-space: pre-wrap;
 }
 
+/* Line the icon up with the text. */
+.aboutTranslationButton {
+  margin-block-start: 8px;
+  margin-inline-start: -10px;
+}
+
 .aboutLinks {
   list-style: none;
   margin: 0;

@@ -611,11 +611,16 @@ Settings:
       Force On: Alltid på
       Force Off: Alltid av
     Comment Translation:
+      Translation: Översättning
+      Offer Translations For: Erbjud översättning av
+      Descriptions: Beskrivningar
       Enable: Aktivera översättning av kommentarer
-      Never Translate: Översätt aldrig kommentarer på
+      Enable Description Translations: Aktivera översättning av beskrivningar
+      Enable Post Translations: Aktivera översättning av inlägg
+      Never Translate: Översätt aldrig text på
       Choose Language: Välj ett språk
-      Description: Kommentarer på appens språk undantas redan. Lägg till andra språk som du kan läsa.
-      Remove Language: Översätt kommentarer på {language} igen
+      Description: Text på appens språk undantas redan. Lägg till andra språk som du kan läsa.
+      Remove Language: Översätt text på {language} igen
     Avoid translation:
       Avoid translation: Föredra oöversatt videotext
       Disabled: Inaktiverat
@@ -3074,3 +3079,6 @@ Twitch Page:
   Search Placeholder: "Kategorier och kanaler"
 New Incognito Tab: Ny inkognitoflik
 Incognito Tab: Inkognitoflik
+Text Translation:
+  Translating, please wait: Översätter, vänta
+  Translation failed: Översättningen misslyckades

@@ -611,11 +611,16 @@ Settings:
       Force On: Her zaman açık
       Force Off: Her zaman kapalı
     Comment Translation:
+      Translation: Çeviri
+      Offer Translations For: Şunlar için çeviri öner
+      Descriptions: Açıklamalar
       Enable: Yorum çevirilerini etkinleştir
-      Never Translate: Şu dildeki yorumları asla çevirme
+      Enable Description Translations: Açıklama çevirilerini etkinleştir
+      Enable Post Translations: Gönderi çevirilerini etkinleştir
+      Never Translate: Şu dildeki metinleri asla çevirme
       Choose Language: Bir dil seçin
-      Description: Uygulama dilindeki yorumlar zaten çevrilmez. Okuyabildiğiniz diğer dilleri ekleyin.
-      Remove Language: '{language} dilindeki yorumları yeniden çevir'
+      Description: Uygulama dilindeki metinler zaten çevrilmez. Okuyabildiğiniz diğer dilleri ekleyin.
+      Remove Language: '{language} dilindeki metinleri yeniden çevir'
     Avoid translation:
       Avoid translation: Çevrilmemiş video metnini tercih et
       Disabled: Devre dışı
@@ -3075,3 +3080,6 @@ Twitch Page:
   Search Placeholder: "Kategoriler ve kanallar"
 New Incognito Tab: Yeni Gizli Sekme
 Incognito Tab: Gizli sekme
+Text Translation:
+  Translating, please wait: Çevriliyor, lütfen bekleyin
+  Translation failed: Çeviri başarısız oldu

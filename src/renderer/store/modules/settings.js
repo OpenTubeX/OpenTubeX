@@ -241,6 +241,21 @@ export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const runLocaleChange = createSettingUpdateQueue()
 
+const TEXT_TRANSLATION_GETTERS = ['getEnableCommentTranslations', 'getEnableDescriptionTranslations', 'getEnablePostTranslations']
+
+/**
+ * Releases the language detector once none of comments, descriptions and posts offer translations.
+ * @param {{ getters: Record<string, unknown> }} store
+ * @param {boolean} value
+ * @param {string} changedGetter the getter of the setting being changed, which still reports its old value
+ */
+function terminateUnusedTranslationLanguageDetector({ getters }, value, changedGetter) {
+  if (value || TEXT_TRANSLATION_GETTERS.some(getter => getter !== changedGetter && getters[getter])) return
+  import('../../helpers/comment-translations')
+    .then(({ terminateCommentTranslationLanguageDetector }) => terminateCommentTranslationLanguageDetector())
+    .catch(() => {})
+}
+
 const sideEffectHandlers = {
   diagnosticLogging: (_store, value) => {
     setDiagnosticLogging(value === true)
@@ -265,13 +280,9 @@ const sideEffectHandlers = {
     return setAITranslationCompletionsEnabled(value)
   },
 
-  enableCommentTranslations: (_store, value) => {
-    if (!value) {
-      import('../../helpers/comment-translations')
-        .then(({ terminateCommentTranslationLanguageDetector }) => terminateCommentTranslationLanguageDetector())
-        .catch(() => {})
-    }
-  },
+  enableCommentTranslations: (store, value) => terminateUnusedTranslationLanguageDetector(store, value, 'getEnableCommentTranslations'),
+  enableDescriptionTranslations: (store, value) => terminateUnusedTranslationLanguageDetector(store, value, 'getEnableDescriptionTranslations'),
+  enablePostTranslations: (store, value) => terminateUnusedTranslationLanguageDetector(store, value, 'getEnablePostTranslations'),
 
   showVolumeBoostToggle: ({ commit }, value) => {
     // Turning the toggle back on must not resume an earlier boost
