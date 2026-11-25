@@ -175,11 +175,17 @@
   gap: 8px;
 }
 
+/* Fill the field like the block layout does, so values longer than the sized-by name still fit. */
+.select-text.withOptionVisuals .selectValueBox {
+  flex: 1;
+}
+
+/* Match the icon size of the app's dropdown menus. */
 .optionIcon {
   color: var(--secondary-text-color);
-  flex: 0 0 10px;
-  font-size: 10px;
-  inline-size: 10px;
+  flex: 0 0 18px;
+  font-size: 16px;
+  inline-size: 18px;
   text-align: center;
 }
 

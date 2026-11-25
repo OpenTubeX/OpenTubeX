@@ -172,9 +172,3 @@
   inline-size: 100%;
   margin-block-start: 0;
 }
-
-.searchControl :deep(.optionIcon) {
-  flex-basis: 14px;
-  inline-size: 14px;
-  font-size: 14px;
-}

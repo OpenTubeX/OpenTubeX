@@ -117,6 +117,7 @@
                   setting-key="landingPage"
                   :select-names="landingPageNames"
                   :select-values="landingPageValues"
+                  :option-icons="landingPageIcons"
                   :icon="['fas', 'location-dot']"
                   @change="updateSetting('LandingPage', $event)"
                 />
@@ -436,7 +437,7 @@ const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.144p'),
   ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
 ])
-const { landingPageNames, landingPageValues } = useLandingPageOptions()
+const { landingPageNames, landingPageValues, landingPageIcons } = useLandingPageOptions()
 const landingPage = computed(() => store.getters.getLandingPage)
 const regionNames = computed(() => store.getters.getRegionNames)
 const regionValues = computed(() => store.getters.getRegionValues)
