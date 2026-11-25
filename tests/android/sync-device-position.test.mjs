@@ -134,7 +134,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
       await watch.dispose()
       const tabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTabId)
       const video = page.locator(`.tabContent[data-tab-id="${tabId}"] .ftVideoPlayer video`)
-      await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
+      await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
       return video
     }
     const video = await preparePlayer()

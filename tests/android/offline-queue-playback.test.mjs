@@ -12,7 +12,7 @@ const sameDownload = Boolean(process.env.ANDROID_QUEUE_SAME_DOWNLOAD)
 const sameVideo = sameDownload || Boolean(process.env.ANDROID_QUEUE_SAME_VIDEO)
 const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIAL?.startsWith('emulator-'))
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
-const launch = () => adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
+const launch = () => adb('shell', 'am', 'start', '-W', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
 
 for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
   test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browse ? ' in the mini player' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
@@ -32,7 +32,8 @@ for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
       launch()
       let pid
       await expect.poll(() => {
-        pid = adb('shell', 'pidof', 'org.opentubex.app.dev').trim()
+        // pidof fails until the restarted app's process exists.
+        pid = adb('shell', 'pidof org.opentubex.app.dev || true').trim()
         return Boolean(pid && adb('shell', 'cat', '/proc/net/unix').includes(`webview_devtools_remote_${pid}`))
       }, { timeout: 15000 }).toBe(true)
       adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:webview_devtools_remote_${pid}`)

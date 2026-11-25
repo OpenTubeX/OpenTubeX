@@ -51,7 +51,8 @@ test('Android enables Google Cast from settings and opens the native device menu
     const googleCast = page.getByRole('option', { name: 'Google Cast', exact: true })
     await expect(googleCast).toHaveAttribute('aria-selected', 'false')
     await googleCast.click()
-    await expect(googleCast).toHaveAttribute('aria-selected', 'true')
+    // The setting reaches the list after the app stores it, which a busy phone delays.
+    await expect(googleCast).toHaveAttribute('aria-selected', 'true', { timeout: 15_000 })
     if (process.env.ANDROID_CAST_SCREENSHOT) {
       for (const scheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme: scheme })

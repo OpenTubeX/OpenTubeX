@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import { verifySyncDeviceRemoval } from '../../e2e/helpers/sync-device-removal.mjs'
-import { connectAndroidApp } from '../helpers/android-webview.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { current: true, reconnectDuringCleanup: true }]) {
   let behavior = 'cleans up synced tabs and orphaned sets can be deleted'
@@ -15,9 +15,12 @@ for (const options of [{ otherLogin: false }, { revokeFailsOnce: true }, { curre
       await page.reload()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
+      // The restored tabs must not reach YouTube; the fixture serves sync.
+      await blockAppNetwork(page)
       await verifySyncDeviceRemoval(page, { phone: true, ...options })
     } finally {
       clearTimeout(keepAlive)
+      await page.evaluate(() => window.__androidTestNetwork?.restore()).catch(() => {})
       await browser.close()
     }
   })
@@ -32,9 +35,11 @@ for (const { conflict, intentionalDeletion, olderLogin, pendingRevocation, aband
     const keepAlive = setTimeout(() => {}, 120_000)
     try {
       await page.reload()
+      await blockAppNetwork(page)
       await verifySyncDeviceReconnection(page, { conflict, intentionalDeletion, olderLogin, pendingRevocation, abandonRevocation, phone: true })
     } finally {
       clearTimeout(keepAlive)
+      await page.evaluate(() => window.__androidTestNetwork?.restore()).catch(() => {})
       await browser.close()
     }
   })

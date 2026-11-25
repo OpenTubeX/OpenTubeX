@@ -175,7 +175,7 @@ for (const audioOnly of [false, true]) {
         component.proxy.enableAudioFormat()
       }, audio)
       await expect(player.locator('video')).toHaveClass(/audioOnly/)
-      await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBe(4)
+      await expect.poll(() => player.locator('video').evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
       await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     }
     const box = await player.boundingBox()

@@ -74,7 +74,7 @@ test('Android fullscreen docks animate without reflowing the player every frame'
     }, media)
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
-    await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
+    await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
     await video.evaluate(element => { element.loop = true; return element.play() })
     await player.evaluate(element => element.requestFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)

@@ -84,7 +84,7 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
       })
     }, media)
     const video = page.locator('.ftVideoPlayer video')
-    await expect.poll(() => video.evaluate(video => video.readyState)).toBe(4)
+    await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
     await expect(page.locator('.shaka-fullscreen-button')).toBeEnabled()
     await video.evaluate(video => { video.loop = true; video.currentTime = 0; return video.play() })
     for (const scale of [100, 125]) {

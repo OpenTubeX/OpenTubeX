@@ -84,7 +84,7 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       })
     }, media)
     const video = page.locator('.ftVideoPlayer video')
-    await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
+    await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 15000 }).toBe(4)
     await video.evaluate(element => { element.loop = true; return element.play() })
     await expect(page.locator('.browsingBehindWatch #watch-scroll-history-fixture')).toHaveCount(1)
     for (const offline of [false, true]) {

@@ -211,8 +211,10 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
       if (capture) await capture('device-removal-reconfirmation', prompt)
     }
     await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+    // Revoking deletes and re-encrypts the synced tab sets through several
+    // requests, which takes longer than the default timeout on a slow phone.
     if (revokeFailsOnce || revokeResponseLost) {
-      await expect(prompt.getByRole('alert')).toHaveText('Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access.')
+      await expect(prompt.getByRole('alert')).toHaveText('Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access.', { timeout: 30_000 })
       await expect(prompt.getByRole('button', { name: 'Revoke session', exact: true })).toBeEnabled()
       expect(revoked).toBe(revokeResponseLost)
       expect(document.devices[oldDeviceId]).toBeUndefined()
@@ -221,15 +223,13 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
     }
     if (postCleanupFailsOnce) {
-      await expect(prompt.getByRole('alert')).toContainText('Session revoked:')
+      await expect(prompt.getByRole('alert')).toContainText('Session revoked:', { timeout: 30_000 })
       expect(revoked).toBe(true)
       expect(document.devices[oldDeviceId].sessions[0].sessionId).toBe('released-window')
       if (capture) await capture('device-removal-post-revocation-failure', prompt)
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
       expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(1)
     }
-    // Revoking deletes and re-encrypts the synced tab sets through several
-    // requests, which takes longer than the default timeout on a slow phone.
     await expect(prompt).toBeHidden({ timeout: 30_000 })
     await expect(device).toHaveCount(0)
     if (current) {

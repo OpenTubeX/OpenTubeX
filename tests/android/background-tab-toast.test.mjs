@@ -51,12 +51,31 @@ test('Android confirms opening a background tab while keeping the current page',
     })
     await expect(page.locator('.mobileLinkActions')).toBeVisible()
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    // The toast lasts three seconds, which a busy phone can spend before the
+    // thumbnail arrives, so record the thumbnail's load in the page.
+    await page.evaluate(() => {
+      window.__backgroundTabToastImage = new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+          const image = [...document.querySelectorAll('.toast[role="status"] img')].find(image => image.closest('.toast').textContent.includes('Opened in a background tab'))
+          if (!image) return
+          observer.disconnect()
+          if (image.complete) resolve(image.naturalWidth)
+          else image.addEventListener('load', () => resolve(image.naturalWidth), { once: true })
+          image.addEventListener('error', () => resolve(0), { once: true })
+        })
+        observer.observe(document.body, { childList: true, subtree: true })
+      })
+    })
     await page.getByRole('menuitem', { name: 'Open in a Background Tab', exact: true }).click()
     const toast = page.locator('.toast[role="status"]').filter({ hasText: 'Opened in a background tab' })
     await expect(toast).toBeVisible()
     await expect(toast).toHaveCount(1)
     await expect(toast.locator('img')).toBeVisible()
-    await expect.poll(() => toast.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    const thumbnailWidth = await page.evaluate(async () => {
+      const timeout = new Promise(resolve => setTimeout(resolve, 30_000, -1))
+      try { return await Promise.race([window.__backgroundTabToastImage, timeout]) } finally { delete window.__backgroundTabToastImage }
+    })
+    assert.ok(thumbnailWidth > 0, 'The toast shows the video thumbnail')
     await expect.poll(async () => (await tabState()).ids.length).toBe(before.ids.length + 1)
     assert.equal((await tabState()).presented, before.presented)
     await expect(page).toHaveURL(/#\/history/)

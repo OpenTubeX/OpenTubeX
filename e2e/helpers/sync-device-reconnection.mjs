@@ -190,8 +190,10 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       await sync.locator('.sessionCard', { hasText: 'Current device' }).getByRole('button', { name: 'Revoke access' }).click()
       const prompt = page.getByRole('dialog', { name: 'Revoke this session?' })
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+      // Revoking deletes and re-encrypts the synced tab sets through several
+      // requests, which takes longer than the default timeout on a slow phone.
       if (abandonRevocation) {
-        await expect(prompt.getByRole('alert')).toContainText('revocation could not be confirmed')
+        await expect(prompt.getByRole('alert')).toContainText('revocation could not be confirmed', { timeout: 30_000 })
         await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
         await expect(prompt).toBeHidden()
         expect(revoked).toBe(false)
@@ -205,7 +207,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       await expect(prompt).toBeHidden({ timeout: 30_000 })
       expect(revoked).toBe(true)
     }
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken)).toBe('')
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken), { timeout: 30_000 }).toBe('')
     expect(document.deletedSessions[deviceId]).toEqual(sessionIds)
     expect(document.deletedSessions[`revoked:${deviceId}`]).toEqual(intentionalDeletion ? undefined : sessionIds)
     expect(document.deletedSessions[`revoked-login:${deviceId}`]).toEqual(intentionalDeletion ? undefined : ['old-login'])
