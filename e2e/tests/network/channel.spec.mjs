@@ -261,7 +261,7 @@ test.describe('channel page', () => {
     await page.locator(sel.tabs).nth(1).click()
     const subscriptionVideosTab = page.locator('[data-subscription-feed-tab="videos"]')
     const subscriptionShortsTab = page.locator('[data-subscription-feed-tab="shorts"]')
-    const subscriptionTabs = page.locator('.subscriptionsHeader [role="tab"]')
+    const subscriptionTabs = page.getByRole('tablist', { name: 'Subscriptions Tabs' }).getByRole('tab')
     await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
     await page.keyboard.press('ArrowRight')
     await expect(subscriptionShortsTab).toHaveAttribute('aria-selected', 'true')
