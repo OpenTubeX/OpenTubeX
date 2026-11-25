@@ -611,11 +611,12 @@ Settings:
       Force On: Επιβολή ενεργοποίησης
       Force Off: Επιβολή απενεργοποίησης
     Comment Translation:
-      Enable: Ενεργοποίηση μεταφράσεων σχολίων
-      Never Translate: Να μη μεταφράζονται σχόλια στα
+      Translation: Μετάφραση
+      Enable: Προσφορά μεταφράσεων για σχόλια, περιγραφές και αναρτήσεις
+      Never Translate: Να μη μεταφράζεται κείμενο στα
       Choose Language: Επιλογή γλώσσας
-      Description: Τα σχόλια στη γλώσσα της εφαρμογής εξαιρούνται ήδη. Προσθέστε όσες άλλες γλώσσες μπορείτε να διαβάσετε.
-      Remove Language: Να μεταφράζονται ξανά τα σχόλια στα {language}
+      Description: Το κείμενο στη γλώσσα της εφαρμογής εξαιρείται ήδη. Προσθέστε όσες άλλες γλώσσες μπορείτε να διαβάσετε.
+      Remove Language: Να μεταφράζεται ξανά το κείμενο στα {language}
     Avoid translation:
       Avoid translation: Προτίμηση μη μεταφρασμένου κειμένου βίντεο
       Disabled: Απενεργοποιημένο
@@ -3089,3 +3090,6 @@ Twitch Page:
   Search Placeholder: "Κατηγορίες και κανάλια"
 New Incognito Tab: Νέα καρτέλα ανώνυμης περιήγησης
 Incognito Tab: Καρτέλα ανώνυμης περιήγησης
+Text Translation:
+  Translating, please wait: Μετάφραση σε εξέλιξη, περιμένετε
+  Translation failed: Η μετάφραση απέτυχε

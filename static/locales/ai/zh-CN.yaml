@@ -611,11 +611,12 @@ Settings:
       Force On: 强制开启
       Force Off: 强制关闭
     Comment Translation:
-      Enable: 启用评论翻译
-      Never Translate: 不翻译以下语言的评论
+      Translation: 翻译
+      Enable: 为评论、简介和帖子提供翻译
+      Never Translate: 不翻译以下语言的文本
       Choose Language: 选择语言
-      Description: 已自动排除使用应用语言的评论。请添加您能读懂的其他语言。
-      Remove Language: 重新翻译{language}评论
+      Description: 已自动排除使用应用语言的文本。请添加您能读懂的其他语言。
+      Remove Language: 重新翻译{language}文本
     Avoid translation:
       Avoid translation: 优先显示未翻译的视频文本
       Disabled: 已禁用
@@ -3074,3 +3075,6 @@ Twitch Page:
   Search Placeholder: "分类和频道"
 New Incognito Tab: 新建无痕标签页
 Incognito Tab: 无痕标签页
+Text Translation:
+  Translating, please wait: 正在翻译，请稍候
+  Translation failed: 翻译失败

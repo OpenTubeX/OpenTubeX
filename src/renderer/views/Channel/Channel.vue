@@ -340,7 +340,6 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import autolinker from 'autolinker'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
@@ -1210,7 +1209,7 @@ async function getChannelAboutLocal() {
     }
 
     aboutDescription = getOriginalChannelText().description || aboutDescription
-    description.value = aboutDescription ? autolinker.link(aboutDescription) : ''
+    description.value = aboutDescription ?? ''
   } catch (err) {
     if (!isCurrentRoute()) return
 
@@ -1339,7 +1338,7 @@ async function getChannelInfoInvidious() {
     // Invidious channel responses have no handle.
     channelHandle.value = savedHandle.value
     updateChannelDetails({ channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
-    description.value = autolinker.link(response.description)
+    description.value = response.description ?? ''
     links.value = []
     viewCount.value = response.totalViews
     videoCount.value = null

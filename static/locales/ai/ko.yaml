@@ -709,11 +709,12 @@ Settings:
       Force On: 강제로 켜기
       Force Off: 강제로 끄기
     Comment Translation:
-      Enable: 댓글 번역 활성화
-      Never Translate: 다음 언어의 댓글은 번역하지 않기
+      Translation: 번역
+      Enable: 댓글, 설명, 게시물 번역 제공
+      Never Translate: 다음 언어의 텍스트는 번역하지 않기
       Choose Language: 언어 선택
-      Description: 앱 언어로 작성된 댓글은 이미 제외됩니다. 읽을 수 있는 다른 언어를 추가하세요.
-      Remove Language: '{language} 댓글 다시 번역'
+      Description: 앱 언어로 작성된 텍스트는 이미 제외됩니다. 읽을 수 있는 다른 언어를 추가하세요.
+      Remove Language: '{language} 텍스트 다시 번역'
     Avoid translation:
       Avoid translation: 번역되지 않은 동영상 텍스트 우선 사용
       Disabled: 사용 안 함
@@ -3531,3 +3532,6 @@ Twitch Page:
   Search Placeholder: "카테고리 및 채널"
 New Incognito Tab: 새 시크릿 탭
 Incognito Tab: 시크릿 탭
+Text Translation:
+  Translating, please wait: 번역 중입니다. 잠시 기다려 주세요
+  Translation failed: 번역에 실패했습니다

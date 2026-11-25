@@ -715,11 +715,12 @@ Settings:
         Server error: "Der Server hat einen Fehler gemeldet (HTTP {status})."
     System Default: Systemvorgabe
     Comment Translation:
-      Enable: Kommentarübersetzungen aktivieren
-      Never Translate: Kommentare in diesen Sprachen nie übersetzen
+      Translation: Übersetzung
+      Enable: Übersetzungen für Kommentare, Beschreibungen und Beiträge anbieten
+      Never Translate: Texte in diesen Sprachen nie übersetzen
       Choose Language: Sprache auswählen
-      Description: Kommentare in der App-Sprache sind bereits ausgeschlossen. Füge weitere Sprachen hinzu, die du verstehst.
-      Remove Language: Kommentare auf {language} wieder übersetzen
+      Description: Texte in der App-Sprache sind bereits ausgeschlossen. Füge weitere Sprachen hinzu, die du verstehst.
+      Remove Language: Texte auf {language} wieder übersetzen
     Current instance will be randomized on startup: Beim Start wird eine zufällige Instanz festgelegt
     No default instance has been set: Es wurde keine Standardinstanz festgelegt
     The currently set default instance is {instance}: Die aktuelle Standardinstanz ist {instance}
@@ -4278,3 +4279,6 @@ Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch durchsuchen"
   Search Placeholder: "Kategorien und Kanäle"
+Text Translation:
+  Translating, please wait: Wird übersetzt, bitte warten
+  Translation failed: Text konnte nicht übersetzt werden

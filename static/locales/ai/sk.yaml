@@ -611,11 +611,12 @@ Settings:
       Force On: Vždy zapnuté
       Force Off: Vždy vypnuté
     Comment Translation:
-      Enable: Zapnúť preklady komentárov
-      Never Translate: Nikdy neprekladať komentáre v jazyku
+      Translation: Preklad
+      Enable: Ponúkať preklady komentárov, popisov a príspevkov
+      Never Translate: Nikdy neprekladať text v jazyku
       Choose Language: Vyberte jazyk
-      Description: Komentáre v jazyku aplikácie sú už vynechané. Pridajte ďalšie jazyky, ktorým rozumiete.
-      Remove Language: Znova prekladať komentáre v jazyku {language}
+      Description: Text v jazyku aplikácie je už vynechaný. Pridajte ďalšie jazyky, ktorým rozumiete.
+      Remove Language: Znova prekladať text v jazyku {language}
     Avoid translation:
       Avoid translation: Uprednostniť nepreložený text videí
       Disabled: Vypnuté
@@ -3074,3 +3075,6 @@ Twitch Page:
   Search Placeholder: "Kategórie a kanály"
 New Incognito Tab: Nová karta inkognito
 Incognito Tab: Karta inkognito
+Text Translation:
+  Translating, please wait: Prekladá sa, čakajte
+  Translation failed: Preklad zlyhal

@@ -742,11 +742,12 @@ Settings:
       Force On: Vedno vklopljeno
       Force Off: Vedno izklopljeno
     Comment Translation:
-      Enable: Omogoči prevajanje komentarjev
-      Never Translate: Ne prevajaj komentarjev v jeziku
+      Translation: Prevajanje
+      Enable: Ponudi prevode komentarjev, opisov in objav
+      Never Translate: Ne prevajaj besedila v jeziku
       Choose Language: Izberite jezik
-      Description: Komentarji v jeziku aplikacije so že izvzeti. Dodajte druge jezike, ki jih razumete.
-      Remove Language: Znova prevajaj komentarje v jeziku {language}
+      Description: Besedilo v jeziku aplikacije je že izvzeto. Dodajte druge jezike, ki jih razumete.
+      Remove Language: Znova prevajaj besedilo v jeziku {language}
     Avoid translation:
       Avoid translation: Daj prednost neprevedenemu besedilu videoposnetka
       Disabled: Onemogočeno
@@ -3671,3 +3672,6 @@ Twitch Page:
   Search Placeholder: "Kategorije in kanali"
 New Incognito Tab: Nov zavihek brez beleženja zgodovine
 Incognito Tab: Zavihek brez beleženja zgodovine
+Text Translation:
+  Translating, please wait: Prevajanje. Počakajte …
+  Translation failed: Prevajanje ni uspelo

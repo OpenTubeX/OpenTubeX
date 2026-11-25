@@ -157,3 +157,52 @@ export function formatCommentTranslation(translatedText) {
 
   return Autolinker.link(escapedText)
 }
+
+// URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
+// translates the words in them too, which would break their links.
+const PROTECTED_TOKEN_PATTERN = /\bhttps?:\/\/\S+|\bwww\.\S+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
+
+/**
+ * Put the source's URLs, hashtags and handles back into its translation, as
+ * long as the translation kept all of them.
+ * @param {string} source
+ * @param {string} translated
+ * @returns {string}
+ */
+function restoreProtectedTokens(source, translated) {
+  const sourceTokens = source.match(PROTECTED_TOKEN_PATTERN) ?? []
+  if (sourceTokens.length === 0) return translated
+  if ((translated.match(PROTECTED_TOKEN_PATTERN)?.length ?? 0) !== sourceTokens.length) return translated
+
+  let index = 0
+  return translated.replaceAll(PROTECTED_TOKEN_PATTERN, () => sourceTokens[index++])
+}
+
+/**
+ * Translate multiline text, such as a description, keeping its blank lines,
+ * which the translation service adds and drops at will, and its links.
+ * @param {string} text
+ * @param {(text: string) => Promise<string>} translate translates newline-separated lines
+ * @returns {Promise<string>} plain text
+ */
+export async function translateTextKeepingLayout(text, translate) {
+  const lines = text.split(/\r?\n/)
+  const lineIndexes = lines.flatMap((line, index) => line.trim() === '' ? [] : [index])
+  if (lineIndexes.length === 0) return text
+
+  const sources = lineIndexes.map(index => lines[index].trim())
+  const translated = (await translate(sources.join('\n'))).trim()
+  if (translated === '') throw new Error('YouTube did not return a translation')
+
+  const translatedLines = translated.split('\n').map(line => line.trim()).filter(line => line !== '')
+  // Merged or split lines can no longer be matched to their source lines.
+  if (translatedLines.length !== sources.length) {
+    return restoreProtectedTokens(sources.join('\n'), translated)
+  }
+
+  lineIndexes.forEach((lineIndex, index) => {
+    const indentation = /^\s*/.exec(lines[lineIndex])[0]
+    lines[lineIndex] = indentation + restoreProtectedTokens(sources[index], translatedLines[index])
+  })
+  return lines.join('\n')
+}

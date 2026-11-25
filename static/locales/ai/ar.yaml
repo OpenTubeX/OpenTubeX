@@ -616,11 +616,12 @@ Settings:
       Force On: تشغيل دائم
       Force Off: إيقاف دائم
     Comment Translation:
-      Enable: تمكين ترجمات التعليق
-      Never Translate: لا تترجم التعليقات مطلقًا
+      Translation: الترجمة
+      Enable: عرض ترجمات للتعليقات والأوصاف والمنشورات
+      Never Translate: لا تترجم النصوص مطلقًا
       Choose Language: اختر لغة
-      Description: التعليقات في لغة التطبيق مستبعدة بالفعل. أضف أي لغات أخرى يمكنك قراءتها.
-      Remove Language: السماح بترجمة التعليقات باللغة {language} مرة أخرى
+      Description: النصوص بلغة التطبيق مستبعدة بالفعل. أضف أي لغات أخرى يمكنك قراءتها.
+      Remove Language: السماح بترجمة النصوص باللغة {language} مرة أخرى
     Avoid translation:
       Avoid translation: تفضل نص الفيديو غير المترجم
       Disabled: معطّل
@@ -3115,3 +3116,6 @@ Twitch Page:
   Search Placeholder: "الفئات والقنوات"
 New Incognito Tab: علامة تبويب جديدة للتصفح المتخفي
 Incognito Tab: علامة تبويب للتصفح المتخفي
+Text Translation:
+  Translating, please wait: جارٍ الترجمة، يرجى الانتظار
+  Translation failed: فشلت الترجمة

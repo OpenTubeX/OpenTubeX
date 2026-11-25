@@ -3,37 +3,21 @@
     v-if="translationAvailable"
     class="commentTranslation"
   >
-    <button
-      type="button"
+    <FtTranslationButton
       class="commentTranslationButton"
-      :disabled="loading"
-      :aria-busy="loading"
+      :loading="loading"
+      :translated="comment.showTranslated && comment.translatedLanguage === targetLanguage"
+      :language-name="targetLanguageName"
+      :loading-label="$t('Comments.Translating comment, please wait')"
       @click="emit('translate-comment', comment)"
-    >
-      <FtLoader
-        v-if="loading"
-        inline
-        size="14px"
-        :label="$t('Comments.Translating comment, please wait')"
-        :tab-loading-indicator="false"
-      />
-      <template v-else>
-        <FtIcon :icon="['fas', 'language']" />
-        <template v-if="comment.showTranslated && comment.translatedLanguage === targetLanguage">
-          {{ $t('Comments.Show original') }}
-        </template>
-        <template v-else>
-          {{ $t('Comments.Translate to {language}', { language: targetLanguageName }) }}
-        </template>
-      </template>
-    </button>
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
 
-import FtLoader from '../FtLoader/FtLoader.vue'
+import FtTranslationButton from '../FtTranslationButton/FtTranslationButton.vue'
 import { shouldOfferCommentTranslation } from '../../helpers/comment-translations'
 
 const props = defineProps({

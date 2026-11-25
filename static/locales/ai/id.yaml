@@ -612,11 +612,12 @@ Settings:
       Force On: Selalu aktif
       Force Off: Selalu nonaktif
     Comment Translation:
-      Enable: Aktifkan terjemahan komentar
-      Never Translate: Jangan terjemahkan komentar berbahasa
+      Translation: Terjemahan
+      Enable: Tawarkan terjemahan untuk komentar, deskripsi, dan postingan
+      Never Translate: Jangan terjemahkan teks berbahasa
       Choose Language: Pilih bahasa
-      Description: Komentar dalam bahasa aplikasi sudah dikecualikan. Tambahkan bahasa lain yang dapat Anda baca.
-      Remove Language: Terjemahkan kembali komentar berbahasa {language}
+      Description: Teks dalam bahasa aplikasi sudah dikecualikan. Tambahkan bahasa lain yang dapat Anda baca.
+      Remove Language: Terjemahkan kembali teks berbahasa {language}
     Avoid translation:
       Avoid translation: Utamakan teks video tanpa terjemahan
       Disabled: Nonaktif
@@ -3101,3 +3102,6 @@ Twitch Page:
   Search Placeholder: "Kategori dan kanal"
 New Incognito Tab: Tab Penyamaran Baru
 Incognito Tab: Tab penyamaran
+Text Translation:
+  Translating, please wait: Menerjemahkan, harap tunggu
+  Translation failed: Terjemahan gagal

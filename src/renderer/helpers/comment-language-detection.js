@@ -56,7 +56,7 @@ export function detectCommentTranslationAvailability(
     return false
   }
 
-  const result = detector.detect(text.replaceAll(/(?:^|\s)@\S+/g, ' '))
+  const result = detector.detect(text.replaceAll(/(?:^|\s)@\S+|https?:\/\/\S+/g, ' '))
   const normalizedIgnoredLanguages = new Set(
     ignoredLanguages.map(normalizeCommentTranslationLanguageCode)
   )

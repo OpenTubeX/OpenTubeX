@@ -45,3 +45,33 @@ export function linkifyHashtagsAndHandles(html) {
     phone: false
   })
 }
+
+/**
+ * @param {string} label
+ * @param {string} href
+ */
+function isShortenedUrl(label, href) {
+  const withoutScheme = url => url.replace(/^https?:\/\/(?:www\.)?/, '')
+  const shortened = withoutScheme(label.trim().replace(/(?:\.\.\.|…)$/, ''))
+  return /^https?:\/\//.test(href) && shortened !== '' && withoutScheme(href).startsWith(shortened)
+}
+
+/**
+ * The text of an HTML description, e.g. formatted text runs from the local API.
+ * @param {string} description
+ * @returns {string}
+ */
+export function getDescriptionText(description) {
+  // Template contents stay inert while extracting text from remote HTML.
+  const template = document.createElement('template')
+  template.innerHTML = description
+  // Links shown as an icon and a label, or as a shortened URL like Invidious
+  // shows them, copy as their URL.
+  for (const link of template.content.querySelectorAll('a[href]')) {
+    const href = link.getAttribute('href')
+    if (link.hasAttribute('data-link-icon') || isShortenedUrl(link.textContent ?? '', href)) {
+      link.replaceWith(href)
+    }
+  }
+  return template.content.textContent ?? ''
+}

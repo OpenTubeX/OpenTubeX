@@ -15,8 +15,8 @@ export function shouldUseSubtitleCookies(url, getters) {
  * @returns {Promise<string>}
  */
 async function translateWithYouTube(text, targetLanguage) {
-  const { translateCaptionText } = await import('../api/local.js')
-  return await translateCaptionText(text, targetLanguage)
+  const { translateLines } = await import('../api/local.js')
+  return await translateLines(text, targetLanguage)
 }
 
 /**

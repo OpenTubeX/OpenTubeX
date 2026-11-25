@@ -611,11 +611,12 @@ Settings:
       Force On: 常に有効
       Force Off: 常に無効
     Comment Translation:
-      Enable: コメントの翻訳を有効化
-      Never Translate: 次の言語のコメントは翻訳しない
+      Translation: 翻訳
+      Enable: コメント、説明、投稿の翻訳を提供
+      Never Translate: 次の言語のテキストは翻訳しない
       Choose Language: 言語を選択
-      Description: アプリの表示言語のコメントはすでに除外されています。ほかに読める言語を追加してください。
-      Remove Language: '{language}のコメントを再び翻訳する'
+      Description: アプリの表示言語のテキストはすでに除外されています。ほかに読める言語を追加してください。
+      Remove Language: '{language}のテキストを再び翻訳する'
     Avoid translation:
       Avoid translation: 動画の原文を優先
       Disabled: 無効
@@ -3074,3 +3075,6 @@ Twitch Page:
   Search Placeholder: "カテゴリーとチャンネル"
 New Incognito Tab: 新しいシークレット タブ
 Incognito Tab: シークレット タブ
+Text Translation:
+  Translating, please wait: 翻訳中です。しばらくお待ちください
+  Translation failed: 翻訳に失敗しました

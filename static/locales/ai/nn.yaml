@@ -628,11 +628,12 @@ Settings:
       Force On: Tving på
       Force Off: Tving av
     Comment Translation:
-      Enable: Slå på omsetjing av kommentarar
-      Never Translate: Omset aldri kommentarar på
+      Translation: Omsetjing
+      Enable: Tilby omsetjingar av kommentarar, skildringar og innlegg
+      Never Translate: Omset aldri tekst på
       Choose Language: Vel eit språk
-      Description: Kommentarar på appspråket er allereie utelatne. Legg til andre språk du kan lese.
-      Remove Language: Omset kommentarar på {language} igjen
+      Description: Tekst på appspråket er allereie utelaten. Legg til andre språk du kan lese.
+      Remove Language: Omset tekst på {language} igjen
     Avoid translation:
       Avoid translation: Føretrekk uomsett videotekst
       Disabled: Av
@@ -3470,3 +3471,6 @@ Twitch Page:
   Search Placeholder: "Kategoriar og kanalar"
 New Incognito Tab: Ny inkognitofane
 Incognito Tab: Inkognitofane
+Text Translation:
+  Translating, please wait: Omset, vent litt
+  Translation failed: Klarte ikkje å omsetje teksten

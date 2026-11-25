@@ -611,11 +611,12 @@ Settings:
       Force On: Luôn bật
       Force Off: Luôn tắt
     Comment Translation:
-      Enable: Bật dịch bình luận
-      Never Translate: Không bao giờ dịch bình luận bằng
+      Translation: Dịch thuật
+      Enable: Cung cấp bản dịch cho bình luận, mô tả và bài đăng
+      Never Translate: Không bao giờ dịch văn bản bằng
       Choose Language: Chọn ngôn ngữ
-      Description: Bình luận bằng ngôn ngữ của ứng dụng đã được loại trừ. Hãy thêm các ngôn ngữ khác mà bạn đọc được.
-      Remove Language: Dịch lại bình luận bằng {language}
+      Description: Văn bản bằng ngôn ngữ của ứng dụng đã được loại trừ. Hãy thêm các ngôn ngữ khác mà bạn đọc được.
+      Remove Language: Dịch lại văn bản bằng {language}
     Avoid translation:
       Avoid translation: Ưu tiên nội dung video chưa dịch
       Disabled: Tắt
@@ -3092,3 +3093,6 @@ Twitch Page:
   Search Placeholder: "Danh mục và kênh"
 New Incognito Tab: Thẻ ẩn danh mới
 Incognito Tab: Thẻ ẩn danh
+Text Translation:
+  Translating, please wait: Đang dịch, vui lòng chờ
+  Translation failed: Không thể dịch

@@ -750,11 +750,12 @@ Settings:
       Force On: Força l'activació
       Force Off: Força la desactivació
     Comment Translation:
-      Enable: Activa la traducció dels comentaris
-      Never Translate: No tradueixis mai els comentaris en
+      Translation: Traducció
+      Enable: Ofereix traduccions de comentaris, descripcions i publicacions
+      Never Translate: No tradueixis mai el text en
       Choose Language: Trieu una llengua
-      Description: Els comentaris en la llengua de l'aplicació ja s'exclouen. Afegiu-hi altres llengües que entengueu.
-      Remove Language: Torna a traduir els comentaris en {language}
+      Description: El text en la llengua de l'aplicació ja s'exclou. Afegiu-hi altres llengües que entengueu.
+      Remove Language: Torna a traduir el text en {language}
     Avoid translation:
       Avoid translation: Prefereix el text dels vídeos sense traduir
       Disabled: Desactivat
@@ -3721,3 +3722,6 @@ Twitch Page:
   Search Placeholder: "Categories i canals"
 New Incognito Tab: Pestanya d’incògnit nova
 Incognito Tab: Pestanya d’incògnit
+Text Translation:
+  Translating, please wait: S'està traduint; espereu
+  Translation failed: Ha fallat la traducció

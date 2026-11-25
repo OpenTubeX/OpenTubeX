@@ -7,9 +7,18 @@
     >
       <h2>{{ $t("Channel.About.Channel Description") }}</h2>
       <div
-        v-safer-html="description"
+        v-safer-html="shownDescription"
         class="aboutInfo"
         dir="auto"
+      />
+      <FtTranslationButton
+        v-if="translationAvailable"
+        class="aboutTranslationButton"
+        :loading="translationLoading"
+        :translated="translatedText !== null"
+        :language-name="translationLanguageName"
+        :loading-label="$t('Text Translation.Translating, please wait')"
+        @click="toggleTranslation"
       />
     </template>
     <section
@@ -166,20 +175,24 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
+import autolinker from 'autolinker'
 import { computed, inject, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelBubble from '../../components/FtChannelBubble/FtChannelBubble.vue'
 import FtFixedBackground from '../FtFixedBackground/FtFixedBackground.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtTranslationButton from '../FtTranslationButton/FtTranslationButton.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
+import { useTextTranslation } from '../../composables/useTextTranslation'
 
 import { formatNumber } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
+import { escapeHTML } from '../../helpers/feed-metadata'
 
 const { locale } = useI18n()
 const handleExternalLink = inject('handleExternalLink')
@@ -189,6 +202,7 @@ const tabId = injectedTabId ?? 'web'
 const failedIcons = reactive(new Set())
 
 const props = defineProps({
+  /** Plain text */
   description: {
     type: String,
     default: ''
@@ -222,6 +236,15 @@ const props = defineProps({
     default: () => []
   }
 })
+
+const {
+  available: translationAvailable,
+  loading: translationLoading,
+  translatedText,
+  targetLanguageName: translationLanguageName,
+  toggleTranslation
+} = useTextTranslation(() => props.description)
+const shownDescription = computed(() => autolinker.link(escapeHTML(translatedText.value ?? props.description)))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideFeaturedChannels = computed(() => {

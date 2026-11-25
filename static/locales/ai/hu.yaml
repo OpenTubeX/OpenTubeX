@@ -611,11 +611,12 @@ Settings:
       Force On: Mindig bekapcsolva
       Force Off: Mindig kikapcsolva
     Comment Translation:
-      Enable: Hozzászólások fordításának engedélyezése
-      Never Translate: Ne fordítsa az ilyen nyelvű hozzászólásokat
+      Translation: Fordítás
+      Enable: Fordítás felajánlása hozzászólásokhoz, leírásokhoz és bejegyzésekhez
+      Never Translate: Ne fordítsa az ilyen nyelvű szövegeket
       Choose Language: Nyelv kiválasztása
-      Description: Az alkalmazás nyelvén írt hozzászólások már ki vannak zárva. Adja hozzá az összes többi nyelvet, amelyen tud olvasni.
-      Remove Language: A(z) {language} nyelvű hozzászólások ismételt fordítása
+      Description: Az alkalmazás nyelvén írt szövegek már ki vannak zárva. Adja hozzá az összes többi nyelvet, amelyen tud olvasni.
+      Remove Language: A(z) {language} nyelvű szövegek ismételt fordítása
     Avoid translation:
       Avoid translation: Fordítatlan videószöveg előnyben részesítése
       Disabled: Kikapcsolva
@@ -3075,3 +3076,6 @@ Twitch Page:
   Search Placeholder: "Kategóriák és csatornák"
 New Incognito Tab: Új inkognitólap
 Incognito Tab: Inkognitólap
+Text Translation:
+  Translating, please wait: Fordítás folyamatban, kis türelmet
+  Translation failed: Nem sikerült a fordítás

@@ -611,11 +611,12 @@ Settings:
       Force On: "Bepred gweredekaet"
       Force Off: "Bepred diweredekaet"
     Comment Translation:
-      Enable: "Gweredekaat treiñ an evezhiadennoù"
-      Never Translate: "Na dreiñ morse an evezhiadennoù e"
+      Translation: "Troidigezh"
+      Enable: "Kinnig troidigezhioù evit an evezhiadennoù, an deskrivadurioù hag ar pennadoù"
+      Never Translate: "Na dreiñ morse an testennoù e"
       Choose Language: "Dibab ur yezh"
-      Description: "Laosket e vez a-gostez dija an evezhiadennoù e yezh an arload. Ouzhpennit ar yezhoù all a c'hallit lenn."
-      Remove Language: "Adkregiñ da dreiñ an evezhiadennoù e {language}"
+      Description: "Laosket e vez a-gostez dija an testennoù e yezh an arload. Ouzhpennit ar yezhoù all a c'hallit lenn."
+      Remove Language: "Adkregiñ da dreiñ an testennoù e {language}"
     Avoid translation:
       Avoid translation: "Gwell eo kaout testenn ar videoioù hep treiñ"
       Disabled: "Diweredekaet"
@@ -3085,3 +3086,6 @@ Twitch Page:
   Search Placeholder: "Rummadoù ha chadennoù"
 New Incognito Tab: Ivinell kuzh nevez
 Incognito Tab: Ivinell kuzh
+Text Translation:
+  Translating, please wait: "O treiñ, gortozit"
+  Translation failed: "C'hwitet eo an droidigezh"

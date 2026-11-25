@@ -611,11 +611,12 @@ Settings:
       Force On: Activează forțat
       Force Off: Dezactivează forțat
     Comment Translation:
-      Enable: Activează traducerea comentariilor
-      Never Translate: Nu traduce niciodată comentariile în
+      Translation: Traducere
+      Enable: Oferă traduceri pentru comentarii, descrieri și postări
+      Never Translate: Nu traduce niciodată textul în
       Choose Language: Alegeți o limbă
-      Description: Comentariile în limba aplicației sunt deja excluse. Adăugați orice alte limbi pe care le puteți citi.
-      Remove Language: Tradu din nou comentariile în {language}
+      Description: Textul în limba aplicației este deja exclus. Adăugați orice alte limbi pe care le puteți citi.
+      Remove Language: Tradu din nou textul în {language}
     Avoid translation:
       Avoid translation: Preferă textul netradus al videoclipurilor
       Disabled: Dezactivată
@@ -3132,3 +3133,6 @@ Twitch Page:
   Search Placeholder: "Categorii și canale"
 New Incognito Tab: Filă incognito nouă
 Incognito Tab: Filă incognito
+Text Translation:
+  Translating, please wait: Se traduce, așteptați
+  Translation failed: Traducerea a eșuat

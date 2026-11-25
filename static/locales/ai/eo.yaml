@@ -658,11 +658,12 @@ Settings:
       Force On: Devigi ŝaltita
       Force Off: Devigi malŝaltita
     Comment Translation:
-      Enable: Ŝalti tradukojn de komentoj
-      Never Translate: Neniam traduki komentojn en
+      Translation: Tradukado
+      Enable: Proponi tradukojn de komentoj, priskriboj kaj afiŝoj
+      Never Translate: Neniam traduki tekston en
       Choose Language: Elektu lingvon
-      Description: Komentoj en la lingvo de la aplikaĵo jam estas ekskluzivitaj. Aldonu aliajn lingvojn, kiujn vi povas legi.
-      Remove Language: Denove traduki komentojn en {language}
+      Description: Teksto en la lingvo de la aplikaĵo jam estas ekskluzivita. Aldonu aliajn lingvojn, kiujn vi povas legi.
+      Remove Language: Denove traduki tekston en {language}
     Avoid translation:
       Avoid translation: Preferi netradukitan tekston de videaĵoj
       Disabled: Malŝaltita
@@ -3075,3 +3076,6 @@ Twitch Page:
   Search Placeholder: "Kategorioj kaj kanaloj"
 New Incognito Tab: Nova inkognita langeto
 Incognito Tab: Inkognita langeto
+Text Translation:
+  Translating, please wait: Tradukado, bonvolu atendi
+  Translation failed: Traduko malsukcesis

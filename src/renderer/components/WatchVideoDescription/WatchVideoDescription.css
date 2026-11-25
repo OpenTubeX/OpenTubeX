@@ -349,3 +349,10 @@
 .contentDisclosureItem + .contentDisclosureItem {
   margin-block-start: 12px;
 }
+
+/* Line the icon up with the text. */
+.descriptionTranslationButton {
+  align-self: flex-start;
+  margin-block: 4px;
+  margin-inline-start: -10px;
+}

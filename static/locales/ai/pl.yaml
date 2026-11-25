@@ -384,11 +384,12 @@ Settings:
     Language Default: Domyślny dla języka
     Use AI Translation Completions: Uzupełniaj brakujące tłumaczenia tłumaczeniami wygenerowanymi przez AI
     Comment Translation:
-      Enable: Włącz tłumaczenie komentarzy
-      Never Translate: Nigdy nie tłumacz komentarzy w języku
+      Translation: Tłumaczenie
+      Enable: Proponuj tłumaczenie komentarzy, opisów i wpisów
+      Never Translate: Nigdy nie tłumacz tekstu w języku
       Choose Language: Wybierz język
-      Description: Komentarze w języku aplikacji są już pomijane. Dodaj pozostałe języki, które rozumiesz.
-      Remove Language: Ponownie tłumacz komentarze w języku {language}
+      Description: Tekst w języku aplikacji jest już pomijany. Dodaj pozostałe języki, które rozumiesz.
+      Remove Language: Ponownie tłumacz tekst w języku {language}
     Playlist View Type:
       Playlist View Type: Sposób wyświetlania playlisty
     Show Thumbnail Previews: Pokazuj podgląd miniatur
@@ -2338,3 +2339,6 @@ Twitch Page:
   Search Placeholder: "Kategorie i kanały"
 New Incognito Tab: Nowa karta incognito
 Incognito Tab: Karta incognito
+Text Translation:
+  Translating, please wait: Tłumaczenie, zaczekaj
+  Translation failed: Nie udało się przetłumaczyć

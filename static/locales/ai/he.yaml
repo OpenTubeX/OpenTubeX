@@ -616,11 +616,12 @@ Settings:
       Force On: תמיד
       Force Off: לעולם לא
     Comment Translation:
-      Enable: הפעלת תרגום תגובות
-      Never Translate: לא לתרגם תגובות בשפה
+      Translation: תרגום
+      Enable: הצעת תרגום לתגובות, לתיאורים ולפוסטים
+      Never Translate: לא לתרגם טקסט בשפה
       Choose Language: בחירת שפה
-      Description: תגובות בשפת היישום ממילא אינן מתורגמות. אפשר להוסיף שפות אחרות שביכולתך לקרוא.
-      Remove Language: תרגום חוזר של תגובות ב־{language}
+      Description: טקסט בשפת היישום ממילא אינו מתורגם. אפשר להוסיף שפות אחרות שביכולתך לקרוא.
+      Remove Language: תרגום חוזר של טקסט ב־{language}
     Avoid translation:
       Avoid translation: העדפת טקסט סרטון ללא תרגום
       Disabled: מושבת
@@ -3138,3 +3139,6 @@ Twitch Page:
   Search Placeholder: "קטגוריות וערוצים"
 New Incognito Tab: כרטיסיית גלישה בסתר חדשה
 Incognito Tab: כרטיסיית גלישה בסתר
+Text Translation:
+  Translating, please wait: מתבצע תרגום, נא להמתין
+  Translation failed: התרגום נכשל

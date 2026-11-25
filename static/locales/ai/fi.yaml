@@ -611,11 +611,12 @@ Settings:
       Force On: Pakota käyttöön
       Force Off: Pakota pois käytöstä
     Comment Translation:
-      Enable: Ota kommenttien käännökset käyttöön
-      Never Translate: Älä koskaan käännä näillä kielillä kirjoitettuja kommentteja
+      Translation: Kääntäminen
+      Enable: Tarjoa käännöksiä kommenteille, kuvauksille ja postauksille
+      Never Translate: Älä koskaan käännä näillä kielillä kirjoitettua tekstiä
       Choose Language: Valitse kieli
-      Description: Sovelluksen kielellä kirjoitettuja kommentteja ei käännetä. Lisää muut kielet, joita osaat lukea.
-      Remove Language: Käännä taas kommentit, joiden kieli on {language}
+      Description: Sovelluksen kielellä kirjoitettua tekstiä ei käännetä. Lisää muut kielet, joita osaat lukea.
+      Remove Language: Käännä taas teksti, jonka kieli on {language}
     Avoid translation:
       Avoid translation: Suosi kääntämättömiä videotekstejä
       Disabled: Ei käytössä
@@ -3083,3 +3084,6 @@ Twitch Page:
   Search Placeholder: "Kategoriat ja kanavat"
 New Incognito Tab: Uusi incognito-välilehti
 Incognito Tab: Incognito-välilehti
+Text Translation:
+  Translating, please wait: Käännetään, odota
+  Translation failed: Kääntäminen epäonnistui

@@ -611,11 +611,12 @@ Settings:
       Force On: Lülita alati sisse
       Force Off: Lülita alati välja
     Comment Translation:
-      Enable: Luba kommentaaride tõlkimine
-      Never Translate: Ära tõlgi kommentaare järgmises keeles
+      Translation: Tõlkimine
+      Enable: Paku kommentaaride, kirjelduste ja postituste tõlkeid
+      Never Translate: Ära tõlgi teksti järgmises keeles
       Choose Language: Vali keel
-      Description: Rakenduse keeles kommentaarid on juba välja jäetud. Lisage muud keeled, mida oskate lugeda.
-      Remove Language: Tõlgi jälle {language} keeles kommentaare
+      Description: Rakenduse keeles tekst on juba välja jäetud. Lisage muud keeled, mida oskate lugeda.
+      Remove Language: Tõlgi jälle {language} keeles teksti
     Avoid translation:
       Avoid translation: Eelista tõlkimata videoteksti
       Disabled: Väljas
@@ -3077,3 +3078,6 @@ Twitch Page:
   Search Placeholder: "Kategooriad ja kanalid"
 New Incognito Tab: Uus inkognito vahekaart
 Incognito Tab: Inkognito vahekaart
+Text Translation:
+  Translating, please wait: Tõlkimine, palun oota
+  Translation failed: Tõlge nurjus

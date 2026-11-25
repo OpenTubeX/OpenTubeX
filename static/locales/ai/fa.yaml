@@ -635,11 +635,12 @@ Settings:
       Force On: همیشه روشن
       Force Off: همیشه خاموش
     Comment Translation:
-      Enable: فعال کردن ترجمه دیدگاه‌ها
-      Never Translate: دیدگاه‌های این زبان‌ها هرگز ترجمه نشوند
+      Translation: ترجمه
+      Enable: پیشنهاد ترجمه برای دیدگاه‌ها، توضیحات و پست‌ها
+      Never Translate: متن‌های این زبان‌ها هرگز ترجمه نشوند
       Choose Language: یک زبان انتخاب کنید
-      Description: دیدگاه‌های هم‌زبان با برنامه از قبل کنار گذاشته شده‌اند. زبان‌های دیگری را که می‌توانید بخوانید اضافه کنید.
-      Remove Language: ترجمه دوباره دیدگاه‌های {language}
+      Description: متن‌های هم‌زبان با برنامه از قبل کنار گذاشته شده‌اند. زبان‌های دیگری را که می‌توانید بخوانید اضافه کنید.
+      Remove Language: ترجمه دوباره متن‌های {language}
     Avoid translation:
       Avoid translation: اولویت دادن به متن ترجمه‌نشده ویدیو
       Disabled: غیرفعال
@@ -3172,3 +3173,6 @@ Twitch Page:
   Search Placeholder: "دسته‌ها و کانال‌ها"
 New Incognito Tab: زبانه ناشناس جدید
 Incognito Tab: زبانه ناشناس
+Text Translation:
+  Translating, please wait: در حال ترجمه، لطفاً صبر کنید
+  Translation failed: ترجمه ناموفق بود

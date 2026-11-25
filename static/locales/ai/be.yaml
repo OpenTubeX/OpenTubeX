@@ -634,11 +634,12 @@ Settings:
       Force On: Заўсёды ўключана
       Force Off: Заўсёды выключана
     Comment Translation:
-      Enable: Уключыць пераклад каментароў
-      Never Translate: Не перакладаць каментары на мове
+      Translation: Пераклад
+      Enable: Прапаноўваць пераклад каментароў, апісанняў і публікацый
+      Never Translate: Не перакладаць тэкст на мове
       Choose Language: Выбраць мову
-      Description: Каментары на мове праграмы ўжо выключаныя з перакладу. Дадайце іншыя мовы, якія вы разумееце.
-      Remove Language: Зноў перакладаць каментары на мове {language}
+      Description: Тэкст на мове праграмы ўжо выключаны з перакладу. Дадайце іншыя мовы, якія вы разумееце.
+      Remove Language: Зноў перакладаць тэкст на мове {language}
     Avoid translation:
       Avoid translation: Аддаваць перавагу неперакладзенаму тэксту відэа
       Disabled: Выключана
@@ -3176,3 +3177,6 @@ Twitch Page:
   Search Placeholder: "Катэгорыі і каналы"
 New Incognito Tab: Новая ўкладка інкогніта
 Incognito Tab: Укладка інкогніта
+Text Translation:
+  Translating, please wait: Пераклад, пачакайце
+  Translation failed: Не ўдалося перакласці

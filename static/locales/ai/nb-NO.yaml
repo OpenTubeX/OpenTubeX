@@ -611,11 +611,12 @@ Settings:
       Force On: Tving på
       Force Off: Tving av
     Comment Translation:
-      Enable: Slå på kommentaroversettelser
-      Never Translate: Oversett aldri kommentarer på
+      Translation: Oversettelse
+      Enable: Tilby oversettelser av kommentarer, beskrivelser og innlegg
+      Never Translate: Oversett aldri tekst på
       Choose Language: Velg et språk
-      Description: Kommentarer på appens språk blir ikke oversatt. Legg til eventuelle andre språk du kan lese.
-      Remove Language: Oversett kommentarer på {language} igjen
+      Description: Tekst på appens språk blir ikke oversatt. Legg til eventuelle andre språk du kan lese.
+      Remove Language: Oversett tekst på {language} igjen
     Avoid translation:
       Avoid translation: Foretrekk uoversatt videotekst
       Disabled: Av
@@ -3078,3 +3079,6 @@ Twitch Page:
   Search Placeholder: "Kategorier og kanaler"
 New Incognito Tab: Ny inkognitofane
 Incognito Tab: Inkognitofane
+Text Translation:
+  Translating, please wait: Oversetter, vent litt
+  Translation failed: Oversettelsen mislyktes

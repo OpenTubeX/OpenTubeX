@@ -624,11 +624,12 @@ Settings:
       Force On: கட்டாயமாக இயக்கு
       Force Off: கட்டாயமாக முடக்கு
     Comment Translation:
-      Enable: கருத்து மொழிபெயர்ப்புகளை இயக்கு
-      Never Translate: இந்த மொழிக் கருத்துகளை மொழிபெயர்க்க வேண்டாம்
+      Translation: மொழிபெயர்ப்பு
+      Enable: கருத்துகள், விளக்கங்கள், இடுகைகளுக்கு மொழிபெயர்ப்புகளை வழங்கு
+      Never Translate: இந்த மொழி உரையை மொழிபெயர்க்க வேண்டாம்
       Choose Language: ஒரு மொழியைத் தேர்ந்தெடுக்கவும்
-      Description: செயலி மொழியிலுள்ள கருத்துகள் ஏற்கெனவே விலக்கப்பட்டுள்ளன. உங்களால் படிக்க முடிந்த மற்ற மொழிகளைச் சேர்க்கவும்.
-      Remove Language: '{language} கருத்துகளை மீண்டும் மொழிபெயர்'
+      Description: செயலி மொழியிலுள்ள உரை ஏற்கெனவே விலக்கப்பட்டுள்ளது. உங்களால் படிக்க முடிந்த மற்ற மொழிகளைச் சேர்க்கவும்.
+      Remove Language: '{language} உரையை மீண்டும் மொழிபெயர்'
     Avoid translation:
       Avoid translation: மொழிபெயர்க்காத காணொளி உரைக்கு முன்னுரிமை அளி
       Disabled: முடக்கப்பட்டது
@@ -3139,3 +3140,6 @@ Twitch Page:
   Search Placeholder: "வகைகள் மற்றும் சேனல்கள்"
 New Incognito Tab: புதிய மறைநிலைத் தாவல்
 Incognito Tab: மறைநிலைத் தாவல்
+Text Translation:
+  Translating, please wait: மொழிபெயர்க்கப்படுகிறது, காத்திருக்கவும்
+  Translation failed: மொழிபெயர்ப்பு தோல்வியடைந்தது

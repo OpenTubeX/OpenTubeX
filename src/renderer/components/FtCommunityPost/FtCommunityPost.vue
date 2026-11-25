@@ -60,9 +60,18 @@
       </p>
     </div>
     <p
-      v-safer-html="postText"
+      v-safer-html="shownPostText"
       class="postText"
       dir="auto"
+    />
+    <FtTranslationButton
+      v-if="translationAvailable"
+      class="postTranslationButton"
+      :loading="translationLoading"
+      :translated="translatedText !== null"
+      :language-name="translationLanguageName"
+      :loading-label="$t('Text Translation.Translating, please wait')"
+      @click="toggleTranslation"
     />
     <swiper-container
       v-if="postType === 'multiImage' && postContent.content.length > 0"
@@ -278,6 +287,7 @@ import FtCommunityPoll from '../FtCommunityPoll/FtCommunityPoll.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtTranslationButton from '../FtTranslationButton/FtTranslationButton.vue'
 import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
@@ -297,6 +307,9 @@ import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { useTextTranslation } from '../../composables/useTextTranslation'
+import { getDescriptionText } from '../../helpers/descriptionLinks'
+import { escapeHTML } from '../../helpers/feed-metadata'
 import { loadSwiperModules } from './swiperLoader'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
@@ -448,6 +461,19 @@ let voteCount = 0
 let commentCount = null
 
 parseCommunityData()
+
+// Autolinker shortens link labels, so the source comes from the unlinked text.
+const postTextSource = getDescriptionText(props.data.postText ?? '')
+const {
+  available: translationAvailable,
+  loading: translationLoading,
+  translatedText,
+  targetLanguageName: translationLanguageName,
+  toggleTranslation
+} = useTextTranslation(() => postTextSource)
+const shownPostText = computed(() => translatedText.value === null
+  ? postText
+  : autolinker.link(escapeHTML(translatedText.value)))
 
 const formattedCommentCount = computed(() => {
   if (commentCount == null) return ''
