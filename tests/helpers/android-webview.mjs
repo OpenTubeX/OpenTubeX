@@ -59,7 +59,8 @@ export async function forwardAndroidWebView(timeout = 120000) {
 
 /**
  * Connects to the app's WebView, forwarding its DevTools socket again first,
- * since an earlier test may have restarted the app or the adb server.
+ * since an earlier test may have restarted the app or the adb server, and
+ * waits until the app has rendered with its tabs restored.
  * ANDROID_CPU_THROTTLE=4 slows the WebView down like a busy CI emulator for
  * as long as the connection stays open.
  */
@@ -67,6 +68,11 @@ export async function connectAndroidApp() {
   await forwardAndroidWebView()
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = appPage(browser)
+  // A restarted app lists its page before Vue mounts and restores the tabs,
+  // which it does only after loading its data, so wait until the app has
+  // rendered. A timer also polls while the app is in the background, where
+  // the WebView draws no frames.
+  await page.waitForFunction(() => document.querySelector('#app .app') !== null, null, { polling: 250, timeout: 120000 })
   const rate = Number(process.env.ANDROID_CPU_THROTTLE)
   if (rate > 1) {
     const session = await browser.contexts()[0].newCDPSession(page)
