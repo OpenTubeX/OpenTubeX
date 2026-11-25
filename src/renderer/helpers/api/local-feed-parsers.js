@@ -6,6 +6,33 @@ import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
 
 /**
+ * Whether text runs show the original text rather than YouTube's translation of it,
+ * so that their link titles and icons can be shown without a translation.
+ * Links can replace their URL with a label, so only the text between them has to match.
+ * @param {(Misc.TextRun|Misc.EmojiRun)[]} runs
+ * @param {string} original
+ * @returns {boolean}
+ */
+export function isOriginalLocalText(runs, original) {
+  let position = 0
+  let afterLink = false
+  for (const run of runs) {
+    if ('endpoint' in run && run.endpoint) {
+      afterLink = true
+      continue
+    }
+
+    const index = original.indexOf(run.text, position)
+    if (index === -1 || (index !== position && !afterLink)) {
+      return false
+    }
+    position = index + run.text.length
+    afterLink = false
+  }
+  return afterLink || position === original.length
+}
+
+/**
  * @param {import('youtubei.js').YTNodes.NavigationEndpoint | undefined} endpoint
  * @returns {string | undefined} the channel handle including the leading `@`
  */

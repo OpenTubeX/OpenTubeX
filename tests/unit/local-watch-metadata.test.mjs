@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { Misc, YTNodes } from 'youtubei.js'
-import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { createLocalFeedParsers, getAuthorVerification, isOriginalLocalText } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoDescriptionSections } from '../../src/renderer/helpers/video-description-sections.js'
@@ -51,6 +51,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
     getAuthorVerification,
+    isOriginalLocalText,
     window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
     formatSubscriberCount: String,
@@ -376,6 +377,30 @@ test('honors the original-language preference with description-panel metadata', 
   assert.equal(watch.videoDescription, 'Original description')
   assert.equal(watch.videoViewCount, 0)
   assert.equal(watch.channelSubscriptionCountText, '123')
+})
+
+test('keeps link titles and icons of an untranslated description with the original-language preference', async () => {
+  const content = descriptionPanel()
+  const link = '   • Linked video  '
+  content.items[2].attributed_description_body_text = Misc.Text.fromAttributed({
+    content: `Watch ${link} next`,
+    commandRuns: [{
+      startIndex: 6,
+      length: link.length,
+      onTap: { innertubeCommand: { commandMetadata: { webCommandMetadata: { url: '/watch?v=AAAAAAAAAAA', webPageType: 'WEB_PAGE_TYPE_WATCH' } }, watchEndpoint: { videoId: 'AAAAAAAAAAA' } } }
+    }],
+    attachmentRuns: [{
+      startIndex: 9,
+      length: 0,
+      element: { type: { imageType: { image: { sources: [{ url: 'https://www.gstatic.com/youtube/img/watch/yt_favicon_ringo2.png' }] } } } }
+    }]
+  })
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Original title', short_description: 'Watch https://youtu.be/AAAAAAAAAAA next', view_count: 0 },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'entire_app')
+  assert.equal(watch.videoDescription, 'Watch <a href="https://www.youtube.com/watch?v=AAAAAAAAAAA" data-link-icon="youtube">Linked video</a> next')
 })
 
 test('retrieves a missing title from oEmbed', async () => {
