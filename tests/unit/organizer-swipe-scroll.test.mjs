@@ -29,9 +29,11 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
       nextTick,
       presentedTabId: ref('tab'),
       CSS: { escape: value => value },
+      // The floating bottom actions overlap the list's end padding.
+      getComputedStyle: () => ({ paddingTop: '12px', paddingBottom: '88px' }),
       dialogRef: {
         value: {
-          querySelector: () => ({ querySelector: () => ({}), getBoundingClientRect: () => ({ top: 800, bottom: 900 }) }),
+          querySelector: () => ({ querySelector: () => ({}), closest() { return this }, getBoundingClientRect: () => ({ top: 800, bottom: 900 }) }),
           closest: () => ({}),
         }
       },
@@ -56,7 +58,7 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
     const gesture = vm.runInContext(`${controller}; ${openWatcher}; organizerSwipe`, context)
     assert.equal(gesture.begin(), true)
     await new Promise(setImmediate)
-    assert.equal(scroll.scrollTop, 523.5, 'the pull temporarily brings the active card into view')
+    assert.equal(scroll.scrollTop, 611.5, 'the pull temporarily brings the active card into view above the bottom actions')
     const committed = ending === 'commit' || ending.endsWith('while settling')
     if (ending === 'resize') listeners.get('resize')()
     else {
@@ -79,10 +81,10 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
     }
     if (committed) open.value = false
     await nextTick()
-    assert.equal(saved.open, committed ? 523.5 : 123.5, 'only committed pulls may persist the temporary viewport')
+    assert.equal(saved.open, committed ? 611.5 : 123.5, 'only committed pulls may persist the temporary viewport')
     scroll.scrollTop = 0
     open.value = true
     await new Promise(setImmediate)
-    assert.equal(scroll.scrollTop, committed ? 523.5 : 123.5, 'normal opening restores the expected viewport')
+    assert.equal(scroll.scrollTop, committed ? 611.5 : 123.5, 'normal opening restores the expected viewport')
   })
 }

@@ -746,9 +746,15 @@ const organizerSwipe = {
       if (target && scroll) {
         const scrollTop = scroll.scrollTop
         state.restoreScroll = () => restoreOverlayScrollTop(scroll, scrollTop)
-        const bounds = target.getBoundingClientRect()
+        // The list's padding clears the floating bottom actions, which
+        // overlap its viewport, so reveal the whole card, border included,
+        // inside the padding.
+        const bounds = target.closest('.capacitorPhoneTabRow').getBoundingClientRect()
         const viewport = scroll.getBoundingClientRect()
-        const offset = bounds.top < viewport.top ? bounds.top - viewport.top : Math.max(0, bounds.bottom - viewport.bottom)
+        const style = getComputedStyle(scroll)
+        const top = viewport.top + Number.parseFloat(style.paddingTop)
+        const bottom = viewport.bottom - Number.parseFloat(style.paddingBottom)
+        const offset = bounds.top < top ? bounds.top - top : Math.max(0, bounds.bottom - bottom)
         restoreOverlayScrollTop(scroll, scroll.scrollTop + offset)
       }
       const preview = target?.querySelector('.capacitorTabPreview')

@@ -93,12 +93,18 @@ test('phone organizer clamps its grid after column and viewport changes', async 
     await window.ftElectron.setZoomFactor(0.95)
     const store = window.$store
     for (let index = 0; index < 6; index++) {
-      await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
+      await store.dispatch('createTab', { route: '/subscriptions', makeActive: index === 5 })
     }
   })
   await enablePhoneTabSwitcher(page)
   await page.locator('.capacitorPhoneTabSwitcherButton').click()
   const panel = page.locator('#capacitor-phone-open-tabs-panel')
+  // Opening reveals the active card above the floating bottom actions, which overlap the list.
+  await expect.poll(() => page.locator('.capacitorPhoneTabDialog').evaluate(dialog => {
+    const card = dialog.querySelector('.capacitorPhoneTabRow.active').getBoundingClientRect()
+    const actions = dialog.querySelector('.capacitorPhoneTabBottomActions').getBoundingClientRect()
+    return card.bottom <= actions.top
+  })).toBe(true)
   await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')).scrollTop)
     .toBeGreaterThan(100)
