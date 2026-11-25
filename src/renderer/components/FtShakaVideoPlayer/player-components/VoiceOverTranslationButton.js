@@ -76,7 +76,7 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
     this.nameSpan_.textContent = label
     this.currentState_.textContent = stateLabel
     // Only `On` and `Off` become a switch, not the actions before them.
-    this.menuSwitch_.element.hidden = this.state_.value !== 'ready'
+    this.menuSwitch_.setShown(this.state_.value === 'ready')
     this.button_.ariaLabel = `${label}: ${stateLabel}`
     this.button_.ariaPressed = this.enabled_.value ? 'true' : 'false'
     this.button_.classList.toggle('voice-over-translation-loading', this.state_.value === 'loading')

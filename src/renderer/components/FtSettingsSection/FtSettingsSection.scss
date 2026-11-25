@@ -71,7 +71,10 @@
     padding-block-end: 0;
   }
 
-  > :deep(:has(> .pure-material-slider:last-child) + :has(> .btn:first-child)) {
+  /* The row after the slider is named: a `:has()` on any element would make
+     Chromium restyle the next sibling's subtree whenever a `:has()` is
+     checked again anywhere, also in the player. */
+  > :deep(:has(> .pure-material-slider:last-child) + :is(.ft-flex-box, .customizerLauncher):has(> .btn:first-child)) {
     padding-block-start: 0;
   }
 
@@ -231,12 +234,12 @@
     display: contents;
   }
 
-  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > *) {
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > .switch-ctn) {
     grid-column: $long-track;
     justify-self: start;
   }
 
-  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > :nth-child(n + #{$n + 1})) {
+  .sectionBody :deep(#{$grid} > .switchColumn:#{$long} > .switch-ctn:nth-child(n + #{$n + 1})) {
     grid-column: 1 / -1;
     justify-self: center;
   }

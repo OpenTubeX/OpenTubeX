@@ -14,8 +14,12 @@ const MenuSwitchIcons = defineComponent({
  * Adds the switch that the player menu's list shows for a toggle, after its
  * label. It follows the state the button reports through `aria-pressed` or
  * `ft-active`, and the tiles and the control bar hide it.
+ *
+ * The button carries `ft-menu-switch-shown` while the switch shows, so the
+ * menu can hide the On and Off text without a `:has()`, which would restyle
+ * every entry's label whenever any entry changes.
  * @param {HTMLElement} button
- * @returns {{ element: HTMLElement, release: () => void }}
+ * @returns {{ element: HTMLElement, setShown: (shown: boolean) => void, release: () => void }}
  */
 export function appendMenuSwitch(button) {
   const element = document.createElement('span')
@@ -28,5 +32,13 @@ export function appendMenuSwitch(button) {
   render(h(MenuSwitchIcons), thumb)
 
   button.appendChild(element)
-  return { element, release: () => render(null, thumb) }
+  button.classList.add('ft-menu-switch-shown')
+  return {
+    element,
+    setShown: shown => {
+      element.hidden = !shown
+      button.classList.toggle('ft-menu-switch-shown', shown)
+    },
+    release: () => render(null, thumb),
+  }
 }
