@@ -5,6 +5,7 @@ Follow these in addition to `AGENTS.md` when you have push access to OpenTubeX (
 ## Pull requests
 
 - Squash-merge PRs (`gh pr merge --squash`). Use a merge commit only for upstream merges and syncs, which must keep upstream's ancestry, and for Dependabot batches landed in one push (the `dependabot` skill does this). Do not infer the method from `development`'s history: since November 2026 it is full of merge commits that broke this rule.
+- Every PR uses up one of CodeRabbit's limited reviews, so bundle related changes, such as several follow-ups, into as few PRs as possible. CodeRabbit skips PRs with more changed files than its limit, which can change with the repository's plan: it was 100 in November 2026, and a skipped review names the current one ("N files exceed the limit of M"). Keep each PR under it by pushing test-only parts straight to `development` (see "Test failures and CI") and splitting the rest by area.
 - Give a milestone only to PRs that fix user-facing bugs or add user-facing features. Leave all other PRs without one, including upstream merges and syncs, CI, dependency, test, and documentation changes, and minor changes users won't notice.
 - For a PR that needs a milestone, copy the linked issue's milestone. If it has none, assign the open milestone with the lowest version in its title: query open milestones with `gh api --paginate` and compare titles by numeric version order (1.10 after 1.9), not alphabetically or by milestone number. Pass the exact title to `gh pr create --milestone` or `gh pr edit --milestone`. If no version milestone is open, report that instead of creating one.
 - When a PR with a milestone is created, gains a closing issue link, or changes milestone, assign its milestone to every issue in this repository that it closes and that has none, immediately, even while the PR is open. Keep existing issue milestones and verify the assignments on GitHub.
@@ -18,6 +19,7 @@ Record follow-ups as comments on the "Agent follow-ups" issue (#2661), not only 
 - Read the existing comments first and skip follow-ups already listed.
 - Post one comment per follow-up, following the `leaving-github-comments` skill if you have it: a bold one-line summary, why it matters, and links to the relevant code and, if one exists, the PR.
 - Before working on a follow-up from the issue, check its comment for an 👀 reaction. If one is there, another agent has it in progress; leave it alone unless the user assigned it to you, or the reaction is more than a day old and no open PR links the comment. Otherwise add the reaction (`gh api repos/OpenTubeX/OpenTubeX/issues/comments/<id>/reactions -f content=eyes`). If you stop without finishing, remove it (`gh api -X DELETE repos/OpenTubeX/OpenTubeX/issues/comments/<id>/reactions/<reaction-id>`).
+- When your task is to work through follow-ups, address the ones you find along the way in the same task instead of posting them, unless they need the user's decision. Before you finish, read the issue again and take the unclaimed follow-ups posted since you started too.
 - When your task addresses a follow-up from the issue, link its comment in the PR description, and delete the comment (`gh api -X DELETE repos/OpenTubeX/OpenTubeX/issues/comments/<id>`) once the fix is merged. If the work is only partly done, leave the comment and post an update instead.
 - Never edit the issue body or other comments, and never close the issue.
 - Link the posted comments in your final message.
@@ -25,7 +27,7 @@ Record follow-ups as comments on the "Agent follow-ups" issue (#2661), not only 
 ## Test failures and CI
 
 - Fix unrelated test failures (tests that fail locally, or fail CI even after its retry). This is authorized; do not ask first. Keep the fix out of the current task's branch and PR.
-  1. Fetch `origin/development` and check its recent commits and open PRs, and other agent threads if your harness lists them, for a fix that has landed or is in progress. Do not duplicate one.
+  1. Fetch `origin/development` and check for a fix that has landed or is in progress, as `AGENTS.md` describes under "Pull requests".
   2. Reproduce on the latest `origin/development`, find the root cause, and fix and verify it.
   3. Push fixes that only touch tests, test helpers, fixtures, or test configuration directly to `origin/development`, however large. Open a separate PR for fixes that change application code so CI runs them, and merge it once it passes CI and gets CodeRabbit's approval as described under Pull requests.
   4. Rebase the working branch onto the updated `origin/development` and rerun the affected checks.

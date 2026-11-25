@@ -15,6 +15,7 @@ Git remote names differ between checkouts, so these files name repositories inst
 
 Requests such as "implement issue #X" authorize local changes, not a PR. Open a PR only when the user explicitly requests or approves one for that repository. Approval for an application PR does not authorize a website PR, or vice versa.
 
+- Before starting a fix or feature, check `development`'s recent commits, open PRs, and other agent threads if your harness lists them, for the same work, landed or in progress. Do not duplicate it; tell the user what you found and build on it or stop.
 - Follow `release-notes/README.md` and `.github/PULL_REQUEST_AGENT_INSTRUCTIONS.md` for release notes and their screenshots and recordings.
 - Never end a turn waiting for something that only you or the user can cause. Before you go quiet, name the event that will wake you (a check, a bot reply, a review you requested); if there is none, act or ask the user.
 - End the PR description with a blurb about the model and harness that made the changes. Use the public model name the harness reports for the model that made the changes. If the harness does not expose a model name, use the harness name. Do not guess.
