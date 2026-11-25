@@ -1,13 +1,14 @@
 import { execFileSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 
-export const ANDROID_APP_ID = process.env.ANDROID_APP_ID || 'org.opentubex.app.dev'
+/** The app's package, read when called, since the script runner sets it from the APK after importing this. */
+export const androidAppId = () => process.env.ANDROID_APP_ID || 'org.opentubex.app.dev'
 
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' }).trim()
 
 function appProcess() {
   try {
-    return adb('shell', 'pidof', ANDROID_APP_ID)
+    return adb('shell', 'pidof', androidAppId())
   } catch {
     // pidof fails when the app isn't running.
     return ''
@@ -32,7 +33,7 @@ export async function forwardAndroidWebView(timeout = 120000) {
       if (process.env.ANDROID_SERIAL) {
         let pid = appProcess()
         if (!pid) {
-          adb('shell', 'am', 'start', '-W', '-n', `${ANDROID_APP_ID}/org.opentubex.app.MainActivity`)
+          adb('shell', 'am', 'start', '-W', '-n', `${androidAppId()}/org.opentubex.app.MainActivity`)
           pid = appProcess()
         }
         const socket = `webview_devtools_remote_${pid}`
@@ -45,7 +46,9 @@ export async function forwardAndroidWebView(timeout = 120000) {
       const targets = await (await fetch(`${url}/json`)).json()
       if (targets.some(target => target.url.startsWith('https://localhost/'))) return
     } catch {
-      // The app or its WebView isn't ready yet.
+      // The app or its WebView isn't ready yet, or a restarted adb server
+      // dropped the forward, so forward the port again on the next try.
+      forwarded = null
     }
     if (Date.now() > deadline) throw new Error(`Timed out waiting for the app's WebView at ${url}`)
     await delay(500)

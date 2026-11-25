@@ -10,7 +10,7 @@ import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoin
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
 import { watchHistoryEntry } from '../../e2e/helpers/watch.mjs'
 import { appPage } from '../helpers/android-app-page.mjs'
-import { ANDROID_APP_ID, forwardAndroidWebView } from '../helpers/android-webview.mjs'
+import { androidAppId, forwardAndroidWebView } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with
 // _scripts/androidScriptTests.mjs, or forward its WebView socket and set
@@ -664,7 +664,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         // while the window is still animating into it, so launch again until
         // the app has left it.
         await expect(async () => {
-          adb('am', 'start', '-n', `${ANDROID_APP_ID}/org.opentubex.app.MainActivity`)
+          adb('am', 'start', '-n', `${androidAppId()}/org.opentubex.app.MainActivity`)
           await expect(page.locator('body')).not.toHaveClass(/androidPictureInPicture(?:\s|$)/, { timeout: 5000 })
         }).toPass({ timeout: 60000 })
       }

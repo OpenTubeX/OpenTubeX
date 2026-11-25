@@ -136,7 +136,8 @@ async function main() {
       console.log(`::warning file=${file},line=${line},title=Flaky test::${title} passed only on retry`)
     }
   }
-  return passedOnRetry.length === first.failed.length
+  // Tests with the same name in several files all run again, so any of them can fail.
+  return retry.failed.length === 0 && passedOnRetry.length === first.failed.length
 }
 
 try {
