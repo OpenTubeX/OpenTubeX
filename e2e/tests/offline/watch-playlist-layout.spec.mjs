@@ -663,11 +663,19 @@ test.describe('long watch playlist', () => {
     // height comparisons below.
     const rowHeight = () => list.evaluate(element => element.querySelector(':scope > .playlistItem:has(.ft-list-video)')
       ?.getBoundingClientRect().height || Number.NaN)
-    // Scroll to the end so rows near the top become measured shells.
+    // The first row is a measured shell once the list has released the rows
+    // that leave the viewport. Until then they are still mounted.
+    const firstRowIsShell = () => list.evaluate(element => {
+      const row = element.querySelector(':scope > .playlistItem')
+      return !row.querySelector('.ft-list-video') && Number.parseFloat(row.style.blockSize) > 0
+    })
+    // Scroll to the end so rows near the top become measured shells. Opening
+    // the dock centers the current first row a few frames later, which can undo
+    // a scroll made right after the list appears, so scroll until the end holds.
     await expect.poll(async () => {
       await list.evaluate(element => { element.scrollTop = element.scrollHeight })
-      return (await shellHeights()).length
-    }).toBeGreaterThan(20)
+      return (await shellHeights()).length > 20 && await firstRowIsShell()
+    }).toBe(true)
     // Rows near the end mount from an intersection observer after the scroll.
     let tallRow
     await expect.poll(async () => (tallRow = await rowHeight())).toBeGreaterThan(0)
@@ -691,6 +699,8 @@ test.describe('long watch playlist', () => {
       return element.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom -
         (Number.parseFloat(getComputedStyle(last).marginBlockEnd) || 0)
     })).toBeLessThan(2)
+    // Only the rows near the top mount again below, so wait until they are shells.
+    await expect.poll(firstRowIsShell).toBe(true)
 
     // Stale shells would change height once the rows near the top mount again.
     // A slow renderer can scroll away before some top rows ever mount; those
