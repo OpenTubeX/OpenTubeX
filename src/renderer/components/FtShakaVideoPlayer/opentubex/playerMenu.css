@@ -387,11 +387,11 @@
     border-color var(--motion-default-effects);
 }
 
-:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button > .ft-menu-switch:not([hidden])) {
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button.ft-menu-switch-shown > .ft-menu-switch) {
   display: flex;
 }
 
-:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button:has(.ft-menu-switch:not([hidden])) .shaka-current-selection-span) {
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button.ft-menu-switch-shown .shaka-current-selection-span) {
   display: none;
 }
 
@@ -460,7 +460,7 @@
 }
 
 /* The switch after the label keeps that distance itself. */
-:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button:has(.ft-menu-switch:not([hidden])) > .shaka-overflow-button-label) {
+:deep(:is(.shaka-overflow-menu, .shaka-sub-menu):not(.ft-menu-grid) > button.ft-menu-switch-shown > .shaka-overflow-button-label) {
   padding-inline-end: 0;
 }
 
