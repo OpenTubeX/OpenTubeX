@@ -773,7 +773,6 @@ Settings:
     All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
     Unknown setting key: 'Nieznany klucz ustawień: {key}'
     Non-transferable setting key: 'Nieprzenoszalny klucz ustawień: {key}'
-    Playlists have been successfully imported: 1/{total} playlista została pomyślnie zaimportowana | {count}/{total} playlisty zostały pomyślnie zaimportowane
     Setting object has insufficient data, skipping item: Obiekt ustawień ma niewystarczające dane, pominięto element
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
