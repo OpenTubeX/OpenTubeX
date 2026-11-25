@@ -51,31 +51,53 @@ test('Android confirms opening a background tab while keeping the current page',
     })
     await expect(page.locator('.mobileLinkActions')).toBeVisible()
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    // The toast lasts three seconds, which a busy phone can spend before the
-    // thumbnail arrives, so record the thumbnail's load in the page.
+    // The toast lasts three seconds. A busy phone can spend them before the
+    // thumbnail arrives, or before Playwright's tap on the menu item returns,
+    // although the toast appears early in that tap. So record the toast and
+    // its thumbnail in the page, measuring visibility like Playwright does.
     await page.evaluate(() => {
-      window.__backgroundTabToastImage = new Promise(resolve => {
+      const isVisible = element => element.isConnected && element.checkVisibility({ visibilityProperty: true }) &&
+        element.getBoundingClientRect().width > 1 && element.getBoundingClientRect().height > 1
+      const record = { count: 0, visible: false, imageVisible: false }
+      window.__backgroundTabToast = record
+      record.done = new Promise(resolve => {
+        let image
         const observer = new MutationObserver(() => {
-          const image = [...document.querySelectorAll('.toast[role="status"] img')].find(image => image.closest('.toast').textContent.includes('Opened in a background tab'))
-          if (!image) return
-          observer.disconnect()
-          if (image.complete) resolve(image.naturalWidth)
-          else image.addEventListener('load', () => resolve(image.naturalWidth), { once: true })
+          const toasts = [...document.querySelectorAll('.toast[role="status"]')].filter(toast => toast.textContent.includes('Opened in a background tab'))
+          record.count = Math.max(record.count, toasts.length)
+          record.visible ||= toasts.some(isVisible)
+          if (image || !toasts[0]?.querySelector('img')) return
+          image = toasts[0].querySelector('img')
+          // The image shows on the render after its load.
+          const loaded = () => requestAnimationFrame(() => {
+            record.imageVisible = isVisible(image)
+            resolve(image.naturalWidth)
+          })
+          if (image.complete && image.naturalWidth > 0) loaded()
+          else image.addEventListener('load', loaded, { once: true })
           image.addEventListener('error', () => resolve(0), { once: true })
         })
-        observer.observe(document.body, { childList: true, subtree: true })
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true })
+        record.stop = () => observer.disconnect()
       })
     })
     await page.getByRole('menuitem', { name: 'Open in a Background Tab', exact: true }).click()
     const toast = page.locator('.toast[role="status"]').filter({ hasText: 'Opened in a background tab' })
-    await expect(toast).toBeVisible()
-    await expect(toast).toHaveCount(1)
-    await expect(toast.locator('img')).toBeVisible()
-    const thumbnailWidth = await page.evaluate(async () => {
+    const shown = await page.evaluate(async () => {
+      const record = window.__backgroundTabToast
       const timeout = new Promise(resolve => setTimeout(resolve, 30_000, -1))
-      try { return await Promise.race([window.__backgroundTabToastImage, timeout]) } finally { delete window.__backgroundTabToastImage }
+      try {
+        const thumbnailWidth = await Promise.race([record.done, timeout])
+        return { count: record.count, visible: record.visible, imageVisible: record.imageVisible, thumbnailWidth }
+      } finally {
+        record.stop()
+        delete window.__backgroundTabToast
+      }
     })
-    assert.ok(thumbnailWidth > 0, 'The toast shows the video thumbnail')
+    assert.ok(shown.visible, 'The toast is visible')
+    assert.equal(shown.count, 1, 'One toast confirms the tab')
+    assert.ok(shown.thumbnailWidth > 0, 'The toast shows the video thumbnail')
+    assert.ok(shown.imageVisible, 'The toast thumbnail is visible')
     await expect.poll(async () => (await tabState()).ids.length).toBe(before.ids.length + 1)
     assert.equal((await tabState()).presented, before.presented)
     await expect(page).toHaveURL(/#\/history/)
