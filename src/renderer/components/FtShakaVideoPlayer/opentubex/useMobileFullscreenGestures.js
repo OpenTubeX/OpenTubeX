@@ -101,6 +101,8 @@ export function useMobileFullscreenGestures({
   let mobileAdjustmentTouchEnd = false
   // Shaka stops its idle timer for touchmoves until a touchend restarts it
   let mobileShakaTouchMoved = false
+  // A tap hid the controls, which Shaka shows again for any touchend
+  let mobileSurfaceTapHidControls = false
   let mobileGestureTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
@@ -145,8 +147,9 @@ export function useMobileFullscreenGestures({
     }
 
     mobileGestureTouchCancelled = false
-    // A canceled touch never reached the touchend that clears this
+    // A canceled touch never reached the touchend that clears these
     mobileShakaTouchMoved = false
+    mobileSurfaceTapHidControls = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
@@ -640,6 +643,7 @@ export function useMobileFullscreenGestures({
       config.fadeDelay = 0
       controls.hideUI()
       config.fadeDelay = fadeDelay
+      mobileSurfaceTapHidControls = true
     }
   }
 
@@ -732,6 +736,8 @@ export function useMobileFullscreenGestures({
 
     mobileSurfaceSuppressTouchEndUntil = 0
     const adjustmentTouchEnd = mobileAdjustmentTouchEnd
+    const hidControls = mobileSurfaceTapHidControls
+    mobileSurfaceTapHidControls = false
     if (mobileGestureTouchCancelled) {
       mobileGestureTouchCancelled = event.touches?.length > 0
       mobilePlayerSuppressClickUntil = performance.now() + 350
@@ -742,8 +748,9 @@ export function useMobileFullscreenGestures({
     event.preventDefault()
     event.stopImmediatePropagation()
     // An adjustment never let Shaka see its touchmoves, so the idle timer is
-    // still running and notifying Shaka would reveal the controls.
-    if (adjustmentTouchEnd) return
+    // still running and notifying Shaka would reveal the controls. Hidden
+    // controls need no idle timer, and Shaka would cancel their fade.
+    if (adjustmentTouchEnd || hidControls) return
     // Shaka's surface-tap handler is on the child controls container. Notify
     // only the player container so its touchmove-stopped idle timer resumes.
     getContainer()?.dispatchEvent(new Event('touchend'))
@@ -913,6 +920,7 @@ export function useMobileFullscreenGestures({
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileAdjustmentTouchEnd = false
     mobileShakaTouchMoved = false
+    mobileSurfaceTapHidControls = false
     mobileTitleSuppressClickUntil = 0
     mobileFullscreenTitleGesture = null
     lastMobileFullscreenTitleTap = null
