@@ -569,3 +569,12 @@ test('parses links that YouTube shows as an icon and a label', () => {
     'Follow <a href="https://www.instagram.com/example.profile" data-link-icon="instagram">example.profile</a>'
   ].join('\n'))
 })
+
+test('recognizes original description text whose links show a label', () => {
+  const text = value => ({ text: value })
+  const link = { text: '   / example  ', endpoint: {} }
+  assert.equal(isOriginalLocalText([text('See '), link, text('.')], 'See https://example.com.'), true)
+  assert.equal(isOriginalLocalText([link], 'https://example.com'), true)
+  assert.equal(isOriginalLocalText([link], 'Read the notes. https://example.com'), false)
+  assert.equal(isOriginalLocalText([text('Siehe '), link], 'See https://example.com'), false)
+})
