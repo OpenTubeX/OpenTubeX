@@ -1,6 +1,7 @@
-import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { relative, resolve } from 'node:path'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, relative, resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { run } from 'node:test'
 import { spec } from 'node:test/reporters'
@@ -15,16 +16,88 @@ import { forwardAndroidWebView } from '../tests/helpers/android-webview.mjs'
  * added to ANDROID_FLAKY_REPORT for the flaky-test issue.
  *
  * The instrumentation tests uninstall the app, so this installs it again,
- * and clears its data, so that every run starts from the same state.
+ * and clears its data, so that every run starts from the same state. Each
+ * file starts with a restarted app, so that no page, stub or session state
+ * of an earlier file leaks into it. Needs ffmpeg for the media fixtures.
  *
- * Usage: node _scripts/androidScriptTests.mjs <test file>...
+ * Usage: node _scripts/androidScriptTests.mjs [<test file>... | <shard> <shards>]
  */
 
 const METADATA = 'android/app/build/outputs/apk/debug/output-metadata.json'
 const PERMISSIONS = ['android.permission.POST_NOTIFICATIONS']
 
-const files = process.argv.slice(2).map(file => resolve(file))
-if (files.length === 0) throw new Error('Pass the test files to run')
+// The scripts to run, with their seconds on a local emulator, which balance
+// the shards. These scripts in tests/android stay out:
+// - chromecast-receiver needs a sender trusting a test CA, openchromecast and mpv.
+// - large-screen-fullscreen and local-network-permission need Android 17.
+// - mobile-performance runs in a desktop Chromium, not on the device.
+// - picture-in-picture-lifecycle looks for the colors and clock position of the
+//   demo video before its restyle, and reads the clock with tesseract.
+// - player-controls-rendering leaves a gap in the classic control bar on the
+//   emulator's WebView 124, but passes on current WebView and Chromium.
+// - rotation-fullscreen drives an instrumentation test, which needs the test APK.
+const SCRIPTS = [
+  ['always-show-scrollbars', 9],
+  ['audio-player-surfaces', 4],
+  ['audio-player-tap', 20],
+  ['background-tab-toast', 17],
+  ['channel-banner-recovery', 7],
+  ['chromecast-settings', 38],
+  ['comments-startup', 46],
+  ['control-bar-buttons', 19],
+  ['fullscreen-actions', 18],
+  ['fullscreen-controls', 19],
+  ['fullscreen-docks', 11],
+  ['fullscreen-portrait-panels', 10],
+  ['fullscreen-seek-gesture', 83],
+  ['fullscreen-status-bar', 28],
+  ['fullscreen-transition', 53],
+  ['header-organizer-swipe', 88],
+  ['header-page-swipe', 76],
+  ['header-page-swipe-scroll', 24],
+  ['image-timeout-recovery', 5],
+  ['material-you', 18],
+  ['mini-player-navigation', 36],
+  ['mobile-mini-player', 390],
+  ['notification-center', 64],
+  ['offline-mini-player', 18],
+  ['offline-queue-playback', 82],
+  ['offline-recommendations', 5],
+  ['organizer-animation', 9],
+  ['organizer-native-tap', 3],
+  ['picture-in-picture-rendering', 8],
+  ['playback-speed-hold', 29],
+  ['sabr-background-start', 214],
+  ['sync-custom-themes', 3],
+  ['sync-device-position', 19],
+  ['sync-device-removal', 165],
+  ['sync-device-stats', 18],
+  ['tab-swipe-rendering', 9],
+  ['thumbnail-swipe', 66],
+  ['watch-scroll-range', 7],
+]
+
+/**
+ * Splits the scripts into shards of similar duration, longest first.
+ * @param {number} shard
+ * @param {number} shards
+ */
+function shardScripts(shard, shards) {
+  const totals = Array(shards).fill(0)
+  const assigned = Array.from({ length: shards }, () => [])
+  for (const [name, seconds] of [...SCRIPTS].sort((a, b) => b[1] - a[1])) {
+    const index = totals.indexOf(Math.min(...totals))
+    totals[index] += seconds
+    assigned[index].push(`tests/android/${name}.test.mjs`)
+  }
+  return assigned[shard].sort()
+}
+
+const args = process.argv.slice(2)
+const shardArgs = args.length === 2 && args.every(arg => /^\d+$/.test(arg)) ? args.map(Number) : null
+const files = (shardArgs ? shardScripts(...shardArgs) : args.length > 0 ? args : SCRIPTS.map(([name]) => `tests/android/${name}.test.mjs`))
+  .map(file => resolve(file))
+if (shardArgs && files.length === 0) throw new Error(`Shard ${shardArgs[0]} of ${shardArgs[1]} has no scripts`)
 
 // CI has one device. Locally, ANDROID_SERIAL selects one of several.
 const serial = process.env.ANDROID_SERIAL || spawnSync('adb', ['get-serialno'], { encoding: 'utf8' }).stdout.trim()
@@ -69,8 +142,12 @@ async function startApp() {
   await forwardAndroidWebView()
 }
 
-/** Skips the first-run tutorial, which makes the rest of the app inert. */
-async function skipTutorial() {
+/**
+ * Skips the first-run tutorial, which makes the rest of the app inert, and
+ * stops the app from offering yt-dlp updates, whose toast covers controls
+ * the tests tap. The app checks for updates when it starts, so restart it.
+ */
+async function prepareProfile() {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   try {
     const page = appPage(browser)
@@ -78,18 +155,48 @@ async function skipTutorial() {
     await tutorial.locator('.tutorialSkip button').click({ timeout: 120000 })
     await tutorial.waitFor({ state: 'hidden' })
     await page.waitForFunction(() => localStorage.getItem('opentubex.tutorial.audience') === 'completed')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .dispatch('updateExternalSoftwareUpdateMode', 'manual'))
   } finally {
     await browser.close()
   }
+  await startApp()
 }
 
 /**
- * Runs the tests and returns the top-level tests that failed.
+ * Copies the downloaded-audio fixtures into the app's files, where the app's
+ * own file loader reads them. A queue test needs a first track of at least
+ * 20 seconds, longer than the demo clip.
+ */
+function prepareMedia() {
+  const directory = mkdtempSync(join(tmpdir(), 'opentubex-script-media-'))
+  try {
+    const long = join(directory, 'long-audio.mp3')
+    execFileSync('ffmpeg', ['-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=24', '-ac', '1', '-q:a', '9', long])
+    const files = { 'demo-audio.mp3': resolve('e2e/fixtures/media/demo-audio.mp3'), 'long-audio.mp3': long }
+    adb('shell', 'run-as', applicationId, 'mkdir', '-p', 'files/script-tests')
+    for (const [name, path] of Object.entries(files)) {
+      // adb cannot write to the app's private files, but the app's user can copy there.
+      adb('push', path, `/data/local/tmp/${name}`)
+      adb('shell', 'run-as', applicationId, 'cp', `/data/local/tmp/${name}`, `files/script-tests/${name}`)
+      adb('shell', 'rm', `/data/local/tmp/${name}`)
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+  const media = `/data/user/0/${applicationId}/files/script-tests`
+  process.env.ANDROID_OFFLINE_MEDIA_PATH = `${media}/demo-audio.mp3`
+  process.env.ANDROID_OFFLINE_FIRST_MEDIA_PATH = `${media}/long-audio.mp3`
+}
+
+/**
+ * Runs the tests of one file and returns its top-level tests that failed.
+ * @param {string} file
  * @param {RegExp[] | undefined} testNamePatterns
  */
-async function runTests(testNamePatterns) {
+async function runTests(file, testNamePatterns) {
   const failed = new Map()
-  const stream = run({ files, testNamePatterns, concurrency: 1 })
+  const stream = run({ files: [file], testNamePatterns, concurrency: 1 })
   stream.on('test:fail', ({ name, nesting, file, line, details }) => {
     // A skipped or todo test reports no failure.
     if (nesting === 0 && details.error) failed.set(`${file}\0${name}`, { name, file, line })
@@ -110,15 +217,28 @@ async function main() {
   // Start from a fresh profile, like the CI emulator, which always shows the tutorial.
   adb('shell', 'pm', 'clear', applicationId)
   for (const permission of PERMISSIONS) adb('shell', 'pm', 'grant', applicationId, permission)
+  prepareMedia()
   await startApp()
-  await skipTutorial()
-  const first = await runTests()
-  if (first.failed.length === 0) return true
+  await prepareProfile()
+  const failed = []
+  for (const [index, file] of files.entries()) {
+    // prepareProfile has just started the app for the first file.
+    if (index > 0) await startApp()
+    const started = Date.now()
+    failed.push(...(await runTests(file)).failed)
+    console.log(`${relative(process.cwd(), file)} took ${Math.round((Date.now() - started) / 1000)} s`)
+  }
+  if (failed.length === 0) return true
 
-  console.log(`Retrying ${first.failed.length} failed tests once with a restarted app:\n  ${first.failed.map(test => test.name).join('\n  ')}`)
-  await startApp()
-  const retry = await runTests(first.failed.map(test => new RegExp(`^${escape(test.name)}$`)))
-  const passedOnRetry = first.failed.filter(test => retry.passed.has(`${test.file}\0${test.name}`))
+  console.log(`Retrying ${failed.length} failed tests once with a restarted app:\n  ${failed.map(test => test.name).join('\n  ')}`)
+  const retry = { failed: [], passed: new Set() }
+  for (const file of new Set(failed.map(test => test.file))) {
+    await startApp()
+    const result = await runTests(file, failed.filter(test => test.file === file).map(test => new RegExp(`^${escape(test.name)}$`)))
+    retry.failed.push(...result.failed)
+    for (const key of result.passed) retry.passed.add(key)
+  }
+  const passedOnRetry = failed.filter(test => retry.passed.has(`${test.file}\0${test.name}`))
   const flaky = passedOnRetry.map(test => ({
     project: 'webview-script',
     title: test.name,
@@ -136,8 +256,7 @@ async function main() {
       console.log(`::warning file=${file},line=${line},title=Flaky test::${title} passed only on retry`)
     }
   }
-  // Tests with the same name in several files all run again, so any of them can fail.
-  return retry.failed.length === 0 && passedOnRetry.length === first.failed.length
+  return retry.failed.length === 0 && passedOnRetry.length === failed.length
 }
 
 try {

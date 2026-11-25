@@ -35,8 +35,8 @@ jobs:
     name: Instrumentation tests (API 35, shard ${{ matrix.shard }})
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # The first shard also runs the WebView script tests at night.
-    timeout-minutes: ${{ matrix.shard == 0 && github.event_name != 'push' && 145 || 80 }}
+    # At night, each shard also runs a third of the WebView script tests.
+    timeout-minutes: ${{ github.event_name != 'push' && 165 || 80 }}
 
     # Software rendering makes long emulator sessions crash, so each shard
     # runs part of the suite on its own emulator.
@@ -175,15 +175,22 @@ jobs:
           timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           node _scripts/androidInstrumentationTests.mjs ${{ matrix.shard }} 3
 
+    # The runner generates an audio fixture, and a SABR test encodes media.
+    - name: Install ffmpeg for the WebView script tests
+      if: ${{ !cancelled() && github.event_name != 'push' && steps.instrumentation.outcome == 'success' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends ffmpeg
+
     # The scripts in tests/android drive the app's WebView over DevTools. They
     # run at night, after the shard's instrumentation tests passed, since a
     # stalled shard leaves its emulator running. The instrumentation tests
     # uninstall the app, so the script installs it again on a fresh emulator.
     - name: Run WebView script tests
-      if: ${{ !cancelled() && matrix.shard == 0 && github.event_name != 'push' && steps.instrumentation.outcome == 'success' }}
-      # The tests take 8 to 13 minutes on a local emulator and about 35 with
-      # software rendering, plus up to 15 for retrying failed tests.
-      timeout-minutes: 60
+      if: ${{ !cancelled() && github.event_name != 'push' && steps.instrumentation.outcome == 'success' }}
+      # A shard's scripts take about 10 minutes on a local emulator. Software
+      # rendering takes up to five times as long, plus retrying failed tests.
+      timeout-minutes: 80
       env:
         ANDROID_FLAKY_REPORT: ${{ runner.temp }}/android-flaky.json
         ANDROID_ARTIFACT_DIR: android/app/build/outputs/androidTest-results/connected/webview-scripts
@@ -209,7 +216,7 @@ jobs:
           adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
           timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           mkdir -p "$ANDROID_ARTIFACT_DIR"
-          node _scripts/androidScriptTests.mjs tests/android/mobile-mini-player.test.mjs
+          node _scripts/androidScriptTests.mjs ${{ matrix.shard }} 3
 
     - name: Show why the emulator stopped
       if: failure()
