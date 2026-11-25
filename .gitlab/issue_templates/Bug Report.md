@@ -49,9 +49,9 @@ Required.
 ### OpenTubeX Version
 <!--
 If using releases, enter the version.
-If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
+If using nightly builds, enter the commit hash shown on the About page in the OpenTubeX application.
 Example:
-v0.37.0, 8c4278
+v1.2.3, or 8c4278f for a nightly build
 Required.
 -->
 
@@ -102,7 +102,9 @@ Required.
 - [ ] AltStore Classic
 - [ ] .exe installer
 - [ ] WinGet
+- [ ] Scoop
 - [ ] .pacman
+- [ ] Arch repository
 - [ ] .rpm
 - [ ] COPR repository
 - [ ] RPM repository
@@ -123,7 +125,7 @@ Check one.
 
 ### Primary API used
 <!--
-What is the primary API being used?
+Which backend is selected as "Preferred API Backend" in Settings > Advanced > Video and metadata providers?
 Check one.
 Required.
 -->
@@ -133,7 +135,7 @@ Required.
 
 ### Stream Extraction Method
 <!--
-Which stream extraction method is selected in General Settings? OpenTubeX Lite does not show this setting; select Built-in.
+Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite does not show this setting; select Built-in.
 Check one.
 Required.
 -->
@@ -144,7 +146,7 @@ Required.
 <!--
 What is the last version of OpenTubeX this worked in, if applicable?
 Example:
-v0.37.0
+v1.2.3
 -->
 
 ### Screenshots or videos

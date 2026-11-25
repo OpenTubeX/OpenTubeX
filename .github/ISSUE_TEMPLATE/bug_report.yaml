@@ -65,8 +65,8 @@ body:
       label: OpenTubeX Version
       description: |
         If using releases, enter the version.
-        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
-      placeholder: v0.37.0, 8c4278
+        If using nightly builds, enter the commit hash shown on the About page in the OpenTubeX application.
+      placeholder: e.g. v1.2.3, or 8c4278f for a nightly build
     validations:
       required: true
   - type: dropdown
@@ -115,7 +115,9 @@ body:
         - AltStore Classic
         - .exe installer
         - WinGet
+        - Scoop
         - .pacman
+        - Arch repository
         - .rpm
         - COPR repository
         - RPM repository
@@ -137,7 +139,7 @@ body:
   - type: dropdown
     attributes:
       label: Primary API used
-      description: What is the primary API being used?
+      description: Which backend is selected as "Preferred API Backend" in Settings > Advanced > Video and metadata providers?
       multiple: false
       options:
         - Local API
@@ -148,7 +150,7 @@ body:
   - type: dropdown
     attributes:
       label: Stream Extraction Method
-      description: Which stream extraction method is selected in General Settings? OpenTubeX Lite does not show this setting; select Built-in.
+      description: Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite does not show this setting; select Built-in.
       multiple: false
       options:
         - Built-in
@@ -159,7 +161,7 @@ body:
     attributes:
       label: 'Last Known Working OpenTubeX Version (If Any)'
       description: What is the last version of OpenTubeX this worked in, if applicable?
-      placeholder: v0.37.0
+      placeholder: e.g. v1.2.3
   - type: textarea
     id: screenshots
     attributes:

@@ -1,9 +1,6 @@
 'B: visual':
     - '(visual bug)'
 
-'B: Unofficial Download':
-    - '(Chocolatey \(Unofficial\)|\.apk \(FreeTubeAndroid Unofficial\)|Homebrew \(Unofficial\)|PortableApps \(Unofficial\)|WAPT \(Unofficial\)|winget \(Unofficial\)|Scoop \(Unofficial\)|Nix \(Unofficial\))'
-
 'B: keyboard control':
     - '(keyboard control not working)'
 

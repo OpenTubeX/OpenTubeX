@@ -35,7 +35,7 @@ body:
       label: Alternatives Considered
       description: A clear and concise description of any alternative solutions or features you've considered.
     validations:
-      required: true
+      required: false
   - type: dropdown
     attributes:
       label: 'Issue Labels'
@@ -57,10 +57,10 @@ body:
       label: OpenTubeX Version
       description: |
         If using releases, enter the version.
-        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
-      placeholder: v0.37.0, 8c4278
+        If using nightly builds, enter the commit hash shown on the About page in the OpenTubeX application.
+      placeholder: e.g. v1.2.3, or 8c4278f for a nightly build
     validations:
-      required: true
+      required: false
   - type: dropdown
     attributes:
       label: Operating System

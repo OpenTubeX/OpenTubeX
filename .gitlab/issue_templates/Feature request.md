@@ -20,10 +20,7 @@ Required.
 -->
 
 ### Alternatives Considered
-<!--
-A clear and concise description of any alternative solutions or features you've considered.
-Required.
--->
+<!-- A clear and concise description of any alternative solutions or features you've considered. -->
 
 ### Issue Labels
 <!--
@@ -43,10 +40,9 @@ Required.
 ### OpenTubeX Version
 <!--
 If using releases, enter the version.
-If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
+If using nightly builds, enter the commit hash shown on the About page in the OpenTubeX application.
 Example:
-v0.37.0, 8c4278
-Required.
+v1.2.3, or 8c4278f for a nightly build
 -->
 
 ### Operating System
