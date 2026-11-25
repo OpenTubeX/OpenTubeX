@@ -589,11 +589,12 @@ test.describe('compact scaled Home page', () => {
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 
       // Keep the mobile bar revealed through its keyboard focus behavior while
-      // measuring clearance at the page bottom. Programmatic focus isn't
-      // keyboard focus, so a scroll event after it, such as the one from the
-      // scroll above, would hide the bar again.
-      await page.locator('.sideNav .navOption:not(.router-link-active)').first().focus()
+      // measuring clearance at the page bottom. Press a key first so the
+      // programmatic focus counts as keyboard focus from the start. Otherwise
+      // a scroll event between the focus and the key press, such as the one
+      // from the scroll above, hides the bar, and nothing reveals it again.
       await page.keyboard.press('Shift')
+      await page.locator('.sideNav .navOption:not(.router-link-active)').first().focus()
       await expect(page.locator('.sideNav')).not.toHaveClass(/scrollHidden/)
       await expect.poll(() => page.locator('.sideNav').evaluate(nav =>
         Math.abs(nav.getBoundingClientRect().bottom - window.innerHeight)
