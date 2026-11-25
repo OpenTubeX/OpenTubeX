@@ -53,7 +53,8 @@ export function linkifyHashtagsAndHandles(html) {
 function isShortenedUrl(label, href) {
   const withoutScheme = url => url.replace(/^https?:\/\/(?:www\.)?/, '')
   const shortened = withoutScheme(label.trim().replace(/(?:\.\.\.|…)$/, ''))
-  return /^https?:\/\//.test(href) && shortened !== '' && withoutScheme(href).startsWith(shortened)
+  // A label without a dot, such as `youtube`, is a word rather than a host.
+  return /^https?:\/\//.test(href) && shortened.includes('.') && withoutScheme(href).startsWith(shortened)
 }
 
 /**
