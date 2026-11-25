@@ -85,6 +85,62 @@ for (const [audioOnly, landscape] of [[false, false], [true, true]]) {
   }, t => testMobileMiniPlayer(t, false, { audioOnly, posterOnly: !audioOnly, geometryOnly: true, landscape }))
 }
 
+/**
+ * Describes why the Watch page did not get ready for the test fixture: the
+ * states the poll saw, the Watch pages and tabs, the native calls in flight
+ * and the app's log, with a screenshot in ANDROID_ARTIFACT_DIR.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ uid: number, generation: number } | null} previous
+ * @param {object[]} readiness
+ */
+async function describeWatchLoad(page, previous, readiness) {
+  const report = { previous, readiness }
+  try {
+    report.page = await page.evaluate(() => {
+      const watches = []
+      const visit = (vnode) => {
+        if (vnode?.component?.type?.name === 'Watch') {
+          const watch = vnode.component.proxy
+          watches.push({ uid: vnode.component.uid, videoId: watch.videoId, isTabPresented: watch.isTabPresented, isLoading: watch.isLoading })
+        }
+        if (vnode?.component?.subTree) visit(vnode.component.subTree)
+        if (Array.isArray(vnode?.children)) vnode.children.forEach(visit)
+      }
+      visit(document.querySelector('#app')?.__vue_app__?._container?._vnode)
+      const store = document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store
+      return {
+        now: Math.round(performance.now()),
+        hash: location.hash,
+        visibility: document.visibilityState,
+        watches,
+        tabs: store?.state.tabs?.tabs?.map(tab => ({ id: tab.id, route: tab.route?.fullPath ?? tab.route })),
+        activeTabId: store?.state.tabs?.activeTabId,
+        presentedTabId: store?.state.tabs?.presentedTabId,
+        pendingNative: [...(window.__miniPlayerPendingNative?.values() ?? [])],
+        overlays: [...document.querySelectorAll('.tutorialOverlay, .prompt, [role="dialog"]')].map(element => element.className),
+      }
+    })
+  } catch (error) {
+    report.pageError = String(error?.message ?? error)
+  }
+  const directory = process.env.ANDROID_ARTIFACT_DIR
+  if (directory) {
+    await page.screenshot({ path: `${directory}/load-test-video-failure.png`, timeout: 10000 }).catch(error => {
+      report.screenshotError = String(error?.message ?? error)
+    })
+    if (process.env.ANDROID_SERIAL) {
+      try {
+        const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+        const pid = adb('shell', 'pidof', androidAppId()).trim()
+        await writeFile(`${directory}/load-test-video-failure-logcat.txt`, adb('logcat', '-d', '-v', 'threadtime', ...(pid ? [`--pid=${pid}`] : [])))
+      } catch (error) {
+        report.logcatError = String(error?.message ?? error)
+      }
+    }
+  }
+  return `Watch page load: ${JSON.stringify(report, null, 2)}`
+}
+
 async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, compactOnly = false, seekingOnly = false, feedbackOnly = false } = {}) {
   // An earlier test may have ended with a restarted app or adb server.
   await forwardAndroidWebView()
@@ -148,9 +204,16 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       // stub does not reach. Without this, the Watch page waits on the
       // network, and its native timeout matches the wait for it below.
       window.__miniPlayerNativePromise = window.Capacitor.nativePromise
+      // Records the native calls in flight for the failure report of loadTestVideo.
+      window.__miniPlayerPendingNative = new Map()
+      let nativeCallId = 0
       window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
         if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') return Promise.reject(new Error('Offline mini-player test'))
-        return window.__miniPlayerNativePromise.call(this, plugin, method, options, ...rest)
+        const promise = window.__miniPlayerNativePromise.call(this, plugin, method, options, ...rest)
+        const id = ++nativeCallId
+        window.__miniPlayerPendingNative?.set(id, { plugin, method, startedAt: Math.round(performance.now()) })
+        promise?.finally?.(() => window.__miniPlayerPendingNative?.delete(id)).catch(() => {})
+        return promise
       }
       const style = document.createElement('style')
       style.id = 'mini-player-test-style'
@@ -172,14 +235,44 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
           }))
         : null
       await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
-      await expect.poll(async () => {
-        const handle = await page.evaluateHandle(findWatchComponent)
-        try {
-          return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun && !component.proxy.isLoading &&
-            component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented() &&
-            (!previous || component.uid !== previous.uid || component.proxy.videoLoadGeneration > previous.generation), previous)
-        } finally { await handle.dispose() }
-      }).toBe(true)
+      // The states the poll saw, for the failure report below.
+      const readiness = []
+      try {
+        await expect.poll(async () => {
+          const handle = await page.evaluateHandle(findWatchComponent)
+          try {
+            const state = await handle.evaluate((component, previous) => {
+              const watch = component?.proxy
+              return {
+                ready: !!component && watch.onMountedRun && !watch.isLoading &&
+                  watch.preparingVideoLoadGeneration === null && watch.isCurrentlyPresented() &&
+                  (!previous || component.uid !== previous.uid || watch.videoLoadGeneration > previous.generation),
+                hash: location.hash,
+                ...(component && {
+                  uid: component.uid,
+                  onMountedRun: watch.onMountedRun,
+                  isLoading: watch.isLoading,
+                  videoId: watch.videoId,
+                  videoLoadGeneration: watch.videoLoadGeneration,
+                  preparingVideoLoadGeneration: watch.preparingVideoLoadGeneration,
+                  isTabPresented: watch.isTabPresented,
+                  errorMessage: watch.errorMessage,
+                }),
+              }
+            }, previous)
+            const { ready, ...details } = state
+            const last = readiness.at(-1)
+            if (JSON.stringify(last?.details) === JSON.stringify(details)) last.until = Date.now()
+            else readiness.push({ at: Date.now(), details })
+            return ready
+          } catch (error) {
+            readiness.push({ at: Date.now(), error: String(error?.message ?? error).split('\n')[0] })
+            throw error
+          } finally { await handle.dispose() }
+        }).toBe(true)
+      } catch (error) {
+        throw new Error(`${error.message}\n${await describeWatchLoad(page, previous, readiness)}`, { cause: error })
+      }
       await watch?.dispose()
       watch = await page.evaluateHandle(findWatchComponent)
       // The test blocks the Watch page's own requests, and under load the page
@@ -1085,6 +1178,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         delete window.__miniPlayerFetch
         if (window.__miniPlayerNativePromise) window.Capacitor.nativePromise = window.__miniPlayerNativePromise
         delete window.__miniPlayerNativePromise
+        delete window.__miniPlayerPendingNative
         window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
         delete window.__miniDismissPointerUp
         delete window.__miniDismissRegression
