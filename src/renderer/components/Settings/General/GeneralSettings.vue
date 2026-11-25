@@ -117,6 +117,7 @@
         setting-key="landingPage"
         :select-names="defaultPageNames"
         :select-values="defaultPageValues"
+        :option-icons="defaultPageIcons"
         :icon="['fas', 'location-dot']"
         @change="updateLandingPage"
       />
@@ -528,7 +529,7 @@ function updateOpenDeepLinksInNewWindow(value) {
 /** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
-const { landingPageNames: defaultPageNames, landingPageValues: defaultPageValues } = useLandingPageOptions()
+const { landingPageNames: defaultPageNames, landingPageValues: defaultPageValues, landingPageIcons: defaultPageIcons } = useLandingPageOptions()
 
 /** @type {import('vue').ComputedRef<'home' | 'subscriptions' | 'subscribedchannels' | 'popular' | 'userplaylists' | 'history' | 'trending' | 'stats'>} */
 const landingPage = computed(() => store.getters.getLandingPage)

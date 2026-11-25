@@ -59,12 +59,6 @@
   margin-block: 8px 0;
 }
 
-.platformSelect :deep(.optionIcon) {
-  flex-basis: 14px;
-  inline-size: 14px;
-  font-size: 14px;
-}
-
 .countBadge {
   display: inline-flex;
   align-items: center;

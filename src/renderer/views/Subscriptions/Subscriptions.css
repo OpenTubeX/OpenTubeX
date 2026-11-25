@@ -665,9 +665,3 @@
 .headerActions .headerFilterSelect :deep(.select-text) {
   padding-inline-start: 12px;
 }
-
-.headerActions .headerFilterSelect :deep(.optionIcon) {
-  flex-basis: 14px;
-  inline-size: 14px;
-  font-size: 14px;
-}
