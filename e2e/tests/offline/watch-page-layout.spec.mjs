@@ -405,7 +405,7 @@ test('keeps keyboard focus clear of the sticky header and pinned player', async 
     await expect(subscribe).toBeFocused()
     await expect.poll(async () => {
       const [button, player] = await Promise.all([subscribe.boundingBox(), videoArea.boundingBox()])
-      return button.y - (player.y + player.height)
+      return button && player ? button.y - (player.y + player.height) : null
     }, { message: offset }).toBeGreaterThanOrEqual(0)
   }
 })

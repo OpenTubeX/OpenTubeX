@@ -127,8 +127,11 @@ export function blockAppNetwork(page) {
  */
 export async function measureNativeTouchOrigin(page, shell) {
   await page.evaluate(() => {
-    window.__nativeTouchProbe = new Promise(resolve => window.addEventListener('pointerdown',
-      event => resolve([event.clientX, event.clientY]), { capture: true, once: true }))
+    window.__nativeTouchProbe = new Promise((resolve, reject) => {
+      window.addEventListener('pointerdown',
+        event => resolve([event.clientX, event.clientY]), { capture: true, once: true })
+      setTimeout(() => reject(new Error('The native touch probe reached no pointerdown in the page')), 10_000)
+    })
   })
   const [width, height] = (await shell('wm size')).match(/(\d+)x(\d+)\s*$/).slice(1).map(Number)
   const x = Math.round(width / 2)
