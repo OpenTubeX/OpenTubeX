@@ -162,6 +162,7 @@ export function installViewTransitions(router) {
           resolve()
         })
       })
+      animateMorphOnCompositor(transition)
 
       transition.finished.finally(() => {
         document.documentElement.classList.remove(
@@ -250,6 +251,7 @@ export function takePendingViewTransition(maxAge = 1000) {
       throw error
     }
 
+    animateMorphOnCompositor(transition)
     transition.finished.then(cleanup, cleanup)
     await transition.updateCallbackDone
   }
@@ -259,6 +261,54 @@ export function takePendingViewTransition(maxAge = 1000) {
     }
   }
   return runTransition
+}
+
+/**
+ * Chromium animates a view transition group's size on the main thread, so a
+ * renderer busy mounting the watch page and its player freezes the morph
+ * partway and the snapshot jumps to the player afterwards. Scaling the
+ * group's final box instead runs the whole morph on the compositor.
+ *
+ * @param {ViewTransition} transition
+ */
+function animateMorphOnCompositor(transition) {
+  transition.ready.then(() => {
+    const pseudoElement = `::view-transition-group(${VIDEO_MORPH_NAME})`
+    const effect = document.getAnimations()
+      .find(animation => animation.effect?.pseudoElement === pseudoElement)
+      ?.effect
+    const [from, to] = effect?.getKeyframes() ?? []
+    const width = parseFloat(from?.width)
+    const height = parseFloat(from?.height)
+    const finalWidth = parseFloat(to?.width)
+    const finalHeight = parseFloat(to?.height)
+    if (!(width && height && finalWidth && finalHeight)) return
+
+    const scaleX = width / finalWidth
+    const scaleY = height / finalHeight
+    // Scaling stretches the snapshots, which the size animation keeps at
+    // their own aspect ratio, e.g. a landscape thumbnail morphing into a Short.
+    if (Math.abs(Math.log(scaleX / scaleY)) > 0.05) return
+
+    // The group transforms around its center, so map the final box onto the
+    // starting box around the final center.
+    const start = new DOMMatrix()
+      .translate(width / 2, height / 2)
+      .multiply(new DOMMatrix(from.transform))
+      .translate(-width / 2, -height / 2)
+    effect.setKeyframes([
+      {
+        transform: new DOMMatrix()
+          .translate(-finalWidth / 2, -finalHeight / 2)
+          .multiply(start)
+          .scale(scaleX, scaleY)
+          .translate(finalWidth / 2, finalHeight / 2)
+          .toString(),
+        easing: from.easing
+      },
+      { transform: to.transform }
+    ])
+  }, () => {})
 }
 
 function cleanupMorphSource() {
