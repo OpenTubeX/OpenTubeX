@@ -69,7 +69,8 @@ export function getDescriptionText(description) {
   // Links shown as an icon and a label, or as a shortened URL like Invidious
   // shows them, copy as their URL.
   for (const link of template.content.querySelectorAll('a[href]')) {
-    const href = link.getAttribute('href')
+    // Invidious posts link YouTube pages relative to the app, see `parseInvidiousCommunityData`.
+    const href = link.getAttribute('href').replace(/^#?\//, 'https://www.youtube.com/')
     if (link.hasAttribute('data-link-icon') || isShortenedUrl(link.textContent ?? '', href)) {
       link.replaceWith(href)
     }

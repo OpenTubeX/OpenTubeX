@@ -104,7 +104,7 @@ test('translates an Invidious post line by line and keeps its links', async ({ p
     const { text } = decodeCommentTranslationAction(request.postData())
     translationRequests.push(text)
     // The service also translates the words in links and adds blank lines.
-    const translated = 'Hello everyone, today we are showing you our new studio. #studio-en\n\nMore about baking: https://example.com/translated-path'
+    const translated = 'Hello everyone, today we are showing you our new studio. #studio-en\n\nMore about baking: https://example.com/translated-path https://www.youtube.com/watch?v=abcdefghijk'
     return route.fulfill({ status: 200, contentType: 'application/json', body: commentTranslationResponse(translated) })
   })
   await page.route('**/api/v1/post/**', route => route.fulfill({
@@ -112,7 +112,7 @@ test('translates an Invidious post line by line and keeps its links', async ({ p
       comments: [{
         commentId: 'translated-post',
         // Invidious separates lines with `<br>` and shortens link labels.
-        contentHtml: `Hallo zusammen, heute zeigen wir euch unser neues Studio. #studio<br>Mehr über das Backen: <a href="${url}">example.com/a-very-long-path…</a>`,
+        contentHtml: `Hallo zusammen, heute zeigen wir euch unser neues Studio. #studio<br>Mehr über das Backen: <a href="${url}">example.com/a-very-long-path…</a> <a href="/watch?v=abcdefghijk">youtube.com/watch?v=abc…</a>`,
         author: 'Another Channel',
         authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
         authorThumbnails: [],
@@ -132,10 +132,11 @@ test('translates an Invidious post line by line and keeps its links', async ({ p
   const translate = page.locator('.ft-list-post .postTranslationButton')
   await translate.click()
 
-  await expect(postText).toHaveText('Hello everyone, today we are showing you our new studio. #studio\nMore about baking: example.com/a-very-long-path-that-invidious-shortens')
+  await expect(postText).toHaveText('Hello everyone, today we are showing you our new studio. #studio\nMore about baking: example.com/a-very-long-path-that-invidious-shortens youtube.com/watch?v=abcdefghijk')
+  await expect(postText.getByRole('link', { name: /^youtube\.com/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=abcdefghijk')
   await expect(postText.getByRole('link', { name: '#studio' })).toHaveAttribute('href', /\/hashtag\/studio$/)
   await expect(postText.getByRole('link', { name: /^example\.com/ })).toHaveAttribute('href', url)
-  expect(translationRequests).toEqual([`Hallo zusammen, heute zeigen wir euch unser neues Studio. #studio\nMehr über das Backen: ${url}`])
+  expect(translationRequests).toEqual([`Hallo zusammen, heute zeigen wir euch unser neues Studio. #studio\nMehr über das Backen: ${url} https://www.youtube.com/watch?v=abcdefghijk`])
 
   await translate.click()
   await expect(postText).toContainText('Hallo zusammen')
