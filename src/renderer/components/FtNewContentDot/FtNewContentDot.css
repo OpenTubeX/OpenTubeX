@@ -1,0 +1,9 @@
+.newContentDot {
+  background-color: var(--primary-color);
+  block-size: 0.4em;
+  border-radius: 50%;
+  display: inline-block;
+  inline-size: 0.4em;
+  margin-inline-end: 0.35em;
+  vertical-align: 0.12em;
+}

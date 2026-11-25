@@ -1,0 +1,59 @@
+.blockedItem.covered {
+  position: relative;
+  overflow: clip;
+  border-radius: var(--shape-corner-large);
+}
+
+.blockedItem.covered > .blockedItemContent {
+  /* Keeps badges with a z-index below the blurring overlay. */
+  isolation: isolate;
+  user-select: none;
+}
+
+.blockedItemReveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: inherit;
+  background-color: color-mix(in srgb, var(--card-bg-color) 25%, transparent);
+
+  /* Blurring the overlay's backdrop keeps a crisp edge, unlike filtering the content. */
+  backdrop-filter: blur(16px);
+  color: var(--primary-text-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.blockedItemLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-inline-size: 100%;
+  padding-block: 8px;
+  padding-inline: 14px;
+  border-radius: var(--shape-corner-full);
+  background-color: var(--thumbnail-badge-bg-color);
+  backdrop-filter: var(--thumbnail-badge-blur);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.blockedItemReveal:is(:hover, :focus-visible) .blockedItemLabel {
+  background-color: var(--card-bg-color);
+}
+
+:root:not(.hideOutlines) .blockedItemReveal:focus-visible {
+  outline: var(--focus-border-width) solid var(--primary-color);
+  outline-offset: calc(var(--focus-border-width) * -1);
+}
+
+.blockedItem:not(.covered),
+.blockedItem:not(.covered) > .blockedItemContent {
+  display: contents;
+}

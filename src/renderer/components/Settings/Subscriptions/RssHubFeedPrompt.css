@@ -1,0 +1,51 @@
+.rssHubForm {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  gap: 16px;
+  inline-size: min(600px, calc(100vw - 100px));
+  max-inline-size: 100%;
+  padding-block-end: 8px;
+}
+
+.rssHubForm :deep(.ft-input-component),
+.rssHubForm :deep(.select) {
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+/* The prompt scrolls its content, which would clip floating suggestions.
+   Staying positioned keeps the list's overlay scrollbars anchored to it. */
+.rssHubForm :deep(.list) {
+  position: relative;
+  max-block-size: min(40vh, 16rem);
+}
+
+.formHint,
+.formMessage,
+.feedUrlPreview {
+  margin: 0;
+}
+
+.formMessage {
+  align-items: baseline;
+  color: var(--tertiary-text-color);
+  display: flex;
+  gap: 8px;
+}
+
+.formMessage.error {
+  color: var(--error-text-color);
+}
+
+.feedUrlPreview {
+  color: var(--tertiary-text-color);
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+@media only screen and (width <= 680px) {
+  .rssHubForm {
+    inline-size: 100%;
+  }
+}

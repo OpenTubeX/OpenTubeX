@@ -20,11 +20,12 @@
           >
             <router-link
               class="playAllLink"
+              :data-tab-title="shelf.title"
               :to="{
                 path: `/playlist/${shelf.playlistId}`
               }"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="thumbnail"
                 :icon="['fas', 'list']"
               />
@@ -44,6 +45,7 @@
           :data="shelf.content"
           :use-channels-hidden-preference="false"
           :display="shelf.isCommunity ? 'list' : ''"
+          :youtube-style-shorts="shelf.isShorts && useCustomShortsPlayer"
           :render-all-items-lazily="index > 2"
         />
       </details>
@@ -52,10 +54,11 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
   shelves: {
@@ -63,6 +66,9 @@ const props = defineProps({
     default: () => []
   }
 })
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 
 /** @type {import('vue').ComputedRef<bool>} */
 const hideFeaturedChannels = computed(() => {
@@ -75,7 +81,9 @@ const filteredShelves = computed(() => {
     shelves = shelves.filter(shelf => shelf.content[0].type !== 'channel')
   }
 
-  return shelves.filter(shelf => shelf.content.length > 0)
+  // Members-only shelves disappear when none of their videos are shown
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return shelves.filter(shelf => shelf.content.some(item => !isVideoHiddenByPreferences(item, { membersOnlyChannelIds })))
 })
 </script>
 

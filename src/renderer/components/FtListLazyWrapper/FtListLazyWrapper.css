@@ -1,16 +1,8 @@
+/* helpers/listFirstScreen.js sizes the rows a list mounts up front with these. */
 .grid {
   min-block-size: 264px;
 }
 
 .list {
   min-block-size: 131px;
-}
-
-.draggable:active {
-  cursor: grabbing;
-}
-
-.draggedVideo {
-  opacity: 0;
-  transition: 0.01s;
 }

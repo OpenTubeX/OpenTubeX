@@ -1,0 +1,112 @@
+/* The groups and actions wrap as one row of chips. */
+.subscriptionGroupBar {
+  --material-tab-min-height: 36px;
+  --material-tab-padding-inline: 14px;
+  --material-tab-highlight-transition: opacity var(--motion-default-effects);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+
+  /* Replaces the tab list's own stacking context for the selection highlight. */
+  isolation: isolate;
+}
+
+.groupTabs {
+  display: contents;
+}
+
+/* Filter chips: outlined at rest, a tonal fill when selected. */
+.groupTabs[role='tablist'] .groupTab[role='tab'] {
+  max-inline-size: min(16rem, 100%);
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-small);
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab']:active:not(:disabled) {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab'][aria-selected='true'] {
+  border-color: transparent;
+  color: var(--primary-text-color);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab']::before {
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.groupName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.newGroupButton {
+  margin: 0;
+}
+
+/* Sized like the group chips, with a dashed outline to set it apart from them */
+.newGroupChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-block-size: var(--material-tab-min-height);
+  padding-block: 8px;
+  padding-inline: var(--material-tab-padding-inline);
+  border: 1px dashed var(--divider-color);
+  border-radius: var(--shape-corner-small);
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.newGroupChip:is(:hover, :focus-visible) {
+  border-color: var(--primary-color);
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.newGroupChip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.newGroupChip:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+@media (any-pointer: coarse) {
+  .subscriptionGroupBar {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+
+  .groupAction :deep(.iconButton) {
+    min-inline-size: var(--phone-touch-target, 48px);
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+}

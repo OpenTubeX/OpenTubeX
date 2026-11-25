@@ -1,0 +1,510 @@
+"""In-process yt-dlp entry point for the iOS Capacitor bridge."""
+
+import contextlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import tempfile
+import threading
+
+from opentubex_ios_ffmpeg import set_control_file
+
+import yt_dlp
+from yt_dlp.downloader.common import FileDownloader
+from yt_dlp.postprocessor.common import PostProcessor
+
+
+class _QuietLogger:
+    def __init__(self):
+        self.errors = []
+
+    @property
+    def last_error(self):
+        return self.errors[-1] if self.errors else ''
+
+    def debug(self, _message):
+        pass
+
+    def warning(self, _message):
+        pass
+
+    def error(self, message):
+        self.errors = [*self.errors[-4:], message]
+
+
+class _ExtractionLogger(_QuietLogger):
+    """Keeps warnings, which explain missing formats, for the renderer."""
+
+    def __init__(self):
+        super().__init__()
+        self.warnings = []
+
+    def warning(self, message):
+        self.warnings.append(f'WARNING: {message}')
+
+
+# Like Android's YtDlpArguments, only media options cross the bridge. yt-dlp
+# also accepts abbreviations and options that write files outside staging.
+# iOS also accepts -x and --concat-playlist, which its staging export supports.
+_FLAGS = {
+    '-x',
+    '--no-simulate', '--no-playlist', '--yes-playlist', '--no-warnings', '--no-progress', '--ignore-no-formats-error',
+    '--write-auto-subs', '--write-subs', '--extract-audio', '--skip-download', '--no-quiet',
+    '--split-chapters', '--embed-subs', '--embed-thumbnail', '--embed-metadata', '--embed-chapters',
+    '--no-overwrites', '--force-keyframes-at-cuts', '--flat-playlist', '--dump-single-json',
+    '--ignore-errors', '--abort-on-error', '--continue', '--no-continue', '--write-thumbnail',
+    '--write-info-json', '--write-description', '--restrict-filenames', '--windows-filenames',
+    '--no-mtime', '--no-embed-subs', '--no-embed-thumbnail', '--no-embed-metadata',
+    '--no-embed-chapters', '--no-write-subs', '--no-write-auto-subs', '--no-check-certificates',
+}
+_VALUES = {
+    '--output', '--output-na-placeholder', '--format', '-f', '--format-sort', '-S',
+    '--merge-output-format', '--remux-video', '--recode-video', '--audio-format', '--audio-quality',
+    '--sponsorblock-remove', '--sponsorblock-mark', '--sub-langs', '--sub-format', '--convert-subs',
+    '--extractor-args', '--match-filter', '--min-filesize', '--max-filesize', '--dateafter',
+    '--datebefore', '--match-title', '--reject-title', '--download-sections', '--print',
+    '--playlist-end', '--playlist-start', '--playlist-items', '--socket-timeout', '--retries',
+    '--fragment-retries', '--concurrent-fragments', '--limit-rate', '--sleep-interval',
+    '--max-sleep-interval', '--sleep-requests', '--geo-bypass-country', '--user-agent',
+    '--progress-template', '--referer', '--add-headers', '--proxy', '--trim-filenames',
+    '--concat-playlist', '--parse-metadata',
+}
+# Other metadata actions can set any field, including ones that name output files.
+# This one numbers local playlist files, like LOCAL_PLAYLIST_INDEX_METADATA in src/ytDlpArguments.js.
+_LOCAL_PLAYLIST_INDEX_METADATA = 'original_url:[?&]index=(?P<opentubex_playlist_index>[0-9]+)(?:&|$)'
+
+
+def _validate_arguments(args):
+    pending = None  # an option whose value is the next argument
+    for arg in args:
+        if pending is not None:
+            option, value, pending = pending, arg, None
+        else:
+            option, separator, value = arg.partition('=')
+            if option in _VALUES and not separator:
+                pending = option
+                continue
+            if option not in _VALUES:
+                if option not in _FLAGS and not re.fullmatch(r'https?://\S+', arg):
+                    raise ValueError('unsupported-custom-argument')
+                continue
+        if option == '--parse-metadata' and value != _LOCAL_PLAYLIST_INDEX_METADATA:
+            raise ValueError('unsupported-custom-argument')
+
+
+_COOKIE_HEADER = '# Netscape HTTP Cookie File'
+_COOKIE_LOCK = threading.Lock()
+
+
+def _parse_cookies(text):
+    """Reads the cookies of a Netscape cookie file, keyed like yt-dlp's cookie jar."""
+    cookies = {}
+    for line in re.split(r'\r?\n', text):
+        if line.startswith('#') and not line.startswith('#HttpOnly_'):
+            continue
+        fields = line.removeprefix('#HttpOnly_').split('\t')
+        if len(fields) != 7:
+            continue
+        try:
+            expires = int(float(fields[4]))
+        except ValueError:
+            expires = 0
+        # yt-dlp drops the HttpOnly prefix and stores session cookies as expiring at
+        # 0 when it saves, so only compare what it keeps.
+        cookies[(fields[0], fields[2], fields[5])] = (line, (fields[3], expires, fields[6]))
+    return cookies
+
+
+def _merge_cookies(base, result, current):
+    """Applies the cookies one yt-dlp instance added or changed to the current file, keeping
+    those other instances changed in the meantime, or returns None when nothing changed."""
+    # yt-dlp writes the header first and ends every cookie with a newline, so this
+    # rejects a save stopped inside a row. One stopped between rows looks like a
+    # complete save without the remaining cookies, so no merge removes cookies.
+    if not result.startswith(_COOKIE_HEADER) or not result.endswith('\n'):
+        return None
+    before, merged = _parse_cookies(base), _parse_cookies(current)
+    changed = False
+    for key, (line, state) in _parse_cookies(result).items():
+        if state in (before.get(key, (None, None))[1], merged.get(key, (None, None))[1]):
+            continue
+        merged[key] = (line, state)
+        changed = True
+    if not changed:
+        return None
+    return _COOKIE_HEADER + '\n' + ''.join(line + '\n' for line, _ in merged.values())
+
+
+@contextlib.contextmanager
+def _private_cookies(path):
+    """yt-dlp rewrites its cookie file when it closes. Instances that shared one could
+    read another's partial write, and the last to close would discard the cookies
+    YouTube rotated for the others. Each instance gets a private copy instead, which
+    is merged back once it closes, like src/main/ytDlpCookieFile.js."""
+    if not path:
+        yield path
+        return
+    shared = Path(path)
+    copy = None
+    with _COOKIE_LOCK:
+        try:
+            base = shared.read_text(encoding='utf-8')
+            descriptor, copy = tempfile.mkstemp(prefix='yt-dlp-cookies-', suffix='.txt')
+            with os.fdopen(descriptor, 'w', encoding='utf-8') as file:
+                file.write(base)
+        except OSError:
+            # yt-dlp reports a missing file, and without room for a copy,
+            # the instance shares the file as before instead of failing.
+            if copy is not None:
+                Path(copy).unlink(missing_ok=True)
+            copy = None
+    if copy is None:
+        yield path
+        return
+    try:
+        yield copy
+    finally:
+        with _COOKIE_LOCK:
+            try:
+                merged = _merge_cookies(base, Path(copy).read_text(encoding='utf-8'),
+                                        shared.read_text(encoding='utf-8'))
+                if merged is not None:
+                    # A complete replacement keeps the previous cookies if writing fails.
+                    target = shared.resolve()
+                    descriptor, replacement = tempfile.mkstemp(prefix=f'.{target.name}.', dir=target.parent)
+                    try:
+                        with os.fdopen(descriptor, 'w', encoding='utf-8') as file:
+                            file.write(merged)
+                        os.replace(replacement, target)
+                    except OSError:
+                        Path(replacement).unlink(missing_ok=True)
+                        raise
+            except OSError:
+                pass
+            finally:
+                Path(copy).unlink(missing_ok=True)
+
+
+def _option(args, name, default=None):
+    try:
+        return args[args.index(name) + 1]
+    except (ValueError, IndexError):
+        return default
+
+
+def _extract(request):
+    args = request['args']
+    url = args[-1]
+    logger = _ExtractionLogger()
+    options = {
+        'ignoreconfig': True,
+        'noplaylist': '--flat-playlist' not in args,
+        'extract_flat': '--flat-playlist' in args,
+        'playlistend': int(_option(args, '--playlist-end', '0')) or None,
+        'socket_timeout': int(_option(args, '--socket-timeout', '15')),
+        'ignore_no_formats_error': '--ignore-no-formats-error' in args,
+        'skip_download': True,
+        'writesubtitles': '--write-subs' in args,
+        'writeautomaticsub': '--write-auto-subs' in args,
+        'subtitleslangs': [language.strip() for language in
+                           _option(args, '--sub-langs', 'all').split(',') if language.strip()],
+        'subtitlesformat': _option(args, '--sub-format', 'vtt'),
+        'quiet': True,
+        'no_warnings': True,
+        'logger': logger,
+    }
+    if _option(args, '--format'):
+        options['format'] = _option(args, '--format')
+    if _option(args, '--extractor-args'):
+        options['extractor_args'] = yt_dlp.parse_options([
+            '--extractor-args', _option(args, '--extractor-args')
+        ]).ydl_opts['extractor_args']
+    with _private_cookies(request.get('cookies')) as cookies:
+        if cookies:
+            options['cookiefile'] = cookies
+        with yt_dlp.YoutubeDL(options) as ydl:
+            info = ydl.sanitize_info(ydl.extract_info(url, download=False))
+    if info is None:
+        raise ValueError('yt-dlp returned no media')
+    if not options['extract_flat']:
+        formats = info.get('formats') or []
+        info['formats'] = [{key: value for key, value in entry.items()
+                            if key in ('format_id', 'url', 'manifest_url', 'http_headers',
+                                       'protocol', 'ext', 'container', 'vcodec', 'acodec',
+                                       'width', 'height', 'fps', 'tbr', 'asr',
+                                       'audio_channels', 'language', 'format_note',
+                                       'dynamic_range', 'available_at', 'target_duration')}
+                           for entry in formats if isinstance(entry, dict)]
+        storyboard = next((entry for entry in formats
+                           if entry.get('protocol') == 'mhtml'), None)
+        if storyboard:
+            info['storyboard'] = {key: storyboard.get(key) for key in (
+                'protocol', 'width', 'height', 'fps', 'rows', 'columns',
+                'fragments', 'http_headers')}
+    return {'stdout': json.dumps(info, ensure_ascii=False),
+            'stderr': '\n'.join(logger.warnings), 'incomplete': False}
+
+
+def _download(request):
+    folder = Path(request['staging'])
+    folder.mkdir(parents=True, exist_ok=True)
+    progress_file = Path(request['progressFile'])
+    control_file = Path(request['controlFile'])
+    saved_files = set()
+    payload = request.get('payload', {})
+    video_ids = payload.get('videoIds') if isinstance(payload.get('videoIds'), list) else []
+    # Parts update their state and write the combined progress under this lock.
+    progress_lock = threading.RLock()
+    parts = []
+
+    def collect(info):
+        paths = [info.get('filepath')]
+        paths.extend(download.get('filepath') for download in info.get('requested_downloads') or [])
+        paths.extend(target or source for source, target in info.get('__files_to_move', {}).items())
+        paths.extend(chapter.get('filepath') for chapter in info.get('chapters') or [])
+        saved_files.update(Path(path) for path in paths if path)
+
+    def position(part):
+        current = part['current']
+        if current.get('playlistIndex'):
+            return current['playlistIndex']
+        video_id = current.get('currentVideoId')
+        return video_ids.index(video_id) + 1 if video_id in video_ids else float('inf')
+
+    def write_progress():
+        # Like desktop and Android, show the earliest video still in progress
+        # with the speed of every part of a split playlist.
+        with progress_lock:
+            active = [part for part in parts if not part['done']]
+            shown = min(active, key=position) if active else parts[0]
+            speeds = [part['speed'] for part in active if part['speed'] is not None]
+            speed = sum(speeds) if speeds else None
+            data = {**shown['current'], 'status': shown['status'], 'percent': shown['percent'],
+                    'speed': None if speed is None else FileDownloader.format_speed(speed).strip(),
+                    'eta': None if shown['eta'] is None else FileDownloader.format_eta(shown['eta']).strip(),
+                    'activeParts': len(active)}
+            if len(parts) > 1:
+                # Like desktop and Android, list the video of every part in playlist order.
+                data['activeVideos'] = [{'videoId': part['current']['currentVideoId'],
+                                         'title': part['current'].get('currentTitle', ''),
+                                         'playlistIndex': part['current'].get('playlistIndex'),
+                                         'status': part['status'], 'percent': part['percent'], 'live': False}
+                                        for part in sorted(active, key=position)
+                                        if 'currentVideoId' in part['current']]
+            progress_file.write_text(json.dumps(data), encoding='utf-8')
+
+    _validate_arguments(request['args'])
+    parsed = yt_dlp.parse_options(['--ignore-config', *request['args']])
+    # Inspect the unvalidated options: yt-dlp supplies bestaudio/best itself
+    # for -x, so the parsed selector alone cannot identify a user's -f choice.
+    requested, _ = parsed.parser.parse_args(request['args'])
+    selects_codec = any(field.split(':', 1)[0].lstrip('+-') in
+                        ('codec', 'vcodec', 'acodec', 'ext', 'vext', 'aext')
+                        for field in parsed.ydl_opts['format_sort'])
+    defaults = []
+    if requested.format is None and not selects_codec:
+        if (payload.get('mode') == 'video' and not payload.get('externalUrl')
+                and not requested.extractaudio and not requested.merge_output_format
+                and not requested.remuxvideo and not requested.recodevideo):
+            defaults = ['--format', 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]']
+        elif payload.get('mode') == 'audio' and requested.audioformat == 'best':
+            defaults = ['--format', 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
+                        '--audio-format', 'm4a']
+    if defaults:
+        parsed = yt_dlp.parse_options(['--ignore-config', *defaults, *request['args']])
+    options = parsed.ydl_opts
+    logger = _QuietLogger()
+    options.update({
+        'paths': {'home': str(folder), 'temp': str(folder)},
+        'quiet': True, 'no_warnings': True, 'logger': logger,
+        'forceprint': {}, 'print_to_file': {},
+    })
+    if request.get('cookies'):
+        options['cookiefile'] = request['cookies']
+    if request.get('bandwidth'):
+        bandwidth = yt_dlp.utils.parse_bytes(str(request['bandwidth']) + 'K') or 0
+        if bandwidth > 0:
+            options['ratelimit'] = max(1, min(bandwidth, 10_000_000 * 1024) // max(1, request.get('concurrency', 1)))
+
+    # The renderer limits the parts to what the playlist and its custom
+    # arguments allow, like splitDownloadArguments in src/ytDlpArguments.js.
+    urls = parsed.urls
+    count = max(1, int(request.get('parts') or 1)) if payload.get('isPlaylist') is True else 1
+    if video_ids:
+        count = min(count, len(urls))
+    for index in range(count):
+        part_options = dict(options)
+        if count == 1:
+            part_urls = urls
+        elif video_ids:
+            # Consecutive videos keep their autonumbers in playlist order.
+            start = index * len(urls) // count
+            part_urls = urls[start:(index + 1) * len(urls) // count]
+            part_options['autonumber_start'] = start + 1
+        else:
+            # Every part takes every count-th entry, so entries keep their playlist index.
+            part_urls = urls
+            part_options['playlist_items'] = f'{index + 1}::{count}'
+        parts.append({'options': part_options, 'urls': part_urls, 'current': {}, 'status': 'preparing',
+                      'percent': 0, 'speed': None, 'eta': None, 'done': False})
+
+    def run_part(part):
+        current = part['current']
+
+        def report(progress):
+            if control_file.exists():
+                raise yt_dlp.utils.DownloadError('Download interrupted')
+            total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
+            value = progress.get('downloaded_bytes') or 0
+            processing = progress.get('status') == 'finished'
+            with progress_lock:
+                # Formatted later like the _speed_str and _eta_str fields that desktop and Android show.
+                part.update({'status': 'processing' if processing else 'downloading',
+                             'percent': 0 if processing or not total else min(100, value * 100 / total),
+                             'speed': None if processing else progress.get('speed'),
+                             'eta': None if processing else progress.get('eta')})
+                write_progress()
+
+        def processed(progress):
+            if progress['postprocessor'] == 'CurrentVideo':
+                return
+            report({'status': 'finished'})
+            if progress['status'] == 'finished' and progress['postprocessor'] == 'MoveFiles':
+                collect(progress['info_dict'])
+
+        class CollectPlaylistFilesPP(PostProcessor):
+            def run(self, info):
+                # Progress hooks receive a copy from before concatenation. Collect
+                # the actual result after the playlist post-processors instead.
+                collect(info)
+                return [], info
+
+        class CurrentVideoPP(PostProcessor):
+            # Desktop and Android parse a --print video: line, which forceprint
+            # cannot deliver here. This stage runs at the same point of each video.
+            def run(self, info):
+                title = info.get('title')
+                with progress_lock:
+                    current.update({
+                        'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
+                        'currentTitle': title[:255] if isinstance(title, str) else '',
+                        # Like src/ytDlpArguments.js, parts of a split playlist show the playlist
+                        # index and count, and one process counts the entries it selects.
+                        'playlistIndex': _positive(info.get('playlist_index' if len(parts) > 1 else 'playlist_autonumber')),
+                        'playlistCount': (_positive(info.get('playlist_count')) or _positive(info.get('n_entries'))
+                                          if len(parts) > 1 else _positive(info.get('n_entries'))),
+                    })
+                    part.update({'status': 'preparing', 'percent': 0, 'speed': None, 'eta': None})
+                    write_progress()
+                return [], info
+
+        set_control_file(str(control_file))
+        try:
+            if control_file.exists():
+                raise yt_dlp.utils.DownloadError('Download interrupted')
+            # Parts run at the same time, so each needs its own copy of the cookie file.
+            with _private_cookies(part['options'].get('cookiefile')) as cookies, \
+                    yt_dlp.YoutubeDL({**part['options'], 'cookiefile': cookies, 'progress_hooks': [report],
+                                      'postprocessor_hooks': [processed]}) as ydl:
+                prepare_filename = ydl.prepare_filename
+
+                def contained_filename(*args, **kwargs):
+                    # Templates may create subdirectories, but all output must remain in this
+                    # job's staging directory until the security-scoped Files export succeeds.
+                    # Check yt-dlp's result: it expands ~ and $VARIABLES and keeps '..' titles.
+                    filename = prepare_filename(*args, **kwargs)
+                    if filename and not Path(filename).resolve().is_relative_to(folder.resolve()):
+                        raise ValueError('Output template must stay inside the download folder')
+                    return filename
+
+                ydl.prepare_filename = contained_filename
+                ydl.add_post_processor(CurrentVideoPP(ydl), when='video')
+                ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
+                return ydl.download(part['urls'])
+        finally:
+            set_control_file('')
+            with progress_lock:
+                part['done'] = True
+                if len(parts) > 1:
+                    write_progress()
+
+    if len(parts) == 1:
+        result = run_part(parts[0])
+    else:
+        results = [1] * len(parts)
+        failures = []
+
+        def run_thread(index):
+            try:
+                results[index] = run_part(parts[index])
+            except Exception as error:
+                failures.append(error)
+
+        threads = [threading.Thread(target=run_thread, args=(index,)) for index in range(len(parts))]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if control_file.exists():
+            raise yt_dlp.utils.DownloadError('Download interrupted')
+        # A part that stopped with an error counts like a skipped playlist entry.
+        for error in failures:
+            logger.error(str(error))
+        result = 0 if all(code == 0 for code in results) else 1
+    files = []
+    for path in sorted(saved_files):
+        if not path.is_file():
+            continue
+        if not path.resolve().is_relative_to(folder.resolve()):
+            raise ValueError('Downloaded file escapes the download folder')
+        files.append(str(path.relative_to(folder)))
+    if result != 0:
+        # yt-dlp skips playlist entries it cannot download, such as members-only
+        # videos, but still reports an error after downloading the others.
+        if payload.get('isPlaylist') is True and files:
+            return {'files': files, 'skippedError': _redact('\n'.join(logger.errors), 2000)}
+        raise ValueError(logger.last_error or 'yt-dlp could not download this media')
+    return {'files': files}
+
+
+def _positive(value):
+    return value if isinstance(value, int) and value > 0 else None
+
+
+def _version():
+    tools = {}
+    for name in ('ffmpeg', 'ffprobe'):
+        try:
+            stdout, stderr, code = yt_dlp.utils.Popen.run(
+                [name, '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            match = re.search(r'version\s+(\S+)', stdout + stderr)
+            version = match.group(1) if code == 0 and match else None
+        except OSError:
+            version = None
+        tools[name] = {'source': 'managed', 'available': version is not None,
+                       'path': '', 'version': version}
+    return {'version': yt_dlp.version.__version__, 'tools': tools}
+
+
+def _redact(message, limit=300):
+    # Signed media URLs and cookie paths can appear in yt-dlp errors.
+    return re.sub(r'https?://\S+', '[media URL]', message)[:limit]
+
+
+def handle(request_path, result_path):
+    try:
+        request = json.loads(Path(request_path).read_text(encoding='utf-8'))
+        operation = request['operation']
+        if operation == 'extract':
+            result = _extract(request)
+        elif operation == 'download':
+            result = _download(request)
+        elif operation == 'version':
+            result = _version()
+        else:
+            raise ValueError('Unsupported yt-dlp operation')
+    except Exception as error:
+        result = {'error': type(error).__name__ + ': ' + _redact(str(error))}
+    Path(result_path).write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')

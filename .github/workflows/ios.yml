@@ -1,0 +1,145 @@
+name: iOS and iPadOS
+
+on:
+  # The suite only runs on macOS runners, which are scarce, so pull requests
+  # don't run it. Each push to development that changes native code runs it on
+  # an iPhone, and the nightly run covers renderer changes on both devices.
+  push:
+    branches: [ development ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios.yml'
+      - 'capacitor.config.json'
+      # Scripts the iOS build and tests run, including iosFlakyTests.mjs
+      - '_scripts/*[Ii]os*'
+      - 'tests/ios_*'
+  schedule:
+    - cron: '45 3 * * *'
+  workflow_dispatch:
+    inputs:
+      playback:
+        description: Test live YouTube search and playback (requires network access)
+        type: boolean
+        default: false
+
+permissions: {}
+cache-mode: none
+
+# A running suite finishes, and only the latest waiting run starts next, so one
+# run can cover several merges.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  simulator:
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ${{ fromJSON(github.event_name == 'push' && '["iPhone"]' || '["iPhone", "iPad"]') }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: '3.14'
+    - run: pnpm run ci
+    - run: pnpm run capacitor:sync:ios
+      env:
+        GH_TOKEN: ${{ github.token }}
+    - run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+    - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p 'ios_*python_test.py'
+    - name: Boot an installed simulator
+      timeout-minutes: 5
+      env:
+        DEVICE_FAMILY: ${{ matrix.device }}
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
+        devices = [device for runtime, group in data['devices'].items() if '.iOS-' in runtime
+                   for device in group if device['name'].startswith(os.environ['DEVICE_FAMILY'])]
+        if not devices:
+            raise SystemExit('No matching iOS simulator installed')
+        device = devices[-1]
+        # bootstatus -b boots if needed and also waits for an ongoing boot.
+        subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True, timeout=240)
+        with open(os.environ['GITHUB_ENV'], 'a') as output:
+            output.write('SIMULATOR_ID=' + device['udid'] + '\n')
+        PY
+    - name: Build and test without Apple credentials
+      # xcodebuild can stall after XCTest kills a hung test. Stop it in time to
+      # upload the results that show which test hung.
+      timeout-minutes: 25
+      env:
+        TEST_PLAYBACK: ${{ inputs.playback || 'false' }}
+      run: |
+        args=(-skip-testing:AppTests/AppTests/testYtDlpPersistenceSeed -skip-testing:AppTests/AppTests/testYtDlpPersistenceAfterRelaunch)
+        if [ "$TEST_PLAYBACK" != true ]; then
+          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown -skip-testing:AppTests/AppTests/testYtDlpLiveExternalPlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubePlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubeDownload -skip-testing:AppTests/AppTests/testYtDlpConcurrentPlaybackAndDownload)
+        fi
+        # A wedged simulator test fails and the runner restarts for the rest
+        # of the suite instead of blocking until the job timeout. Failed tests
+        # run once more, and the next step records those that pass then.
+        xcodebuild -project ios/App/App.xcodeproj -scheme App \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+          -parallel-testing-enabled NO \
+          -test-timeouts-enabled YES -maximum-test-execution-time-allowance 300 \
+          -retry-tests-on-failure -test-iterations 2 \
+          -derivedDataPath ios/DerivedData -resultBundlePath ios/TestResults \
+          "${args[@]}" \
+          CODE_SIGN_IDENTITY=- test
+    - name: Find tests that passed only on retry
+      if: ${{ !cancelled() }}
+      env:
+        DEVICE_FAMILY: ${{ matrix.device }}
+        IOS_FLAKY_REPORT: ${{ runner.temp }}/ios-flaky.json
+      run: |
+        [ -d ios/TestResults.xcresult ] || exit 0
+        xcrun xcresulttool get test-results tests --path ios/TestResults.xcresult > "$RUNNER_TEMP/ios-test-results.json"
+        node _scripts/iosFlakyTests.mjs "$RUNNER_TEMP/ios-test-results.json" "$DEVICE_FAMILY"
+    # Read by the Flaky Tests workflow.
+    - name: Upload flaky tests
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ios-flaky-${{ github.run_attempt }}-${{ matrix.device }}
+        path: ${{ runner.temp }}/ios-flaky.json
+        if-no-files-found: ignore
+        retention-days: 7
+    - name: Preserve simulator test results
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ios-${{ matrix.device }}-tests
+        # xcodebuild moves the bundle into place only when it finishes, so a
+        # stopped run leaves it in the staging folder.
+        path: |
+          ios/TestResults.xcresult
+          ios/TestResults
+        if-no-files-found: ignore
+
+  device:
+    name: Package device IPA
+    if: github.event_name == 'workflow_dispatch'
+    needs: simulator
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      snapshot: true

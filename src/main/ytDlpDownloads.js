@@ -1,0 +1,1802 @@
+import {
+  buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
+  SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, splitArguments, isYtDlpMediaUrl,
+  isSafeDownloadFilenameTemplate, DOT_FIELD_PATTERN, playlistDownloadPartLimit, splitDownloadArguments,
+} from '../ytDlpArguments'
+import { execFile, spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { mkdtemp, readdir, readFile, rm, stat, statfs, writeFile } from 'node:fs/promises'
+import { isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { promisify } from 'node:util'
+import { app, powerMonitor, shell } from 'electron'
+import { settings } from '../datastores/handlers/base'
+import { isTrustedSender } from './ipc'
+import { IpcChannels } from '../constants'
+import { createSerialQueue } from './serialQueue'
+import { readJsonState } from './readJsonState'
+import { writeFileAtomic } from './writeFileAtomic'
+import { shouldUseGioTrash } from './trashPlatform'
+import { interruptProcess, killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
+import {
+  combineDownloadSpeeds,
+  compareQueuedDownloads,
+  normalizeDownloadBandwidth,
+  normalizeDownloadConcurrency,
+  resumePendingDownload,
+  updatePendingDownloadStatuses,
+} from './downloadQueue'
+import {
+  broadcastToRenderers,
+  downloadManagedFfmpeg,
+  downloadManagedYtDlp,
+  prependJsRuntimeArgument,
+  pushProxyArgument,
+  resolveExecutable,
+  resolveFfprobeExecutable,
+  ytDlpEnvironment,
+} from './ytDlpBinaries'
+import { pushYtDlpPlaybackAuthenticationArguments } from './ytDlpPlayback'
+import { checkOutYtDlpCookies } from './ytDlpCookieFile'
+import { usesYtDlpCookiesFor } from '../ytDlpCookieUses'
+import { authorizeAutomaticDownload, showAutomaticDownloadNotification } from './ytDlpAutomaticDownloads'
+
+const execFileAsync = promisify(execFile)
+
+/**
+ * @typedef YtDlpDownloadPayload
+ * @property {string} videoId
+ * @property {string} [externalUrl] web media URL to download instead of a YouTube video ID
+ * @property {string[]} [videoIds]
+ * @property {number[]} [playlistIndexes] position of each of videoIds in its playlist, defaults to their order
+ * @property {string} [playlistId]
+ * @property {string} [playlistKey] stable playlist identity used only by the renderer
+ * @property {boolean} [isPlaylist]
+ * @property {number} [videoCount] number of videos in a remote playlist, limits how many processes download it
+ * @property {string} [title] only used for display purposes in the renderer
+ * @property {string} [thumbnail] only used for display purposes in the renderer
+ * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
+ * @property {string} [quality] maximum video resolution e.g. '1080'
+ * @property {string} [videoFormat] e.g. 'mp4'
+ * @property {string} [audioFormat] e.g. 'mp3'
+ * @property {string} [videoCodec]
+ * @property {string} [filenameTemplate]
+ * @property {string} [startTime]
+ * @property {string} [endTime]
+ * @property {boolean} [splitChapters]
+ * @property {boolean} [removeSponsorblock]
+ * @property {string[]} [sponsorBlockCategories]
+ * @property {boolean} [includeSubtitles]
+ * @property {boolean} [embedSubtitles]
+ * @property {string} [subtitleLanguages]
+ * @property {string} [subtitleFormat] e.g. 'srt'
+ * @property {boolean} [embedThumbnail]
+ * @property {boolean} [embedMetadata]
+ * @property {string} [customArgs] additional yt-dlp command line arguments
+ * @property {number} [estimatedSizeBytes] estimated output size when the caller has format metadata
+ * @property {string} [template] the template the options came from, only used for display purposes
+ * @property {boolean} [automatic] whether a subscription refresh started the download
+ * @property {string} [channelId] channel whose persisted rule authorized the automatic download
+ * @property {'video' | 'short' | 'livestream'} [automaticMediaType]
+ * @property {string} [refreshOwnerTabId] logical tab that owns the subscription refresh
+ * @property {number} [minDurationSeconds]
+ * @property {number} [maxDurationSeconds]
+ * @property {number} [minFileSizeMb]
+ * @property {number} [maxFileSizeMb]
+ * @property {number} [maxAgeDays]
+ * @property {{ startedTitle?: string, startedBody?: string, completedTitle?: string, completedBody?: string, failedTitle?: string, failedBody?: string, thumbnail?: string }} [notification]
+ */
+
+/**
+ * @typedef YtDlpDownloadStatus
+ * @property {number} id
+ * @property {string} videoId
+ * @property {string} playlistId
+ * @property {string} playlistKey
+ * @property {string} title
+ * @property {string} thumbnail
+ * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
+ * @property {string} template
+ * @property {boolean} [automatic]
+ * @property {YtDlpDownloadPayload} [retryPayload]
+ * @property {'queued' | 'preparing' | 'downloading' | 'processing' | 'pausing' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
+ * @property {number} queuePosition
+ * @property {'unmetered' | 'charging' | null} [waitingFor] unmet automatic download requirement
+ * @property {boolean} [started]
+ * @property {number} percent
+ * @property {boolean} [live] whether the current video is a live stream, which yt-dlp records until it ends or is stopped
+ * @property {number} [recordedSeconds] length of the live recording so far
+ * @property {number} [recordedBytes] size of the live recording so far
+ * @property {string} [currentVideoId] video yt-dlp is working on
+ * @property {string} [currentTitle]
+ * @property {number | null} [playlistIndex] position of the current video in a remote playlist download
+ * @property {number | null} [playlistCount]
+ * @property {{ videoId: string, title: string, playlistIndex: number | null, status: 'preparing' | 'downloading' | 'processing', percent: number, live: boolean }[]} [activeVideos]
+ *   videos the parts of a split playlist are working on, in playlist order
+ * @property {string | null} speed
+ * @property {string | null} eta
+ * @property {string | null} destination
+ * @property {string[]} destinations
+ * @property {{ videoId: string, path: string, title?: string, author?: string, authorId?: string, duration?: number, width?: number, height?: number, available?: boolean }[]} [files]
+ * @property {'available' | 'partial' | 'missing'} [availability]
+ * @property {number} [availableDestinationCount]
+ * @property {number} [destinationCount]
+ * @property {number} [sizeBytes]
+ * @property {number} [completedAt] Unix timestamp in milliseconds
+ * @property {boolean} [titleTruncated]
+ * @property {number} [estimatedSizeBytes]
+ * @property {number} [availableSpaceBytes]
+ * @property {'unknown-estimate' | 'space-check-unavailable' | null} [spaceWarning]
+ * @property {string | null} errorMessage
+ */
+
+const PROGRESS_REGEX = /^\[download\]\s+(\d+(?:\.\d+)?)%(?:.*?\bat\s+(\S+))?(?:.*?\bETA\s+(\S+))?/
+const DESTINATION_REGEX = /^\[(?:download|ExtractAudio)\] Destination: (.+)$/
+const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
+// yt-dlp doesn't include subtitle files in its `after_move:%(filepath)s` output
+const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
+const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
+const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+const LIVE_PREFIX = '__OPENTUBEX_LIVE__:'
+// The keys of FFmpeg's `-progress` output that a live recording shows
+const FFMPEG_PROGRESS_REGEX = /^(out_time_us|total_size|progress)=(\S+)$/
+const STOP_UNANSWERED_MS = 10_000
+const DOWNLOAD_STOPPED_ERROR = 'DOWNLOAD_STOPPED_UNEXPECTEDLY'
+const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
+// Names the process whose download uses a temporary folder
+const TEMPORARY_FOLDER_OWNER_FILE = '.opentubex-owner'
+const TEMPORARY_FOLDER_LEGACY_MAX_AGE_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Whether a download may still use a temporary folder. Development and test
+ * instances can run at the same time and share the downloads folder, so a
+ * folder is in use while the process that made it runs.
+ * @param {string} folder
+ */
+async function isTemporaryDownloadFolderInUse(folder) {
+  let pid
+  try {
+    pid = Number.parseInt(await readFile(join(folder, TEMPORARY_FOLDER_OWNER_FILE), 'utf8'), 10)
+  } catch {
+    // Older versions wrote no owner file, so only folders unchanged for a day are left over
+    try {
+      return Date.now() - (await stat(folder)).mtimeMs < TEMPORARY_FOLDER_LEGACY_MAX_AGE_MS
+    } catch {
+      return false
+    }
+  }
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false
+  if (pid === process.pid) return true
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    return error.code === 'EPERM'
+  }
+}
+
+/**
+ * Removes the temporary folders of downloads that a crash or forced quit left
+ * behind, which can hold gigabytes of partial media.
+ * @param {string} downloadFolder
+ */
+async function removeStaleTemporaryDownloadFolders(downloadFolder) {
+  for (const [folder, prefix] of [[downloadFolder, `.${TEMPORARY_FOLDER_PREFIX}`], [app.getPath('temp'), TEMPORARY_FOLDER_PREFIX]]) {
+    let entries
+    try {
+      entries = await readdir(folder, { withFileTypes: true })
+    } catch {
+      continue
+    }
+    for (const entry of entries) {
+      // Symbolic links are not directories here, so their targets stay untouched
+      if (!entry.isDirectory() || !entry.name.startsWith(prefix)) continue
+      const temporaryFolder = join(folder, entry.name)
+      if (await isTemporaryDownloadFolderInUse(temporaryFolder)) continue
+      await rm(temporaryFolder, { recursive: true, force: true })
+        .catch(error => console.warn('Could not remove a left over temporary download folder', error))
+    }
+  }
+}
+
+/**
+ * Custom arguments can `--print` lines that look like yt-dlp's own output, so
+ * only paths inside the folders of the download are recorded as its files.
+ * @param {string} path
+ * @param {string[]} folders
+ */
+function isPathInsideFolders(path, folders) {
+  return folders.some((folder) => {
+    const relativePath = relative(resolve(folder), resolve(path))
+    return relativePath !== '' && relativePath !== '..' &&
+      !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath)
+  })
+}
+
+let downloadCounter = 0
+let downloadQueuePositionCounter = 0
+const enqueueDownloadRecordsSave = createSerialQueue()
+const retryingDownloadIds = new Set()
+let downloadQueueDrainRunning = false
+let downloadQueueDrainRequested = false
+let runningDownloadCount = 0
+let persistedDownloadQueueRestorePromise = null
+let shuttingDownDownloads = false
+let downloadQueuePaused = false
+let downloadQueuePauseAllRequested = false
+let powerSourceListenersAdded = false
+/** @type {ReturnType<typeof downloadManagedFfmpeg> | null} */
+let missingFfmpegInstall = null
+/** @type {NodeJS.Timeout | null} */
+let powerSourcePollTimer = null
+
+/**
+ * A playlist download can run several yt-dlp processes, which `children` holds until they exit.
+ * @type {Map<number, { children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string }>}
+ */
+const activeDownloads = new Map()
+// Downloads run in their own process groups, so the terminal's SIGINT or
+// SIGHUP no longer reaches them. Stop any that `shutdownYtDlpDownloads` did not.
+process.on('exit', () => {
+  for (const { children } of activeDownloads.values()) {
+    for (const child of children) killProcessTreeSync(child)
+  }
+})
+
+/**
+ * @param {{ children: Set<import('node:child_process').ChildProcess> }} entry
+ * @param {NodeJS.Signals} [signal]
+ */
+function signalDownload(entry, signal) {
+  const signalled = []
+  let failed = false
+  for (const child of entry.children) {
+    if (signalProcessTree(child, signal)) signalled.push(child)
+    // A part that exited before its close event needs no signal.
+    else if (child.exitCode === null && child.signalCode === null) failed = true
+  }
+  // A pause stops every part or none, so continue the parts it stopped.
+  if (failed && signal === 'SIGSTOP') {
+    for (const child of signalled) signalProcessTree(child, 'SIGCONT')
+  }
+  return !failed
+}
+/** @type {Map<number, YtDlpDownloadStatus>} */
+const downloadRecords = new Map()
+const MAX_SAVED_FILELESS_DOWNLOAD_RECORDS = 200
+const FILELESS_DOWNLOAD_STATUSES = ['failed', 'cancelled', 'skipped']
+/** @type {Map<number, (slots: number) => void>} */
+const queuedDownloadWaiters = new Map()
+/** @type {Map<number, number>} how many slots a queued download can use */
+const queuedDownloadSlotDemands = new Map()
+const individuallyResumedDownloadIds = new Set()
+/** @type {Promise<void> | null} */
+let downloadRecordsLoadPromise = null
+
+function getDownloadRecordsPath() {
+  return join(app.getPath('userData'), 'downloads.json')
+}
+
+/** @type {((download: YtDlpDownloadStatus) => void) | null} */
+let finishedDownloadListener = null
+
+/**
+ * @param {typeof finishedDownloadListener} listener called when a download the
+ * user started completes or fails, as often as the renderers announce it
+ */
+export function setFinishedDownloadListener(listener) {
+  finishedDownloadListener = listener
+}
+
+/** @type {((id: number) => unknown) | null} */
+let endedDownloadListener = null
+
+/**
+ * @param {typeof endedDownloadListener} listener called when a download
+ * completes, fails, is cancelled or skipped, also while no window is open
+ */
+export function setEndedDownloadListener(listener) {
+  endedDownloadListener = listener
+}
+
+function broadcastDownloadStatus(record) {
+  broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...record })
+  if (['completed', 'failed', 'cancelled', 'skipped'].includes(record.status) && endedDownloadListener) {
+    Promise.resolve(endedDownloadListener(record.id))
+      .catch(error => console.error('Failed to handle an ended download', error))
+  }
+  // Automatic downloads have notifications of their own.
+  if (record.automatic !== true && (record.status === 'completed' || record.status === 'failed')) {
+    finishedDownloadListener?.({ ...record })
+  }
+}
+
+function setPendingDownloadStatus(status) {
+  const pendingIds = status === 'paused'
+    ? [...queuedDownloadWaiters.keys()].filter(id => !individuallyResumedDownloadIds.has(id))
+    : queuedDownloadWaiters.keys()
+  const updated = updatePendingDownloadStatuses(
+    downloadRecords,
+    pendingIds,
+    status
+  )
+  for (const record of updated) {
+    broadcastDownloadStatus(record)
+  }
+  return updated
+}
+
+async function getDownloadQueueSettings() {
+  const concurrency = await settings._findOne('ytDlpMaxConcurrentDownloads')
+  return {
+    concurrency: normalizeDownloadConcurrency(concurrency?.value),
+  }
+}
+
+/**
+ * Electron cannot detect metered connections, so charging is the only
+ * automatic download requirement on desktop.
+ * @returns {Promise<'charging' | null>}
+ */
+async function getAutomaticDownloadWaitingFor() {
+  const conditions = (await settings._findOne('ytDlpAutomaticDownloadConditions'))?.value
+  return Array.isArray(conditions) && conditions.includes('charging') && powerMonitor.isOnBatteryPower() ? 'charging' : null
+}
+
+function watchPowerSource(waiting) {
+  const drain = () => requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
+  if (waiting && !powerSourceListenersAdded) {
+    powerSourceListenersAdded = true
+    powerMonitor.on('on-ac', drain)
+    powerMonitor.on('on-battery', drain)
+  }
+  // Power source events are not emitted on every platform.
+  if (waiting && powerSourcePollTimer === null) {
+    powerSourcePollTimer = setInterval(drain, 60_000)
+    powerSourcePollTimer.unref()
+  } else if (!waiting && powerSourcePollTimer !== null) {
+    clearInterval(powerSourcePollTimer)
+    powerSourcePollTimer = null
+  }
+}
+
+async function drainDownloadQueue() {
+  if (shuttingDownDownloads) return
+  const queueSettings = await getDownloadQueueSettings()
+  const automaticWaitingFor = await getAutomaticDownloadWaitingFor()
+
+  let waiting = false
+  for (const id of queuedDownloadWaiters.keys()) {
+    const record = downloadRecords.get(id)
+    if (record?.status !== 'queued') continue
+    const waitingFor = record.automatic === true ? automaticWaitingFor : null
+    waiting ||= waitingFor !== null
+    if ((record.waitingFor ?? null) !== waitingFor) {
+      record.waitingFor = waitingFor
+      broadcastDownloadStatus(record)
+    }
+  }
+  watchPowerSource(waiting)
+
+  while (runningDownloadCount < queueSettings.concurrency) {
+    const next = [...queuedDownloadWaiters.keys()]
+      .map(id => downloadRecords.get(id))
+      .filter(record => record?.status === 'queued' && !record.waitingFor && (
+        !downloadQueuePaused || individuallyResumedDownloadIds.has(record.id)
+      ))
+      .sort(compareQueuedDownloads)[0]
+    if (!next) return
+
+    const resolve = queuedDownloadWaiters.get(next.id)
+    // A playlist also takes the other free slots for parallel processes.
+    const slots = Math.min(queuedDownloadSlotDemands.get(next.id) ?? 1, queueSettings.concurrency - runningDownloadCount)
+    queuedDownloadWaiters.delete(next.id)
+    queuedDownloadSlotDemands.delete(next.id)
+    runningDownloadCount += slots
+    resolve?.(slots)
+  }
+}
+
+async function requestDownloadQueueDrain() {
+  downloadQueueDrainRequested = true
+  if (downloadQueueDrainRunning) return
+  downloadQueueDrainRunning = true
+  try {
+    while (downloadQueueDrainRequested) {
+      downloadQueueDrainRequested = false
+      await drainDownloadQueue()
+    }
+  } finally {
+    downloadQueueDrainRunning = false
+  }
+}
+
+/**
+ * @param {number} id
+ * @param {number} demand
+ * @returns {Promise<number>} the number of slots granted, or 0 if the download was cancelled
+ */
+function waitForDownloadSlot(id, demand) {
+  return new Promise(resolve => {
+    queuedDownloadWaiters.set(id, resolve)
+    queuedDownloadSlotDemands.set(id, demand)
+    if (downloadQueuePaused && setPendingDownloadStatus('paused').length > 0) {
+      saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
+    }
+    requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
+  })
+}
+
+function cancelQueuedDownload(id) {
+  const resolve = queuedDownloadWaiters.get(id)
+  if (!resolve) return false
+  queuedDownloadWaiters.delete(id)
+  queuedDownloadSlotDemands.delete(id)
+  individuallyResumedDownloadIds.delete(id)
+  resolve(0)
+  return true
+}
+
+function releaseDownloadSlot(count = 1) {
+  runningDownloadCount = Math.max(0, runningDownloadCount - count)
+  requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
+}
+
+function loadDownloadRecords() {
+  downloadRecordsLoadPromise ??= (async () => {
+    // A failed read must not leave the history empty, as the next save would
+    // replace it and automatic downloads would fetch every video again.
+    const records = await readJsonState(getDownloadRecordsPath(), 'download history', Array.isArray) ?? []
+    for (const record of records) {
+      if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
+        ['queued', 'paused', 'completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) {
+        const normalizedRecord = {
+          ...record,
+          queuePosition: Number.isFinite(record.queuePosition) ? record.queuePosition : record.id,
+        }
+        if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, normalizedRecord)
+        downloadCounter = Math.max(downloadCounter, record.id)
+        downloadQueuePositionCounter = Math.max(downloadQueuePositionCounter, normalizedRecord.queuePosition)
+      }
+    }
+  })().catch(error => {
+    downloadRecordsLoadPromise = null
+    throw error
+  })
+  return downloadRecordsLoadPromise
+}
+
+function hasAutomaticDownloadRecord(videoId) {
+  return [...downloadRecords.values()].some(record => (
+    record.videoId === videoId && ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'completed', 'skipped'].includes(record.status)
+  ))
+}
+
+/** @type {Promise<void> | null} */
+let pendingDownloadRecordsSave = null
+
+function saveDownloadRecords() {
+  // A download changes status several times in a row, and each change asked for
+  // a write of the whole history. Changes made before a queued write starts
+  // share it, as it saves the records it finds when it runs.
+  if (pendingDownloadRecordsSave !== null) return pendingDownloadRecordsSave
+  const save = enqueueDownloadRecordsSave(async () => {
+    if (pendingDownloadRecordsSave === save) pendingDownloadRecordsSave = null
+    // Saved records the history could not read yet would be lost.
+    await loadDownloadRecords()
+    const records = [...downloadRecords.values()]
+      .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
+        ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
+        : record)
+    // Completed and unfinished downloads stay listed and playable. Records
+    // without a file have their own limit, so recent failures stay retryable
+    // however many downloads completed.
+    let excessRecords = records.filter(record => FILELESS_DOWNLOAD_STATUSES.includes(record.status)).length -
+      MAX_SAVED_FILELESS_DOWNLOAD_RECORDS
+    const savedRecords = records.filter(record => {
+      if (excessRecords <= 0 || !FILELESS_DOWNLOAD_STATUSES.includes(record.status)) return true
+      excessRecords--
+      return false
+    })
+    // Write atomically so a crash mid-write cannot wipe the download history
+    // and reset the id counter.
+    return writeFileAtomic(getDownloadRecordsPath(), JSON.stringify(savedRecords))
+  })
+  pendingDownloadRecordsSave = save
+  return save
+}
+
+export function flushYtDlpDownloadRecords() {
+  return enqueueDownloadRecordsSave(() => {})
+}
+
+export async function shutdownYtDlpDownloads() {
+  shuttingDownDownloads = true
+  const children = [...activeDownloads.values()].flatMap(({ children }) => [...children])
+  const settled = children.map(child => new Promise((resolve) => {
+    child.once('close', resolve)
+    child.once('error', resolve)
+  }))
+
+  for (const [id, entry] of activeDownloads) {
+    entry.restarting = true
+    const record = downloadRecords.get(id)
+    entry.restartStatus = record && ['paused', 'pausing'].includes(record.status) ? 'paused' : 'queued'
+    if (entry.paused) signalDownload(entry, 'SIGCONT')
+    signalDownload(entry)
+  }
+
+  await Promise.allSettled(settled)
+  await saveDownloadRecords()
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {YtDlpDownloadPayload} incomingPayload
+ * @param {boolean} automaticDownloadAuthorized
+ * @param {boolean} [automaticDiscoveryPreviouslyAuthorized]
+ * @param {(result: { id: number }) => void} [onQueued]
+ * @param {boolean} [previouslyAccepted]
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
+ */
+async function startYtDlpDownload(
+  event,
+  incomingPayload,
+  automaticDownloadAuthorized,
+  automaticDiscoveryPreviouslyAuthorized = false,
+  onQueued,
+  previouslyAccepted = false
+) {
+  if ((!previouslyAccepted && !(event && isTrustedSender(event))) ||
+    typeof incomingPayload !== 'object' || incomingPayload === null) {
+    return null
+  }
+
+  const payload = previouslyAccepted
+    ? incomingPayload
+    : incomingPayload.automatic === true && automaticDownloadAuthorized
+      ? await authorizeAutomaticDownload(incomingPayload, automaticDiscoveryPreviouslyAuthorized)
+      : incomingPayload.automatic === true ? null : incomingPayload
+  if (payload === null || (!previouslyAccepted && payload.automatic !== true && !event.sender.isFocused())) {
+    return null
+  }
+
+  if ((await settings._findOne('enableDownloads'))?.value === false) {
+    return { error: 'downloads-disabled' }
+  }
+
+  if (!['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) {
+    return null
+  }
+
+  const subtitlesOnly = payload.mode === 'subtitles'
+  const subtitleFormat = typeof payload.subtitleFormat === 'string' && SUBTITLE_FORMATS.includes(payload.subtitleFormat)
+    ? payload.subtitleFormat
+    : ''
+
+  const globalCustomArgsSetting = (await settings._findOne('ytDlpDownloadCustomArgs'))?.value
+  const globalCustomArgs = typeof globalCustomArgsSetting === 'string' && globalCustomArgsSetting.trim() !== ''
+    ? splitArguments(globalCustomArgsSetting)
+    : []
+  const customArgs = typeof payload.customArgs === 'string' && payload.customArgs.trim() !== ''
+    ? splitArguments(payload.customArgs)
+    : []
+  if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) {
+    return { error: 'unsupported-custom-argument' }
+  }
+  if (!isSafeDownloadFilenameTemplate(payload.filenameTemplate)) {
+    return { error: 'invalid-filename-template' }
+  }
+
+  if (payload.videoIds !== undefined && (!Array.isArray(payload.videoIds) ||
+    payload.videoIds.some(videoId => typeof videoId !== 'string' || !ID_REGEX.test(videoId)))) {
+    return { error: 'invalid-video-ids' }
+  }
+
+  const videoIds = Array.isArray(payload.videoIds)
+    ? payload.videoIds
+    : []
+  if (videoIds.length > MAX_LOCAL_PLAYLIST_VIDEOS) {
+    return { error: 'too-many-videos' }
+  }
+  const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' &&
+    PLAYLIST_ID_REGEX.test(payload.playlistId) && videoIds.length === 0
+  const isSingleVideo = typeof payload.videoId === 'string' && ID_REGEX.test(payload.videoId)
+
+  const isExternalMedia = payload.externalUrl !== undefined
+  if (isExternalMedia && (!isYtDlpMediaUrl(payload.externalUrl) || payload.automatic === true || payload.isPlaylist === true || isSingleVideo || videoIds.length > 0)) {
+    return { error: 'invalid-media-url' }
+  }
+  if (!isExternalMedia && !isRemotePlaylist && !isSingleVideo && videoIds.length === 0) {
+    return null
+  }
+
+  await loadDownloadRecords()
+
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
+    return { skipped: 'already-downloaded' }
+  }
+
+  // yt-dlp would otherwise load a yt-dlp.conf from the download folder, which
+  // anything that saves there can write, and run its `--exec` commands.
+  const args = [
+    '--ignore-config',
+    '--newline',
+    '--progress',
+    '--print',
+    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
+    '--print',
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`,
+    // yt-dlp records live streams with FFmpeg, which reports no progress to yt-dlp
+    // and runs silently because `--print` implies quiet mode.
+    '--downloader-args',
+    'ffmpeg:-progress pipe:1'
+  ]
+
+  await pushProxyArgument(args)
+
+  const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
+
+  if (ffmpeg.source === 'managed') {
+    const ffprobe = await resolveFfprobeExecutable()
+    // An installation places both files before it validates them, so wait for one in progress
+    if (missingFfmpegInstall !== null || !existsSync(ffmpeg.executable) || !existsSync(ffprobe.executable)) {
+      // downloads that start together share one FFmpeg installation
+      missingFfmpegInstall ??= downloadManagedFfmpeg().finally(() => {
+        missingFfmpegInstall = null
+      })
+      const result = await missingFfmpegInstall
+
+      if ('error' in result) {
+        return { error: result.error }
+      }
+    }
+
+    args.push('--ffmpeg-location', ffmpeg.executable)
+  } else if (ffmpeg.executable !== 'ffmpeg') {
+    args.push('--ffmpeg-location', ffmpeg.executable)
+  }
+
+  /** @type {string} */
+  const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
+  // The global custom arguments lead these, so they can keep a playlist in one process.
+  const { args: commandArgs, truncatesLongTitles, directoryFields } =
+    buildYtDlpDownloadArguments(payload, typeof globalCustomArgsSetting === 'string' ? globalCustomArgsSetting : '')
+  // Custom arguments follow the destination, so an option missing its value
+  // cannot take `--paths` as its value. Each process appends its own URLs.
+  args.push('--paths', downloadFolder, ...splitDownloadArguments(payload, commandArgs, 1).shared)
+
+  if (!isExternalMedia && usesYtDlpCookiesFor((await settings._findOne('ytDlpCookieUses'))?.value, 'downloads') &&
+    ((await settings._findOne('ytDlpPlaybackAuthMode'))?.value ?? 'none') !== 'none') {
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
+  }
+
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+
+    if ('error' in result) {
+      return { error: result.error }
+    }
+  }
+  await prependJsRuntimeArgument(executable, args)
+
+  // Authorization and executable setup contain awaits, so another refresh can
+  // start the same video after the initial fast-path check above.
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
+    return { skipped: 'already-downloaded' }
+  }
+
+  const id = ++downloadCounter
+  /** @type {YtDlpDownloadStatus} */
+  const status = {
+    id,
+    videoId: isSingleVideo ? payload.videoId : '',
+    playlistId: typeof payload.playlistId === 'string' ? payload.playlistId.slice(0, 128) : '',
+    playlistKey: typeof payload.playlistKey === 'string' ? payload.playlistKey.slice(0, 255) : '',
+    title: typeof payload.title === 'string'
+      ? payload.title.slice(0, 255)
+      : (isSingleVideo ? payload.videoId : isRemotePlaylist ? payload.playlistId : ''),
+    thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
+    mode: payload.mode,
+    template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
+    automatic: payload.automatic === true,
+    retryPayload: structuredClone(payload),
+    status: downloadQueuePaused ? 'paused' : 'queued',
+    started: false,
+    queuePosition: ++downloadQueuePositionCounter,
+    percent: 0,
+    speed: null,
+    eta: null,
+    destination: null,
+    destinations: [],
+    files: [],
+    titleTruncated: false,
+    estimatedSizeBytes: Number.isSafeInteger(payload.estimatedSizeBytes) && payload.estimatedSizeBytes > 0
+      ? payload.estimatedSizeBytes
+      : undefined,
+    availableSpaceBytes: undefined,
+    spaceWarning: null,
+    errorMessage: null
+  }
+  downloadRecords.set(id, status)
+
+  let lastSent = 0
+
+  /**
+   * @param {boolean} [force]
+   */
+  function sendStatus(force = false) {
+    const now = Date.now()
+    if (!force && now - lastSent < 500) {
+      return
+    }
+    lastSent = now
+
+    broadcastDownloadStatus(status)
+  }
+
+  sendStatus(true)
+  await saveDownloadRecords()
+  onQueued?.({ id })
+  // A cancel while saving found no waiter, so one registered now would never resolve
+  if (status.status !== 'queued' && status.status !== 'paused') return { id }
+
+  const slots = await waitForDownloadSlot(id, playlistDownloadPartLimit(payload, commandArgs))
+  if (slots === 0) {
+    return { id }
+  }
+
+  // Keep post-processing inputs away from completed files with the same title
+  // and video ID. Put the isolated directory beside the completed files so a
+  // sandbox's capacity-limited runtime directory does not hold the media data.
+  // Audio extraction otherwise reuses and then deletes an existing video file
+  // when both variants have the same source extension.
+  let temporaryDownloadFolder
+  try {
+    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, `.${TEMPORARY_FOLDER_PREFIX}`))
+  } catch {
+    try {
+      temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), TEMPORARY_FOLDER_PREFIX))
+    } catch (error) {
+      individuallyResumedDownloadIds.delete(id)
+      status.status = 'failed'
+      status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
+      sendStatus(true)
+      releaseDownloadSlot(slots)
+      await saveDownloadRecords()
+      return { id }
+    }
+  }
+  // Without the owner, another instance would remove the folder only once it is a day old
+  await writeFile(join(temporaryDownloadFolder, TEMPORARY_FOLDER_OWNER_FILE), String(process.pid))
+    .catch(error => console.warn('Could not mark the temporary download folder', error))
+  args.push('--paths', `temp:${temporaryDownloadFolder}`)
+  if (directoryFields.length > 0) {
+    // Restricted names apply Unicode normalization, which can join an ASCII
+    // letter with a following mark into a character that sanitizing removes.
+    // This also overrides a `--restrict-filenames` custom argument.
+    args.push('--replace-in-metadata', directoryFields.join(','), DOT_FIELD_PATTERN, '_', '--no-restrict-filenames')
+  }
+
+  try {
+    const fileSystem = await statfs(downloadFolder)
+    status.availableSpaceBytes = fileSystem.bavail * fileSystem.bsize
+    if (status.estimatedSizeBytes === undefined) {
+      status.spaceWarning = 'unknown-estimate'
+    } else if (status.availableSpaceBytes < status.estimatedSizeBytes) {
+      individuallyResumedDownloadIds.delete(id)
+      status.status = 'failed'
+      status.errorMessage = 'INSUFFICIENT_SPACE'
+      sendStatus(true)
+      releaseDownloadSlot(slots)
+      await rm(temporaryDownloadFolder, { recursive: true, force: true })
+      await saveDownloadRecords()
+      return { id }
+    }
+  } catch {
+    status.spaceWarning = 'space-check-unavailable'
+  }
+
+  async function abortQueuedPreparation(error) {
+    individuallyResumedDownloadIds.delete(id)
+    if (error) {
+      console.error('Could not prepare queued download', error)
+      status.status = 'failed'
+      status.errorMessage = 'download-queue-failed'
+      sendStatus(true)
+    }
+    releaseDownloadSlot(slots)
+    await rm(temporaryDownloadFolder, { recursive: true, force: true })
+    await saveDownloadRecords()
+    return { id }
+  }
+
+  function queuedPreparationWasInterrupted() {
+    // Keep the download queued for the next launch instead of spawning during shutdown
+    if (shuttingDownDownloads || status.status !== 'queued') return true
+    if (!downloadQueuePaused || individuallyResumedDownloadIds.has(id)) return false
+    status.status = 'paused'
+    sendStatus(true)
+    return true
+  }
+
+  if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
+
+  try {
+    const bandwidthLimit = normalizeDownloadBandwidth(
+      (await settings._findOne('ytDlpDownloadBandwidthLimit'))?.value
+    )
+    if (bandwidthLimit > 0) {
+      const bandwidthShare = Math.max(1, Math.floor(
+        bandwidthLimit / (await getDownloadQueueSettings()).concurrency
+      ))
+      args.push('--limit-rate', `${bandwidthShare}K`)
+    }
+  } catch (error) {
+    return abortQueuedPreparation(error)
+  }
+  if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
+
+  individuallyResumedDownloadIds.delete(id)
+  status.status = 'preparing'
+  status.started = true
+  const partArgs = splitDownloadArguments(payload, commandArgs, slots).parts
+  // The limit only counts videos, so it cannot change between the request and the split.
+  if (partArgs.length < slots) releaseDownloadSlot(slots - partArgs.length)
+  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[], showProgress: () => void }} */
+  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [], showProgress: () => {} }
+  activeDownloads.set(id, entry)
+  showAutomaticDownloadNotification(payload, 'started', id)
+  sendStatus(true)
+
+  /** @type {string[]} */
+  const stderrLines = []
+  // Progress lines also go to stderr, so a playlist's earlier per-video
+  // errors do not stay among the last few lines.
+  /** @type {string[]} */
+  const errorLines = []
+  /** @type {Set<string>} */
+  const subtitleDestinations = new Set()
+  const downloadFolders = [downloadFolder, temporaryDownloadFolder]
+
+  /**
+   * @typedef DownloadPart
+   * @property {'preparing' | 'downloading' | 'processing'} phase
+   * @property {number} percent
+   * @property {string | null} speed
+   * @property {string | null} eta
+   * @property {string} [currentVideoId]
+   * @property {string} [currentTitle]
+   * @property {number | null} [playlistIndex]
+   * @property {number | null} [playlistCount]
+   * @property {boolean} [live] whether the current video is a live stream
+   * @property {number} [recordedSeconds]
+   * @property {number} [recordedBytes]
+   * @property {number} [stopRequestedAt] when the live recording was asked to stop
+   * @property {import('node:child_process').ChildProcess} [child]
+   * @property {boolean} done
+   * @property {number | null} code
+   * @property {Error | null} error
+   */
+  /** @type {DownloadPart[]} */
+  const parts = partArgs.map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false, code: null, error: null }))
+  entry.parts = parts
+  entry.showProgress = showProgress
+
+  /** @param {DownloadPart} part */
+  function partPosition(part) {
+    return part.playlistIndex || (videoIds.indexOf(part.currentVideoId ?? '') + 1) || Infinity
+  }
+
+  // The row shows the earliest video still in progress, with the speed of all processes.
+  // A live recording comes first, so the row offers to stop it instead of pausing it.
+  // 2: recording a live stream, 1: processing one, 0: a regular video
+  /** @param {DownloadPart} part */
+  const liveRank = part => part.live !== true ? 0 : part.phase === 'downloading' ? 2 : 1
+  function showProgress() {
+    const unfinished = parts.filter(part => !part.done)
+    const topRank = Math.max(...unfinished.map(liveRank))
+    const active = unfinished.filter(part => liveRank(part) === topRank)
+    const shown = active.reduce((earliest, part) => partPosition(part) < partPosition(earliest) ? part : earliest, active[0] ?? parts[0])
+    if (status.status === 'paused' || status.status === 'pausing') {
+      entry.resumeStatus = shown.phase
+    } else {
+      status.status = shown.phase
+    }
+    status.percent = shown.percent
+    status.speed = parts.length === 1 ? shown.speed : combineDownloadSpeeds(active.map(part => part.speed))
+    status.eta = shown.eta
+    status.live = shown.live === true
+    for (const key of /** @type {const} */ (['recordedSeconds', 'recordedBytes'])) {
+      if (shown[key] === undefined) delete status[key]
+      else status[key] = shown[key]
+    }
+    if (shown.currentVideoId !== undefined) {
+      status.currentVideoId = shown.currentVideoId
+      status.currentTitle = shown.currentTitle
+      status.playlistIndex = shown.playlistIndex
+      status.playlistCount = shown.playlistCount
+    }
+    if (parts.length > 1) {
+      status.activeVideos = unfinished.filter(part => part.currentVideoId !== undefined)
+        .sort((first, second) => partPosition(first) - partPosition(second))
+        .map(part => ({
+          videoId: part.currentVideoId ?? '',
+          title: part.currentTitle ?? '',
+          playlistIndex: part.playlistIndex ?? null,
+          status: part.phase,
+          percent: part.percent,
+          live: part.live === true
+        }))
+    }
+  }
+
+  const metadataByVideoId = new Map()
+
+  /**
+   * @param {DownloadPart} part
+   * @param {string} line
+   */
+  function handleStdoutLine(part, line) {
+    if (line.startsWith('__OPENTUBEX_PREPARING__:')) {
+      const [videoId, rawIndex, rawCount, rawTitle] = line.slice('__OPENTUBEX_PREPARING__:'.length).split('\t')
+      let title = null
+      try { title = JSON.parse(rawTitle) } catch {}
+      const index = Number.parseInt(rawIndex, 10)
+      const count = Number.parseInt(rawCount, 10)
+      part.currentVideoId = ID_REGEX.test(videoId) ? videoId : ''
+      part.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
+      part.playlistIndex = index > 0 ? index : null
+      part.playlistCount = count > 0 ? count : null
+      // The next line reports whether this video is live
+      part.live = false
+      delete part.recordedSeconds
+      delete part.recordedBytes
+      delete part.stopRequestedAt
+    }
+    if (line.startsWith(LIVE_PREFIX)) {
+      part.live = line.slice(LIVE_PREFIX.length) === 'True'
+      // Pausing checks the row, which has to show a live video before it reports progress
+      showProgress()
+      sendStatus(true)
+      return
+    }
+    const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
+    if (ffmpegProgress) {
+      if (part.live !== true) return
+      if (part.stopRequestedAt !== undefined) {
+        // FFmpeg ends its report within moments of a stop request. A process that
+        // started with interrupts ignored keeps recording, so show that again.
+        if (Date.now() - part.stopRequestedAt < STOP_UNANSWERED_MS) return
+        delete part.stopRequestedAt
+      }
+      const [, key, value] = ffmpegProgress
+      if (key === 'out_time_us' && /^\d+$/.test(value)) part.recordedSeconds = Number(value) / 1_000_000
+      else if (key === 'total_size' && /^\d+$/.test(value)) part.recordedBytes = Number(value)
+      else if (key === 'progress' && value === 'continue') {
+        const previousStatus = status.status
+        part.phase = 'downloading'
+        part.percent = 0
+        part.speed = null
+        part.eta = null
+        showProgress()
+        sendStatus(previousStatus !== status.status)
+      }
+      return
+    }
+    if (line.startsWith('__OPENTUBEX_PREPARING__:') || line === '__OPENTUBEX_PROCESSING__' || line.startsWith('__OPENTUBEX_DOWNLOAD__:finished')) {
+      part.phase = line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing'
+      part.percent = 0
+      part.speed = null
+      part.eta = null
+      showProgress()
+      sendStatus(true)
+      return
+    }
+    if (line.startsWith('__OPENTUBEX_DOWNLOAD__:downloading\t')) {
+      const [, percent, speed, eta] = line.split('\t')
+      const previousStatus = status.status
+      part.phase = 'downloading'
+      part.percent = Number.parseFloat(percent) || 0
+      part.speed = !speed || /^(Unknown|NA)/.test(speed.trim()) ? null : speed.trim()
+      part.eta = !eta || /^(Unknown|NA)/.test(eta.trim()) ? null : eta.trim()
+      showProgress()
+      sendStatus(previousStatus !== status.status)
+      return
+    }
+    if (line.startsWith(FINAL_METADATA_PREFIX)) {
+      const [rawVideoId, rawTitle, rawThumbnail, rawAuthor, rawAuthorId] = line.slice(FINAL_METADATA_PREFIX.length).split('\t')
+      try {
+        const videoId = JSON.parse(rawVideoId)
+        const title = JSON.parse(rawTitle)
+        const thumbnail = JSON.parse(rawThumbnail)
+        const author = JSON.parse(rawAuthor)
+        const authorId = JSON.parse(rawAuthorId)
+        const metadata = {
+          title: typeof title === 'string' ? title.slice(0, 255) : '',
+          author: typeof author === 'string' ? author.slice(0, 255) : '',
+          authorId: typeof authorId === 'string' ? authorId.slice(0, 128) : ''
+        }
+        metadataByVideoId.set(videoId, metadata)
+        for (const file of status.files) {
+          if (file.videoId === videoId) Object.assign(file, metadata)
+        }
+        if (typeof title === 'string' && title !== '') {
+          status.titleTruncated ||= truncatesLongTitles &&
+            Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
+        }
+        if (videoId === status.videoId || (isExternalMedia && status.videoId === '')) {
+          if (typeof title === 'string' && title !== '') {
+            status.title = title.slice(0, 255)
+          }
+          if (typeof thumbnail === 'string') status.thumbnail = thumbnail.slice(0, 2048)
+          else if (thumbnail === null) status.thumbnail = ''
+        }
+        sendStatus(true)
+      } catch {
+        // A malformed metadata line must not interfere with the download itself.
+      }
+      return
+    }
+
+    if (line.startsWith(FINAL_PATH_PREFIX)) {
+      const fields = line.slice(FINAL_PATH_PREFIX.length).split('\t')
+      const hasMediaMetadata = fields.length >= 5
+      const [videoId, rawDuration, rawWidth, rawHeight] = fields
+      const pathParts = fields.slice(hasMediaMetadata ? 4 : fields.length > 1 ? 1 : 0)
+      const destination = pathParts.join('\t')
+      if (!isPathInsideFolders(destination, downloadFolders)) return
+      status.destination = destination
+      if (status.destination !== '' && !status.destinations.includes(status.destination)) {
+        status.destinations.push(status.destination)
+      }
+      if (ID_REGEX.test(videoId) && status.destination !== '' &&
+        !status.files.some(file => file.videoId === videoId && file.path === status.destination)) {
+        const duration = hasMediaMetadata ? Number(rawDuration) : NaN
+        const width = hasMediaMetadata ? Number(rawWidth) : NaN
+        const height = hasMediaMetadata ? Number(rawHeight) : NaN
+        status.files.push({
+          ...metadataByVideoId.get(videoId),
+          videoId,
+          path: status.destination,
+          ...(Number.isFinite(duration) && duration > 0 ? { duration } : {}),
+          ...(Number.isInteger(width) && width > 0 ? { width } : {}),
+          ...(Number.isInteger(height) && height > 0 ? { height } : {})
+        })
+      }
+      sendStatus(true)
+      return
+    }
+
+    const subtitleMatch = SUBTITLE_DESTINATION_REGEX.exec(line)
+    if (subtitleMatch) {
+      const subtitlePath = subtitleMatch[1]
+      if (!isPathInsideFolders(subtitlePath, downloadFolders)) return
+      subtitleDestinations.add(subtitlePath)
+      status.destination = subtitlePath
+      if (!status.destinations.includes(subtitlePath)) status.destinations.push(subtitlePath)
+      sendStatus(true)
+      return
+    }
+    const progressMatch = PROGRESS_REGEX.exec(line)
+    if (progressMatch) {
+      const previousStatus = status.status
+      part.phase = /\bin\s/.test(line) && Number(progressMatch[1]) === 100 ? 'processing' : 'downloading'
+      part.percent = parseFloat(progressMatch[1])
+      part.speed = progressMatch[2] ?? null
+      part.eta = progressMatch[3] ?? null
+      showProgress()
+      sendStatus(previousStatus !== status.status)
+      return
+    }
+
+    // subtitle files are announced twice, and only the line handled above
+    // accounts for the extension a conversion gives them
+    const destinationMatch = subtitlesOnly ? null : DESTINATION_REGEX.exec(line)
+    if (destinationMatch) {
+      // Removing a download falls back to this path when no file was recorded
+      if (isPathInsideFolders(destinationMatch[1], downloadFolders)) status.destination = destinationMatch[1]
+
+      if (line.startsWith('[ExtractAudio]')) {
+        part.phase = 'processing'
+        showProgress()
+      }
+
+      sendStatus(true)
+      return
+    }
+
+    const mergerMatch = MERGER_REGEX.exec(line)
+    if (mergerMatch) {
+      part.phase = 'processing'
+      showProgress()
+      if (isPathInsideFolders(mergerMatch[1], downloadFolders)) status.destination = mergerMatch[1]
+      sendStatus(true)
+    }
+  }
+
+  /**
+   * @param {DownloadPart} part
+   * @param {string} line
+   */
+  function handleStderrLine(part, line) {
+    // `--print` writes the file and metadata sentinels to stdout. Extractor and
+    // server text can reach stderr, so sentinels found there are ignored.
+    if (!line.startsWith(FINAL_PATH_PREFIX) && !line.startsWith(FINAL_METADATA_PREFIX)) {
+      handleStdoutLine(part, line)
+    }
+    // Progress sentinels would hide the actual error, and yt-dlp prints none
+    // when it is killed.
+    if (line.length > 0 && !line.startsWith('__OPENTUBEX_')) stderrLines.push(line)
+    // only keep the last few lines for error reporting
+    if (stderrLines.length > 5) {
+      stderrLines.splice(0, stderrLines.length - 5)
+    }
+    if (line.startsWith('ERROR:')) {
+      errorLines.push(line)
+      if (errorLines.length > 5) errorLines.shift()
+    }
+  }
+
+  function finishDownload() {
+    activeDownloads.delete(id)
+    delete status.activeVideos
+    rm(temporaryDownloadFolder, { recursive: true, force: true })
+      .catch(error => console.warn('Could not remove temporary download folder', error))
+
+    if (entry.restarting) {
+      status.status = entry.restartStatus
+      status.speed = null
+      status.eta = null
+    } else if (entry.cancelled) {
+      status.status = 'cancelled'
+    } else {
+      const succeeded = parts.every(part => part.code === 0)
+      if (subtitleFormat !== '') {
+        const convertedSubtitleDestinations = new Map([...subtitleDestinations]
+          .map((subtitlePath) => [subtitlePath, subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)])
+          // A failed download may have stopped before converting some subtitles
+          .filter(([, convertedPath]) => succeeded || existsSync(convertedPath)))
+        status.destinations = status.destinations.map((destination) => (
+          convertedSubtitleDestinations.get(destination) ?? destination
+        ))
+        status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
+      }
+      // yt-dlp skips playlist entries it cannot download, such as members-only
+      // videos, but still exits with an error after downloading the others.
+      const skippedPlaylistVideos = !succeeded && payload.isPlaylist === true &&
+        status.destinations.some(destination => existsSync(destination))
+      const spawnError = parts.find(part => part.error !== null)?.error
+      if (succeeded || skippedPlaylistVideos) {
+        if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n') || DOWNLOAD_STOPPED_ERROR
+        status.status = payload.automatic === true && status.destinations.length === 0
+          ? 'skipped'
+          : 'completed'
+        if (status.status === 'completed') {
+          status.percent = 100
+          status.completedAt = Date.now()
+        }
+      } else {
+        status.status = 'failed'
+        status.errorMessage = stderrLines.join('\n') || (spawnError
+          ? (/** @type {NodeJS.ErrnoException} */ (spawnError).code === 'ENOENT' ? 'ENOENT' : spawnError.message)
+          : DOWNLOAD_STOPPED_ERROR)
+      }
+    }
+
+    if (status.status === 'completed') {
+      showAutomaticDownloadNotification(payload, 'completed', id)
+    } else if (status.status === 'failed') {
+      showAutomaticDownloadNotification(payload, 'failed', id)
+    }
+
+    sendStatus(true)
+    saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
+  }
+
+  for (const [index, part] of parts.entries()) {
+    /** @type {import('node:child_process').ChildProcess | undefined} */
+    let child
+    // Parts run at the same time, so each needs its own copy of the cookie file.
+    const cookies = checkOutYtDlpCookies(args)
+    /**
+     * @param {number | null} code
+     * @param {Error | null} error
+     */
+    function finishPart(code, error) {
+      if (part.done) {
+        return
+      }
+      part.done = true
+      part.code = code
+      part.error = error
+      cookies.release()
+      if (child) entry.children.delete(child)
+      releaseDownloadSlot()
+      if (parts.every(other => other.done)) {
+        finishDownload()
+      } else {
+        showProgress()
+        sendStatus(true)
+      }
+    }
+
+    try {
+      child = spawn(executable, [...cookies.args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
+    } catch (error) {
+      // Some spawn errors are thrown instead of emitted, and the other parts keep running.
+      finishPart(null, error)
+      continue
+    }
+    entry.children.add(child)
+    part.child = child
+
+    let stdoutBuffer = ''
+    child.stdout.setEncoding('utf-8')
+    child.stdout.on('data', (chunk) => {
+      stdoutBuffer += chunk
+      const lines = stdoutBuffer.split(/\r?\n/)
+      stdoutBuffer = lines.pop()
+      lines.forEach(line => handleStdoutLine(part, line))
+    })
+
+    let stderrBuffer = ''
+    child.stderr.setEncoding('utf-8')
+    child.stderr.on('data', (chunk) => {
+      stderrBuffer += chunk
+      const lines = stderrBuffer.split(/\r?\n/)
+      stderrBuffer = lines.pop()
+      lines.forEach(line => handleStderrLine(part, line))
+    })
+    child.stderr.on('end', () => {
+      if (stderrBuffer) handleStderrLine(part, stderrBuffer)
+    })
+
+    child.on('error', error => finishPart(null, error))
+    child.on('close', code => finishPart(code, null))
+  }
+
+  return { id }
+}
+
+function queueYtDlpDownload(
+  event,
+  payload,
+  automaticDownloadAuthorized,
+  automaticDiscoveryPreviouslyAuthorized = false,
+  previouslyAccepted = false,
+  onQueued
+) {
+  return new Promise(resolve => {
+    let resolved = false
+    const resolveOnce = result => {
+      if (resolved) return
+      resolved = true
+      resolve(result)
+    }
+    const resolveQueued = result => {
+      onQueued?.(result)
+      resolveOnce(result)
+    }
+    startYtDlpDownload(
+      event,
+      payload,
+      automaticDownloadAuthorized,
+      automaticDiscoveryPreviouslyAuthorized,
+      resolveQueued,
+      previouslyAccepted
+    ).then(resolveOnce).catch(error => {
+      console.error('Could not queue download', error)
+      resolveOnce({ error: 'download-queue-failed' })
+    })
+  })
+}
+
+async function restartPersistedDownload(event, record, resumeIndividually = false) {
+  if (!record?.retryPayload) return { error: 'download-not-resumable' }
+  // Callers iterate over snapshots, so the record may have been restarted,
+  // cancelled, or removed while an earlier restart was awaited
+  if (downloadRecords.get(record.id) !== record || !['queued', 'paused'].includes(record.status) ||
+    queuedDownloadWaiters.has(record.id) || activeDownloads.has(record.id)) {
+    return { error: 'download-not-resumable' }
+  }
+  downloadRecords.delete(record.id)
+  const result = await queueYtDlpDownload(
+    event,
+    record.retryPayload,
+    true,
+    record.automatic === true,
+    true,
+    queuedResult => {
+      if (!resumeIndividually || !queuedResult || !('id' in queuedResult)) return
+      const restartedRecord = downloadRecords.get(queuedResult.id)
+      if (resumePendingDownload(restartedRecord, individuallyResumedDownloadIds, downloadQueuePaused)) {
+        broadcastDownloadStatus(restartedRecord)
+      }
+    }
+  )
+  if (result && 'id' in result) {
+    broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [record.id])
+    await saveDownloadRecords()
+    return result
+  }
+  if (result?.error === 'downloads-disabled') {
+    downloadRecords.set(record.id, record)
+    broadcastDownloadStatus(record)
+    await saveDownloadRecords()
+    return result
+  }
+  record.status = 'failed'
+  record.errorMessage = result && 'error' in result ? result.error : 'download-queue-failed'
+  downloadRecords.set(record.id, record)
+  broadcastDownloadStatus(record)
+  await saveDownloadRecords()
+  return result
+}
+
+async function restorePersistedDownloadQueue(event) {
+  persistedDownloadQueueRestorePromise ??= (async () => {
+    await loadDownloadRecords()
+    try {
+      const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
+      await removeStaleTemporaryDownloadFolders(downloadFolder)
+    } catch (error) {
+      console.warn('Could not remove left over temporary download folders', error)
+    }
+    const persisted = [...downloadRecords.values()]
+      .filter(record => record.status === 'queued' &&
+        !queuedDownloadWaiters.has(record.id) && !activeDownloads.has(record.id))
+      .sort(compareQueuedDownloads)
+    for (const record of persisted) await restartPersistedDownload(event, record)
+  })().catch(error => {
+    persistedDownloadQueueRestorePromise = null
+    throw error
+  })
+  return persistedDownloadQueueRestorePromise
+}
+
+export function restoreYtDlpDownloadQueue() {
+  return restorePersistedDownloadQueue(null)
+}
+
+export function refreshYtDlpDownloadQueue() {
+  return requestDownloadQueueDrain()
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {YtDlpDownloadPayload} payload
+ * @param {number} [retryDownloadId]
+ * @param {boolean} [automaticDownloadAuthorized]
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
+ */
+export async function handleYtDlpDownload(event, payload, retryDownloadId, automaticDownloadAuthorized = false) {
+  if (retryDownloadId === undefined) {
+    return queueYtDlpDownload(event, payload, automaticDownloadAuthorized)
+  }
+
+  if (!isTrustedSender(event) || !event.sender.isFocused() ||
+    !Number.isInteger(retryDownloadId)) {
+    return null
+  }
+  if (retryingDownloadIds.has(retryDownloadId)) {
+    return { error: 'download-already-retrying' }
+  }
+
+  retryingDownloadIds.add(retryDownloadId)
+  try {
+    await loadDownloadRecords()
+    const retryRecord = downloadRecords.get(retryDownloadId)
+    if (!['failed', 'cancelled'].includes(retryRecord?.status)) {
+      return { error: 'download-not-retryable' }
+    }
+
+    const retryPayload = retryRecord.automatic === true ? retryRecord.retryPayload : payload
+    const result = await queueYtDlpDownload(event, retryPayload, true, retryRecord.automatic === true)
+    if (result && 'id' in result) {
+      downloadRecords.delete(retryDownloadId)
+      broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])
+      await saveDownloadRecords()
+        .catch(error => console.warn('Could not save download history', error))
+    }
+    return result
+  } finally {
+    retryingDownloadIds.delete(retryDownloadId)
+  }
+}
+
+/**
+ * @param {import('electron').IpcMainEvent} event
+ * @param {number} id
+ */
+export function handleYtDlpCancelDownload(event, id) {
+  if (!isTrustedSender(event)) {
+    return
+  }
+
+  const entry = activeDownloads.get(id)
+  if (entry) {
+    entry.cancelled = true
+    if (entry.paused) signalDownload(entry, 'SIGCONT')
+    signalDownload(entry)
+    return
+  }
+
+  const record = downloadRecords.get(id)
+  if (record && ['queued', 'paused'].includes(record.status)) {
+    cancelQueuedDownload(id)
+    record.status = 'cancelled'
+    record.speed = null
+    record.eta = null
+    broadcastDownloadStatus(record)
+    saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
+    requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
+  }
+}
+
+function clearQueuePauseAfterLastIndividualResume() {
+  if (!downloadQueuePauseAllRequested || [...downloadRecords.values()]
+    .some(download => ['paused', 'pausing'].includes(download.status))) return
+
+  downloadQueuePaused = false
+  downloadQueuePauseAllRequested = false
+  individuallyResumedDownloadIds.clear()
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {number} id
+ * @param {'pause' | 'resume' | 'stop' | 'move'} action
+ * @param {number} [value]
+ */
+export async function handleYtDlpControlDownload(event, id, action, value) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) return false
+  await loadDownloadRecords()
+  const record = downloadRecords.get(id)
+  if (!record) return false
+
+  const entry = activeDownloads.get(id)
+  if (action === 'pause') {
+    if (record.status === 'queued') {
+      individuallyResumedDownloadIds.delete(id)
+      record.status = 'paused'
+    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status) && record.live !== true) {
+      entry.resumeStatus = record.status
+      if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
+        entry.paused = true
+        record.status = 'paused'
+      } else {
+        downloadQueuePaused = true
+        record.status = 'pausing'
+        setPendingDownloadStatus('paused')
+      }
+    } else {
+      return false
+    }
+  } else if (action === 'resume') {
+    if (entry?.paused && record.status === 'paused') {
+      signalDownload(entry, 'SIGCONT')
+      entry.paused = false
+      record.status = entry.resumeStatus ?? 'preparing'
+    } else if (record.status === 'paused') {
+      if (!queuedDownloadWaiters.has(id)) {
+        const result = await restartPersistedDownload(event, record, true)
+        const resumed = Boolean(result && 'id' in result)
+        if (resumed) clearQueuePauseAfterLastIndividualResume()
+        return resumed
+      }
+      resumePendingDownload(record, individuallyResumedDownloadIds, downloadQueuePaused)
+    } else if (record.status === 'pausing') {
+      record.status = entry.resumeStatus ?? 'preparing'
+      const anotherDownloadIsPausing = [...downloadRecords.values()]
+        .some(download => download.id !== id && download.status === 'pausing')
+      if (!downloadQueuePauseAllRequested && !anotherDownloadIsPausing) {
+        downloadQueuePaused = false
+        individuallyResumedDownloadIds.clear()
+        setPendingDownloadStatus('queued')
+      }
+    } else {
+      return false
+    }
+    clearQueuePauseAfterLastIndividualResume()
+  } else if (action === 'stop') {
+    // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
+    // Other parts of a playlist download or process its other videos, which an interrupt would stop.
+    const recordingParts = entry?.paused === false
+      ? entry.parts.filter(part => part.live === true && part.phase === 'downloading' && !part.done &&
+        part.stopRequestedAt === undefined && part.child)
+      : []
+    if (recordingParts.length === 0) return false
+    const requestedAt = Date.now()
+    for (const part of recordingParts) {
+      part.stopRequestedAt = requestedAt
+      part.phase = 'processing'
+    }
+    entry.showProgress()
+    broadcastDownloadStatus(record)
+    const interrupted = await Promise.all(recordingParts.map(part => interruptProcess(part.child)))
+    if (!interrupted.includes(true)) {
+      // A part that moved on to the next video while waiting is no longer this request's
+      for (const part of recordingParts) {
+        if (part.stopRequestedAt !== requestedAt || part.done) continue
+        delete part.stopRequestedAt
+        part.phase = 'downloading'
+      }
+      if (activeDownloads.get(id) === entry && !entry.cancelled) {
+        entry.showProgress()
+        broadcastDownloadStatus(record)
+      }
+      return false
+    }
+  } else if (action === 'move' && ['queued', 'paused'].includes(record.status) && !entry && (value === -1 || value === 1)) {
+    const peers = [...downloadRecords.values()]
+      .filter(download => ['queued', 'paused'].includes(download.status) && !activeDownloads.has(download.id))
+      .sort(compareQueuedDownloads)
+    const index = peers.findIndex(download => download.id === id)
+    const other = peers[index + value]
+    if (!other) return false
+    const position = record.queuePosition
+    record.queuePosition = other.queuePosition
+    other.queuePosition = position
+    broadcastDownloadStatus(other)
+  } else {
+    return false
+  }
+
+  broadcastDownloadStatus(record)
+  await saveDownloadRecords()
+  await requestDownloadQueueDrain()
+  return true
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {'pause-all' | 'resume-all' | 'retry-all' | 'refresh'} action
+ */
+export async function handleYtDlpQueueAction(event, action) {
+  if (!isTrustedSender(event) || !event.sender.isFocused()) return false
+  await loadDownloadRecords()
+  if (action === 'refresh') {
+    await requestDownloadQueueDrain()
+    return true
+  }
+  if (action === 'pause-all') {
+    downloadQueuePaused = true
+    downloadQueuePauseAllRequested = true
+    individuallyResumedDownloadIds.clear()
+    setPendingDownloadStatus('paused')
+    for (const [id, entry] of activeDownloads) {
+      const record = downloadRecords.get(id)
+      // A paused live recording would miss the stream in the meantime, and one
+      // waiting to pause on Windows would keep recording until the stream ends.
+      if (!record || entry.paused || record.live === true) continue
+      if (record.status !== 'pausing') entry.resumeStatus = record.status
+      if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
+        entry.paused = true
+        record.status = 'paused'
+      } else {
+        record.status = 'pausing'
+      }
+      broadcastDownloadStatus(record)
+    }
+  } else if (action === 'resume-all') {
+    downloadQueuePaused = false
+    downloadQueuePauseAllRequested = false
+    individuallyResumedDownloadIds.clear()
+    setPendingDownloadStatus('queued')
+    const persistedPaused = []
+    for (const record of downloadRecords.values()) {
+      const entry = activeDownloads.get(record.id)
+      if (entry?.paused) {
+        signalDownload(entry, 'SIGCONT')
+        entry.paused = false
+        record.status = entry.resumeStatus ?? 'preparing'
+        broadcastDownloadStatus(record)
+      } else if (entry && record.status === 'pausing') {
+        record.status = entry.resumeStatus ?? 'preparing'
+        broadcastDownloadStatus(record)
+      } else if (record.status === 'paused') {
+        persistedPaused.push(record)
+      }
+    }
+    for (const record of persistedPaused) await restartPersistedDownload(event, record)
+  } else if (action === 'retry-all') {
+    const failed = [...downloadRecords.values()].filter(record => record.status === 'failed')
+    for (const record of failed) {
+      await handleYtDlpDownload(event, record.retryPayload ?? {
+        videoId: record.videoId,
+        playlistId: record.playlistId,
+        isPlaylist: Boolean(record.playlistId),
+        title: record.title,
+        thumbnail: record.thumbnail,
+        mode: record.mode,
+        template: record.template,
+      }, record.id, true)
+    }
+  } else {
+    return false
+  }
+
+  await saveDownloadRecords()
+  await requestDownloadQueueDrain()
+  return true
+}
+
+/**
+ * Moves a file to the operating system trash.
+ * Electron does not use the Trash portal for document portal paths, so let
+ * GIO handle the operation when running inside Flatpak.
+ * @param {string} destination
+ */
+async function moveToTrash(destination) {
+  if (shouldUseGioTrash()) {
+    await execFileAsync('gio', ['trash', destination])
+  } else {
+    await shell.trashItem(destination)
+  }
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {number} id
+ */
+export async function handleYtDlpOpenDownload(event, id) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) {
+    return false
+  }
+
+  await loadDownloadRecords()
+  const record = downloadRecords.get(id)
+  const destinations = Array.isArray(record?.destinations) && record.destinations.length > 0
+    ? record.destinations
+    : [record?.destination].filter(destination => typeof destination === 'string')
+  const destination = destinations.find(existsSync)
+  if (destination === undefined) {
+    return false
+  }
+
+  shell.showItemInFolder(destination)
+  return true
+}
+
+/**
+ * Moves a completed download to the operating system trash.
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {number} id
+ */
+export async function handleYtDlpRemoveDownload(event, id) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) {
+    return false
+  }
+
+  await loadDownloadRecords()
+  const record = downloadRecords.get(id)
+  const destinations = Array.isArray(record?.destinations) && record.destinations.length > 0
+    ? record.destinations
+    : [record?.destination].filter(destination => typeof destination === 'string')
+  if (record?.status !== 'completed' || destinations.length === 0 || !destinations.some(existsSync)) {
+    return false
+  }
+
+  for (const destination of destinations) {
+    if (!existsSync(destination)) continue
+    try {
+      await moveToTrash(destination)
+    } catch (error) {
+      console.warn('Could not move download to trash', destination, error)
+    }
+  }
+  // Keep the record while any of its files remain
+  if (destinations.some(existsSync)) return false
+
+  downloadRecords.delete(id)
+  await saveDownloadRecords()
+  broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [id])
+  return true
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ */
+export async function handleYtDlpListDownloads(event) {
+  if (!isTrustedSender(event)) return []
+  await loadDownloadRecords()
+  await restorePersistedDownloadQueue(event)
+  return Promise.all([...downloadRecords.values()].map(async record => {
+    if (record.status !== 'completed') return record
+
+    const destinations = Array.isArray(record.destinations) && record.destinations.length > 0
+      ? record.destinations
+      : [record.destination].filter(destination => typeof destination === 'string')
+    const destinationStats = await Promise.all(destinations.map(async destination => {
+      try {
+        return await stat(destination)
+      } catch {
+        return null
+      }
+    }))
+    const availableDestinationCount = destinationStats.filter(Boolean).length
+    const sizeBytes = destinationStats.reduce((total, destinationStat) => (
+      total + (destinationStat?.isFile() ? destinationStat.size : 0)
+    ), 0)
+    const availability = availableDestinationCount === 0
+      ? 'missing'
+      : availableDestinationCount === destinations.length
+        ? 'available'
+        : 'partial'
+    const legacyCompletedAt = Math.max(0, ...destinationStats.map(destinationStat => (
+      destinationStat?.birthtimeMs > 0 ? destinationStat.birthtimeMs : (destinationStat?.ctimeMs ?? 0)
+    )))
+
+    return {
+      ...record,
+      availability,
+      availableDestinationCount,
+      destinationCount: destinations.length,
+      sizeBytes,
+      completedAt: record.completedAt ?? (legacyCompletedAt || undefined),
+      // Asynchronous, as the list can hold thousands of files.
+      files: await Promise.all(getDownloadFiles(record).map(async file => ({
+        ...file,
+        available: await stat(file.path).then(() => true, () => false)
+      })))
+    }
+  }))
+}
+
+/**
+ * Returns the playable files recorded for a video download. Older single-video
+ * records can be identified without guessing from their user-customizable path.
+ * @param {YtDlpDownloadStatus} record
+ */
+function getDownloadFiles(record) {
+  if (Array.isArray(record.files) && record.files.length > 0) {
+    return record.files.filter(file => ID_REGEX.test(file?.videoId) && typeof file.path === 'string')
+  }
+  if (['video', 'audio'].includes(record.mode) && ID_REGEX.test(record.videoId) && typeof record.destination === 'string') {
+    return [{ videoId: record.videoId, path: record.destination }]
+  }
+  return []
+}
+
+/**
+ * Resolves a local media request without exposing arbitrary filesystem access
+ * through the custom protocol.
+ * @param {number} id
+ * @param {string} videoId
+ * @param {string | null} [filePath] an exact path from this download's recorded files
+ */
+export async function getYtDlpDownloadFile(id, videoId, filePath = null) {
+  if (!Number.isInteger(id) || !ID_REGEX.test(videoId) || (filePath !== null && typeof filePath !== 'string')) return null
+  await loadDownloadRecords()
+  const record = downloadRecords.get(id)
+  if (record?.status !== 'completed' || !['video', 'audio'].includes(record.mode)) return null
+  const file = getDownloadFiles(record).find(file => file.videoId === videoId &&
+    (filePath === null || file.path === filePath) && existsSync(file.path))
+  return file === undefined ? null : { path: file.path, mode: record.mode }
+}
+
+/**
+ * Removes download history entries without touching their files.
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {number[]} ids
+ */
+export async function handleYtDlpClearDownloads(event, ids) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() ||
+    !Array.isArray(ids) || ids.some(id => !Number.isInteger(id))) {
+    return false
+  }
+  await loadDownloadRecords()
+  const removedIds = []
+  for (const id of ids) {
+    const record = downloadRecords.get(id)
+    if (!activeDownloads.has(id) && !queuedDownloadWaiters.has(id) &&
+      ['completed', 'failed', 'cancelled', 'skipped'].includes(record?.status) &&
+      downloadRecords.delete(id)) removedIds.push(id)
+  }
+  await saveDownloadRecords()
+  if (removedIds.length > 0) broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, removedIds)
+  return true
+}

@@ -1,0 +1,349 @@
+<template>
+  <FtPrompt
+    theme="flex-column"
+    fixed-layout
+    card-class="subscriptionGroupEditor"
+    :label="title"
+    :inert="showDeletePrompt"
+    :busy="saving"
+    @click="close"
+  >
+    <template #label="{ labelId }">
+      <h2
+        :id="labelId"
+        class="editorHeading"
+      >
+        {{ title }}
+      </h2>
+      <FtInput
+        ref="nameInput"
+        class="groupNameInput"
+        :label="t('Subscription Groups.Group Name')"
+        :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Music') })"
+        :show-action-button="false"
+        :value="name"
+        :maxlength="255"
+        @input="name = $event"
+        @click="save"
+      />
+      <FtInput
+        v-if="channels.length > 1"
+        class="channelSearchInput"
+        input-type="search"
+        :label="t('Channels.Search bar placeholder')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
+        :show-action-button="false"
+        :value="query"
+        :maxlength="255"
+        @input="query = $event"
+      />
+      <div class="selectionRow">
+        <p class="selectedCount">
+          {{ t('Profile.{number} selected', { number: selectedSubscribedCount }) }}
+        </p>
+        <!-- With a search, these change only the matching channels -->
+        <FtButtonGroup
+          v-if="displayedChannels.length > 1"
+          class="selectionActions"
+        >
+          <FtButton
+            :label="t('Profile.Select All')"
+            :icon="['fas', 'check']"
+            :disabled="displayedChannels.every(channel => selected.has(channel.id))"
+            @click="setDisplayedChannelsSelected(true)"
+          />
+          <FtButton
+            :label="t('Profile.Select None')"
+            :icon="['fas', 'xmark']"
+            :disabled="!displayedChannels.some(channel => selected.has(channel.id))"
+            @click="setDisplayedChannelsSelected(false)"
+          />
+        </FtButtonGroup>
+      </div>
+    </template>
+    <div
+      class="iconPicker"
+      role="group"
+      :aria-label="t('Subscription Groups.Group Icon')"
+    >
+      <button
+        v-for="option in iconOptions"
+        :key="option.icon ?? ''"
+        type="button"
+        class="iconOption"
+        :aria-pressed="icon === option.icon"
+        :aria-label="option.label"
+        :title="option.label"
+        @click="icon = option.icon"
+      >
+        <FtIcon
+          :icon="['fas', option.icon ?? 'ban']"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+    <p
+      v-if="channels.length === 0"
+      class="message"
+    >
+      {{ t('Channels.Empty') }}
+    </p>
+    <template v-else>
+      <FtFlexBox
+        ref="channelPicker"
+        class="channelPicker"
+      >
+        <FtChannelBubble
+          v-for="channel in pagedChannels"
+          :key="channel.id"
+          :channel-id="channel.id"
+          :channel-name="channel.name"
+          :channel-thumbnail="channel.thumbnail"
+          :channel-handle="channel.handle"
+          selectable
+          :selected="selected.has(channel.id)"
+          @change="toggleChannel(channel.id)"
+        />
+      </FtFlexBox>
+      <!-- Mounting every subscription at once takes seconds on slower devices -->
+      <FtAutoLoadNextPageWrapper
+        v-if="hasMoreChannels"
+        :key="channelPage"
+        @load-next-page="channelPage++"
+      >
+        <FtFlexBox>
+          <FtButton
+            :label="t('Channels.Load More Channels')"
+            :icon="['fas', 'arrow-down']"
+            @click="loadMoreChannels"
+          />
+        </FtFlexBox>
+      </FtAutoLoadNextPageWrapper>
+    </template>
+    <template #footer>
+      <FtButtonGroup>
+        <FtButton
+          v-if="group !== null"
+          theme="destructive"
+          variant="tonal"
+          :label="t('Subscription Groups.Delete Group')"
+          :icon="['fas', 'trash']"
+          @click="showDeletePrompt = true"
+        />
+        <FtButton
+          theme="primary"
+          :label="group === null ? t('Subscription Groups.Create') : t('Subscription Groups.Save')"
+          :icon="group === null ? ['fas', 'plus'] : ['fas', 'floppy-disk']"
+          :disabled="name.trim() === ''"
+          @click="save"
+        />
+        <FtButton
+          :label="t('Cancel')"
+          :icon="['fas', 'xmark']"
+          :text-color="null"
+          :background-color="null"
+          @click="close"
+        />
+      </FtButtonGroup>
+    </template>
+  </FtPrompt>
+  <FtPrompt
+    v-if="showDeletePrompt"
+    :label="t('Subscription Groups.Delete Group')"
+    :extra-labels="[t('Subscription Groups.Delete Prompt', { groupName: group.name })]"
+    :option-names="[t('Yes, Delete'), t('Cancel')]"
+    :option-values="['delete', 'cancel']"
+    :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
+    is-first-option-destructive
+    autosize
+    @click="handleDeletePrompt"
+  />
+</template>
+
+<script setup>
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
+import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
+import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
+import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import FtInput from '../FtInput/FtInput.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+
+import store from '../../store/index'
+
+import { useListPagination } from '../../composables/useListPagination'
+import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { SUBSCRIPTION_GROUP_ICONS } from '../../helpers/subscription-groups'
+import { getTabGroupIconLabels } from '../../helpers/tabGroupIconLabels'
+import { showToast } from '../../helpers/utils'
+
+const props = defineProps({
+  /** The group to edit, or `null` to create one */
+  group: {
+    type: Object,
+    default: null
+  },
+  /** Channels a new group starts with */
+  initialChannelIds: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const emit = defineEmits(['close', 'created'])
+
+const { locale, t } = useI18n()
+
+const title = computed(() => {
+  return props.group === null ? t('Subscription Groups.New Group') : t('Subscription Groups.Edit Group')
+})
+
+const name = ref(props.group?.name ?? '')
+/** @type {import('vue').Ref<string | null>} */
+const icon = ref(props.group?.icon ?? null)
+
+const iconOptions = computed(() => {
+  const labels = getTabGroupIconLabels(t)
+  return [
+    { icon: null, label: t('Subscription Groups.No Icon') },
+    ...SUBSCRIPTION_GROUP_ICONS.map(icon => ({ icon, label: labels[icon] }))
+  ]
+})
+
+const query = ref('')
+const saving = ref(false)
+const showDeletePrompt = ref(false)
+
+// Channels this device isn't subscribed to stay in the group, as other
+// devices may still be subscribed to them.
+/** @type {import('vue').Reactive<Set<string>>} */
+const selected = reactive(new Set(props.group?.channelIds ?? props.initialChannelIds))
+
+const channels = computed(() => {
+  const instanceUrl = store.getters.getBackendPreference === 'invidious'
+    ? store.getters.getCurrentInvidiousInstanceUrl
+    : null
+
+  // Groups can hold any channel of the profiles that share subscriptions
+  return store.getters.getSubscriptionRootProfile.subscriptions.map(({ id, name, thumbnail, handle }) => ({
+    id,
+    name: name ?? id,
+    handle: handle ?? null,
+    thumbnail: instanceUrl === null ? thumbnail : youtubeImageUrlToInvidious(thumbnail, instanceUrl)
+  }))
+})
+
+// Members are listed first, ordered once so that toggling doesn't move channels.
+const initialMembers = new Set(selected)
+const sortedChannels = computed(() => {
+  const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base', numeric: true })
+  return channels.value.toSorted((a, b) => {
+    return Number(initialMembers.has(b.id)) - Number(initialMembers.has(a.id)) || collator.compare(a.name, b.name)
+  })
+})
+
+const displayedChannels = computed(() => {
+  const search = query.value.trim().toLowerCase()
+  if (search === '') return sortedChannels.value
+  return sortedChannels.value.filter(channel => {
+    return channel.name.toLowerCase().includes(search) || !!channel.handle?.toLowerCase().includes(search)
+  })
+})
+
+const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(displayedChannels, {
+  pageSize: 100,
+  append: true,
+  resetOn: query,
+  focusItem: index => channelPicker.value?.$el.querySelectorAll('[role="checkbox"]')[index]?.focus()
+})
+
+const channelPicker = useTemplateRef('channelPicker')
+
+const selectedSubscribedCount = computed(() => {
+  return channels.value.reduce((count, channel) => count + Number(selected.has(channel.id)), 0)
+})
+
+/** @param {string} channelId */
+function toggleChannel(channelId) {
+  if (selected.has(channelId)) {
+    selected.delete(channelId)
+  } else {
+    selected.add(channelId)
+  }
+}
+
+/** @param {boolean} included */
+function setDisplayedChannelsSelected(included) {
+  for (const channel of displayedChannels.value) {
+    if (included) {
+      selected.add(channel.id)
+    } else {
+      selected.delete(channel.id)
+    }
+  }
+}
+
+const nameInput = useTemplateRef('nameInput')
+
+onMounted(() => {
+  nextTick(() => nameInput.value?.focus())
+})
+
+async function save() {
+  const trimmedName = name.value.trim()
+  if (trimmedName === '' || saving.value) return
+
+  saving.value = true
+  const group = {
+    name: trimmedName,
+    channelIds: [...selected],
+    ...(icon.value === null ? {} : { icon: icon.value })
+  }
+  let saved
+  try {
+    if (props.group === null) {
+      const id = await store.dispatch('createSubscriptionGroup', group)
+      saved = id !== null
+      if (saved) emit('created', id)
+    } else {
+      saved = await store.dispatch('saveSubscriptionGroup', { id: props.group.id, ...group })
+    }
+  } finally {
+    saving.value = false
+  }
+
+  // Keep the edits open to retry, as the failed write was rolled back
+  if (saved) {
+    close()
+  } else {
+    showSaveFailedToast()
+  }
+}
+
+/** @param {'delete' | 'cancel' | null} option */
+async function handleDeletePrompt(option) {
+  showDeletePrompt.value = false
+  if (option !== 'delete') return
+
+  if (await store.dispatch('deleteSubscriptionGroup', props.group.id)) {
+    close()
+  } else {
+    showToast({ message: t('Subscription Groups.Delete Failed'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+function showSaveFailedToast() {
+  showToast({ message: t('Subscription Groups.Save Failed'), icon: ['fas', 'circle-exclamation'] })
+}
+
+function close() {
+  emit('close')
+}
+</script>
+
+<style scoped src="./FtSubscriptionGroupEditor.css" />

@@ -1,0 +1,36 @@
+import { chooseSelectOption, test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+test('codec preference defaults to auto and persists independently of quality', async ({ page }) => {
+  await goToSettingsSection(page, 'advanced')
+  const section = page.locator('.settingsSection').filter({ hasText: 'Video and metadata providers' })
+  const field = section.locator('.select').filter({ hasText: 'Preferred video codec' })
+  const select = field.locator('select')
+  await expect(select).toHaveValue('auto')
+  const quality = await page.evaluate(() => window.$store.getters.getDefaultQuality)
+  await chooseSelectOption(select, 'vp9')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPreferredVideoCodec)).toBe('vp9')
+  await page.reload()
+  await goToSettingsSection(page, 'advanced')
+  await expect(select).toHaveValue('vp9')
+  expect(await page.evaluate(() => window.$store.getters.getDefaultQuality)).toBe(quality)
+})
+
+for (const preference of ['auto', 'vp9']) {
+  test(`player keeps automatic HDR selection with ${preference}`, async ({ app, page }) => {
+    await page.evaluate(async value => {
+      await window.$store.dispatch('updateVideoPlaybackEngine', 'built-in')
+      await window.$store.dispatch('updatePreferredVideoCodec', value)
+    }, preference)
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const preferences = await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
+      const overlay = element.ui ?? element.querySelector('video')?.ui
+      return overlay.getControls().getPlayer().getConfiguration().preferredVideo
+    })
+    expect(preferences.map(entry => entry.codec)).toEqual(preference === 'auto' ? [''] : ['vp09', 'vp9', ''])
+    expect(preferences.every(entry => entry.hdrLevel === 'AUTO')).toBe(true)
+  })
+}

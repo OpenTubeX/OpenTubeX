@@ -1,0 +1,80 @@
+/* phonePanelCard.css styles the surface; the watch page's .phonePanelButton rule adds the margins. */
+.phoneDescriptionButton {
+  display: flex;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--phone-touch-target, 48px);
+  padding-block: 12px;
+  padding-inline: 16px;
+  border: 0;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.phoneDescriptionContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.phoneDescriptionHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 24px;
+}
+
+.phoneDescriptionTitle {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.phoneDescriptionExcerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 0.875em;
+  line-height: 1.4;
+  color: var(--secondary-text-color);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.phoneDescriptionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 2px;
+}
+
+.phoneDescriptionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
+  padding-block: 4px;
+  padding-inline: 8px;
+  border-radius: var(--shape-corner-small);
+  background: var(--secondary-card-bg-color);
+  font-size: 0.8125em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.phoneDescriptionChipCount {
+  box-sizing: border-box;
+  min-inline-size: 1.6em;
+  margin-inline-end: -2px;
+  padding-block: 1px;
+  padding-inline: 6px;
+  border-radius: var(--shape-corner-full);
+  background: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

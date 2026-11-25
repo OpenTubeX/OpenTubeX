@@ -1,0 +1,229 @@
+.description,
+.hint {
+  text-align: center;
+}
+
+/* The rows share their columns, so the custom engines' addresses line up
+   with the built-in ones. */
+.engineList {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(240px, 2fr) auto;
+  gap: 12px;
+  align-items: center;
+
+  /* As wide as the custom engine row below, so both line up. */
+  max-inline-size: 840px;
+}
+
+.engineRow {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.engineRow > code {
+  grid-column: 2 / -1;
+}
+
+:deep(.addEngine .ft-input) {
+  margin-block-end: 0;
+}
+
+.engineRow code {
+  overflow-wrap: anywhere;
+}
+
+.engineToggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-inline-size: 0;
+}
+
+/* The name follows the switch, so narrow sections' switch margins must not
+   push it away from the built-in names. */
+.engineToggle :deep(.switch-ctn.labelHidden) {
+  margin-inline-end: 0;
+}
+
+/* Like a tab group's name, a custom engine's name and address turn into
+   fields when clicked. */
+.engineEditButton {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: 32px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: calc(16px * var(--ui-roundness));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.engineEditButton:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.engineEditButton:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.engineEditButton > :is(span, code) {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.engineEditButton .ft-icon {
+  flex: 0 0 auto;
+  color: var(--secondary-text-color);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity var(--motion-fast-effects);
+}
+
+.engineEditButton:is(:hover, :focus-visible) .ft-icon {
+  opacity: 1;
+}
+
+.engineNameButton {
+  /* Line the name up with the built-in engines' names, which start 12px after
+     the track. The hidden label leaves 18px after it, the row gap adds 10px,
+     and the button pads its text by 8px. */
+  margin-inline-start: -24px;
+  font-weight: 500;
+}
+
+/* The button pads the address by 8px, so pull it back in line with the
+   built-in engines' addresses. */
+.engineUrlButton {
+  justify-self: start;
+  margin-inline-start: -8px;
+}
+
+.engineNameInput,
+.engineUrlInput {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: 100%;
+  block-size: 32px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: var(--shape-corner-small);
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 4%, var(--search-bar-color));
+  color: inherit;
+  font: inherit;
+}
+
+.engineNameInput {
+  flex: 1 1 auto;
+
+  /* Keep the field's outline clear of the switch. */
+  margin-inline-start: -18px;
+  font-weight: 500;
+}
+
+/* Starts where the address did, so its text stays in place. */
+.engineUrlInput {
+  inline-size: calc(100% + 8px);
+  margin-inline-start: -8px;
+  font-family: monospace;
+}
+
+.engineIcon {
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.engineIcon :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
+.fallbackIcon {
+  color: var(--secondary-text-color);
+}
+
+.removeEngine {
+  justify-self: center;
+}
+
+.addEngine {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 340px)) auto;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.addEngine :deep(.btn) {
+  justify-self: center;
+  margin: 0;
+}
+
+/* New values have no saved-setting markers to reserve a gutter for. The
+   gutter would also widen a field past its column, against the button beside
+   it. */
+.addEngine :deep(.ft-input-component.floatingLabel) {
+  border-inline-start: 0;
+  padding-inline-start: 0;
+}
+
+h3 {
+  text-align: center;
+}
+
+@container settings-content (width <= 800px) {
+  .addEngine {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stacked, the engines' icons and switches line up in a middle column as
+     wide as the widest of them, and their addresses center below them. */
+  .engineList {
+    grid-template-columns: [row-start] minmax(0, 1fr) [toggle-start] minmax(0, max-content) [toggle-end] minmax(0, 1fr) [row-end];
+  }
+
+  .engineRow {
+    grid-column: row;
+    row-gap: 4px;
+  }
+
+  .engineRow > *,
+  .engineRow > code {
+    grid-column: row;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .engineRow > .engineToggle {
+    grid-column: toggle;
+    justify-self: start;
+  }
+
+  .addEngine :deep(.ft-input-component) {
+    justify-self: center;
+    inline-size: min(340px, 100%);
+  }
+
+  .engineRow > .engineUrlButton {
+    margin-inline-start: 0;
+  }
+
+  .engineRow > .engineUrlInput {
+    inline-size: min(340px, 100%);
+    margin-inline-start: 0;
+  }
+}

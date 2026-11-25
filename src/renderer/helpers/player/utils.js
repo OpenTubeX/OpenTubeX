@@ -1,12 +1,12 @@
 import shaka from 'shaka-player'
+import { deepCopy } from '../utils'
 import i18n from '../../i18n/index'
 import { sponsorBlockSkipSegments } from '../sponsorblock'
-import { MIME_TYPE_CODECS_REGEX } from '../utils'
 import { KeyboardShortcuts } from '../../../constants.js'
 
 /** @typedef {import('../sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
-const RequestType = shaka.net.NetworkingEngine.RequestType
+export { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './manifestTypes'
 
 /** @type {Map<string, string>} */
 export const PLAYER_LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
@@ -16,26 +16,46 @@ export const PLAYER_LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
   See: https://github.com/shaka-project/shaka-player/blob/main/ui/locales/en.json
 */
 export const SHAKA_CONTROL_KEYS_TO_SHORTCUTS = {
-  MUTE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
-  UNMUTE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
-  PLAY: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
-  PAUSE: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
-  PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  ENTER_PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  EXIT_PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  CAPTIONS: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS,
-  FULL_SCREEN: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN,
-  EXIT_FULL_SCREEN: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN
+  MUTE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
+  UNMUTE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
+  PLAY: () => KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
+  PAUSE: () => KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
+  PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  ENTER_PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  EXIT_PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  CAPTIONS: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS,
+  FULL_SCREEN: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN,
+  EXIT_FULL_SCREEN: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN
 }
 
 /**
- * @param {shaka.util.Error} error
+ * @param {shaka.util.Error | Error} error
  * @param {string} context
  * @param {string} videoId
  * @param {object?} details
  */
 export function logShakaError(error, context, videoId, details) {
   const { Severity, Category, Code } = shaka.util.Error
+
+  if (error?.category === undefined && error?.code === undefined) {
+    /** @type {*[]} */
+    const args = [
+      'Player exception. This is a JavaScript error, not a shaka-player error.\n' +
+      `Video ID: "${videoId}"\n` +
+      `OpenTubeX player context: "${context}"\n`,
+      error
+    ]
+
+    if (details) {
+      args.push(
+        '\n\nOpenTubeX data:',
+        typeof details === 'object' ? deepCopy(details) : details
+      )
+    }
+
+    console.error(...args)
+    return
+  }
 
   // shaka's error type also has a message property but that is apparently only available in uncompiled mode
 
@@ -49,9 +69,9 @@ export function logShakaError(error, context, videoId, details) {
   const codeText = Object.keys(Code).find((/** @type {keyof Code} */ key) => Code[key] === error.code)
 
   const message =
-    `Player Error (category and code explainations here: https://shaka-project.github.io/shaka-player/docs/api/shaka.util.Error.html#value%3A${error.code})\n` +
+    `Player Error (category and code explanations here: https://shaka-project.github.io/shaka-player/docs/api/shaka.util.Error.html#value%3A${error.code})\n` +
     `Video ID: "${videoId}"\n` +
-    `FreeTube player context: "${context}"\n\n` +
+    `OpenTubeX player context: "${context}"\n\n` +
     `Severity: ${severityText} (${error.severity})\n` +
     `Category: ${categoryText} (${error.category})\n` +
     `Code: ${codeText} (${error.code})\n` +
@@ -63,14 +83,17 @@ export function logShakaError(error, context, videoId, details) {
   if (error.data && error.data.length > 0) {
     args.push(
       '\n\nshaka-player Data:',
-      JSON.stringify(error.data)
+      error.data
     )
   }
 
   if (details) {
     args.push(
-      '\n\nFreeTube data:',
-      typeof details === 'object' ? JSON.stringify(details) : details
+      '\n\nOpenTubeX data:',
+      // use deepCopy to get rid of Vue's proxying,
+      // as that requires you click the 3 dots for every property in the logged object to see their values
+      // doing it like this, results in a "clean" object where everything is immediately visible
+      typeof details === 'object' ? deepCopy(details) : details
     )
   }
 
@@ -80,9 +103,11 @@ export function logShakaError(error, context, videoId, details) {
 /**
  * @param {string} videoId
  * @param {SponsorBlockCategory[]} categories
+ * @param {import('../sponsorblock').SponsorBlockActionType[]} [actionTypes]
  */
-export async function getSponsorBlockSegments(videoId, categories) {
-  const segments = await sponsorBlockSkipSegments(videoId, categories)
+export async function getSponsorBlockSegments(videoId, categories, actionTypes) {
+  const requestedActionTypes = actionTypes ?? (categories.includes('poi_highlight') ? ['skip', 'poi'] : ['skip'])
+  const segments = await sponsorBlockSkipSegments(videoId, categories, requestedActionTypes)
 
   if (segments.length === 0) {
     return {
@@ -95,12 +120,24 @@ export async function getSponsorBlockSegments(videoId, categories) {
     return accumulator + segment.videoDuration
   }, 0) / segments.length
 
-  const mappedSegments = segments.map(({ category, segment: [startTime, endTime], UUID }) => {
+  const mappedSegments = segments.map(({
+    category,
+    segment: [startTime, endTime],
+    UUID,
+    actionType,
+    description,
+    locked,
+    votes,
+  }) => {
     return {
       uuid: UUID,
       category,
+      actionType,
+      description,
+      locked,
       startTime,
-      endTime
+      endTime,
+      votes,
     }
   })
 
@@ -113,26 +150,48 @@ export async function getSponsorBlockSegments(videoId, categories) {
 }
 
 /**
+ * Map SponsorBlock API categories to locale keys under Video.Sponsor Block category.
+ * Prefer the short label (extension seekbar/skip-notice wording) when available,
+ * unless `short: false` is passed (e.g. submission / settings UI).
+ * Falls back to the full label when the active locale has not translated the short key yet.
  * @param {SponsorBlockCategory} category
+ * @param {{ short?: boolean }} [options]
  */
-export function translateSponsorBlockCategory(category) {
+export function translateSponsorBlockCategory(category, { short = true } = {}) {
+  const locale = i18n.global.locale.value
+
   switch (category) {
     case 'sponsor':
       return i18n.global.t('Video.Sponsor Block category.sponsor')
     case 'intro':
-      return i18n.global.t('Video.Sponsor Block category.intro')
+      return short && i18n.global.te('Video.Sponsor Block category short.intro', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.intro')
+        : i18n.global.t('Video.Sponsor Block category.intro')
     case 'outro':
       return i18n.global.t('Video.Sponsor Block category.outro')
     case 'recap':
+    case 'preview':
       return i18n.global.t('Video.Sponsor Block category.recap')
+    case 'hook':
+      return i18n.global.t('Video.Sponsor Block category.hook')
     case 'selfpromo':
       return i18n.global.t('Video.Sponsor Block category.self-promotion')
     case 'interaction':
-      return i18n.global.t('Video.Sponsor Block category.interaction')
+      return short && i18n.global.te('Video.Sponsor Block category short.interaction', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.interaction')
+        : i18n.global.t('Video.Sponsor Block category.interaction')
     case 'music_offtopic':
-      return i18n.global.t('Video.Sponsor Block category.music offtopic')
+      return short && i18n.global.te('Video.Sponsor Block category short.music offtopic', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.music offtopic')
+        : i18n.global.t('Video.Sponsor Block category.music offtopic')
     case 'filler':
-      return i18n.global.t('Video.Sponsor Block category.filler')
+      return short && i18n.global.te('Video.Sponsor Block category short.filler', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.filler')
+        : i18n.global.t('Video.Sponsor Block category.filler')
+    case 'poi_highlight':
+      return i18n.global.t('Video.Sponsor Block category.highlight')
+    case 'exclusive_access':
+      return i18n.global.t('Video.Sponsor Block category.exclusive access')
     default:
       console.error(`Unknown translation for SponsorBlock category ${category}`)
       return category
@@ -140,7 +199,7 @@ export function translateSponsorBlockCategory(category) {
 }
 
 /**
- * Moves the captions that are the most similar to the display language to the top
+ * Moves the captions that are the most similar to the preferred language to the top
  * and sorts the remaining ones alphabetically.
  * @param {{
  *   url: string,
@@ -149,9 +208,10 @@ export function translateSponsorBlockCategory(category) {
  *   mimeType: string,
  *   isAutotranslated?: boolean
  * }[]} captions
+ * @param {string} [preferredLocale]
  */
-export function sortCaptions(captions) {
-  const currentLocale = i18n.global.locale.value
+export function sortCaptions(captions, preferredLocale = i18n.global.locale.value) {
+  const currentLocale = preferredLocale.replace('_', '-')
   const userLocale = currentLocale.split('-') // ex. [en,US]
 
   const collator = new Intl.Collator([currentLocale, 'en'])
@@ -268,7 +328,8 @@ export function repairInvidiousManifest(periods) {
           ?.children[0]
 
         if (baseUrl) {
-          const url = new URL(baseUrl.replaceAll('&amp;', '&'))
+          // Proxied manifests can use relative URLs, and only the query matters here
+          const url = new URL(baseUrl.replaceAll('&amp;', '&'), 'http://localhost')
 
           if (url.searchParams.has('xtags')) {
             const xtags = url.searchParams.get('xtags').split(':')
@@ -367,130 +428,6 @@ export function deduplicateAudioTracks(tracks) {
   }
 
   return knownTracks
-}
-
-const HLS_AUDIO_PARAMS_ITAG_REGEX = /\/sgoap\/[^/]*?itag%3D(\d+)/
-// eslint-disable-next-line no-control-regex
-const HLS_QUOTED_STRING_REGEX = /[\0-\u001F"\u007F-\u009F]/g
-const ITAG_139_SAMPLE_RATE = '22050'
-
-/**
- * The HLS spec forbids control characters and double quotes inside strings
- * @param {string} text
- */
-function cleanHlsString(text) {
-  return text.trim().replaceAll(HLS_QUOTED_STRING_REGEX, '')
-}
-
-/**
- * @param {import('youtubei.js').Misc.Format} format
- */
-function getAudioTrackName(format) {
-  if (format.audio_track?.display_name) {
-    return format.audio_track.display_name
-  }
-
-  if (format.language) {
-    const languageName = new Intl.DisplayNames('en-US', {
-      type: 'language',
-      languageDisplay: 'standard',
-      fallback: 'none'
-    }).of(format.language)
-
-    if (languageName !== undefined) {
-      return languageName
-    }
-  }
-
-  return 'Untitled'
-}
-
-/**
- * @param {string} codec
- * @param {number} channels
- * @param {number} sampleRate
- */
-function createHlsAudioGroupId(codec, channels, sampleRate) {
-  return `${codec.split('.', 1)[0]}-${channels}-${sampleRate || 0}`
-}
-
-/**
- * Patches the missing audio metadata into the HLS manifest
- * so that shaka-player treats the audio streams as the same track at different qualities
- * @param {ArrayBuffer | ArrayBufferView<ArrayBufferLike>} data
- * @param {import('youtubei.js').Misc.Format[]} audioFormats
- */
-export function patchLiveHlsMainManifest(data, audioFormats) {
-  const stringBody = new TextDecoder().decode(data)
-
-  const linesToInsert = []
-  const lines = stringBody.trim().split('\n')
-
-  let firstStreamIndex = -1
-
-  for (let i = 0; i < lines.length; i++) {
-    if (!lines[i].startsWith('#EXT-X-STREAM-INF:')) {
-      continue
-    }
-
-    if (firstStreamIndex === -1) {
-      firstStreamIndex = i
-    }
-
-    const itagMatch = lines[i + 1].match(HLS_AUDIO_PARAMS_ITAG_REGEX)
-
-    if (itagMatch !== null) {
-      const itag = parseInt(itagMatch[1])
-
-      // Theoretically there could be xtags that we should match too
-      // but I have yet to see a YouTube livestream with multiple audio tracks
-      // so we'll only match by itag for now
-      let format = audioFormats.find(format => format.itag === itag)
-
-      if (!format && itag === 139) {
-        // itag 139 appears in the HLS manifest but usually doesn't appear in the API response
-        // it seems to be the same as itag 140 but with half the sample rate,
-        // so we'll use everything but the sample rate from itag 140 instead
-        format = audioFormats.find(format => format.itag === 140)
-      }
-
-      if (format) {
-        const sampleRate = itag === 139 && format.itag !== 139 ? ITAG_139_SAMPLE_RATE : format.audio_sample_rate.toFixed(0)
-
-        const groupId = createHlsAudioGroupId(format.mime_type.match(MIME_TYPE_CODECS_REGEX)[1], format.audio_channels, sampleRate)
-
-        const mediaLine = `\
-#EXT-X-MEDIA:\
-TYPE=AUDIO,\
-GROUP-ID="${groupId}",\
-NAME="${cleanHlsString(getAudioTrackName(format))}",\
-LANGUAGE="${format.language ? cleanHlsString(format.language) : 'und'}",\
-DEFAULT=${format.is_original ? 'YES' : 'NO'},\
-AUTOSELECT=${format.is_auto_dubbed ? 'NO' : 'YES'},\
-CHANNELS=${format.audio_channels.toFixed(0)},\
-SAMPLE-RATE=${sampleRate}`
-
-        lines[i] = lines[i] + `,AUDIO=${groupId}`
-
-        if (!linesToInsert.includes(mediaLine)) {
-          linesToInsert.push(mediaLine)
-        }
-      }
-    }
-
-    // the next line is the URL line, which we can skip as it definitely won't match the stream info regex
-    i++
-  }
-
-  if (linesToInsert.length > 0) {
-    lines.splice(firstStreamIndex, 0, ...linesToInsert)
-    lines.splice(1, 0, '#EXT-X-VERSION:7')
-
-    const newString = lines.join('\n') + '\n'
-    return new TextEncoder().encode(newString)
-  }
-
-  return data
 }
 
 /**
@@ -624,8 +561,11 @@ export function manifestPreprocessorTXml(mpdNode) {
     // and a shorter one for low latency streams
     // If we don't add a little bit of a delay, we get presented with a loading symbol every 5 seconds,
     // while shaka-player processes the new manifest and segments
-    const minimumUpdatePeriod = parseFloat(mpdNode.attributes.minimumUpdatePeriod.match(/^PT(\d+(?:\.\d+)?)S$/)[1])
-    mpdNode.attributes.suggestedPresentationDelay = `PT${(minimumUpdatePeriod * 2).toFixed(3)}S`
+    // yt-dlp's live manifests are never updated and state their own delay
+    const minimumUpdatePeriod = mpdNode.attributes.minimumUpdatePeriod?.match(/^PT(\d+(?:\.\d+)?)S$/)
+    if (minimumUpdatePeriod) {
+      mpdNode.attributes.suggestedPresentationDelay = `PT${(parseFloat(minimumUpdatePeriod[1]) * 2).toFixed(3)}S`
+    }
 
     // fix live streams with subtitles having duplicate Representation ids
     // shaka-player throws DASH_DUPLICATE_REPRESENTATION_ID if we don't fix it
@@ -662,32 +602,5 @@ export function manifestPreprocessorTXml(mpdNode) {
     }
   } else if (!process.env.SUPPORTS_LOCAL_API) {
     repairInvidiousManifest(periods)
-  }
-}
-
-/** @type {shaka.extern.RequestFilter} */
-export function requestFilter(type, request, _context) {
-  if (type === RequestType.SEGMENT) {
-    const url = new URL(request.uris[0])
-
-    // only when we aren't proxying through Invidious,
-    // it doesn't like the range param and makes get requests to youtube anyway
-    if (url.protocol !== 'sabr:' && url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
-      request.method = 'POST'
-      request.body = new Uint8Array([0x78, 0]) // protobuf: { 15: 0 } (no idea what it means but this is what YouTube uses)
-
-      if (request.headers.Range) {
-        request.uris[0] += `&range=${request.headers.Range.split('=')[1]}`
-        delete request.headers.Range
-      }
-
-      request.uris[0] += '&alr=yes'
-    }
-  }
-}
-
-export function stopPowerSaveBlocker() {
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.stopPowerSaveBlocker()
   }
 }

@@ -1,0 +1,95 @@
+/* Size the card to its sections, so a lone title history does not stretch
+   across the window while thumbnails and descriptions get columns. */
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout) {
+  --history-columns: 1;
+  --history-column-gap: 24px;
+
+  max-inline-size: calc(var(--history-columns) * 40rem + (var(--history-columns) - 1) * var(--history-column-gap) + 2 * var(--prompt-padding-inline));
+  margin-inline: auto;
+  inset-inline: 0;
+}
+
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout:has(.historySection:nth-child(2))) {
+  --history-columns: 2;
+}
+
+:global(.promptCard.videoMetadataHistoryPrompt.fixedLayout:has(.historySection:nth-child(3))) {
+  --history-columns: 3;
+}
+
+.historySections {
+  display: grid;
+  gap: var(--history-column-gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  margin-block-end: 12px;
+}
+
+.historySection {
+  min-inline-size: 0;
+}
+
+.historySection h3 {
+  margin-block: 0 12px;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.textHistory,
+.thumbnailHistory {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.textHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.thumbnailHistory {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 280px));
+  justify-content: center;
+}
+
+.historyEntryHeader {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  justify-content: space-between;
+  margin-block-end: 6px;
+}
+
+.historyEntryHeader time {
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
+.metadataText {
+  background: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-medium);
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.metadataDescription {
+  max-block-size: min(30vh, 280px);
+  overflow: auto;
+}
+
+.thumbnailFrame {
+  aspect-ratio: 16 / 9;
+  background: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-medium);
+  overflow: hidden;
+}
+
+.thumbnailFrame img,
+.thumbnailFrame .retryImagePlaceholder {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: contain;
+}

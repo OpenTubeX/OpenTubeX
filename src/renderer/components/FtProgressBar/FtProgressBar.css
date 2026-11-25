@@ -1,8 +1,73 @@
+/* Material 3 linear progress indicator: a rounded active indicator, a gap,
+   the remaining track and a stop indicator at its end. */
 .progressBar {
   position: fixed;
-  block-size: 3px;
+  box-sizing: border-box;
+  block-size: var(--progress-bar-height);
+  padding-block: 2px;
+  padding-inline: 12px;
   inset-block-end: 0;
-  inset-inline-start: 0;
-  background-color: var(--primary-color);
+  inset-inline: 0;
   z-index: 4;
+  background-color: var(--bg-color);
+  pointer-events: none;
+}
+
+.progressBarIndicator {
+  position: relative;
+  block-size: 100%;
+}
+
+.progressBarActive,
+.progressBarTrack,
+.progressBarTrack::after {
+  position: absolute;
+  inset-block: 0;
+  border-radius: var(--shape-corner-full);
+}
+
+/* Both parts span the whole bar and clip-path cuts them to their share. A
+   subscription refresh updates the progress for every channel, and clipping
+   runs on the compositor, while resizing would lay out the page on every frame
+   of each transition. The clip also hides the stop indicator while the
+   remaining track is narrower than it. */
+.progressBarActive {
+  inset-inline: 0;
+  background-color: var(--primary-color);
+  clip-path: inset(0 calc((1 - var(--progress-fraction)) * 100%) 0 0 round var(--shape-corner-full));
+  transition: clip-path var(--motion-slow-effects);
+}
+
+.progressBarActive:dir(rtl) {
+  clip-path: inset(0 0 0 calc((1 - var(--progress-fraction)) * 100%) round var(--shape-corner-full));
+}
+
+.progressBarTrack {
+  inset-inline: 0;
+  background-color: color-mix(in srgb, var(--primary-color) 24%, var(--bg-color));
+  clip-path: inset(0 0 0 calc(var(--progress-fraction) * 100% + 4px) round var(--shape-corner-full));
+  transition: clip-path var(--motion-slow-effects);
+}
+
+.progressBarTrack:dir(rtl) {
+  clip-path: inset(0 calc(var(--progress-fraction) * 100% + 4px) 0 0 round var(--shape-corner-full));
+}
+
+.progressBarTrack::after {
+  inset-inline-end: 0;
+  aspect-ratio: 1;
+  background-color: var(--primary-color);
+  content: '';
+}
+
+@media only screen and (width <= 680px) {
+  .progressBar {
+    inset-block-end: var(--mobile-nav-height);
+    overflow: hidden;
+    background-color: var(--side-nav-color);
+  }
+
+  .progressBarTrack {
+    background-color: color-mix(in srgb, var(--primary-color) 24%, var(--side-nav-color));
+  }
 }

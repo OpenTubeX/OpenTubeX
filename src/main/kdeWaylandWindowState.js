@@ -1,0 +1,652 @@
+import dbus from 'dbus-native'
+
+import { createKwinScriptFile, getKwinScriptPluginName, getKwinWindowOwner, isKwinWindowOwnedBy } from './kwinScripts.js'
+
+const KDE_DESKTOP_PATTERN = /(?:^|[:;/_-])(?:kde|plasma(?:wayland)?)(?:$|[:;/_-])/i
+const KWIN_SERVICE = 'org.kde.KWin'
+const KWIN_SCRIPTING_PATH = '/Scripting'
+const KWIN_SCRIPTING_INTERFACE = 'org.kde.kwin.Scripting'
+const KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX = 'opentubex-active-window'
+const ACTIVE_WINDOW_REPORT_PATH = '/io/github/OpenTubeX/KWinActiveWindow'
+const ACTIVE_WINDOW_REPORT_INTERFACE = 'io.github.OpenTubeX.KWinActiveWindow'
+const ACTIVE_WINDOW_QUERY_TIMEOUT = 1_500
+const KDE_DESKTOP_POPUP_CLASS = /(?:^|\.)(?:krunner|plasmashell)$/i
+const WINDOW_SEARCH_TERM = 'OpenTubeX'
+// D-Bus can still be starting when the session restores the app at login
+const BACKEND_RETRY_DELAYS = [3_000, 10_000, 30_000]
+
+/**
+ * @param {NodeJS.ProcessEnv} environment
+ * @returns {boolean}
+ */
+export function isKdePlasmaDesktop(environment) {
+  if (environment.KDE_FULL_SESSION === 'true') return true
+
+  return [
+    environment.XDG_CURRENT_DESKTOP,
+    environment.XDG_SESSION_DESKTOP,
+    environment.DESKTOP_SESSION,
+  ].some(value => typeof value === 'string' && KDE_DESKTOP_PATTERN.test(value))
+}
+
+/**
+ * @param {{
+ *   platform: NodeJS.Platform,
+ *   ozonePlatform: string,
+ *   environment: NodeJS.ProcessEnv
+ * }} options
+ * @returns {boolean}
+ */
+export function isWaylandPlatform({ platform, ozonePlatform }) {
+  return platform === 'linux' && ozonePlatform === 'wayland'
+}
+
+/**
+ * @param {{
+ *   platform: NodeJS.Platform,
+ *   ozonePlatform: string,
+ *   environment: NodeJS.ProcessEnv
+ * }} options
+ * @returns {boolean}
+ */
+function mayUseWayland({ platform, ozonePlatform, environment }) {
+  if (platform !== 'linux' || ozonePlatform === 'x11') return false
+  if (ozonePlatform === 'wayland') return true
+
+  return environment.XDG_SESSION_TYPE === 'wayland' ||
+    typeof environment.WAYLAND_DISPLAY === 'string'
+}
+
+/**
+ * @param {{
+ *   platform: NodeJS.Platform,
+ *   ozonePlatform: string,
+ *   environment: NodeJS.ProcessEnv
+ * }} options
+ * @returns {boolean}
+ */
+export function shouldMonitorKdeWaylandWindowState({
+  platform,
+  ozonePlatform,
+  environment,
+}) {
+  return mayUseWayland({ platform, ozonePlatform, environment }) &&
+    isKdePlasmaDesktop(environment)
+}
+
+/**
+ * @typedef {{
+ *   uuid: string,
+ *   caption: string,
+ *   minimized: boolean,
+ *   pid: number,
+ *   desktopFile: string,
+ *   width: number,
+ *   height: number
+ * }} KwinWindowInfo
+ */
+
+/**
+ * @typedef {{
+ *   uuid: string,
+ *   skipTaskbar: boolean,
+ *   resourceClass: string
+ * }} KwinActiveWindowInfo
+ */
+
+/**
+ * @param {unknown} value
+ * @returns {KwinWindowInfo | null}
+ */
+export function normalizeKwinWindowInfo(value) {
+  if (value === null || typeof value !== 'object') return null
+
+  const { uuid, caption, minimized, pid, desktopFile = '', width, height } = value
+  const numericPid = typeof pid === 'bigint' ? Number(pid) : pid
+  if (
+    typeof uuid !== 'string' ||
+    typeof caption !== 'string' ||
+    typeof minimized !== 'boolean' ||
+    !Number.isSafeInteger(numericPid) ||
+    typeof desktopFile !== 'string' ||
+    ![width, height].every(Number.isSafeInteger)
+  ) {
+    return null
+  }
+
+  return {
+    uuid,
+    caption,
+    minimized,
+    pid: numericPid,
+    desktopFile,
+    width,
+    height,
+  }
+}
+
+/**
+ * @param {unknown} matches
+ * @returns {string[]}
+ */
+export function extractKwinWindowHandles(matches) {
+  if (!Array.isArray(matches)) return []
+
+  return matches.flatMap(match => {
+    const id = Array.isArray(match) ? match[0] : null
+    const handle = typeof id === 'string'
+      ? id.match(/^0_(\{[0-9a-f-]+\})$/i)?.[1]
+      : null
+    return handle === undefined || handle === null ? [] : [handle]
+  })
+}
+
+/**
+ * @param {KwinWindowInfo[]} previous
+ * @param {KwinWindowInfo[]} current
+ * @param {{ caption: string, bounds: Electron.Rectangle }} target
+ * @returns {KwinWindowInfo | null}
+ */
+export function findNewlyMinimizedWindow(previous, current, target) {
+  const previousByUuid = new Map(previous.map(window => [window.uuid, window]))
+  const transitionedWindows = current.filter(window => (
+    window.minimized &&
+    previousByUuid.get(window.uuid)?.minimized === false
+  ))
+  const transitionedWindow = findMatchingWindow(transitionedWindows, target)
+  if (transitionedWindow !== null) return transitionedWindow
+
+  if (previous.length === 0) {
+    return findMatchingWindow(current.filter(window => window.minimized), target)
+  }
+
+  return null
+}
+
+/**
+ * BrowserWindow bounds and KWin frame geometry can differ by the server-side
+ * decoration size. Native Wayland does not expose reliable window positions
+ * to Electron, so use the size only when more than one minimized window has
+ * the same caption.
+ *
+ * @param {KwinWindowInfo[]} windows
+ * @param {{ caption: string, bounds: Electron.Rectangle }} target
+ * @returns {KwinWindowInfo | null}
+ */
+function findMatchingWindow(windows, { caption, bounds }) {
+  const maximumDecorationSize = 64
+  const matchingWindows = windows.filter(window => window.caption === caption)
+  if (matchingWindows.length === 1) return matchingWindows[0]
+
+  const candidates = matchingWindows.flatMap(window => {
+    const differences = [
+      Math.abs(window.width - bounds.width),
+      Math.abs(window.height - bounds.height),
+    ]
+    if (differences.some(difference => difference > maximumDecorationSize)) return []
+
+    return [{ window, distance: differences.reduce((total, difference) => total + difference, 0) }]
+  }).sort((left, right) => left.distance - right.distance)
+
+  if (candidates.length === 0 || candidates[0].distance === candidates[1]?.distance) return null
+  return candidates[0].window
+}
+
+/**
+ * @param {import('dbus-native').DBusInterface} kwin
+ * @param {string} uuid
+ * @returns {Promise<KwinWindowInfo | null>}
+ */
+async function queryKwinWindow(kwin, uuid) {
+  return normalizeKwinWindowInfo(await kwin.getWindowInfo(uuid))
+}
+
+/**
+ * @param {import('dbus-native').DBusInterface} kwin
+ * @param {import('dbus-native').DBusInterface} runner
+ * @param {import('./kwinScripts.js').KwinWindowOwner} owner
+ * @returns {Promise<KwinWindowInfo[]>}
+ */
+async function queryKwinWindows(kwin, runner, owner) {
+  const handles = [...new Set(extractKwinWindowHandles(await runner.Match(WINDOW_SEARCH_TERM)))]
+  const windows = await Promise.all(handles.map(handle => queryKwinWindow(kwin, handle)))
+
+  return windows.filter(window => window !== null && isKwinWindowOwnedBy(window, owner))
+}
+
+/**
+ * Connect to KWin through the user's D-Bus session and verify the interfaces
+ * used by the monitor. Retries while the bus times out.
+ *
+ * @param {number[]} [retryDelays]
+ * @param {NodeJS.ProcessEnv} [environment]
+ * @returns {ReturnType<typeof connectKdeWaylandWindowStateBackend>}
+ */
+export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_RETRY_DELAYS, environment = process.env) {
+  for (const delay of retryDelays) {
+    try {
+      return await connectKdeWaylandWindowStateBackend(environment)
+    } catch {
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  return connectKdeWaylandWindowStateBackend(environment).catch(() => null)
+}
+
+/**
+ * @param {NodeJS.ProcessEnv} environment
+ * @returns {Promise<{
+ *   close: () => Promise<void>,
+ *   queryWindow: (uuid: string) => Promise<KwinWindowInfo | null>,
+ *   queryWindows: (owner: import('./kwinScripts.js').KwinWindowOwner) => Promise<KwinWindowInfo[]>,
+ *   watchActiveWindow: (listener: (window: KwinActiveWindowInfo) => void) => {
+ *     activeWindow: KwinActiveWindowInfo | null,
+ *     stop: () => void
+ *   },
+ *   watchWindowMinimized: (listener: (uuid: string, minimized: boolean) => void) => () => void
+ * } | null>}
+ */
+async function connectKdeWaylandWindowStateBackend(environment) {
+  let bus
+  let scriptFile
+  let scripting
+  const scriptPluginName = getKwinScriptPluginName(KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX, getKwinWindowOwner(environment))
+
+  try {
+    bus = dbus.sessionBus({ reconnect: true, timeout: 2_000 })
+    bus.connection.on('error', () => {})
+    const service = bus.getService(KWIN_SERVICE)
+    const [kwin, runner, scriptingInterface] = await Promise.all([
+      service.getInterface('/KWin', 'org.kde.KWin'),
+      service.getInterface('/WindowsRunner', 'org.kde.krunner1'),
+      service.getInterface(KWIN_SCRIPTING_PATH, KWIN_SCRIPTING_INTERFACE),
+    ])
+    scripting = scriptingInterface
+    await runner.Match(WINDOW_SEARCH_TERM)
+    if (typeof bus.name !== 'string') throw new Error('D-Bus connection has no unique name')
+
+    scriptFile = await createKwinScriptFile('active-window.js', environment)
+    /** @type {KwinActiveWindowInfo | null} */
+    let activeWindow = null
+    let closed = false
+    const activeWindowListeners = new Set()
+    const minimizedListeners = new Set()
+    let resolveInitialReport
+    const initialReport = new Promise(resolve => {
+      const timeout = setTimeout(() => {
+        resolveInitialReport = undefined
+        resolve(null)
+      }, ACTIVE_WINDOW_QUERY_TIMEOUT)
+      resolveInitialReport = value => {
+        clearTimeout(timeout)
+        resolveInitialReport = undefined
+        resolve(value)
+      }
+    })
+
+    bus.exportInterface({
+      ReportActiveWindow: (uuid, skipTaskbar, resourceClass) => {
+        activeWindow = { uuid, skipTaskbar, resourceClass }
+        resolveInitialReport?.(activeWindow)
+        for (const listener of activeWindowListeners) {
+          listener(activeWindow)
+        }
+        return null
+      },
+      ReportWindowMinimized: (uuid, minimized) => {
+        for (const listener of minimizedListeners) {
+          listener(uuid, minimized)
+        }
+        return null
+      },
+    }, ACTIVE_WINDOW_REPORT_PATH, {
+      name: ACTIVE_WINDOW_REPORT_INTERFACE,
+      methods: {
+        ReportActiveWindow: ['sbs', '', ['uuid', 'skipTaskbar', 'resourceClass'], []],
+        ReportWindowMinimized: ['sb', '', ['uuid', 'minimized'], []],
+      },
+      signals: {},
+      properties: {},
+    })
+
+    const loadActiveWindowScript = async () => {
+      if (closed) return
+      if (typeof bus.name !== 'string') {
+        throw new Error('D-Bus connection has no unique name')
+      }
+
+      const destination = bus.name
+      await scripting.unloadScript(scriptPluginName).catch(() => {})
+      if (closed) return
+
+      const report = `callDBus(${[destination, ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE].map(value => JSON.stringify(value)).join(', ')}`
+      const script = `
+const reportActiveWindow = activeWindow => {
+  ${report},
+    "ReportActiveWindow",
+    activeWindow ? activeWindow.internalId.toString() : "",
+    activeWindow ? activeWindow.skipTaskbar : false,
+    activeWindow ? activeWindow.resourceClass.toString() : ""
+  )
+}
+reportActiveWindow(workspace.activeWindow)
+workspace.windowActivated.connect(reportActiveWindow)
+const watchMinimized = window => {
+  const reportMinimized = () => {
+    ${report}, "ReportWindowMinimized", window.internalId.toString(), window.minimized)
+  }
+  window.minimizedChanged.connect(reportMinimized)
+  return reportMinimized
+}
+// A reload after a D-Bus reconnect misses changes made while no script ran
+workspace.windowList().forEach(window => watchMinimized(window)())
+workspace.windowAdded.connect(watchMinimized)
+`
+      await scriptFile.write(script)
+      if (closed) return
+
+      const scriptId = await bus.invoke({
+        destination: KWIN_SERVICE,
+        path: KWIN_SCRIPTING_PATH,
+        interface: KWIN_SCRIPTING_INTERFACE,
+        member: 'loadScript',
+        signature: 'ss',
+        body: [scriptFile.path, scriptPluginName],
+      })
+      if (!Number.isInteger(scriptId) || scriptId < 0) {
+        throw new Error('KWin rejected the active-window script')
+      }
+      if (closed) return
+      // KWin assigns IDs from the loaded-script count. After an unload, an
+      // ID's D-Bus path can still belong to another running script. Start
+      // through the manager so our reporter runs even when its ID collides.
+      await scripting.start()
+    }
+
+    // A previous process may have exited while its activation script was running.
+    await loadActiveWindowScript()
+    if (await initialReport === null) throw new Error('KWin did not report its active window')
+    let scriptReload = Promise.resolve()
+    // Without the reporter, restores without focus go unnoticed, so keep
+    // retrying a failed reload as the removed poll kept checking.
+    let endRetryWait = null
+    const reloadScript = attempt => loadActiveWindowScript().catch(() => {
+      if (closed) return
+      return new Promise(resolve => {
+        const timer = setTimeout(resolve, Math.min(1000 * 2 ** attempt, 30_000))
+        // Closing ends the wait instead of holding up shutdown
+        endRetryWait = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+      }).then(() => {
+        endRetryWait = null
+        return closed ? undefined : reloadScript(attempt + 1)
+      })
+    })
+    const handleReconnect = () => {
+      scriptReload = scriptReload.then(() => reloadScript(0))
+    }
+    bus.on('reconnected', handleReconnect)
+
+    return {
+      close: async () => {
+        if (closed) return
+        closed = true
+        bus.removeListener('reconnected', handleReconnect)
+        resolveInitialReport?.(null)
+        activeWindowListeners.clear()
+        minimizedListeners.clear()
+        endRetryWait?.()
+        await scriptReload
+        await scripting.unloadScript(scriptPluginName).catch(() => {})
+        bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
+        await scriptFile.remove()
+        await bus.close()
+      },
+      watchActiveWindow: listener => {
+        if (closed) return { activeWindow: null, stop: () => {} }
+        activeWindowListeners.add(listener)
+        return {
+          activeWindow,
+          stop: () => activeWindowListeners.delete(listener),
+        }
+      },
+      watchWindowMinimized: listener => {
+        if (closed) return () => {}
+        minimizedListeners.add(listener)
+        return () => minimizedListeners.delete(listener)
+      },
+      queryWindow: uuid => queryKwinWindow(kwin, uuid),
+      queryWindows: owner => queryKwinWindows(kwin, runner, owner),
+    }
+  } catch (error) {
+    await scripting?.unloadScript(scriptPluginName).catch(() => {})
+    await scriptFile?.remove()
+    await bus?.close().catch(() => {})
+    // A slow bus can answer later. A missing or refusing KWin fails at once
+    // and stays that way, so only timeouts are retried.
+    if (error?.code === 'ETIMEDOUT' || error?.cause?.code === 'ETIMEDOUT') throw error
+    return null
+  }
+}
+
+/**
+ * Electron does not receive KWin's compositor-driven minimize event on native
+ * Wayland. Compare KWin state after blur, then follow KWin's minimized reports
+ * so a restore is forwarded too.
+ *
+ * @param {{
+ *   browserWindow: import('electron').BrowserWindow,
+ *   backend: ReturnType<typeof createKdeWaylandWindowStateBackend>,
+ *   applyWindowIdentity?: () => void,
+ *   onFocusedState?: (focused: boolean) => void,
+ *   onMinimizedState: (minimized: boolean) => void,
+ *   releaseWindowIdentity?: () => void,
+ *   owner?: import('./kwinScripts.js').KwinWindowOwner,
+ *   detectionDelay?: number,
+ *   focusHandoffDelay?: number
+ * }} options
+ * @returns {() => void}
+ */
+export function monitorKdeWaylandWindowState({
+  browserWindow,
+  backend,
+  applyWindowIdentity = () => {},
+  onFocusedState = () => {},
+  onMinimizedState,
+  releaseWindowIdentity = () => {},
+  owner = getKwinWindowOwner(),
+  detectionDelay = 100,
+  focusHandoffDelay = 100,
+}) {
+  let baseline = []
+  let generation = 0
+  let minimized = false
+  let minimizedUuid = null
+  let windowUuid = null
+  let focusHandoffTimer = null
+  let stopRestoreWatch = null
+  let stopActiveWindowWatch = null
+  let stopped = false
+
+  const clearFocusHandoff = () => {
+    if (focusHandoffTimer !== null) clearTimeout(focusHandoffTimer)
+    focusHandoffTimer = null
+  }
+  const clearActiveWindowWatch = () => {
+    clearFocusHandoff()
+    stopActiveWindowWatch?.()
+    stopActiveWindowWatch = null
+  }
+  const clearRestoreWatch = () => {
+    stopRestoreWatch?.()
+    stopRestoreWatch = null
+  }
+  const setMinimized = value => {
+    if (minimized === value) return
+    minimized = value
+    onMinimizedState(value)
+  }
+  const refreshBaseline = token => {
+    const target = {
+      caption: browserWindow.getTitle(),
+      bounds: browserWindow.getBounds(),
+    }
+    const pending = backend.then(value => value?.queryWindows(owner) ?? [])
+    pending.then(windows => {
+      if (!stopped && generation === token && !minimized && browserWindow.isFocused()) {
+        baseline = windows
+        const window = findMatchingWindow(windows, target)
+        if (window !== null) {
+          windowUuid = window.uuid
+          releaseWindowIdentity()
+        }
+      }
+    }).catch(() => {})
+    return pending
+  }
+  const watchRestore = (value, token, uuid) => {
+    clearRestoreWatch()
+    const restored = () => {
+      if (stopped || generation !== token || minimizedUuid !== uuid) return
+      clearRestoreWatch()
+      minimizedUuid = null
+      setMinimized(false)
+      refreshBaseline(token).catch(() => {})
+    }
+    stopRestoreWatch = value.watchWindowMinimized((reportedUuid, isMinimized) => {
+      if (reportedUuid === uuid && !isMinimized) restored()
+    })
+    // The window can be restored before the watch starts. Retry a failed
+    // check while this watch still applies, as the removed poll did.
+    const checkRestored = () => {
+      value.queryWindow(uuid).then(window => {
+        if (!window?.minimized) restored()
+      }).catch(() => {
+        if (stopped || generation !== token || minimizedUuid !== uuid) return
+        setTimeout(checkRestored, 1000)
+      })
+    }
+    checkRestored()
+  }
+  const isDesktopPopup = activeWindow => activeWindow !== null &&
+    activeWindow.skipTaskbar &&
+    KDE_DESKTOP_POPUP_CLASS.test(activeWindow.resourceClass)
+  const isTargetWindowActive = (activeWindow, targetUuid) => (
+    activeWindow !== null && activeWindow.uuid === targetUuid
+  )
+  const isLogicallyFocused = (activeWindow, targetUuid) =>
+    isTargetWindowActive(activeWindow, targetUuid) || isDesktopPopup(activeWindow)
+  // Starting an app from the launcher does not blur this BrowserWindow again.
+  // Keep watching KWin after a popup so a later launcher handoff is forwarded
+  // even though Electron does not emit another blur event.
+  const watchActiveWindow = (value, targetUuid) => {
+    clearActiveWindowWatch()
+    const reportActiveWindow = activeWindow => {
+      if (stopped || browserWindow.isFocused()) return
+      clearFocusHandoff()
+      // KWin reports an empty active window between the two sides of some
+      // focus handoffs. Give the next activation time to arrive, but still
+      // report focus loss when no window becomes active, such as on desktop.
+      if (activeWindow === null || activeWindow.uuid === '') {
+        focusHandoffTimer = setTimeout(() => {
+          focusHandoffTimer = null
+          if (stopped || browserWindow.isFocused()) return
+
+          onFocusedState(false)
+          clearActiveWindowWatch()
+        }, focusHandoffDelay)
+        return
+      }
+
+      const focused = isLogicallyFocused(activeWindow, targetUuid)
+      onFocusedState(focused)
+      if (!focused) {
+        clearActiveWindowWatch()
+      }
+    }
+    const watch = value.watchActiveWindow(reportActiveWindow)
+    stopActiveWindowWatch = watch.stop
+    reportActiveWindow(watch.activeWindow)
+  }
+  const handleFocus = () => {
+    applyWindowIdentity()
+    const token = ++generation
+    clearActiveWindowWatch()
+    clearRestoreWatch()
+    minimizedUuid = null
+    setMinimized(false)
+    onFocusedState(true)
+    refreshBaseline(token).catch(() => {})
+  }
+  const handleBlur = async () => {
+    applyWindowIdentity()
+    const token = ++generation
+    clearActiveWindowWatch()
+    clearRestoreWatch()
+
+    const previous = baseline
+    try {
+      await new Promise(resolve => setTimeout(resolve, detectionDelay))
+      if (stopped || generation !== token) return
+
+      const value = await backend
+      if (value === null) {
+        releaseWindowIdentity()
+        onFocusedState(false)
+        return
+      }
+      applyWindowIdentity()
+      const target = {
+        caption: browserWindow.getTitle(),
+        bounds: browserWindow.getBounds(),
+      }
+      const current = await value.queryWindows(owner)
+      if (stopped || generation !== token) return
+
+      baseline = current
+      const matchedWindow = windowUuid === null
+        ? findMatchingWindow(current, target)
+        : current.find(window => window.uuid === windowUuid) ?? null
+      const targetUuid = matchedWindow?.uuid ?? windowUuid
+      watchActiveWindow(value, targetUuid)
+      const previousByUuid = new Map(previous.map(window => [window.uuid, window]))
+      const claimedWindow = windowUuid === null
+        ? null
+        : current.find(window => (
+          window.uuid === windowUuid &&
+          window.minimized &&
+          (previous.length === 0 || previousByUuid.get(windowUuid)?.minimized === false)
+        )) ?? null
+      const window = claimedWindow ?? findNewlyMinimizedWindow(previous, current, target)
+      if (window === null) return
+
+      windowUuid = window.uuid
+      releaseWindowIdentity()
+      minimizedUuid = window.uuid
+      setMinimized(true)
+      watchRestore(value, token, window.uuid)
+    } catch {
+      // A failed query disables this transition only. The next focus or blur
+      // retries without affecting normal Electron window events.
+      if (!stopped && generation === token) onFocusedState(false)
+    }
+  }
+  const stop = () => {
+    stopped = true
+    generation++
+    clearActiveWindowWatch()
+    clearRestoreWatch()
+    browserWindow.removeListener('focus', handleFocus)
+    browserWindow.removeListener('blur', handleBlur)
+    browserWindow.removeListener('closed', stop)
+  }
+
+  browserWindow.on('focus', handleFocus)
+  browserWindow.on('blur', handleBlur)
+  browserWindow.once('closed', stop)
+  refreshBaseline(generation).catch(() => {})
+
+  return stop
+}

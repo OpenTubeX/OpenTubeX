@@ -1,0 +1,394 @@
+<template>
+  <div>
+    <FtLoader
+      v-if="isLoading"
+      :fullscreen="true"
+    />
+    <FtCard
+      v-else-if="!channel"
+      class="card"
+    >
+      <p class="message">
+        {{ errorMessage }}
+      </p>
+      <FtFlexBox>
+        <PlatformRetryButton
+          :error="channelError"
+          @retry="loadChannel"
+        />
+      </FtFlexBox>
+    </FtCard>
+    <template v-else>
+      <FtCard class="card channelCard">
+        <img
+          v-if="channel.banner"
+          class="channelBanner"
+          :src="channel.banner"
+          alt=""
+        >
+        <div class="channelHeader">
+          <FtRetryImage
+            class="channelAvatar"
+            :src="channel.avatar ?? ''"
+            :fallback-icon="['fas', 'circle-user']"
+            alt=""
+          />
+          <div class="channelInfo">
+            <h2
+              :id="headingId"
+              class="channelName"
+              dir="auto"
+            >
+              {{ channel.name }}
+            </h2>
+            <p class="channelMeta">
+              <span>
+                <FtIcon
+                  :icon="PLATFORM_ICONS[platform.id]"
+                  aria-hidden="true"
+                />
+                {{ platform.name }}
+              </span>
+              <span v-if="channel.followerCount != null && !hideChannelSubscriptions">
+                {{ t('Platforms.Follower Count', { count: formatSubscriberCount(channel.followerCount) }, channel.followerCount) }}
+              </span>
+            </p>
+          </div>
+          <div class="channelActions">
+            <PlatformFollowButton
+              :platform="platform.id"
+              :channel-id="channel.id"
+            />
+            <FtIconButton
+              :title="t('Platforms.Open Website', { platform: platform.name })"
+              :icon="['fas', 'arrow-up-right-from-square']"
+              theme="base-no-default"
+              :size="20"
+              :padding="8"
+              @click="openExternalLink(channel.url)"
+            />
+          </div>
+        </div>
+        <p
+          v-if="channel.description"
+          class="channelDescription"
+          dir="auto"
+        >
+          {{ channel.description }}
+        </p>
+        <FtTabs
+          v-if="platform.channelTabs.length > 1"
+          class="channelTabs"
+          role="tablist"
+          :aria-labelledby="headingId"
+        >
+          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+          <div
+            v-for="tab in platform.channelTabs"
+            :id="`${panelId}-${tab}`"
+            :key="tab"
+            :ref="element => setTabRef(tab, element)"
+            class="tab"
+            role="tab"
+            :aria-selected="currentTab === tab"
+            :aria-controls="panelId"
+            :tabindex="currentTab === tab ? 0 : -1"
+            :data-channel-tab="tab"
+            @click="changeTab(tab)"
+            @keydown.space.enter.prevent="changeTab(tab)"
+            @keydown.left.right.prevent="focusNextTab(tab, $event)"
+          >
+            <FtIcon
+              :icon="TAB_ICONS[tab]"
+              class="tabIcon"
+            />
+            {{ tabLabels[tab] }}
+          </div>
+        </FtTabs>
+      </FtCard>
+      <FtCard
+        :id="panelId"
+        class="card"
+        :role="platform.channelTabs.length > 1 ? 'tabpanel' : undefined"
+        :aria-labelledby="platform.channelTabs.length > 1 ? `${panelId}-${currentTab}` : undefined"
+      >
+        <FtLoader v-if="page.loading && page.results.length === 0" />
+        <template v-else>
+          <p
+            v-if="page.error"
+            class="message"
+          >
+            {{ canPassBrowserCheck(page.cause) ? t('Platforms.Browser Check', { platform: platform.name }) : t('Platforms.Load Error', { platform: platform.name }) }}
+          </p>
+          <p
+            v-else-if="page.results.length === 0"
+            class="message"
+          >
+            {{ t('Platforms.Empty Tab') }}
+          </p>
+          <!-- Later pages try again with their next page button, unless a check fails them -->
+          <FtFlexBox v-if="page.error && (!page.loaded || canPassBrowserCheck(page.cause))">
+            <PlatformRetryButton
+              :error="page.cause"
+              @retry="page.loaded ? loadMore() : loadPage(currentTab)"
+            />
+          </FtFlexBox>
+          <!-- Remounts per tab, so each tab's results fade in like YouTube channel tabs -->
+          <PlatformResultList
+            :key="currentTab"
+            appear
+            :results="page.results"
+            :channel="channel"
+          />
+          <!-- After a failed page, the button tries again -->
+          <FtAutoLoadNextPageWrapper
+            v-if="page.continuation !== null"
+            :key="`${currentTab}:${autoLoadRevision}`"
+            :loading="page.loading"
+            :paused="page.error"
+            @load-next-page="loadMore"
+          >
+            <div
+              class="getNextPage"
+              role="button"
+              tabindex="0"
+              @click="loadMore"
+              @keydown.enter.space.prevent="loadMore"
+            >
+              <FtIcon :icon="['fas', 'search']" /> {{ t('Search Filters.Fetch more results') }}
+            </div>
+          </FtAutoLoadNextPageWrapper>
+        </template>
+      </FtCard>
+    </template>
+  </div>
+</template>
+
+<script setup>
+import { computed, reactive, ref, shallowRef, toRaw, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { FtIcon } from '@opentubex/icons'
+
+import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
+import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
+import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtRetryImage from '../../components/FtRetryImage.vue'
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
+import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
+import PlatformResultList from '../../components/PlatformResultList/PlatformResultList.vue'
+import PlatformRetryButton from '../../components/PlatformRetryButton/PlatformRetryButton.vue'
+
+import store from '../../store/index'
+import { canPassBrowserCheck, getPlatformFetch } from '../../helpers/platformFetch'
+import { forgetChannel, getRecentChannel, rememberChannel, startChannelLoad } from '../../helpers/recentPlatformChannels'
+import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
+import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
+import { useTabAvatar, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { getPlatform, PLATFORM_ICONS } from '../../../platforms/index'
+
+const TAB_ICONS = {
+  videos: ['fas', 'video'],
+  tracks: ['fas', 'music'],
+  clips: ['fas', 'film'],
+  playlists: ['fas', 'list']
+}
+
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const setTabTitle = useTabTitle()
+const setTabAvatar = useTabAvatar()
+const headingId = useId()
+const panelId = useId()
+
+const tabLabels = computed(() => ({
+  videos: t('Global.Videos'),
+  tracks: t('Platforms.Tracks'),
+  clips: t('Subscriptions.Platforms.Clips'),
+  playlists: t('Platforms.Playlists')
+}))
+
+const hideChannelSubscriptions = computed(() => store.getters.getHideChannelSubscriptions)
+
+const platform = computed(() => getPlatform(route.query.platform))
+const channelId = computed(() => typeof route.query.id === 'string' ? route.query.id : '')
+
+/** @type {import('vue').ShallowRef<import('../../../platforms/types').PlatformChannel | null>} */
+const channel = shallowRef(null)
+const isLoading = ref(true)
+const notFound = ref(false)
+/** What failed the channel to load */
+const channelError = shallowRef(/** @type {unknown} */ (null))
+const errorMessage = computed(() => {
+  if (notFound.value || !platform.value) return t('Platforms.Channel Not Found')
+  return canPassBrowserCheck(channelError.value)
+    ? t('Platforms.Browser Check', { platform: platform.value.name })
+    : t('Platforms.Load Error', { platform: platform.value.name })
+})
+
+const currentTab = ref('videos')
+/** @type {Record<string, { results: import('../../../platforms/types').PlatformResult[], continuation: string | null, loading: boolean, error: boolean, cause: unknown, loaded: boolean }>} */
+const pages = reactive({})
+const page = computed(() => pages[currentTab.value] ?? { results: [], continuation: null, loading: true, error: false, cause: null, loaded: false })
+
+let loadGeneration = 0
+/** The load of the shown channel, which its remembered pages keep */
+let channelLoad = startChannelLoad()
+/** The shown channel, kept for its requests, which can finish after the route moved on */
+let channelKey = { platform: '', id: '' }
+
+async function loadChannel() {
+  const generation = ++loadGeneration
+  isLoading.value = true
+  notFound.value = false
+  channelError.value = null
+  channel.value = null
+  for (const key of Object.keys(pages)) delete pages[key]
+  if (!platform.value || !channelId.value) {
+    notFound.value = true
+    isLoading.value = false
+    return
+  }
+  setTabTitle(platform.value.name)
+  const requested = route.query.tab
+  const tab = platform.value.channelTabs.includes(requested) ? requested : platform.value.channelTabs[0]
+  // Shown at once, so going back also restores the scroll position
+  channelKey = { platform: platform.value.id, id: channelId.value }
+  const recent = getRecentChannel(channelKey.platform, channelKey.id)
+  channelLoad = recent ?? startChannelLoad()
+  if (recent) {
+    for (const [key, cached] of Object.entries(recent.pages)) {
+      pages[key] = { ...cached, loading: false, error: false, cause: null, loaded: true }
+    }
+    showChannel(recent.channel, tab)
+    isLoading.value = false
+    // Unless the tab didn't load before
+    loadPage(tab)
+    return
+  }
+  try {
+    const result = await platform.value.getChannelWithPage(getPlatformFetch(platform.value.id), channelId.value, tab)
+    if (generation !== loadGeneration) return
+    channel.value = result?.channel ?? null
+    notFound.value = result === null
+    if (result) {
+      showChannel(result.channel, tab)
+      loadPage(tab, false, result.page)
+    }
+  } catch (error) {
+    if (generation !== loadGeneration) return
+    console.error('Failed to load the channel', error)
+    channelError.value = error
+  } finally {
+    if (generation === loadGeneration) isLoading.value = false
+  }
+}
+
+/**
+ * @param {import('../../../platforms/types').PlatformChannel} shown
+ * @param {string} tab
+ */
+function showChannel(shown, tab) {
+  channel.value = shown
+  setTabTitle(shown.name)
+  if (shown.avatar) setTabAvatar(shown.avatar)
+  currentTab.value = tab
+}
+
+/**
+ * Keeps the loaded tabs for going back to the channel.
+ */
+function rememberLoadedPages() {
+  const loaded = Object.entries(pages).flatMap(([tab, { results, continuation, loaded }]) =>
+    loaded ? [[tab, { results: toRaw(results), continuation }]] : [])
+  rememberChannel(channelKey.platform, channelKey.id, channel.value, Object.fromEntries(loaded), channelLoad)
+}
+
+/**
+ * @param {string} tab
+ * @param {boolean} [more] whether to load the next page
+ * @param {Promise<import('../../../platforms/types').PlatformPage>} [firstPage] the page that loads with the channel
+ */
+async function loadPage(tab, more = false, firstPage = undefined) {
+  const generation = loadGeneration
+  pages[tab] ??= { results: [], continuation: null, loading: false, error: false, cause: null, loaded: false }
+  // The reactive copy, which renders the changes
+  const current = pages[tab]
+  if (current.loading || (current.loaded && !more)) return
+  current.loading = true
+  current.error = false
+  current.cause = null
+  try {
+    const result = await (firstPage ?? platform.value.getChannelPage(getPlatformFetch(platform.value.id), channel.value, tab, more ? current.continuation : null))
+    if (generation !== loadGeneration) return
+    current.results = more ? [...current.results, ...result.results] : result.results
+    current.continuation = result.continuation
+    current.loaded = true
+    rememberLoadedPages()
+  } catch (error) {
+    if (generation !== loadGeneration) return
+    console.error('Failed to load the channel page', error)
+    current.error = true
+    current.cause = error
+  } finally {
+    if (generation === loadGeneration) current.loading = false
+  }
+}
+
+const autoLoadRevision = useAutoLoadRevision(() => page.value.continuation)
+
+function loadMore() {
+  loadPage(currentTab.value, true)
+}
+
+/**
+ * @param {string} tab
+ */
+function changeTab(tab) {
+  currentTab.value = tab
+  loadPage(tab)
+  // Back and reload return to the tab
+  if (route.query.tab !== tab) router.replace({ query: { ...route.query, tab } })
+}
+
+/** @type {Map<string, HTMLElement>} */
+const tabRefs = new Map()
+
+/**
+ * @param {string} tab
+ * @param {unknown} element
+ */
+function setTabRef(tab, element) {
+  if (element instanceof HTMLElement) tabRefs.set(tab, element)
+  else tabRefs.delete(tab)
+}
+
+/**
+ * @param {string} tab
+ * @param {KeyboardEvent} event
+ */
+function focusNextTab(tab, event) {
+  const tabs = platform.value.channelTabs
+  const index = tabs.indexOf(tab)
+  const next = tabs[(index + (event.key === 'ArrowLeft' ? tabs.length - 1 : 1)) % tabs.length]
+  changeTab(next)
+  tabRefs.get(next)?.focus()
+}
+
+// Reloading the tab, also by pulling down, loads the channel again, and
+// requests of the page it replaces no longer keep their results
+useTabLifecycle({
+  beforeReload() {
+    loadGeneration++
+    if (platform.value && channelId.value) forgetChannel(platform.value.id, channelId.value)
+  }
+})
+
+// Only another channel needs loading, not another tab of it
+watch([() => route.query.platform, () => route.query.id], loadChannel, { immediate: true })
+</script>
+
+<style scoped src="./ExternalChannel.css" />

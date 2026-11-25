@@ -1,0 +1,758 @@
+diff --git a/dist/shaka-player.ui-es2021.d.ts b/dist/shaka-player.ui-es2021.d.ts
+index 6aff7bc5a52c14fd685158b75ec11a1c619ee367..a0c4ac6916cc2021a7a1edb56f6ee96ee0854f3a 100644
+--- a/dist/shaka-player.ui-es2021.d.ts
++++ b/dist/shaka-player.ui-es2021.d.ts
+@@ -7266,7 +7266,7 @@ nameSpan : HTMLElement ;
+ }
+ // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
+ declare namespace shaka.extern {
+-  type UIConfiguration = { adStatisticsList : string [] , addSeekBar : boolean , allowTogglePresentationTime : boolean , alwaysShowVolumeBar : boolean , bigButtons : string [] , captionsFontScaleFactors : number [] , captionsStyleElements : string [] , captionsStyles : boolean , castAndroidReceiverCompatible : boolean , castReceiverAppId : string , castSenderUrl : string , clearBufferOnQualityChange : boolean , closeMenusDelay : number , contextMenuElements : string [] , controlPanelElements : string [] , customContextMenu : boolean , customTrackLabel : shaka.extern.UITrackLabelCallback , defaultVrProjectionMode : string , displayInVrMode : boolean , documentPictureInPicture : shaka.extern.UIDocumentPictureInPicture , doubleClickForFullscreen : boolean , enableFullscreenOnRotation : boolean , enableKeyboardPlaybackControls : boolean , enableKeyboardPlaybackControlsInWindow : boolean , enableTooltips : boolean , enableVrDeviceMotion : boolean , enableVrWheelZoom : boolean , fadeDelay : number , fastForwardRates : number [] , forceLandscapeOnFullscreen : boolean , fullScreenElement : HTMLElement | null , keyboardLargeSeekDistance : number , keyboardSeekDistance : number , mediaSession : shaka.extern.UIMediaSession , menuOpenUntilUserClosesIt : boolean , overflowMenuButtons : string [] , playbackRateBarColors : shaka.extern.UIVolumeBarColors , playbackRateSliderMax : number , playbackRateSliderMin : number , playbackRateSliderStep : number , playbackRates : number [] , preferIntlDisplayNames : boolean , preferVideoFullScreenInVisionOS : boolean , qualityMarks : shaka.extern.UIQualityMarks , refreshTickInSeconds : number , rewindRates : number [] , seekBarColors : shaka.extern.UISeekBarColors , seekButtonDistance : number , seekOnTaps : boolean , shortcuts : shaka.extern.UIShortcuts , showAudioChannelCountVariants : boolean , showAudioCodec : boolean , showBufferingSpinner : boolean , showRemainingTimeInPresentationTime : boolean , showUIAlways : boolean , showUIAlwaysOnAudioOnly : boolean , showUIOnPaused : boolean , showUnbufferedStart : boolean , showVideoCodec : boolean , singleClickForPlayAndPause : boolean , statisticsList : string [] , tapSeekDistance : number , textTrackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , topControlPanelElements : string [] , trackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , volumeBarColors : shaka.extern.UIVolumeBarColors } ;
++  type UIConfiguration = { adStatisticsList : string [] , addSeekBar : boolean , allowTogglePresentationTime : boolean , alwaysShowVolumeBar : boolean , bigButtons : string [] , captionsFontScaleFactors : number [] , captionsStyleElements : string [] , captionsStyles : boolean , castAndroidReceiverCompatible : boolean , castReceiverAppId : string , castSenderUrl : string , clearBufferOnQualityChange : boolean , closeMenusDelay : number , contextMenuElements : string [] , controlPanelElements : string [] , customContextMenu : boolean , customTrackLabel : shaka.extern.UITrackLabelCallback , defaultVrProjectionMode : string , displayInVrMode : boolean , documentPictureInPicture : shaka.extern.UIDocumentPictureInPicture , doubleClickForFullscreen : boolean , enableFullscreenOnRotation : boolean , enableKeyboardPlaybackControls : boolean , enableKeyboardPlaybackControlsInWindow : boolean , enableTooltips : boolean , enableVrDeviceMotion : boolean , enableVrWheelZoom : boolean , fadeDelay : number , fastForwardRates : number [] , forceLandscapeOnFullscreen : boolean , fullScreenElement : HTMLElement | null , keyboardLargeSeekDistance : number , keyboardSeekDistance : number , mediaSession : shaka.extern.UIMediaSession , menuOpenUntilUserClosesIt : boolean , overflowMenuButtons : string [] , playbackRateBarColors : shaka.extern.UIVolumeBarColors , playbackRateSliderMax : number , playbackRateSliderMin : number , playbackRateSliderStep : number , playbackRates : number [] , preferIntlDisplayNames : boolean , preferVideoFullScreenInVisionOS : boolean , qualityMarks : shaka.extern.UIQualityMarks , refreshTickInSeconds : number , rewindRates : number [] , seekBarColors : shaka.extern.UISeekBarColors , seekButtonDistance : number , seekOnTaps : boolean , shortcuts : shaka.extern.UIShortcuts , showAudioChannelCountVariants : boolean , showAudioCodec : boolean , showBufferingSpinner : boolean , showRemainingTimeInPresentationTime : boolean , showUIAlways : boolean , showUIAlwaysOnAudioOnly : boolean , showUIOnPaused : boolean , showUnbufferedStart : boolean , showVideoCodec : boolean , singleClickForPlayAndPause : boolean , statisticsList : string [] , tapSeekDistance : number , textTrackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , topControlPanelElements : string [] , trackLabelFormat : shaka.ui.Overlay.TrackLabelFormat , volumeBarColors : shaka.extern.UIVolumeBarColors , vrSideBySide : boolean } ;
+ }
+ // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
+ declare namespace shaka.extern {
+diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
+index a3596c9aa5af1236ec90588617fcf18685064397..860e58f82c25ac7c60b72cce0270914dcb7ae2b8 100644
+--- a/dist/shaka-player.ui-es2021.js
++++ b/dist/shaka-player.ui-es2021.js
+@@ -520,7 +520,7 @@ function zo(a,b=!1){var c=f=>{if(f.fullMimeTypes&&f.fullMimeTypes.size>1&&a.i.ha
+ async function So(a,b,c){if(c.code==3024)b.Sa=!1,po(b),uo(a,b,0);else{await a.$.attempt();Hg(a.m);if(c.code==3015||c.code==3014||c.category===1&&c.code!=1003){if(b.dd){Io(a,!1);return}var d=!1;if(c.code==3015||c.code==3014){d=await To(a,!0);for(var e of a.i.values())po(e);Hg(a.m)}e=a.h.disableStream(b.stream,Uo(a,c));c.handled=e||d;e&&(c.severity=1)}if(!c.handled&&c.code==1011){d=a.h.hc();e=lm(a.h.ha,b.type);let f=Ro(a,b,d,e);for(;f?.lc()===2;)b.Xa=f,f=Ro(a,b,d,e);if(f){await Om(a.h.ha,b.type,f.startTime);
+ b.Sa=!1;b.Md=!1;po(b);uo(a,b,0);return}}if(!c.handled||c.code!=1011)a.h.onError(c);c.handled||a.l.failureCallback(c)}}
+ function Vo(a,b){if(mo(b))return Am(a.h.ha,b.stream.originalId||""),null;b.type==L&&Bm(a.h.ha);if(b.stream.isAudioMuxedInVideo&&b.type=="audio")return null;if(b.type!=L&&bm(a.h.ha))return To(a,!0),null;var c=a.l.updateIntervalSeconds/Math.max(1,Math.abs(a.h.La()));if(!hm(a.h.ha)&&b.type!=L)return c/2;var d=a.h.hc(),e=a.h.La()<0;if(b.type==="audio")for(var f of a.o.keys()){var g=a.o.get(f);g.eb(d,!0);Vn(g,d)}f=Po(a,b,d);var h=e?om(a.h.ha,b.type,d):nm(a.h.ha,b.type,d);b.type=="video"&&!a.i.has("audio")&&
+-a.h.ha.l.has("audio")&&(g=e?om(a.h.ha,"audio",d):nm(a.h.ha,"audio",d),h=Math.min(h,g));g=Math.max(1,Math.max(a.l.rebufferingGoal,a.l.bufferingGoal)*a.D);var k=a.j.presentationTimeline.wa()?Infinity:a.j.presentationTimeline.getDuration()-f,l=lm(a.h.ha,b.type);if(!e&&k<1E-6&&l)return b.endOfStream=!0,b.type=="video"&&((c=a.i.get(L))&&mo(c)&&(c.endOfStream=!0),(c=a.i.get("audio"))&&c.stream.isAudioMuxedInVideo&&(c.endOfStream=!0)),null;b.endOfStream=!1;if(e){var m=a.j.presentationTimeline.Qb();if(l!=
++a.h.ha.l.has("audio")&&(g=e?om(a.h.ha,"audio",d):nm(a.h.ha,"audio",d),h=Math.min(h,g));g=Math.max(1,a.l.rebufferingGoal,Math.max(a.l.rebufferingGoal,a.l.bufferingGoal)*a.D);var k=a.j.presentationTimeline.wa()?Infinity:a.j.presentationTimeline.getDuration()-f,l=lm(a.h.ha,b.type);if(!e&&k<1E-6&&l)return b.endOfStream=!0,b.type=="video"&&((c=a.i.get(L))&&mo(c)&&(c.endOfStream=!0),(c=a.i.get("audio"))&&c.stream.isAudioMuxedInVideo&&(c.endOfStream=!0)),null;b.endOfStream=!1;if(e){var m=a.j.presentationTimeline.Qb();if(l!=
+ null&&f<=m+1E-6)return null}if(h>0&&a.l.stopFetchingOnPause&&a.h.video.paused||h>=g)return c/2;m=!b.Ba;h=Ro(a,b,d,l);if(!h){if(!a.j.presentationTimeline.wa()&&k<1E-6)return b.endOfStream=!0,b.type=="video"&&(c=a.i.get(L))&&mo(c)&&(c.endOfStream=!0),null;a=Infinity;(b=b.Xa)&&(a=b.endTime-b.startTime);return Math.min(a/2,c)}k=b.zb;l=h.initSegmentReference;k&&l&&Uj(l,k)&&(k.h=l.h);k=!1;m&&b.qg&&(k=!0,b.qg=!1);m=Infinity;l=-Infinity;for(let n of a.i.values()){if(mo(n)||n.stream.isAudioMuxedInVideo)continue;
+ if(n.Ba&&!n.Ba.current())continue;let p=Po(a,n,d);m=Math.min(m,p);l=Math.max(l,p)}if((e?l-f:f-m)>=Math.max(a.j.presentationTimeline.i,.5))return c;b.ua&&b.Ba&&!a.o.has(b.stream)&&(b.ua.eb(h.startTime+.001),Vn(b.ua,h.startTime).catch(()=>{}));if(No(a)&&Wo(a,b,h))return null;Xo(a,b,d,h,k).catch(()=>{});b.Uc&&Yo(a,b.Uc,d,g);return null}
+ async function vo(a,b){Hg(a.m);if(!b.Sa&&b.kb!=null&&!b.Tb)if(b.kb=null,b.Rb)await Ho(a,b,b.fe,b.Fd);else{Mo(a,b);if(!b.stream.segmentIndex){var c=b.stream,d=b.stream.codecs;let e=b.stream.mimeType;try{await b.stream.createSegmentIndex()}catch(f){await So(a,b,f);return}b.type!==L||d==b.stream.codecs&&e==b.stream.mimeType||(d=me(b.stream.mimeType,b.stream.codecs),dm(a.h.ha,d,b.stream.external));if(c!=b.stream){c.closeSegmentIndex&&c.closeSegmentIndex();b.Sa||b.kb||uo(a,b,0);return}}if(b.Uc&&!b.Uc.stream.segmentIndex)try{await b.Uc.stream.createSegmentIndex()}catch(e){}try{let e=
+@@ -534,7 +534,7 @@ function Wo(a,b,c){if(b.type===L)return!1;var d=b.zb;if(!d)return!1;var e=c.init
+ async function Xo(a,b,c,d,e){var f=b.stream,g=b.Ba;b.Sa=!0;try{if(d.lc()==2)throw new K(1,1,1011);await Zo(a,b,d,e);Hg(a.m);if(!a.G){var h=f.mimeType=="video/mp4"||f.mimeType=="audio/mp4",k=window.ReadableStream,l={sd:null};if(a.l.lowLatencyMode&&a.j.isLowLatency&&k&&h&&(a.j.type!="HLS"||d.o)){let n=new Uint8Array(0),p=!1,q=!1,r,u=await $o(a,b,d,async t=>{if(!p&&(q=!0,Hg(a.m),!a.G))try{n=Ib(n,t);let v=!1,w=0;(new Yg).box("mdat",z=>{w=z.size+z.start;v=!0}).parse(n,!1,!0);if(v){let z=n.subarray(0,w);
+ n=n.subarray(w);let x=await ap(a,b,c,f,d,z,!0,e);l.sd==null&&(l=x);b.ua&&b.Ba&&Vn(b.ua,d.startTime,!0)}}catch(v){r=v}});if(r)throw r;if(!q){p=!0;Hg(a.m);if(a.G)return;if(b.Rb){b.Sa=!1;uo(a,b,0);return}l=await ap(a,b,c,f,d,u,!1,e)}b.ua&&b.Ba&&Vn(b.ua,d.startTime,!0)}else{let n=await $o(a,b,d);Hg(a.m);if(a.G)return;Hg(a.m);if(b.Rb){b.Sa=!1;uo(a,b,0);return}if(bo(a.C,d.startTime,d.endTime)){b.Sa=!1;b.kb||uo(a,b,0);return}l=await ap(a,b,c,f,d,n,!1,e)}Hg(a.m);if(!a.G){b.Xa=d;g.next();b.Sa=!1;b.Qh=!1;var m=
+ a.h.ha.Wc()[b.type];ra(JSON.stringify(m));b.Rb||(g=null,b.type==="video"?g=a.i.get("audio"):b.type==="audio"&&(g=a.i.get("video")),g&&g.type=="audio"?a.h.Wd(d,b.stream,g.stream.isAudioMuxedInVideo,!1,l.sd):a.h.Wd(d,b.stream,b.stream.codecs.includes(","),!1,l.sd));po(b);uo(a,b,0)}}}catch(n){Hg(a.m,n),a.G||(b.Sa=!1,n.code!=7001&&n.category!=1||!b.ua||(Un(b.ua,d),d.initSegmentReference&&Un(b.ua,d.initSegmentReference)),n.code==7001?(b.Sa=!1,po(b),uo(a,b,0)):b.type==L&&a.l.ignoreTextStreamFailures?a.i.delete(L):
+-n.code==3017?await bp(a,b,n):(b.Md=!0,n.severity=2,await So(a,b,n)))}}
++n.code==3017?await bp(a,b,n,d):(b.Md=!0,n.severity=2,await So(a,b,n)))}}
+ async function Yo(a,b,c,d){var e=b.stream,f=e.segmentIndex;for(c=(f=f&&f.Hb(c))&&f.next().value;c&&a.P.includes(c.startTime);)c=f&&f.next().value;if(c){if((f=c.initSegmentReference)&&!Uj(f,b.zb)){b.zb=f;try{let k=await $o(a,b,f);if(!a.h)return;var g=a.h.ha;g.H&&kc(g.H,k,0,e);a.P=[]}catch(k){throw b.zb=null,k;}}if(!b.Xa||b.Xa!=c){b.Xa=c;try{let k=await $o(a,b,c);if(!a.h)return;var h=a.h.ha;h.H&&kc(h.H,k,0,e);a.P.push(c.startTime)}catch(k){throw b.Xa=null,k;}a.h&&(b.Rb||(e=null,b.type==="video"?e=a.i.get("audio"):
+ b.type==="audio"&&(e=a.i.get("video")),e&&e.type=="audio"?a.h.Wd(c,b.stream,e.stream.isAudioMuxedInVideo,!0,null):a.h.Wd(c,b.stream,b.stream.codecs.includes(","),!0,null)),e=Math.max(0,...a.P),a.h.hc()+d>e&&await Yo(a,b,c.startTime,d))}}}
+ async function Zo(a,b,c,d){var e=b.Xa==null,f=[],g=Math.max(0,Math.max(c.appendWindowStart,a.ea)-.1),h=Math.min(c.appendWindowEnd,a.ba)+.1;if(a.l.clampAppendWindowToDuration){var k=a.j.presentationTimeline.getDuration();k<Infinity&&(h=Math.min(h,k))}k=te(c.codecs||b.stream.codecs);var l=ue(c.mimeType||b.stream.mimeType),m=c.timestampOffset;m==b.Jf&&g==b.Hc&&h==b.Gc&&k==b.wh&&l==b.xh||await cp(a,b,m,g,h,c,k,l);if(!Uj(c.initSegmentReference,b.zb)&&(b.zb=c.initSegmentReference,c.l&&c.initSegmentReference)){let n=
+@@ -543,7 +543,7 @@ new Yg;t.Ca(["moov","trak","mdia"],Qg).X("mdhd",x=>{q=xi(x.reader,x.version).tim
+ u);r.has(b.type)?c.initSegmentReference.timescale=r.get(b.type):q!=null&&(c.initSegmentReference.timescale=q);let v=b.stream.segmentIndex,w;v instanceof An&&(w=zn(v,c.startTime));let z=b.stream.closedCaptions&&b.stream.closedCaptions.size>0;await a.h.Ji(b.type,p);await sm(a.h.ha,b.type,p,null,b.stream,z,b.ud,d,!1,!1,w)}catch(p){throw b.zb=null,p;}})())}c.discontinuitySequence!=(b.Xa?b.Xa.discontinuitySequence:-1)&&f.push(Om(a.h.ha,b.type,c.startTime));await Promise.all(f)}
+ async function $o(a,b,c,d){var e=c.jc();if(e)return e;e=null;if(b.ua){{e=b.ua;let f=e.h;c instanceof Vj&&(f=e.l);f.has(c)?(e=f.get(c),d&&(e.ki=d),e=e.Ge):e=null}}e||=no(c,b.stream,d||null,a.l.retryParameters,a.h.Jc);a=0;b.Ba&&(a=b.Ba.i);b.operation=e;d=await e.promise;b.operation=null;b=d.data;c.aesKey&&(b=await rl(b,c.aesKey,a));return b}
+ async function ap(a,b,c,d,e,f,g=!1,h=!1){var k=d.closedCaptions&&d.closedCaptions.size>0;if(a.l.shouldFixTimestampOffset){let l=d.mimeType=="video/mp4"||d.mimeType=="audio/mp4",m=null;e.initSegmentReference&&(m=e.initSegmentReference.timescale);l&&m&&d.type==="video"&&a.j.type=="DASH"&&(new Yg).Ca($g,Qg).X("tfdt",async n=>{if(n=wi(n.reader,n.version).Ta)n=-n/m,(Number(b.Jf)||0)<n&&await cp(a,b,n,b.Hc,b.Gc,e)}).parse(f,!1,g)}await ep(a,b,c);Hg(a.m);c=b.ud;b.ud=!1;await a.h.Ji(b.type,f);d=await sm(a.h.ha,
+-b.type,f,e,d,k,c,h,g);Hg(a.m);return d}async function bp(a,b,c){var d=!1;for(let e of a.i.values())if(e!=b&&e.Qh){d=!0;break}if(!d){if(a.l.avoidEvictionOnQuotaExceededError){if(a.h.disableStream(b.stream,Uo(a,c)))return;uo(a,b,4);return}d=Math.round(100*a.D);if(d>20)a.D-=.2;else if(d>4)a.D-=.04;else{a.h.disableStream(b.stream,Uo(a,c))?(a.D=1,c=a.h.hc(),await ep(a,b,c)):(b.Md=!0,a.G=!0,a.h.onError(c));return}b.Qh=!0;c=a.h.hc();await ep(a,b,c)}uo(a,b,4)}
++b.type,f,e,d,k,c,h,g);Hg(a.m);return d}async function bp(a,b,c,x){var d=!1;for(let e of a.i.values())if(e!=b&&e.Qh){d=!0;break}if(!d){if(a.l.avoidEvictionOnQuotaExceededError){if(a.h.disableStream(b.stream,Uo(a,c)))return;uo(a,b,4);return}d=a.h.La();if(d>=0){let t=a.h.hc(),r=x.endTime-x.startTime,k=nm(a.h.ha,b.type,t);b.type=="video"&&!a.i.has("audio")&&a.h.ha.l.has("audio")&&(k=Math.min(k,nm(a.h.ha,"audio",t)));let f=k-r,g=b.quotaExceededAt!=t||k>=Math.max(1,a.l.rebufferingGoal);b.quotaExceededAt=t;if(f>0&&g){a.D=Math.min(a.D,f/Math.max(a.l.rebufferingGoal,a.l.bufferingGoal));b.Qh=!0;await ep(a,b,t);uo(a,b,r/Math.max(1,d));return}}d=Math.round(100*a.D);if(d>20)a.D-=.2;else if(d>4)a.D-=.04;else{a.h.disableStream(b.stream,Uo(a,c))?(a.D=1,c=a.h.hc(),await ep(a,b,c)):(b.Md=!0,a.G=!0,a.h.onError(c));return}b.Qh=!0;c=a.h.hc();await ep(a,b,c)}uo(a,b,4)}
+ function Uo(a,b){return a.l.maxDisabledTime===0&&b.code==1011?1:b.code==3014||b.code==3015?Infinity:a.l.maxDisabledTime}
+ async function ep(a,b,c){a.I==b&&(a.I=null);var d=b.stream.segmentIndex;if(d instanceof An){d.eb(a.j.presentationTimeline.Jb());var e=[];yn(d,n=>{e.push(n.A())})}d=Math.max(a.l.bufferBehind*a.D,a.j.presentationTimeline.i);var f=km(a.h.ha,b.type);if(f!=null){var g=c-f,h=a.l.evictionGoal,k=a.j.presentationTimeline.Qb(),l=a.j.presentationTimeline.Ib()-k,m=g-d;l>h&&(m=Math.max(g-d,k-h-f));m<=h||(await a.h.ha.remove(b.type,f,f+m,e),Hg(a.m),a.I&&(await ep(a,a.I,c),Hg(a.m)))}}
+ async function cp(a,b,c,d,e,f,g,h){var k=zo(a);try{b.Hc=d;b.Gc=e;g&&(b.wh=g);h&&(b.xh=h);b.Jf=c;let l=a.j.sequenceMode||a.j.type=="HLS",m=null;b.type==="video"?m=a.i.get("audio"):b.type==="audio"&&(m=a.i.get("video"));m&&m.stream&&m.stream.isAudioMuxedInVideo&&await Nm(a.h.ha,m.type,c,d,e,l,m.stream.mimeType,m.stream.codecs,k);await Nm(a.h.ha,b.type,c,d,e,l,f.mimeType||b.stream.mimeType,f.codecs||b.stream.codecs,k,()=>fp(a,m))}catch(l){throw b.Hc=null,b.Gc=null,b.wh=null,b.xh=null,b.Jf=null,l;}}
+@@ -1701,7 +1701,7 @@ TOGGLE_STEREOSCOPIC:"M830-720H128C102-720 80-697 80-669v378c0 28 22 51 48 51h194
+ CHAPTER:"m400-200-182 91q-20 10-39-2T160-145v-495q0-33 24-56T240-720h320q33 0 56 24T640-640v495q0 23-19 34t-39 2l-182-91Zm360-40q-17 0-28-12T720-280v-520H320q-17 0-28-12T280-840q0-17 12-28T320-880h400q33 0 56 24T800-800v520q0 17-12 28T760-240Z",VIDEO_TYPE:"m460-380 280-180-280-180v360ZM320-240q-33 0-56-24T240-320v-480q0-33 24-56T320-880h480q33 0 56 24T880-800v480q0 33-24 56T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56-24T80-160v-560h80v560h560v80H160Zm160-720v480-480Z",COPY:"M360-240q-33 0-56-24T280-320v-480q0-33 24-56T360-880h360q33 0 56 24T800-800v480q0 33-24 56T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56-24T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z",
+ QUEUE:"M120-320v-80h320v80H120Zm0-160v-80h480v80H120Zm0-160v-80h480v80H120Zm520 520v-320l240 160-240 160Z"};y("shaka.ui.Enums.MaterialDesignSVGIcons",bO);function cO(a,b,c){a.h.style.setProperty("background-color","transparent");a.h.style.setProperty("mask-image","");a.h.setAttribute("viewBox",c||"0 -960 960 960");if(Array.isArray(b))for(let d=0,e=b.length;d<e;d++)dO(a,b[d]);else b&&dO(a,b)}function dO(a,b){var c=Il("path");c.setAttribute("d",b);a.h.appendChild(c)}
+ var eO=class{constructor(a,b){this.parent=a;this.h=Il("svg");this.h.classList.add("shaka-ui-icon");this.h.ariaHidden="true";this.h.setAttribute("viewBox","0 -960 960 960");b&&this.use(b);this.parent&&a.appendChild(this.h)}use(a){if(a){var b=this.h.childNodes;for(let c=0,d=b.length,e;c<d;c++)e=b[c],e instanceof SVGPathElement&&e.remove();if(typeof a=="string")this.h.style.setProperty("font-size",""),cO(this,a,null);else if(typeof a=="object"){b=a.url;let c=a.path,d=a.viewBox;a=a.size;this.h.style.setProperty("font-size",
+-a?a+"px":"");b?(this.h.style.setProperty("background-color","currentColor"),this.h.style.setProperty("mask-image",`url("${b}")`)):c&&cO(this,c,d)}}}El(){return this.h}al(){var a=(new XMLSerializer).serializeToString(this.h);return`url("data:image/svg+xml;base64,${window.btoa(a)}")`}};y("shaka.ui.Icon",eO);eO.prototype.getDataUrl=eO.prototype.al;eO.prototype.getSvgElement=eO.prototype.El;eO.prototype.use=eO.prototype.use;function fO(a,b){a=a.getElementsByClassName(b);return a.length?a[0]:null}function gO(a){if(a){var b=Array.from(a.getElementsByClassName("shaka-chosen-item")).find(c=>{for(;c&&c!=a;c=c.parentElement)if(c.classList.contains("shaka-hidden"))return!1;return!0});(b=b?b.closest("button"):a.querySelector(".shaka-back-to-overflow-button"))&&b.focus()}}function hO(a){var b=fO(a,"shaka-back-to-overflow-button");Nl(a);a.appendChild(b)}
++a?a+"px":"");b?(this.h.style.setProperty("background-color","currentColor"),this.h.style.setProperty("mask-image",`url("${b}")`)):c&&cO(this,c,d)}}}El(){return this.h}al(){var a=(new XMLSerializer).serializeToString(this.h);return`url("data:image/svg+xml;base64,${window.btoa(a)}")`}};y("shaka.ui.Icon",eO);eO.prototype.getDataUrl=eO.prototype.al;eO.prototype.getSvgElement=eO.prototype.El;eO.prototype.use=eO.prototype.use;function fO(a,b){a=a.getElementsByClassName(b);return a.length?a[0]:null}function gO(a){if(a&&!a.closest(".shaka-hidden")){var b=Array.from(a.getElementsByClassName("shaka-chosen-item")).find(c=>{for(;c&&c!=a;c=c.parentElement)if(c.classList.contains("shaka-hidden"))return!1;return!0});(b=b?b.closest("button"):a.querySelector(".shaka-back-to-overflow-button"))&&b.focus()}}function hO(a){var b=fO(a,"shaka-back-to-overflow-button");Nl(a);a.appendChild(b)}
+ function iO(){var a=(new eO(null,bO.CHECKMARK)).h;a.classList.add("shaka-chosen-item");return a}function Y(a,b){a&&(b?a.classList.remove("shaka-hidden"):a.classList.add("shaka-hidden"))}function jO(a,b,c,d){a.B(b,"mouseenter",c);a.B(b,"mouseleave",d);a.B(b,"focus",c);a.B(b,"blur",d)}function kO(a,b){var c=Math.floor(a/86400),d=Math.floor(a%86400/3600),e=Math.floor(a/60%60);a=Math.floor(a%60);a<10&&(a="0"+a);a=e+":"+a;b&&(e<10&&(a="0"+a),a=d+":"+a,c>0&&(d<10&&(a="0"+a),a=c+":"+a));return a}
+ function lO(a,b,c=!0){a.setAttribute("aria-checked",c?"true":"false");b.classList.toggle("shaka-chosen-item",c)}function mO(a,b){var c="";a.codecs=="mjpg"?(new Yg).box("mdat",Vg(d=>{c=URL.createObjectURL(new Blob([d],{type:"image/jpeg"}))},!0)).parse(b.data,!1):c=URL.createObjectURL(new Blob([b.data],{type:a.mimeType||"image/jpeg"}));return c};var nO=class extends aO{constructor(a,b){super(a,b);this.h=Jl();this.h.classList.add("shaka-ad-info");this.h.disabled=!0;this.parent.appendChild(this.h);this.i=new N(()=>{if(this.ad.isLinear()){var c="",d=this.ad.getSequenceLength();d>1&&(c=this.ad.getPositionInSequence(),c=this.localization.resolve("AD_PROGRESS").replace("[AD_ON]",String(c)).replace("[NUM_ADS]",String(d)));var e=Math.round(this.ad.getRemainingTime()),f=this.ad.getDuration();e!=-1&&f!=-1&&isFinite(e)&&isFinite(f)?e>0?(e=kO(f-e,!1)+
+ " / "+kO(f,!1),c=d>1?c+("\u00a0\u00a0"+e):this.localization.resolve("AD_TIME").replace("[AD_TIME]",e),this.h.textContent=c,this.h.ariaLabel=c,Y(this.h,c!="")):(this.i.stop(),this.h.textContent=""):(this.h.textContent=c,this.h.ariaLabel=c,Y(this.h,c!=""))}});this.eventManager.B(this.adManager,dw,()=>{this.i.Ja();this.i.Ia(.5)});this.eventManager.B(this.adManager,jw,()=>{this.i.stop();this.h.textContent=""});this.ad&&(this.i.Ja(),this.i.Ia(.5))}release(){this.i.stop();this.i=null;super.release()}};
+@@ -1726,11 +1726,11 @@ b&&b.isLinear()||GO(this.h,a.seekOffset||c);break;case "seekto":if(a.seekTime==n
+ 1);break;case "skipad":b&&b.skip()}}};y("shaka.ui.MediaSession",IO);IO.prototype.commonActionHandler=IO.prototype.Qi;IO.prototype.addMediaSessionHandler=IO.prototype.hb;IO.prototype.setupChapters=IO.prototype.Tj;IO.prototype.setupPoster=IO.prototype.eg;IO.prototype.setupAlbum=IO.prototype.Rj;IO.prototype.setupArtist=IO.prototype.Sj;IO.prototype.setupTitle=IO.prototype.Le;IO.prototype.release=IO.prototype.release;IO.prototype.configure=IO.prototype.configure;function JO(a,b){a.bar.value=a.H(b.clientX)}function KO(a,b){b.preventDefault();a.bar.value=a.H(b.changedTouches[0].clientX)}
+ var LO=class extends aO{constructor(a,b,c,d,e=!1){super(a,b);this.container=U("div");this.container.classList.add("shaka-range-container");this.container.classList.add(...c);this.A=this.i=!1;this.bar=document.createElement("input");this.G=new N(()=>{this.onChangeEnd();this.i=!1});this.bar.classList.add("shaka-range-element");this.bar.classList.add(...d);this.bar.type="range";this.bar.step="any";this.bar.min="0";this.bar.max="1";this.bar.value="0";this.bar.disabled=!this.controls.Fa();this.container.appendChild(this.bar);
+ this.parent.appendChild(this.container);this.W=new N(()=>{this.bar.disabled=!1});this.eventManager.B(this.controls,"showingui",()=>{this.W.aa(0)});this.eventManager.B(this.controls,"hidingui",()=>{this.W.stop();document.activeElement!=this.bar&&(this.bar.disabled=!0)});this.eventManager.B(this.bar,"mousedown",f=>{!this.bar.disabled&&this.controls.Fa()&&(f.preventDefault(),this.bar.focus(),this.G.stop(),this.A=this.i=!0,JO(this,f),this.onChangeStart(),this.onChange(),f.stopPropagation())});this.eventManager.B(document,
+-"mousemove",f=>{this.A&&(JO(this,f),this.onChange())});this.eventManager.B(document,"mouseup",f=>{this.A&&(this.A=!1,this.i&&(this.i=!1,JO(this,f),this.onChangeEnd()))});this.eventManager.B(this.bar,"input",()=>{this.onChange()});navigator.maxTouchPoints>0&&(this.eventManager.B(this.bar,"touchstart",f=>{!this.bar.disabled&&this.controls.Fa()&&(this.G.stop(),this.i=!0,KO(this,f),this.onChangeStart(!0),this.onChange(),f.stopPropagation())}),this.eventManager.B(this.bar,"touchmove",f=>{this.i&&(KO(this,
++"mousemove",f=>{this.A&&(JO(this,f),this.onChange())});this.eventManager.B(document,"mouseup",f=>{this.A&&(this.A=!1,f.target!==this.bar&&(()=>{const ftDragClick=g=>{g.stopPropagation()};window.addEventListener("click",ftDragClick,{capture:!0,once:!0});setTimeout(()=>window.removeEventListener("click",ftDragClick,!0))})(),this.i&&(this.i=!1,JO(this,f),this.onChangeEnd()))});this.eventManager.B(this.bar,"input",()=>{this.onChange()});navigator.maxTouchPoints>0&&(this.eventManager.B(this.bar,"touchstart",f=>{!this.bar.disabled&&this.controls.Fa()&&(this.G.stop(),this.i=!0,KO(this,f),this.onChangeStart(!0),this.onChange(),f.stopPropagation())}),this.eventManager.B(this.bar,"touchmove",f=>{this.i&&(KO(this,
+ f),this.onChange(),f.stopPropagation())}),this.eventManager.ia(this.bar,["touchend","touchcancel"],f=>{this.i&&(this.i=!1,KO(this,f),this.onChangeEnd(),f.stopPropagation())}));this.eventManager.B(this.bar,"mouseup",f=>{this.i&&(this.A=this.i=!1,JO(this,f),this.onChangeEnd(),f.stopPropagation())});this.eventManager.B(this.bar,"blur",()=>{this.i&&(this.A=this.i=!1,this.onChangeEnd());this.controls.Fa()||(this.bar.disabled=!0)});this.eventManager.B(this.bar,"contextmenu",f=>{f.preventDefault();f.stopPropagation()});
+ e&&this.eventManager.B(this.container,"wheel",f=>{if(!f.ctrlKey&&!f.metaKey){f.preventDefault();var g=parseFloat(this.bar.min),h=parseFloat(this.bar.max),k=parseFloat(this.bar.step)||1;f=this.getValue()+(f.deltaY>0?-k:k);f=Math.max(g,Math.min(h,f));this.setValue(f);this.onChange()}})}release(){this.G&&(this.G.stop(),this.G=null);super.release()}setRange(a,b){this.bar.min=a;this.bar.max=b}setStep(a){this.bar.step=a}getMin(){return parseFloat(this.bar.min)}getMax(){return parseFloat(this.bar.max)}setBackground(a){this.container.style.background=
+ a}onChangeStart(){}onChange(){}onChangeEnd(){}changeTo(a){this.i||(this.i=!0,this.onChangeStart());var b=parseFloat(this.bar.min),c=parseFloat(this.bar.max);this.bar.value=a>c?c:a<b?b:a;this.onChange();this.G.aa(.5)}endMouseInteraction(){this.A&&(this.i=this.A=!1,this.onChangeEnd())}getValue(){return parseFloat(this.bar.value)}setValue(a){this.i||(this.bar.value=a)}H(a){var b=this.bar.getBoundingClientRect(),c=parseFloat(this.bar.min),d=parseFloat(this.bar.max),e=parseFloat(this.bar.step)||1,f=b.left+
+-6;b=b.right-6;a=c+(Math.max(f,Math.min(b,a))-f)/(b-f)*(d-c);a=Math.round((a-c)/e)*e+c;return a=Math.min(d,Math.max(c,a))}};y("shaka.ui.RangeElement",LO);LO.prototype.setValue=LO.prototype.setValue;LO.prototype.getValue=LO.prototype.getValue;LO.prototype.endMouseInteraction=LO.prototype.endMouseInteraction;LO.prototype.changeTo=LO.prototype.changeTo;LO.prototype.onChangeEnd=LO.prototype.onChangeEnd;LO.prototype.onChange=LO.prototype.onChange;LO.prototype.onChangeStart=LO.prototype.onChangeStart;
++6;b=b.right-6;a=c+(Math.max(f,Math.min(b,a))-f)/(b-f)*(d-c);this.bar.step!="any"&&(a=Math.round((a-c)/e)*e+c);return a=Math.min(d,Math.max(c,a))}};y("shaka.ui.RangeElement",LO);LO.prototype.setValue=LO.prototype.setValue;LO.prototype.getValue=LO.prototype.getValue;LO.prototype.endMouseInteraction=LO.prototype.endMouseInteraction;LO.prototype.changeTo=LO.prototype.changeTo;LO.prototype.onChangeEnd=LO.prototype.onChangeEnd;LO.prototype.onChange=LO.prototype.onChange;LO.prototype.onChangeStart=LO.prototype.onChangeStart;
+ LO.prototype.setBackground=LO.prototype.setBackground;LO.prototype.getMax=LO.prototype.getMax;LO.prototype.getMin=LO.prototype.getMin;LO.prototype.setStep=LO.prototype.setStep;LO.prototype.setRange=LO.prototype.setRange;function MO(a){if(a.D.length){var b=a.player.ya(),c=b.end-b.start,d=[],e=a.J.seekBarColors.adBreaks,f=!1;for(let g of a.D)if(g.start==-1&&!g.end)f=!0;else if(!g.end&&g.start>=b.start||typeof g.end=="number"&&g.end>b.start){let h=(Math.max(g.start,b.start)-b.start)/c||0,k=h+.01;g.end&&(k=(g.end-b.start)/c||0);d.push({position:h*100+"%",width:(k-h)*100+"%"})}f&&d.push({position:"99%",width:"1%"});a.M.style.background=NO(d,e)}else a.M.style.background="transparent",a.L.stop()}
+ function OO(a){var b=a.J.seekBarColors.chapters,c=a.controls.I;if(c.length&&b&&b!=="transparent"){var d=a.player.ya(),e=d.end-d.start;if(e<5)e<=0?a.o.aa(.1):(a.F.style.background="transparent",a.o?.stop());else{e=new Set;for(let f of c)f.startTime<d.start||f.startTime>d.end||(f.startTime>d.start&&e.add(f.startTime),f.endTime&&f.endTime<d.end-1&&e.add(f.endTime));if(e.size){c=[];for(let f of Array.from(e).sort((g,h)=>g-h)){d=PO(a,f);if(d==null){a.o.aa(.1);return}c.push({position:d-1+"px",width:"2px"})}a.F.style.background=
+ NO(c,b)}else a.F.style.background="transparent",a.o?.stop()}}else a.F.style.background="transparent",a.o?.stop()}function QO(a){a.j.style.visibility="hidden"}function RO(a,b,c=!1){var d=PO(a,b);d!=null&&SO(a,d,b,c)}function TO(a){var b=a.player.ya();b=b.end-b.start;return a.player.wa()&&(b<5||!isFinite(b))?!1:a.ad==null||!a.ad.isLinear()}function UO(a){var b=()=>{MO(a);var c=a.player.ya();c=c.end-c.start;a.player.wa()&&c>5&&a.L.Ia(.25)};b();a.player.ze()||a.eventManager.Ga(a.player,"loaded",b)}
+@@ -1738,9 +1738,9 @@ function NO(a,b){return a.length&&b&&b!=="transparent"?a.map(({position:c,width:
+ function PO(a,b,c){c=c||a.bar.getBoundingClientRect();var d=parseFloat(a.bar.min);a=parseFloat(a.bar.max);return c.width<=0||a<=d?null:(b-d)/(a-d)*(c.width-12)+6}
+ async function SO(a,b,c,d){c<0&&(c=0);var e=a.bar.offsetWidth,f=!1;a.D.length&&(f=a.D.some(v=>v.end?c>=v.start&&c<=v.end:!1));var g=a.player.ya(),h=Math.max(Math.ceil(g.start),Math.min(Math.floor(g.end),c));if(a.player.wa()){g=g.end-c;var k=g<1?a.localization.resolve("LIVE"):"-"+kO(g,g>=3600)}else k=kO(c,c>=3600);(g=VO(a,c))&&(k+=" \u00b7 "+g.title);var l=a.player.re().length>0,m=g&&g.images.length>0;f=!f&&(l||m);var n=[b,e,f,k].join(),p=a.C;p=d&&(!f||!!p&&h>=p.startTime&&h<p.startTime+p.duration);
+ if(!p||n!=a.V)if(a.V=n,a.U.textContent=k,d=Math.max(150,e*.15),a.l.style.width=(a.j.classList.contains("portrait-thumbnail")?d/2:d)+"px",a.l.style.display=f?"":"none",a.j.classList.toggle("time-only",!f),a.j.style.left="0",a.ea?a.j.style.transform="translateX(clamp(0px, calc("+b+"px - 50%), calc("+e+"px - 100%)))":(k=a.j.clientWidth,a.j.style.left=Math.min(e-k,Math.max(0,b-k/2))+"px"),a.j.style.visibility="visible",f&&!p){a.l.style.height||(b=16/9,(e=a.player.getVideoTracks().find(v=>v.active))&&
+-e.width&&e.height&&(b=e.width/e.height),a.l.style.height=Math.floor(a.l.clientWidth/b)+"px");var q;m&&(q=WO(g));l&&(q=await a.player.ih(null,h)??q);if(q){h=q.width<q.height;a.j.classList.toggle("portrait-thumbnail",h);a.l.style.width=(h?d/2:d)+"px";var r=q.uris[0].split("#xywh=")[0];if(!a.C||r!==a.C.uris[0].split("#xywh=")[0]||q.startByte!=a.C.startByte||q.endByte!=a.C.endByte){a.C=q;a.m&&(a.m.abort(),a.m=null);if(q.codecs=="mjpg"||r.startsWith("offline:")){a.h.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+-try{var u=lo(q.uris,q.startByte,q.endByte,a.player.getConfiguration().streaming.retryParameters);a.m=a.player.ob().request(Dg,u,{type:1});var t=await a.m.promise;a.m=null;r=mO(q,t)}catch(v){if(v.code==7001)return;throw v;}}try{a.l.removeChild(a.h)}catch(v){}a.h=U("img");a.h.alt="";a.h.classList.add("shaka-player-ui-thumbnail-image");a.h.draggable=!1;a.h.src=r;a.h.onload=()=>{r.startsWith("blob:")&&URL.revokeObjectURL(r)};a.l.insertBefore(a.h,a.l.firstChild)}u=a.l.clientWidth;t=u/q.width;q.imageHeight?
+-a.h.height=q.imageHeight:q.sprite||(a.h.style.height="100%",a.h.style.objectFit="contain");q.imageWidth?a.h.width=q.imageWidth:q.sprite||(a.h.style.width="100%",a.h.style.objectFit="contain");!isNaN(t)&&isFinite(t)&&(a.h.style.left="-"+t*q.positionX+"px",a.h.style.top="-"+t*q.positionY+"px",a.h.style.transform="scale("+t+")",a.h.style.transformOrigin="left top");q=Math.floor(u*q.height/q.width);!isNaN(q)&&isFinite(q)&&(a.l.style.height=q+"px")}}}
++e.width&&e.height&&(b=e.width/e.height),a.l.style.height=Math.floor(a.l.clientWidth/b)+"px");var q;m&&(q=WO(g));l&&(q=await a.player.ih(null,h)??q);if(q){const ftSheet=q.sprite||q.imageWidth>q.width||q.imageHeight>q.height||q.positionX!=0||q.positionY!=0;h=q.width<q.height;a.j.classList.toggle("portrait-thumbnail",h);a.l.style.width=(h?d/2:d)+"px";var r=q.uris[0].split("#xywh=")[0];if(!a.C||r!==a.C.uris[0].split("#xywh=")[0]||q.startByte!=a.C.startByte||q.endByte!=a.C.endByte){a.C=q;a.m&&(a.m.abort(),a.m=null);if(q.codecs=="mjpg"||r.startsWith("offline:")){a.h.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
++try{var u=lo(q.uris,q.startByte,q.endByte,a.player.getConfiguration().streaming.retryParameters);a.m=a.player.ob().request(Dg,u,{type:1});var t=await a.m.promise;a.m=null;r=mO(q,t)}catch(v){if(v.code==7001)return;throw v;}}try{a.l.removeChild(a.h)}catch(v){}a.h=U("img");const ftImg=a.h;a.h.alt="";a.h.classList.add("shaka-player-ui-thumbnail-image");a.h.draggable=!1;a.h.src=r;a.h.onload=()=>{ftSheet&&ftImg.naturalWidth&&ftImg.naturalHeight&&(ftImg.width=ftImg.naturalWidth,ftImg.height=ftImg.naturalHeight);r.startsWith("blob:")&&URL.revokeObjectURL(r)};a.l.insertBefore(a.h,a.l.firstChild)}u=a.l.clientWidth;t=u/q.width;ftSheet&&a.h.naturalHeight?a.h.height=a.h.naturalHeight:q.imageHeight?
++a.h.height=q.imageHeight:q.sprite||(a.h.style.height="100%",a.h.style.objectFit="contain");ftSheet&&a.h.naturalWidth?a.h.width=a.h.naturalWidth:q.imageWidth?a.h.width=q.imageWidth:q.sprite||(a.h.style.width="100%",a.h.style.objectFit="contain");!isNaN(t)&&isFinite(t)&&(a.h.style.left="-"+t*q.positionX+"px",a.h.style.top="-"+t*q.positionY+"px",a.h.style.transform="scale("+t+")",a.h.style.transformOrigin="left top");q=Math.floor(u*q.height/q.width);!isNaN(q)&&isFinite(q)&&(a.l.style.height=q+"px")}}}
+ function VO(a,b){a=a.controls.I;for(let c=0;c<a.length;c++){let d=a[c],e=c===a.length-1;if(d.startTime<=b&&(d.endTime>b||e&&b>=d.endTime))return d}return null}function WO(a){if(!a||!a.images.length)return null;var b=a.images[0];return{segment:null,imageHeight:b.height||0,imageWidth:b.width||0,height:b.height||0,positionX:0,positionY:0,startTime:a.startTime,duration:a.endTime-a.startTime,uris:[b.url],startByte:0,endByte:null,width:b.width||0,sprite:!1,mimeType:"",codecs:""}}
+ var XO=class extends LO{constructor(a,b){super(a,b,["shaka-seek-bar-container"],["shaka-seek-bar","shaka-no-propagation","shaka-show-controls-on-mouse-over"]);this.eventManager.B(this.container,"wheel",c=>{if(!c.ctrlKey&&!c.metaKey&&c.deltaY&&!this.bar.disabled&&this.controls.Fa()&&this.video.duration&&this.isShowing()){c.preventDefault();var d=this.player.ya();c=(this.controls.O?this.getValue():this.video.currentTime)+(c.deltaY>0?-1:1);HO(this.controls,Math.max(d.start,Math.min(d.end,c)),!1)}});
+ this.M=U("div");this.M.classList.add("shaka-ad-markers");this.container.insertBefore(this.M,this.container.childNodes[0]);this.F=U("div");this.F.classList.add("shaka-chapter-markers");this.container.insertBefore(this.F,this.container.childNodes[0]);this.J=this.controls.h;this.O=new N(()=>{var c=this.getValue();this.player.wa()||c==this.video.duration&&(c-=.001);this.video.currentTime=c;this.controls.we();this.controls.mc();this.update()});this.L=new N(()=>{MO(this)});this.o=new N(()=>{OO(this)});
+@@ -1787,15 +1787,15 @@ function vP(a,b){switch(b){case a.h.VERTEX_SHADER:var c=a.m=="cubemap"?"attribut
+ break;case a.h.FRAGMENT_SHADER:switch(a.m){case "cubemap":c="varying highp vec2 vTextureCoord;\nuniform sampler2D uSampler;\nvoid main(void) {\n  highp vec4 texelColor = texture2D(uSampler, vTextureCoord);\n  gl_FragColor = vec4(texelColor.rgb , texelColor.a);\n}";break;case "fisheye":c="precision highp float;\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n if (distance(v_TexCoordinate, vec2(0.5, 0.5)) > 0.5001) {\n  // There is no content outside of the image circle.\n  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n } else {\n  highp vec4 texelColor = texture2D(uSampler, v_TexCoordinate);\n  gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n }\n}";
+ break;case "halfequirectangular":c="precision highp float;\n#define PI 3.141592653589793238462643383279\n#define HALF_PI 1.570796326794896619231321691639\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // The semi-sphere only spans 180 degrees of longitude, so the whole\n // texture width maps to half a turn of atan().\n highp float xValue =\n      (HALF_PI + atan(pass_position.z, pass_position.x)) / PI;\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}";
+ break;default:c="precision highp float;\n#define PI 3.141592653589793238462643383279\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // Compute the longitude per fragment, instead of using the interpolated\n // texture coordinate, to avoid needing texture wrapping at the seam.\n // (REPEAT is not available for non-power-of-two video textures in WebGL1.)\n highp float xValue =\n      (PI + atan(pass_position.z, pass_position.x)) / (2.0 * PI);\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}"}break;
+-default:return null}b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function wP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function xP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
+-function yP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,f/=2;var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],q=g[10],r=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-q*e;g[3]=m*b-r*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+q*b;g[11]=m*e+r*b}else a.H-=b;if(a.I<f&&a.I>
++default:return null}a.ftSbs&&(c=c.replace("vec2(xValue,","vec2(xValue * 0.5,"));b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function wP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function xP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
++function yP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,a.m=="fisheye"&&(f/=2);var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],q=g[10],r=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-q*e;g[3]=m*b-r*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+q*b;g[11]=m*e+r*b}else a.H-=b;if(a.I<f&&a.I>
+ -f){f=b=fP();e=fP();h=-1*c;c=Math.sin(h);h=Math.cos(h);k=e[4];l=e[5];m=e[6];n=e[7];p=e[8];q=e[9];r=e[10];let u=e[11];e!==f&&(f[0]=e[0],f[1]=e[1],f[2]=e[2],f[3]=e[3],f[12]=e[12],f[13]=e[13],f[14]=e[14],f[15]=e[15]);f[4]=k*h+p*c;f[5]=l*h+q*c;f[6]=m*h+r*c;f[7]=n*h+u*c;f[8]=p*h-k*c;f[9]=q*h-l*c;f[10]=r*h-m*c;f[11]=u*h-n*c;gP(g,b,g)}else a.I-=c;c=fP();f=fP();e=Math.sin(d);d=Math.cos(d);b=f[0];h=f[1];k=f[2];l=f[3];m=f[4];n=f[5];p=f[6];q=f[7];f!==c&&(c[8]=f[8],c[9]=f[9],c[10]=f[10],c[11]=f[11],c[12]=f[12],
+ c[13]=f[13],c[14]=f[14],c[15]=f[15]);c[0]=b*d+m*e;c[1]=h*d+n*e;c[2]=k*d+p*e;c[3]=l*d+q*e;c[4]=m*d-b*e;c[5]=n*d-h*e;c[6]=p*d-k*e;c[7]=q*d-l*e;gP(g,c,g);tP(a,!1)}function zP(a,b){b/=50;a.u>=20&&a.u<=100&&(a.u+=b);a.u<20?a.u=20:a.u>100&&(a.u=100);tP(a,!1)}
+ function AP(a,b=!0){b&&(hP(a.j,a.G),a.T=0,a.A=jP(),a.A[0]=(a.j[0]-a.K[0])/20,a.A[1]=(a.j[1]-a.K[1])/20,a.A[2]=(a.j[2]-a.K[2])/20,a.A[3]=(a.j[3]-a.K[3])/20);a.j[0]-=a.A[0];a.j[1]-=a.A[1];a.j[2]-=a.A[2];a.j[3]-=a.A[3];b=fP();kP(a.j,a.j);iP(b,a.j);a.G=b;a.L&&(a.L.stop(),a.L=null);a.T<20?a.L=(new N(()=>{AP(a,!1);a.H=0;a.I=0;a.T++;tP(a,!1)})).aa(.025):(iP(b,a.K),a.G=b)}
+-var BP=class{constructor(a,b,c,d,e,f=180){this.i=a;this.ma=b;this.l=c;this.h=d;this.C=new bb;this.K=jP();this.j=jP();this.ka=this.P=this.ea=this.o=null;this.G=fP();this.$=fP();this.M=fP();this.U=fP();this.A=null;this.J=!1;this.L=this.D=null;this.V=this.W=0;this.ba=this.ra=this.sa=this.va=this.xa=this.N=this.O=this.F=null;this.I=this.H=0;this.u=75;this.T=0;this.m=e;this.qa=f;this.R=new Yt(this.i);nP(this)}release(){this.R?.release();this.R=null;this.C?.release();this.C=null;this.D?.stop();this.D=null;
++var BP=class{constructor(a,b,c,d,e,f=180,g=!1){this.ftSbs=g;this.i=a;this.ma=b;this.l=c;this.h=d;this.C=new bb;this.K=jP();this.j=jP();this.ka=this.P=this.ea=this.o=null;this.G=fP();this.$=fP();this.M=fP();this.U=fP();this.A=null;this.J=!1;this.L=this.D=null;this.V=this.W=0;this.ba=this.ra=this.sa=this.va=this.xa=this.N=this.O=this.F=null;this.I=this.H=0;this.u=75;this.T=0;this.m=e;this.qa=f;this.R=new Yt(this.i);nP(this)}release(){this.R?.release();this.R=null;this.C?.release();this.C=null;this.D?.stop();this.D=null;
+ this.L?.stop();this.L=null}ee(){(this.J=!this.J)||this.h.viewport(0,0,this.l.width,this.l.height);tP(this,!1)}};function CP(a){if(!a||!window.WebGLRenderingContext)return null;var b=["webgl2","webgl"];for(let c of b)if(b=a.getContext(c))return b;return null}
+-function DP(a){var b=a.J.F.Wa();if(!a.C.displayInVrMode&&!a.m||b)a.j&&a.h&&(a.j.style.display="none",a.i.Qa(),a.h.release(),a.h=null,a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Fc()))));else{a.j||(a.j=document.createElement("canvas"),a.j.classList.add("shaka-vr-canvas-container"),a.H.parentElement.insertBefore(a.j,a.H.nextElementSibling),a.G=CP(a.j));b=a.m||a.C.defaultVrProjectionMode;let c=a.I||180;if(a.h){let d=b=="fisheye"&&a.h.qa!=c;if(a.h.m!=b||d)a.i.Qa(),a.h.release(),
+-EP(a,b,c)}else a.j.style.display="",EP(a,b,c),a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Fc())))}}function EP(a,b,c){a.G&&a.j&&(a.h=new BP(a.H,a.N,a.j,a.G,b,c),FP(a))}
++function DP(a){var b=a.J.F.Wa();if(!a.C.displayInVrMode&&!a.m||b)a.j&&a.h&&(a.j.style.display="none",a.i.Qa(),a.h.release(),a.h=null,a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Fc()))));else{a.j||(a.j=document.createElement("canvas"),a.j.classList.add("shaka-vr-canvas-container"),a.H.parentElement.insertBefore(a.j,a.H.nextElementSibling),a.G=CP(a.j));b=a.m||a.C.defaultVrProjectionMode;let c=a.I||180;if(a.h){let d=b=="fisheye"&&a.h.qa!=c;if(a.h.m!=b||d||a.h.ftSbs!=a.C.vrSideBySide)a.i.Qa(),a.h.release(),
++EP(a,b,c)}else a.j.style.display="",EP(a,b,c),a.dispatchEvent(new D("vrstatuschanged",(new Map).set("newStatus",a.Fc())))}}function EP(a,b,c){a.G&&a.j&&(a.h=new BP(a.H,a.N,a.j,a.G,b,c,a.C.vrSideBySide),FP(a))}
+ function FP(a){a.i.B(a.o,"mousedown",b=>{if(!a.l&&b.button==0&&GP(b.target)){var c=b.clientX;b=b.clientY;a.l=!0;a.D=c;a.F=b}});navigator.maxTouchPoints>0&&a.i.B(a.o,"touchstart",b=>{if(b.touches.length==2)a.l=!1,a.A=HP(b);else if(!a.l&&GP(b.target)){var c=b.touches[0].clientX;b=b.touches[0].clientY;a.l=!0;a.D=c;a.F=b}});a.i.B(a.o,"wheel",b=>{!a.l&&a.C.enableVrWheelZoom&&GP(b.target)&&(zP(a.h,b.deltaY),b.preventDefault(),b.stopPropagation())});a.i.B(a.o,"mousemove",b=>{a.l&&IP(a,b.clientX,b.clientY)});
+ navigator.maxTouchPoints>0&&a.i.B(a.o,"touchmove",b=>{if(a.A!=null&&b.touches.length==2){let c=HP(b);zP(a.h,(a.A-c)*5);a.A=c;b.preventDefault()}else a.l&&(IP(a,b.touches[0].clientX,b.touches[0].clientY),b.preventDefault())});a.i.ia(a.o,["mouseleave","mouseup"],()=>{a.l=!1});navigator.maxTouchPoints>0&&a.i.B(a.o,"touchend",b=>{a.l=!1;b.touches.length==2?a.A=HP(b):a.A=null;if(b.touches.length==1){var c=b.touches[0].clientX;b=b.touches[0].clientY;a.l=!0;a.D=c;a.F=b}});if(a.C.enableVrDeviceMotion&&window.DeviceOrientationEvent){let b=
+ !1;if(typeof DeviceMotionEvent.requestPermission=="function"){let c=["click","mouseup"];navigator.maxTouchPoints>0&&c.push("touchend");let d=()=>{DeviceMotionEvent.requestPermission().then(f=>{f!=="granted"||b||(b=!0,JP(a))})},e=()=>{a.i.xi(a.o,c,d);a.i.mj(a.o,c,d)};DeviceMotionEvent.requestPermission().then(f=>{f!=="granted"?e():(a.i.xi(a.o,c,d),b=!0,JP(a))}).catch(e)}else b=!0,JP(a)}}function GP(a){return a instanceof Element?!a.closest(".shaka-no-propagation"):!0}
+@@ -1999,7 +1999,7 @@ function sO(a,b=!1){a.Da&&!a.Fc()&&(a.ug()?a.we():a.wb()?a.V.Ja():b&&a.Fa()?(b=a
+ function uO(a,b){if(a.C.duration)if(a.gb&&a.ug())a.gb=!1,b.cancelable&&b.preventDefault();else{var c=a.ra!=null;a.Fa()?sO(a,!0):(SP(a,b),tO(a));b.cancelable&&b.preventDefault();c&&a.ra==null||(a.W=Date.now(),a.ra=Date.now())}}function FO(a){if(a.Da){if(a.o&&(a.o&&a.o.isPaused()?a.o.play():a.o&&a.o.pause(),a.o.isLinear()))return;a.C.duration&&(a.A&&a.A.endMouseInteraction(),a.C.paused&&!a.O?(a.m.qd()&&(a.C.currentTime=a.m.ya().start),a.C.play()):a.C.pause())}}
+ function GO(a,b){TP(a);HO(a,a.Ec()+b)}function UP(a){a.Fa()?a.dispatchEvent(new D("showingui")):a.dispatchEvent(new D("hidingui"))}function VP(a,b=!0){var c=[],d=a.j.getElementsByClassName("shaka-text-container")[0],e=a.j.getElementsByClassName("shaka-speech-to-text-container")[0];d&&c.push(d);e&&c.push(e);if(c.length){d="0px";a.Fa()&&(d=a.U.clientHeight+"px");for(let f of c)b?f.style.bottom=d:(f.style.transition="none",f.style.bottom=d,f.getBoundingClientRect(),f.style.transition="")}}
+ function WP(a,b=null){a.i.classList.contains("shaka-keyboard-navigation")&&b&&MP(b)?b.focus():a.j.focus({preventScroll:!0})}
+-function TP(a){if(a.A)if(a.A.setValue(a.C.currentTime),a.A.update(),a.A.isShowing()){for(var b of a.M)b.classList.remove("shaka-low-position");b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.remove("shaka-tooltips-low-position")}else{for(let c of a.M)c.classList.add("shaka-low-position");b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.add("shaka-tooltips-low-position")}a.dispatchEvent(new D("timeandseekrangeupdated"))}
++function TP(a){if(a.A)if(a.A.setValue(a.C.currentTime),a.A.update(),a.A.isShowing()){for(var b of a.M)b.classList.toggle("shaka-low-position",!1);b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.toggle("shaka-tooltips-low-position",!1)}else{for(let c of a.M)c.classList.toggle("shaka-low-position",!0);b=a.J;b.classList.contains("shaka-tooltips-on")&&b.classList.toggle("shaka-tooltips-low-position",!0)}a.dispatchEvent(new D("timeandseekrangeupdated"))}
+ function XP(a){a.l.B(a.m,"buffering",()=>{YP(a)});YP(a);a.l.B(window,"keydown",d=>{a.j.ownerDocument.defaultView==window&&ZP(a,d)});var b=a.ib();a.l.B(document,"fullscreenchange",()=>{var d=a.ib();b&&!d&&$P(a);b=d});a.l.B(window,"click",()=>a.mc());a.l.ia(a.C,["play","pause"],()=>{aQ(a)});a.l.B(a.j,"mousemove",d=>{SP(a,d)});navigator.maxTouchPoints>0&&a.l.ia(a.j,["touchmove","touchend"],d=>{SP(a,d)},{passive:!0});a.l.B(a.j,"mouseleave",()=>{a.W||a.$.Ja()});a.l.B(a.j,"wheel",d=>{SP(a,d)},{passive:!0});
+ a.l.B(a.F,"caststatuschanged",()=>{bQ(a)});a.l.B(a.D,"vrstatuschanged",()=>{a.dispatchEvent(new D("vrstatuschanged"))});a.l.B(a.i,"focusin",()=>{a.Mb&&!a.i.classList.contains("shaka-keyboard-navigation")&&(a.i.classList.add("shaka-keyboard-navigation"),aQ(a))});a.l.B(window,"keydown",()=>{a.Mb=!0},{capture:!0,passive:!0});var c=()=>{a.Mb=!1};a.l.B(window,"mousedown",c,{capture:!0,passive:!0});a.l.B(window,"touchstart",c,{capture:!0,passive:!0});a.l.B(a.j,"focusout",d=>{d.relatedTarget||d.target==
+ a.j||(a.uc=d.target,a.vc.aa(0))});cQ(a,a.j,()=>!a.h.enableKeyboardPlaybackControlsInWindow&&!a.ib());cQ(a,window,()=>a.j.ownerDocument.defaultView==window&&(a.h.enableKeyboardPlaybackControlsInWindow||a.ib()));a.l.B(a.R,dw,()=>{a.o=a.R.getCurrentAd();a.Uj();YP(a)});a.l.B(a.R,jw,()=>{a.o=null;a.hj();YP(a)});a.l.B(a.R,qw,d=>{a.xa=d.cuepoints||[]});screen.orientation&&a.l.B(screen.orientation,"change",async()=>{await dQ(a)})}
+@@ -2008,7 +2008,7 @@ async function eQ(a){var b=[],c=a.m.aj()||[],d=new Set(c.map(g=>Aa(g.language)))
+ async function fQ(a){gQ(a)?(screen.orientation&&screen.orientation.unlock(),await document.exitFullscreen()):(a=a.u,a.webkitSupportsFullscreen&&a.webkitExitFullscreen())}function hQ(a){for(let b of a.L)b.release();a.L=[]}
+ function iQ(a){a.i=U("div");a.i.classList.add("shaka-controls-container");a.j.appendChild(a.i);a.j.setAttribute("shaka-controls","true");navigator.maxTouchPoints>0&&(a.l.B(a.i,"touchstart",()=>{a.gb=!1}),a.l.B(a.i,"contextmenu",()=>{a.gb=!0}),a.l.B(a.i,"touchend",c=>{uO(a,c)}));a.l.B(a.i,"click",()=>{sO(a)});var b=()=>{a.i.classList.remove("shaka-tooltips-dismissed")};a.l.B(a.i,"mouseover",b);a.l.B(a.i,"focusin",b);a.l.B(a.i,"dblclick",()=>{a.h.doubleClickForFullscreen&&a.Od()&&a.Ne()})}
+ function jQ(a){a.G=U("div");a.G.classList.add("shaka-client-side-ad-container");Y(a.G,!1);a.l.B(a.G,"click",()=>{sO(a)});a.j.appendChild(a.G);a.H=U("div");a.H.classList.add("shaka-server-side-ad-container");Y(a.H,!1);a.l.B(a.H,"click",()=>{sO(a)});a.j.appendChild(a.H)}
+-function SP(a,b){b.type=="mousemove"&&(a.i.classList.remove("shaka-keyboard-navigation"),aQ(a));b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.W=Date.now():a.W+1E3<Date.now()&&(a.W=null);a.W&&b.type=="mousemove"||(a.j.classList.remove("no-cursor"),a.wc=!0,a.V.stop(),a.Fa()||(TP(a),aQ(a)),a.$.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.W||a.$.aa(3))}function kQ(a){return!!a.A&&a.A.isShowing()}function lQ(a,b={}){a.N?.D(b)}
++function SP(a,b){b.type=="mousemove"&&a.i.classList.remove("shaka-keyboard-navigation");b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.W=Date.now():a.W+1E3<Date.now()&&(a.W=null);a.W&&b.type=="mousemove"||(a.j.classList.remove("no-cursor"),a.wc=!0,a.V.stop(),a.Fa()||TP(a),aQ(a),a.$.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.W||a.$.aa(Number(a.j.dataset.playingInterfaceHideDelay)||3))}function kQ(a){return!!a.A&&a.A.isShowing()}function lQ(a,b={}){a.N?.D(b)}
+ function gQ(a){return!document.fullscreenEnabled||a.u.webkitSupportsFullscreen&&a.h.preferVideoFullScreenInVisionOS&&gb().i()=="APPLE_VR"?!1:!0}function mQ(a){return"documentPictureInPicture"in window&&a.h.documentPictureInPicture.enabled}
+ async function nQ(a){try{if(gQ(a)){if(a.Qd()&&(await a.Mc(),mQ(a)&&await Ve(.05)),await a.h.fullScreenElement.requestFullscreen({navigationUI:"hide"}),a.h.forceLandscapeOnFullscreen&&screen.orientation)try{await screen.orientation.lock("landscape")}catch(b){}}else{let b=a.u;b.webkitSupportsFullscreen&&b.webkitEnterFullscreen()}}catch(b){a.dispatchEvent(new D("error",(new Map).set("detail",b)))}}
+ async function oQ(a){if(window.documentPictureInPicture.window)window.documentPictureInPicture.window.close();else{var b=a.j,c=b.ownerDocument.activeElement,d=b.getBoundingClientRect(),e=await window.documentPictureInPicture.requestWindow({width:d.width,height:d.height,disallowReturnToOpener:a.h.documentPictureInPicture.disallowReturnToOpener,preferInitialWindowPlacement:a.h.documentPictureInPicture.preferInitialWindowPlacement});pQ(e);d=b.parentNode||document.body;var f=U("div");f.classList.add("shaka-video-container");
+@@ -2026,25 +2026,25 @@ function vQ(a){var b=U("div");b.classList.add("shaka-big-buttons-container");a.h
+ function wQ(a){a.K=U("div");a.K.classList.add("shaka-spinner-container");a.j.appendChild(a.K);var b=U("div");b.classList.add("shaka-spinner");a.K.appendChild(b);b.insertAdjacentHTML("beforeend",'<svg focusable="false" stroke="currentColor"\n         viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg"\n         width="50px" height="50px" class="q-spinner text-grey-9">\n      <g transform="translate(1 1)" stroke-width="6" fill="none"\n        fill-rule="evenodd">\n        <circle stroke-opacity=".5" cx="18" cy="18" r="16"></circle>\n        <path d="M34 18c0-9.94-8.06-16-16-16">\n          <animateTransform attributeName="transform" type="rotate"\n            from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite">\n          </animateTransform>\n        </path>\n      </g>\n    </svg>');YP(a)}
+ function xQ(a){var b=U("div");b.classList.add("shaka-hidden-fast-forward-container");a.i.appendChild(b);a.jd=new wO(b,a);a.L.push(a.jd)}function yQ(a){var b=U("div");b.classList.add("shaka-hidden-rewind-container");a.i.appendChild(b);a.kd=new xO(b,a);a.L.push(a.kd)}
+ function zQ(a){a.ub=U("div");a.ub.classList.add("shaka-top-controls");a.ub.classList.add("shaka-no-propagation");a.i.appendChild(a.ub);a.P=U("div");a.P.classList.add("shaka-controls-top-button-panel");a.P.classList.add("shaka-show-controls-on-mouse-over");a.h.enableTooltips&&(a.P.classList.add("shaka-tooltips-on"),a.P.classList.add("shaka-tooltips-bottom"));a.ub.appendChild(a.P);for(var b of a.h.topControlPanelElements)if(PP.has(b)){var c=PP.get(b).create(a.P,a);a.L.push(c);b=="time_and_duration"&&
+-(c=new nO(a.P,a),a.L.push(c))}else la("Unrecognized top control panel element requested:",b);a.U=U("div");a.U.classList.add("shaka-bottom-controls");a.U.classList.add("shaka-no-propagation");a.i.appendChild(a.U);a.l.B(a.U,"click",d=>{d.target.closest(".shaka-overflow-button")||a.mc()});AQ(a);BQ(a);a.J=U("div");a.J.classList.add("shaka-controls-button-panel");a.J.classList.add("shaka-show-controls-on-mouse-over");a.J.setAttribute("role","toolbar");a.h.enableTooltips&&a.J.classList.add("shaka-tooltips-on");
++(c=new nO(a.P,a),a.L.push(c))}else la("Unrecognized top control panel element requested:",b);a.U=U("div");a.U.classList.add("shaka-bottom-controls");a.U.classList.add("shaka-no-propagation");a.U.classList.add("shaka-show-controls-on-mouse-over");a.i.appendChild(a.U);a.l.B(a.U,"click",d=>{d.target.closest(".shaka-overflow-button")||a.mc()});AQ(a);BQ(a);a.J=U("div");a.J.classList.add("shaka-controls-button-panel");a.J.classList.add("shaka-show-controls-on-mouse-over");a.J.setAttribute("role","toolbar");a.h.enableTooltips&&a.J.classList.add("shaka-tooltips-on");
+ a.U.appendChild(a.J);for(let d of a.h.controlPanelElements)PP.has(d)?(b=PP.get(d).create(a.J,a),a.L.push(b),d=="time_and_duration"&&(b=new nO(a.J,a),a.L.push(b))):la("Unrecognized control panel element requested:",d)}function AQ(a){a.ka=U("div");a.ka.classList.add("shaka-ad-controls");var b=a.o!=null&&a.o.isLinear();Y(a.ka,b);a.U.appendChild(a.ka);b=new aP(a.ka,a);a.L.push(b)}function YP(a){a.Da&&a.K&&(a.o&&a.o.isClientRendering()&&a.o.isLinear()?Y(a.K,!1):Y(a.K,a.m.ye()))}
+ function BQ(a){if(a.h.addSeekBar)a.A=CQ.create(a.U,a),a.L.push(a.A);else{for(let b of a.M)b.classList.add("shaka-low-position");a=a.J;a.classList.contains("shaka-tooltips-on")&&a.classList.add("shaka-tooltips-low-position")}}function $P(a){var b=a.j.ownerDocument.activeElement,c=b&&a.M.some(d=>!d.classList.contains("shaka-hidden")&&d.contains(b));a.V.Ja();c&&a.ea&&MP(a.ea)&&(a.ea.setAttribute("aria-expanded","false"),a.ea.focus())}
+ function aQ(a){var b=a.o?a.o.isPaused():!1,c=a.C.paused&&!a.O&&a.h.showUIOnPaused,d=a.i.classList.contains("shaka-keyboard-navigation");b||(!a.o||!a.o.isLinear())&&c||a.wc||d||DQ(a)?(a.i.getAttribute("shown")==null&&(TP(a),a.i.setAttribute("shown","true"),UP(a),VP(a)),a.jb.stop()):a.jb.aa(a.h.fadeDelay);a.wb()&&(a.P.classList.remove("shaka-tooltips-on"),a.J.classList.remove("shaka-tooltips-on"),a.Ua?.classList.remove("shaka-tooltips-on"))}
+-function cQ(a,b,c){a.l.B(b,"keydown",d=>{c()&&qQ(a,d)});a.l.B(b,"keyup",d=>{c()&&a.ba.delete(d.key)})}async function dQ(a){a.C&&a.C.readyState!=0&&!a.F.Wa()&&a.h.enableFullscreenOnRotation&&a.Od()&&(screen.orientation.type.includes("landscape")&&!a.ib()?await nQ(a):screen.orientation.type.includes("portrait")&&a.ib()&&await fQ(a))}function DQ(a){return window.matchMedia("hover: hover").matches?a.Pc.some(b=>b.matches(":hover")):!1}
++function cQ(a,b,c){a.l.B(b,"keydown",d=>{c()&&qQ(a,d)});a.l.B(b,"keyup",d=>{c()&&a.ba.delete(d.key)})}async function dQ(a){a.C&&a.C.readyState!=0&&!a.F.Wa()&&a.h.enableFullscreenOnRotation&&a.Od()&&(screen.orientation.type.includes("landscape")&&!a.ib()?await nQ(a):screen.orientation.type.includes("portrait")&&a.ib()&&await fQ(a))}function DQ(a){return window.matchMedia("(hover: hover)").matches?a.j.querySelector(".shaka-show-controls-on-mouse-over:hover")!=null:!1}
+ function HO(a,b,c=!1){a.A?.endMouseInteraction();c&&"fastSeek"in a.C?a.C.fastSeek(b):a.C.currentTime=b;TP(a)}function tQ(a,b){if(!(a.o&&a.o.isLinear()||a.m.nc())){var c=a.m.getVideoTracks().find(d=>d.active);c&&c.frameRate&&(a.A&&a.A.endMouseInteraction(),a.C.paused||a.C.pause(),TP(a),c=1/c.frameRate,b=a.Ec()+c*b,b>=0&&b<=a.m.ya().end&&a.C.currentTime!==b&&HO(a,b))}}
+ function rQ(a,b){for(var c=a.j.ownerDocument.activeElement;c&&!a.M.some(d=>d==c);)c=c.parentElement;if(!c||c.classList.contains("shaka-hidden"))return!1;sQ(a,b,c);return!0}
+ function sQ(a,b,c,d=!1){var e=a.j.ownerDocument.activeElement;c=Array.from(c.querySelectorAll("button, input, select, textarea, a[href], [tabindex]")).filter(h=>h.tabIndex>=0&&MP(h));if(c.length){var f=c[0],g=c[c.length-1];d&&!c.some(h=>h==e)?(b.preventDefault(),a.ba.has("Shift")?g.focus():f.focus()):a.ba.has("Shift")?e==f&&(b.preventDefault(),g.focus()):e==g&&(b.preventDefault(),f.focus())}}
+ var Z=class extends ua{constructor(a,b,c,d,e){super();this.Da=!0;this.h=e;this.F=new Zz(c,a,this.h.castReceiverAppId,this.h.castAndroidReceiverCompatible);this.ma=null;this.Na=!0;this.C=this.F.Kd();this.u=c;this.m=this.F.yb();this.Ma=a;this.j=b;this.Cd=d;this.R=this.F.ec();this.Oc=this.m.Vb();this.Oc.setCustomPlayer(this.m);this.o=this.R.getCurrentAd();this.xa=[];this.I=[];this.A=null;this.O=!1;this.M=[];this.ea=null;this.Lb=[];this.rb=null;this.Pc=[];this.wc=!1;this.$=new N(()=>{this.h.showUIAlways||
+-this.h.showUIAlwaysOnAudioOnly&&this.m.nc()||(this.j.classList.add("no-cursor"),this.wc=!1,aQ(this))});this.jb=new N(()=>{if(!(this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.nc()||this.h.menuOpenUntilUserClosesIt&&this.wb())){var f=this.i.getAttribute("shown")!=null;this.i.removeAttribute("shown");UP(this);VP(this);var g=this.j.ownerDocument.activeElement;f&&g&&g!=this.i&&this.i.contains(g)&&WP(this);this.va&&this.va.lf();this.V.aa(this.h.closeMenusDelay)}});this.V=new N(()=>{var f=this.j.ownerDocument.activeElement,
+-g=this.M.some(h=>h.contains(f));for(let h of this.M)Y(h,!1);g&&WP(this,this.ea);this.dispatchEvent(new D("submenuclose"));this.N?.j();this.h.enableTooltips&&this.J.classList.add("shaka-tooltips-on");this.h.enableTooltips&&(this.P.classList.add("shaka-tooltips-on"),this.Ua?.classList.add("shaka-tooltips-on"))});this.qa=new N(()=>{this.ij()});this.uc=null;this.Mb=!1;this.vc=new N(()=>{var f=this.uc;this.uc=null;var g=this.j.ownerDocument.activeElement;!f||g&&g!=this.j.ownerDocument.body||MP(f)||WP(this)});
++this.h.showUIAlwaysOnAudioOnly&&this.m.nc()||(DQ(this)||this.j.classList.add("no-cursor"),this.wc=!1,aQ(this))});this.jb=new N(()=>{if(!(this.h.showUIAlways||this.h.showUIAlwaysOnAudioOnly&&this.m.nc()||this.h.menuOpenUntilUserClosesIt&&(this.wb()||this.ug()))){var f=this.i.getAttribute("shown")!=null;this.i.removeAttribute("shown");UP(this);VP(this);var g=this.j.ownerDocument.activeElement;f&&g&&g!=this.i&&this.i.contains(g)&&WP(this);this.va&&this.va.lf();this.V.aa(this.h.closeMenusDelay)}});this.V=new N(()=>{var f=this.j.ownerDocument.activeElement,
++g=this.M.some(h=>h.contains(f)),k=this.wb();for(let h of this.M)Y(h,!1);g&&WP(this,this.ea);k&&this.dispatchEvent(new D("submenuclose"));this.N?.j();this.h.enableTooltips&&this.J.classList.add("shaka-tooltips-on");this.h.enableTooltips&&(this.P.classList.add("shaka-tooltips-on"),this.Ua?.classList.add("shaka-tooltips-on"))});this.qa=new N(()=>{this.ij()});this.uc=null;this.Mb=!1;this.vc=new N(()=>{var f=this.uc;this.uc=null;var g=this.j.ownerDocument.activeElement;!f||g&&g!=this.j.ownerDocument.body||MP(f)||WP(this)});
+ this.yc=new N(()=>{this.Fa()&&(TP(this),VP(this))});this.xc=new MutationObserver(f=>{var g=h=>h instanceof HTMLElement&&(h.classList.contains("shaka-text-container")||h.classList.contains("shaka-speech-to-text-container"));f.some(h=>Array.from(h.addedNodes).some(g))&&VP(this,!1)});this.xc.observe(this.j,{childList:!0});this.ra=this.W=null;this.gb=!1;this.L=[];this.Ua=null;this.T=NP();this.N=new eP(this.Ma,this.T);this.l=new bb;this.D=null;this.configure(this.h);XP(this);this.ba=new Set;bQ(this);this.yc.Ia(this.h.refreshTickInSeconds);
+ this.l.B(this.T,"locale-updated",()=>{eQ(this)});this.l.B(this.T,"locale-changed",f=>{f=f.locales[0];this.R.setLocale(f);this.j.setAttribute("lang",f);eQ(this)});this.R.setContainers(this.G,this.H);this.l.B(this.m,"textchanged",()=>{VP(this);var f=this.m.bb().find(g=>g.active);f&&(this.rb=f)});this.l.ia(this.m,["trackschanged","manifestupdated","loaded"],()=>{this.m.ze()&&eQ(this)});this.l.B(this.m,"unloading",f=>{this.o||(f=f.isSwitchingContent||!1,this.xa=[],this.rb=null,this.ib()&&!f&&fQ(this),
+ this.Qd()&&!f&&this.Mc(),this.I.length&&(this.I=[],this.dispatchEvent(new D("chaptersupdated"))))});this.sa=new IO(this)}async destroy(a=!1){document.pictureInPictureElement==this.u&&await document.exitPictureInPicture();this.N?.release();this.N=null;this.xc?.disconnect();this.xc=null;this.l?.release();this.l=null;this.$?.stop();this.$=null;this.jb?.stop();this.jb=null;this.V?.stop();this.V=null;this.qa?.stop();this.qa=null;this.vc?.stop();this.vc=null;this.yc?.stop();this.yc=null;this.D?.release();
+ this.D=null;hQ(this);this.i&&(this.j.removeChild(this.i),this.i=null);this.F&&(await this.F.destroy(a),this.F=null);this.K&&(this.j.removeChild(this.K),this.K=null);this.G&&(this.j.removeChild(this.G),this.G=null);this.H&&(this.j.removeChild(this.H),this.H=null);this.Ma&&(await this.Ma.destroy(),this.Ma=null);this.T=this.C=this.u=this.m=null;this.ba.clear();this.sa&&(this.sa.release(),this.sa=null);super.release()}hk(a){this.Na=a;bQ(this)}Yl(){aQ(this)}configure(a){this.h=a;this.N?.j();this.F.Mi(a.castReceiverAppId,
+-a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.va&&(this.va=null);this.D&&this.D.configure(a);this.i?(Nl(this.i),hQ(this),this.Ua=null):(iQ(this),jQ(this),this.D=new LP(this.i,this.Cd,this.u,this.m,this.h,this));this.j.classList.add("shaka-video-container");this.j.hasAttribute("tabindex")||(this.j.tabIndex=-1);this.u.classList.add("shaka-video");uQ(this);this.h.bigButtons.length&&vQ(this);this.h.showBufferingSpinner?this.K||wQ(this):this.K&&(this.j.removeChild(this.K),this.K=null);this.h.seekOnTaps&&
++a.castAndroidReceiverCompatible);this.A&&(this.A=null);this.va&&(this.va=null);this.D&&this.D.configure(a);this.i?((()=>{for(const b of this.j.getElementsByClassName("shaka-no-propagation"))for(const c of ["click","dblclick","touchend"])this.l.Ra(b,c)})(),Nl(this.i),hQ(this),this.Ua=null):(iQ(this),jQ(this),this.D=new LP(this.i,this.Cd,this.u,this.m,this.h,this));this.j.classList.add("shaka-video-container");this.j.hasAttribute("tabindex")||(this.j.tabIndex=-1);this.u.classList.add("shaka-video");uQ(this);this.h.bigButtons.length&&vQ(this);this.h.showBufferingSpinner?this.K||wQ(this):this.K&&(this.j.removeChild(this.K),this.K=null);this.h.seekOnTaps&&
+ (xQ(this),yQ(this));zQ(this);this.h.customContextMenu&&(this.va=new rO(this.J,this),this.L.push(this.va));this.M=Array.from(this.j.getElementsByClassName("shaka-settings-menu"));this.M.push(...Array.from(this.j.getElementsByClassName("shaka-overflow-menu")));this.M.push(...Array.from(this.j.getElementsByClassName("shaka-sub-menu")));this.Lb=Array.from(this.j.getElementsByClassName("shaka-context-menu"));this.Pc=Array.from(this.j.getElementsByClassName("shaka-show-controls-on-mouse-over"));aQ(this);
+ a=this.j.getElementsByClassName("shaka-no-propagation");for(let b of a)this.l.ia(b,["click","dblclick"],c=>c.stopPropagation()),navigator.maxTouchPoints>0&&this.l.B(b,"touchend",c=>{this.Fa()&&(SP(this,c),c.stopPropagation())});this.sa&&this.sa.configure(this.h)}di(a){(this.Da=a)?(this.j.setAttribute("shaka-controls","true"),this.u.tabIndex=-1,this.u.controls=!1):this.j.removeAttribute("shaka-controls");aQ(this)}Lj(a){this.u.controls=a;this.u.tabIndex=a?0:-1;a&&this.di(!1)}Lm(a){this.ma=a}getAd(){return this.o}Lk(){return this.xa}Uk(){return this.I}Sk(){return this.F}Tk(){return this.ma}ol(){return this.T}Ld(){return this.j}Kd(){return this.C}ll(){return this.u}yb(){return this.m}kl(){return this.Ma}ec(){return this.R}Vb(){return this.Oc}vl(){return this.sa}Zk(){return this.i}Cl(){return this.H}Vk(){return this.G}Wk(){return this.h}Ul(){return this.O}gi(a){(this.O=
+-a)?this.$.stop():this.$.aa(3)}Pl(){return this.Na}Ec(){return this.A?this.A.getValue():this.C.currentTime}Om(){Zf("setLastTouchEventTime","This method is no longer used.")}wb(){return this.M.some(a=>!a.classList.contains("shaka-hidden"))}mc(){this.V.Ja()}ug(){return this.Lb.some(a=>!a.classList.contains("shaka-hidden"))}we(){for(let a of this.Lb)Y(a,!1);this.N?.j()}Od(){return this.F.Wa()?!1:gQ(this)||(!this.o||!this.o.isUsingAnotherMediaElement())&&this.u.webkitSupportsFullscreen?!0:!1}ib(){if(gQ(this))return document.fullscreenElement?
++a)?this.$.stop():this.$.aa(Number(this.j.dataset.playingInterfaceHideDelay)||3)}Pl(){return this.Na}Ec(){return this.A?this.A.getValue():this.C.currentTime}Om(){Zf("setLastTouchEventTime","This method is no longer used.")}wb(){return this.M.some(a=>!a.classList.contains("shaka-hidden"))}mc(){this.V.Ja()}ug(){return this.Lb.some(a=>!a.classList.contains("shaka-hidden"))}we(){for(let a of this.Lb)Y(a,!1);this.N?.j()}Od(){return this.F.Wa()?!1:gQ(this)||(!this.o||!this.o.isUsingAnotherMediaElement())&&this.u.webkitSupportsFullscreen?!0:!1}ib(){if(gQ(this))return document.fullscreenElement?
+ document.fullscreenElement==this.h.fullScreenElement||!(!this.h.fullScreenElement||!this.h.fullScreenElement.contains(document.fullscreenElement)):!1;var a=this.u;return a.webkitSupportsFullscreen?a.webkitDisplayingFullscreen:!1}async Ne(){this.ib()?await fQ(this):await nQ(this)}Gf(){return this.F.Wa()?!1:document.pictureInPictureEnabled||mQ(this)?!this.u.disablePictureInPicture:!1}Qd(){return!!(window.documentPictureInPicture&&window.documentPictureInPicture.window||document.pictureInPictureElement)}async Mc(){try{mQ(this)?
+ (this.ib()&&await fQ(this),await oQ(this)):document.pictureInPictureElement?await document.exitPictureInPicture():(this.ib()&&fQ(this),await this.u.requestPictureInPicture())}catch(a){this.dispatchEvent(new D("error",(new Map).set("detail",a)))}}Uj(){Y(this.ka,!0);this.G&&this.G.hasChildNodes()&&Y(this.G,!0);this.H&&this.H.hasChildNodes()&&Y(this.H,!0);this.o.hasCustomClick()?this.i.setAttribute("ad-active","true"):this.i.removeAttribute("ad-active")}hj(){Y(this.ka,!1);Y(this.G,!1);Y(this.H,!1);this.i.removeAttribute("ad-active")}Fa(){return this.Da?
+ this.i.getAttribute("shown")!=null||this.i.getAttribute("casting")!=null:!1}jf(){var a=!0;this.Fc()&&(a=!1);a&&this.F.Wa()&&(a=!1);a&&(this.m.drmInfo()||this.m.nc())&&(a=!1);a&&this.o&&(a=!1);a&&this.m.Ka()&&(a=!1);return a}ni(a="png",b=1){if(this.jf()){var c=`image/${a==="jpg"?"jpeg":a}`,d=document.createElement("canvas"),e=d.getContext("2d"),f=this.u;d.width=f.videoWidth;d.height=f.videoHeight;e.drawImage(f,0,0,d.width,d.height);b=d.toDataURL(c,b);c=document.createElement("a");c.href=b;c.download=
+@@ -2084,7 +2084,7 @@ function dR(a){var b="play_pause skip_previous skip_next mute_volume time_and_du
+ "spacer"],bigButtons:[],overflowMenuButtons:"captions-settings quality video_type language chapter picture_in_picture playback_rate recenter_vr toggle_stereoscopic".split(" "),statisticsList:"width height currentCodecs corruptedFrames decodedFrames droppedFrames drmTimeSeconds licenseTime liveLatency loadLatency timeToFirstFrame bufferingTime manifestTimeSeconds estimatedBandwidth streamBandwidth maxSegmentDuration pauseTime playTime completionPercent manifestSizeBytes bytesDownloaded nonFatalErrorCount manifestPeriodCount manifestGapCount gapsJumped stallsDetected".split(" "),
+ adStatisticsList:"loadTimes averageLoadTime started overlayAds playedCompletely skipped errors".split(" "),contextMenuElements:["loop","picture_in_picture","copy_video_frame","save_video_frame"],playbackRates:[1,1.25,1.5,2,3],playbackRateSliderMin:.5,playbackRateSliderMax:3,playbackRateSliderStep:.05,fastForwardRates:[2,4,8,1],rewindRates:[-1,-2,-4,-8],addSeekBar:!0,customContextMenu:!0,castReceiverAppId:"",castAndroidReceiverCompatible:!1,clearBufferOnQualityChange:!0,showUnbufferedStart:!1,seekBarColors:{base:"rgba(255, 255, 255, 0.3)",
+ buffered:"rgba(255, 255, 255, 0.54)",played:"rgb(255, 255, 255)",adBreaks:"rgb(255, 204, 0)",chapters:"rgba(255, 0, 0, 0.8)"},volumeBarColors:{base:"rgba(255, 255, 255, 0.54)",level:"rgb(255, 255, 255)"},playbackRateBarColors:{base:"rgba(255, 255, 255, 0.54)",level:"rgb(255, 255, 255)"},qualityMarks:{720:"",1080:"HD",1440:"2K",2160:"4K",4320:"8K"},trackLabelFormat:eR,textTrackLabelFormat:eR,fadeDelay:0,closeMenusDelay:2,doubleClickForFullscreen:!0,singleClickForPlayAndPause:!0,enableKeyboardPlaybackControls:!0,
+-enableFullscreenOnRotation:!1,forceLandscapeOnFullscreen:!1,enableTooltips:!0,keyboardSeekDistance:5,keyboardLargeSeekDistance:60,fullScreenElement:a.m,showAudioChannelCountVariants:!0,seekOnTaps:!1,tapSeekDistance:10,seekButtonDistance:10,refreshTickInSeconds:.125,displayInVrMode:!1,defaultVrProjectionMode:"equirectangular",preferVideoFullScreenInVisionOS:!0,showAudioCodec:!0,showVideoCodec:!0,castSenderUrl:"https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",enableKeyboardPlaybackControlsInWindow:!1,
++enableFullscreenOnRotation:!1,forceLandscapeOnFullscreen:!1,enableTooltips:!0,keyboardSeekDistance:5,keyboardLargeSeekDistance:60,fullScreenElement:a.m,showAudioChannelCountVariants:!0,seekOnTaps:!1,tapSeekDistance:10,seekButtonDistance:10,refreshTickInSeconds:.125,displayInVrMode:!1,defaultVrProjectionMode:"equirectangular",vrSideBySide:!1,preferVideoFullScreenInVisionOS:!0,showAudioCodec:!0,showVideoCodec:!0,castSenderUrl:"https://www.gstatic.com/cv/js/sender/v1/cast_sender.js",enableKeyboardPlaybackControlsInWindow:!1,
+ alwaysShowVolumeBar:!1,shortcuts:{small_rewind:"ArrowLeft",small_fast_forward:"ArrowRight",large_rewind:"PageDown",large_fast_forward:"PageUp",home:"Home",end:"End",captions:"c",fullscreen:"f",mute:"m",picture_in_picture:"p",increase_video_speed:">",decrease_video_speed:"<",play:"k",take_screenshot:"u",last_frame:",",next_frame:"."},menuOpenUntilUserClosesIt:!0,allowTogglePresentationTime:!0,showRemainingTimeInPresentationTime:!1,enableVrDeviceMotion:!0,enableVrWheelZoom:!1,showUIAlways:!1,showUIAlwaysOnAudioOnly:!0,
+ preferIntlDisplayNames:!0,mediaSession:{enabled:!0,handleMetadata:!0,handleActions:!0,handlePosition:!0,supportedActions:c,allowAutoPiP:!0},captionsStyles:!0,captionsFontScaleFactors:[.5,.75,1,1.25,1.5,1.75,2],captionsStyleElements:"captions-font-family captions-font-color captions-size captions-background-color captions-background-opacity captions-character-edge-style captions-font-opacity captions-position captions-style-reset".split(" "),documentPictureInPicture:{enabled:!0,preferInitialWindowPlacement:!1,
+ disallowReturnToOpener:!1},showUIOnPaused:!0,customTrackLabel:()=>"",showBufferingSpinner:!0};if(a.rh()){b.bigButtons=["skip_previous_always","play_pause_buffering","skip_next_always"];b.customContextMenu=!1;b.singleClickForPlayAndPause=!1;b.seekOnTaps=!0;b.enableTooltips=!1;a=gb();b.enableFullscreenOnRotation=a.j()!=="WEBKIT";b.forceLandscapeOnFullscreen=!0;b.controlPanelElements=b.controlPanelElements.map(e=>e==="mute_volume"?"mute":e);let d=["play_pause","skip_previous","skip_next"];b.controlPanelElements=
+@@ -2180,7 +2180,7 @@ GQ("recenter_vr",new GS);OP("recenter_vr",new GS);async function HS(a,b=!1){if(a
+ (await a.i.cancelWatchAvailability(a.j),a.j=-1);a.h.ariaPressed=a.i?.state=="connected"?"true":"false"}function IS(a){a.l||(a.i.state=="disconnected"?a.o.use(bO.CAST):a.o.use(bO.EXIT_CAST))}
+ var JS=class extends aO{constructor(a,b){super(a,b);a=gb();this.l=a.P();this.h=Jl();this.h.classList.add("shaka-remote-button");this.h.classList.add("shaka-tooltip");this.h.classList.add("shaka-no-propagation");this.h.ariaPressed="false";this.o=new eO(this.h,this.l?bO.AIRPLAY:bO.CAST);b=U("label");b.classList.add("shaka-overflow-button-label");b.classList.add("shaka-overflow-menu-only");this.u=U("span");b.appendChild(this.u);this.m=U("span");this.m.classList.add("shaka-current-selection-span");b.appendChild(this.m);
+ this.h.appendChild(b);this.parent.appendChild(this.h);this.j=-1;this.updateLocalizedStrings();Y(this.h,!1);if(this.i=Wh(a,this.video))this.eventManager.B(this.controls,"caststatuschanged",()=>{HS(this)}),this.eventManager.B(this.h,"click",()=>{this.controls.Fa()&&this.i.prompt().catch(()=>{})}),this.eventManager.ia(this.i,["connect","connecting","disconnect"],()=>{HS(this);IS(this)}),this.eventManager.B(this.player,"loaded",()=>{HS(this)}),HS(this,!0),IS(this)}release(){this.i&&this.j!=-1&&this.i.cancelWatchAvailability(this.j).catch(()=>
+-{});super.release()}updateLocalizedStrings(){var a=this.l?this.localization.resolve("AIRPLAY"):this.localization.resolve("CAST");this.h.ariaLabel=a;this.u.textContent=a}checkAvailability(){HS(this,!0)}};y("shaka.ui.RemoteButton",JS);var KS=class{create(a,b){return new JS(a,b)}};GQ("remote",new KS);OP("remote",new KS);QP("remote",new KS);function LS(a){hO(a.menu);var b=0;b=a.player.nc()?MS(a):NS(a);var c=Jl();c.setAttribute("role","menuitemradio");c.setAttribute("aria-checked","false");c.classList.add("shaka-enable-abr-button");a.eventManager.B(c,"click",()=>{a.player.configure({abr:{enabled:!0}});LS(a)});a.l=U("span");a.l.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.l);a.player.getConfiguration().abr.enabled&&(c.appendChild(iO()),lO(c,a.l),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
++{});super.release()}updateLocalizedStrings(){var a=this.l?this.localization.resolve("AIRPLAY"):this.localization.resolve("CAST");this.h.ariaLabel=a;this.u.textContent=a}checkAvailability(){HS(this,!0)}};y("shaka.ui.RemoteButton",JS);var KS=class{create(a,b){return new JS(a,b)}};GQ("remote",new KS);OP("remote",new KS);QP("remote",new KS);function LS(a){for(const b of a.menu.querySelectorAll(".explicit-resolution, .shaka-enable-abr-button"))a.eventManager.Ra(b,"click");hO(a.menu);var b=0;b=a.player.nc()?MS(a):NS(a);var c=Jl();c.setAttribute("role","menuitemradio");c.setAttribute("aria-checked","false");c.classList.add("shaka-enable-abr-button");a.eventManager.B(c,"click",()=>{a.player.configure({abr:{enabled:!0}});LS(a)});a.l=U("span");a.l.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.l);a.player.getConfiguration().abr.enabled&&(c.appendChild(iO()),lO(c,a.l),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
+ a.button.setAttribute("shaka-status",a.currentSelection.textContent);a.menu.appendChild(c);gO(a.menu);a.controls.dispatchEvent(new D("resolutionselectionupdated"));a.updateLocalizedStrings();Y(a.button,b>0&&!a.isSubMenuOpened)}
+ function OS(a){var b=a.player.getConfiguration().abr.enabled;if(a.player.nc()){a.j.textContent="";a.j.style.display="none";a.h&&(a.h.textContent="",a.h.style.display="none");var c=a.player.Wb()||[],d=c.find(e=>e.active);d&&(b?(a.i.textContent=d.bandwidth?PS(a,d,c):"Unknown",a.i.style.display=""):a.i.style.display="none")}else c=a.player.getVideoTracks()||[],(d=c.find(e=>e.active))?(b?(a.i.textContent=d.height&&d.width?QS(a,d,c):d.bandwidth?RS(d.bandwidth):"Unknown",a.i.style.display=""):a.i.style.display=
+ "none",b=SS(a,d.width,d.height),a.j.textContent=b,a.j.style.display=b!==""?"":"none",a.h&&(a.h.textContent=b,a.h.style.display=b!==""?"":"none")):a.h&&(b=a.player.getStats(),b=SS(a,b.width,b.height),a.h.textContent=b,a.h.style.display=b!==""?"":"none")}function PS(a,b,c){var d=RS(b.bandwidth);if(a.controls.h.showAudioCodec){let e=f=>{var g="";f&&(g=re(f).toUpperCase());return g?" "+g:g};c.some(f=>e(f.codecs)!=e(b.codecs))&&(d+=e(b.codecs))}return d}
+diff --git a/lib/media/streaming_engine.js b/lib/media/streaming_engine.js
+index 798c012e026a9955ff1055238aa972b141c6872e..07861beff58164550ca586bff8a529084f7c2e7a 100644
+--- a/lib/media/streaming_engine.js
++++ b/lib/media/streaming_engine.js
+@@ -1388,6 +1388,7 @@ shaka.media.StreamingEngine = class {
+       seeked: true,
+       adaptation: false,
+       recovering: false,
++      quotaExceededAt: null,
+       hasError: false,
+       operation: null,
+       dependencyMediaState: null,
+@@ -1842,7 +1843,9 @@ shaka.media.StreamingEngine = class {
+     const unscaledBufferingGoal = Math.max(
+         this.config_.rebufferingGoal, this.config_.bufferingGoal);
+ 
+-    const scaledBufferingGoal = Math.max(1,
++    // Playback that stalled waits for the rebuffering goal, so buffering less
++    // would keep it stalled.
++    const scaledBufferingGoal = Math.max(1, this.config_.rebufferingGoal,
+         unscaledBufferingGoal * this.bufferingScale_);
+ 
+     // Check if we've buffered to the end of the presentation.
+@@ -2504,7 +2507,7 @@ shaka.media.StreamingEngine = class {
+         }
+         this.mediaStates_.delete(ContentType.TEXT);
+       } else if (error.code == shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR) {
+-        await this.handleQuotaExceeded_(mediaState, error);
++        await this.handleQuotaExceeded_(mediaState, error, reference);
+       } else {
+         shaka.log.error(logPrefix, 'failed fetch and append: code=' +
+             error.code);
+@@ -2653,10 +2656,12 @@ shaka.media.StreamingEngine = class {
+    *
+    * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+    * @param {!shaka.util.Error} error
++   * @param {!shaka.media.SegmentReference} reference The segment that did not
++   *   fit.
+    * @return {!Promise}
+    * @private
+    */
+-  async handleQuotaExceeded_(mediaState, error) {
++  async handleQuotaExceeded_(mediaState, error, reference) {
+     const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+ 
+     // The segment cannot fit into the SourceBuffer. Ideally, MediaSource would
+@@ -2698,6 +2703,15 @@ shaka.media.StreamingEngine = class {
+         this.scheduleUpdate_(mediaState, 4);
+         return;
+       }
++      // This must not await before marking the stream as recovering, or
++      // another stream could pass the check above and reduce the goal too.
++      const retryDelay = this.reduceBufferingGoalToFit_(mediaState, reference);
++      if (retryDelay != null) {
++        const presentationTime = this.playerInterface_.getPresentationTime();
++        await this.evict_(mediaState, presentationTime);
++        this.scheduleUpdate_(mediaState, retryDelay);
++        return;
++      }
+       // Reduction schedule: 80%, 60%, 40%, 20%, 16%, 12%, 8%, 4%, fail.
+       // Note: percentages are used for comparisons to avoid rounding errors.
+       const percentBefore = Math.round(100 * this.bufferingScale_);
+@@ -2750,6 +2764,67 @@ shaka.media.StreamingEngine = class {
+     this.scheduleUpdate_(mediaState, 4);
+   }
+ 
++  /**
++   * Lowers the buffering goal to what was buffered ahead of the playhead when
++   * the segment was rejected, minus that segment, so that the next append
++   * brings the buffer back to an amount that is known to fit.
++   *
++   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
++   * @param {!shaka.media.SegmentReference} reference The segment that did not
++   *   fit.
++   * @return {?number} The number of seconds after which to retry the segment,
++   *   or null if the goal cannot be derived this way, because not even one
++   *   segment fits next to the playhead, the playhead hasn't moved since the
++   *   last error and the lowered goal isn't met, or playback is backwards.  The caller should then fall back to the
++   *   reduction schedule.
++   * @private
++   */
++  reduceBufferingGoalToFit_(mediaState, reference) {
++    const playbackRate = this.playerInterface_.getPlaybackRate();
++    if (playbackRate < 0) {
++      return null;
++    }
++    const presentationTime = this.playerInterface_.getPresentationTime();
++    const playheadMoved = mediaState.quotaExceededAt != presentationTime;
++    mediaState.quotaExceededAt = presentationTime;
++    const ContentType = shaka.util.ManifestParserUtils.ContentType;
++    const mediaSourceEngine = this.playerInterface_.mediaSourceEngine;
++    let bufferedAhead =
++        mediaSourceEngine.bufferedAheadOf(mediaState.type, presentationTime);
++    // Like update_, use the intersection of audio and video for muxed content.
++    if (mediaState.type == ContentType.VIDEO &&
++        !this.mediaStates_.has(ContentType.AUDIO) &&
++        mediaSourceEngine.hasSourceBufferFor(ContentType.AUDIO)) {
++      bufferedAhead = Math.min(bufferedAhead,
++          mediaSourceEngine.bufferedAheadOf(
++              ContentType.AUDIO, presentationTime));
++    }
++    const segmentDuration = reference.endTime - reference.startTime;
++    const fittingGoal = bufferedAhead - segmentDuration;
++    // A playhead that hasn't moved since the last error, such as in a stall,
++    // frees no room. Retrying the segment would then fail the same way, unless
++    // the lowered goal is already met and nothing is fetched until it moves.
++    const goalMet = bufferedAhead >= Math.max(1, this.config_.rebufferingGoal);
++    if (fittingGoal <= 0 || (!playheadMoved && !goalMet)) {
++      return null;
++    }
++
++    const unscaledBufferingGoal = Math.max(
++        this.config_.rebufferingGoal, this.config_.bufferingGoal);
++    // Only ever lower the scale: a later, larger segment lowers it again.
++    this.bufferingScale_ = Math.min(
++        this.bufferingScale_, fittingGoal / unscaledBufferingGoal);
++    shaka.log.warning(
++        shaka.media.StreamingEngine.logPrefix_(mediaState),
++        'MediaSource threw QuotaExceededError:',
++        'reducing buffering goal to ' + fittingGoal.toFixed(1) + ' seconds');
++    mediaState.recovering = true;
++
++    // There is room for the segment once the playhead has played the buffer
++    // down to the new goal, which takes about one segment.
++    return segmentDuration / Math.max(1, playbackRate);
++  }
++
+ 
+   /**
+    * Sets the given MediaState's associated SourceBuffer's timestamp offset,
+@@ -4144,6 +4219,7 @@ shaka.media.StreamingEngine.PlayerInterface;
+  *   seeked: boolean,
+  *   adaptation: boolean,
+  *   recovering: boolean,
++ *   quotaExceededAt: ?number,
+  *   hasError: boolean,
+  *   operation: shaka.net.NetworkingEngine.PendingRequest,
+  *   segmentPrefetch: shaka.media.SegmentPrefetch,
+@@ -4200,6 +4276,8 @@ shaka.media.StreamingEngine.PlayerInterface;
+  * @property {boolean} recovering
+  *   True indicates that the last segment was not appended because it could not
+  *   fit in the buffer.
++ * @property {?number} quotaExceededAt
++ *   The presentation time of the last QuotaExceededError.
+  * @property {boolean} hasError
+  *   True indicates that the stream has encountered an error and has stopped
+  *   updating.
+diff --git a/ui/controls.js b/ui/controls.js
+index 8c8241b87db20ecd644649e3522f475533390db0..a911f7bcd1186fd402de29545b55b244f4fd593e 100644
+--- a/ui/controls.js
++++ b/ui/controls.js
+@@ -270,7 +270,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+         return;
+       }
+       if (this.config_.menuOpenUntilUserClosesIt &&
+-          this.anySettingsMenusAreOpen()) {
++          (this.anySettingsMenusAreOpen() ||
++           this.anyContextMenusAreOpen())) {
+         return;
+       }
+       const wasShown = this.controlsContainer_.getAttribute('shown') != null;
+@@ -317,13 +318,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       const activeElement = this.videoContainer_.ownerDocument.activeElement;
+       const focusIsInMenu = this.menus_.some(
+           (menu) => menu.contains(activeElement));
++      // The seek bar hides the menus on every input, so only announce a close
++      // when a menu was open.  Every menu element refreshes on this event.
++      const anyMenuWasOpen = this.anySettingsMenusAreOpen();
+       for (const menu of this.menus_) {
+         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
+       }
+       if (focusIsInMenu) {
+         this.restoreFocus(this.settingsMenuOpener_);
+       }
+-      this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
++      if (anyMenuWasOpen) {
++        this.dispatchEvent(new shaka.util.FakeEvent('submenuclose'));
++      }
+       this.hideTextStylePreview();
+       if (this.config_.enableTooltips) {
+         this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+@@ -705,6 +711,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     }
+ 
+     if (this.controlsContainer_) {
++      // These bindings belong to the current layout, not the controls lifetime.
++      // Release them before replacing the DOM so old menu trees can be collected.
++      const oldElements = this.videoContainer_.getElementsByClassName(
++          'shaka-no-propagation');
++      for (const element of oldElements) {
++        for (const type of ['click', 'dblclick', 'touchend']) {
++          this.eventManager_.unlisten(element, type);
++        }
++      }
+       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
+       this.releaseChildElements_();
+       this.bigButtonsContainer_ = null;
+@@ -979,7 +994,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (seeking) {
+       this.mouseStillTimer_.stop();
+     } else {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+ 
+@@ -1834,6 +1850,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
+     this.bottomControls_.classList.add('shaka-bottom-controls');
+     this.bottomControls_.classList.add('shaka-no-propagation');
++    // Keep the controls up while the pointer rests anywhere on them, including
++    // the seek bar, not only on the button panel.
++    this.bottomControls_.classList.add('shaka-show-controls-on-mouse-over');
+     this.controlsContainer_.appendChild(this.bottomControls_);
+ 
+     // Overflow menus are supposed to hide once you click elsewhere
+@@ -2114,7 +2133,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     // Disable blue outline for focused elements for mouse navigation.
+     if (event.type == 'mousemove') {
+       this.controlsContainer_.classList.remove('shaka-keyboard-navigation');
+-      this.computeOpacity();
+     }
+     if (event.type == 'touchstart' || event.type == 'touchmove' ||
+         event.type == 'touchend' || event.type == 'keyup') {
+@@ -2147,8 +2165,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       // seek bar will be updated much more rapidly during mouse movement.  Do
+       // this right before making it visible.
+       this.updateTimeAndSeekRange_();
+-      this.computeOpacity();
+     }
++    // Recompute only after the movement counts as recent: controls kept up by
++    // a resting hover or keyboard navigation would otherwise fade at once.
++    this.computeOpacity();
+ 
+     // Hide the cursor when the mouse stops moving.
+     // Only applies while the cursor is over the video container.
+@@ -2159,7 +2179,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (event.type == 'touchend' ||
+         event.type == 'wheel' ||
+         event.type == 'keyup'|| !this.lastTouchEventTime_) {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+ 
+@@ -2189,8 +2210,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (this.shouldShowUIAlways_()) {
+       return;
+     }
+-    // Hide the cursor.
+-    this.videoContainer_.classList.add('no-cursor');
++    // Hide the cursor, unless it rests on controls that stay visible.
++    if (!this.isHovered_()) {
++      this.videoContainer_.classList.add('no-cursor');
++    }
+     this.recentMouseMovement_ = false;
+     this.computeOpacity();
+   }
+@@ -2200,7 +2223,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+    * @private
+    */
+   isHovered_() {
+-    if (!window.matchMedia('hover: hover').matches) {
++    if (!window.matchMedia('(hover: hover)').matches) {
+       // This is primarily a touch-screen device, so the :hover query below
+       // doesn't make sense.  In spite of this, the :hover query on an element
+       // can still return true on such a device after a touch ends.
+@@ -2208,9 +2231,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       return false;
+     }
+ 
+-    return this.showOnHoverControls_.some((element) => {
+-      return element.matches(':hover');
+-    });
++    // Query on each call, so that elements the app adds to the container
++    // later (e.g. fullscreen overlays) count too.
++    return this.videoContainer_.querySelector(
++        '.shaka-show-controls-on-mouse-over:hover') != null;
+   }
+ 
+   /**
+@@ -2869,22 +2893,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+       this.seekBar_.setValue(this.video_.currentTime);
+       this.seekBar_.update();
+ 
+-      if (this.seekBar_.isShowing()) {
+-        for (const menu of this.menus_) {
+-          menu.classList.remove('shaka-low-position');
+-        }
+-        const controlsButtonPanel = this.controlsButtonPanel_;
+-        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+-          controlsButtonPanel.classList.remove('shaka-tooltips-low-position');
+-        }
+-      } else {
+-        for (const menu of this.menus_) {
+-          menu.classList.add('shaka-low-position');
+-        }
+-        const controlsButtonPanel = this.controlsButtonPanel_;
+-        if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
+-          controlsButtonPanel.classList.add('shaka-tooltips-low-position');
+-        }
++      // This runs on every refresh tick. Unlike add() and remove(), toggle()
++      // with a force argument leaves an unchanged class attribute alone, so
++      // idle menus do not receive a mutation per tick.
++      const lowPosition = !this.seekBar_.isShowing();
++      for (const menu of this.menus_) {
++        menu.classList.toggle('shaka-low-position', lowPosition);
++      }
++      const controlsButtonPanel = this.controlsButtonPanel_;
++      if (controlsButtonPanel.classList.contains('shaka-tooltips-on')) {
++        controlsButtonPanel.classList.toggle(
++            'shaka-tooltips-low-position', lowPosition);
+       }
+     }
+ 
+diff --git a/ui/externs/ui.js b/ui/externs/ui.js
+index e3242df55e38d600ffb6e49939bcd2ddd488bef9..d5cd1ee1c0e59518bc7965902bf9634f48a9a1b9 100644
+--- a/ui/externs/ui.js
++++ b/ui/externs/ui.js
+@@ -339,6 +339,7 @@ shaka.extern.UITrackLabelCallback;
+  *   refreshTickInSeconds: number,
+  *   displayInVrMode: boolean,
+  *   defaultVrProjectionMode: string,
++ *   vrSideBySide: boolean,
+  *   preferVideoFullScreenInVisionOS: boolean,
+  *   showAudioCodec: boolean,
+  *   showVideoCodec: boolean,
+@@ -591,6 +592,12 @@ shaka.extern.UITrackLabelCallback;
+  *   <code>'cubemap'</code>.
+  *   <br>
+  *   Defaults to <code>'equirectangular'</code>.
++ * @property {boolean} vrSideBySide
++ *   If true, each frame of VR content packs the left and right eye side by
++ *   side, and only the left eye is shown. Applies to the equirectangular and
++ *   half equirectangular projections.
++ *   <br>
++ *   Defaults to <code>false</code>.
+  * @property {boolean} preferVideoFullScreenInVisionOS
+  *   If true, we will use the fullscreen API of the video element itself if it
+  *   is available in Vision OS. This is useful to be able to access 3D
+diff --git a/ui/range_element.js b/ui/range_element.js
+index d85839a80edc90dad46acdc2b74b412efa5ff838..fa472411ca8783db233e4caae57c160808691550 100644
+--- a/ui/range_element.js
++++ b/ui/range_element.js
+@@ -125,6 +125,16 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
+     this.eventManager.listen(document, 'mouseup', (e) => {
+       if (this.isMouseChanging_) {
+         this.isMouseChanging_ = false;
++        // The mousedown default is prevented, so the browser does not capture
++        // the mouse for the range. Releasing it elsewhere then clicks their
++        // common ancestor, e.g. the controls container, which toggles playback.
++        if (e.target != this.bar) {
++          const suppressClick = (event) => event.stopPropagation();
++          window.addEventListener('click', suppressClick,
++              {capture: true, once: true});
++          setTimeout(() => window.removeEventListener(
++              'click', suppressClick, /* capture= */ true));
++        }
+         if (this.isChanging_) {
+           this.isChanging_ = false;
+           this.setBarValueForMouse_(e);
+@@ -385,8 +395,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
+     // Convert the percentage into a value within the input's range
+     let value = min + percent * (max - min);
+ 
+-    // Round the value to the nearest step
+-    value = Math.round((value - min) / step) * step + min;
++    // A continuous range must preserve sub-second seeking and hover positions.
++    if (this.bar.step != 'any') {
++      value = Math.round((value - min) / step) * step + min;
++    }
+ 
+     // Ensure the value stays within the min and max bounds
+     value = Math.min(max, Math.max(min, value));
+diff --git a/ui/resolution_selection.js b/ui/resolution_selection.js
+index 8ce1fc74b78213e67dc8a8ed94a33db8deab0ffd..68f452487ebdab3600f8a1d14d6ee448ef429632 100644
+--- a/ui/resolution_selection.js
++++ b/ui/resolution_selection.js
+@@ -187,6 +187,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
+ 
+   /** @private */
+   updateSelection_() {
++    // Release the event manager's references before discarding the choices.
++    // Track changes and submenu transitions rebuild this menu during playback.
++    for (const button of this.menu.querySelectorAll(
++      '.explicit-resolution, .shaka-enable-abr-button')) {
++      this.eventManager.unlisten(button, 'click');
++    }
++
+     // Remove old shaka-resolutions
+     shaka.ui.Utils.clearMenuKeepingBackButton(this.menu);
+ 
+diff --git a/ui/seek_bar.js b/ui/seek_bar.js
+index deb178dd47dead6ceecc52d062c0f54991e37bab..9a0b73e3652d8722f39189249c1b198579e245cd 100644
+--- a/ui/seek_bar.js
++++ b/ui/seek_bar.js
+@@ -974,6 +974,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     if (!thumbnail) {
+       return;
+     }
++    const isThumbnailSheet = thumbnail.sprite ||
++        thumbnail.imageWidth > thumbnail.width ||
++        thumbnail.imageHeight > thumbnail.height ||
++        thumbnail.positionX != 0 || thumbnail.positionY != 0;
+     const isPortrait = thumbnail.width < thumbnail.height;
+     this.thumbnailContainer_.classList.toggle('portrait-thumbnail', isPortrait);
+     this.thumbnailImageContainer_.style.width =
+@@ -1018,11 +1022,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+       }
+       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
+         shaka.util.Dom.createHTMLElement('img'));
++      const thumbnailImage = this.thumbnailImage_;
+       this.thumbnailImage_.alt = '';
+       this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
+       this.thumbnailImage_.draggable = false;
+       this.thumbnailImage_.src = uri;
+       this.thumbnailImage_.onload = () => {
++        if (isThumbnailSheet &&
++            thumbnailImage.naturalWidth && thumbnailImage.naturalHeight) {
++          thumbnailImage.width = thumbnailImage.naturalWidth;
++          thumbnailImage.height = thumbnailImage.naturalHeight;
++        }
+         if (uri.startsWith('blob:')) {
+           URL.revokeObjectURL(uri);
+         }
+@@ -1032,13 +1042,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     }
+     const widthImageContainer = this.thumbnailImageContainer_.clientWidth;
+     const scale = widthImageContainer / thumbnail.width;
+-    if (thumbnail.imageHeight) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalHeight) {
++      this.thumbnailImage_.height = this.thumbnailImage_.naturalHeight;
++    } else if (thumbnail.imageHeight) {
+       this.thumbnailImage_.height = thumbnail.imageHeight;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.height = '100%';
+       this.thumbnailImage_.style.objectFit = 'contain';
+     }
+-    if (thumbnail.imageWidth) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalWidth) {
++      this.thumbnailImage_.width = this.thumbnailImage_.naturalWidth;
++    } else if (thumbnail.imageWidth) {
+       this.thumbnailImage_.width = thumbnail.imageWidth;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.width = '100%';
+diff --git a/ui/ui.js b/ui/ui.js
+index 736e4a5405830038f935752ddf48684ca6f65f6d..dd9d088047934f43ead0e75eb5998258f527ddd9 100644
+--- a/ui/ui.js
++++ b/ui/ui.js
+@@ -425,6 +425,7 @@ shaka.ui.Overlay = class {
+       refreshTickInSeconds: 0.125,
+       displayInVrMode: false,
+       defaultVrProjectionMode: 'equirectangular',
++      vrSideBySide: false,
+       preferVideoFullScreenInVisionOS: true,
+       showAudioCodec: true,
+       showVideoCodec: true,
+diff --git a/ui/ui_utils.js b/ui/ui_utils.js
+index 2952b5ccfd5c05905df12b6a5edd489b24dbc2a4..3f77d96d9e4a9e18149ee7efedc12f57e53d0318 100644
+--- a/ui/ui_utils.js
++++ b/ui/ui_utils.js
+@@ -53,7 +53,9 @@ shaka.ui.Utils = class {
+    * @param {HTMLElement} menu
+    */
+   static focusOnTheChosenItem(menu) {
+-    if (!menu) {
++    // Menus are rebuilt whenever their tracks or strings change. Focusing
++    // inside a closed one does nothing, but still forces a layout.
++    if (!menu || menu.closest('.shaka-hidden')) {
+       return;
+     }
+     // Skip the items of hidden nested submenus, e.g. those inside a
+diff --git a/ui/vr_manager.js b/ui/vr_manager.js
+index c4aabc0a984f6ea51be7923de1cbb1922e6abcd5..06be4c04c5acf58968f236fe9a5b98191ffed3f4 100644
+--- a/ui/vr_manager.js
++++ b/ui/vr_manager.js
+@@ -354,9 +354,10 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+       const newProjectionMode =
+           this.vrAsset_ || this.config_.defaultVrProjectionMode;
+       const newHfov = this.vrHfov_ || 180;
++      const newSideBySide = this.config_.vrSideBySide;
+       if (!this.vrWebgl_) {
+         this.canvas_.style.display = '';
+-        this.init_(newProjectionMode, newHfov);
++        this.init_(newProjectionMode, newHfov, newSideBySide);
+         this.dispatchEvent(new shaka.util.FakeEvent(
+             'vrstatuschanged',
+             (new Map()).set('newStatus', this.isPlayingVR())));
+@@ -364,10 +365,13 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+         const currentProjectionMode = this.vrWebgl_.getProjectionMode();
+         const hfovChanged = newProjectionMode == 'fisheye' &&
+             this.vrWebgl_.getHfov() != newHfov;
+-        if (currentProjectionMode != newProjectionMode || hfovChanged) {
++        const sideBySideChanged =
++            this.vrWebgl_.isSideBySide() != newSideBySide;
++        if (currentProjectionMode != newProjectionMode || hfovChanged ||
++            sideBySideChanged) {
+           this.eventManager_.removeAll();
+           this.vrWebgl_.release();
+-          this.init_(newProjectionMode, newHfov);
++          this.init_(newProjectionMode, newHfov, newSideBySide);
+           // Re-initialization the status does not change.
+         }
+       }
+@@ -385,13 +389,14 @@ shaka.ui.VRManager = class extends shaka.util.FakeEventTarget {
+   /**
+    * @param {string} projectionMode
+    * @param {number} hfov
++   * @param {boolean} sideBySide
+    * @private
+    */
+-  init_(projectionMode, hfov) {
++  init_(projectionMode, hfov, sideBySide) {
+     if (this.gl_ && this.canvas_) {
+       this.vrWebgl_ = new shaka.ui.VRWebgl(
+           this.video_, this.player_, this.canvas_, this.gl_, projectionMode,
+-          hfov);
++          hfov, sideBySide);
+       this.setupVRListeners_();
+     }
+   }
+diff --git a/ui/vr_webgl.js b/ui/vr_webgl.js
+index 3568a1ea232d7e7c3536d3e8da8e558f016b9cd4..9ef03be6a61dcee5385c98a4142ccda6d6b792da 100644
+--- a/ui/vr_webgl.js
++++ b/ui/vr_webgl.js
+@@ -32,8 +32,12 @@ shaka.ui.VRWebgl = class {
+    * @param {string} projectionMode
+    * @param {number=} hfov Horizontal field of view of the content, in
+    *   degrees. Only used by the fisheye projection.
++   * @param {boolean=} sideBySide Whether each frame packs the left and right
++   *   eye side by side. Only the left eye is shown. Not used by the fisheye
++   *   and cubemap projections.
+    */
+-  constructor(video, player, canvas, gl, projectionMode, hfov = 180) {
++  constructor(video, player, canvas, gl, projectionMode, hfov = 180,
++      sideBySide = false) {
+     /** @private {!HTMLVideoElement} */
+     this.video_ = /** @type {!HTMLVideoElement} */ (video);
+ 
+@@ -142,6 +146,9 @@ shaka.ui.VRWebgl = class {
+     /** @private {number} */
+     this.hfov_ = hfov;
+ 
++    /** @private {boolean} */
++    this.sideBySide_ = sideBySide;
++
+     /** @private {?shaka.util.VideoFrameCallbackHandler} */
+     this.videoFrameCallbackHandler_ =
+         new shaka.util.VideoFrameCallbackHandler(this.video_);
+@@ -180,6 +187,13 @@ shaka.ui.VRWebgl = class {
+     return this.hfov_;
+   }
+ 
++  /**
++   * @return {boolean}
++   */
++  isSideBySide() {
++    return this.sideBySide_;
++  }
++
+   /**
+    * @param {!Float32Array} quat
+    * @return {{pitch: number, yaw: number, roll: number}} as radians
+@@ -416,6 +430,11 @@ shaka.ui.VRWebgl = class {
+         return null;
+     }
+ 
++    if (this.sideBySide_) {
++      // Sample the left eye, which fills the left half of the frame.
++      source = source.replace('vec2(xValue,', 'vec2(xValue * 0.5,');
++    }
++
+     const shader = this.gl_.createShader(glType);
+ 
+     this.gl_.shaderSource(shader, source);
+@@ -674,7 +693,10 @@ shaka.ui.VRWebgl = class {
+     if (this.projectionMode_ == 'halfequirectangular' ||
+         this.projectionMode_ == 'fisheye') {
+       yawBoundary = 90.0 * Math.PI / 180;
+-      pitchBoundary /= 2;
++      // A half sphere still spans the full 180 degrees of latitude.
++      if (this.projectionMode_ == 'fisheye') {
++        pitchBoundary /= 2;
++      }
+     }
+ 
+     let matrix;

@@ -1,0 +1,19 @@
+:global(.promptCard.exportTypePrompt.fixedLayout) {
+  inline-size: min(360px, 100%);
+  block-size: auto;
+  margin-inline: auto;
+}
+
+.exportTypeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exportTypeOptions .btn,
+.exportTypeClose {
+  min-block-size: 48px;
+  inline-size: 100%;
+  margin: 0;
+  white-space: normal;
+}

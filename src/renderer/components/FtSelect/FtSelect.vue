@@ -1,70 +1,361 @@
 <template>
   <div
+    ref="selectRoot"
     class="select"
-    :data-settings-search-label="placeholder"
+    :data-setting-key="settingKey || undefined"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
+    @focusout="handleFocusOut"
   >
-    <div class="select-header">
-      <label
-        v-if="!disabled"
-        class="select-label"
-        :for="id"
-      >
-        <FontAwesomeIcon
-          :icon="icon"
-          class="select-icon"
-          :color="iconColor"
-        />
-        {{ placeholder }}
-      </label>
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        :tooltip="tooltip"
-      />
-    </div>
     <select
-      :id="id"
+      :id="`${id}-native`"
       :aria-describedby="describeById"
-      class="select-text"
-      :class="{ disabled }"
-      :value="value"
+      aria-hidden="true"
+      class="nativeSelect"
+      v-bind="multiple ? null : { value }"
       :name="id"
       :disabled="disabled"
+      :multiple="multiple"
+      inert
+      tabindex="-1"
       @change="change"
     >
       <option
-        v-for="(name, index) in selectNames"
+        v-for="{ name, index } in nativeOptions"
         :key="selectValues[index]"
         :dir="isLocaleSelector ? 'auto' : null"
         :value="selectValues[index]"
-        :lang="isLocaleSelector && selectValues[index] !== 'system' ? selectValues[index] : null"
+        v-bind="multiple ? { selected: isSelectedValue(selectValues[index]) } : null"
+        :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
       >
         {{ name }}
       </option>
     </select>
-    <FontAwesomeIcon
-      :icon="['fas', 'sort-down']"
-      class="select-down-icon"
+    <button
+      :id="id"
+      ref="selectButton"
+      type="button"
+      role="combobox"
+      aria-haspopup="listbox"
+      class="select-text"
+      :class="{ disabled, withOptionVisuals: hasOptionVisuals }"
+      :aria-labelledby="`${id}-label`"
+      :aria-controls="`${id}-listbox`"
+      :aria-describedby="[`${id}-value`, describeById].filter(Boolean).join(' ')"
+      :aria-expanded="dropdownShown"
+      :aria-activedescendant="dropdownShown && !searchPanel ? `${id}-option-${activeIndex}` : null"
+      :disabled="disabled"
+      :dir="isLocaleSelector ? 'auto' : null"
+      :lang="selectedLocale"
+      :style="{ anchorName: dropdownRendered ? dropdownAnchor : null }"
+      @click="toggleDropdown"
+      @keydown="handleButtonKeydown"
+    >
+      <FtIcon
+        v-if="selectedOptionIcon"
+        :icon="selectedOptionIcon"
+        class="optionIcon"
+        aria-hidden="true"
+      />
+      <span
+        v-else-if="selectedOptionColor !== undefined"
+        class="optionColorDot"
+        :class="{ empty: selectedOptionColor == null }"
+        :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
+        aria-hidden="true"
+      />
+      <span class="selectValueBox">
+        <!-- Sizes a content-sized select by a fixed name, so choosing another option never resizes it. -->
+        <span
+          v-if="sizerNames"
+          class="selectValueSizer"
+          :data-names="sizerNames"
+          aria-hidden="true"
+        />
+        <span
+          :id="`${id}-value`"
+          class="selectedValue"
+        >
+          <slot
+            name="option"
+            :label="selectedName"
+            :value="value"
+          >{{ selectedName }}</slot>
+        </span>
+      </span>
+    </button>
+    <FtIcon
+      :icon="['fas', 'angle-down']"
+      class="iconSelect"
     />
     <span class="select-highlight" />
     <span class="select-bar" />
+    <fieldset
+      class="selectOutline"
+      role="presentation"
+    >
+      <legend class="selectLegend">
+        <label
+          :id="`${id}-label`"
+          class="select-label"
+          :for="id"
+          :title="placeholder"
+        >
+          <FtIcon
+            v-if="showIcon && icon !== null"
+            :icon="icon"
+            class="select-icon"
+            :color="iconColor"
+          />
+          <span class="select-label-text">
+            <span class="select-placeholder">{{ placeholder }}</span>
+            <FtPerformanceImpact
+              compact
+              :setting-key="settingKey"
+            />
+          </span>
+        </label>
+      </legend>
+    </fieldset>
+    <span
+      class="selectIndicators"
+    >
+      <FtTooltip
+        v-if="tooltip !== ''"
+        class="selectTooltip"
+        :tooltip="tooltip"
+        :allow-newlines="tooltipAllowNewlines"
+      />
+      <FtSyncedSettingIndicator
+        :setting-key="settingKey"
+        :setting-keys="syncSettingKeys"
+        :is-changed="isChanged"
+        :disabled="disabled"
+        @reset="emit('reset')"
+      />
+    </span>
+    <span
+      class="selectSearchHighlightFrame"
+      aria-hidden="true"
+    />
+    <Teleport
+      v-if="settingsOverlayActive"
+      :to="dropdownTarget"
+    >
+      <FtMobileSheet
+        v-if="dropdownRendered"
+        :enabled="phoneLayout"
+        :open="dropdownShown"
+        :title="placeholder"
+        :compact="phoneLayout"
+        @closed="dropdownShown = false; dropdownRendered = false"
+        @close="closeDropdown"
+      >
+        <!-- Searchable desktop lists keep the search field above the scrolling
+             options. Otherwise the panel only groups them, and the list is the menu. -->
+        <div
+          v-if="dropdownRendered"
+          ref="dropdownPanel"
+          class="selectDropdownPanel"
+          :class="searchPanel ? ['selectDropdown', 'searchPanel', dropdownPlacement] : null"
+          :style="searchPanel ? dropdownStyle : null"
+          @pointerdown="handleDropdownPointerDown"
+          @mousedown="handleDropdownMouseDown"
+          @focusout="handleFocusOut"
+        >
+          <div
+            v-if="showSearch"
+            class="pickerSearchField"
+          >
+            <FtInput
+              ref="searchInput"
+              variant="rounded"
+              :icon="['fas', 'search']"
+              :value="search"
+              input-type="search"
+              :label="$t('Search Bar.Search')"
+              :show-label="false"
+              :placeholder="$t('Form Inputs.Search Text Hint')"
+              :show-action-button="false"
+              :input-attributes="searchInputAttributes"
+              :class="{ searchLoading: loading }"
+              @input="search = $event"
+              @keydown="handleSearchKeydown"
+            >
+              <template #extraAction>
+                <FtLoader
+                  v-if="loading"
+                  class="searchLoadingIndicator"
+                  inline
+                  size="20px"
+                  :tab-loading-indicator="false"
+                />
+              </template>
+            </FtInput>
+          </div>
+          <!-- Start on the listbox so a long picker does not summon the Android keyboard. -->
+          <!-- eslint-disable vuejs-accessibility/no-autofocus -->
+          <ul
+            :id="`${id}-listbox`"
+            ref="dropdown"
+            v-overlay-scrollbars
+            class="selectOptionList"
+            :class="[searchPanel ? null : ['selectDropdown', dropdownPlacement], { phonePicker: phoneLayout, lazyOptions, multiple }]"
+            role="listbox"
+            :aria-multiselectable="multiple || null"
+            tabindex="-1"
+            :autofocus="phoneLayout"
+            :aria-labelledby="`${id}-label`"
+            :aria-busy="loading || null"
+            :style="phoneLayout || searchPanel ? null : dropdownStyle"
+            @keydown="handlePickerKeydown"
+          >
+            <!-- A new sentinel per page gets a fresh intersection check, so a list that
+                 still shows it after loading a page loads the next one too -->
+            <li
+              v-if="lazyOptions && windowStart > 0"
+              ref="loadPreviousSentinel"
+              :key="`load-previous:${windowStart}`"
+              class="selectLoadMore"
+              role="presentation"
+            />
+            <template
+              v-for="({ name, index }, visibleIndex) in renderedOptions"
+              :key="selectValues[index]"
+            >
+              <li
+                v-if="optionGroupLabels[optionGroups[index]] && (visibleIndex === 0 || optionGroups[index] !== optionGroups[renderedOptions[visibleIndex - 1].index])"
+                :id="`${id}-group-${optionGroups[index]}`"
+                class="selectGroupHeading"
+                role="presentation"
+              >
+                {{ optionGroupLabels[optionGroups[index]] }}
+              </li>
+              <!-- Desktop uses aria-activedescendant; phone sheets move focus between rows. -->
+              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+              <li
+                :id="`${id}-option-${index}`"
+                ref="options"
+                class="selectOption"
+                :class="{
+                  active: index === activeIndex,
+                  selected: isSelectedValue(selectValues[index]),
+                  hasOptionVisuals: hasOptionVisuals || multiple,
+                  disabledOption: disabledValues.includes(selectValues[index])
+                }"
+                role="option"
+                :tabindex="phoneLayout ? 0 : -1"
+                :aria-selected="isSelectedValue(selectValues[index])"
+                :aria-disabled="disabledValues.includes(selectValues[index]) || null"
+                :aria-describedby="optionGroupLabels[optionGroups[index]] ? `${id}-group-${optionGroups[index]}` : null"
+                :dir="isLocaleSelector ? 'auto' : null"
+                :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
+                @mousedown.prevent
+                @pointermove="activeIndex = index"
+                @focus="activeIndex = index"
+                @click="selectOption(index)"
+                @keydown.enter.space.prevent="selectOption(index)"
+              >
+                <span
+                  v-if="phoneLayout || multiple"
+                  class="optionRadio"
+                  :class="{ optionCheckbox: multiple }"
+                  aria-hidden="true"
+                />
+                <FtIcon
+                  v-if="optionIcons[index]"
+                  :icon="optionIcons[index]"
+                  class="optionIcon"
+                  aria-hidden="true"
+                />
+                <span
+                  v-else-if="optionColors[index] !== undefined"
+                  class="optionColorDot"
+                  :class="{ empty: optionColors[index] == null }"
+                  :style="optionColors[index] == null ? null : { '--option-color': optionColors[index] }"
+                  aria-hidden="true"
+                />
+                <span class="optionName">
+                  <slot
+                    name="option"
+                    :label="name"
+                    :value="selectValues[index]"
+                  >{{ name }}</slot>
+                </span>
+              </li>
+            </template>
+            <li
+              v-if="lazyOptions && renderLimit < filteredOptions.length"
+              ref="loadMoreSentinel"
+              :key="`load-more:${renderLimit}`"
+              class="selectLoadMore"
+              role="presentation"
+            />
+            <li
+              v-if="(loading && !showSearch) || filteredOptions.length === 0"
+              ref="statusRow"
+              class="selectStatus"
+              role="presentation"
+            >
+              <FtLoader
+                v-if="loading && !showSearch"
+                inline
+                size="24px"
+                :tab-loading-indicator="false"
+              />
+              <template v-else>
+                {{ $t('CommandPalette.No Results') }}
+              </template>
+            </li>
+          </ul>
+          <!-- eslint-enable vuejs-accessibility/no-autofocus -->
+        </div>
+      </FtMobileSheet>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useId } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+
+import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import FtInput from '../FtInput/FtInput.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
+import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import { DEFAULT_SETTINGS } from '../../store/modules/settings'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
+import { getAnchoredPosition } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
-defineProps({
+const props = defineProps({
+  variant: {
+    type: String,
+    default: 'outlined',
+    validator: value => ['filled', 'outlined'].includes(value)
+  },
+  sizeToContent: {
+    type: Boolean,
+    default: false
+  },
   placeholder: {
     type: String,
     required: true
   },
+  // An array of the selected values with `multiple`
   value: {
-    type: String,
+    type: [String, Number, Array],
     required: true
+  },
+  // Choosing an option toggles it and keeps the list open
+  multiple: {
+    type: Boolean,
+    default: false
   },
   selectNames: {
     type: Array,
@@ -74,9 +365,39 @@ defineProps({
     type: Array,
     required: true
   },
+  optionGroupLabels: {
+    type: Object,
+    default: () => ({})
+  },
+  optionGroups: {
+    type: Array,
+    default: () => []
+  },
+  optionColors: {
+    type: Array,
+    default: () => []
+  },
+  optionIcons: {
+    type: Array,
+    default: () => []
+  },
+  // Options that stay visible but can't be toggled
+  disabledValues: {
+    type: Array,
+    default: () => []
+  },
+  // Shown while no option is selected, such as with an empty `multiple` value
+  emptyLabel: {
+    type: String,
+    default: ''
+  },
   tooltip: {
     type: String,
     default: ''
+  },
+  tooltipAllowNewlines: {
+    type: Boolean,
+    default: false
   },
   disabled: {
     type: Boolean,
@@ -88,7 +409,11 @@ defineProps({
   },
   icon: {
     type: Array,
-    required: true
+    default: null
+  },
+  showIcon: {
+    type: Boolean,
+    default: true
   },
   iconColor: {
     type: String,
@@ -97,18 +422,701 @@ defineProps({
   isLocaleSelector: {
     type: Boolean,
     default: false
+  },
+  settingKey: {
+    type: String,
+    default: ''
+  },
+  // Synced setting keys for a select that edits several settings
+  syncSettingKeys: {
+    type: Array,
+    default: () => []
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
+  },
+  dropdownZIndex: {
+    type: [Number, String],
+    default: null
+  },
+  // Very long lists render rows on demand and keep only the selected value in
+  // the hidden native select.
+  lazyOptions: {
+    type: Boolean,
+    default: false
+  },
+  // Long lists can show a search field on desktop too. Phone sheets show one
+  // for more than ten options regardless.
+  searchable: {
+    type: Boolean,
+    default: false
+  },
+  // Shows a spinner in the search field, or below the options without one,
+  // while more options are loading.
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'open', 'preview', 'reset'])
 
 const id = useId()
+const dropdownAnchor = `--select-${id}`
+const selectRoot = useTemplateRef('selectRoot')
+const selectButton = useTemplateRef('selectButton')
+const dropdown = useTemplateRef('dropdown')
+const dropdownPanel = useTemplateRef('dropdownPanel')
+const searchInput = useTemplateRef('searchInput')
+const statusRow = useTemplateRef('statusRow')
+const options = useTemplateRef('options')
+const loadMoreSentinel = useTemplateRef('loadMoreSentinel')
+const loadPreviousSentinel = useTemplateRef('loadPreviousSentinel')
+
+const phoneLayout = usePhoneLayout(process.env.IS_CAPACITOR
+  ? `(any-pointer: coarse), ${PHONE_LAYOUT_QUERY}`
+  : PHONE_LAYOUT_QUERY)
+const search = ref('')
+const searchPanel = computed(() => props.searchable && !phoneLayout.value)
+const showSearch = computed(() => searchPanel.value || (phoneLayout.value && (props.searchable || props.selectNames.length > 10)))
+const filteredOptions = computed(() => {
+  const options = props.selectNames.map((name, index) => ({ name, index }))
+  const query = showSearch.value ? search.value.trim().toLocaleLowerCase() : ''
+  return query === '' ? options : options.filter(({ name }) => name.toLocaleLowerCase().includes(query))
+})
+// The positioned menu surface: the panel with its search field, or the list itself.
+const dropdownSurface = computed(() => searchPanel.value ? dropdownPanel.value : dropdown.value)
+const activeDescendant = computed(() =>
+  filteredOptions.value.some(option => option.index === activeIndex.value) ? getOptionId(activeIndex.value) : null)
+const searchInputAttributes = computed(() => searchPanel.value
+  ? {
+      role: 'combobox',
+      'aria-autocomplete': 'list',
+      'aria-expanded': 'true',
+      'aria-controls': `${id}-listbox`,
+      'aria-activedescendant': activeDescendant.value
+    }
+  : null)
+const OPTION_PAGE_SIZE = 100
+// Lazy lists render the filtered options in [windowStart, renderLimit).
+const windowStart = ref(0)
+const renderLimit = ref(OPTION_PAGE_SIZE)
+const renderedOptions = computed(() => props.lazyOptions ? filteredOptions.value.slice(windowStart.value, renderLimit.value) : filteredOptions.value)
+const nativeOptions = computed(() => {
+  if (!props.lazyOptions) return props.selectNames.map((name, index) => ({ name, index }))
+  // A native multiple select keeps every checked option
+  if (props.multiple) return selectedIndices.value.map(index => ({ name: props.selectNames[index], index }))
+  return selectedIndex.value === -1 ? [] : [{ name: selectedName.value, index: selectedIndex.value }]
+})
+
+function resetRenderedOptions() {
+  windowStart.value = 0
+  renderLimit.value = OPTION_PAGE_SIZE
+}
+
+/**
+ * Extend the rendered window by a page to reach a neighbouring option, or move
+ * it to a distant one without rendering every option in between.
+ * @param {number} visibleIndex
+ */
+function renderOptionAt(visibleIndex) {
+  if (!props.lazyOptions || visibleIndex < 0) return
+  if (visibleIndex >= windowStart.value && visibleIndex < renderLimit.value) return
+  if (visibleIndex >= renderLimit.value && visibleIndex < renderLimit.value + OPTION_PAGE_SIZE) {
+    renderLimit.value += OPTION_PAGE_SIZE
+  } else if (visibleIndex < windowStart.value && visibleIndex >= windowStart.value - OPTION_PAGE_SIZE) {
+    windowStart.value -= OPTION_PAGE_SIZE
+  } else {
+    windowStart.value = Math.floor(visibleIndex / OPTION_PAGE_SIZE) * OPTION_PAGE_SIZE
+    renderLimit.value = windowStart.value + OPTION_PAGE_SIZE
+  }
+}
+
+/**
+ * @param {import('vue').Ref<HTMLElement | null>} sentinelRef
+ * @param {() => void} load
+ */
+function loadWhenVisible(sentinelRef, load) {
+  watchEffect(onCleanup => {
+    const sentinel = sentinelRef.value
+    const menu = dropdown.value
+    if (!sentinel || !menu) return
+    // Observe within the scrolling list so the margin loads pages early.
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) load()
+    }, { root: menu, rootMargin: '200px' })
+    observer.observe(sentinel)
+    onCleanup(() => observer.disconnect())
+  })
+}
+
+loadWhenVisible(loadMoreSentinel, () => { renderLimit.value += OPTION_PAGE_SIZE })
+loadWhenVisible(loadPreviousSentinel, async () => {
+  const menu = dropdown.value
+  const scrollHeight = menu?.scrollHeight ?? 0
+  windowStart.value = Math.max(0, windowStart.value - OPTION_PAGE_SIZE)
+  await nextTick()
+  // Keep the visible rows in place while earlier rows are inserted above them.
+  if (menu) menu.scrollTop += menu.scrollHeight - scrollHeight
+})
+
+const dropdownShown = ref(false)
+useAnchoredViewportBounds(selectButton, dropdownSurface, computed(() => dropdownShown.value && !phoneLayout.value))
+const dropdownRendered = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  closeDropdown()
+  dropdownRendered.value = false
+})
+const activeIndex = ref(0)
+const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
+const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
+const dropdownPlacement = ref('below')
+let typeahead = ''
+let typeaheadTimer = null
+let pointerDownInDropdown = false
+// Filtering keeps the menu at least as wide as it opened, so it does not jump.
+let minimumMenuWidth = 0
+
+/** @param {unknown} value */
+function isSelectedValue(value) {
+  return props.multiple ? Array.isArray(props.value) && props.value.includes(value) : value === props.value
+}
+
+const selectedIndices = computed(() => props.selectValues.flatMap((value, index) => isSelectedValue(value) ? [index] : []))
+const selectedIndex = computed(() => selectedIndices.value[0] ?? -1)
+const selectedName = computed(() => selectedIndices.value.map(index => props.selectNames[index]).join(', ') || props.emptyLabel)
+
+/**
+ * Content-sized selects take the width of their default option, so choosing
+ * another one never resizes them, and longer values truncate. Multi-selects
+ * and selects without a listed default reserve their longest option instead.
+ */
+const sizerNames = computed(() => {
+  if (!props.sizeToContent) return null
+  const defaultValue = !props.multiple && props.settingKey && Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)
+    ? String(DEFAULT_SETTINGS[props.settingKey])
+    : null
+  const index = defaultValue === null ? -1 : props.selectValues.findIndex(value => String(value) === defaultValue)
+  return index === -1
+    ? [...props.selectNames, props.emptyLabel].filter(Boolean).join('\n')
+    : props.selectNames[index]
+})
+const hasOptionVisuals = computed(() =>
+  props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
+  props.optionIcons.some(icon => Array.isArray(icon))
+)
+const selectedOptionColor = computed(() => props.optionColors[selectedIndex.value])
+const selectedOptionIcon = computed(() => props.optionIcons[selectedIndex.value] ?? null)
+const selectedLocale = computed(() => {
+  if (!props.isLocaleSelector || props.value === 'system' || props.value === '') {
+    return null
+  }
+
+  return props.value
+})
+
+watch(dropdownShown, (shown) => {
+  if (shown) {
+    dropdownRendered.value = true
+    stopOutsidePress?.()
+    stopOutsidePress = listenForOutsidePress(handleOutsidePointerDown, true)
+    window.addEventListener('resize', refreshDropdownLayout)
+  } else {
+    if (!phoneLayout.value) dropdownRendered.value = false
+    removeDropdownListeners()
+  }
+})
+
+// Lets the parent show the highlighted option before it is chosen, `null` once the list closes.
+// Opening highlights the current value, which needs no preview.
+watch([dropdownShown, activeIndex, () => props.selectValues[activeIndex.value]], ([shown, index], [wasShown]) => {
+  if (shown && wasShown) emit('preview', props.selectValues[index] ?? null)
+  else if (wasShown && !shown) emit('preview', null)
+})
+
+// Rows from a moved or extended window can be wider than the measured ones.
+// Resize before scrolling them into view, which waits for the next tick.
+watch([windowStart, renderLimit], () => {
+  if (props.lazyOptions && dropdownShown.value) updateDropdownPosition()
+}, { flush: 'post' })
+
+watch([search, phoneLayout], async () => {
+  resetRenderedOptions()
+  // Highlight the first match, and the selected value again once the search is cleared.
+  if (searchPanel.value && dropdownShown.value) {
+    const firstMatch = search.value.trim() === '' ? Math.max(0, selectedIndex.value) : filteredOptions.value[0]?.index
+    if (firstMatch !== undefined) activeIndex.value = firstMatch
+  }
+  await nextTick()
+  await refreshDropdownLayout()
+  if (searchPanel.value && dropdownShown.value) scrollActiveOptionIntoView()
+})
+
+watch(() => props.disabled, (disabled) => {
+  if (disabled) closeDropdown()
+})
+
+watch([() => props.selectNames, () => props.selectValues], async (_, [, previousValues]) => {
+  if (!dropdownShown.value) return
+
+  // Options that arrive while the list is open, like system fonts, must not
+  // move the user back to the selected value. Follow the highlighted option
+  // unless it is gone or the selected value has just appeared.
+  const selectedAppeared = selectedIndex.value >= 0 && !previousValues.includes(props.selectValues[selectedIndex.value])
+  const keptIndex = selectedAppeared ? -1 : props.selectValues.indexOf(previousValues[activeIndex.value])
+  const nextIndex = keptIndex >= 0 ? keptIndex : Math.max(0, selectedIndex.value)
+  // A search keeps the highlight on a match.
+  activeIndex.value = filteredOptions.value.some(option => option.index === nextIndex)
+    ? nextIndex
+    : filteredOptions.value[0]?.index ?? nextIndex
+  await nextTick()
+  await refreshDropdownLayout()
+  // Lazy lists render only some options, so reveal a highlight that moved out of them.
+  if (keptIndex < 0 || !findOptionElement(activeIndex.value)) scrollActiveOptionIntoView()
+}, { flush: 'post' })
+
+onBeforeUnmount(() => {
+  removeDropdownListeners()
+  if (typeaheadTimer !== null) {
+    clearTimeout(typeaheadTimer)
+  }
+})
+
+function toggleDropdown() {
+  if (dropdownShown.value) {
+    closeDropdown()
+  } else {
+    openDropdown()
+  }
+}
+
+function openDropdown() {
+  if (props.disabled || !settingsOverlayActive.value) return
+
+  search.value = ''
+  minimumMenuWidth = 0
+  resetRenderedOptions()
+  emit('open')
+  activeIndex.value = Math.max(0, selectedIndex.value)
+  // Mobile sheets must keep focus inside their subscription popup. Desktop lists
+  // stay outside it so blurred card backgrounds cannot offset or clip them.
+  const popupTarget = phoneLayout.value ? selectRoot.value?.closest('.profileDropdown') : null
+  dropdownTarget.value = popupTarget ?? selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? document.fullscreenElement ?? document.body
+  dropdownShown.value = true
+
+  nextTick(async () => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
+    await refreshDropdownLayout()
+    scrollActiveOptionIntoView()
+    if (searchPanel.value) searchInput.value?.focus()
+  })
+}
+
+function closeDropdown() {
+  dropdownShown.value = false
+}
+
+function updateDropdownPosition() {
+  if (phoneLayout.value) return
+  const button = selectButton.value
+  const menu = dropdownSurface.value
+  const list = dropdown.value
+  if (button === null || menu === null || list === null) {
+    return
+  }
+
+  const viewportMargin = 8
+  const menuGap = 4
+  const maximumHeight = 400
+  const minimumTop = Math.max(viewportMargin, getTopChromeBottom() + menuGap)
+  const maximumBottom = window.innerHeight - viewportMargin
+  const buttonRect = button.getBoundingClientRect()
+  // Measure the complete labels, including option visuals and padding, before
+  // constraining the menu. Measuring clipped rows loses their intrinsic width.
+  // Option slots can swap costly content for plain labels while measuring.
+  menu.classList.add('measuringOptions')
+  menu.style.inlineSize = 'max-content'
+  const menuWidth = Math.min(
+    Math.max(buttonRect.width, menu.getBoundingClientRect().width, minimumMenuWidth),
+    window.innerWidth - viewportMargin * 2
+  )
+  if (searchPanel.value) minimumMenuWidth = menuWidth
+  menu.classList.remove('measuringOptions')
+  menu.style.inlineSize = `${menuWidth}px`
+  const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
+  const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
+  // The surface's own height plus the options scrolled out of the list.
+  const naturalHeight = menu.offsetHeight + list.scrollHeight - list.clientHeight
+  const desiredHeight = Math.min(maximumHeight, naturalHeight)
+  const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
+  const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
+  const menuHeight = Math.min(desiredHeight, availableHeight)
+  const centeredLeft = buttonRect.left + (buttonRect.width - menuWidth) / 2
+  const top = openAbove
+    ? buttonRect.top - menuGap - menuHeight
+    : buttonRect.bottom + menuGap
+
+  dropdownPlacement.value = openAbove ? 'above' : 'below'
+  dropdownStyle.value = {
+    inlineSize: `${menuWidth}px`,
+    ...getAnchoredPosition(dropdownAnchor, buttonRect, snapToDevicePixels(centeredLeft), snapToDevicePixels(top), {
+      minLeft: viewportMargin,
+      maxLeft: window.innerWidth - viewportMargin - menuWidth,
+      minTop: minimumTop,
+      maxTop: maximumBottom - menuHeight
+    }),
+    maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
+    zIndex: props.dropdownZIndex
+  }
+}
+
+async function refreshDropdownLayout() {
+  updateDropdownPosition()
+  await nextTick()
+
+  const menu = dropdown.value
+  // Rows inserted above the window can be appended to the ref array.
+  const lastRendered = renderedOptions.value.at(-1)
+  const contentEnd = statusRow.value ?? (lastRendered && findOptionElement(lastRendered.index)) ?? null
+  if (menu !== null) clampOverlayScrollTop(menu, contentEnd)
+}
+
+/**
+ * The button's bounding box rarely lands on a whole pixel, and Chromium only
+ * snaps an option's text to the pixel grid once it has a background to paint,
+ * so hovering an option at a fractional offset visibly nudges its label. Place
+ * the menu on the device pixel grid instead, which keeps every option's text
+ * where it already was.
+ *
+ * @param {number} value
+ */
+function snapToDevicePixels(value) {
+  const ratio = window.devicePixelRatio || 1
+  return Math.round(value * ratio) / ratio
+}
+
+function getTopChromeBottom() {
+  if (document.fullscreenElement !== null) {
+    return 0
+  }
+
+  let bottom = 0
+  for (const selector of ['.topNav', '.tabBar.position-top']) {
+    const element = document.querySelector(selector)
+    if (element !== null) {
+      bottom = Math.max(bottom, element.getBoundingClientRect().bottom)
+    }
+  }
+
+  return bottom
+}
+
+/** Moves the highlight among the options that match the search. */
+function moveActiveIndex(offset) {
+  const visibleOptions = filteredOptions.value
+  if (visibleOptions.length === 0) return
+  const current = visibleOptions.findIndex(option => option.index === activeIndex.value)
+  const next = current === -1
+    ? (offset > 0 ? 0 : visibleOptions.length - 1)
+    : Math.max(0, Math.min(visibleOptions.length - 1, current + offset))
+  activeIndex.value = visibleOptions[next].index
+  scrollActiveOptionIntoView()
+}
+
+/** @param {number} index */
+function getOptionId(index) {
+  return `${id}-option-${index}`
+}
+
+/** @param {number} index */
+function findOptionElement(index) {
+  return options.value?.find(option => option.id === getOptionId(index))
+}
+
+function scrollActiveOptionIntoView() {
+  const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
+  renderOptionAt(visibleIndex)
+  nextTick(() => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
+    findOptionElement(activeIndex.value)?.scrollIntoView({ block: 'nearest' })
+  })
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleButtonKeydown(event) {
+  if (!settingsOverlayActive.value) return
+  // Alt+Arrow is the platform shortcut for opening/closing a select
+  if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && event.altKey) {
+    event.preventDefault()
+    if (dropdownShown.value) {
+      closeDropdown()
+    } else {
+      openDropdown()
+    }
+    return
+  }
+
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    const offset = event.key === 'ArrowDown' ? 1 : -1
+    if (dropdownShown.value) {
+      moveActiveIndex(offset)
+    } else {
+      // Native selects change the value straight away while closed
+      selectOffset(offset)
+    }
+    return
+  }
+
+  if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault()
+    const index = event.key === 'Home' ? 0 : props.selectValues.length - 1
+    if (dropdownShown.value) {
+      activeIndex.value = index
+      scrollActiveOptionIntoView()
+    } else if (props.multiple) {
+      openDropdown()
+    } else {
+      const enabledIndex = enabledIndexFrom(index, event.key === 'Home' ? 1 : -1)
+      if (enabledIndex !== -1) selectOption(enabledIndex)
+    }
+    return
+  }
+
+  if (event.key === 'PageDown' || event.key === 'PageUp') {
+    event.preventDefault()
+    const offset = event.key === 'PageDown' ? 10 : -10
+    if (dropdownShown.value) {
+      moveActiveIndex(offset)
+    } else {
+      selectOffset(offset)
+    }
+    return
+  }
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    if (dropdownShown.value) {
+      selectOption(activeIndex.value)
+    } else {
+      openDropdown()
+    }
+    return
+  }
+
+  if (event.key === 'Escape' && dropdownShown.value) {
+    event.preventDefault()
+    event.stopPropagation()
+    closeDropdown()
+    return
+  }
+
+  if (event.key === 'Tab') {
+    closeDropdown()
+    return
+  }
+
+  if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    handleTypeahead(event.key)
+  }
+}
+
+function handleTypeahead(character) {
+  typeahead += character.toLocaleLowerCase()
+  if (typeaheadTimer !== null) {
+    clearTimeout(typeaheadTimer)
+  }
+  typeaheadTimer = setTimeout(() => {
+    typeahead = ''
+    typeaheadTimer = null
+  }, 700)
+
+  const match = props.selectNames.findIndex(name => name.toLocaleLowerCase().startsWith(typeahead))
+  if (match === -1) {
+    return
+  }
+
+  if (dropdownShown.value) {
+    activeIndex.value = match
+    scrollActiveOptionIntoView()
+  } else if (!props.multiple) {
+    selectOption(match)
+  }
+}
+
+/**
+ * Moves the selection relative to the currently selected option, like a closed native select does.
+ * Clamping happens after the offset is applied, so that moving down from a value that isn't in
+ * the list (`selectedIndex` is -1) lands on the first option instead of skipping it.
+ * @param {number} offset
+ */
+function selectOffset(offset) {
+  // Several values have no single one to move from
+  if (props.multiple) {
+    openDropdown()
+    return
+  }
+  const target = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
+  const step = Math.sign(offset)
+  // Steps over disabled options, and at the end of the list falls back to the last one it can select
+  let index = enabledIndexFrom(target, step)
+  if (index === -1) index = enabledIndexFrom(target, -step)
+  if (index !== -1) selectOption(index)
+}
+
+/**
+ * The first option from `index` on, walking by `step`, that isn't in `disabledValues`.
+ * @param {number} index
+ * @param {number} step
+ * @returns {number} its index, or -1 if there is none
+ */
+function enabledIndexFrom(index, step) {
+  for (let i = index; i >= 0 && i < props.selectValues.length; i += step) {
+    if (!props.disabledValues.includes(props.selectValues[i])) return i
+  }
+  return -1
+}
+
+function selectOption(index) {
+  if (!settingsOverlayActive.value) return
+  if (props.disabled) {
+    closeDropdown()
+    return
+  }
+
+  const selectedValue = props.selectValues[index]
+  if (props.disabledValues.includes(selectedValue)) return
+  if (props.multiple) {
+    activeIndex.value = index
+    emit('change', props.selectValues.filter(value => value === selectedValue ? !isSelectedValue(value) : isSelectedValue(value)))
+    return
+  }
+  if (selectedValue !== props.value) {
+    emit('change', selectedValue)
+  }
+  closeDropdown()
+  if (settingsOverlayActive.value) selectButton.value?.focus()
+}
+
+let stopOutsidePress = null
+function handleOutsidePointerDown(event) {
+  if (phoneLayout.value) return
+  const target = event.target
+  if (target instanceof Node && (selectRoot.value?.contains(target) || dropdownPanel.value?.contains(target))) {
+    return
+  }
+
+  closeDropdown()
+}
+
+function handleFocusOut(event) {
+  if (phoneLayout.value) return
+  if (pointerDownInDropdown) {
+    return
+  }
+
+  const nextTarget = event.relatedTarget
+  const focusStaysInControl = nextTarget instanceof Node && (
+    selectRoot.value?.contains(nextTarget) || dropdownPanel.value?.contains(nextTarget)
+  )
+
+  if (!focusStaysInControl) {
+    closeDropdown()
+  }
+}
+
+function handlePickerKeydown(event) {
+  if (!phoneLayout.value || !['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
+  event.preventDefault()
+  const visibleOptions = filteredOptions.value
+  const current = visibleOptions.findIndex(option => getOptionId(option.index) === document.activeElement?.id)
+  const next = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? visibleOptions.length - 1
+      : Math.max(0, Math.min(visibleOptions.length - 1, current + (event.key === 'ArrowDown' ? 1 : -1)))
+  const option = visibleOptions[next]
+  if (!option) return
+  activeIndex.value = option.index
+  renderOptionAt(next)
+  nextTick(() => findOptionElement(option.index)?.focus())
+}
+
+function handleDropdownPointerDown() {
+  pointerDownInDropdown = true
+  setTimeout(() => {
+    pointerDownInDropdown = false
+  }, 0)
+}
+
+function handleDropdownMouseDown(event) {
+  // Desktop lists use aria-activedescendant on the button or search field.
+  // Keep that focus when grabbing a scrollbar, including inside a popup that
+  // closes on blur.
+  if (!phoneLayout.value && !(event.target instanceof HTMLInputElement)) event.preventDefault()
+}
+
+/**
+ * The search field of a desktop list holds focus while it is open, so it
+ * handles the keys the button handles for lists without one.
+ * @param {KeyboardEvent} event
+ */
+function handleSearchKeydown(event) {
+  if (!searchPanel.value || event.isComposing) return
+
+  if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && event.altKey) {
+    event.preventDefault()
+    closeDropdown()
+    selectButton.value?.focus()
+  } else if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(event.key)) {
+    event.preventDefault()
+    const step = event.key.startsWith('Page') ? 10 : 1
+    moveActiveIndex(event.key === 'ArrowDown' || event.key === 'PageDown' ? step : -step)
+  } else if (event.key === 'Enter') {
+    event.preventDefault()
+    if (activeDescendant.value !== null) selectOption(activeIndex.value)
+  } else if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    closeDropdown()
+    selectButton.value?.focus()
+  } else if (event.key === 'Tab') {
+    // Let Tab continue from the button, as it does for lists without a search field.
+    closeDropdown()
+    selectButton.value?.focus()
+  }
+}
+
+function removeDropdownListeners() {
+  stopOutsidePress?.()
+  stopOutsidePress = null
+  window.removeEventListener('resize', refreshDropdownLayout)
+}
 
 /**
  * @param {Event} event
  */
 function change(event) {
-  emit('change', event.target.value)
+  if (!settingsOverlayActive.value) return
+  const select = event.target
+  // Native options hold strings, so emit the matching value with its original type.
+  if (props.multiple) {
+    const chosen = new Set(Array.from(select.selectedOptions, option => option.value))
+    emit('change', props.selectValues.filter(value => chosen.has(String(value))))
+  } else {
+    emit('change', props.selectValues.find(value => String(value) === select.value) ?? select.value)
+  }
+  nextTick(() => {
+    // Keep the native control driven by `value` when an async update is rejected.
+    if (props.multiple) {
+      for (const option of select.options) option.selected = props.value.some(value => String(value) === option.value)
+    } else {
+      select.value = props.value
+    }
+  })
 }
 </script>
 

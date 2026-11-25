@@ -1,0 +1,52 @@
+{
+  "darwin-arm64": {
+    "ffmpeg": {
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/arm64/1795207104_9.1/ffmpeg.zip",
+      "sha256": "1f66e9a690a7f1c9e60b012379f8869c11818d1797f45b21dbb2f2564ba61ae1"
+    },
+    "ffprobe": {
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/arm64/1795207104_9.1/ffprobe.zip",
+      "sha256": "6ef2df5f575042923a28537ab37adf936f28bf3e7b85de23a1447ed447ec1dbd"
+    }
+  },
+  "darwin-x64": {
+    "ffmpeg": {
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/amd64/1795212433_9.1/ffmpeg.zip",
+      "sha256": "35b3d82cccc2c1d644d49d15f5e57eb913a08ef68f798042c90eecec62c51f1e"
+    },
+    "ffprobe": {
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/amd64/1795212433_9.1/ffprobe.zip",
+      "sha256": "41ca7b7cba7992e33f1da3f1bf54db8ec103a4d387b1bfac3162062e8b1074ad"
+    }
+  },
+  "linux-arm64": {
+    "ffmpeg": {
+      "url": "https://ffmpeg.martin-riedl.de/download/linux/arm64/1795204341_9.1/ffmpeg.zip",
+      "sha256": "e42242dd20b01cf9fe6cff1902b6e5e72be07c2b551d95abc8f332cdb0ff7d86"
+    },
+    "ffprobe": {
+      "url": "https://ffmpeg.martin-riedl.de/download/linux/arm64/1795204341_9.1/ffprobe.zip",
+      "sha256": "a1561aa2136bce9f51dac9b13be4480466a3031f82907d551619dcdc3b867ccc"
+    }
+  },
+  "linux-x64": {
+    "ffmpeg": {
+      "url": "https://ffmpeg.martin-riedl.de/download/linux/amd64/1795205506_9.1/ffmpeg.zip",
+      "sha256": "707d4fa675932cc310e39e1506ac9224049786119689e345fed1c453a8a0896e"
+    },
+    "ffprobe": {
+      "url": "https://ffmpeg.martin-riedl.de/download/linux/amd64/1795205506_9.1/ffprobe.zip",
+      "sha256": "5e4c53c9c86d6371027efa83d62c2cea00e02ded0234d8cc952d06c9259e4b33"
+    }
+  },
+  "win32-x64": {
+    "ffmpeg": {
+      "url": "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2026-10-31-18-18/ffmpeg-N-128251-g6d1bfd7609-win64-gpl.zip",
+      "sha256": "7c3535fd0e0960bbebb8bf8acc71292e855c97f58a628fd4f43aacc2adc16c87"
+    },
+    "ffprobe": {
+      "url": "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2026-10-31-18-18/ffmpeg-N-128251-g6d1bfd7609-win64-gpl.zip",
+      "sha256": "7c3535fd0e0960bbebb8bf8acc71292e855c97f58a628fd4f43aacc2adc16c87"
+    }
+  }
+}

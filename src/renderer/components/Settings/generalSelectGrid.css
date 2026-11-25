@@ -1,0 +1,153 @@
+.generalSelectGrid.generalSelectGrid {
+  --general-select-indicator-track: calc(8px + 32px + 22px + 22px);
+  --general-select-min-field: var(--settings-stacked-field-min, 200px);
+
+  /* Both fields are as wide as the widest one, and every select keeps room
+     for all of its possible icons, so the two columns mirror each other and
+     a select without a partner can be centered between them. The first
+     column's icons also hold the 40px margin before the second column. */
+  grid-template-columns:
+    minmax(0, 1fr) calc(var(--general-select-indicator-track) + 40px)
+    minmax(0, 1fr) var(--general-select-indicator-track);
+  justify-content: center;
+  column-gap: 0;
+  inline-size: fit-content;
+
+  /* Keeps the columns within 1000px while the block spans the section. */
+  padding-inline: max(20px, calc((100% - 960px) / 2));
+}
+
+/* Odd selects count only selects, since General puts its switches first. */
+/* stylelint-disable selector-max-compound-selectors -- the parser counts the "of .select" filter as compound selectors */
+.generalSelectGrid :deep(.select:nth-child(odd of .select)) {
+  margin-inline-end: 40px;
+}
+
+/* A select without a partner keeps the first column's field width, but its
+   field moves onto the center line, as a lone select's field does elsewhere:
+   half the select, half of the icons' room and the 40px margin, minus half
+   of the 12px marker gutter before the field. */
+.generalSelectGrid :deep(.select:nth-child(odd of .select):last-child) {
+  --general-select-center-shift: calc(50% + var(--general-select-indicator-track) / 2 + 20px - 6px);
+
+  translate: var(--general-select-center-shift);
+}
+
+.generalSelectGrid :deep(.select:nth-child(odd of .select):last-child:dir(rtl)) {
+  translate: calc(-1 * var(--general-select-center-shift));
+}
+/* stylelint-enable selector-max-compound-selectors */
+
+.generalSelectGrid :deep(.select.contentSized) {
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+  inline-size: auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  justify-self: stretch;
+  box-sizing: border-box;
+}
+
+/* Reserve the same marker gutter even when highlighting is switched off. */
+:where(.generalSelectGrid) :deep(:is(.select, .switch-ctn)) {
+  padding-inline-start: 12px;
+}
+
+.generalSelectGrid :deep(.select-text) {
+  min-inline-size: var(--general-select-min-field);
+}
+
+.generalSelectGrid :deep(.selectIndicators) {
+  grid-area: 1 / 2;
+  position: relative;
+  inset: auto;
+  transform: none;
+  align-self: center;
+  box-sizing: border-box;
+  inline-size: var(--select-indicator-space);
+}
+
+.generalSelectGrid :deep(.selectIndicators:not(:empty)) {
+  inline-size: calc(var(--select-indicator-space) - 8px);
+  margin-inline-start: 8px;
+}
+
+.generalSelectGrid :deep(.select-label) {
+  column-gap: 4px;
+  max-inline-size: calc(100% - 24px);
+  margin-inline-end: 24px;
+}
+
+/* Let long captions contribute to the shared field widths. */
+.generalSelectGrid :deep(.select.outlined .selectOutline) {
+  position: relative;
+  inset-block: auto;
+  margin-block-start: -7px;
+}
+
+.generalSelectGrid :deep(.select.outlined .selectLegend) {
+  max-inline-size: none;
+  margin-inline-end: 24px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .generalSelectGrid :deep(.select.outlined .selectOutline) {
+    margin-block-start: -9px;
+  }
+}
+
+.generalSelectGrid :deep(.iconSelect),
+.generalSelectGrid :deep(.selectSearchHighlightFrame) {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.generalSelectGrid :deep(.iconSelect) {
+  inset-inline-end: 10px;
+}
+
+.switchGrid {
+  row-gap: 0;
+}
+
+@container settings-content (width <= 800px) {
+  /* The fields stack into one column, centered on the card: a track before
+     them balances the icons' room after them, minus the marker gutter. Those
+     tracks already keep the fields off the card's edges, so the padding can
+     shrink on phones. When space still runs out, the balancing track gives
+     way before the field narrows past its minimum, and long captions and
+     values are cut off instead. */
+  .generalSelectGrid.generalSelectGrid {
+    grid-template-columns:
+      clamp(
+        0px,
+        100% - var(--general-select-min-field) - 12px - var(--general-select-indicator-track),
+        var(--general-select-indicator-track) - 12px
+      )
+      minmax(0, max-content) var(--general-select-indicator-track);
+    justify-content: center;
+
+    /* As wide as the card, so the balancing track can resolve against it. */
+    inline-size: 100%;
+    padding-inline: max(8px, calc((100% - 460px) / 2));
+  }
+
+  .generalSelectGrid :deep(.select.contentSized) {
+    grid-column: 2 / span 2;
+  }
+
+  /* A caption longer than its field is cut off instead of running past it. */
+  .generalSelectGrid :deep(.select.outlined .selectLegend) {
+    max-inline-size: calc(100% - 12px - 24px);
+  }
+
+  /* stylelint-disable selector-max-compound-selectors -- the parser counts the "of .select" filter as compound selectors */
+  .generalSelectGrid :deep(.select:nth-child(odd of .select)) {
+    margin-inline-end: 0;
+  }
+
+  .generalSelectGrid :deep(.select:nth-child(odd of .select):last-child),
+  .generalSelectGrid :deep(.select:nth-child(odd of .select):last-child:dir(rtl)) {
+    translate: none;
+  }
+  /* stylelint-enable selector-max-compound-selectors */
+}

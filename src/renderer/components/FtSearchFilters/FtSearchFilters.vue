@@ -1,6 +1,8 @@
 <template>
   <FtPrompt
     theme="slim"
+    fixed-layout
+    card-class="searchFiltersCard"
     @click="hideSearchFilters"
   >
     <template #label="{ labelId }">
@@ -12,13 +14,16 @@
           {{ title }}
         </h2>
         <button
+          type="button"
           class="clearFilterButton"
+          :aria-label="$t('Search Filters.Clear Filters')"
           :title="$t('Search Filters.Clear Filters')"
           :style="{visibility: (searchFilterValueChanged ? 'visible' : 'hidden')}"
           @click="clearFilters"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="clearFilterIcon"
+            aria-hidden="true"
             :icon="['fas', 'filter-circle-xmark']"
           />
         </button>
@@ -48,6 +53,7 @@
         class="searchRadio"
       />
       <FtCheckboxList
+        v-if="supportsFeatureFilters"
         v-model="featuresValue"
         :title="$t('Search Filters.Features.Features')"
         :labels="featureLabels"
@@ -62,14 +68,17 @@
         class="searchRadio"
       />
     </FtFlexBox>
-    <div class="searchFilterCloseButtonContainer">
-      <FtButton
-        :label="$t('Close')"
-        background-color="null"
-        text-color="null"
-        @click="hideSearchFilters"
-      />
-    </div>
+    <template #footer>
+      <div class="searchFilterCloseButtonContainer">
+        <FtButton
+          :label="$t('Close')"
+          :icon="['fas', 'xmark']"
+          background-color="null"
+          text-color="null"
+          @click="hideSearchFilters"
+        />
+      </div>
+    </template>
   </FtPrompt>
 </template>
 
@@ -84,8 +93,10 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 
 import store from '../../store/index'
+import { getSearchFilterTabId } from '../../../search-history'
 
 const { t } = useI18n()
+const tabId = getSearchFilterTabId(store.getters.getPresentedTabId)
 
 const PRIORITIZE_VALUES = [
   'relevance',
@@ -180,13 +191,16 @@ const featureLabels = computed(() => [
   t('Search Filters.Features.Location'),
 ])
 
-const searchSettings = store.getters.getSearchSettings
+const searchSettings = store.getters.getSearchSettings(tabId)
+
+// Yattee servers ignore the feature filters
+const supportsFeatureFilters = computed(() => store.getters.getBackendPreference !== 'yattee')
 
 /** @type {import('vue').Ref<'relevance' | 'popularity'>} */
 const prioritizeValue = ref(searchSettings.prioritize)
 
 watch(prioritizeValue, (value) => {
-  store.commit('setSearchPrioritize', value)
+  store.commit('setSearchPrioritize', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'' | 'today' | 'week' | 'month' | 'year'>} */
@@ -197,7 +211,7 @@ watch(timeValue, (value) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchTime', value)
+  store.commit('setSearchTime', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'all' | 'video' | 'shorts' | 'channel' | 'playlist' | 'movie'>} */
@@ -218,7 +232,7 @@ watch(typeValue, (value) => {
     }
   }
 
-  store.commit('setSearchType', value)
+  store.commit('setSearchType', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'' | 'under_three_mins' | 'three_to_twenty_mins' | 'over_twenty_mins'>} */
@@ -229,7 +243,7 @@ watch(durationValue, (value) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchDuration', value)
+  store.commit('setSearchDuration', { tabId, value })
 })
 
 /** @type {import('vue').Ref<('hd' | 'subtitles' | 'creative_commons' | '3d' | 'live' | '4k' | '360' | 'location' | 'hdr' | 'vr180')[]>} */
@@ -240,7 +254,7 @@ watch(featuresValue, (values) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchFeatures', [...values])
+  store.commit('setSearchFeatures', { tabId, value: [...values] })
 }, { deep: true })
 
 const searchFilterValueChanged = computed(() => {
@@ -252,7 +266,7 @@ const searchFilterValueChanged = computed(() => {
 })
 
 watch(searchFilterValueChanged, (value) => {
-  store.commit('setSearchFilterValueChanged', value)
+  store.commit('setSearchFilterValueChanged', { tabId, value })
 })
 
 function hideSearchFilters() {

@@ -45,13 +45,12 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
-          version: 11
           cache: false
 
       - name: Compress SVG Images
         run: |
-          pnpm dlx svgo -r -f ./_icons -o ./_icons
-          pnpm dlx svgo -r -f ./src/renderer/assets/img -o ./src/renderer/assets/img
+          pnpm dlx svgo --multipass -r -f ./_icons -o ./_icons
+          pnpm dlx svgo --multipass -r -f ./src/renderer/assets/img -o ./src/renderer/assets/img
         shell: bash
       - name: Compress PNG Images
         run: oxipng -o max --strip safe --recursive ./_icons  ./src/renderer/assets/img
@@ -59,7 +58,7 @@ jobs:
 
       - name: Generate File Diff Content
         id: file_diff
-        uses: PikachuEXE/file-size-diff@c623d1e49f0b19ecb006caf05522f9756561052b
+        uses: PikachuEXE/file-size-diff@c623d1e49f0b19ecb006caf05522f9756561052b # main
         with:
           target_branch: ${{ github.event.repository.default_branch }}
           dir_glob: "**/*.png,**/*.svg"
@@ -74,3 +73,6 @@ jobs:
             Images automagically compressed by tools in `.github/workflows/compress-images.yml`
 
             ${{ steps.file_diff.outputs.file_size_diff_content_markdown }}
+
+            ## Release note
+            - [x] No release note needed

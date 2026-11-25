@@ -1,0 +1,165 @@
+name: Create Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: New package version (for example, 0.33.0)
+        required: true
+        type: string
+      target:
+        description: Target branch
+        required: true
+        default: development
+        type: string
+
+permissions: {}
+
+jobs:
+  resolve-target:
+    name: Resolve release target
+    runs-on: ubuntu-latest
+
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        ref: ${{ inputs.target }}
+
+    - name: Resolve target commit
+      id: target
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  full-e2e:
+    name: Full E2E test run
+    needs: resolve-target
+    permissions:
+      contents: read
+    uses: ./.github/workflows/e2e.yml
+    with:
+      checkoutRef: ${{ needs.resolve-target.outputs.sha }}
+
+  create:
+    needs: [ resolve-target, full-e2e ]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: true
+        ref: ${{ needs.resolve-target.outputs.sha }}
+        token: ${{ secrets.PUSH_TOKEN }}
+
+    - name: Generate release notes
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TARGET_BRANCH: ${{ inputs.target }}
+      run: node _scripts/releaseNotes.mjs generate release-notes.md
+
+    - name: Bump package version
+      id: release
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+          echo 'Version must use the x.y.z format, for example 0.33.0.' >&2
+          exit 1
+        fi
+
+        node --input-type=module <<'EOF'
+        import { readFileSync, writeFileSync } from 'node:fs';
+
+        const file = 'package.json';
+        const packageJson = JSON.parse(readFileSync(file, 'utf8'));
+        packageJson.version = process.env.VERSION;
+        writeFileSync(file, `${JSON.stringify(packageJson, null, 2)}\n`);
+        EOF
+
+        # The release commit records its own Android version code so F-Droid
+        # can read it from the tag. Twice the commit count plus one lets stable
+        # code update a nightly built from the same commit.
+        version_code="$(( ($(git rev-list --count HEAD) + 1) * 2 + 1 ))"
+        sed -i "s/^versionCode=.*/versionCode=${version_code}/" android/app/version.properties
+
+        # F-Droid reads "What's new" from the release tag. The self-hosted F-Droid
+        # and SideStore repositories reuse this text for their stable apps.
+        changelog=fastlane/metadata/android/en-US/changelogs/default.txt
+        mkdir -p "$(dirname "$changelog")"
+        node _scripts/storeReleaseNotes.mjs fdroid release-notes.md > "$changelog"
+
+        # The release consumes the pending release notes. Notes added after the
+        # tested commit stay pending when this commit merges into the branch.
+        git ls-files -z 'release-notes/*.md' ':!release-notes/README.md' |
+          xargs -0 --no-run-if-empty git rm --quiet --
+
+        git add package.json android/app/version.properties "$changelog"
+        git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "chore(release): bump to $VERSION"
+
+        echo "tag=v${VERSION}-beta" >> "$GITHUB_OUTPUT"
+
+    - name: Resolve release target
+      id: target
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+    # The target branch may have moved while the E2E tests ran. Merge the release
+    # commit into its latest state so the release stays pinned to the tested commit.
+    - name: Push package version
+      env:
+        TARGET_BRANCH: ${{ inputs.target }}
+        TARGET_SHA: ${{ steps.target.outputs.sha }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        git fetch origin "$TARGET_BRANCH"
+        git checkout -B "$TARGET_BRANCH" FETCH_HEAD
+        git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            merge --no-edit "$TARGET_SHA"
+        git push origin "HEAD:$TARGET_BRANCH"
+
+    - name: Create draft release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+        TARGET_SHA: ${{ steps.target.outputs.sha }}
+      run: |
+        set -euo pipefail
+
+        release_title="$TAG"
+        if [[ "$release_title" == *-beta ]]; then
+          release_title="${release_title%-beta} Beta"
+        fi
+
+        release="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+          -f tag_name="$TAG" \
+          -f target_commitish="$TARGET_SHA" \
+          -f name="$release_title" \
+          -F draft=true \
+          -F body=@release-notes.md)"
+        release_id="$(jq --raw-output .id <<< "$release")"
+        release_url="$(jq --raw-output .html_url <<< "$release")"
+
+        {
+          echo "## Draft release created"
+          echo
+          echo "- Release: ${release_url}"
+          echo "- Release ID for the Upload Release workflow: \`${release_id}\`"
+        } >> "$GITHUB_STEP_SUMMARY"

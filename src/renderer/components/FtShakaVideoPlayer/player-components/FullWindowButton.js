@@ -3,6 +3,7 @@ import shaka from 'shaka-player'
 import i18n from '../../../i18n/index'
 import { KeyboardShortcuts, PlayerIcons } from '../../../../constants'
 import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
+import { appendMenuSwitch } from './menuSwitch'
 
 export class FullWindowButton extends shaka.ui.Element {
   /**
@@ -39,6 +40,9 @@ export class FullWindowButton extends shaka.ui.Element {
 
     this.button_.appendChild(label)
 
+    /** @private */
+    this.menuSwitch_ = appendMenuSwitch(this.button_)
+
     this.parent.appendChild(this.button_)
 
     /** @private */
@@ -54,8 +58,10 @@ export class FullWindowButton extends shaka.ui.Element {
 
     this.eventManager.listen(events, 'setFullWindow', (/** @type {CustomEvent} */ event) => {
       this.fullWindowEnabled_ = event.detail
+      this.isSubMenuOpened = false
 
       this.updateLocalisedStrings_()
+      this.checkAvailability()
     })
 
     this.eventManager.listen(events, 'localeChanged', () => {
@@ -63,6 +69,11 @@ export class FullWindowButton extends shaka.ui.Element {
     })
 
     this.updateLocalisedStrings_()
+  }
+
+  release() {
+    this.menuSwitch_.release()
+    super.release()
   }
 
   /** @private */
@@ -76,6 +87,7 @@ export class FullWindowButton extends shaka.ui.Element {
       KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW
     )
     this.nameSpan_.textContent = this.button_.ariaLabel = newLabel
+    this.button_.ariaPressed = this.fullWindowEnabled_ ? 'true' : 'false'
   }
 
   /** @override */

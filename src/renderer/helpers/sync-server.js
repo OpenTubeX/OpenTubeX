@@ -1,0 +1,2099 @@
+import { toRaw } from 'vue'
+import {
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo,
+  mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
+} from './sync-history-merge.js'
+import { runBackgroundJob } from './background-jobs.js'
+import { historyChanges } from './sync-history-changes.js'
+import { DEFAULT_SYSTEM_THEMES, MAIN_PROFILE_ID } from '../../constants'
+import { isValidSeparateProfileId } from '../../datastores/profileDatastoreNames.js'
+import i18n from '../i18n/index'
+import packageDetails from '../../../package.json'
+import { applySyncServerUserAgent } from '../../syncServerUserAgent'
+import {
+  CUSTOM_THEMES_SYNC_KEY,
+  customThemeIdFromValue,
+  normalizeCustomThemes,
+} from '../../customTheme'
+import {
+  SyncServerDataLossError,
+  SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
+  SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  SYNC_SERVER_RESTORED_DEVICE_MESSAGE,
+  isAccountDeletedError,
+  isExpiredSessionReauthentication,
+  isSessionExpiredError,
+  syncServerResponseErrorMessage,
+} from './sync-server-errors'
+import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled, sharedSettingValue, syncedProfileSettings, withSharedSettings } from '../store/modules/settings'
+import { canHaveOwnSettings, isPlainObject, isProfileSettingsId, ownSettingsOf, profileSettingEditTimeId, profileSettingsId, settingEditedBetween } from '../../profileSettings.js'
+import { deepCopy } from './utils'
+import { replaceCustomThemes } from './customTheme'
+import { repairSystemThemeSettings } from './customThemeSync'
+import { generateRandomUniqueId, isPlaylistSortOrder } from './playlists'
+import { normalizePlaylistThumbnail } from './playlist-thumbnails'
+import {
+  getMergedProfileBackground,
+  getMergedProfileTextColor,
+  getSyncProfileBackground,
+  getSyncProfileTextColor
+} from './profile-sync.js'
+import { createSyncServerRequestHeaders } from './sync-server-request'
+import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
+import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
+import { isValidSyncServerDeviceId } from './sync-server-sessions'
+import {
+  areSyncSettingValuesEqual,
+  isListSetting,
+  mergeSettingEntry,
+  mergeSettingItemsEntry,
+  mergeSettingListEntry,
+  mergeProfileSettingsEntry,
+  profileSettingTimesOf,
+  migrateLegacySyncedSettings,
+  resolveMergedThemeEntry,
+} from './sync-settings-conflict'
+import { getCapacitorTabService } from '../tabs/CapacitorTabService'
+import { capacitorHttpFetch } from './api/capacitor-http'
+import { delegateRequests } from './networkRecovery'
+import { setActiveTimeout } from './activeTimeout'
+
+import {
+  SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
+  getSubscriptionSettingsForSync,
+  applySubscriptionSettingsSync,
+  scopedSubscriptionSettingsSyncKey
+} from './subscription-settings-sync'
+import {
+  PLAYLIST_PREFERENCES_SYNC_KEYS,
+  getPlaylistPreferencesForSync,
+  applyPlaylistPreferencesSync
+} from './playlist-preferences-sync'
+
+const LEGACY_HISTORY_PAGE_SIZE = 50
+const BULK_SYNC_CHUNK_SIZE = 100
+const LEGACY_SYNC_CONCURRENCY = 4
+// The server may wait up to 30 seconds each for a database connection and a
+// SQLite lock under load, so leave room for that plus a slow transfer.
+const REQUEST_TIMEOUT_MS = 60_000
+// The server holds /changes open for 25 seconds before rereading the cursor.
+const CHANGES_WAIT_TIMEOUT_MS = 25_000 + REQUEST_TIMEOUT_MS
+const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
+
+function syncServerFetch(input, init, timeoutMs) {
+  return process.env.IS_CAPACITOR
+    ? capacitorHttpFetch(input, {
+        ...init,
+        // Encrypted transfers may outlast the native client's 30-second default.
+        nativeTimeoutMs: timeoutMs,
+        // The user may explicitly configure an HTTP server on their local network.
+        allowHttp: true,
+        headers: applySyncServerUserAgent(Object.fromEntries(new Headers(init.headers))),
+      })
+    : fetch(input, init)
+}
+
+export {
+  SyncServerDataLossError,
+  SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
+  SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  SYNC_SERVER_RESTORED_DEVICE_MESSAGE,
+  isAccountDeletedError,
+  isExpiredSessionReauthentication,
+  isSessionExpiredError,
+}
+
+export function normalizeSyncServerUrl(value) {
+  let url
+  try {
+    url = new URL(value)
+  } catch {
+    throw new SyncServerError('Invalid sync server URL')
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new SyncServerError('Sync server URL must use HTTP or HTTPS')
+  }
+
+  url.username = ''
+  url.password = ''
+  url.search = ''
+  url.hash = ''
+  url.pathname = url.pathname
+    .replace(/\/(?:docs|v1)\/?$/, '')
+    .replace(/\/$/, '')
+
+  return url.toString().replace(/\/$/, '')
+}
+
+export class SyncServerClient {
+  constructor(serverUrl, token = '') {
+    this.serverUrl = normalizeSyncServerUrl(serverUrl)
+    this.token = token
+    this.apiPrefix = null
+    this.serverInfoPromise = null
+    this.requestControllers = new Set()
+    this.cancelled = false
+  }
+
+  cancel() {
+    this.cancelled = true
+    for (const controller of this.requestControllers) controller.abort()
+  }
+
+  async request(path, { timeoutMs = REQUEST_TIMEOUT_MS, ...options } = {}) {
+    if (this.cancelled) throw new SyncServerCancelledError()
+    const controller = new AbortController()
+    this.requestControllers.add(controller)
+    // Sync retries and times out its own requests. In the app's recovery queue,
+    // a long poll held past its header timeout would mark the server as failed
+    // and delay every other sync request until the poll itself timed out.
+    const releaseRequest = delegateRequests(controller.signal, { ownDeadline: true })
+    const cancelTimeout = setActiveTimeout(() => controller.abort(), timeoutMs)
+    const headers = createSyncServerRequestHeaders({
+      hasBody: options.body != null,
+      headers: options.headers,
+      token: this.token,
+      version: process.env.IS_ELECTRON || process.env.IS_CAPACITOR ? packageDetails.version : '',
+    })
+
+    try {
+      const response = await syncServerFetch(`${this.serverUrl}${path}`, {
+        ...options,
+        redirect: 'error',
+        headers,
+        // Bodies and responses are mostly one large ciphertext string.
+        // Copying it to a worker in chunks costs far more than JSON itself.
+        body: options.body == null ? undefined : JSON.stringify(options.body),
+        signal: controller.signal,
+      }, timeoutMs)
+      const text = await response.text()
+
+      if (!response.ok) {
+        throw new SyncServerError(syncServerResponseErrorMessage(response.status, text), response.status)
+      }
+
+      if (!text) return null
+
+      try {
+        return JSON.parse(text)
+      } catch (error) {
+        if (error.name !== 'SyntaxError') throw error
+        return text
+      }
+    } catch (error) {
+      if (error instanceof SyncServerError) {
+        throw error
+      }
+      if (error?.name === 'AbortError') {
+        if (this.cancelled) throw new SyncServerCancelledError()
+        throw new SyncServerError('Sync server request timed out')
+      }
+      throw new SyncServerError(error?.message || 'Unable to reach sync server')
+    } finally {
+      cancelTimeout()
+      this.requestControllers.delete(controller)
+      releaseRequest()
+    }
+  }
+
+  health() {
+    return this.request('/health')
+  }
+
+  getServerInfo() {
+    this.serverInfoPromise ??= this.health().then(response => {
+      // Existing LibreTube servers return the plain text "OK". A structured
+      // health response advertises the optional OpenTubeX extensions.
+      if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
+      return response
+    }).catch(error => {
+      this.serverInfoPromise = null
+      throw error
+    })
+    return this.serverInfoPromise
+  }
+
+  async getCapabilities() {
+    const { capabilities } = await this.getServerInfo()
+    const supported = capabilities && typeof capabilities === 'object' ? capabilities : {}
+    if (supported.encrypted_sync === 1 && supported.live_sync !== 1) {
+      throw new SyncServerUnsupportedError()
+    }
+    return supported
+  }
+
+  async getPrivacyPolicyUrl() {
+    const { privacy_policy_url: value } = await this.getServerInfo()
+    if (typeof value !== 'string') return null
+    try {
+      const url = new URL(value)
+      return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password
+        ? url.href
+        : null
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * The OIDC login the server offers, or null. Servers report it through
+   * `/meta`, which older servers do not serve.
+   * @returns {Promise<{ name: string } | null>}
+   */
+  async getOidcLogin() {
+    let meta
+    try {
+      // Without session listing the app cannot tell whether a login callback
+      // belongs to a sign-in this device started.
+      if (!await this.supportsAccountSessions()) return null
+      meta = await this.request('/meta')
+    } catch (error) {
+      if (error instanceof SyncServerCancelledError) throw error
+      return null
+    }
+    if (meta?.oidc !== true) return null
+    const name = typeof meta.oidc_display_name === 'string' ? meta.oidc_display_name.trim() : ''
+    return { name }
+  }
+
+  /**
+   * Whether OIDC callbacks carry the `state` the app sent. Older servers do
+   * not serve `/meta`.
+   * @returns {Promise<boolean>}
+   */
+  async returnsOidcState() {
+    try {
+      return (await this.request('/meta'))?.oidc_state === true
+    } catch (error) {
+      if (error.status === 404) return false
+      throw error
+    }
+  }
+
+  async supportsEncryptedSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.encrypted_sync === 1
+  }
+
+  async supportsBulkSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.bulk_sync === 1
+  }
+
+  async supportsPlaylistThumbnails() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.playlist_thumbnails === 1
+  }
+
+  async supportsSeenVideosSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.seen_videos === 1
+  }
+
+  async supportsKeyPairing() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.key_pairing === 1
+  }
+
+  async supportsAccountSessions() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.account_sessions === 1
+  }
+
+  createPairingSession(recipient) {
+    return this.request('/v1/pairing', {
+      method: 'POST',
+      body: {
+        version: 1,
+        id: recipient.sessionId,
+        recipient_public_key: recipient.recipientPublicKey,
+        recipient_device_id: recipient.recipientDeviceId,
+        recipient_device_name: recipient.recipientDeviceName,
+        recipient_token_hash: recipient.recipientTokenHash,
+      },
+    })
+  }
+
+  getPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  claimPairingSession(request, encryptedDeviceInfo) {
+    return this.request(`/v1/pairing/${encodeURIComponent(request.sessionId)}/claim`, {
+      method: 'POST',
+      body: {
+        version: request.version,
+        recipient_public_key: request.recipientPublicKey,
+        recipient_device_id: request.recipientDeviceId,
+        recipient_device_name: request.recipientDeviceName,
+        encrypted_device_info: encryptedDeviceInfo,
+      },
+    })
+  }
+
+  approvePairingSession(sessionId, approvingDeviceId, encryptedPayload) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'PUT',
+      body: {
+        approving_device_id: approvingDeviceId,
+        encrypted_payload: encryptedPayload,
+      },
+    })
+  }
+
+  consumePairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}/consume`, {
+      method: 'POST',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  cancelPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  getEncryptedSyncManifest({ playbackSpeedsInSettings = false } = {}) {
+    const query = playbackSpeedsInSettings ? '?playback_speeds_in_settings=true' : ''
+    return this.request(`/v1/encrypted_sync${query}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  /**
+   * Servers with `collection_changes` return only the changes after `since`
+   * when they can, and refuse reads without it while changes are pending.
+   * Reading with `since` also lets the account append changes. Older servers
+   * ignore it and return the full collection.
+   * @param {string} collection
+   * @param {number} [since]
+   */
+  getEncryptedSyncCollection(collection, since) {
+    const query = since === undefined ? '' : `?since=${encodeURIComponent(since)}`
+    return this.request(
+      `/v1/encrypted_sync/${encodeURIComponent(collection)}${query}`,
+      { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS }
+    )
+  }
+
+  getLegacyEncryptedSync() {
+    return this.request('/v1/encrypted_sync/legacy', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  putEncryptedSyncCollection(collection, revision, payload, activity) {
+    // Upload throughput and server commit latency cannot be inferred from size.
+    // Allow the same bounded transfer window as encrypted downloads.
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
+      method: 'PUT',
+      body: { revision, payload, ...(activity ? { activity } : {}) },
+      timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
+    })
+  }
+
+  /** Deletes a separate profile's collection. Servers refuse other collections. */
+  async deleteEncryptedSyncCollection(collection) {
+    try {
+      await this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, { method: 'DELETE' })
+    } catch (error) {
+      if (error.status !== 404) throw error
+    }
+  }
+
+  appendEncryptedSyncChange(collection, revision, payload, activity) {
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}/changes`, {
+      method: 'POST',
+      body: { revision, payload, ...(activity ? { activity } : {}) },
+    })
+  }
+
+  waitForSyncChanges(cursor) {
+    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: CHANGES_WAIT_TIMEOUT_MS })
+  }
+
+  getSyncEvents(since = '') {
+    // Activity is encrypted and padded too; accumulated events can be several
+    // megabytes even when the library collections need no further changes.
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  sendDeviceRequest(recipient, payload) {
+    return this.request('/v1/encrypted_sync/events', { method: 'POST', body: { recipient, payload } })
+  }
+
+  acknowledgeDeviceRequest(id) {
+    return this.request(`/v1/encrypted_sync/events/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  }
+
+  async apiRequest(path, options = {}) {
+    if (this.apiPrefix !== null) {
+      return this.request(`${this.apiPrefix}${path}`, options)
+    }
+
+    try {
+      const response = await this.request(`/v1${path}`, options)
+      this.apiPrefix = '/v1'
+      return response
+    } catch (error) {
+      if (error.status !== 404) throw error
+      const response = await this.request(path, options)
+      this.apiPrefix = ''
+      return response
+    }
+  }
+
+  async authenticate(mode, name, password, deviceId) {
+    // Account operations use the v1 contract, independent of legacy sync routing.
+    const response = await this.request(`/v1/account/${mode}`, {
+      method: 'POST',
+      body: { name, password, device_id: deviceId },
+    })
+    this.token = response.jwt
+    return response.jwt
+  }
+
+  /**
+   * Starts deleting an OIDC account. The server deletes it once its owner signs
+   * in at the returned URL.
+   * @param {string} redirectUrl
+   * @param {string} state returned in the callback by servers that support it
+   * @returns {Promise<string>}
+   */
+  async startOidcAccountDeletion(redirectUrl, state) {
+    const response = await this.request('/v1/account/oidc/delete', {
+      method: 'POST',
+      body: { redirect_url: redirectUrl, state },
+    })
+    let url = null
+    try {
+      url = new URL(response?.authorization_url)
+    } catch {}
+    if (url?.protocol !== 'https:' && url?.protocol !== 'http:') {
+      throw new SyncServerError('The sync server returned an invalid sign-in URL')
+    }
+    return url.href
+  }
+
+  deleteAccount(password) {
+    return this.request('/v1/account/delete', {
+      method: 'DELETE',
+      body: { password },
+    })
+  }
+
+  getAccountSessions() {
+    return this.request('/v1/account/sessions')
+  }
+
+  updateAccountSession(sessionId, encryptedDeviceInfo) {
+    return this.request(`/v1/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'PATCH',
+      body: { encrypted_device_info: encryptedDeviceInfo },
+    })
+  }
+
+  revokeAccountSession(sessionId) {
+    return this.request(`/v1/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  changePassword(currentPassword, newPassword) {
+    return this.request('/v1/account/password', {
+      method: 'PUT',
+      body: {
+        current_password: currentPassword,
+        new_password: newPassword,
+      },
+    })
+  }
+
+  getSubscriptions() {
+    return this.apiRequest('/subscriptions/')
+  }
+
+  async getSubscriptionGroups() {
+    try {
+      return await this.apiRequest('/subscriptions/groups/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+
+  createSubscriptionGroup(group) {
+    return this.apiRequest('/subscriptions/groups/', { method: 'POST', body: group })
+  }
+
+  updateSubscriptionGroup(groupId, group) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'PATCH',
+      body: group,
+    })
+  }
+
+  deleteSubscriptionGroup(groupId) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  addSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'PUT' }
+    )
+  }
+
+  removeSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  subscribe(channel) {
+    return this.apiRequest('/subscriptions/', { method: 'PUT', body: channel })
+  }
+
+  subscribeBulk(channels) {
+    return this.apiRequest('/subscriptions/bulk', { method: 'PUT', body: channels })
+  }
+
+  unsubscribe(channelId) {
+    return this.apiRequest(`/subscriptions/${encodeURIComponent(channelId)}`, { method: 'DELETE' })
+  }
+
+  getPlaylists() {
+    return this.apiRequest('/playlists/')
+  }
+
+  getPlaylistBookmarks() {
+    return this.apiRequest('/playlist_bookmarks/')
+  }
+
+  createPlaylistBookmark(bookmark) {
+    return this.apiRequest('/playlist_bookmarks/', { method: 'POST', body: bookmark })
+  }
+
+  deletePlaylistBookmark(playlistId) {
+    return this.apiRequest(
+      `/playlist_bookmarks/${encodeURIComponent(playlistId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  getPlaylist(playlistId) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`)
+  }
+
+  createPlaylist(playlist) {
+    return this.apiRequest('/playlists/', { method: 'POST', body: playlist })
+  }
+
+  updatePlaylist(playlistId, playlist) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, {
+      method: 'PATCH',
+      // Omitted custom thumbnails are left alone by released clients. An empty
+      // value explicitly restores the default without changing thumbnail_url.
+      body: {
+        ...playlist,
+        ...(Object.hasOwn(playlist, 'custom_thumbnail') ? { custom_thumbnail: playlist.custom_thumbnail ?? '' } : {}),
+      },
+    })
+  }
+
+  deletePlaylist(playlistId) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, { method: 'DELETE' })
+  }
+
+  addPlaylistVideos(playlistId, videos) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}/videos`, {
+      method: 'POST',
+      body: videos,
+    })
+  }
+
+  removePlaylistVideo(playlistId, videoId) {
+    return this.apiRequest(
+      `/playlists/${encodeURIComponent(playlistId)}/videos/${encodeURIComponent(videoId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  async getWatchHistory() {
+    const history = []
+    const capabilities = await this.getCapabilities()
+    const advertisedPageSize = capabilities.history_page_size
+    const hasUsablePageSize = Number.isInteger(advertisedPageSize) && advertisedPageSize > 0
+    const pageSize = hasUsablePageSize ? advertisedPageSize : LEGACY_HISTORY_PAGE_SIZE
+    const pageSizeQuery = hasUsablePageSize ? `&page_size=${pageSize}` : ''
+
+    for (let page = 1; ; page++) {
+      let entries
+      try {
+        entries = await this.apiRequest(
+          `/watch_history/?page=${page}&order=added_date_desc${pageSizeQuery}`
+        )
+      } catch (error) {
+        if (error.status === 404) return null
+        throw error
+      }
+      history.push(...entries)
+      // An empty page ends paging even if the server ignored the requested
+      // size, so a misreported capability cannot keep this loop running.
+      if (entries.length === 0 || entries.length < pageSize) {
+        return history
+      }
+    }
+  }
+
+  putWatchHistory(entry) {
+    return this.apiRequest('/watch_history/', { method: 'PUT', body: entry })
+  }
+
+  putWatchHistoryBulk(entries) {
+    return this.apiRequest('/watch_history/bulk', { method: 'PUT', body: entries })
+  }
+
+  deleteWatchHistory(videoId) {
+    return this.apiRequest(`/watch_history/${encodeURIComponent(videoId)}`, { method: 'DELETE' })
+  }
+
+  async getChannelPlaybackSpeeds() {
+    try {
+      return await this.apiRequest('/channel_playback_speeds/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+}
+
+function mapBy(items, getId) {
+  return new Map(items.map(item => [getId(item), item]))
+}
+
+async function uploadInChunks(items, supportsBulk, uploadBulk, uploadSingle) {
+  if (items.length === 0) return
+
+  if (supportsBulk) {
+    for (let index = 0; index < items.length; index += BULK_SYNC_CHUNK_SIZE) {
+      await uploadBulk(items.slice(index, index + BULK_SYNC_CHUNK_SIZE))
+    }
+    return
+  }
+
+  // Older LibreTube-compatible servers do not expose bulk endpoints.
+  for (let index = 0; index < items.length; index += LEGACY_SYNC_CONCURRENCY) {
+    const chunk = items.slice(index, index + LEGACY_SYNC_CONCURRENCY)
+    const results = await Promise.allSettled(chunk.map(uploadSingle))
+
+    for (let resultIndex = 0; resultIndex < results.length; resultIndex++) {
+      const result = results[resultIndex]
+      if (result.status === 'fulfilled') continue
+
+      const status = result.reason?.status
+      const retryable = status === 409 || status === 423 || status === 429 || status >= 500
+      if (!retryable) throw result.reason
+
+      // Some legacy SQLite servers reject concurrent writes instead of queuing them.
+      await uploadSingle(chunk[resultIndex])
+    }
+  }
+}
+
+export function mergeIds(...args) {
+  return mergeSyncIds(...args)
+}
+
+function channelToRemote(channel) {
+  return {
+    id: channel.id,
+    name: channel.name || channel.id,
+    avatar: normalizeChannelAvatar(channel.thumbnail) || DEFAULT_CHANNEL_AVATAR,
+    verified: false,
+  }
+}
+
+function channelToLocal(channel) {
+  return {
+    id: channel.id,
+    name: channel.name,
+    thumbnail: normalizeChannelAvatar(channel.avatar),
+  }
+}
+
+function videoToRemote(video, options) {
+  return syncVideoToRemote(video, options)
+}
+
+function videoToLocal(video, timeAdded = Date.now()) {
+  return {
+    videoId: video.id,
+    title: video.title,
+    ...uploaderToLocal(video.uploader),
+    lengthSeconds: video.duration,
+    published: video.upload_date,
+    timeAdded,
+    playlistItemId: generateRandomUniqueId(),
+    type: 'video',
+  }
+}
+
+/** `null` follows the default sort order. */
+function playlistSortOrder(sortOrder) {
+  return isPlaylistSortOrder(sortOrder) ? sortOrder : null
+}
+
+function playlistMetadataFromLocal(playlist, features) {
+  return {
+    id: playlist._id,
+    title: playlist.playlistName,
+    description: playlist.description || '',
+    thumbnail_url: null,
+    ...(features.thumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sortOrder) } : {}),
+  }
+}
+
+function playlistMetadataFromRemote(playlist, features) {
+  return {
+    id: playlist.id,
+    title: playlist.title,
+    description: playlist.description || '',
+    thumbnail_url: null,
+    ...(features.thumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sort_order) } : {}),
+  }
+}
+
+// Baselines only detect cover edits. A fingerprint avoids repeating every
+// image in each snapshot write.
+function thumbnailFingerprint(thumbnail) {
+  if (!thumbnail) return null
+  let first = 0xdeadbeef
+  let second = 0x41c6ce57
+  for (let index = 0; index < thumbnail.length; index++) {
+    const code = thumbnail.charCodeAt(index)
+    first = Math.imul(first ^ code, 2654435761)
+    second = Math.imul(second ^ code, 1597334677)
+  }
+  first = Math.imul(first ^ (first >>> 16), 2246822507) ^ Math.imul(second ^ (second >>> 13), 3266489909)
+  second = Math.imul(second ^ (second >>> 16), 2246822507) ^ Math.imul(first ^ (first >>> 13), 3266489909)
+  return `${thumbnail.length}:${(second >>> 0).toString(36)}${(first >>> 0).toString(36)}`
+}
+
+function playlistBaselineMetadata(metadata) {
+  if (!Object.hasOwn(metadata, 'custom_thumbnail')) return metadata
+  return { ...metadata, custom_thumbnail: thumbnailFingerprint(metadata.custom_thumbnail) }
+}
+
+function metadataEquals(first, second) {
+  return JSON.stringify(first) === JSON.stringify(second)
+}
+
+function selectPlaylistMetadata(local, remote, previous, features) {
+  if (!local) return playlistMetadataFromRemote(remote, features)
+  if (!remote) return playlistMetadataFromLocal(local, features)
+
+  const localMetadata = playlistMetadataFromLocal(local, features)
+  const remoteMetadata = playlistMetadataFromRemote(remote, features)
+  if (!previous) return localMetadata
+
+  const previousMetadata = playlistMetadataFromRemote(previous, features)
+  const localBaseline = playlistBaselineMetadata(localMetadata)
+  const merged = { ...localMetadata }
+  const fields = ['title', 'description', ...(features.thumbnails ? ['custom_thumbnail'] : []), ...(features.sortOrder ? ['sort_order'] : [])]
+  for (const field of fields) {
+    if (localBaseline[field] === previousMetadata[field]) {
+      merged[field] = remoteMetadata[field]
+    }
+  }
+  return merged
+}
+
+function isSameLocalPlaylist(playlist, metadata, videos) {
+  return playlist.playlistName === metadata.title &&
+    (playlist.description || '') === metadata.description &&
+    (!Object.hasOwn(metadata, 'custom_thumbnail') || (playlist.customThumbnail || null) === metadata.custom_thumbnail) &&
+    (!Object.hasOwn(metadata, 'sort_order') || playlistSortOrder(playlist.sortOrder) === metadata.sort_order) &&
+    playlist.videos.length === videos.length &&
+    playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
+}
+
+// `options.onRetryBaseline` receives a getter for the baseline to merge against
+// if the upload conflicts. It also holds the downloaded subscriptions, so their
+// removal on the server is not undone. Playlists and profiles accept it too.
+// `options.profileId` names the separate profile whose channels to sync, or is
+// null for the main profile's.
+export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
+  // Subscriptions edited here or in another window while the server responds
+  // would be overwritten, so merge again from the changed subscriptions.
+  let baseline = previousIds
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await mergeSubscriptions(client, store, baseline, options)
+    // Later attempts also read this sync's own writes.
+    if (attempt === 0) options.onRetryBaseline?.(() => Array.from(new Set([...previousIds, ...result.remoteIds])))
+    if (result.mergedIds) return result.mergedIds
+    // The attempt already brought the server to its merge of the local
+    // subscriptions it read, so the retry merges against those. Otherwise an
+    // edit made meanwhile would look like a change from another device and be
+    // undone.
+    baseline = result.baseline
+  }
+  throw new Error('Subscriptions changed during sync. Try again.')
+}
+
+async function mergeSubscriptions(client, store, previousIds, options) {
+  const profiles = deepCopy(store.state.profiles.profileList)
+  const mainProfile = options.profileId == null
+    ? profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
+    : profiles.find(profile => profile._id === options.profileId && profile.separate === true)
+  if (!mainProfile) throw new Error('Profiles changed during sync. Try again.')
+  // A separate profile's channels don't limit the other profiles, nor theirs it.
+  const scopeProfiles = mainProfile.separate === true
+    ? [mainProfile]
+    : profiles.filter(profile => profile.separate !== true)
+  const localSubscriptions = mainProfile.subscriptions.map(channel => ({
+    ...channel,
+    thumbnail: normalizeChannelAvatar(channel.thumbnail),
+  }))
+  const localById = mapBy(localSubscriptions, channel => channel.id)
+  const remoteSubscriptions = await client.getSubscriptions()
+  const remoteById = mapBy(remoteSubscriptions, channel => channel.id)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'subscriptions',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.name,
+  })
+
+  for (const id of remoteById.keys()) {
+    if (!mergedIds.has(id)) {
+      await client.unsubscribe(id)
+    }
+  }
+  const subscriptionsToAdd = Array.from(mergedIds)
+    .filter(id => !remoteById.has(id))
+    .map(id => channelToRemote(localById.get(id)))
+  await uploadInChunks(
+    subscriptionsToAdd,
+    await client.supportsBulkSync(),
+    channels => client.subscribeBulk(channels),
+    channel => client.subscribe(channel)
+  )
+
+  const mergedSubscriptions = Array.from(mergedIds).map(id => {
+    return localById.get(id) ?? channelToLocal(remoteById.get(id))
+  })
+  const mergedIdSet = new Set(mergedIds)
+
+  let mainProfileSaved = false
+  for (const profile of scopeProfiles) {
+    const subscriptions = profile._id === mainProfile._id
+      ? mergedSubscriptions
+      : profile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
+
+    if (!metadataEquals(profile.subscriptions, subscriptions)) {
+      const saved = await store.dispatch('updateProfileSubscriptionsFromSync', {
+        profileId: profile._id,
+        subscriptions,
+        previous: profile.subscriptions,
+      })
+      if (!saved) {
+        // Once the main profile holds the merge, both sides agree on it.
+        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()), remoteIds: Array.from(remoteById.keys()) }
+      }
+    }
+    if (profile._id === mainProfile._id) mainProfileSaved = true
+  }
+
+  return { mergedIds: Array.from(mergedIds), remoteIds: Array.from(remoteById.keys()) }
+}
+
+// Merges the bookmarks of the profile whose data the store shows: a separate
+// profile's own, or the shared ones.
+export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
+  const localBookmarks = store.getters.getPlaylistBookmarks.filter(isValidPlaylistBookmark)
+  const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
+  const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
+  const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
+  // Like for subscriptions, the baseline of a sync whose upload failed also
+  // holds the downloaded bookmarks, so their removal on the server is not undone.
+  options.onRetryBaseline?.(() => Array.from(new Set([...previousIds, ...remoteById.keys()])))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'playlistBookmarks',
+    getItemName: id => localById.get(id)?.playlist.title || remoteById.get(id)?.playlist.title,
+  })
+
+  for (const id of remoteById.keys()) {
+    if (!mergedIds.has(id)) {
+      await client.deletePlaylistBookmark(id)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!remoteById.has(id) && mergedIds.has(id)) {
+      await client.createPlaylistBookmark(playlistBookmarkForSync(localById.get(id)))
+    }
+  }
+
+  const addedIds = Array.from(mergedIds).filter(id => !localById.has(id))
+  const removedIds = new Set(Array.from(localById.keys()).filter(id => !mergedIds.has(id)))
+
+  if (addedIds.length > 0 || removedIds.size > 0) {
+    // Apply the merge to the saved list as part of the write, so bookmarks
+    // saved or removed meanwhile survive, and the next sync syncs them.
+    const saved = await store.dispatch('updateActivePlaylistBookmarks', savedBookmarks => {
+      const currentBookmarks = savedBookmarks.filter(isValidPlaylistBookmark)
+      const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
+      return [
+        ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
+        ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
+      ]
+    })
+    if (!saved) throw new Error('Could not save synced playlist bookmarks')
+  }
+
+  return Array.from(mergedIds)
+}
+
+export async function syncPlaylists(client, store, previous = {}, options = {}) {
+  const features = {
+    thumbnails: typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails(),
+    sortOrder: typeof client.supportsPlaylistSortOrder === 'function' && await client.supportsPlaylistSortOrder(),
+  }
+  // Playlists synced from YouTube come from YouTube on each signed-in device.
+  const localPlaylists = deepCopy(store.state.playlists.playlists.filter(playlist => !playlist.youTube))
+  const localById = mapBy(localPlaylists, playlist => playlist._id)
+  const remotePlaylistHeaders = await client.getPlaylists()
+  const remotePlaylists = await Promise.all(
+    remotePlaylistHeaders.map(playlist => client.getPlaylist(playlist.id))
+  )
+  const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
+    return [snapshot.remoteId ?? localId, localId]
+  }))
+  const remoteById = new Map(remotePlaylists.map(entry => {
+    const remoteId = entry.playlist.id
+    const localId = localIdByRemoteId.get(remoteId) ?? remoteId
+    return [localId, { ...entry, remoteId }]
+  }))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'playlists',
+    getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
+  })
+  // A conflicting upload merges again, also against the downloaded playlists,
+  // so their removal on the server is not undone. The adapter replaces the
+  // entries it changes, so these stay as downloaded.
+  options.onRetryBaseline?.(() => {
+    const baseline = { ...previous }
+    for (const [id, remote] of remoteById) {
+      baseline[id] = {
+        remoteId: remote.remoteId,
+        metadata: playlistBaselineMetadata(playlistMetadataFromRemote({ ...remote.playlist, id }, features)),
+        videos: Array.from(new Set([...(previous[id]?.videos ?? []), ...remote.videos.map(video => video.id)])),
+      }
+    }
+    return baseline
+  })
+  // `removePlaylist` keeps protected playlists, so restore them remotely instead.
+  for (const [id, local] of localById) {
+    if (local.protected) mergedIds.add(id)
+  }
+  const nextSnapshot = {}
+  const assertCurrent = (local, id) => {
+    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
+    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
+  }
+
+  for (const [id, remote] of remoteById) {
+    if (!mergedIds.has(id)) {
+      await client.deletePlaylist(remote.remoteId)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id)) {
+      // `removePlaylist` logs failures instead of returning them.
+      await store.dispatch('removePlaylist', id)
+      if (store.state.playlists.playlists.some(playlist => playlist._id === id)) {
+        throw new Error('Could not remove synced playlist')
+      }
+    }
+  }
+
+  for (const id of mergedIds) {
+    let local = localById.get(id)
+    let remote = remoteById.get(id)
+    // A playlist missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredPlaylist = !local || !remote || options.deletions?.playlists?.kept?.includes(id)
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
+    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
+    if (metadata.custom_thumbnail) {
+      for (const candidate of new Set([metadata.custom_thumbnail, local?.customThumbnail])) {
+        if (!candidate) continue
+        try {
+          metadata.custom_thumbnail = await normalizePlaylistThumbnail(candidate)
+          break
+        } catch (error) {
+          console.warn('Could not load synced playlist thumbnail', id, error)
+          metadata.custom_thumbnail = null
+        }
+      }
+    }
+    let remoteId = remote?.remoteId ?? id
+    assertCurrent(local, id)
+
+    if (!remote) {
+      const createdPlaylist = await client.createPlaylist(metadata)
+      remoteId = createdPlaylist?.id ?? id
+      // Keep the generated ID even if a later stale-state guard aborts this
+      // sync. A retry must recognize our copy instead of importing it as new.
+      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata) })
+      remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
+    } else if (!metadataEquals(metadata, rawRemoteMetadata)) {
+      await client.updatePlaylist(remoteId, metadata)
+    }
+
+    const localVideos = local?.videos ?? []
+    const remoteVideosById = mapBy(remote.videos, video => video.id)
+    const localVideosById = mapBy(
+      localVideos.filter(video => videoToRemote(video, options) !== null || remoteVideosById.has(video.videoId)),
+      video => video.videoId
+    )
+    const localMetadataById = new Map()
+    for (const video of localVideos) {
+      const payload = videoToRemote(video, options)
+      if (!payload) continue
+      const existing = localMetadataById.get(video.videoId)
+      localMetadataById.set(video.videoId, existing ? enrichSyncVideo(existing, payload) : payload)
+    }
+    const mergedVideoIds = mergeIds(
+      localVideosById.keys(),
+      remoteVideosById.keys(),
+      previous[id]?.videos,
+      {
+        ...options,
+        restored: restoredPlaylist,
+        collection: 'playlistVideos',
+        scope: id,
+        scopeName: metadata.title,
+        getItemName: videoId => localVideosById.get(videoId)?.title || remoteVideosById.get(videoId)?.title,
+      }
+    )
+    const remoteVideosToAdd = []
+    for (const videoId of mergedVideoIds) {
+      const localMetadata = localMetadataById.get(videoId)
+      const existing = remoteVideosById.get(videoId)
+      if (!localMetadata) continue
+      const enriched = existing ? enrichSyncVideo(existing, localMetadata) : localMetadata
+      if (!metadataEquals(existing, enriched)) remoteVideosToAdd.push(enriched)
+      remoteVideosById.set(videoId, enriched)
+    }
+
+    let added = []
+    const removed = []
+    try {
+      if (remoteVideosToAdd.length > 0) {
+        await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
+        added = remoteVideosToAdd.map(video => video.id)
+      }
+      for (const videoId of remoteVideosById.keys()) {
+        if (!mergedVideoIds.has(videoId)) {
+          await client.removePlaylistVideo(remoteId, videoId)
+          removed.push(videoId)
+        }
+      }
+    } finally {
+      // Record completed writes once, including when a later removal fails.
+      if (added.length > 0 || removed.length > 0) {
+        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), added, removed })
+      }
+    }
+
+    // Preserve each local occurrence and its identity/order when metadata alone
+    // changes. The membership map intentionally deduplicates only remote IDs.
+    const retainedVideos = localVideos
+      .filter(video => videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId))
+      .map(video => {
+        const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
+          ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
+          : video
+        const remoteVideo = remoteVideosById.get(video.videoId)
+        if (!remoteVideo) return current
+        const uploader = uploaderToLocal(remoteVideo.uploader)
+        const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
+        const payload = videoToRemote(identified, options)
+        if (!payload) return current
+        const enriched = enrichSyncVideo(payload, remoteVideo)
+        const result = { ...identified }
+        if (payload.title !== enriched.title) result.title = enriched.title
+        if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
+        if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
+        if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
+          result.lengthSeconds = enriched.duration
+          result.isLive = false
+          result.liveNow = false
+          result.isUpcoming = false
+        }
+        return result
+      })
+    const addedVideos = Array.from(mergedVideoIds)
+      .filter(videoId => !localVideosById.has(videoId))
+      .map(videoId => videoToLocal(remoteVideosById.get(videoId)))
+    const mergedVideos = local?.addVideosToTop === true
+      ? addedVideos.concat(retainedVideos)
+      : retainedVideos.concat(addedVideos)
+
+    assertCurrent(local, id)
+    if (!local) {
+      local = {
+        _id: id,
+        playlistName: metadata.title,
+        description: metadata.description,
+        customThumbnail: metadata.custom_thumbnail || '',
+        ...(metadata.sort_order ? { sortOrder: metadata.sort_order } : {}),
+        protected: false,
+        videos: mergedVideos,
+      }
+      if (!await store.dispatch('addPlaylist', local)) throw new Error('Could not save synced playlist')
+    } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
+      const saved = await store.dispatch('updatePlaylistFromSync', {
+        previous: local,
+        // Sorting is a view preference, so a sort order change alone keeps `lastUpdatedAt`
+        keepLastUpdatedAt: isSameLocalPlaylist({ ...local, sortOrder: metadata.sort_order }, metadata, mergedVideos),
+        playlist: {
+          ...local,
+          playlistName: metadata.title,
+          description: metadata.description,
+          ...(features.thumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
+          ...(features.sortOrder ? { sortOrder: metadata.sort_order } : {}),
+          videos: mergedVideos,
+        },
+      })
+      if (!saved) throw new Error('Playlist changed during sync. Try again.')
+    }
+
+    await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), applied: true, videos: Array.from(mergedVideoIds) })
+    nextSnapshot[id] = {
+      remoteId,
+      metadata: playlistBaselineMetadata(metadata),
+      videos: Array.from(mergedVideoIds),
+    }
+  }
+
+  return nextSnapshot
+}
+
+// `changedIds` lists the entries changed locally since the last merge, while
+// the remote history is still the one that merge produced. `onRetryBaseline`
+// receives a getter for the baseline of a merge after a conflicting upload.
+export async function syncHistory(client, store, previous = {}, options = {}, { changedIds = null, onRetryBaseline } = {}) {
+  const historyChanged = new Error('Watch history changed during sync. Try again.')
+  const legacy = typeof client.applyWatchHistoryChanges !== 'function'
+  const acknowledgedUpserts = new Map()
+  const acknowledgedDeletions = new Set()
+  const acknowledge = (upserts, deletions = []) => {
+    for (const id of deletions) {
+      acknowledgedUpserts.delete(id)
+      acknowledgedDeletions.add(id)
+    }
+    for (const entry of upserts) {
+      acknowledgedDeletions.delete(entry.video.id)
+      acknowledgedUpserts.set(entry.video.id, entry.metadata)
+    }
+  }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    store.assertActive?.()
+    const remoteHistory = await client.getWatchHistory()
+    if (remoteHistory === null) return null
+    if (attempt === 0) {
+      // The baseline also holds the downloaded entries, so their removal on the
+      // server is not undone. Later attempts also read this sync's own writes.
+      onRetryBaseline?.(() => ({
+        ...(Array.isArray(previous) ? Object.fromEntries(previous.map(id => [id, null])) : previous),
+        ...Object.fromEntries(remoteHistory.map(entry => [entry.video.id, entry.metadata])),
+      }))
+    }
+    // Playback saves progress every few seconds. An edit this merge does not
+    // overwrite locally is uploaded by the sync it schedules, as the baseline
+    // still holds the value this sync saw. Only overwriting it needs a retry.
+    const edits = historyChanges.watch()
+    try {
+      const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+      const edited = () => edits.changed()?.size !== 0
+      let merged
+      try {
+        // Sending tens of thousands of entries to the worker costs more than
+        // the merge. Unchanged entries would merge to their baseline again.
+        // A retry follows an edit made during this sync, which the IDs lack.
+        const changed = changedIds && !legacy && attempt === 0
+          ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
+          : null
+        merged = await runBackgroundJob('mergeHistory', {
+          ...(changed ?? { localHistory, remoteHistory, previous }),
+          // Large deletions take the full merge, which asks to confirm them.
+          options: { ...options, ...(changed ? { allowDataLoss: true } : {}), deferRepairAcknowledgement: !legacy },
+          acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+        })
+        if (changed) merged.next = mergeChangedHistoryBaseline(previous, changedIds, merged.next)
+      } catch (error) {
+        store.assertActive?.()
+        // Even a failed merge can be based on mixed chunks and report false data
+        // loss. Only retry stale computations; rejected writes have uncertain effects.
+        if (edited()) continue
+        throw error
+      }
+      const { next, baselineChanged, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+      const localWrites = [...insertions, ...updates].map(record => record.videoId).concat(deletions)
+      const overwritesEdit = () => {
+        const changed = edits.changed()
+        return localWrites.some(id => !changed || changed.has(id))
+      }
+      const assertHistoryCurrent = () => {
+        store.assertActive?.()
+        if (overwritesEdit()) throw historyChanged
+      }
+      store.assertActive?.()
+      if (overwritesEdit()) continue
+      let completed = false
+      try {
+        if (!legacy) {
+          if (historyToUpload.length || remoteDeletions.length) {
+            await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+            acknowledge(historyToUpload, remoteDeletions)
+          }
+        } else {
+          for (const id of remoteDeletions) {
+            await client.deleteWatchHistory(id)
+            acknowledge([], [id])
+          }
+          await uploadInChunks(
+            historyToUpload,
+            await client.supportsBulkSync(),
+            async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+            async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
+          )
+        }
+
+        store.assertActive?.()
+        if (overwritesEdit()) continue
+        if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+          try {
+            const applied = await store.dispatch('applyHistorySyncChanges', {
+              insertions,
+              updates,
+              deletions,
+              assertActive: assertHistoryCurrent,
+              overwritesEdit,
+            })
+            if (applied === false) continue
+          } catch (error) {
+            if (error !== historyChanged) throw error
+            store.assertActive?.()
+            continue
+          }
+        }
+        completed = true
+        return next
+      } finally {
+        // Legacy requests already changed the server even if a later write,
+        // local application, or collection fails. Encrypted adapter writes only
+        // change its in-memory document and must wait for the actual upload.
+        const acknowledged = acknowledgedUpserts.size > 0 || acknowledgedDeletions.size > 0
+        if (legacy && ((completed && baselineChanged) || acknowledged)) {
+          await store.persistHistorySyncBaseline?.({
+            previous,
+            acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+            ...(completed ? { next } : {}),
+          })
+        }
+      }
+    } finally {
+      edits.stop()
+    }
+  }
+  throw historyChanged
+}
+
+function profileMetadata(profile, fallback = {}) {
+  return {
+    title: profile.name,
+    bgColor: getSyncProfileBackground(profile.bgColor, fallback.bgColor),
+    textColor: getSyncProfileTextColor(profile.textColor, fallback.textColor),
+  }
+}
+
+function remoteProfileMetadata(group, fallback = {}) {
+  return {
+    title: group.title,
+    bgColor: getSyncProfileBackground(group.bg_color, fallback.bgColor),
+    textColor: group.text_color ?? fallback.textColor ?? '#FFFFFF',
+  }
+}
+
+const PROFILES_CHANGED = Symbol('profiles changed')
+
+// A profile edited, added, or deleted here while the server responds would be
+// overwritten or recreated, so merge again. For profiles the attempt did not
+// save, the retry keeps the baseline, so their remote changes are not mistaken
+// for local removals. It adds the profiles deleted here meanwhile.
+export async function syncProfiles(client, store, previous = {}, options = {}) {
+  let baseline = previous
+  let retryOptions = options
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const read = deepCopy(store.state.profiles.profileList)
+    const result = await mergeProfiles(client, store, baseline, retryOptions)
+    if (result === null || !(PROFILES_CHANGED in result)) return result
+    // Profiles the attempt already saved are in sync, so later edits to them are local
+    baseline = { ...baseline, ...result[PROFILES_CHANGED] }
+    // A profile deleted here meanwhile would look new on the server without a
+    // baseline. Deleting it in the app confirms the deletion, so it needs no review.
+    const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
+    const deleted = read.filter(profile => profile._id !== MAIN_PROFILE_ID && profile.separate !== true &&
+      !remaining.has(profile._id))
+    if (deleted.length === 0) continue
+    for (const profile of deleted) {
+      baseline[profile._id] ??= {
+        metadata: profileMetadata(profile),
+        channels: profile.subscriptions.map(channel => channel.id),
+      }
+    }
+    const deletedIds = new Set(deleted.map(profile => profile._id))
+    const decision = retryOptions.deletions?.profiles
+    retryOptions = {
+      ...retryOptions,
+      deletions: {
+        ...retryOptions.deletions,
+        // Like syncDeletions.confirm, the new decision replaces an earlier one to keep it
+        profiles: {
+          confirmed: [...(decision?.confirmed ?? []), ...deletedIds],
+          kept: (decision?.kept ?? []).filter(id => !deletedIds.has(id)),
+        },
+      },
+    }
+  }
+  throw new Error('Profiles changed during sync. Try again.')
+}
+
+async function mergeProfiles(client, store, previous, options) {
+  // A copy, because channels added meanwhile are pushed into the stored profile
+  const profiles = deepCopy(store.state.profiles.profileList)
+  // Separate profiles sync in their own collection. Older versions would show
+  // their channels in every profile.
+  const separateIds = new Set(profiles.filter(profile => profile.separate === true).map(profile => profile._id))
+  const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID && !separateIds.has(profile._id))
+  const localById = mapBy(localProfiles, profile => profile._id)
+  const remoteGroups = await client.getSubscriptionGroups()
+  if (remoteGroups === null) return null
+  const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
+    return [snapshot.remoteId ?? localId, localId]
+  }))
+  const remoteById = new Map(remoteGroups.map(entry => {
+    const remoteId = entry.group.id
+    const localId = entry.group.local_id ?? localIdByRemoteId.get(remoteId) ?? remoteId
+    return [localId, { ...entry, remoteId }]
+  }).filter(([localId]) => !separateIds.has(localId)))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'profiles',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.group.title || previous[id]?.metadata?.title,
+  })
+  const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
+  const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
+  // A conflicting upload merges again, also against the downloaded profiles,
+  // so their removal on the server is not undone. Like the snapshot, it only
+  // records saved channels.
+  const retryBaseline = { ...previous }
+  for (const [id, remote] of remoteById) {
+    const old = previous[id]?.metadata
+    const local = localById.get(id)
+    retryBaseline[id] = {
+      remoteId: remote.remoteId,
+      metadata: remoteProfileMetadata(remote.group, old ?? (local ? profileMetadata(local, old) : {})),
+      channels: Array.from(new Set([
+        ...(previous[id]?.channels ?? []),
+        ...remote.channels.map(channel => channel.id).filter(channelId => subscriptionsById.has(channelId)),
+      ])),
+    }
+  }
+  options.onRetryBaseline?.(() => retryBaseline)
+  const next = {}
+
+  for (const [id, remote] of remoteById) {
+    if (!mergedIds.has(id)) await client.deleteSubscriptionGroup(remote.remoteId)
+  }
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id) && !await store.dispatch('removeProfile', id)) {
+      throw new Error('Could not remove synced profile')
+    }
+  }
+
+  for (const id of mergedIds) {
+    const local = localById.get(id)
+    let remote = remoteById.get(id)
+    // A profile missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredProfile = !local || !remote || options.deletions?.profiles?.kept?.includes(id)
+    const oldMetadata = previous[id]?.metadata
+    const localMetadata = local ? profileMetadata(local, oldMetadata) : null
+    const remoteMetadata = remote
+      ? remoteProfileMetadata(remote.group, oldMetadata ?? localMetadata ?? {})
+      : null
+    const localChanged = localMetadata && !metadataEquals(localMetadata, oldMetadata)
+    const remoteChanged = remoteMetadata && !metadataEquals(remoteMetadata, oldMetadata)
+    const metadata = remoteChanged && !localChanged ? remoteMetadata : localMetadata ?? remoteMetadata
+    let remoteId = remote?.remoteId ?? id
+
+    const groupPayload = {
+      id,
+      local_id: id,
+      title: metadata.title,
+      bg_color: metadata.bgColor,
+      text_color: metadata.textColor,
+    }
+    if (!remote) {
+      const created = await client.createSubscriptionGroup(groupPayload)
+      remoteId = created?.id ?? id
+      remote = { group: { ...groupPayload, id: remoteId }, channels: [], remoteId }
+    } else if (!metadataEquals(metadata, remoteMetadata)) {
+      await client.updateSubscriptionGroup(remoteId, groupPayload)
+    }
+
+    const localChannelIds = local?.subscriptions.map(channel => channel.id) ?? []
+    const remoteChannelIds = remote.channels.map(channel => channel.id)
+    const mergedChannelIds = mergeIds(
+      localChannelIds,
+      remoteChannelIds,
+      previous[id]?.channels,
+      {
+        ...options,
+        restored: restoredProfile,
+        collection: 'profileChannels',
+        scope: id,
+        scopeName: metadata.title,
+        getItemName: channelId => subscriptionsById.get(channelId)?.name ||
+          local?.subscriptions.find(channel => channel.id === channelId)?.name ||
+          remote.channels.find(channel => channel.id === channelId)?.name,
+      }
+    )
+    for (const channelId of remoteChannelIds) {
+      if (!mergedChannelIds.has(channelId)) {
+        await client.removeSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+    for (const channelId of mergedChannelIds) {
+      if (!remoteChannelIds.includes(channelId)) {
+        await client.addSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+
+    const mergedSubscriptions = Array.from(mergedChannelIds)
+      .map(channelId => subscriptionsById.get(channelId))
+      .filter(Boolean)
+    const mergedProfile = {
+      _id: id,
+      name: metadata.title,
+      bgColor: getMergedProfileBackground(local, metadata.bgColor),
+      textColor: getMergedProfileTextColor(local, metadata.textColor),
+      ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
+      subscriptions: mergedSubscriptions,
+    }
+    if ((!local || !metadataEquals(local, mergedProfile)) &&
+      !await store.dispatch('saveSyncedProfile', { profile: mergedProfile, previous: local ?? null })) {
+      return { [PROFILES_CHANGED]: next }
+    }
+
+    next[id] = {
+      remoteId,
+      metadata,
+      // Only record saved channels. A remote channel missing from the main
+      // profile would otherwise look like a local removal on the next sync.
+      channels: mergedSubscriptions.map(channel => channel.id),
+    }
+  }
+
+  return next
+}
+
+const SEPARATE_PROFILE_COLOR = /^(?:#[\da-f]{3,8}|transparent|var\(--[\w-]+\))$/i
+const SEPARATE_PROFILE_ICON_TYPES = new Set(['icon', 'emoji', 'image'])
+// Profile images are 256-pixel WebP data URLs, far below this.
+const MAX_SEPARATE_PROFILE_ICON_LENGTH = 1024 * 1024
+
+function separateProfileIcon(icon) {
+  if (icon?.type === 'initial') return { type: 'initial' }
+  if (!SEPARATE_PROFILE_ICON_TYPES.has(icon?.type) || typeof icon.value !== 'string' ||
+      icon.value.length === 0 || icon.value.length > MAX_SEPARATE_PROFILE_ICON_LENGTH ||
+      (icon.type === 'image' && !icon.value.startsWith('data:image/'))) return null
+  return { type: icon.type, value: icon.value }
+}
+
+function isValidSeparateProfileEntry(entry) {
+  // Profile IDs name the profile's datastores and collections, which limits their length.
+  return isValidSeparateProfileId(entry?.id) && entry.id !== MAIN_PROFILE_ID && typeof entry.name === 'string' && entry.name.length > 0 &&
+    SEPARATE_PROFILE_COLOR.test(entry.bgColor) && SEPARATE_PROFILE_COLOR.test(entry.textColor)
+}
+
+function separateProfileEntry(profile) {
+  const icon = separateProfileIcon(profile.icon)
+  return { id: profile._id, name: profile.name, bgColor: profile.bgColor, textColor: profile.textColor, ...(icon ? { icon } : {}) }
+}
+
+/** The baseline of an entry, which fingerprints images instead of repeating them in each snapshot */
+function separateProfileMetadata(entry) {
+  const icon = separateProfileIcon(entry.icon)
+  return {
+    name: entry.name,
+    bgColor: entry.bgColor,
+    textColor: entry.textColor,
+    icon: icon?.type === 'image' ? { type: 'image', value: thumbnailFingerprint(icon.value) } : icon,
+  }
+}
+
+/**
+ * Syncs the names, colors, and icons of the profiles that keep their data
+ * separate. Their channels and data sync in their own collections while they
+ * are active. Deleting a separate profile deletes its history and playlists
+ * too, so a deletion from another device always asks first.
+ * @returns {Promise<Record<string, ReturnType<typeof separateProfileMetadata>>>} The baseline
+ */
+// A separate profile edited, added, or deleted in another window while the
+// server responds would be overwritten or recreated, so merge again, like
+// `syncProfiles`.
+export async function syncSeparateProfiles(client, store, previous = {}, options = {}) {
+  let baseline = previous
+  let retryOptions = options
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const read = new Set(store.state.profiles.profileList.filter(profile => profile.separate === true).map(profile => profile._id))
+    const result = await mergeSeparateProfiles(client, store, baseline, retryOptions)
+    if (!(PROFILES_CHANGED in result)) return result
+    // Profiles the attempt already saved are in sync, so later edits to them are local
+    const saved = result[PROFILES_CHANGED]
+    baseline = { ...baseline, ...saved }
+    // A profile deleted here meanwhile would look new on the server without a
+    // baseline. Deleting it in the app confirms the deletion, so it needs no review.
+    const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
+    const deletedIds = [...new Set([...read, ...Object.keys(saved)])].filter(id => !remaining.has(id) && Object.hasOwn(baseline, id))
+    if (deletedIds.length === 0) continue
+    const decision = retryOptions.deletions?.separateProfiles
+    retryOptions = {
+      ...retryOptions,
+      deletions: {
+        ...retryOptions.deletions,
+        separateProfiles: {
+          confirmed: [...(decision?.confirmed ?? []), ...deletedIds],
+          kept: (decision?.kept ?? []).filter(id => !deletedIds.includes(id)),
+        },
+      },
+    }
+  }
+  throw new Error('Profiles changed during sync. Try again.')
+}
+
+async function mergeSeparateProfiles(client, store, previous, options) {
+  const profiles = store.state.profiles.profileList
+  const local = profiles.filter(profile => profile.separate === true)
+  const localById = mapBy(local, profile => profile._id)
+  // Another device can't turn a profile of this one into a separate one.
+  const sharedIds = new Set(profiles.filter(profile => profile.separate !== true).map(profile => profile._id))
+  const remote = await client.getSeparateProfiles()
+  const remoteById = new Map(remote
+    .filter(entry => isValidSeparateProfileEntry(entry) && !sharedIds.has(entry.id))
+    .map(entry => [entry.id, entry]))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'separateProfiles',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.name || previous[id]?.name,
+  })
+  // A conflicting upload merges again, also against the downloaded profiles,
+  // so their removal on the server is not undone.
+  options.onRetryBaseline?.(() => ({
+    ...previous,
+    ...Object.fromEntries(Array.from(remoteById, ([id, entry]) => [id, separateProfileMetadata(entry)])),
+  }))
+
+  const removedHere = Array.from(localById.keys()).filter(id => !mergedIds.has(id))
+  const confirmed = new Set(options.deletions?.separateProfiles?.confirmed)
+  const unconfirmed = removedHere.filter(id => !confirmed.has(id))
+  if (!options.allowDataLoss && unconfirmed.length > 0) {
+    throw new SyncServerDataLossError({
+      collection: 'separateProfiles',
+      deleted: unconfirmed.length,
+      previous: Object.keys(previous).length,
+      items: unconfirmed.map(id => ({ id, name: localById.get(id).name })),
+    })
+  }
+
+  const next = {}
+  const entries = []
+  for (const id of mergedIds) {
+    const localProfile = localById.get(id)
+    const remoteEntry = remoteById.get(id)
+    const localEntry = localProfile ? separateProfileEntry(localProfile) : null
+    const base = previous[id]
+    const remoteChanged = remoteEntry && base && !metadataEquals(separateProfileMetadata(remoteEntry), base)
+    const localChanged = localEntry && !metadataEquals(separateProfileMetadata(localEntry), base)
+    const entry = remoteEntry && (!localEntry || (remoteChanged && !localChanged)) ? remoteEntry : localEntry
+    // Entries without an icon keep the local one.
+    const icon = separateProfileIcon(entry.icon) ?? (localProfile ? separateProfileIcon(localProfile.icon) : null)
+    const synced = { id, name: entry.name, bgColor: entry.bgColor, textColor: entry.textColor, ...(icon ? { icon } : {}) }
+    if (!localProfile) {
+      const profile = {
+        _id: id,
+        name: synced.name,
+        bgColor: synced.bgColor,
+        textColor: synced.textColor,
+        ...(icon ? { icon } : {}),
+        subscriptions: [],
+        separate: true,
+      }
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) return { [PROFILES_CHANGED]: next }
+    } else if (!metadataEquals(separateProfileMetadata(synced), separateProfileMetadata(localEntry))) {
+      const savedIcon = icon ?? localProfile.icon
+      const profile = { ...localProfile, name: synced.name, bgColor: synced.bgColor, textColor: synced.textColor, ...(savedIcon ? { icon: savedIcon } : {}) }
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: localProfile })) return { [PROFILES_CHANGED]: next }
+    }
+    entries.push(synced)
+    next[id] = separateProfileMetadata(synced)
+  }
+
+  for (const id of removedHere) {
+    if (!await store.dispatch('removeProfile', id)) throw new Error('Could not remove synced profile')
+  }
+
+  // Keep entries this version can't read, and the server's order.
+  const order = new Map(remote.map((entry, index) => [entry?.id, index]))
+  const kept = remote.filter(entry => !remoteById.has(entry?.id))
+  const position = entry => order.get(entry.id) ?? remote.length
+  const merged = [...kept, ...entries.sort((a, b) => position(a) - position(b))]
+  if (!metadataEquals(remote, merged)) await client.putSeparateProfiles(merged)
+  return next
+}
+
+/**
+ * A profile's own settings as merged on this device, with the settings of
+ * `remoteEntry` that this device doesn't sync, and when they were edited, so
+ * that its upload keeps them. Turning the profile's own settings off drops them all.
+ * @param {{ key: string, value: any, updatedAt: number, settingsUpdatedAt?: Record<string, number> }} entry the merged settings this device syncs
+ * @param {{ value: any, updatedAt: number } | undefined} remoteEntry
+ * @param {Record<string, unknown> | null | undefined} syncedRemote the settings of `remoteEntry` this device syncs
+ */
+function withSettingsSyncedElsewhere(entry, remoteEntry, syncedRemote) {
+  if (entry.value === null || !remoteEntry || !syncedRemote) return entry
+  const elsewhere = Object.entries(remoteEntry.value).filter(([key]) => !Object.hasOwn(syncedRemote, key))
+  if (elsewhere.length === 0) return entry
+  const value = Object.fromEntries([...elsewhere, ...Object.entries(entry.value)].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
+  // An entry that replaced all settings has no times yet; its settings count as edited with it.
+  return { ...entry, value, settingsUpdatedAt: { ...profileSettingTimesOf(remoteEntry), ...profileSettingTimesOf(entry) } }
+}
+
+function settingUpdater(key) {
+  return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
+}
+
+async function repairCustomThemeReferences(store, previousThemes, themes) {
+  const themeIds = new Set(themes.map(theme => theme.id))
+  const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
+  const fallbacks = {
+    baseTheme: 'system',
+    systemLightTheme: DEFAULT_SYSTEM_THEMES.light,
+    systemDarkTheme: DEFAULT_SYSTEM_THEMES.dark,
+  }
+
+  for (const [key, defaultTheme] of Object.entries(fallbacks)) {
+    const id = customThemeIdFromValue(store.state.settings[key])
+    if (id === null || themeIds.has(id)) continue
+
+    const deletedTheme = previousById.get(id)
+    // Each repair saves where the shown value comes from. Another profile can
+    // show meanwhile, whose settings only need it if they name the theme too.
+    const stillNamed = () => customThemeIdFromValue(store.state.settings[key]) === id
+    if (key === 'baseTheme' && deletedTheme) {
+      await store.dispatch('repairShownSetting', { settingId: 'mainColor', value: deletedTheme.mainColor })
+      if (!stillNamed()) continue
+      await store.dispatch('repairShownSetting', { settingId: 'secColor', value: deletedTheme.secondaryColor })
+    }
+    if (!stillNamed()) continue
+    await store.dispatch('repairShownSetting', { settingId: key, value: deletedTheme?.basedOn ?? defaultTheme })
+  }
+
+  await repairSystemThemeSettings(store, themes)
+}
+
+const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
+let volatileSyncDeviceId = null
+
+/** Forgets the device ID of another installation whose data was restored */
+export function forgetSyncDeviceId() {
+  volatileSyncDeviceId = null
+  try {
+    localStorage.removeItem(SYNC_DEVICE_ID_KEY)
+  } catch {}
+}
+
+function getSyncDeviceId() {
+  try {
+    let deviceId = localStorage.getItem(SYNC_DEVICE_ID_KEY)
+    if (!deviceId) {
+      deviceId = crypto.randomUUID()
+      localStorage.setItem(SYNC_DEVICE_ID_KEY, deviceId)
+    }
+    return deviceId
+  } catch {
+    volatileSyncDeviceId ??= crypto.randomUUID()
+    return volatileSyncDeviceId
+  }
+}
+
+function getTabSessionDeviceIdentity(settings = {}) {
+  const legacyDeviceId = getSyncDeviceId()
+  const deviceId = isValidSyncServerDeviceId(settings.syncServerDeviceId)
+    ? settings.syncServerDeviceId
+    : legacyDeviceId
+  return {
+    deviceId,
+    legacyDeviceIds: deviceId === legacyDeviceId ? [] : [legacyDeviceId],
+  }
+}
+
+export function getSavedOtherDeviceSessions(snapshot, settings) {
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(settings)
+  return getOtherDeviceSessions(
+    snapshot?.sessionsV2 ?? snapshot?.sessions,
+    deviceId,
+    legacyDeviceIds
+  )
+}
+
+function getTabSyncAdapter() {
+  if (process.env.IS_ELECTRON) return window.ftElectron?.tabs ?? null
+  if (process.env.IS_CAPACITOR) {
+    try {
+      return getCapacitorTabService()
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+export async function syncSessions(client, store, previous = null, { accountClient = client, onRetryBaseline } = {}) {
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+
+  const tabs = getTabSyncAdapter()
+  if (typeof tabs?.getSyncSessions !== 'function' ||
+      typeof tabs?.applySyncSessions !== 'function') {
+    return null
+  }
+
+  // Windows with only incognito tabs have nothing to share, and other devices cannot apply an empty session.
+  // A device with only those keeps its synced tabs as they were.
+  const allLocal = await tabs.getSyncSessions()
+  const local = allLocal.filter(session => session.tabs.length > 0)
+  if (allLocal.length > 0 && local.length === 0) return null
+  const remote = await client.getSessions()
+  // After a conflicting upload, merge against the downloaded document, so its
+  // changes do not look like local ones. Without one, keep the previous baseline.
+  onRetryBaseline?.(() => remote === null || (Array.isArray(remote) && remote.length === 0) ? previous : remote)
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
+  const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)
+  let reclaimDeviceSessions = false
+  let activeRevokedLogins = []
+  if (revokedLogins.length > 0) {
+    const response = await accountClient.getAccountSessions()
+    const current = Array.isArray(response?.sessions)
+      ? response.sessions.filter(session => session?.current === true)
+      : []
+    if (current.length !== 1 || current[0].device_id !== deviceId ||
+        response.sessions.some(session => typeof session?.id !== 'string' || session.id.length === 0)) {
+      throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+    }
+    // Block this login's entire upload, including windows opened after cleanup.
+    // Keep local tabs intact while the account-session DELETE is pending.
+    if (revokedLogins.includes(current[0].id)) {
+      throw new SyncServerTabRevocationPendingError(i18n.global.t('Settings.Sync Settings.Tab Sync Revocation Pending'))
+    }
+    activeRevokedLogins = revokedLogins.filter(id => response.sessions.some(session => session.id === id))
+    reclaimDeviceSessions = true
+  }
+  const merged = mergeSyncSessions({
+    localSessions: local,
+    remoteValue: remote,
+    previousValue: previous,
+    deviceId,
+    platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
+    preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
+    legacyDeviceIds,
+    reclaimDeviceSessions,
+    activeRevokedLogins,
+  })
+
+  if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
+    const applied = await tabs.applySyncSessions(merged.sessionsToApply)
+    if (!applied) throw new Error('Failed to apply synced tab sessions')
+  }
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+  if (!metadataEquals(remote, merged.document)) {
+    await client.putSessions(merged.document)
+  }
+  if ((merged.mode === 'shared') !== store.state.settings.syncServerSharedTabs) {
+    await store.dispatch('updateSyncServerSharedTabs', merged.mode === 'shared')
+  }
+
+  return merged
+}
+
+// Settings whose values name custom themes
+const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDarkTheme'])
+
+// `playlistSnapshot` holds the baselines of this sync's playlist merge, which
+// map local playlist IDs to the server's. Without it, playlist preferences stay
+// as the server has them. Lists and profiles' own settings merge against
+// `options.listSnapshot`, and `options.onRetryBaseline` receives a getter for
+// the one a retry after a rejected upload merges them against: those this sync
+// applied. The rejected result would drop this device's edits the server never
+// received.
+// `store.persistSettingsSyncBaseline` receives the server entries this sync
+// merged and applied, so a failed upload cannot make them look like local edits.
+// `store.readSavedSettingEditTimes` returns the saved edit times, which include
+// edits other windows saved but this window hasn't received yet.
+// `options.dataScope` is the separate profile whose data the store shows, whose
+// channel settings sync under their own key. Those of the deleted separate
+// profiles in `options.removedProfileIds` are removed.
+export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null, {
+  listSnapshot = previousSnapshot, onRetryBaseline, dataScope = null, removedProfileIds = [],
+} = {}) {
+  const remoteEntries = await client.getSettings()
+  // Optimistic edits show their value before saving its edit time. Wait for
+  // them, then read the local settings without awaiting anything in between.
+  for (let pending = settingWritesSettled(); pending; pending = settingWritesSettled()) await pending
+  // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
+  const previous = migrateLegacySyncedSettings(previousSnapshot)
+  const previousLists = migrateLegacySyncedSettings(listSnapshot)
+  const remote = migrateLegacySyncedSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
+  // Keep the server's entry order even when devices sync different keys.
+  // Reordering unchanged settings would create revisions that wake each other.
+  const merged = { ...remote }
+  const now = Date.now()
+  // Edits save a new object, so this holds the times as this sync read them.
+  const editTimes = () => {
+    const times = store.state.settings.syncServerSettingUpdatedAt
+    return times !== null && typeof times === 'object' && !Array.isArray(times) ? times : {}
+  }
+  const localUpdatedAt = editTimes()
+  const savedEditTimeChanged = async key => {
+    const saved = await store.readSavedSettingEditTimes?.() ?? {}
+    return Object.hasOwn(saved, key) && saved[key] !== localUpdatedAt[key]
+  }
+  const local = Object.fromEntries([
+    [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    // A profile with its own settings may show other values, which sync with that profile.
+    ...getSyncableSettingKeys(store.state.settings).map(key => (
+      [key, deepCopy(sharedSettingValue(store.state.settings, key))]
+    )),
+  ])
+
+  // The own settings of each profile, by their settings key. Those of a
+  // profile this device lacks wait on the server until it syncs the profile.
+  const isSynced = key => isSettingSyncEnabled(store.state.settings, key)
+  const syncedOwnSettingsOf = profileId => syncedProfileSettings(ownSettingsOf(store.state.settings.profileSettingsState?.overrides, profileId), isSynced)
+  const profileSettingsProfiles = new Map()
+  for (const profile of store.state.profiles.profileList) {
+    if (!canHaveOwnSettings(profile._id)) continue
+    const key = profileSettingsId(profile._id)
+    const value = syncedOwnSettingsOf(profile._id)
+    // Entries that aren't settings, which other versions may write, stay as they are.
+    if (remote[key] && remote[key].value !== null && !isPlainObject(remote[key].value)) continue
+    if (value === null && !previous[key] && !remote[key]) continue
+    profileSettingsProfiles.set(key, profile._id)
+    local[key] = value
+  }
+  for (const id of removedProfileIds) {
+    if (canHaveOwnSettings(id)) delete merged[profileSettingsId(id)]
+  }
+
+  // The profiles whose channel settings sync, by their settings key
+  const channelSettingsProfiles = new Map()
+  if (isSettingSyncEnabled(store.state.settings, SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY)) {
+    channelSettingsProfiles.set(SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, store.state.profiles.profileList[0])
+    const separateProfile = dataScope === null
+      ? null
+      : store.state.profiles.profileList.find(profile => profile._id === dataScope && profile.separate === true)
+    if (separateProfile) channelSettingsProfiles.set(scopedSubscriptionSettingsSyncKey(dataScope), separateProfile)
+    for (const id of removedProfileIds) delete merged[scopedSubscriptionSettingsSyncKey(id)]
+  }
+  for (const [key, profile] of channelSettingsProfiles) local[key] = getSubscriptionSettingsForSync(profile)
+  for (const key of PLAYLIST_PREFERENCES_SYNC_KEYS) {
+    if (playlistSnapshot && isSettingSyncEnabled(store.state.settings, key)) {
+      local[key] = getPlaylistPreferencesForSync(store.state.playlists.playlists, playlistSnapshot, key)
+    }
+  }
+  const itemKeys = new Set([...channelSettingsProfiles.keys(), ...PLAYLIST_PREFERENCES_SYNC_KEYS])
+
+  // Set when another window changed the themes, so the ones the server's
+  // theme selections name may be missing here
+  let themesDeferred = false
+  // Settings that merge their items or settings against `listSnapshot`
+  const mergesAgainstLists = key => isListSetting(key) || profileSettingsProfiles.has(key)
+  const syncedEntry = entry => entry && { ...entry, value: syncedProfileSettings(entry.value, isSynced) }
+  // A profile's synced settings keep only those this device syncs, so a
+  // setting it starts syncing later has no baseline here, and its value on the
+  // server doesn't look removed.
+  const baselineOf = (key, entry) => profileSettingsProfiles.has(key) ? syncedEntry(entry) : entry
+  // Lists and failed saves this sync didn't apply, which keep their previous baseline
+  const skippedSettings = new Set()
+  // Server entries of the settings this sync merged and applied
+  const applied = {}
+  try {
+    for (const [key, value] of Object.entries(local)) {
+      const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
+      const remoteEntry = remote[key]
+      if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
+        if (remoteEntry) merged[key] = remoteEntry
+        else delete merged[key]
+        continue
+      }
+      const profileSettingsKey = profileSettingsProfiles.has(key)
+      const mergeEntry = itemKeys.has(key)
+        ? mergeSettingItemsEntry
+        : isListSetting(key)
+          ? mergeSettingListEntry
+          : profileSettingsKey ? mergeProfileSettingsEntry : mergeSettingEntry
+      // A profile's own settings merge as this device syncs them, and keep the
+      // settings that only other devices sync.
+      let entry = mergeEntry({
+        key,
+        value,
+        old: profileSettingsKey ? syncedEntry(old) : old,
+        remoteEntry: profileSettingsKey ? syncedEntry(remoteEntry) : remoteEntry,
+        localUpdatedAt: localUpdatedAt[key],
+        localSettingUpdatedAt: settingId => localUpdatedAt[profileSettingEditTimeId(key, settingId)],
+        localSettingIds: profileSettingsKey
+          ? Object.keys(localUpdatedAt).filter(name => name.startsWith(profileSettingEditTimeId(key, ''))).map(name => name.slice(key.length + 1))
+          : [],
+        syncsSetting: isSynced,
+        now,
+      })
+      if (profileSettingsKey) {
+        entry = remoteEntry && metadataEquals(entry, syncedEntry(remoteEntry))
+          ? remoteEntry
+          : withSettingsSyncedElsewhere(entry, remoteEntry, syncedEntry(remoteEntry)?.value)
+      }
+
+      entry = resolveMergedThemeEntry(
+        entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
+      )
+      merged[key] = entry
+      if (key === 'defaultProfile' &&
+          !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
+        entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
+        merged[key] = entry
+      }
+      const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
+        ? value
+        : profileSettingsProfiles.has(key)
+          ? syncedOwnSettingsOf(profileSettingsProfiles.get(key))
+          : sharedSettingValue(store.state.settings, key)
+      const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
+        ? areSyncSettingValuesEqual(key, currentValue, entry.value)
+        : metadataEquals(currentValue, profileSettingsKey ? syncedProfileSettings(entry.value, isSynced) : entry.value)
+      // Edited while this sync saved an earlier setting, also back to the value
+      // it read. Applying the merge would undo the edit, so the server keeps its
+      // entry and the next sync merges it.
+      const skip = () => {
+        if (remoteEntry) merged[key] = remoteEntry
+        else delete merged[key]
+        if (mergesAgainstLists(key)) skippedSettings.add(key)
+      }
+      const editedHere = () => !metadataEquals(profileSettingsKey ? currentValue : sharedSettingValue(store.state.settings, key), value) ||
+        settingEditedBetween(localUpdatedAt, editTimes(), key)
+      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY &&
+          (editedHere() ||
+            // Another window saves an edit's time before this one receives the
+            // edit. This window can edit too while the times load. Saving a
+            // profile's own settings checks the saved times itself.
+            (!profileSettingsKey && (await savedEditTimeChanged(key) || editedHere())))) {
+        skip()
+        continue
+      }
+      if (!valuesEqual) {
+        if (channelSettingsProfiles.has(key)) {
+          await applySubscriptionSettingsSync(store, entry.value, channelSettingsProfiles.get(key), value)
+        } else if (profileSettingsProfiles.has(key)) {
+          // Edited meanwhile: the next sync merges the edit.
+          if (!await store.dispatch('saveSyncedProfileSettings', {
+            profileId: profileSettingsProfiles.get(key), settings: entry.value, previous: value, updatedAt: localUpdatedAt, isSynced,
+          })) {
+            skip()
+            continue
+          }
+        } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
+          await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
+        } else if (key === CUSTOM_THEMES_SYNC_KEY) {
+          const previousThemes = store.state.utils.customThemes
+          const themes = await replaceCustomThemes(entry.value, value)
+          if (themes === null) {
+            skip()
+            themesDeferred = true
+            continue
+          }
+          store.commit('setCustomThemes', themes)
+          await repairCustomThemeReferences(store, previousThemes, themes)
+        } else if (isListSetting(key)) {
+          // Another window may save the list after this sync read it. That edit
+          // or a failed save keeps the server entry, and the next sync merges it.
+          let applied = false
+          const saved = await withSharedSettings(() => store.dispatch(settingUpdater(key), current => {
+            applied = metadataEquals(current, value)
+            return applied ? deepCopy(entry.value) : current
+          }))
+          if (!applied || saved === false) skip()
+        } else if (await withSharedSettings(() => store.dispatch(settingUpdater(key), deepCopy(entry.value))) === false) {
+          // The local value did not change, so the next sync applies the server entry again
+          skip()
+          skippedSettings.add(key)
+          continue
+        }
+      }
+      if (remoteEntry && !skippedSettings.has(key)) applied[key] = baselineOf(key, remoteEntry)
+    }
+  } finally {
+    await store.persistSettingsSyncBaseline?.(applied)
+  }
+
+  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(mergesAgainstLists).flatMap(key => {
+    const entry = skippedSettings.has(key) ? previousLists[key] : remote[key]
+    return entry ? [[key, baselineOf(key, entry)]] : []
+  })))
+  await client.putSettings(Object.values(merged))
+  const snapshot = { ...merged }
+  for (const key of Object.keys(snapshot)) {
+    if (!isProfileSettingsId(key)) continue
+    // Settings waiting for a profile this device lacks have no baseline, so
+    // when the profile arrives, they apply instead of looking turned off here.
+    if (profileSettingsProfiles.has(key)) snapshot[key] = baselineOf(key, snapshot[key])
+    else delete snapshot[key]
+  }
+  // Items from the server that this device never applied must not count as removed here next time.
+  for (const key of skippedSettings) {
+    const old = mergesAgainstLists(key) ? previousLists[key] : previous[key]
+    if (old) snapshot[key] = baselineOf(key, old)
+    else delete snapshot[key]
+  }
+  return snapshot
+}
