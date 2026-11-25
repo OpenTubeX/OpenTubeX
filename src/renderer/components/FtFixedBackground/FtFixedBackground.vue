@@ -68,6 +68,13 @@
     animation-timeline: var(--fixed-background-timelines);
     animation-range: exit-crossing -1000000px exit-crossing 1000000px;
   }
+
+  /* Reduced Motion stops every animation, but these only keep the field in place. */
+  :root[data-reduced-motion='reduce'] .fixedBackgroundLayer::before {
+    animation: fixed-background-follow-y linear both, fixed-background-follow-x linear both !important;
+    animation-timeline: var(--fixed-background-timelines) !important;
+    animation-range: exit-crossing -1000000px exit-crossing 1000000px !important;
+  }
 }
 
 @keyframes fixed-background-follow-y {

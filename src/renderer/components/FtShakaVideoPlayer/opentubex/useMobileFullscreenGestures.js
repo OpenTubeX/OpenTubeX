@@ -370,6 +370,9 @@ export function useMobileFullscreenGestures({
         time: performance.now(),
       }
       setFullscreenMetadata(!isFullscreenMetadataShown())
+      // A side tap's hide can fire during this touch. The controls show again,
+      // so its touchend has to restart Shaka's idle timer.
+      mobileSurfaceTapHidControls = false
       showOverlayControls()
       return true
     }
