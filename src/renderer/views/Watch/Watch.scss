@@ -267,6 +267,11 @@
       }
 
       .errorActionButton {
+        // The overlay stays dark in every theme, so the outlined buttons
+        // cannot use the theme's text colors.
+        --button-foreground: #fff;
+        --button-border: rgb(255 255 255 / 60%);
+
         margin: 0;
         min-block-size: 44px;
         max-inline-size: 100%;
