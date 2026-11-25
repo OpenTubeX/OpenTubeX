@@ -1187,7 +1187,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         delete window.__miniDismissFrames
         document.querySelector('#mini-player-test-style')?.remove()
         document.querySelector('#mini-player-test-spacer')?.remove()
-        await Promise.all(saving)
+        await Promise.allSettled(saving)
       }, { settings, originalRoute, compactOnly, seekingOnly, savedHistory })
     }
     await watch?.dispose()
