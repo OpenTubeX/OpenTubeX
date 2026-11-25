@@ -103,8 +103,8 @@ test('translates an Invidious post line by line and keeps its links', async ({ p
   await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, (route, request) => {
     const { text } = decodeCommentTranslationAction(request.postData())
     translationRequests.push(text)
-    // The service also translates the words in links and adds blank lines.
-    const translated = 'Hello everyone, today we are showing you our new studio. #studio-en\n\nMore about baking: https://example.com/translated-path https://www.youtube.com/watch?v=abcdefghijk'
+    // The service keeps the placeholders of the links and adds blank lines.
+    const translated = 'Hello everyone, today we are showing you our new studio. {0}\n\nMore about baking: {1} {2}'
     return route.fulfill({ status: 200, contentType: 'application/json', body: commentTranslationResponse(translated) })
   })
   await page.route('**/api/v1/post/**', route => route.fulfill({
@@ -136,7 +136,7 @@ test('translates an Invidious post line by line and keeps its links', async ({ p
   await expect(postText.getByRole('link', { name: /^youtube\.com/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=abcdefghijk')
   await expect(postText.getByRole('link', { name: '#studio' })).toHaveAttribute('href', /\/hashtag\/studio$/)
   await expect(postText.getByRole('link', { name: /^example\.com/ })).toHaveAttribute('href', url)
-  expect(translationRequests).toEqual([`Hallo zusammen, heute zeigen wir euch unser neues Studio. #studio\nMehr über das Backen: ${url} https://www.youtube.com/watch?v=abcdefghijk`])
+  expect(translationRequests).toEqual(['Hallo zusammen, heute zeigen wir euch unser neues Studio. {0}\nMehr über das Backen: {1} {2}'])
 
   await translate.click()
   await expect(postText).toContainText('Hallo zusammen')

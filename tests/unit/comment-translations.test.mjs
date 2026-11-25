@@ -86,46 +86,32 @@ test('escapes translated markup and links translated URLs', () => {
 test('translates descriptions line by line, keeping blank lines and links', async () => {
   const requests = []
   const translated = await translateTextKeepingLayout(
-    'Hallo zusammen!\n\n0:00 Einleitung\nRezept: https://example.com/rezept #brot @kanal\n',
+    'Hallo zusammen!\n\n0:00 Einleitung\nRezept: https://example.com/über-uns. #brot @kanal\n',
     async (text) => {
       requests.push(text)
-      // The service translates the words in links and adds blank lines.
-      return 'Hello everyone!\n\n0:00 Introduction\n\nRecipe: https://example.com/recipe #bread @channel'
+      // The service adds blank lines.
+      return 'Hello everyone!\n\n0:00 Introduction\n\nRecipe: {0}. {1} {2}'
     }
   )
 
-  assert.deepEqual(requests, ['Hallo zusammen!\n0:00 Einleitung\nRezept: https://example.com/rezept #brot @kanal'])
-  assert.equal(translated, 'Hello everyone!\n\n0:00 Introduction\nRecipe: https://example.com/rezept #brot @kanal\n')
+  assert.deepEqual(requests, ['Hallo zusammen!\n0:00 Einleitung\nRezept: {0}. {1} {2}'])
+  assert.equal(translated, 'Hello everyone!\n\n0:00 Introduction\nRecipe: https://example.com/über-uns. #brot @kanal\n')
 })
 
-test('keeps links that the translation moved', async () => {
+test('restores links that the translation moved or attached words to', async () => {
   const translated = await translateTextKeepingLayout(
-    'Vergleiche https://example.com/a mit https://example.com/b #vergleich',
-    async () => 'https://example.com/b と https://example.com/a を比較 #comparison'
+    'Folge @kanal und vergleiche https://example.com/a mit https://example.com/b',
+    async () => '{0}をフォローして、{2}と{1}を比較してください。'
   )
-  assert.equal(translated, 'https://example.com/b と https://example.com/a を比較 #vergleich')
+  assert.equal(translated, '@kanal をフォローして、https://example.com/b とhttps://example.com/a を比較してください。')
 })
 
-test('keeps translated text that follows a URL directly', async () => {
+test('keeps merged lines and the links the translation dropped', async () => {
   const translated = await translateTextKeepingLayout(
-    'Siehe https://example.com/hilfe',
-    async () => 'https://example.com/helpをご覧ください。'
+    'Erste Zeile #eins\nzweite Zeile https://example.com/a',
+    async () => 'First line {0}, second line'
   )
-  assert.equal(translated, 'https://example.com/hilfeをご覧ください。')
-
-  const withPeriod = await translateTextKeepingLayout(
-    'Siehe https://example.com/hilfe.',
-    async () => 'https://example.com/helpをご覧ください。'
-  )
-  assert.equal(withPeriod, 'https://example.com/hilfeをご覧ください。')
-})
-
-test('keeps merged translated lines and only restores links it can match', async () => {
-  const translated = await translateTextKeepingLayout(
-    'Erste Zeile\nzweite Zeile https://example.com/a',
-    async () => 'First line, second line https://example.com/b'
-  )
-  assert.equal(translated, 'First line, second line https://example.com/a')
+  assert.equal(translated, 'First line #eins, second line https://example.com/a')
 
   await assert.rejects(translateTextKeepingLayout('Text', async () => ' '))
 })

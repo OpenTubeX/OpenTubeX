@@ -159,36 +159,11 @@ export function formatCommentTranslation(translatedText) {
 }
 
 // URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
-// translates the words in them too, which would break their links. URLs end at
-// the first character a URL can't contain unencoded, as languages such as
-// Japanese continue the sentence right after them.
-// Sentence punctuation after a URL stays outside of it, as the translation may change it.
-const PROTECTED_TOKEN_PATTERN = /\b(?:https?:\/\/|www\.)[\w!#$%&'()*+,\-./:;=?@[\]~]*[\w#$%&()*+\-/=@[\]~]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
-
-/**
- * Put the source's URLs, hashtags and handles back into its translation, as
- * long as the translation kept all of them.
- * @param {string} source
- * @param {string} translated
- * @returns {string}
- */
-function restoreProtectedTokens(source, translated) {
-  const sourceTokens = source.match(PROTECTED_TOKEN_PATTERN) ?? []
-  const translatedTokens = translated.match(PROTECTED_TOKEN_PATTERN) ?? []
-  if (sourceTokens.length === 0 || translatedTokens.length !== sourceTokens.length) return translated
-
-  // Tokens the translation kept stay where it moved them. The changed ones
-  // get the remaining source tokens back in order.
-  const unused = [...sourceTokens]
-  const kept = translatedTokens.map((token) => {
-    const index = unused.indexOf(token)
-    if (index === -1) return false
-    unused.splice(index, 1)
-    return true
-  })
-  let tokenIndex = 0
-  return translated.replaceAll(PROTECTED_TOKEN_PATTERN, token => kept[tokenIndex++] ? token : unused.shift())
-}
+// translates the words in them too, which would break their links. Sentence
+// punctuation after a URL or handle stays outside of it.
+const PROTECTED_TOKEN_PATTERN = /\b(?:https?:\/\/|www\.)\S*[^\s.,;:!?'")\]]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_](?:[\p{L}\p{N}_.-]*[\p{L}\p{N}_])?/gu
+// The service keeps numbered placeholders like `{0}` in place, even when it reorders the sentence.
+const PLACEHOLDER_PATTERN = /\{(\d+)\}/g
 
 /**
  * Translate multiline text, such as a description, keeping its links and,
@@ -203,19 +178,39 @@ export async function translateTextKeepingLayout(text, translate) {
   const lineIndexes = lines.flatMap((line, index) => line.trim() === '' ? [] : [index])
   if (lineIndexes.length === 0) return text
 
-  const sources = lineIndexes.map(index => lines[index].trim())
+  // Text that already contains placeholders is sent as is.
+  const tokens = []
+  const protect = !/\{\d+\}/.test(text)
+  const sources = lineIndexes.map((index) => {
+    const line = lines[index].trim()
+    return protect ? line.replaceAll(PROTECTED_TOKEN_PATTERN, token => `{${tokens.push(token) - 1}}`) : line
+  })
+
   const translated = (await translate(sources.join('\n'))).trim()
   if (translated === '') throw new Error('YouTube did not return a translation')
 
   const translatedLines = translated.split('\n').map(line => line.trim()).filter(line => line !== '')
-  // Merged or split lines can no longer be matched to their source lines.
-  if (translatedLines.length !== sources.length) {
-    return restoreProtectedTokens(sources.join('\n'), translated)
+  let result
+  if (translatedLines.length === sources.length) {
+    lineIndexes.forEach((lineIndex, index) => {
+      lines[lineIndex] = /^\s*/.exec(lines[lineIndex])[0] + translatedLines[index]
+    })
+    result = lines.join('\n')
+  } else {
+    // Merged or split lines can no longer be matched to their source lines.
+    result = translated
   }
+  if (!protect) return result
 
-  lineIndexes.forEach((lineIndex, index) => {
-    const indentation = /^\s*/.exec(lines[lineIndex])[0]
-    lines[lineIndex] = indentation + restoreProtectedTokens(sources[index], translatedLines[index])
+  const restored = new Set()
+  result = result.replaceAll(PLACEHOLDER_PATTERN, (placeholder, index, offset, string) => {
+    const token = tokens[index]
+    if (token === undefined) return placeholder
+    restored.add(Number(index))
+    // Keep words the translation attached directly, as in Japanese, out of the link.
+    return /^[\p{L}\p{N}_]/u.test(string.slice(offset + placeholder.length)) ? `${token} ` : token
   })
-  return lines.join('\n')
+  // Links the translation dropped are added at the end rather than lost.
+  const dropped = tokens.filter((_token, index) => !restored.has(index))
+  return dropped.length > 0 ? `${result} ${dropped.join(' ')}` : result
 }
