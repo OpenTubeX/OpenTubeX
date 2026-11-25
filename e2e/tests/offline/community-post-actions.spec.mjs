@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { commentTranslationResponse, decodeCommentTranslationAction } from '../../helpers/innertube.mjs'
 
 const CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 const now = Date.now()
@@ -94,4 +95,47 @@ test('copies a standalone post link for an unsubscribed author', async ({ app, p
   await page.getByRole('option', { name: 'Copy YouTube Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
     .toBe('https://www.youtube.com/post/standalone-post')
+})
+
+test('translates an Invidious post line by line and keeps its links', async ({ page }) => {
+  const url = 'https://example.com/a-very-long-path-that-invidious-shortens'
+  const translationRequests = []
+  await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, (route, request) => {
+    const { text } = decodeCommentTranslationAction(request.postData())
+    translationRequests.push(text)
+    // The service also translates the words in links and adds blank lines.
+    const translated = 'Hello everyone, today we are showing you our new studio.\n\nMore about baking: https://example.com/translated-path'
+    return route.fulfill({ status: 200, contentType: 'application/json', body: commentTranslationResponse(translated) })
+  })
+  await page.route('**/api/v1/post/**', route => route.fulfill({
+    json: {
+      comments: [{
+        commentId: 'translated-post',
+        // Invidious separates lines with `<br>` and shortens link labels.
+        contentHtml: `Hallo zusammen, heute zeigen wir euch unser neues Studio.<br>Mehr über das Backen: <a href="${url}">example.com/a-very-long-path…</a>`,
+        author: 'Another Channel',
+        authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+        authorThumbnails: [],
+        publishedText: '1 day ago',
+        likeCount: 3,
+        replyCount: 0
+      }]
+    }
+  }))
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateBackendPreference', 'invidious')
+    await window.$store.dispatch('updateHideComments', true)
+    await window.ftElectron.tabs.create({ route: '/post/translated-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
+  })
+
+  const postText = page.locator('.ft-list-post .postText')
+  const translate = page.locator('.ft-list-post .postTranslationButton')
+  await translate.click()
+
+  await expect(postText).toHaveText('Hello everyone, today we are showing you our new studio.\nMore about baking: example.com/a-very-long-path-that-invidious-shortens')
+  await expect(postText.locator('a')).toHaveAttribute('href', url)
+  expect(translationRequests).toEqual([`Hallo zusammen, heute zeigen wir euch unser neues Studio.\nMehr über das Backen: ${url}`])
+
+  await translate.click()
+  await expect(postText).toContainText('Hallo zusammen')
 })
