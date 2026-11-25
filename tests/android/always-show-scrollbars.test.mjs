@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Install a current debug APK and hold the emulator's lab lock. Forward its
 // WebView socket to ANDROID_CDP_URL and set ANDROID_SERIAL to its ADB serial.
@@ -10,8 +10,7 @@ test('Always show scrollbars keeps the native page scrollbar when enabled while 
   skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL,
 }, async () => {
   assert.match(process.env.ANDROID_SERIAL, /^emulator-\d+$/)
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const setAlwaysShowScrollbars = enabled => page.evaluate(enabled => document.querySelector('#app').__vue_app__
     .config.globalProperties.$store.commit('setAlwaysShowScrollbars', enabled), enabled)
   let original

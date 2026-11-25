@@ -142,7 +142,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     await page.evaluate(() => {
       window.__syncDeviceReconnectionNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && options.url.startsWith('https://device-reconnection.example/')
+        (plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request' && options.url.startsWith('https://device-reconnection.example/')
           ? window.__syncDeviceReconnectionRequest(options)
           : window.__syncDeviceReconnectionNativePromise(plugin, method, options)
       )
@@ -199,7 +199,10 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
         await sync.locator('.sessionCard', { hasText: 'Current device' }).getByRole('button', { name: 'Revoke access' }).click()
         await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
       }
-      await expect(prompt).toBeHidden()
+      // With a pending revocation, the server holds the request while the
+      // checks above run, which takes longer than the default timeout on a
+      // slow phone.
+      await expect(prompt).toBeHidden({ timeout: 30_000 })
       expect(revoked).toBe(true)
     }
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken)).toBe('')

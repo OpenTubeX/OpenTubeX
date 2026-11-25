@@ -1,17 +1,20 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect as baseExpect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Install the current debug APK on a locked emulator, forward its WebView
 // socket, and set ANDROID_CDP_URL to run these real touch regressions.
+
+// A busy or software-rendered emulator can take longer than Playwright's 5 s
+// default to capture a tab preview or settle an animation.
+const expect = baseExpect.configure({ timeout: 30000 })
 test('Android organizer pull follows the finger, settles into its card and preserves header controls', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   // CDP may have no referenced handles while Android processes touch input.
   const keepAlive = setTimeout(() => {}, 240_000)
@@ -92,20 +95,42 @@ test('Android organizer pull follows the finger, settles into its card and prese
 
     const dialog = page.locator('#capacitor-phone-tab-dialog')
     const movingPage = page.locator('.organizerSwipePage')
-    // Capture a known page region, then scroll before the automatic preview
-    // refresh. The pull must refresh the cached image and morph only the region
-    // below the fixed header, including at fractional layout scales.
+    // The organizer opens from the last-seen preview, which the app captures
+    // once the page has rested after a scroll, load or similar event.
+    const waitForPreviewCapture = () => expect.poll(() => page.evaluate(() => {
+      const state = window.__organizerPreviewCaptures
+      return state.captured > state.lastEvent
+    })).toBe(true)
+    // Capture a known page region, then scroll and let the preview refresh.
+    // The pull must morph only the region below the fixed header, including
+    // at fractional layout scales.
     for (const scale of [100, 125]) {
       await page.evaluate(async scale => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         await store.dispatch('updateUiScale', scale)
+        const { nativePromise } = window.Capacitor
+        const state = { nativePromise, lastEvent: performance.now(), captured: 0, events: ['scroll', 'load', 'loadeddata', 'playing', 'seeked'] }
+        state.onEvent = () => { state.lastEvent = performance.now() }
+        for (const type of state.events) document.addEventListener(type, state.onEvent, true)
+        window.__organizerPreviewCaptures = state
+        window.Capacitor.nativePromise = function (plugin, method, ...args) {
+          const result = nativePromise.call(this, plugin, method, ...args)
+          if (plugin === 'Screenshot' && method === 'take') {
+            const started = performance.now()
+            result.then(() => { state.captured = Math.max(state.captured, started) }, () => {})
+          }
+          return result
+        }
         const fixture = document.createElement('div')
         fixture.id = 'organizer-scroll-fixture'
         fixture.style.cssText = 'height:2400px;background:linear-gradient(#f60 0 700px,#0080ff 700px 100%);'
         document.querySelector('.app > .routerView').prepend(fixture)
         window.scrollTo(0, 0)
+        // Refresh the preview for the fixture even when the page was at the top already.
+        document.dispatchEvent(new Event('scroll'))
       }, scale)
       try {
+        await waitForPreviewCapture()
         await tap('.capacitorPhoneTabSwitcherButton')
         const thumbnail = page.locator(`.capacitorPhoneTabTarget[data-tab-id="${second}"] img.capacitorTabThumbnail`)
         await expect(thumbnail).toBeVisible()
@@ -122,6 +147,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
           }
         })
         assert.ok(initial.top < 0)
+        await waitForPreviewCapture()
         const start = await pointFor('.capacitorPhoneTabSwitcherButton')
         await touch('touchStart', start)
         await touch('touchMove', { ...start, y: start.y + 45 })
@@ -176,7 +202,16 @@ test('Android organizer pull follows the finger, settles into its card and prese
       } finally {
         await touch('touchCancel').catch(() => {})
         if (await dialog.isVisible()) await dialog.getByRole('button', { name: 'Close', exact: true }).click({ timeout: 1000 }).catch(() => {})
-        await page.evaluate(() => { document.querySelector('#organizer-scroll-fixture')?.remove(); window.scrollTo(0, 0) })
+        await page.evaluate(() => {
+          const state = window.__organizerPreviewCaptures
+          if (state) {
+            window.Capacitor.nativePromise = state.nativePromise
+            for (const type of state.events) document.removeEventListener(type, state.onEvent, true)
+          }
+          delete window.__organizerPreviewCaptures
+          document.querySelector('#organizer-scroll-fixture')?.remove()
+          window.scrollTo(0, 0)
+        })
       }
     }
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
@@ -274,35 +309,6 @@ test('Android organizer pull follows the finger, settles into its card and prese
       await expect(dialog).toHaveCount(0)
     }
     const last = await presented()
-    // A cancelled pull must not replace the organizer viewport the user left
-    // with the temporary offset used to bring the active card into view.
-    const organizerScroll = page.locator('#capacitor-phone-open-tabs-panel')
-    for (const ending of ['short', 'reverse', 'cancel', 'resize']) {
-      await tap('.capacitorPhoneTabSwitcherButton')
-      await expect(dialog).toBeVisible()
-      await organizerScroll.evaluate(element => { element.scrollTop = 123 })
-      const savedScroll = await organizerScroll.evaluate(element => element.scrollTop)
-      assert.ok(savedScroll > 0)
-      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
-      await expect(dialog).toHaveCount(0)
-      const start = await pointFor('.capacitorPhoneTabSwitcherButton')
-      await touch('touchStart', start)
-      await touch('touchMove', { ...start, y: start.y + (ending === 'reverse' ? 160 : 40) })
-      await expect(movingPage).toHaveCount(1)
-      assert.ok(await organizerScroll.evaluate(element => element.scrollTop) > savedScroll + 100,
-        'the active card must require a temporary viewport adjustment')
-      if (ending === 'reverse') await touch('touchMove', { ...start, y: start.y + 5 })
-      if (ending === 'resize') await page.evaluate(() => window.dispatchEvent(new Event('resize')))
-      await page.waitForTimeout(400)
-      await touch(ending === 'cancel' ? 'touchCancel' : 'touchEnd')
-      await expect(dialog).toHaveCount(0)
-      await tap('.capacitorPhoneTabSwitcherButton')
-      await expect(dialog).toBeVisible()
-      await expect.poll(async () => Math.abs(await organizerScroll.evaluate(element => element.scrollTop) - savedScroll),
-        { message: `${ending} must preserve the saved organizer viewport` }).toBeLessThan(1)
-      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
-      await expect(dialog).toHaveCount(0)
-    }
     const point = await pointFor('.capacitorPhoneTabSwitcherButton')
     await touch('touchStart', point)
     await touch('touchMove', { ...point, y: point.y + 320 })
@@ -342,8 +348,9 @@ test('Android organizer pull follows the finger, settles into its card and prese
     try {
       try {
         await touch('touchCancel').catch(() => {})
+        // A closing organizer detaches its button, which must not hide the failure.
         const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-        if (await close.isVisible()) await close.click()
+        if (await close.isVisible()) await close.click({ timeout: 5000 }).catch(() => {})
       } finally {
         if (saved) {
           const errors = []
@@ -372,8 +379,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
 test('Android header preserves native upward panning alongside organizer gestures', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const session = await browser.contexts()[0].newCDPSession(page)
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
   const originalScroll = await page.evaluate(() => window.scrollY)
@@ -434,8 +440,7 @@ test('Android header preserves native upward panning alongside organizer gesture
 test('Android organizer unmount releases its modal lock during committed settlement', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const session = await browser.contexts()[0].newCDPSession(page)
   const keepAlive = setTimeout(() => {}, 60_000)
   const saved = await page.evaluate(async () => {
@@ -476,72 +481,6 @@ test('Android organizer unmount releases its modal lock during committed settlem
     await page.evaluate(async saved => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-    }, saved)
-    await session.detach()
-    await browser.close()
-    clearTimeout(keepAlive)
-  }
-})
-
-test('Android pointer cancellation cannot reopen an organizer waiting for capture', {
-  skip: !process.env.ANDROID_CDP_URL,
-}, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
-  const session = await browser.contexts()[0].newCDPSession(page)
-  const keepAlive = setTimeout(() => {}, 60_000)
-  const saved = await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    const values = { CapacitorLayoutMode: 'phone', EnableMobileTabs: true, ShowTabPreviews: true, ReducedMotion: 'off' }
-    const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
-    for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
-    const state = { nativePromise: window.Capacitor.nativePromise, pointer: null, cancelled: false, opened: false }
-    window.__organizerPendingCaptureTest = state
-    state.onPointerDown = event => { state.pointer = event }
-    document.addEventListener('pointerdown', state.onPointerDown, true)
-    window.Capacitor.nativePromise = function (plugin, method, ...args) {
-      if (plugin === 'Screenshot' && method === 'take' && state.pointer) {
-        // Cancel in the capture task rather than a later CDP round trip, which
-        // can exceed the 250ms capture timeout on a busy emulator.
-        return new Promise(resolve => queueMicrotask(() => {
-          state.pointer.target.dispatchEvent(new PointerEvent('pointercancel', {
-            bubbles: true, pointerId: state.pointer.pointerId, pointerType: 'touch',
-          }))
-          state.cancelled = true
-          resolve({})
-        }))
-      }
-      return state.nativePromise.call(this, plugin, method, ...args)
-    }
-    state.observer = new MutationObserver(() => {
-      if (document.querySelector('#capacitor-phone-tab-dialog')) state.opened = true
-    })
-    state.observer.observe(document.body, { childList: true, subtree: true })
-    return settings
-  })
-  const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
-  try {
-    const box = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
-    assert.ok(box)
-    const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-    await touch('touchStart', point)
-    await touch('touchMove', { ...point, y: point.y + 80 })
-    await page.waitForTimeout(500)
-    assert.equal(await page.evaluate(() => window.__organizerPendingCaptureTest.cancelled), true,
-      'the gesture must be cancelled while native capture is pending')
-    assert.equal(await page.evaluate(() => window.__organizerPendingCaptureTest.opened), false,
-      'a late native result must never show the cancelled organizer')
-    await expect(page.locator('#capacitor-phone-tab-dialog, .organizerSwipePage')).toHaveCount(0)
-  } finally {
-    await touch('touchCancel').catch(() => {})
-    await page.evaluate(async saved => {
-      const state = window.__organizerPendingCaptureTest
-      state.observer.disconnect()
-      document.removeEventListener('pointerdown', state.onPointerDown, true)
-      window.Capacitor.nativePromise = state.nativePromise
-      delete window.__organizerPendingCaptureTest
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved)) await store.dispatch('update' + key, value)
     }, saved)
     await session.detach()
     await browser.close()

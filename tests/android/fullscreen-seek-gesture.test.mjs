@@ -4,9 +4,9 @@ import { readFile, writeFile, rm } from 'node:fs/promises'
 import { test } from 'node:test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_SERIAL and ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -17,9 +17,8 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
   skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL,
   timeout: 240000,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
@@ -39,6 +38,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       await tutorial.locator('.tutorialSkip button').click()
       await expect(tutorial).toBeHidden()
     }
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -61,10 +61,6 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__fullscreenSeekFetch = window.fetch
-      window.fetch = (url, options) => /^(https:\/\/localhost\/|data:|blob:)/.test(String(url))
-        ? window.__fullscreenSeekFetch(url, options)
-        : Promise.reject(new Error('Offline fullscreen seek test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-seek-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -373,8 +369,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
         for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
         if (settings?.ShowMobileSeekPreview !== undefined) await store.dispatch('updateShowMobileSeekPreview', settings.ShowMobileSeekPreview)
         if (settings?.IconPack) await store.dispatch('updateIconPack', settings.IconPack)
-        if (window.__fullscreenSeekFetch) window.fetch = window.__fullscreenSeekFetch
-        delete window.__fullscreenSeekFetch
+        window.__androidTestNetwork?.restore()
         for (const uri of window.__fullscreenSeekUrls ?? []) URL.revokeObjectURL(uri)
         delete window.__fullscreenSeekUrls
         document.querySelector('#fullscreen-seek-test-style')?.remove()

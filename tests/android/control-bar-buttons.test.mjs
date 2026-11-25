@@ -1,20 +1,20 @@
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Use a current debug APK on a locked emulator with its WebView forwarded.
 test('Android places the compact controls on the control bar, in the player menu or nowhere', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -29,10 +29,6 @@ test('Android places the compact controls on the control bar, in the player menu
       saved.PlayerMenuControls = structuredClone(store.getters.getPlayerMenuControls)
       saved.HiddenPlayerMenuControls = [...store.state.settings.hiddenPlayerMenuControls]
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__controlBarFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__controlBarFetch(url, options)
-        : Promise.reject(new Error('Offline control bar test'))
       document.querySelector('.tutorialOverlay')?.remove()
       return saved
     })
@@ -118,8 +114,7 @@ test('Android places the compact controls on the control bar, in the player menu
   } finally {
     await page.evaluate(({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      if (window.__controlBarFetch) window.fetch = window.__controlBarFetch
-      delete window.__controlBarFetch
+      window.__androidTestNetwork?.restore()
       location.hash = originalRoute
       if (settings) {
         const { ControlBarButtons, PlayerMenuControls, HiddenPlayerMenuControls, ...values } = settings

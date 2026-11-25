@@ -2,18 +2,17 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView
 // socket forwarded to ANDROID_CDP_URL.
 test('offline audio fullscreen queue uses a draggable portrait bottom panel', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
@@ -27,6 +26,7 @@ test('offline audio fullscreen queue uses a draggable portrait bottom panel', {
       await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
       await expect(tutorial).toBeHidden()
     }
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -40,10 +40,6 @@ test('offline audio fullscreen queue uses a draggable portrait bottom panel', {
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__audioTapFetch = window.fetch
-      window.fetch = (url, options) => /^(https:\/\/localhost\/|data:|blob:)/.test(String(url))
-        ? window.__audioTapFetch(url, options)
-        : Promise.reject(new Error('Offline audio tap test'))
       const style = document.createElement('style')
       style.id = 'audio-tap-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -130,10 +126,7 @@ test('offline audio fullscreen queue uses a draggable portrait bottom panel', {
     await page.evaluate(async ({ settings, originalRoute, addedQueueIds }) => {
       if (document.fullscreenElement) await document.exitFullscreen()
       document.querySelectorAll('.ftVideoPlayer video').forEach(video => video.pause())
-      if (window.__audioTapFetch) {
-        window.fetch = window.__audioTapFetch
-        delete window.__audioTapFetch
-      }
+      window.__androidTestNetwork?.restore()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const id of addedQueueIds) store.commit('removeVideoFromWatchQueue', id)
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)

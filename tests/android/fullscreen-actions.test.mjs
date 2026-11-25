@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { goTo } from '../../e2e/helpers/app.mjs'
-import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { clickInFullscreen, goTo } from '../../e2e/helpers/app.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
+import { replaceWatchVideo } from '../helpers/android-watch.mjs'
 
 // Use a current debug APK on a locked emulator with its WebView forwarded.
 test('Android customizes fullscreen actions and removes the empty bubble', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   let watch
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -29,14 +29,12 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
         RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false,
         EnableDownloads: true,
+        // A slow load would otherwise fall back to yt-dlp, which replaces the fixture.
+        PlaybackEngineFallback: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__fullscreenActionsQueue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
-      window.__fullscreenActionsFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenActionsFetch(url, options)
-        : Promise.reject(new Error('Offline fullscreen actions test'))
       document.querySelector('.tutorialOverlay')?.remove()
       return saved
     })
@@ -44,7 +42,8 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await goTo(page, 'settings')
     while (!await page.locator('.settingsMenu').isVisible()) await page.locator('.settingsBackButton').click()
     await page.locator('.settingsMenu [data-section="appearance"]').click()
-    await page.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+    await page.getByRole('button', { name: 'Customize interface', exact: true }).click()
+    await page.locator('[data-settings-subpage-tab="fullscreenActions"]').click()
     const rows = page.locator('.selectedAction')
     await expect(rows).toHaveCount(2)
     await page.getByRole('button', { name: 'Move SponsorBlock up', exact: true }).click()
@@ -57,40 +56,24 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await menu.getByRole('menuitem').first().press('Escape')
     await page.locator('.settingsCloseButton').click()
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
-    await expect.poll(async () => {
-      const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
-    }).toBe(true)
-    watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
-    await watch.evaluate((component, media) => {
-      const watch = component.proxy
-      watch.videoLoadGeneration++
-      Object.assign(watch, {
-        isLoading: false,
-        ytDlpStreamsPending: false,
-        errorMessage: null,
-        isUpcoming: false,
-        isLive: false,
-        localFilePlayback: true,
-        activeFormat: 'legacy',
-        videoTitle: 'Fullscreen actions test',
-        videoLengthSeconds: 30,
-        legacyFormats: [{
-          itag: 0,
-          qualityLabel: 'Test',
-          mimeType: 'video/webm',
-          width: 640,
-          height: 360,
-          bitrate: 0,
-          localFile: true,
-          url: `data:video/webm;base64,${media}`
-        }],
-      })
-    }, media)
+    watch = await replaceWatchVideo(page, {
+      activeFormat: 'legacy',
+      videoTitle: 'Fullscreen actions test',
+      videoLengthSeconds: 30,
+      legacyFormats: [{
+        itag: 0,
+        qualityLabel: 'Test',
+        mimeType: 'video/webm',
+        width: 640,
+        height: 360,
+        bitrate: 0,
+        localFile: true,
+        url: `data:video/webm;base64,${media}`
+      }],
+    })
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
-    await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
     await player.locator('.shaka-fullscreen-button').click()
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
     const dock = player.locator('.fullscreenActions')
@@ -149,7 +132,7 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
       })
     })).toBe(true)
     await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 2', exact: true }) }).getByRole('button', { name: 'More Options', exact: true }).click()
-    await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+    await clickInFullscreen(page.getByRole('menuitem', { name: /^Move video up$/i }))
     await expect(queue.locator('.queueItem h3').first()).toHaveText('Queued video 2')
     const queueScroller = queue.locator('.queueItems')
     await queueScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -170,7 +153,7 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await dock.getByRole('button', { name: 'Download Video', exact: true }).click()
     await expect(page.locator('.downloadPromptCard')).toBeVisible()
     assert.equal(await page.evaluate(() => document.fullscreenElement?.contains(document.querySelector('.downloadPromptCard'))), true)
-    await page.locator('.downloadPromptCard').getByRole('button', { name: 'Cancel', exact: true }).click()
+    await clickInFullscreen(page.locator('.downloadPromptCard').getByRole('button', { name: 'Cancel', exact: true }))
     await page.evaluate(async () => {
       await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateFullscreenActions', [])
     })
@@ -190,8 +173,7 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
         for (const video of window.__fullscreenActionsQueue) store.commit('addVideoToWatchQueue', { video })
       }
       delete window.__fullscreenActionsQueue
-      if (window.__fullscreenActionsFetch) window.fetch = window.__fullscreenActionsFetch
-      delete window.__fullscreenActionsFetch
+      window.__androidTestNetwork?.restore()
       location.hash = originalRoute
     }, { settings, originalRoute })
     await watch?.dispose()

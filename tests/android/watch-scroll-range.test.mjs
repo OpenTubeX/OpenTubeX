@@ -1,22 +1,22 @@
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run with a current debug APK on a locked emulator and its WebView socket
 // forwarded to ANDROID_CDP_URL. The Pixel also exposed this on WebView 155.
 test('Android excludes the hidden browsing page from the watch scroll range', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   let saved
   let watch
   try {
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
+    await blockAppNetwork(page)
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -33,10 +33,6 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       const route = location.hash
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__watchScrollFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__watchScrollFetch(url, options)
-        : Promise.reject(new Error('Watch scroll test'))
       location.hash = '#/history'
       return { route, settings }
     })
@@ -109,8 +105,7 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
         document.querySelector('#watch-scroll-history-fixture')?.remove()
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         for (const [key, value] of Object.entries(settings)) store.commit('set' + key, value)
-        window.fetch = window.__watchScrollFetch
-        delete window.__watchScrollFetch
+        window.__androidTestNetwork?.restore()
         location.hash = route
       }, saved)
     }

@@ -3,9 +3,9 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp, measureNativeTouchOrigin } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -13,15 +13,15 @@ import { appPage } from '../helpers/android-app-page.mjs'
 test('touch holds double playback speed and restore it on release', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -39,10 +39,6 @@ test('touch holds double playback speed and restore it on release', {
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__playbackSpeedHoldFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__playbackSpeedHoldFetch(url, options)
-        : Promise.reject(new Error('Offline playback speed hold test'))
       const style = document.createElement('style')
       style.id = 'playback-speed-hold-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -100,6 +96,9 @@ test('touch holds double playback speed and restore it on release', {
         await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
       }
       for (const native of process.env.ANDROID_SERIAL ? [false, true] : [false]) {
+        const adb = (...args) => promisify(execFile)('adb', ['-s', process.env.ANDROID_SERIAL, ...args])
+        // Before the controls are hidden, as the probe touches the player.
+        const origin = native && await measureNativeTouchOrigin(page, async command => (await adb('shell', command)).stdout)
         await video.evaluate(video => { video.playbackRate = 1.25 })
         await controls.evaluate(element => element.removeAttribute('shown'))
         await expect(playButton).toHaveCSS('opacity', '0')
@@ -108,19 +107,8 @@ test('touch holds double playback speed and restore it on release', {
         const y = bounds.y + bounds.height / 2
         let finished
         if (native) {
-          const adb = (...args) => promisify(execFile)('adb', ['-s', process.env.ANDROID_SERIAL, ...args])
-          const dumpPath = '/sdcard/otx-hold-window.xml'
-          await adb('shell', 'uiautomator', 'dump', dumpPath)
-          const { stdout } = await adb('exec-out', 'cat', dumpPath)
-          await adb('shell', 'rm', dumpPath)
-          const webView = stdout.match(/class="android.webkit.WebView"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/)
-          assert.ok(webView, 'The WebView must have native screen bounds')
-          const point = await page.evaluate(({ x, y }) => {
-            const scale = devicePixelRatio * visualViewport.scale
-            return { x: Math.round(x * scale), y: Math.round(y * scale) }
-          }, { x, y })
-          const screenX = String(Number(webView[1]) + point.x)
-          const screenY = String(Number(webView[2]) + point.y)
+          const screenX = String(Math.round(origin.x + x * origin.scale))
+          const screenY = String(Math.round(origin.y + y * origin.scale))
           finished = adb('shell', 'input', 'swipe', screenX, screenY, screenX, screenY, '2500')
         } else {
           await touch('touchStart', x, y)
@@ -150,8 +138,7 @@ test('touch holds double playback speed and restore it on release', {
       if (document.fullscreenElement) await document.exitFullscreen()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (window.__playbackSpeedHoldFetch) window.fetch = window.__playbackSpeedHoldFetch
-      delete window.__playbackSpeedHoldFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#playback-speed-hold-test-style')?.remove()
       location.hash = originalRoute
     }, { settings, originalRoute })

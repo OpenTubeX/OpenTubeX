@@ -1,24 +1,24 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
 test('fullscreen swipe controls respect the idle delay and subsequent surface taps', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const { browser, page } = await connectAndroidApp()
   const context = browser.contexts()[0]
-  const page = appPage(browser)
   const session = await context.newCDPSession(page)
   let settings
   let watch
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -35,10 +35,6 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__fullscreenControlsFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenControlsFetch(url, options)
-        : Promise.reject(new Error('Offline fullscreen test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-controls-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -132,8 +128,7 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       if (document.fullscreenElement) await document.exitFullscreen()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (window.__fullscreenControlsFetch) window.fetch = window.__fullscreenControlsFetch
-      delete window.__fullscreenControlsFetch
+      window.__androidTestNetwork?.restore()
       document.querySelector('#fullscreen-controls-test-style')?.remove()
       location.hash = originalRoute
     }, { settings, originalRoute })

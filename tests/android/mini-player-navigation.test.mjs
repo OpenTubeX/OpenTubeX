@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { mkdir, readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
-import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { expect } from '@playwright/test'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
+import { replaceWatchVideo } from '../helpers/android-watch.mjs'
 
 // Run on a locked emulator with a current debug APK, ANDROID_SERIAL, and
 // ANDROID_CDP_URL pointing to its forwarded WebView socket.
@@ -12,8 +12,7 @@ const skip = !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
 
 async function withMobileVideo(run, { fromChannel = false } = {}) {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const session = await page.context().newCDPSession(page)
   const tap = async (locator, position = null) => {
     const box = await locator.boundingBox()
@@ -31,6 +30,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
     adb('settings', 'put', 'system', 'user_rotation', '0')
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(fromChannel => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -48,11 +48,12 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         EnterFullscreenOnDisplayRotate: false,
         // The fullscreen comment test opens comments from this action
         FullscreenActions: ['comments'],
+        // A slow load would otherwise fall back to yt-dlp, which replaces the fixture.
+        PlaybackEngineFallback: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__miniNavigationFetch = window.fetch
-      window.fetch = (url, options) => {
+      window.__androidTestNetwork.respond = url => {
         if (fromChannel && String(url).includes('/api/v1/channels/UC-title-test')) {
           const response = String(url).includes('/videos')
             ? { videos: [] }
@@ -68,10 +69,10 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
                 relatedChannels: [],
                 tabs: ['videos'],
               }
-          return Promise.resolve(new Response(JSON.stringify(response), { headers: { 'Content-Type': 'application/json' } }))
+          return response
         }
         if (String(url).includes('/api/v1/comments/')) {
-          return Promise.resolve(new Response(JSON.stringify({
+          return {
             commentCount: 1,
             comments: [{
               commentId: 'test-comment',
@@ -83,11 +84,8 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
               likeCount: 0,
               published: 1700000000,
             }],
-          }), { headers: { 'Content-Type': 'application/json' } }))
+          }
         }
-        return String(url).startsWith('https://localhost/')
-          ? window.__miniNavigationFetch(url, options)
-          : Promise.reject(new Error('Offline navigation test'))
       }
       const style = document.createElement('style')
       style.id = 'mini-navigation-test-style'
@@ -98,7 +96,8 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     }, fromChannel)
     if (fromChannel) {
       await expect(page).toHaveURL(/#\/subscriptions/)
-      await expect(page.locator('.bannerContainer')).toHaveCount(0)
+      // The channel page of an earlier test can stay retained, but hidden.
+      await expect(page.locator('.bannerContainer:visible')).toHaveCount(0)
       await page.evaluate(() => { location.hash = '#/channel/UC-title-test' })
       await expect.poll(() => page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -106,42 +105,27 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
       })).toBe('Test channel')
       await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
     }
-    await expect.poll(async () => {
-      const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
-    }).toBe(true)
-    watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
-    await watch.evaluate((component, media) => {
-      const watch = component.proxy
-      watch.videoLoadGeneration++
-      Object.assign(watch, {
-        isLoading: false,
-        ytDlpStreamsPending: false,
-        errorMessage: null,
-        isUpcoming: false,
-        isLive: false,
-        localFilePlayback: false,
-        activeFormat: 'legacy',
-        isOffline: false,
-        channelId: 'UC-test-channel',
-        channelName: 'Test channel',
-        videoTitle: 'Mini-player navigation test',
-        videoLengthSeconds: 60,
-        legacyFormats: [{
-          itag: 0,
-          qualityLabel: 'Test',
-          mimeType: 'video/webm',
-          width: 320,
-          height: 180,
-          bitrate: 0,
-          localFile: true,
-          url: `data:video/webm;base64,${media}`
-        }],
-      })
-    }, media)
+    watch = await replaceWatchVideo(page, {
+      localFilePlayback: false,
+      activeFormat: 'legacy',
+      isOffline: false,
+      channelId: 'UC-test-channel',
+      channelName: 'Test channel',
+      videoTitle: 'Mini-player navigation test',
+      videoLengthSeconds: 60,
+      legacyFormats: [{
+        itag: 0,
+        qualityLabel: 'Test',
+        mimeType: 'video/webm',
+        width: 320,
+        height: 180,
+        bitrate: 0,
+        localFile: true,
+        url: `data:video/webm;base64,${media}`
+      }],
+    })
     const player = page.locator('.ftVideoPlayer')
-    await expect.poll(() => player.locator('video').evaluate(video => video.readyState), { timeout: 15000 }).toBeGreaterThanOrEqual(1)
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     await expect.poll(() => player.locator('video').evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
     await run({ page, player, watch, tap, session })
@@ -154,8 +138,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         store.commit('setKeepPlayingOnNavigation', false)
         location.hash = originalRoute
         for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-        if (window.__miniNavigationFetch) window.fetch = window.__miniNavigationFetch
-        delete window.__miniNavigationFetch
+        window.__androidTestNetwork?.restore()
         document.querySelector('#mini-navigation-test-style')?.remove()
       }, { settings, originalRoute })
     } finally {

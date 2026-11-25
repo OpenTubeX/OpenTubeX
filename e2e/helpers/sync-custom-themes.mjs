@@ -51,7 +51,7 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
     await page.evaluate(() => {
       window.__themeSyncNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && options.url.startsWith('https://theme-sync.example/')
+        (plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request' && options.url.startsWith('https://theme-sync.example/')
           ? window.__themeSyncRequest(options)
           : window.__themeSyncNativePromise(plugin, method, options)
       )

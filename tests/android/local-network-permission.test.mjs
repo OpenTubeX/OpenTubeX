@@ -4,9 +4,9 @@ import { writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { promisify } from 'node:util'
 import test from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 const run = promisify(execFile)
 
@@ -53,8 +53,7 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
   try {
     await new Promise((resolve, reject) => server.once('error', reject).listen(0, '0.0.0.0', resolve))
     const url = `http://10.0.2.2:${server.address().port}`
-    browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-    page = appPage(browser)
+    ;({ browser, page } = await connectAndroidApp())
     await page.locator('.profileTrigger').waitFor()
     const permission = await page.evaluate(() => window.Capacitor.nativePromise('AndroidLocalNetwork', 'checkPermissions', {}))
     assert.notEqual(permission.localNetwork, 'granted', 'Revoke ACCESS_LOCAL_NETWORK and clear its flags outside the app, then restart and forward its WebView before this test')

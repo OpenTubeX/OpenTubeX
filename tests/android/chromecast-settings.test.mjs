@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator, with its WebView forwarded.
 test('Android enables Google Cast from settings and opens the native device menu', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  const { browser, page } = await connectAndroidApp()
   const originalRoute = await page.evaluate(() => location.hash)
   let settings
   let watch
   try {
     await page.locator('.profileTrigger').waitFor()
+    await blockAppNetwork(page)
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
@@ -34,10 +34,6 @@ test('Android enables Google Cast from settings and opens the native device menu
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__castSettingsFetch = window.fetch
-      window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__castSettingsFetch(url, options)
-        : Promise.reject(new Error('Offline Cast settings test'))
       return saved
     })
     const tutorial = page.locator('.tutorialOverlay')
@@ -125,8 +121,7 @@ test('Android enables Google Cast from settings and opens the native device menu
     await page.evaluate(async ({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) await store.dispatch('update' + key, value)
-      window.fetch = window.__castSettingsFetch ?? window.fetch
-      delete window.__castSettingsFetch
+      window.__androidTestNetwork?.restore()
       location.hash = originalRoute
     }, { settings, originalRoute }).catch(() => {})
     await browser.close()

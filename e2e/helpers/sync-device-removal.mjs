@@ -153,7 +153,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
       const capacitor = window.Capacitor
       window.__syncDeviceRemovalNativePromise = capacitor.nativePromise
       capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && options.url.startsWith('https://device-removal.example/')
+        (plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request' && options.url.startsWith('https://device-removal.example/')
           ? window.__syncDeviceRemovalRequest(options)
           : window.__syncDeviceRemovalNativePromise(plugin, method, options)
       )
@@ -228,7 +228,9 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
       expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(1)
     }
-    await expect(prompt).toBeHidden()
+    // Revoking deletes and re-encrypts the synced tab sets through several
+    // requests, which takes longer than the default timeout on a slow phone.
+    await expect(prompt).toBeHidden({ timeout: 30_000 })
     await expect(device).toHaveCount(0)
     if (current) {
       expect(revoked).toBe(true)

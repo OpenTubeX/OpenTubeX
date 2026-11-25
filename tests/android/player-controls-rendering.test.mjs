@@ -19,7 +19,12 @@ before(async () => {
   const shakaCss = await readFile(new URL('../../node_modules/shaka-player/dist/controls.css', import.meta.url), 'utf8')
   styles = shakaCss + compileStyle({ source: css, filename: 'player.css', id: 'data-v-controls-test', scoped: true }).code
   const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useAdaptiveControlPanelLayout.js', import.meta.url), 'utf8')
-  layoutSource = source.slice(source.indexOf('  const controlPanelCompactClasses = ['), source.indexOf('  /** @param {HTMLElement} controlPanel */\n  function scheduleControlPanelLayout'))
+  // From the compact modes through updateRightControlGlass, ending before the
+  // comment of the next function.
+  const start = source.indexOf('  const controlPanelCompactClasses = [')
+  const end = source.lastIndexOf('  /**', source.indexOf('  function scheduleControlPanelLayout('))
+  assert.ok(start >= 0 && end > start, 'the layout functions must be found in their source')
+  layoutSource = source.slice(start, end)
 })
 after(async () => { await browser?.close() })
 
