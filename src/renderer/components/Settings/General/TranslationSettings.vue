@@ -4,13 +4,19 @@
     :icon="['fas', 'language']"
   >
     <div class="translationSettings">
-      <FtCheckboxList
-        v-model="enabledTranslations"
-        :title="t('Settings.General Settings.Comment Translation.Offer Translations For')"
-        :labels="translationLabels"
-        :values="TRANSLATION_SETTING_KEYS"
+      <FtSelect
+        multiple
+        class="translationLanguageSelect"
+        :placeholder="t('Settings.General Settings.Comment Translation.Offer Translations For')"
+        :empty-label="t('Global.Off')"
+        :value="enabledTranslations"
+        setting-key="enableCommentTranslations"
         :sync-setting-keys="TRANSLATION_SETTING_KEYS"
         :is-changed="translationsChanged"
+        :select-names="translationLabels"
+        :select-values="TRANSLATION_SETTING_KEYS"
+        :icon="['fas', 'language']"
+        @change="updateTranslations"
         @reset="resetTranslations"
       />
       <p
@@ -66,7 +72,6 @@ import { useI18n } from 'vue-i18n'
 
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
-import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 
 import {
   COMMENT_TRANSLATION_LANGUAGE_CODES,
@@ -84,15 +89,14 @@ const translationLabels = computed(() => [
   t('Settings.General Settings.Comment Translation.Descriptions'),
   t('Global.Posts'),
 ])
-const enabledTranslations = computed({
-  get: () => TRANSLATION_SETTING_KEYS.filter(key => store.state.settings[key]),
-  set: (values) => {
-    const enabled = new Set(values)
-    for (const key of TRANSLATION_SETTING_KEYS) {
-      if (store.state.settings[key] !== enabled.has(key)) store.dispatch(defaultUpdaterId(key), enabled.has(key))
-    }
+const enabledTranslations = computed(() => TRANSLATION_SETTING_KEYS.filter(key => store.state.settings[key]))
+
+function updateTranslations(values) {
+  const enabled = new Set(values)
+  for (const key of TRANSLATION_SETTING_KEYS) {
+    if (store.state.settings[key] !== enabled.has(key)) store.dispatch(defaultUpdaterId(key), enabled.has(key))
   }
-})
+}
 const anyTranslationEnabled = computed(() => enabledTranslations.value.length > 0)
 const translationsChanged = computed(() => TRANSLATION_SETTING_KEYS.some(key => store.state.settings[key] !== DEFAULT_SETTINGS[key]))
 
