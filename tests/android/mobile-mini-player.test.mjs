@@ -144,6 +144,14 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
         ? window.__miniPlayerFetch(url, options)
         : Promise.reject(new Error('Offline mini-player test'))
+      // The app requests through native plugins on Android, which the fetch
+      // stub does not reach. Without this, the Watch page waits on the
+      // network, and its native timeout matches the wait for it below.
+      window.__miniPlayerNativePromise = window.Capacitor.nativePromise
+      window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
+        if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') return Promise.reject(new Error('Offline mini-player test'))
+        return window.__miniPlayerNativePromise.call(this, plugin, method, options, ...rest)
+      }
       const style = document.createElement('style')
       style.id = 'mini-player-test-style'
       // Toasts, such as an available yt-dlp update, can cover the docked bar.
@@ -1066,6 +1074,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
         if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
         delete window.__miniPlayerFetch
+        if (window.__miniPlayerNativePromise) window.Capacitor.nativePromise = window.__miniPlayerNativePromise
+        delete window.__miniPlayerNativePromise
         window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
         delete window.__miniDismissPointerUp
         delete window.__miniDismissRegression
