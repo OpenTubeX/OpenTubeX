@@ -1013,7 +1013,6 @@ Settings:
     Profile Directory: Katalog profilu
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
-    Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
     Import subscription groups hint: Aby przydzielić kanały do grup, dodaj w pliku .csv po tytule kanału kolumnę z nazwami grup oddzielonymi średnikami albo zaimportuj plik .opml z folderami. Brakujące grupy zostaną utworzone.
   Sync Settings:
     Automatic Sync Paused: 'Automatyczna synchronizacja jest wstrzymana, ponieważ synchronizacja usunęłaby wcześniej zsynchronizowane elementy. Przejrzyj usunięcia, aby ją wznowić.'
