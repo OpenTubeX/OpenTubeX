@@ -198,6 +198,7 @@
             :id="`${id}-listbox`"
             ref="dropdown"
             v-overlay-scrollbars
+            data-scrollbar-always-visible
             class="selectOptionList"
             :class="[searchPanel ? null : ['selectDropdown', dropdownPlacement], { phonePicker: phoneLayout, lazyOptions, multiple }]"
             role="listbox"

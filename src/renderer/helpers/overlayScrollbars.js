@@ -61,6 +61,7 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @property {HTMLElement} scrollElement the element whose offsets scroll
  * @property {boolean} isPage
  * @property {boolean} clickScrollOptIn whether the tracks take clicks regardless of the setting
+ * @property {boolean} alwaysVisible whether the bars stay visible regardless of the setting
  * @property {Scrollbar} horizontal
  * @property {Scrollbar} vertical
  * @property {{ x?: ScrollTimeline, y?: ScrollTimeline }} timelines
@@ -266,6 +267,8 @@ function create(element) {
     scrollElement,
     isPage,
     clickScrollOptIn: element.matches('[data-scrollbar-click-scroll]'),
+    // Option lists show that they hold more options without waiting for the pointer.
+    alwaysVisible: element.matches('[data-scrollbar-always-visible]'),
     horizontal,
     vertical,
     timelines: {},
@@ -724,7 +727,7 @@ function updateAutoHideHandler(instance) {
   removeAutoHideHandlers.get(instance)?.()
   removeAutoHideHandlers.delete(instance)
   const { horizontal, vertical } = instance
-  if (store.getters.getAlwaysShowScrollbars) {
+  if (instance.alwaysVisible || store.getters.getAlwaysShowScrollbars) {
     for (const { scrollbar } of [horizontal, vertical]) {
       scrollbar.classList.remove('app-scrollbar-idle')
     }
@@ -1011,7 +1014,8 @@ function offsetTopFromDocument(element) {
 /**
  * `v-overlay-scrollbars` - does the same for a nested scroll container.
  * Pass `false` to leave the native scrollbars alone, for containers that only
- * scroll in some layouts.
+ * scroll in some layouts. Option lists add `data-scrollbar-always-visible`,
+ * which keeps their bars from hiding while idle.
  *
  * Surviving a `<Teleport>` is fine. Use `restoreOverlayScrollTop` when the
  * destination layout needs a different offset.

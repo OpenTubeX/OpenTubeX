@@ -119,6 +119,7 @@
               v-if="isProfileDropdownEnabled || isGroupListEnabled"
               ref="profileDropdownScroller"
               v-overlay-scrollbars
+              data-scrollbar-always-visible
               class="profileDropdownScroller"
             >
               <div ref="profileListContent">

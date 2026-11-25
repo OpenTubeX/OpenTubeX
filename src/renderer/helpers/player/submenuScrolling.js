@@ -88,6 +88,7 @@ export function setupSubmenuScrolling(menu, controls, selector = SCROLLING_SUBME
 
   for (const submenu of submenus) {
     submenu.classList.add('ft-scrolling-submenu')
+    submenu.dataset.scrollbarAlwaysVisible = ''
     addOverlayScrollbars(submenu)
     resizeObserver.observe(submenu)
     mutationObserver.observe(submenu, { childList: true, subtree: true, attributeFilter: ['class'] })
@@ -105,6 +106,7 @@ export function setupSubmenuScrolling(menu, controls, selector = SCROLLING_SUBME
     for (const submenu of submenus) {
       submenu.classList.remove('ft-scrolling-submenu')
       removeOverlayScrollbars(submenu)
+      delete submenu.dataset.scrollbarAlwaysVisible
     }
   }
 }
