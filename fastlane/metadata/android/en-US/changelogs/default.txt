@@ -1,5 +1,7 @@
+Highlights
+• Profiles can now keep their data, their settings, or both separate. With separate data, a profile has its own subscriptions, history, playlists, and queue. With separate settings, changes only apply to it, so a car profile can hide comments and live chat while sharing your subscriptions.
+
 New features
-• Follow conferences on media.ccc.de, search its talks, and watch them like media from the other supported platforms. Conference links open their page in the app.
-• Subscription imports can sort channels into groups, from group names after the channel title in a .csv file or from the folders of an .opml file. The group editor can also select or clear all channels matching a search.
-• The app font setting now includes Libron, a serif font designed for comfortable reading.
+• Watched comments of yours now also notify you when the video's creator hearts them.
+• Twitch livestreams now play without Twitch's ads, and also play on iPhone and iPad.
 …and more
