@@ -89,6 +89,7 @@
             :id="id"
             share-target-type="Channel"
             class="shareIcon"
+            theme="base-no-default"
           />
 
           <FtIconButton

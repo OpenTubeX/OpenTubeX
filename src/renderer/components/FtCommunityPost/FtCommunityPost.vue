@@ -247,6 +247,7 @@
         :id="postId"
         share-target-type="Post"
         class="shareButton"
+        theme="base-no-default"
         :size="18"
       />
       <FtIconButton

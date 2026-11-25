@@ -3,7 +3,7 @@
     ref="iconButton"
     class="shareButton"
     :title="shareTitle"
-    theme="secondary"
+    :theme="theme"
     :size="size"
     :icon="['fas', 'share-alt']"
     :dropdown-modal-on-mobile="true"
@@ -143,6 +143,10 @@ const props = defineProps({
   size: {
     type: Number,
     default: 20
+  },
+  theme: {
+    type: String,
+    default: 'secondary'
   }
 })
 

@@ -144,6 +144,10 @@
     opacity: 1;
   }
 
+  .shareButton + .optionsButton {
+    margin-inline-start: 4px;
+  }
+
   .postRatingButton {
     display: inline-flex;
     align-items: center;
