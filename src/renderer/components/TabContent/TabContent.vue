@@ -585,13 +585,15 @@ function cancelLoaderSettle() {
   will-change: transform;
 }
 
-/* The hint would also anchor the fixed card fields of themes that paint them
-   (FtFixedBackground) to the page instead of the viewport, so those pages get
-   their layer only while they slide. */
-@container style(--fixed-background-display: block) {
-  .backSlidePage {
-    will-change: auto;
-  }
+/* The hint makes the page, rather than the viewport, contain the fixed card
+   fields of themes that paint them. Its view timelines keep the fields on the
+   viewport, see FtFixedBackground. A kept page slides in with the same hint. */
+.backSlidePage,
+.retainedPage {
+  view-timeline: --page-scroll-y y, --page-scroll-x x;
+  view-timeline-inset: 0;
+
+  --fixed-background-timelines: --page-scroll-y, --page-scroll-x;
 }
 
 .backSlideCover {
