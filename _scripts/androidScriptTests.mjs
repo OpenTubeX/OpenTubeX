@@ -4,6 +4,9 @@ import { relative, resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { run } from 'node:test'
 import { spec } from 'node:test/reporters'
+import { chromium } from '@playwright/test'
+import { appPage } from '../tests/helpers/android-app-page.mjs'
+import { forwardAndroidWebView } from '../tests/helpers/android-webview.mjs'
 
 /**
  * Runs the WebView test scripts in tests/android against the debug APK on the
@@ -11,7 +14,8 @@ import { spec } from 'node:test/reporters'
  * app, like the instrumentation tests. Tests that pass only on the retry are
  * added to ANDROID_FLAKY_REPORT for the flaky-test issue.
  *
- * The instrumentation tests uninstall the app, so this installs it again.
+ * The instrumentation tests uninstall the app, so this installs it again,
+ * and clears its data, so that every run starts from the same state.
  *
  * Usage: node _scripts/androidScriptTests.mjs <test file>...
  */
@@ -47,26 +51,36 @@ async function waitFor(description, check, timeout = 120000) {
 
 const { applicationId, elements } = JSON.parse(readFileSync(METADATA, 'utf8'))
 const apk = resolve('android/app/build/outputs/apk/debug', elements[0].outputFile)
+process.env.ANDROID_SERIAL = serial
+process.env.ANDROID_APP_ID = applicationId
 let forwardedPort = null
 
 /** Starts the app from scratch and points the tests at its WebView. */
 async function startApp() {
-  if (forwardedPort) adb('forward', '--remove', `tcp:${forwardedPort}`)
-  forwardedPort = null
   adb('shell', 'am', 'force-stop', applicationId)
   adb('shell', 'am', 'start', '-W', '-n', `${applicationId}/org.opentubex.app.MainActivity`)
-  const pid = await waitFor('the app process', () => adb('shell', 'pidof', applicationId))
-  await waitFor('the WebView DevTools socket', () =>
-    adb('shell', 'cat', '/proc/net/unix').includes(`webview_devtools_remote_${pid}`))
-  // tcp:0 picks a free local port.
-  forwardedPort = adb('forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
-  const url = `http://127.0.0.1:${forwardedPort}`
-  await waitFor('the app page', async () => {
-    const targets = await (await fetch(`${url}/json`)).json()
-    return targets.some(target => target.url.startsWith('https://localhost/'))
-  })
-  process.env.ANDROID_CDP_URL = url
-  process.env.ANDROID_SERIAL = serial
+  if (!forwardedPort) {
+    // tcp:0 picks a free local port. The tests forward it to the app's current
+    // socket again, since the app's process or the adb server can restart.
+    const pid = await waitFor('the app process', () => adb('shell', 'pidof', applicationId))
+    forwardedPort = adb('forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
+    process.env.ANDROID_CDP_URL = `http://127.0.0.1:${forwardedPort}`
+  }
+  await forwardAndroidWebView()
+}
+
+/** Skips the first-run tutorial, which makes the rest of the app inert. */
+async function skipTutorial() {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  try {
+    const page = appPage(browser)
+    const tutorial = page.locator('.tutorialOverlay')
+    await tutorial.locator('.tutorialSkip button').click({ timeout: 120000 })
+    await tutorial.waitFor({ state: 'hidden' })
+    await page.waitForFunction(() => localStorage.getItem('opentubex.tutorial.audience') === 'completed')
+  } finally {
+    await browser.close()
+  }
 }
 
 /**
@@ -93,8 +107,11 @@ const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 /** Runs the tests, retries failures once, and returns whether all passed. */
 async function main() {
   adb('install', '-r', apk)
+  // Start from a fresh profile, like the CI emulator, which always shows the tutorial.
+  adb('shell', 'pm', 'clear', applicationId)
   for (const permission of PERMISSIONS) adb('shell', 'pm', 'grant', applicationId, permission)
   await startApp()
+  await skipTutorial()
   const first = await runTests()
   if (first.failed.length === 0) return true
 
@@ -125,5 +142,6 @@ async function main() {
 try {
   process.exitCode = await main() ? 0 : 1
 } finally {
-  if (forwardedPort) adb('forward', '--remove', `tcp:${forwardedPort}`)
+  // A restarted adb server has dropped the forward already.
+  if (forwardedPort) spawnSync('adb', ['-s', serial, 'forward', '--remove', `tcp:${forwardedPort}`])
 }
