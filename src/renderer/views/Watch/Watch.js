@@ -106,7 +106,7 @@ import {
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
 import { disableVisionOsStreams, isVisionOsStreamUrl } from '../../helpers/api/visionos-streams'
-import { getAuthorVerification } from '../../helpers/api/local-feed-parsers'
+import { getAuthorVerification, isOriginalLocalText } from '../../helpers/api/local-feed-parsers'
 import {
   convertInvidiousToLocalFormat,
   generateInvidiousDashManifestLocally,
@@ -3918,9 +3918,9 @@ export default defineComponent({
 
         // The description is HTML, like the parsed text runs, while the short description is plain text
         const shortDescription = escapeHTML(result.basic_info.short_description ?? '')
-        if (avoidTranslation) {
-          this.videoDescription = shortDescription
-        } else if (localizedDescription?.runs) {
+        // The parsed description shows YouTube's link titles and icons, so keep it unless it is translated
+        if (localizedDescription?.runs &&
+          (!avoidTranslation || isOriginalLocalText(localizedDescription.runs, result.basic_info.short_description ?? ''))) {
           try {
             this.videoDescription = parseLocalTextRuns(localizedDescription.runs)
           } catch (error) {

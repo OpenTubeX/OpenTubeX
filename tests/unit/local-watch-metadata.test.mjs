@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { Misc, YTNodes } from 'youtubei.js'
-import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { createLocalFeedParsers, getAuthorVerification, isOriginalLocalText } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoDescriptionSections } from '../../src/renderer/helpers/video-description-sections.js'
@@ -51,6 +51,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
     getAuthorVerification,
+    isOriginalLocalText,
     window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
     formatSubscriberCount: String,
@@ -378,6 +379,30 @@ test('honors the original-language preference with description-panel metadata', 
   assert.equal(watch.channelSubscriptionCountText, '123')
 })
 
+test('keeps link titles and icons of an untranslated description with the original-language preference', async () => {
+  const content = descriptionPanel()
+  const link = '   • Linked video  '
+  content.items[2].attributed_description_body_text = Misc.Text.fromAttributed({
+    content: `Watch ${link} next`,
+    commandRuns: [{
+      startIndex: 6,
+      length: link.length,
+      onTap: { innertubeCommand: { commandMetadata: { webCommandMetadata: { url: '/watch?v=AAAAAAAAAAA', webPageType: 'WEB_PAGE_TYPE_WATCH' } }, watchEndpoint: { videoId: 'AAAAAAAAAAA' } } }
+    }],
+    attachmentRuns: [{
+      startIndex: 9,
+      length: 0,
+      element: { type: { imageType: { image: { sources: [{ url: 'https://www.gstatic.com/youtube/img/watch/yt_favicon_ringo2.png' }] } } } }
+    }]
+  })
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Original title', short_description: 'Watch https://youtu.be/AAAAAAAAAAA next', view_count: 0 },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'entire_app')
+  assert.equal(watch.videoDescription, 'Watch <a href="https://www.youtube.com/watch?v=AAAAAAAAAAA" data-link-icon="youtube">Linked video</a> next')
+})
+
 test('retrieves a missing title from oEmbed', async () => {
   let calls = 0
   const watch = await loadMetadata({ playability_status: { status: 'OK' }, basic_info: {}, page: [] }, 'disabled', {
@@ -543,4 +568,18 @@ test('parses links that YouTube shows as an icon and a label', () => {
     'By <a href="https://www.youtube.com/channel/UC_TEST_CHANNEL" data-link-icon="youtube">@ExampleChannel</a>',
     'Follow <a href="https://www.instagram.com/example.profile" data-link-icon="instagram">example.profile</a>'
   ].join('\n'))
+})
+
+test('recognizes original description text whose links show a label', () => {
+  const text = value => ({ text: value })
+  const link = { text: '   / example  ', endpoint: {} }
+  assert.equal(isOriginalLocalText([text('See '), link, text('.')], 'See https://example.com.'), true)
+  assert.equal(isOriginalLocalText([link], 'https://example.com'), true)
+  assert.equal(isOriginalLocalText([link], 'Read the notes. https://example.com'), false)
+  assert.equal(isOriginalLocalText([text('Siehe '), link], 'See https://example.com'), false)
+  assert.equal(isOriginalLocalText([text('By '), text('Example'), text(':\nGet '), link], 'By *Example*:\n- Get https://example.com'), true)
+  assert.equal(isOriginalLocalText([link, text(' | '), link, text("'s podcast")], "#first | #second's podcast"), true)
+  assert.equal(isOriginalLocalText([link, text('\nExample: '), link], 'https://example.com/@ExampleClips\nExample: https://example.com/@Example'), true)
+  const links = Array.from({ length: 30 }, () => [link, text(',')]).flat()
+  assert.equal(isOriginalLocalText([...links, text('Übersetzt')], `${'https://example.com,'.repeat(30)}Original`), false)
 })

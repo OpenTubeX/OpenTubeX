@@ -6,6 +6,83 @@ import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
 
 /**
+ * Whether text runs show the original text rather than YouTube's translation of it,
+ * so that their link titles and icons can be shown without a translation.
+ * Only letters and digits are compared, as the runs drop or restyle formatting such as
+ * `*bold*` and `- ` list items. Links can show a label instead of their URL, handle,
+ * hashtag or time, so the original only needs one word for each of them.
+ * @param {(Misc.TextRun|Misc.EmojiRun)[]} runs
+ * @param {string} original
+ * @returns {boolean}
+ */
+export function isOriginalLocalText(runs, original) {
+  let text = ''
+  /** The position of each character of `text` in `original` */
+  const offsets = []
+  for (const match of original.matchAll(/[\p{L}\p{N}]+/gu)) {
+    text += match[0]
+    for (let i = 0; i < match[0].length; i++) {
+      offsets.push(match.index + i)
+    }
+  }
+
+  let position = 0
+  let links = 0
+  /**
+   * Whether the original text up to `end` can be the links since `position`
+   * @param {number} end
+   * @returns {-1 | 0 | 1 | 2} 2 if it can, 1 if it can but the text after it doesn't start
+   * after whitespace like after a link, 0 if only a later end can, -1 if no later end can
+   */
+  const fitLinks = (end) => {
+    if (links === 0) {
+      return end === position ? 2 : -1
+    }
+    if (end === position) {
+      return 0
+    }
+    const words = original.slice(offsets[position], offsets[end - 1] + 1).split(/\s+/)
+      .filter(word => /[\p{L}\p{N}]/u.test(word)).length
+    if (words > links) {
+      return -1
+    }
+    return end === text.length || /\s/.test(original.slice(offsets[end - 1] + 1, offsets[end])) ? 2 : 1
+  }
+
+  for (const run of runs) {
+    if ('endpoint' in run && run.endpoint) {
+      links++
+      continue
+    }
+
+    const segment = run.text.replaceAll(/[^\p{L}\p{N}]+/gu, '')
+    if (!segment) {
+      continue
+    }
+    // Prefer a match after whitespace, as the text can also appear inside a link, like `ATN Bangla` in `@ATNBanglaClips`
+    let index = position - 1
+    let fallback = -1
+    let fit
+    do {
+      index = text.indexOf(segment, index + 1)
+      fit = index === -1 ? -1 : fitLinks(index)
+      if (fit === 1 && fallback === -1) {
+        fallback = index
+      }
+    } while (fit === 0 || fit === 1)
+    if (fit === -1) {
+      index = fallback
+    }
+    if (index === -1) {
+      return false
+    }
+    position = index + segment.length
+    links = 0
+  }
+  return fitLinks(text.length) > 0
+}
+
+/**
  * @param {import('youtubei.js').YTNodes.NavigationEndpoint | undefined} endpoint
  * @returns {string | undefined} the channel handle including the leading `@`
  */
