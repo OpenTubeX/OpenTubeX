@@ -5,7 +5,7 @@ import i18n from '../i18n/index'
 import { MAIN_PROFILE_ID } from '../../constants'
 import { deepCopy, ERROR_TOAST_ICON, showToast } from './utils'
 import { recordNotification } from './notificationHistory'
-import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
+import { generateRandomUniqueId, getPlaylistSortOrder, isSortedByYouTube, SORT_BY_VALUES, YOUTUBE_PLAYLIST_ORDERS } from './playlists'
 import { getYouTubeChannelKey, getYouTubeSyncKey } from './youtube-account-state'
 import { setYouTubePlaylistChangeListener } from './youtube-playlist-changes'
 import { DBPlaylistHandlers, getDataScope, withDataScope } from '../../datastores/handlers/index'
@@ -45,14 +45,6 @@ import {
 const LOCK_NAME = 'opentubex-youtube-sync'
 const LIKED_VIDEOS = 'LL'
 const WATCH_LATER = 'WL'
-/** The sort orders YouTube also has, as its `playlistVideoOrder` values. */
-const YOUTUBE_PLAYLIST_ORDERS = Object.freeze({
-  [SORT_BY_VALUES.Custom]: 0,
-  [SORT_BY_VALUES.DateAddedNewest]: 1,
-  [SORT_BY_VALUES.DateAddedOldest]: 2,
-  [SORT_BY_VALUES.PublishedNewest]: 4,
-  [SORT_BY_VALUES.PublishedOldest]: 5
-})
 const STARTUP_SYNC_INTERVAL_MS = 5 * 60_000
 // Feed refreshes, settings changes, and every window ask for a sync.
 const MIN_SYNC_INTERVAL_MS = 60_000
@@ -693,7 +685,9 @@ async function pushPlaylistChange(change, playlistId, localId, account) {
       if (current?.addVideosToTop === true) {
         await pushReorder({ type: 'reorder', playlist: deepCopy(toRaw(current)), previous: [] }, account)
       }
-      break
+      // A playlist sorted on YouTube shows them where YouTube sorts them in.
+      const sortOrder = getPlaylistSortOrder(current, store.getters.getUserPlaylistSortOrder)
+      return sortOrder !== SORT_BY_VALUES.Custom && isSortedByYouTube(current, sortOrder)
     }
     case 'remove':
       if (isLikedVideos) {
@@ -738,7 +732,7 @@ function handlePlaylistChange(change) {
   const { _id: localId, playlistName, youTube: { playlistId } } = playlist
 
   withSyncLock(() => pushPlaylistChange(change, playlistId, localId, account)).then(reordered => {
-    // Reads YouTube's new order, which the Custom sort shows.
+    // Reads YouTube's new order, which synced playlists show.
     if (reordered) refreshYouTubePlaylist(localId)
   }, error => {
     if (error instanceof AccountChangedError) return

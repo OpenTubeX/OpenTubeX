@@ -309,7 +309,7 @@ import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../
 import { navigationDownloadId } from '../../helpers/downloadPlayback'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getPlaylistSkipAvailability, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
+import { getPlaylistSkipAvailability, getPlaylistSortOrder, getSortedPlaylistItems, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 
@@ -584,8 +584,12 @@ const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOr
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
   if (!isUserPlaylist.value) { return SORT_BY_VALUES.Custom }
-  const playlistSortOrder = selectedUserPlaylist.value?.sortOrder
-  return isPlaylistSortOrder(playlistSortOrder) ? playlistSortOrder : userPlaylistSortOrder.value
+  return getPlaylistSortOrder(selectedUserPlaylist.value, userPlaylistSortOrder.value)
+})
+
+// Synced playlists are saved in the order YouTube lists them
+const appliedSortOrder = computed(() => {
+  return isSortedByYouTube(selectedUserPlaylist.value, sortOrder.value) ? SORT_BY_VALUES.Custom : sortOrder.value
 })
 
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
@@ -1287,7 +1291,7 @@ function loadCachedPlaylistInformation(cachedPlaylist) {
   // Playback must not wait for later pages when the next video is already cached.
   // A sort preference can finish saving after the page cached its previous order.
   playlistItems.value = isUserPlaylist.value
-    ? getSortedPlaylistItems(videos, sortOrder.value, locale.value, reversePlaylist.value)
+    ? getSortedPlaylistItems(videos, appliedSortOrder.value, locale.value, reversePlaylist.value)
     : applyReversePlaylistState(videos.slice())
   // Shuffle stays enabled across playlists, so rebuild the order from this one.
   if (shuffleEnabled.value) shufflePlaylistItems()
@@ -1402,7 +1406,7 @@ function parseUserPlaylist(playlist) {
     prevVideoBeforeDeletion.value = targetVideoIndex >= 0 ? playlistItems.value[targetVideoIndex] : null
   }
 
-  playlistItems.value = getSortedPlaylistItems(playlist.videos, sortOrder.value, locale.value, reversePlaylist.value)
+  playlistItems.value = getSortedPlaylistItems(playlist.videos, appliedSortOrder.value, locale.value, reversePlaylist.value)
 
   isLoading.value = false
 }
