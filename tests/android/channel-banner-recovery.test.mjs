@@ -47,10 +47,13 @@ test('Android Invidious banners recover through the selected proxy after WebView
     saved = await page.evaluate(instance => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const saved = { settings: { ...store.state.settings }, instance: store.getters.getCurrentInvidiousInstance, route: location.hash }
+      // Without a default instance, the app picks a random one once it has
+      // refreshed the instance list, replacing the test's.
       Object.assign(store.state.settings, {
         backendPreference: 'invidious',
         backendFallback: false,
         currentLocale: 'en-US',
+        defaultInvidiousInstance: instance,
         invidiousInstanceCredentials: { instance, username: 'user', password: 'password' }
       })
       store.commit('setCurrentInvidiousInstance', `${instance}/`)
