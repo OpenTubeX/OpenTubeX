@@ -26,6 +26,7 @@ function createLoad () {
   const releases = []
   const context = vm.createContext({
     shortsPaused: ref(false),
+    isPausedByUser: element => element.paused,
     video: ref({ paused: true, duration: 30, videoWidth: 0, videoHeight: 0 }),
     hasLoaded: ref(false),
     videoLayoutReady: ref(false),

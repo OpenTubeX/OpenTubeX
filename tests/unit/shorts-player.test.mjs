@@ -583,11 +583,16 @@ const handleLoadedSource = playerSource.slice(
   playerSource.indexOf('async function handleLoaded() {'),
   playerSource.indexOf('async function unloadForFormatSwitch() {')
 )
-for (const paused of [true]) {
-  test(`Shorts controls reflect media paused=${paused} after loading without a playback event`, async () => {
+const pausedByUserSource = ['isAwaitingAutoplay', 'isPausedByUser']
+  .map(name => playerSource.match(new RegExp(`^function ${name}\\([\\s\\S]*?^}`, 'm'))[0])
+  .join('\n')
+for (const autoplay of [false, true]) {
+  test(`Shorts controls show ${autoplay ? 'playing while autoplay is pending' : 'paused'} after loading without a playback event`, async () => {
     const shortsPaused = ref(false)
-    const video = ref({ paused, duration: 30, videoWidth: 1080, videoHeight: 1920 })
-    const handleLoaded = vm.runInNewContext(`${handleLoadedSource}\nhandleLoaded`, {
+    const video = ref({ paused: true, autoplay, played: { length: 0 }, readyState: 1, duration: 30, videoWidth: 1080, videoHeight: 1920 })
+    const handleLoaded = vm.runInNewContext(`${pausedByUserSource}\n${handleLoadedSource}\nhandleLoaded`, {
+      HTMLMediaElement: { HAVE_ENOUGH_DATA: 4 },
+      initialAutoplayCanceled: false,
       shortsPaused,
       video,
       hasLoaded: ref(false),
@@ -618,8 +623,8 @@ for (const paused of [true]) {
     })
 
     await handleLoaded()
-    assert.equal(shortsPaused.value, paused, 'the play/pause control must match the loaded media')
-    assert.equal(video.value.paused, paused, 'synchronizing the control must not start playback')
+    assert.equal(shortsPaused.value, !autoplay, 'the play/pause control must match the loaded media')
+    assert.equal(video.value.paused, true, 'synchronizing the control must not start playback')
   })
 }
 

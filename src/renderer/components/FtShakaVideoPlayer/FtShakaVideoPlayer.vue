@@ -119,7 +119,7 @@
         vrMode: useVrMode,
         playerPaused: playerPaused && hasLoaded,
         bufferingSpinnerShown,
-        autoplayPending,
+        autoplayPending: autoplayLoading,
         endedScreenShown: showEndedScreen && endedRecommendations.length > 0,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
@@ -8574,6 +8574,8 @@ let preRollIntervalId = null
 const countdownRemainingMs = computed(() => sabrBackoffRemainingMs.value || preRollRemainingMs.value)
 const countdownDurationMs = computed(() => sabrBackoffRemainingMs.value > 0 ? sabrBackoffDurationMs.value : preRollDurationMs.value)
 const showCountdownOverlay = computed(() => countdownRemainingMs.value > 0)
+// A countdown shows the wait itself and keeps the play button to cancel autoplay.
+const autoplayLoading = computed(() => autoplayPending.value && !showCountdownOverlay.value)
 const countdownTimeSeconds = computed(() => +(countdownRemainingMs.value / 1000).toFixed(1))
 const countdownTimeLabel = computed(() => `${countdownTimeSeconds.value}s`)
 const countdownAriaLabel = computed(() => {
@@ -12233,7 +12235,7 @@ const mediaWaiting = ref(false)
 // the same delay as in bufferSpinner.css, so short buffers while seeking keep it.
 const bufferingSpinnerShown = ref(false)
 let bufferingSpinnerTimeout
-watch(() => isBuffering.value || autoplayPending.value, (loading) => {
+watch(() => isBuffering.value || autoplayLoading.value, (loading) => {
   clearTimeout(bufferingSpinnerTimeout)
   if (loading) {
     bufferingSpinnerTimeout = setTimeout(() => { bufferingSpinnerShown.value = true }, 400)
