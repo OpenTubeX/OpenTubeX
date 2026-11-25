@@ -104,33 +104,35 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       }
       await touch('touchEnd')
     }
-    // Shaka's idle timer starts at the last touchend. On a slow device, the
-    // fullscreen change settles seconds after it, so time the hide in the page.
+    // Shaka's idle timer starts at the last touchend with the hide delay of
+    // the player's data-playing-interface-hide-delay. Record the timers that
+    // touchend schedules, since on a slow device the fullscreen change settles
+    // seconds later and the time until the hide says little.
     await page.evaluate(() => {
-      const controls = document.querySelector('.ftVideoPlayer .shaka-controls-container')
-      const timing = { touchEnd: 0, hidden: 0, abort: new AbortController() }
+      const timing = { delays: [], setTimeout: window.setTimeout, abort: new AbortController() }
       window.__fullscreenControlsTiming = timing
-      document.addEventListener('touchend', () => { timing.touchEnd = performance.now() }, { capture: true, signal: timing.abort.signal })
-      timing.observer = new MutationObserver(() => {
-        if (!controls.hasAttribute('shown') && !timing.hidden) timing.hidden = performance.now()
-      })
-      timing.observer.observe(controls, { attributes: true, attributeFilter: ['shown'] })
+      window.addEventListener('touchend', () => { timing.delays = [] }, { capture: true, signal: timing.abort.signal })
+      window.setTimeout = function (handler, delay, ...args) {
+        if (window.event?.type === 'touchend') timing.delays.push(delay)
+        return timing.setTimeout.call(this, handler, delay, ...args)
+      }
     })
     await swipe(-1)
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null), { timeout: 15000 }).toBe(true)
     assert.equal(await player.getAttribute('data-playing-interface-hide-delay'), '5')
     await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
-    // The inline default is three seconds. Staying visible past that default
-    // distinguishes the fullscreen preference from merely restarting a timer.
-    const shownFor = await page.evaluate(() => {
+    const delays = await page.evaluate(() => {
       const timing = window.__fullscreenControlsTiming
-      timing.observer.disconnect()
+      window.setTimeout = timing.setTimeout
       timing.abort.abort()
       delete window.__fullscreenControlsTiming
-      return timing.hidden - timing.touchEnd
+      return timing.delays
     })
-    assert.ok(shownFor > 4000, `The controls hid ${Math.round(shownFor)} ms after the swipe, before the 5 second fullscreen delay`)
+    // The inline default is three seconds, so the swipe's touchend must start
+    // the five second fullscreen delay rather than merely restart a timer.
+    assert.ok(delays.includes(5000) && !delays.includes(3000),
+      `The swipe's touchend must schedule the 5 s hide, not the 3 s default: ${JSON.stringify(delays)}`)
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
     await expect(controls.locator('.shaka-controls-button-panel')).toBeHidden()
     await expect(controls.locator('.shaka-seek-bar-container')).toHaveCSS('opacity', '0')
 
@@ -148,6 +150,12 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     assert.equal(await video.evaluate(video => video.paused), false, 'Swipes must not toggle playback')
   } finally {
     await page.evaluate(async ({ settings, originalRoute }) => {
+      const timing = window.__fullscreenControlsTiming
+      if (timing) {
+        window.setTimeout = timing.setTimeout
+        timing.abort.abort()
+        delete window.__fullscreenControlsTiming
+      }
       if (document.fullscreenElement) await document.exitFullscreen()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
