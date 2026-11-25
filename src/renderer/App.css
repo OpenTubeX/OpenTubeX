@@ -579,8 +579,12 @@
 }
 
 /* Keep Chromium from cancelling pointer streams for pinch zoom or fullscreen
-   horizontal seeking, even when the other player gestures are disabled. */
+   horizontal seeking, even when the other player gestures are disabled. A
+   pinned player owns all movement as well. Android WebView cancels a touch
+   whose events a busy phone handles late, unless its touch-action is none,
+   and a docking swipe would stop halfway. */
 .app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled),
+.app.capacitorTabs :deep(.ftVideoPlayer.scrollPinnedPlayer),
 .app.capacitorTabs :deep(.ftVideoPlayer:is(:fullscreen, .fullWindow)) {
   touch-action: none;
 }
