@@ -394,7 +394,10 @@ function getSelectionText(target) {
     return target.value.slice(start, end)
   }
 
-  return window.getSelection()?.toString() ?? ''
+  // A right-click on nonselectable content, or on the custom title bar's drag
+  // region, keeps a selection elsewhere on the page, which isn't the target
+  const selection = window.getSelection()
+  return target && selection?.containsNode(target, true) ? selection.toString() : ''
 }
 
 function getContextParameters(event) {

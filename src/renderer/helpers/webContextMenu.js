@@ -23,14 +23,18 @@ function getEditable(target) {
 }
 
 /**
+ * @param {Element} target
  * @param {HTMLElement | null} editable
  */
-function getSelectionText(editable) {
+function getSelectionText(target, editable) {
   if ((editable instanceof HTMLInputElement || editable instanceof HTMLTextAreaElement) && editable.selectionStart !== null) {
     return editable.value.slice(editable.selectionStart, editable.selectionEnd ?? editable.selectionStart)
   }
 
-  return window.getSelection()?.toString() ?? ''
+  // A right-click on nonselectable content keeps a selection elsewhere on the
+  // page, which isn't the target
+  const selection = window.getSelection()
+  return selection?.containsNode(target, true) ? selection.toString() : ''
 }
 
 /**
@@ -104,7 +108,7 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
   const [linkBase, linkRoute] = linkUrl.split('#')
   const isInAppUrl = linkUrl !== '' && linkBase === appUrl && linkRoute?.startsWith('/') === true
   // Like browsers, never copy or search a password
-  const selectionText = editable instanceof HTMLInputElement && editable.type === 'password' ? '' : getSelectionText(editable)
+  const selectionText = editable instanceof HTMLInputElement && editable.type === 'password' ? '' : getSelectionText(target, editable)
   const trimmedSelection = selectionText.trim()
   const hasSelection = selectionText.length > 0
   const searchable = trimmedSelection.length <= SEARCH_CHAR_LIMIT
