@@ -29,6 +29,7 @@
       <div
         ref="listScroller"
         v-overlay-scrollbars
+        data-scrollbar-always-visible
         class="playlistList"
         :style="searchSize && { minBlockSize: searchSize.listBlockSize }"
       >

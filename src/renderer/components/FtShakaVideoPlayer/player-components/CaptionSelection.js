@@ -91,6 +91,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     // `addCaptionActions_` moves them in here after every rebuild.
     this.choices_ = document.createElement('div')
     this.choices_.classList.add('ft-caption-list-options')
+    this.choices_.dataset.scrollbarAlwaysVisible = ''
     addOverlayScrollbars(this.choices_)
     // A taller list, for example in a larger player, shortens its scroll range.
     this.choicesObserver_ = new ResizeObserver(() => this.clampChoicesScroll_())
@@ -234,6 +235,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     backButton.appendChild(backLabel)
     const options = document.createElement('div')
     options.classList.add('ft-caption-list-options', `${menuClass}-options`)
+    options.dataset.scrollbarAlwaysVisible = ''
     menu.appendChild(options)
 
     const optionsMenu = { button, label, menu, backButton, backLabel, options, buttons: [], signature: '', overlayFrame: 0 }

@@ -184,6 +184,7 @@
             v-if="showColorSources"
             ref="colorSourceListRef"
             v-overlay-scrollbars
+            data-scrollbar-always-visible
             class="colorSourceList"
             :class="{ above: colorSourcesAbove }"
             :aria-label="t('Color Picker.Copy From Another Color')"

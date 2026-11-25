@@ -35,6 +35,7 @@
       <div
         ref="menu"
         v-overlay-scrollbars="phoneLayout"
+        data-scrollbar-always-visible
         class="commentFilterOptions"
         :class="{ commentFilterSheet: phoneLayout }"
       >

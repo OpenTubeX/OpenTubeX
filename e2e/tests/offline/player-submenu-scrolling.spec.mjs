@@ -107,7 +107,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       // Dragging the scrollbar must not count as a click that closes the submenu.
       const track = submenu.locator(':scope > .os-scrollbar-vertical')
       const handle = track.locator('.os-scrollbar-handle')
-      // The scrollbar only shows while the pointer is over the options.
+      // Hovering the options keeps the pointer on the submenu before the drag.
       await submenu.getByRole('menuitemradio', { name: 'ar audio' }).hover()
       await expect(track).toHaveClass(/os-scrollbar-visible/)
       const start = await handle.boundingBox()

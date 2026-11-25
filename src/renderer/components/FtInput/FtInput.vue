@@ -175,6 +175,7 @@
         v-if="showOptions && (visibleDataList.length > 0 || $slots.preview)"
         ref="optionsList"
         v-overlay-scrollbars
+        data-scrollbar-always-visible
         class="list"
         @mouseenter="searchState.isPointerInList = true"
         @mouseleave="searchState.isPointerInList = false"
