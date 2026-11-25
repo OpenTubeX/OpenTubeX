@@ -986,5 +986,10 @@ function handleRestartPrompt(value) {
     grid-column: 2;
     margin-inline-start: 0;
   }
+
+  /* The Test Toast button keeps the whole row, not the balancing track. */
+  .themeSelectRow > .testToastAction {
+    grid-column: 1 / -1;
+  }
 }
 </style>
