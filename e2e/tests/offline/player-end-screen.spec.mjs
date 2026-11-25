@@ -319,7 +319,7 @@ test('keeps phone end screen recommendations and replay clear of the controls', 
   await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime < element.duration / 2)).toBe(true)
 })
 
-test('shows the poster and recommendations after canceling autoplay, and starts a fresh countdown on replay', async ({ app, page }) => {
+test('shows the poster and recommendations after canceling autoplay or when autoplay has nothing to open, and starts a fresh countdown on replay', async ({ app, page }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
@@ -344,6 +344,18 @@ test('shows the poster and recommendations after canceling autoplay, and starts 
   await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
   await expect(page.locator('.endedPoster')).toHaveCount(0)
   await expect(page.locator('.endedRecommendations')).toHaveCount(0)
+  // Offline, autoplay cannot open the recommendation, so the end screen replaces
+  // the countdown and also follows the next ending.
+  await watch.evaluate(component => {
+    component.proxy.handleDownloadConnectionChange({ detail: 'offline' })
+  })
+  await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+  await expect(page.locator('.endedRecommendation')).toBeVisible()
+  await video.evaluate(element => { element.currentTime = 1 })
+  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
+  await endVideo(video)
+  await expect(page.locator('.endedRecommendation')).toBeVisible()
+  await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
 })
 
 for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop', 'boundary-empty', 'boundary-failed']) {

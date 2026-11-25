@@ -1940,7 +1940,7 @@ export default defineComponent({
       this.isOffline = detail === 'offline'
       if (this.isOffline && !this.watchingPlaylist) {
         // The recommended video that the countdown would open needs the internet.
-        if (this.playNextTimeout) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+        if (this.playNextTimeout) this.stopAfterVideoEnded()
         this.abortAutoplayCountdown(true)
       }
       if (detail !== 'offline' && this.downloadedPlaybackWithoutMetadata && !this.downloadedMetadataLoading) {
@@ -6138,13 +6138,13 @@ export default defineComponent({
 
     handlePlayerEnded: function (sleepTimerEnded = false) {
       if (!this.isPlaybackPresented()) {
-        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+        this.stopAfterVideoEnded()
         return
       }
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
 
       if (sleepTimerEnded) {
-        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+        this.stopAfterVideoEnded()
         this.handleWatchProgressAutoSaveWhenProgressEnabled()
         return
       }
@@ -6159,7 +6159,13 @@ export default defineComponent({
     handleVideoEnded: function () {
       // Android keeps its playback service for the next video until this
       // reports that nothing follows.
-      if (!this.continueAfterVideoEnded()) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+      if (!this.continueAfterVideoEnded()) this.stopAfterVideoEnded()
+    },
+
+    /** Nothing plays after the ended video, so the player shows its end screen. */
+    stopAfterVideoEnded: function () {
+      tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+      this.$refs.player?.stopAutoplay()
     },
 
     /** @returns {boolean} whether another video starts or is still coming */
@@ -6235,7 +6241,7 @@ export default defineComponent({
         const getters = this.$store.getters
         if (getters.getWellbeingBedtimeWaiting || getters.getWellbeingStopsAutoplay) {
           this.abortAutoplayCountdown(true)
-          tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+          this.stopAfterVideoEnded()
           if (getters.getWellbeingBedtimeWaiting) this.$store.commit('showWellbeingPrompt', 'bedtime')
           return
         }
@@ -6443,7 +6449,7 @@ export default defineComponent({
       this.autoplayCountdown = null
 
       if (!hideToast) {
-        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+        this.stopAfterVideoEnded()
         showToast({ message: this.t('Canceled next video autoplay'), icon: ['fas', 'times-circle'] })
       }
     },
@@ -7720,7 +7726,7 @@ export default defineComponent({
 
     toggleAutoplay: function() {
       // Nothing follows once the playlist stops waiting for its next page.
-      if (this.waitingForPlaylistContinuation) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+      if (this.waitingForPlaylistContinuation) this.stopAfterVideoEnded()
       this.waitingForPlaylistContinuation = false
       if (this.isShort) {
         return

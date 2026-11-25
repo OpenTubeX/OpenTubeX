@@ -120,6 +120,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   })
   watch.continueAfterVideoEnded = () => ended.continueAfterVideoEnded.call(watch)
   watch.handleVideoEnded = () => ended.handleVideoEnded.call(watch)
+  watch.stopAfterVideoEnded = () => ended.stopAfterVideoEnded.call(watch)
   Object.assign(watch, vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleUpcomingPlaylistVideosChange(videos) {', '\n    preloadUpcomingYtDlpPlaybackSources(')} })`))
   const cancel = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    abortAutoplayCountdown: function (', '\n    handleRouteChange:')} })`, {
     clearTimeout() {}, clearInterval() {}, tabMediaCoordinator,
