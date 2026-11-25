@@ -104,7 +104,7 @@
         />
       </FtFlexBox>
     </div>
-    <div class="settingsSelectGrid privacySelects">
+    <div class="settingsSelectGrid singleColumn">
       <FtSelect
         :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
         :value="externalLinkHandling"
@@ -358,10 +358,6 @@ function updateWatchedPercentageThreshold(value) {
   }
 }
 
-.privacySelects {
-  --settings-select-grid-columns: 1;
-}
-
 /* Day counts need little room. The gap leaves room for each field's icons. */
 .privacyRetention > .ft-flex-box {
   justify-content: center;
@@ -371,6 +367,14 @@ function updateWatchedPercentageThreshold(value) {
 .privacyRetention :deep(.ft-input-component) {
   inline-size: 240px;
   min-inline-size: 0;
+}
+
+/* Alone in its row, a field is centered: the space before it balances its
+   icons after it, minus the marker gutter. */
+@container settings-content (width <= 680px) {
+  .privacyRetention :deep(.ft-input-component) {
+    margin-inline-start: max(0px, var(--input-indicator-space, 0px) - var(--settings-marker-gutter, 0px));
+  }
 }
 
 </style>

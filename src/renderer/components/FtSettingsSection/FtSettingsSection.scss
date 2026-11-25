@@ -356,12 +356,12 @@
 /* A select's icons sit after it, so a select alone in its row reserves as
    much space before it, keeping the field itself centered. The
    changed-setting marker gutter already reserves part of it. When space runs
-   out, that reserve gives way before the 200px field does. */
+   out, that reserve gives way before the field narrows past its minimum. */
 @mixin balanced-select {
   --select-balance-space: calc(var(--select-indicator-space) - var(--settings-marker-gutter, 0px));
   --select-fitted-balance-space: clamp(
     min(0px, var(--select-balance-space)),
-    100% - 200px - var(--select-indicator-space) - var(--settings-marker-gutter, 0px),
+    100% - var(--settings-stacked-field-min, 200px) - var(--select-indicator-space) - var(--settings-marker-gutter, 0px),
     var(--select-balance-space)
   );
 
@@ -373,20 +373,60 @@
    their fields line up across rows. Set --settings-select-grid-columns for
    another column count. */
 :deep(.settingsSelectGrid) {
+  --settings-select-indicator-space: calc(8px + 32px + 22px + 22px);
+
   display: grid;
   grid-template-columns: repeat(var(--settings-select-grid-columns, 2), minmax(0, max-content));
   justify-content: center;
   column-gap: 16px;
+}
 
-  @container settings-content (width <= 680px) {
-    grid-template-columns: minmax(0, max-content);
+/* Stacked fields may narrow further on phones, so they can stay centered. */
+@container settings-content (width <= 460px) {
+  .sectionBody {
+    --settings-stacked-field-min: 150px;
+  }
+}
+
+/* In one column, a track before the fields balances the icons' room after
+   them, minus the marker gutter, so the fields are centered. When space runs
+   out, it gives way before the fields narrow past their minimum. */
+@mixin balanced-select-column {
+  grid-template-columns:
+    clamp(
+      0px,
+      100% - var(--settings-stacked-field-min, 200px) - var(--settings-marker-gutter, 0px) - var(--settings-select-indicator-space),
+      var(--settings-select-indicator-space) - var(--settings-marker-gutter, 0px)
+    )
+    minmax(0, max-content);
+  column-gap: 0;
+
+  > .select {
+    grid-column: 2;
+  }
+}
+
+:deep(.settingsSelectGrid.singleColumn) {
+  @include balanced-select-column;
+}
+
+@container settings-content (width <= 680px) {
+  :deep(.settingsSelectGrid) {
+    @include balanced-select-column;
+  }
+}
+
+/* The balancing track already keeps the fields off the card's edges. */
+@container settings-content (width <= 460px) {
+  .sectionBody > :deep(.settingsSelectGrid) {
+    padding-inline: 8px;
   }
 }
 
 /* Every select keeps room for all of its possible icons, which start right
    after the field, so the fields in a column end at the same edge. */
 :deep(.settingsSelectGrid > .select) {
-  --select-indicator-space: calc(8px + 32px + 22px + 22px);
+  --select-indicator-space: var(--settings-select-indicator-space);
 
   box-sizing: border-box;
   inline-size: auto;
@@ -503,10 +543,14 @@
       overflow-wrap: break-word;
     }
 
+    /* Space before the select balances its icons after the field, minus
+       the marker gutter, so the field is centered in the column. */
     :deep(.switchColumn > .select) {
+      --switch-column-select-balance: max(0px, var(--select-indicator-space) - var(--settings-marker-gutter, 0px));
+
       box-sizing: border-box;
-      inline-size: min(100%, 270px);
-      margin-inline-end: 0;
+      inline-size: min(100% - var(--switch-column-select-balance), 270px);
+      margin-inline: var(--switch-column-select-balance) 0;
     }
 
     :deep(.switchColumn .switch-label-icons > .tooltip) {
@@ -534,12 +578,14 @@
       inset-block-start: -2px;
     }
 
+    /* The space after a switch also balances the marker gutter before it,
+       so its toggle and label are centered. */
     :deep(.switch-ctn) {
       box-sizing: border-box;
       min-inline-size: 0;
-      inline-size: calc(100% - 14px);
-      max-inline-size: calc(100% - 14px);
-      margin-inline: 7px;
+      inline-size: calc(100% - 14px - var(--settings-marker-gutter, 0px));
+      max-inline-size: calc(100% - 14px - var(--settings-marker-gutter, 0px));
+      margin-inline: 7px calc(7px + var(--settings-marker-gutter, 0px));
     }
 
     :deep(.switch-ctn.compact) {

@@ -196,9 +196,26 @@ async function chooseDownloadFolder() {
   max-inline-size: 100%;
 }
 
+/* Stacked, each field is centered: the space before it balances its icons
+   after it, minus the marker gutter. */
 @container settings-content (width <= 860px) {
   .downloadFieldGrid {
-    grid-template-columns: minmax(0, 410px);
+    grid-template-columns: minmax(0, calc(340px + 2 * 84px));
+    justify-items: center;
+  }
+
+  .downloadFieldGrid > :deep(.ft-input-component) {
+    --download-field-balance: max(0px, var(--input-indicator-space, 0px) - var(--settings-marker-gutter, 0px));
+
+    margin-inline-start: var(--download-field-balance);
+    max-inline-size: calc(100% - var(--input-indicator-space, 0px) - var(--download-field-balance));
+  }
+
+  .downloadFieldGrid > :deep(.select) {
+    --download-field-balance: max(0px, var(--select-indicator-space) - var(--settings-marker-gutter, 0px));
+
+    margin-inline-start: var(--download-field-balance);
+    max-inline-size: calc(100% - var(--download-field-balance));
   }
 }
 

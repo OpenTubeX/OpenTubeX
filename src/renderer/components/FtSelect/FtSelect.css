@@ -37,9 +37,10 @@
   margin-block: var(--settings-control-margin, 30px 0);
 }
 
+/* Settings lets stacked fields narrow further on phones, so they stay centered. */
 .select.contentSized {
   display: grid;
-  grid-template-columns: minmax(200px, 1fr) var(--select-indicator-space);
+  grid-template-columns: minmax(var(--settings-stacked-field-min, 200px), 1fr) var(--select-indicator-space);
   inline-size: fit-content;
   max-inline-size: 100%;
 }
