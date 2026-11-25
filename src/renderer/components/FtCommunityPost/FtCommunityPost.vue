@@ -308,7 +308,7 @@ import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { useTextTranslation } from '../../composables/useTextTranslation'
-import { getDescriptionText } from '../../helpers/descriptionLinks'
+import { getDescriptionText, linkifyDescription } from '../../helpers/descriptionLinks'
 import { escapeHTML } from '../../helpers/feed-metadata'
 import { loadSwiperModules } from './swiperLoader'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
@@ -473,7 +473,7 @@ const {
 } = useTextTranslation(() => postTextSource, 'getEnablePostTranslations')
 const shownPostText = computed(() => translatedText.value === null
   ? postText
-  : autolinker.link(escapeHTML(translatedText.value)))
+  : linkifyDescription(escapeHTML(translatedText.value)))
 
 const formattedCommentCount = computed(() => {
   if (commentCount == null) return ''

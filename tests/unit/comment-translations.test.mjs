@@ -98,6 +98,14 @@ test('translates descriptions line by line, keeping blank lines and links', asyn
   assert.equal(translated, 'Hello everyone!\n\n0:00 Introduction\nRecipe: https://example.com/rezept #brot @kanal\n')
 })
 
+test('keeps links that the translation moved', async () => {
+  const translated = await translateTextKeepingLayout(
+    'Vergleiche https://example.com/a mit https://example.com/b #vergleich',
+    async () => 'https://example.com/b と https://example.com/a を比較 #comparison'
+  )
+  assert.equal(translated, 'https://example.com/b と https://example.com/a を比較 #vergleich')
+})
+
 test('keeps merged translated lines and only restores links it can match', async () => {
   const translated = await translateTextKeepingLayout(
     'Erste Zeile\nzweite Zeile https://example.com/a',

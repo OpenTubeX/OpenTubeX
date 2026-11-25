@@ -171,11 +171,20 @@ const PROTECTED_TOKEN_PATTERN = /\bhttps?:\/\/\S+|\bwww\.\S+|[\w.+-]+@[\w-]+(?:\
  */
 function restoreProtectedTokens(source, translated) {
   const sourceTokens = source.match(PROTECTED_TOKEN_PATTERN) ?? []
-  if (sourceTokens.length === 0) return translated
-  if ((translated.match(PROTECTED_TOKEN_PATTERN)?.length ?? 0) !== sourceTokens.length) return translated
+  const translatedTokens = translated.match(PROTECTED_TOKEN_PATTERN) ?? []
+  if (sourceTokens.length === 0 || translatedTokens.length !== sourceTokens.length) return translated
 
-  let index = 0
-  return translated.replaceAll(PROTECTED_TOKEN_PATTERN, () => sourceTokens[index++])
+  // Tokens the translation kept stay where it moved them. The changed ones
+  // get the remaining source tokens back in order.
+  const unused = [...sourceTokens]
+  const kept = translatedTokens.map((token) => {
+    const index = unused.indexOf(token)
+    if (index === -1) return false
+    unused.splice(index, 1)
+    return true
+  })
+  let tokenIndex = 0
+  return translated.replaceAll(PROTECTED_TOKEN_PATTERN, token => kept[tokenIndex++] ? token : unused.shift())
 }
 
 /**
