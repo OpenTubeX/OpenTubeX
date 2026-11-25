@@ -40,10 +40,10 @@
   cursor: pointer;
 }
 
+/* Long profile and group names wrap so similar names stay distinguishable. */
 .preferenceChip bdi {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-align: start;
 }
 
 .preferenceChip[aria-checked='true'] {

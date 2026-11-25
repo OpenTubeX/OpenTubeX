@@ -986,6 +986,7 @@ Comments:
   View 1 reply from {channelName}: '{channelName} kanalından 1 yanıtı görüntüle'
   View {replyCount} replies from {channelName} and others: '{channelName} kanalından ve diğerlerinden {replyCount} yanıtı görüntüle'
   Loading replies: Yanıtlar yükleniyor...
+  Comments are turned off: Yorumlar kapalı
 Up Next: 'Sonraki'
 
 # Toast Messages

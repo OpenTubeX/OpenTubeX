@@ -86,6 +86,7 @@ Search Filters:
     VR180: VR180
     Location: Miejsce
   Clear Filters: Odznacz filtry
+  No results found: Nie znaleziono żadnych wyników. Spróbuj wpisać inne słowa kluczowe lub dostosuj filtry wyszukiwania
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: 'Subskrypcje'
@@ -825,6 +826,7 @@ Settings:
     Add: Dodaj
     Remove: Usuń
     Hide Channel Shows: Ukryj zakładkę „Programy” w kanale
+    More Items Count: +{count} więcej…
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
   Proxy Settings:
     Your Info: O Tobie
