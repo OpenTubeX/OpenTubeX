@@ -53,6 +53,9 @@
   max-block-size: 95%;
   padding-inline: var(--prompt-padding-inline);
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
+
+  /* Wrap long URLs and names instead of scrolling the card sideways. */
+  overflow-wrap: break-word;
 }
 
 .promptCard > :deep(h2) {
