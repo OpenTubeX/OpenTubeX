@@ -190,16 +190,32 @@ function prepareMedia() {
 }
 
 /**
- * Runs the tests of one file and returns its top-level tests that failed.
+ * How long a file may take before it counts as hung: several times its local
+ * duration, since CI runs the emulator with software rendering.
+ * @param {string} file
+ */
+function fileTimeout(file) {
+  const seconds = SCRIPTS.find(([name]) => file === resolve(`tests/android/${name}.test.mjs`))?.[1] ?? 60
+  return (120 + seconds * 6) * 1000
+}
+
+/**
+ * Runs the tests of one file and returns its top-level tests that failed. A
+ * file that hangs is stopped and fails as a whole.
  * @param {string} file
  * @param {RegExp[] | undefined} testNamePatterns
  */
 async function runTests(file, testNamePatterns) {
   const failed = new Map()
-  const stream = run({ files: [file], testNamePatterns, concurrency: 1 })
+  // A connection that a failed test left open would keep the file's process
+  // alive after its tests finished, so exit once they have.
+  const stream = run({ files: [file], testNamePatterns, concurrency: 1, forceExit: true, signal: AbortSignal.timeout(fileTimeout(file)) })
   stream.on('test:fail', ({ name, nesting, file, line, details }) => {
     // A skipped or todo test reports no failure.
-    if (nesting === 0 && details.error) failed.set(`${file}\0${name}`, { name, file, line })
+    if (nesting !== 0 || !details.error) return
+    const hung = name === file
+    if (hung) name = `${relative(process.cwd(), file)} timed out`
+    failed.set(`${file}\0${name}`, { name, file, line, hung })
   })
   const passed = new Set()
   stream.on('test:pass', ({ name, nesting, file, skip }) => {
@@ -234,7 +250,11 @@ async function main() {
   const retry = { failed: [], passed: new Set() }
   for (const file of new Set(failed.map(test => test.file))) {
     await startApp()
-    const result = await runTests(file, failed.filter(test => test.file === file).map(test => new RegExp(`^${escape(test.name)}$`)))
+    const tests = failed.filter(test => test.file === file)
+    // A hung file runs again in full, and passes when all its tests do.
+    const hung = tests.find(test => test.hung)
+    const result = await runTests(file, hung ? undefined : tests.map(test => new RegExp(`^${escape(test.name)}$`)))
+    if (hung && result.failed.length === 0) result.passed.add(`${file}\0${hung.name}`)
     retry.failed.push(...result.failed)
     for (const key of result.passed) retry.passed.add(key)
   }
@@ -259,9 +279,15 @@ async function main() {
   return retry.failed.length === 0 && passedOnRetry.length === failed.length
 }
 
+// The first fullscreen of a fresh emulator shows Android's immersive mode
+// hint, which takes Back presses and native touches from the app.
+const immersiveConfirmations = adb('shell', 'settings', 'get', 'secure', 'immersive_mode_confirmations')
+adb('shell', 'settings', 'put', 'secure', 'immersive_mode_confirmations', 'confirmed')
 try {
   process.exitCode = await main() ? 0 : 1
 } finally {
   // A restarted adb server has dropped the forward already.
   if (forwardedPort) spawnSync('adb', ['-s', serial, 'forward', '--remove', `tcp:${forwardedPort}`])
+  if (immersiveConfirmations === 'null') adb('shell', 'settings', 'delete', 'secure', 'immersive_mode_confirmations')
+  else adb('shell', 'settings', 'put', 'secure', 'immersive_mode_confirmations', `'${immersiveConfirmations}'`)
 }
