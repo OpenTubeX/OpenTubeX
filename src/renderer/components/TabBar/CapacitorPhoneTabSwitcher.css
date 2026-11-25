@@ -179,8 +179,13 @@
 }
 
 .capacitorPhoneTabList {
+  /* Clears the floating bottom actions (56px FAB, their inset and a 16px gap).
+     Revealing the active card and focus scrolling keep cards inside it too. */
+  --capacitor-phone-tab-list-end: calc(max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))) + 72px);
+
   min-block-size: 0;
-  padding-block: 12px 88px;
+  padding-block: 12px var(--capacitor-phone-tab-list-end);
+  scroll-padding-block: 12px var(--capacitor-phone-tab-list-end);
   padding-inline: 12px;
   overflow: hidden auto;
   overscroll-behavior: contain;
