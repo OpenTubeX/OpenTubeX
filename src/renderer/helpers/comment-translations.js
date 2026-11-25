@@ -2,6 +2,7 @@ import Autolinker from 'autolinker'
 
 import {
   detectCommentTranslationAvailability,
+  URL_PATTERN_SOURCE,
 } from './comment-language-detection.js'
 
 export {
@@ -160,12 +161,9 @@ export function formatCommentTranslation(translatedText) {
 
 // URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
 // translates the words in them too, which would break their links. Sentence
-// punctuation after a URL or handle stays outside of it. URLs may contain
-// letters like `ü`, but end at CJK text, which these languages write right
-// after a URL and which URLs usually percent-encode.
-const CJK_CHARACTERS = String.raw`\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}\p{scx=Hangul}\u3000-\u303F\uFF00-\uFFEF`
+// punctuation after a handle stays outside of it.
 const PROTECTED_TOKEN_PATTERN = new RegExp([
-  String.raw`\b(?:https?:\/\/|www\.)[^\s${CJK_CHARACTERS}]*[^\s.,;:!?'")\]${CJK_CHARACTERS}]`,
+  URL_PATTERN_SOURCE,
   String.raw`[\w.+-]+@[\w-]+(?:\.[\w-]+)+`,
   String.raw`(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_](?:[\p{L}\p{N}_.-]*[\p{L}\p{N}_])?`,
 ].join('|'), 'gu')

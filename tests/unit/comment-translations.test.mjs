@@ -115,6 +115,10 @@ test('ends URLs before Japanese text that follows them', async () => {
   assert.deepEqual(requests, ['詳しくは {0}をご覧ください。'])
 })
 
+test('detects the language of CJK text that follows a URL', async () => {
+  assert.equal(await shouldOfferCommentTranslation('https://example.com/helpをご覧ください。詳しい説明はこちらです。', 'en'), true)
+})
+
 test('keeps merged lines and the links the translation dropped', async () => {
   const translated = await translateTextKeepingLayout(
     'Erste Zeile #eins\nzweite Zeile https://example.com/a',

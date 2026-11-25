@@ -563,8 +563,9 @@ onBeforeUnmount(() => {
 })
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.sections, () => props.license, () => props.contentDisclosures], async () => {
-  // Metadata can arrive or disappear after the card has mounted.
+watch([shownDescription, translationAvailable, () => props.tags, () => props.games, () => props.musicTracks, () => props.sections, () => props.license, () => props.contentDisclosures], async () => {
+  // Metadata can arrive or disappear after the card has mounted, and the translate
+  // button narrows the text once language detection offers it.
   // Control visibility follows the content, independently of the user's expansion choice.
   hasMeasured = false
   await nextTick()
