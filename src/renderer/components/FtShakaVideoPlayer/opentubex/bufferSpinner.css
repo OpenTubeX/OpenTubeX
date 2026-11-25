@@ -56,10 +56,19 @@
   spinner takes the button's place once it fades in. The class survives the
   control rebuilds that often happen while a video starts.
 */
-.ftVideoPlayer.bufferingSpinnerShown :deep(.shaka-big-buttons-container > .shaka-play-button) {
+.ftVideoPlayer:is(.bufferingSpinnerShown, .autoplayPending) :deep(.shaka-big-buttons-container > .shaka-play-button) {
   visibility: hidden;
   opacity: 0;
   transition: opacity 150ms ease-out, visibility 0s 150ms;
+}
+
+/*
+  Shaka stops buffering as soon as its tiny rebuffering goal is met, but
+  autoplay waits for more data, so keep the spinner until playback starts.
+  Staying displayed also keeps its fade in from restarting in between.
+*/
+.ftVideoPlayer.autoplayPending[shaka-controls='true'] > :deep(.shaka-spinner-container.shaka-hidden) {
+  display: flex !important;
 }
 
 @keyframes ft-buffer-spinner-appear {
