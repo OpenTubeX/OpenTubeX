@@ -130,6 +130,10 @@ let forwardedPort = null
 
 /** Starts the app from scratch and points the tests at its WebView. */
 async function startApp() {
+  // A file stopped for hanging skipped its cleanup, which may have left the
+  // device asleep or locked.
+  adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
+  adb('shell', 'wm', 'dismiss-keyguard')
   adb('shell', 'am', 'force-stop', applicationId)
   adb('shell', 'am', 'start', '-W', '-n', `${applicationId}/org.opentubex.app.MainActivity`)
   if (!forwardedPort) {
