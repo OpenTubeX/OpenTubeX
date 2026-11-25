@@ -73,5 +73,9 @@ export function getDescriptionText(description) {
       link.replaceWith(href)
     }
   }
+  // Invidious separates lines with `<br>`, which has no text of its own.
+  for (const lineBreak of template.content.querySelectorAll('br')) {
+    lineBreak.replaceWith('\n')
+  }
   return template.content.textContent ?? ''
 }
