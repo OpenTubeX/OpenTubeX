@@ -656,6 +656,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       // alone cannot prove that Android painted the artwork on the launcher.
       await player.locator('.shaka-pip-button').first().evaluate(button => button.click())
       await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
+      let checkError = null
       try {
         await expect.poll(() => {
           const tasks = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'dumpsys', 'activity', 'activities'], { encoding: 'utf8' })
@@ -667,15 +668,23 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
           const painted = await page.evaluate(sampleAudioArtwork, { png: png.toString('base64'), cropToSurface: false })
           return painted.green
         }).toBeGreaterThan(100)
-      } finally {
-        // SystemUI ignores the launch's request to expand picture-in-picture
-        // while the window is still animating into it, so launch again until
-        // the app has left it.
+      } catch (error) {
+        checkError = error
+      }
+      // SystemUI ignores the launch's request to expand picture-in-picture
+      // while the window is still animating into it, so launch again until
+      // the app has left it.
+      try {
         await expect(async () => {
           adb('am', 'start', '-n', `${androidAppId()}/org.opentubex.app.MainActivity`)
           await expect(page.locator('body')).not.toHaveClass(/androidPictureInPicture(?:\s|$)/, { timeout: 5000 })
         }).toPass({ timeout: 60000 })
+      } catch (error) {
+        // Keep a failed check's own error rather than replacing it with this one.
+        if (!checkError) throw error
+        console.error('Could not leave picture-in-picture after a failed check:', error)
       }
+      if (checkError) throw checkError
       return
     }
     if (navigationOnly) {
