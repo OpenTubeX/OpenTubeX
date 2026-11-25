@@ -636,7 +636,11 @@ Settings:
       Force Off: همیشه خاموش
     Comment Translation:
       Translation: ترجمه
-      Enable: پیشنهاد ترجمه برای دیدگاه‌ها، توضیحات و پست‌ها
+      Offer Translations For: پیشنهاد ترجمه برای
+      Descriptions: توضیحات
+      Enable: فعال کردن ترجمه دیدگاه‌ها
+      Enable Description Translations: فعال کردن ترجمه توضیحات
+      Enable Post Translations: فعال کردن ترجمه پست‌ها
       Never Translate: متن‌های این زبان‌ها هرگز ترجمه نشوند
       Choose Language: یک زبان انتخاب کنید
       Description: متن‌های هم‌زبان با برنامه از قبل کنار گذاشته شده‌اند. زبان‌های دیگری را که می‌توانید بخوانید اضافه کنید.

@@ -617,7 +617,11 @@ Settings:
       Force Off: Altijd uit
     Comment Translation:
       Translation: Vertaling
-      Enable: Vertalingen aanbieden voor reacties, beschrijvingen en posts
+      Offer Translations For: Vertalingen aanbieden voor
+      Descriptions: Beschrijvingen
+      Enable: Vertaling van reacties inschakelen
+      Enable Description Translations: Vertaling van beschrijvingen inschakelen
+      Enable Post Translations: Vertaling van posts inschakelen
       Never Translate: Tekst nooit vertalen uit het
       Choose Language: Kies een taal
       Description: Tekst in de taal van de app is al uitgesloten. Voeg andere talen toe die je kunt lezen.

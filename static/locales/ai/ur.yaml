@@ -673,7 +673,11 @@ Settings:
       Force Off: ہمیشہ آف
     Comment Translation:
       Translation: ترجمہ
-      Enable: کمنٹس، تفصیلات اور پوسٹس کے ترجمے پیش کریں
+      Offer Translations For: ان کے لیے ترجمے پیش کریں
+      Descriptions: تفصیلات
+      Enable: کمنٹس کے ترجمے فعال کریں
+      Enable Description Translations: تفصیل کے ترجمے فعال کریں
+      Enable Post Translations: پوسٹس کے ترجمے فعال کریں
       Never Translate: ان زبانوں کے متن کا کبھی ترجمہ نہ کریں
       Choose Language: زبان منتخب کریں
       Description: ایپ کی زبان کا متن پہلے ہی خارج ہے۔ کوئی دوسری زبانیں شامل کریں جو آپ پڑھ سکتے ہیں۔

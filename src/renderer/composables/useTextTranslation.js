@@ -7,12 +7,13 @@ import { normalizeYouTubeCaptionLanguageCode } from '../helpers/player/youtubeCa
 import { showApiErrorToast } from '../helpers/utils'
 
 /**
- * The settings shared by the translations of comments, descriptions and posts.
+ * The settings of the translations of comments, descriptions or posts.
+ * @param {'getEnableCommentTranslations' | 'getEnableDescriptionTranslations' | 'getEnablePostTranslations'} enabledGetter
  */
-export function useTextTranslationSettings() {
+export function useTextTranslationSettings(enabledGetter) {
   const { locale } = useI18n()
 
-  const enabled = computed(() => !!process.env.SUPPORTS_LOCAL_API && store.getters.getEnableCommentTranslations)
+  const enabled = computed(() => !!process.env.SUPPORTS_LOCAL_API && store.getters[enabledGetter])
 
   const targetLanguage = computed(() => normalizeYouTubeCaptionLanguageCode(locale.value))
 
@@ -35,10 +36,11 @@ export function useTextTranslationSettings() {
  * Offers a translation of plain text, such as a description or post, when it
  * is in a language other than the app language and the ignored ones.
  * @param {() => string} getText
+ * @param {'getEnableDescriptionTranslations' | 'getEnablePostTranslations'} enabledGetter
  */
-export function useTextTranslation(getText) {
+export function useTextTranslation(getText, enabledGetter) {
   const { t } = useI18n()
-  const { enabled, targetLanguage, targetLanguageName, ignoredLanguages } = useTextTranslationSettings()
+  const { enabled, targetLanguage, targetLanguageName, ignoredLanguages } = useTextTranslationSettings(enabledGetter)
 
   const available = ref(false)
   const loading = ref(false)

@@ -612,7 +612,11 @@ Settings:
       Force Off: 常に無効
     Comment Translation:
       Translation: 翻訳
-      Enable: コメント、説明、投稿の翻訳を提供
+      Offer Translations For: 翻訳を提案する対象
+      Descriptions: 説明
+      Enable: コメントの翻訳を有効化
+      Enable Description Translations: 説明の翻訳を有効化
+      Enable Post Translations: 投稿の翻訳を有効化
       Never Translate: 次の言語のテキストは翻訳しない
       Choose Language: 言語を選択
       Description: アプリの表示言語のテキストはすでに除外されています。ほかに読める言語を追加してください。

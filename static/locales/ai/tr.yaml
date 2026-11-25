@@ -612,7 +612,11 @@ Settings:
       Force Off: Her zaman kapalı
     Comment Translation:
       Translation: Çeviri
-      Enable: Yorumlar, açıklamalar ve gönderiler için çeviri sun
+      Offer Translations For: Şunlar için çeviri öner
+      Descriptions: Açıklamalar
+      Enable: Yorum çevirilerini etkinleştir
+      Enable Description Translations: Açıklama çevirilerini etkinleştir
+      Enable Post Translations: Gönderi çevirilerini etkinleştir
       Never Translate: Şu dildeki metinleri asla çevirme
       Choose Language: Bir dil seçin
       Description: Uygulama dilindeki metinler zaten çevrilmez. Okuyabildiğiniz diğer dilleri ekleyin.

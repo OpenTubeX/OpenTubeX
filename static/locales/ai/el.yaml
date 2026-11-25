@@ -612,7 +612,11 @@ Settings:
       Force Off: Επιβολή απενεργοποίησης
     Comment Translation:
       Translation: Μετάφραση
-      Enable: Προσφορά μεταφράσεων για σχόλια, περιγραφές και αναρτήσεις
+      Offer Translations For: Προσφορά μεταφράσεων για
+      Descriptions: Περιγραφές
+      Enable: Ενεργοποίηση μεταφράσεων σχολίων
+      Enable Description Translations: Ενεργοποίηση μεταφράσεων περιγραφών
+      Enable Post Translations: Ενεργοποίηση μεταφράσεων αναρτήσεων
       Never Translate: Να μη μεταφράζεται κείμενο στα
       Choose Language: Επιλογή γλώσσας
       Description: Το κείμενο στη γλώσσα της εφαρμογής εξαιρείται ήδη. Προσθέστε όσες άλλες γλώσσες μπορείτε να διαβάσετε.

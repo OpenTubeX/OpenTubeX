@@ -470,7 +470,7 @@ const {
   translatedText,
   targetLanguageName: translationLanguageName,
   toggleTranslation
-} = useTextTranslation(() => postTextSource)
+} = useTextTranslation(() => postTextSource, 'getEnablePostTranslations')
 const shownPostText = computed(() => translatedText.value === null
   ? postText
   : autolinker.link(escapeHTML(translatedText.value)))

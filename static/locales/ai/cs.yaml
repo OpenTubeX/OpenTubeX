@@ -612,7 +612,11 @@ Settings:
       Force Off: Vždy vypnuto
     Comment Translation:
       Translation: Překlad
-      Enable: Nabízet překlady komentářů, popisů a příspěvků
+      Offer Translations For: Nabízet překlad pro
+      Descriptions: Popisy
+      Enable: Povolit překlad komentářů
+      Enable Description Translations: Povolit překlad popisů
+      Enable Post Translations: Povolit překlad příspěvků
       Never Translate: Nepřekládat text v jazyce
       Choose Language: Vyberte jazyk
       Description: Text v jazyce aplikace je již vyloučen. Přidejte další jazyky, kterým rozumíte.

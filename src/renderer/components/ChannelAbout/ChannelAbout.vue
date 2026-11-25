@@ -243,7 +243,7 @@ const {
   translatedText,
   targetLanguageName: translationLanguageName,
   toggleTranslation
-} = useTextTranslation(() => props.description)
+} = useTextTranslation(() => props.description, 'getEnableDescriptionTranslations')
 const shownDescription = computed(() => autolinker.link(escapeHTML(translatedText.value ?? props.description)))
 
 /** @type {import('vue').ComputedRef<boolean>} */

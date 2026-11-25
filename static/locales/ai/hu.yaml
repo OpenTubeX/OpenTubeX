@@ -612,7 +612,11 @@ Settings:
       Force Off: Mindig kikapcsolva
     Comment Translation:
       Translation: Fordítás
-      Enable: Fordítás felajánlása hozzászólásokhoz, leírásokhoz és bejegyzésekhez
+      Offer Translations For: Fordítás felajánlása a következőkhöz
+      Descriptions: Leírások
+      Enable: Hozzászólások fordításának engedélyezése
+      Enable Description Translations: Leírások fordításának engedélyezése
+      Enable Post Translations: Bejegyzések fordításának engedélyezése
       Never Translate: Ne fordítsa az ilyen nyelvű szövegeket
       Choose Language: Nyelv kiválasztása
       Description: Az alkalmazás nyelvén írt szövegek már ki vannak zárva. Adja hozzá az összes többi nyelvet, amelyen tud olvasni.

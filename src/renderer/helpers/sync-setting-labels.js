@@ -86,6 +86,8 @@ export const SYNC_SETTING_LABELS = {
   enableUploadNotifications: 'Settings.Subscription Settings.Notify About New Uploads',
   notificationMode: 'Settings.General Settings.Notifications.Notifications',
   enableCommentTranslations: 'Settings.General Settings.Comment Translation.Enable',
+  enableDescriptionTranslations: 'Settings.General Settings.Comment Translation.Enable Description Translations',
+  enablePostTranslations: 'Settings.General Settings.Comment Translation.Enable Post Translations',
   enableDownloads: 'Settings.Download Settings.Enable Downloads',
   enableHomeRecommendations: 'Home Page.Enable recommendations',
   enableMobileFullscreenSwipe: 'Settings.Player Settings.Swipe Up or Down to Enter or Exit Fullscreen',

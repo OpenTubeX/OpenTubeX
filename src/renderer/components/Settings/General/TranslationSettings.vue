@@ -4,12 +4,14 @@
     :icon="['fas', 'language']"
   >
     <div class="translationSettings">
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Comment Translation.Enable')"
-        :default-value="commentTranslationsEnabled"
-        setting-key="enableCommentTranslations"
-        :compact="true"
-        @change="updateCommentTranslationsEnabled"
+      <FtCheckboxList
+        v-model="enabledTranslations"
+        :title="t('Settings.General Settings.Comment Translation.Offer Translations For')"
+        :labels="translationLabels"
+        :values="TRANSLATION_SETTING_KEYS"
+        :sync-setting-keys="TRANSLATION_SETTING_KEYS"
+        :is-changed="translationsChanged"
+        @reset="resetTranslations"
       />
       <p
         :id="descriptionId"
@@ -25,7 +27,7 @@
         :select-names="languageNames"
         :select-values="languageValues"
         :describe-by-id="descriptionId"
-        :disabled="!commentTranslationsEnabled"
+        :disabled="!anyTranslationEnabled"
         :icon="['fas', 'language']"
         :is-locale-selector="true"
         @change="addLanguage"
@@ -44,7 +46,7 @@
           <button
             type="button"
             class="translationLanguageRemove"
-            :disabled="!commentTranslationsEnabled"
+            :disabled="!anyTranslationEnabled"
             :aria-label="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
             :title="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
             @click="removeLanguage(language.code)"
@@ -64,17 +66,41 @@ import { useI18n } from 'vue-i18n'
 
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
-import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 
 import {
   COMMENT_TRANSLATION_LANGUAGE_CODES,
   normalizeCommentTranslationLanguageCode,
 } from '../../../helpers/comment-translations'
 import store from '../../../store/index'
+import { DEFAULT_SETTINGS, defaultUpdaterId } from '../../../store/modules/settings'
 
 const { locale, t } = useI18n()
 const descriptionId = useId()
-const commentTranslationsEnabled = computed(() => store.getters.getEnableCommentTranslations)
+const TRANSLATION_SETTING_KEYS = ['enableCommentTranslations', 'enableDescriptionTranslations', 'enablePostTranslations']
+
+const translationLabels = computed(() => [
+  t('Comments.Comments'),
+  t('Settings.General Settings.Comment Translation.Descriptions'),
+  t('Global.Posts'),
+])
+const enabledTranslations = computed({
+  get: () => TRANSLATION_SETTING_KEYS.filter(key => store.state.settings[key]),
+  set: (values) => {
+    const enabled = new Set(values)
+    for (const key of TRANSLATION_SETTING_KEYS) {
+      if (store.state.settings[key] !== enabled.has(key)) store.dispatch(defaultUpdaterId(key), enabled.has(key))
+    }
+  }
+})
+const anyTranslationEnabled = computed(() => enabledTranslations.value.length > 0)
+const translationsChanged = computed(() => TRANSLATION_SETTING_KEYS.some(key => store.state.settings[key] !== DEFAULT_SETTINGS[key]))
+
+function resetTranslations() {
+  for (const key of TRANSLATION_SETTING_KEYS) {
+    if (store.state.settings[key] !== DEFAULT_SETTINGS[key]) store.dispatch('resetSettingToDefault', key)
+  }
+}
 
 const displayNames = computed(() => new Intl.DisplayNames([locale.value, 'en'], {
   type: 'language',
@@ -126,10 +152,6 @@ function removeLanguage(language) {
     'updateCommentTranslationIgnoredLanguages',
     ignoredLanguages.value.filter(code => code !== language)
   )
-}
-
-function updateCommentTranslationsEnabled(value) {
-  store.dispatch('updateEnableCommentTranslations', value)
 }
 </script>
 

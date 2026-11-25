@@ -613,7 +613,11 @@ Settings:
       Force Off: Selalu nonaktif
     Comment Translation:
       Translation: Terjemahan
-      Enable: Tawarkan terjemahan untuk komentar, deskripsi, dan postingan
+      Offer Translations For: Tawarkan terjemahan untuk
+      Descriptions: Deskripsi
+      Enable: Aktifkan terjemahan komentar
+      Enable Description Translations: Aktifkan terjemahan deskripsi
+      Enable Post Translations: Aktifkan terjemahan postingan
       Never Translate: Jangan terjemahkan teks berbahasa
       Choose Language: Pilih bahasa
       Description: Teks dalam bahasa aplikasi sudah dikecualikan. Tambahkan bahasa lain yang dapat Anda baca.

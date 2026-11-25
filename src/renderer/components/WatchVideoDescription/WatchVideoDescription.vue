@@ -9,14 +9,28 @@
     }"
     @click="expandDescriptionWithClick"
   >
-    <FtIconButton
+    <div
       v-if="shownDescription.length > 0"
-      class="descriptionCopyButton"
-      :title="t('Description.Copy Description')"
-      :icon="['fas', 'copy']"
-      theme="base"
-      @click="copyDescription"
-    />
+      class="descriptionActions"
+    >
+      <FtIconButton
+        v-if="translationAvailable"
+        class="descriptionTranslationButton"
+        :title="translationButtonTitle"
+        :icon="['fas', translationLoading ? 'sync' : 'language']"
+        :spin="translationLoading"
+        :disabled="translationLoading"
+        :theme="translatedText === null ? 'base' : 'primary'"
+        @click="toggleTranslation"
+      />
+      <FtIconButton
+        class="descriptionCopyButton"
+        :title="t('Description.Copy Description')"
+        :icon="['fas', 'copy']"
+        theme="base"
+        @click="copyDescription"
+      />
+    </div>
     <div
       ref="descriptionScroll"
       v-overlay-scrollbars="!alwaysExpanded"
@@ -224,15 +238,6 @@
         aria-hidden="true"
       />
     </div>
-    <FtTranslationButton
-      v-if="translationAvailable"
-      class="descriptionTranslationButton"
-      :loading="translationLoading"
-      :translated="translatedText !== null"
-      :language-name="translationLanguageName"
-      :loading-label="t('Text Translation.Translating, please wait')"
-      @click="toggleTranslation"
-    />
     <button
       v-if="showControls && !alwaysExpanded"
       type="button"
@@ -259,7 +264,6 @@ import FtCard from '../ft-card/ft-card.vue'
 import { FtIcon } from '@opentubex/icons'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
-import FtTranslationButton from '../FtTranslationButton/FtTranslationButton.vue'
 
 import { getDescriptionText, linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { copyToClipboard } from '../../helpers/utils'
@@ -358,7 +362,12 @@ const {
   translatedText,
   targetLanguageName: translationLanguageName,
   toggleTranslation
-} = useTextTranslation(() => originalDescriptionContent.value.text)
+} = useTextTranslation(() => originalDescriptionContent.value.text, 'getEnableDescriptionTranslations')
+const translationButtonTitle = computed(() => {
+  if (translationLoading.value) return t('Text Translation.Translating, please wait')
+  if (translatedText.value !== null) return t('Comments.Show original')
+  return t('Comments.Translate to {language}', { language: translationLanguageName.value })
+})
 const descriptionContent = computed(() => {
   if (translatedText.value === null) return originalDescriptionContent.value
   return { html: linkifyDescription(escapeHTML(translatedText.value)), text: translatedText.value }

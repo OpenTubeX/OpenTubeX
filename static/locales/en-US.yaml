@@ -940,7 +940,11 @@ Settings:
     System Default: System Default
     Comment Translation:
       Translation: Translation
-      Enable: Offer translations for comments, descriptions, and posts
+      Offer Translations For: Offer translations for
+      Descriptions: Descriptions
+      Enable: Enable comment translations
+      Enable Description Translations: Enable description translations
+      Enable Post Translations: Enable post translations
       Never Translate: Never translate text in
       Choose Language: Choose a language
       Description: Text in the app language is already excluded. Add any other languages you can read.

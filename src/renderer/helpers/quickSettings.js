@@ -226,6 +226,8 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   },
   ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Enable Translations', 'language', ['fas', 'closed-captioning']],
   ['enableCommentTranslations', 'Settings.General Settings.Comment Translation.Enable', 'language', ['fas', 'language']],
+  ['enableDescriptionTranslations', 'Settings.General Settings.Comment Translation.Enable Description Translations', 'language', ['fas', 'language']],
+  ['enablePostTranslations', 'Settings.General Settings.Comment Translation.Enable Post Translations', 'language', ['fas', 'language']],
   ['useVoiceOverTranslation', 'Settings.Player Settings.Voice-over Translation.Enable', 'language', ['fas', 'headphones'], { electronOnly: true, capacitorSupported: true, iosUnsupported: true }],
   ['hideSubscriptionsShorts', 'Settings.Distraction Free Settings.Hide Subscriptions Shorts', 'content', ['fas', 'eye-slash']],
   ['hideSubscriptionsLive', 'Settings.Distraction Free Settings.Hide Subscriptions Live', 'content', ['fas', 'satellite-dish'], {

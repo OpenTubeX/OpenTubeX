@@ -617,7 +617,11 @@ Settings:
       Force Off: לעולם לא
     Comment Translation:
       Translation: תרגום
-      Enable: הצעת תרגום לתגובות, לתיאורים ולפוסטים
+      Offer Translations For: הצעת תרגום עבור
+      Descriptions: תיאורים
+      Enable: הפעלת תרגום תגובות
+      Enable Description Translations: הפעלת תרגום תיאורים
+      Enable Post Translations: הפעלת תרגום פוסטים
       Never Translate: לא לתרגם טקסט בשפה
       Choose Language: בחירת שפה
       Description: טקסט בשפת היישום ממילא אינו מתורגם. אפשר להוסיף שפות אחרות שביכולתך לקרוא.

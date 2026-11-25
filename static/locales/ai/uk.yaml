@@ -617,7 +617,11 @@ Settings:
       Force Off: Примусово вимкнути
     Comment Translation:
       Translation: Переклад
-      Enable: Пропонувати переклад коментарів, описів і дописів
+      Offer Translations For: Пропонувати переклад для
+      Descriptions: Описи
+      Enable: Увімкнути переклад коментарів
+      Enable Description Translations: Увімкнути переклад описів
+      Enable Post Translations: Увімкнути переклад дописів
       Never Translate: Не перекладати текст мовою
       Choose Language: Вибрати мову
       Description: Текст мовою програми вже не перекладається. Додайте інші мови, які ви розумієте.

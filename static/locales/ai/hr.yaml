@@ -615,7 +615,11 @@ Settings:
       Force Off: Uvijek isključeno
     Comment Translation:
       Translation: Prijevod
-      Enable: Nudi prijevode komentara, opisa i objava
+      Offer Translations For: Ponudi prijevode za
+      Descriptions: Opisi
+      Enable: Omogući prijevode komentara
+      Enable Description Translations: Omogući prijevode opisa
+      Enable Post Translations: Omogući prijevode objava
       Never Translate: Nikad ne prevodi tekst na jeziku
       Choose Language: Odaberi jezik
       Description: Tekst na jeziku aplikacije već je izuzet. Dodajte druge jezike koje razumijete.

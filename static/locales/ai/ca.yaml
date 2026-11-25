@@ -751,7 +751,11 @@ Settings:
       Force Off: Força la desactivació
     Comment Translation:
       Translation: Traducció
-      Enable: Ofereix traduccions de comentaris, descripcions i publicacions
+      Offer Translations For: Ofereix traduccions per a
+      Descriptions: Descripcions
+      Enable: Activa la traducció dels comentaris
+      Enable Description Translations: Activa la traducció de les descripcions
+      Enable Post Translations: Activa la traducció de les publicacions
       Never Translate: No tradueixis mai el text en
       Choose Language: Trieu una llengua
       Description: El text en la llengua de l'aplicació ja s'exclou. Afegiu-hi altres llengües que entengueu.

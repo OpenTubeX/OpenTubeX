@@ -716,7 +716,11 @@ Settings:
     System Default: Systemvorgabe
     Comment Translation:
       Translation: Übersetzung
-      Enable: Übersetzungen für Kommentare, Beschreibungen und Beiträge anbieten
+      Offer Translations For: Übersetzungen anbieten für
+      Descriptions: Beschreibungen
+      Enable: Kommentarübersetzungen aktivieren
+      Enable Description Translations: Beschreibungsübersetzungen aktivieren
+      Enable Post Translations: Beitragsübersetzungen aktivieren
       Never Translate: Texte in diesen Sprachen nie übersetzen
       Choose Language: Sprache auswählen
       Description: Texte in der App-Sprache sind bereits ausgeschlossen. Füge weitere Sprachen hinzu, die du verstehst.

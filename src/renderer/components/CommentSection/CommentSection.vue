@@ -1903,7 +1903,7 @@ const {
   targetLanguage: translationLanguage,
   targetLanguageName: translationLanguageName,
   ignoredLanguages: commentTranslationIgnoredLanguages
-} = useTextTranslationSettings()
+} = useTextTranslationSettings('getEnableCommentTranslations')
 
 /**
  * @param {Comment} comment

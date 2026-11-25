@@ -612,7 +612,11 @@ Settings:
       Force Off: Dezactivează forțat
     Comment Translation:
       Translation: Traducere
-      Enable: Oferă traduceri pentru comentarii, descrieri și postări
+      Offer Translations For: Oferă traduceri pentru
+      Descriptions: Descrieri
+      Enable: Activează traducerea comentariilor
+      Enable Description Translations: Activează traducerea descrierilor
+      Enable Post Translations: Activează traducerea postărilor
       Never Translate: Nu traduce niciodată textul în
       Choose Language: Alegeți o limbă
       Description: Textul în limba aplicației este deja exclus. Adăugați orice alte limbi pe care le puteți citi.

@@ -612,7 +612,11 @@ Settings:
       Force Off: Behartu desgaituta
     Comment Translation:
       Translation: Itzulpena
-      Enable: Eskaini iruzkinen, deskribapenen eta argitalpenen itzulpenak
+      Offer Translations For: Eskaini itzulpenak hauetarako
+      Descriptions: Deskribapenak
+      Enable: Gaitu iruzkinen itzulpena
+      Enable Description Translations: Gaitu deskribapenen itzulpena
+      Enable Post Translations: Gaitu argitalpenen itzulpena
       Never Translate: Ez itzuli hizkuntza honetako testua
       Choose Language: Aukeratu hizkuntza
       Description: Aplikazioaren hizkuntzako testua baztertuta dago dagoeneko. Gehitu irakur ditzakezun gainerako hizkuntzak.

@@ -613,7 +613,11 @@ Settings:
       Force Off: Gorfodi i ffwrdd
     Comment Translation:
       Translation: Cyfieithu
-      Enable: Cynnig cyfieithiadau ar gyfer sylwadau, disgrifiadau a phostiadau
+      Offer Translations For: Cynnig cyfieithiadau ar gyfer
+      Descriptions: Disgrifiadau
+      Enable: Galluogi cyfieithiadau sylwadau
+      Enable Description Translations: Galluogi cyfieithiadau disgrifiadau
+      Enable Post Translations: Galluogi cyfieithiadau postiadau
       Never Translate: Peidio byth â chyfieithu testun yn
       Choose Language: Dewis iaith
       Description: Mae testun yn iaith yr ap eisoes wedi'i hepgor. Ychwanegwch unrhyw ieithoedd eraill rydych yn gallu eu darllen.

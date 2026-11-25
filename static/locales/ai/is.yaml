@@ -612,7 +612,11 @@ Settings:
       Force Off: Alltaf af
     Comment Translation:
       Translation: Þýðing
-      Enable: Bjóða þýðingar á ummælum, lýsingum og færslum
+      Offer Translations For: Bjóða þýðingar fyrir
+      Descriptions: Lýsingar
+      Enable: Virkja þýðingar ummæla
+      Enable Description Translations: Virkja þýðingar lýsinga
+      Enable Post Translations: Virkja þýðingar færslna
       Never Translate: Aldrei þýða texta á
       Choose Language: Veldu tungumál
       Description: Texti á tungumáli forritsins er þegar undanskilinn. Bættu við öðrum tungumálum sem þú getur lesið.

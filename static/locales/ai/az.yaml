@@ -619,7 +619,11 @@ Settings:
       Force Off: Məcburi söndür
     Comment Translation:
       Translation: Tərcümə
-      Enable: Şərhlər, təsvirlər və postlar üçün tərcümə təklif et
+      Offer Translations For: Bunlar üçün tərcümə təklif et
+      Descriptions: Təsvirlər
+      Enable: Şərh tərcümələrini aktivləşdir
+      Enable Description Translations: Təsvir tərcümələrini aktivləşdir
+      Enable Post Translations: Post tərcümələrini aktivləşdir
       Never Translate: Bu dillərdəki mətnləri heç vaxt tərcümə etmə
       Choose Language: Dil seçin
       Description: Tətbiq dilindəki mətnlər artıq istisna edilib. Oxuya bildiyiniz digər dilləri əlavə edin.

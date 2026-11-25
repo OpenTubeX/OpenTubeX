@@ -612,7 +612,11 @@ Settings:
       Force Off: Pakota pois käytöstä
     Comment Translation:
       Translation: Kääntäminen
-      Enable: Tarjoa käännöksiä kommenteille, kuvauksille ja postauksille
+      Offer Translations For: Tarjoa käännöksiä kohteille
+      Descriptions: Kuvaukset
+      Enable: Ota kommenttien käännökset käyttöön
+      Enable Description Translations: Ota kuvausten käännökset käyttöön
+      Enable Post Translations: Ota postausten käännökset käyttöön
       Never Translate: Älä koskaan käännä näillä kielillä kirjoitettua tekstiä
       Choose Language: Valitse kieli
       Description: Sovelluksen kielellä kirjoitettua tekstiä ei käännetä. Lisää muut kielet, joita osaat lukea.

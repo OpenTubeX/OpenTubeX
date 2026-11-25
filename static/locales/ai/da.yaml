@@ -623,7 +623,11 @@ Settings:
       Force Off: Altid slået fra
     Comment Translation:
       Translation: Oversættelse
-      Enable: Tilbyd oversættelse af kommentarer, beskrivelser og opslag
+      Offer Translations For: Tilbyd oversættelse af
+      Descriptions: Beskrivelser
+      Enable: Slå oversættelse af kommentarer til
+      Enable Description Translations: Slå oversættelse af beskrivelser til
+      Enable Post Translations: Slå oversættelse af opslag til
       Never Translate: Oversæt aldrig tekst på
       Choose Language: Vælg et sprog
       Description: Tekst på appens sprog er allerede udeladt. Tilføj andre sprog, du kan læse.

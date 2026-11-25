@@ -385,7 +385,11 @@ Settings:
     Use AI Translation Completions: Uzupełniaj brakujące tłumaczenia tłumaczeniami wygenerowanymi przez AI
     Comment Translation:
       Translation: Tłumaczenie
-      Enable: Proponuj tłumaczenie komentarzy, opisów i wpisów
+      Offer Translations For: Oferuj tłumaczenie dla
+      Descriptions: Opisy
+      Enable: Włącz tłumaczenie komentarzy
+      Enable Description Translations: Włącz tłumaczenie opisów
+      Enable Post Translations: Włącz tłumaczenie wpisów
       Never Translate: Nigdy nie tłumacz tekstu w języku
       Choose Language: Wybierz język
       Description: Tekst w języku aplikacji jest już pomijany. Dodaj pozostałe języki, które rozumiesz.

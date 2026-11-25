@@ -629,7 +629,11 @@ Settings:
       Force Off: Tving av
     Comment Translation:
       Translation: Omsetjing
-      Enable: Tilby omsetjingar av kommentarar, skildringar og innlegg
+      Offer Translations For: Tilby omsetjing av
+      Descriptions: Skildringar
+      Enable: Slå på omsetjing av kommentarar
+      Enable Description Translations: Slå på omsetjing av skildringar
+      Enable Post Translations: Slå på omsetjing av innlegg
       Never Translate: Omset aldri tekst på
       Choose Language: Vel eit språk
       Description: Tekst på appspråket er allereie utelaten. Legg til andre språk du kan lese.

@@ -612,7 +612,11 @@ Settings:
       Force Off: Luôn tắt
     Comment Translation:
       Translation: Dịch thuật
-      Enable: Cung cấp bản dịch cho bình luận, mô tả và bài đăng
+      Offer Translations For: Đề xuất bản dịch cho
+      Descriptions: Mô tả
+      Enable: Bật dịch bình luận
+      Enable Description Translations: Bật dịch mô tả
+      Enable Post Translations: Bật dịch bài đăng
       Never Translate: Không bao giờ dịch văn bản bằng
       Choose Language: Chọn ngôn ngữ
       Description: Văn bản bằng ngôn ngữ của ứng dụng đã được loại trừ. Hãy thêm các ngôn ngữ khác mà bạn đọc được.

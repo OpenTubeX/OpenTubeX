@@ -617,7 +617,11 @@ Settings:
       Force Off: إيقاف دائم
     Comment Translation:
       Translation: الترجمة
-      Enable: عرض ترجمات للتعليقات والأوصاف والمنشورات
+      Offer Translations For: اقتراح الترجمة لما يلي
+      Descriptions: الأوصاف
+      Enable: تمكين ترجمات التعليق
+      Enable Description Translations: تمكين ترجمات الوصف
+      Enable Post Translations: تمكين ترجمات المنشورات
       Never Translate: لا تترجم النصوص مطلقًا
       Choose Language: اختر لغة
       Description: النصوص بلغة التطبيق مستبعدة بالفعل. أضف أي لغات أخرى يمكنك قراءتها.

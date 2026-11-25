@@ -6,7 +6,7 @@
 
 .translationDescription {
   color: var(--tertiary-text-color);
-  margin-block: 0 4px;
+  margin-block: 12px 4px;
   max-inline-size: 700px;
   text-align: center;
 }

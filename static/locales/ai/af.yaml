@@ -786,7 +786,11 @@ Settings:
       Force Off: Dwing af
     Comment Translation:
       Translation: Vertaling
-      Enable: Bied vertalings vir kommentaar, beskrywings en plasings aan
+      Offer Translations For: Bied vertalings aan vir
+      Descriptions: Beskrywings
+      Enable: Aktiveer kommentaarvertalings
+      Enable Description Translations: Aktiveer beskrywingvertalings
+      Enable Post Translations: Aktiveer plasingvertalings
       Never Translate: Moet nooit teks vertaal in
       Choose Language: Kies ’n taal
       Description: Teks in die toeptaal word reeds uitgesluit. Voeg enige ander tale by wat u kan lees.

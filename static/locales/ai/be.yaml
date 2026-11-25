@@ -635,7 +635,11 @@ Settings:
       Force Off: Заўсёды выключана
     Comment Translation:
       Translation: Пераклад
-      Enable: Прапаноўваць пераклад каментароў, апісанняў і публікацый
+      Offer Translations For: Прапаноўваць пераклад для
+      Descriptions: Апісанні
+      Enable: Уключыць пераклад каментароў
+      Enable Description Translations: Уключыць пераклад апісанняў
+      Enable Post Translations: Уключыць пераклад публікацый
       Never Translate: Не перакладаць тэкст на мове
       Choose Language: Выбраць мову
       Description: Тэкст на мове праграмы ўжо выключаны з перакладу. Дадайце іншыя мовы, якія вы разумееце.

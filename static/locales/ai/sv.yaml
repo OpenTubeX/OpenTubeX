@@ -612,7 +612,11 @@ Settings:
       Force Off: Alltid av
     Comment Translation:
       Translation: Översättning
-      Enable: Erbjud översättningar av kommentarer, beskrivningar och inlägg
+      Offer Translations For: Erbjud översättning av
+      Descriptions: Beskrivningar
+      Enable: Aktivera översättning av kommentarer
+      Enable Description Translations: Aktivera översättning av beskrivningar
+      Enable Post Translations: Aktivera översättning av inlägg
       Never Translate: Översätt aldrig text på
       Choose Language: Välj ett språk
       Description: Text på appens språk undantas redan. Lägg till andra språk som du kan läsa.

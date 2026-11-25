@@ -659,7 +659,11 @@ Settings:
       Force Off: Devigi malŝaltita
     Comment Translation:
       Translation: Tradukado
-      Enable: Proponi tradukojn de komentoj, priskriboj kaj afiŝoj
+      Offer Translations For: Proponi tradukojn por
+      Descriptions: Priskriboj
+      Enable: Ŝalti tradukojn de komentoj
+      Enable Description Translations: Ŝalti tradukojn de priskriboj
+      Enable Post Translations: Ŝalti tradukojn de afiŝoj
       Never Translate: Neniam traduki tekston en
       Choose Language: Elektu lingvon
       Description: Teksto en la lingvo de la aplikaĵo jam estas ekskluzivita. Aldonu aliajn lingvojn, kiujn vi povas legi.

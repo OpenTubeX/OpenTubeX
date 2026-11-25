@@ -612,7 +612,11 @@ Settings:
       Force Off: "Bepred diweredekaet"
     Comment Translation:
       Translation: "Troidigezh"
-      Enable: "Kinnig troidigezhioù evit an evezhiadennoù, an deskrivadurioù hag ar pennadoù"
+      Offer Translations For: Kinnig troidigezhioù evit
+      Descriptions: Deskrivadurioù
+      Enable: "Gweredekaat treiñ an evezhiadennoù"
+      Enable Description Translations: Gweredekaat treiñ an deskrivadurioù
+      Enable Post Translations: Gweredekaat treiñ ar pennadoù
       Never Translate: "Na dreiñ morse an testennoù e"
       Choose Language: "Dibab ur yezh"
       Description: "Laosket e vez a-gostez dija an testennoù e yezh an arload. Ouzhpennit ar yezhoù all a c'hallit lenn."

@@ -625,7 +625,11 @@ Settings:
       Force Off: கட்டாயமாக முடக்கு
     Comment Translation:
       Translation: மொழிபெயர்ப்பு
-      Enable: கருத்துகள், விளக்கங்கள், இடுகைகளுக்கு மொழிபெயர்ப்புகளை வழங்கு
+      Offer Translations For: இவற்றுக்கு மொழிபெயர்ப்பை வழங்கு
+      Descriptions: விளக்கங்கள்
+      Enable: கருத்து மொழிபெயர்ப்புகளை இயக்கு
+      Enable Description Translations: விளக்க மொழிபெயர்ப்புகளை இயக்கு
+      Enable Post Translations: இடுகை மொழிபெயர்ப்புகளை இயக்கு
       Never Translate: இந்த மொழி உரையை மொழிபெயர்க்க வேண்டாம்
       Choose Language: ஒரு மொழியைத் தேர்ந்தெடுக்கவும்
       Description: செயலி மொழியிலுள்ள உரை ஏற்கெனவே விலக்கப்பட்டுள்ளது. உங்களால் படிக்க முடிந்த மற்ற மொழிகளைச் சேர்க்கவும்.

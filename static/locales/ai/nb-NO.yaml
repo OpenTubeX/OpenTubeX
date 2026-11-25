@@ -612,7 +612,11 @@ Settings:
       Force Off: Tving av
     Comment Translation:
       Translation: Oversettelse
-      Enable: Tilby oversettelser av kommentarer, beskrivelser og innlegg
+      Offer Translations For: Tilby oversettelse av
+      Descriptions: Beskrivelser
+      Enable: Slå på kommentaroversettelser
+      Enable Description Translations: Slå på beskrivelsesoversettelser
+      Enable Post Translations: Slå på innleggsoversettelser
       Never Translate: Oversett aldri tekst på
       Choose Language: Velg et språk
       Description: Tekst på appens språk blir ikke oversatt. Legg til eventuelle andre språk du kan lese.

@@ -87,6 +87,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     defaultAutoplayInterruptionIntervalHours: 3,
     defaultCaptionSettings: '{}',
     enableCommentTranslations: true,
+    enableDescriptionTranslations: true,
+    enablePostTranslations: true,
     enableCaptionTranslations: false,
     preferredCaptionLocale: '',
     autoTranslatedCaptionLocale: '',

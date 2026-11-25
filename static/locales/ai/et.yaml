@@ -612,7 +612,11 @@ Settings:
       Force Off: Lülita alati välja
     Comment Translation:
       Translation: Tõlkimine
-      Enable: Paku kommentaaride, kirjelduste ja postituste tõlkeid
+      Offer Translations For: Paku tõlget järgmistele
+      Descriptions: Kirjeldused
+      Enable: Luba kommentaaride tõlkimine
+      Enable Description Translations: Luba kirjelduste tõlkimine
+      Enable Post Translations: Luba postituste tõlkimine
       Never Translate: Ära tõlgi teksti järgmises keeles
       Choose Language: Vali keel
       Description: Rakenduse keeles tekst on juba välja jäetud. Lisage muud keeled, mida oskate lugeda.

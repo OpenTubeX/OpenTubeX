@@ -622,7 +622,11 @@ Settings:
       Force Off: Увек искључено
     Comment Translation:
       Translation: Превод
-      Enable: Нуди преводе коментара, описа и постова
+      Offer Translations For: Нуди превођење за
+      Descriptions: Описи
+      Enable: Укључи превођење коментара
+      Enable Description Translations: Укључи превођење описа
+      Enable Post Translations: Укључи превођење постова
       Never Translate: Никада не преводи текст на
       Choose Language: Изаберите језик
       Description: Текст на језику апликације већ је изузет. Додајте све остале језике које разумете.

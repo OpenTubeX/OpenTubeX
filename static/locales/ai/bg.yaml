@@ -615,7 +615,11 @@ Settings:
       Force Off: Винаги изключено
     Comment Translation:
       Translation: Превод
-      Enable: Предлагай превод на коментари, описания и публикации
+      Offer Translations For: Предлагай превод за
+      Descriptions: Описания
+      Enable: Включи превода на коментарите
+      Enable Description Translations: Включи превода на описанията
+      Enable Post Translations: Включи превода на публикациите
       Never Translate: Не превеждай текст на следните езици
       Choose Language: Изберете език
       Description: Текстът на езика на приложението и без това не се превежда. Добавете другите езици, които разбирате.

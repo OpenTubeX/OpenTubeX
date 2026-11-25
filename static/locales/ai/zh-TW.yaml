@@ -612,7 +612,11 @@ Settings:
       Force Off: 強制關閉
     Comment Translation:
       Translation: 翻譯
-      Enable: 為留言、說明和貼文提供翻譯
+      Offer Translations For: 為以下內容提供翻譯
+      Descriptions: 說明
+      Enable: 啟用留言翻譯
+      Enable Description Translations: 啟用說明翻譯
+      Enable Post Translations: 啟用貼文翻譯
       Never Translate: 一律不翻譯以下語言的文字
       Choose Language: 選擇語言
       Description: 系統已排除使用應用程式語言的文字。請加入其他您看得懂的語言。

@@ -710,7 +710,11 @@ Settings:
       Force Off: 강제로 끄기
     Comment Translation:
       Translation: 번역
-      Enable: 댓글, 설명, 게시물 번역 제공
+      Offer Translations For: 번역 제안 대상
+      Descriptions: 설명
+      Enable: 댓글 번역 활성화
+      Enable Description Translations: 설명 번역 활성화
+      Enable Post Translations: 게시물 번역 활성화
       Never Translate: 다음 언어의 텍스트는 번역하지 않기
       Choose Language: 언어 선택
       Description: 앱 언어로 작성된 텍스트는 이미 제외됩니다. 읽을 수 있는 다른 언어를 추가하세요.
