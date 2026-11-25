@@ -82,9 +82,17 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
 
-    const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
-      type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+    const touch = (type, x, y, timestamp) => session.send('Input.dispatchTouchEvent', {
+      type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }], timestamp,
     })
+    // The player tells taps from holds by their event times. A slow device
+    // can take longer than a tap between two DevTools calls, so date the
+    // release like a finger would.
+    const tap = async (x, y) => {
+      const start = Date.now() / 1000
+      await touch('touchStart', x, y, start)
+      await touch('touchEnd', undefined, undefined, start + 0.08)
+    }
     const swipe = async direction => {
       const bounds = await player.boundingBox()
       const x = bounds.x + bounds.width / 2
@@ -96,30 +104,45 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       }
       await touch('touchEnd')
     }
+    // Shaka's idle timer starts at the last touchend. On a slow device, the
+    // fullscreen change settles seconds after it, so time the hide in the page.
+    await page.evaluate(() => {
+      const controls = document.querySelector('.ftVideoPlayer .shaka-controls-container')
+      const timing = { touchEnd: 0, hidden: 0, abort: new AbortController() }
+      window.__fullscreenControlsTiming = timing
+      document.addEventListener('touchend', () => { timing.touchEnd = performance.now() }, { capture: true, signal: timing.abort.signal })
+      timing.observer = new MutationObserver(() => {
+        if (!controls.hasAttribute('shown') && !timing.hidden) timing.hidden = performance.now()
+      })
+      timing.observer.observe(controls, { attributes: true, attributeFilter: ['shown'] })
+    })
     await swipe(-1)
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null), { timeout: 15000 }).toBe(true)
     assert.equal(await player.getAttribute('data-playing-interface-hide-delay'), '5')
     await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
     // The inline default is three seconds. Staying visible past that default
     // distinguishes the fullscreen preference from merely restarting a timer.
-    await page.waitForTimeout(4000)
-    await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(controls).not.toHaveAttribute('shown', { timeout: 6000 })
+    const shownFor = await page.evaluate(() => {
+      const timing = window.__fullscreenControlsTiming
+      timing.observer.disconnect()
+      timing.abort.abort()
+      delete window.__fullscreenControlsTiming
+      return timing.hidden - timing.touchEnd
+    })
+    assert.ok(shownFor > 4000, `The controls hid ${Math.round(shownFor)} ms after the swipe, before the 5 second fullscreen delay`)
     await expect(controls.locator('.shaka-controls-button-panel')).toBeHidden()
     await expect(controls.locator('.shaka-seek-bar-container')).toHaveCSS('opacity', '0')
 
     // A fresh tap must reveal controls once and still allow them to hide.
     const bounds = await player.boundingBox()
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).toHaveAttribute('shown', 'true')
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).not.toHaveAttribute('shown', { timeout: 1000 })
-    await touch('touchStart', bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
-    await touch('touchEnd')
+    await tap(bounds.x + bounds.width / 2, bounds.y + bounds.height * 0.35)
     await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(controls).not.toHaveAttribute('shown', { timeout: 6000 })
+    await expect(controls).not.toHaveAttribute('shown', { timeout: 15000 })
     await swipe(1)
     await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
     assert.equal(await video.evaluate(video => video.paused), false, 'Swipes must not toggle playback')
