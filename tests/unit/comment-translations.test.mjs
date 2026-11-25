@@ -106,6 +106,14 @@ test('keeps links that the translation moved', async () => {
   assert.equal(translated, 'https://example.com/b と https://example.com/a を比較 #vergleich')
 })
 
+test('keeps translated text that follows a URL directly', async () => {
+  const translated = await translateTextKeepingLayout(
+    'Siehe https://example.com/hilfe',
+    async () => 'https://example.com/helpをご覧ください。'
+  )
+  assert.equal(translated, 'https://example.com/hilfeをご覧ください。')
+})
+
 test('keeps merged translated lines and only restores links it can match', async () => {
   const translated = await translateTextKeepingLayout(
     'Erste Zeile\nzweite Zeile https://example.com/a',

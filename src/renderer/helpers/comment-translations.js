@@ -159,8 +159,10 @@ export function formatCommentTranslation(translatedText) {
 }
 
 // URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
-// translates the words in them too, which would break their links.
-const PROTECTED_TOKEN_PATTERN = /\bhttps?:\/\/\S+|\bwww\.\S+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
+// translates the words in them too, which would break their links. URLs end at
+// the first character a URL can't contain unencoded, as languages such as
+// Japanese continue the sentence right after them.
+const PROTECTED_TOKEN_PATTERN = /\bhttps?:\/\/[\w!#$%&'()*+,\-./:;=?@[\]~]+|\bwww\.[\w!#$%&'()*+,\-./:;=?@[\]~]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_][\p{L}\p{N}_.-]*/gu
 
 /**
  * Put the source's URLs, hashtags and handles back into its translation, as
