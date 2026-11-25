@@ -28,8 +28,9 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
   const rotation = adb('settings', 'get', 'system', 'user_rotation')
   const automaticRotation = adb('settings', 'get', 'system', 'accelerometer_rotation')
   const originalRoute = await page.evaluate(() => location.hash)
+  let videoElement
   try {
-    await page.reload()
+    // The script runner starts the app afresh for each file, so this needs no reload.
     adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
     adb('settings', 'put', 'system', 'user_rotation', '0')
     await page.locator('.profileTrigger').waitFor()
@@ -107,18 +108,31 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     const preview = player.locator('.shaka-player-ui-thumbnail-container')
     const previewLabel = preview.locator('.shaka-player-ui-thumbnail-time')
     const filmstrip = player.locator('.ft-seek-filmstrip')
-    const seekBar = player.locator('.shaka-seek-bar')
-    const seekBarTime = () => seekBar.evaluate(element => Number(element.value))
     await expect.poll(() => video.evaluate(video => ({ ready: video.readyState, source: video.currentSrc.slice(0, 80), error: video.error?.message })), { timeout: 15000 }).toMatchObject({ ready: 4 })
+    // A slow device answers each call late, and a locator first looks up its
+    // element in a call of its own, so the many reads below go to the element
+    // or the page directly.
+    videoElement = await video.elementHandle()
+    const seekBarTime = () => page.evaluate(() => Number(document.querySelector('.ftVideoPlayer .shaka-seek-bar').value))
     const touch = (type, points = []) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: points,
     })
-    const resetTime = async (time = 15) => {
-      await video.evaluate((video, time) => { video.pause(); video.currentTime = time }, time)
-      await expect.poll(() => video.evaluate(video => video.seeking)).toBe(false)
-    }
+    const resetTime = (time = 15) => videoElement.evaluate((video, time) => {
+      if (video !== document.querySelector('.ftVideoPlayer video')) throw new Error('The player replaced its video element')
+      video.pause()
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error(`Seeking to ${time} s did not finish`)), 15000)
+        video.addEventListener('seeked', () => {
+          clearTimeout(timeout)
+          resolve()
+        }, { once: true })
+        video.currentTime = time
+      })
+    }, time)
+    // The player keeps its size until the next rotation or fullscreen change.
+    let bounds = null
     const beginSeek = async (start, distance) => {
-      const bounds = await player.boundingBox()
+      bounds ??= await player.boundingBox()
       const point = { x: bounds.x + bounds.width * start, y: bounds.y + bounds.height * 0.42 }
       await touch('touchStart', [point])
       for (let step = 1; step <= 5; step++) {
@@ -135,6 +149,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     for (const orientation of ['0', '1']) {
       adb('settings', 'put', 'system', 'user_rotation', orientation)
       await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(orientation === '1')
+      bounds = null
       // Fullscreen must own horizontal touch even with pinch and vertical
       // fullscreen swipes disabled; pan-x otherwise cancels the pointer stream.
       await expect(player).toHaveCSS('touch-action', 'none')
@@ -149,33 +164,33 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       await expect(preview).toBeVisible()
       await expect.poll(seekBarTime).toBe(21)
       await expect(filmstrip).toBeHidden()
-      assert.equal(await video.evaluate(video => video.currentTime), 15, 'Dragging only previews the target')
-      assert.equal(await video.evaluate(video => video.playbackRate), 1, 'Horizontal movement must not adjust speed')
+      assert.equal(await videoElement.evaluate(video => video.currentTime), 15, 'Dragging only previews the target')
+      assert.equal(await videoElement.evaluate(video => video.playbackRate), 1, 'Horizontal movement must not adjust speed')
       if (process.env.ANDROID_ARTIFACT_DIR) {
         await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-${orientation}.png`)
       }
       await touch('touchEnd')
       await expect(preview).toBeHidden()
-      await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(21)
-      assert.equal(await video.evaluate(video => video.paused), true, 'Paused playback stays paused')
+      await expect.poll(() => videoElement.evaluate(video => video.currentTime)).toBe(21)
+      assert.equal(await videoElement.evaluate(video => video.paused), true, 'Paused playback stays paused')
 
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', false))
       await resetTime()
       await beginSeek(0.25, 0.2)
       await expect(preview).toBeHidden()
       await expect.poll(seekBarTime).toBe(21)
-      assert.equal(await video.evaluate(video => video.currentTime), 15)
+      assert.equal(await videoElement.evaluate(video => video.currentTime), 15)
       if (process.env.ANDROID_ARTIFACT_DIR) {
         await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-no-popup-${orientation}.png`)
       }
       await touch('touchEnd')
-      await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(21)
+      await expect.poll(() => videoElement.evaluate(video => video.currentTime)).toBe(21)
       await resetTime()
       await beginSeek(0.75, -0.2)
       await expect.poll(seekBarTime).toBe(9)
       await touch('touchCancel')
       await expect.poll(seekBarTime).toBe(15)
-      assert.equal(await video.evaluate(video => video.currentTime), 15)
+      assert.equal(await videoElement.evaluate(video => video.currentTime), 15)
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', true))
 
       await resetTime()
@@ -183,28 +198,28 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       await expect(previewLabel).toHaveText('0:09')
       await expect.poll(seekBarTime).toBe(9)
       await touch('touchEnd')
-      await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(9)
+      await expect.poll(() => videoElement.evaluate(video => video.currentTime)).toBe(9)
 
       await resetTime(1)
       await beginSeek(0.75, -0.2)
       await expect(previewLabel).toHaveText('0:00')
       await touch('touchEnd')
-      await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(0)
+      await expect.poll(() => videoElement.evaluate(video => video.currentTime)).toBe(0)
       await resetTime(29)
       await beginSeek(0.25, 0.2)
       await expect(previewLabel).toHaveText('0:30')
       await touch('touchEnd')
-      await expect.poll(() => video.evaluate(video => video.seeking)).toBe(false)
-      await expect.poll(() => video.evaluate(video => video.duration - video.currentTime)).toBeCloseTo(0.1, 4)
-      assert.equal(await video.evaluate(video => video.ended), false, 'Seeking to the end leaves the paused video at its last frame')
-      assert.equal(await video.evaluate(video => video.paused), true)
+      await expect.poll(() => videoElement.evaluate(video => video.seeking)).toBe(false)
+      await expect.poll(() => videoElement.evaluate(video => video.duration - video.currentTime)).toBeCloseTo(0.1, 4)
+      assert.equal(await videoElement.evaluate(video => video.ended), false, 'Seeking to the end leaves the paused video at its last frame')
+      assert.equal(await videoElement.evaluate(video => video.paused), true)
 
       await resetTime()
       await beginSeek(0.25, 0.2)
       await expect(preview).toBeVisible()
       await touch('touchCancel')
       await expect(preview).toBeHidden()
-      assert.equal(await video.evaluate(video => video.currentTime), 15)
+      assert.equal(await videoElement.evaluate(video => video.currentTime), 15)
       await expect.poll(seekBarTime).toBe(15)
 
       await resetTime()
@@ -212,7 +227,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       await touch('touchStart', [{ ...point, id: 0 }, { x: point.x + 50, y: point.y, id: 1 }])
       await expect(preview).toBeHidden()
       await touch('touchEnd')
-      assert.equal(await video.evaluate(video => video.currentTime), 15, 'A second finger cancels seeking')
+      assert.equal(await videoElement.evaluate(video => video.currentTime), 15, 'A second finger cancels seeking')
       await expect.poll(seekBarTime).toBe(15)
     }
 
@@ -246,6 +261,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     for (const orientation of ['0', '1']) {
       adb('settings', 'put', 'system', 'user_rotation', orientation)
       await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(orientation === '1')
+      bounds = null
       await resetTime()
       await beginSeek(0.25, 0.2)
       const markedFrame = () => filmstrip.evaluate(element => {
@@ -292,17 +308,17 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileFullscreenSeek', false))
     await expect(preview).toBeHidden()
     await touch('touchEnd')
-    assert.equal(await video.evaluate(video => video.currentTime), 15, 'Turning off the setting cancels an active seek')
+    assert.equal(await videoElement.evaluate(video => video.currentTime), 15, 'Turning off the setting cancels an active seek')
     await expect.poll(seekBarTime).toBe(15)
     await resetTime()
     await beginSeek(0.25, 0.2)
     await expect(preview).toBeHidden()
     await touch('touchEnd')
-    assert.equal(await video.evaluate(video => video.currentTime), 15, 'Disabling the setting prevents horizontal seeking')
+    assert.equal(await videoElement.evaluate(video => video.currentTime), 15, 'Disabling the setting prevents horizontal seeking')
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileFullscreenSeek', true))
 
     await resetTime()
-    await video.evaluate(video => { video.loop = true; return video.play() })
+    await videoElement.evaluate(video => { video.loop = true; return video.play() })
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
     await beginSeek(0.25, 0.2)
     await expect(preview).toBeVisible()
@@ -313,29 +329,34 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     const previewTime = await seekBarTime()
     // Allow multiple Shaka progress refreshes and video timeupdates while the
     // finger stays down: they must not reset the preview thumb to playback.
-    const startingPlaybackTime = await video.evaluate(video => video.currentTime)
-    await expect.poll(() => video.evaluate(video => video.currentTime)).toBeGreaterThan(startingPlaybackTime + 0.5)
+    // Count them, since the looping video can wrap around to its start.
+    await videoElement.evaluate(video => {
+      video.fullscreenSeekUpdates = 0
+      video.addEventListener('timeupdate', () => video.fullscreenSeekUpdates++)
+    })
+    await expect.poll(() => videoElement.evaluate(video => video.fullscreenSeekUpdates)).toBeGreaterThan(3)
     assert.equal(await seekBarTime(), previewTime)
     // Capture the committed position when seeking starts. Playback can advance
     // between releasing the touch and the next CDP round trip on slow emulators,
     // and can even loop back to the start, so record every seek.
-    await video.evaluate(video => {
+    await videoElement.evaluate(video => {
       video.fullscreenSeekTargets = []
       video.addEventListener('seeking', () => video.fullscreenSeekTargets.push(video.currentTime))
     })
     await touch('touchEnd')
     await expect(preview).toBeHidden()
-    await expect.poll(() => video.evaluate((video, time) => video.fullscreenSeekTargets.some(target => Math.abs(target - time) < 0.5), previewTime)).toBe(true)
-    assert.equal(await video.evaluate(video => video.paused), false, 'Playing video continues after seeking')
+    await expect.poll(() => videoElement.evaluate((video, time) => video.fullscreenSeekTargets.some(target => Math.abs(target - time) < 0.5), previewTime)).toBe(true)
+    assert.equal(await videoElement.evaluate(video => video.paused), false, 'Playing video continues after seeking')
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
     assert.equal(await page.evaluate(() => document.fullscreenElement !== null), true)
-    await video.evaluate(video => video.pause())
+    await videoElement.evaluate(video => video.pause())
     await page.evaluate(() => document.exitFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+    bounds = null
     await resetTime()
     await beginSeek(0.25, 0.2)
     await touch('touchEnd')
-    assert.equal(await video.evaluate(video => video.currentTime), 15, 'Inline swipes must not seek')
+    assert.equal(await videoElement.evaluate(video => video.currentTime), 15, 'Inline swipes must not seek')
     adb('settings', 'put', 'system', 'user_rotation', '0')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -383,6 +404,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       adb('run-as', 'org.opentubex.app.dev', 'rm', '-f', appSpritePath)
       adb('rm', '-f', deviceSpritePath)
       await rm(spritePath, { force: true })
+      await videoElement?.dispose()
       await watch?.dispose()
       await page.emulateMedia({ reducedMotion: null }).catch(() => {})
       await session.detach().catch(() => {})
