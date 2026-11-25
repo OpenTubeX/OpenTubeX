@@ -1870,6 +1870,8 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 // received.
 // `store.persistSettingsSyncBaseline` receives the server entries this sync
 // merged and applied, so a failed upload cannot make them look like local edits.
+// `store.readSavedSettingEditTimes` returns the saved edit times, which include
+// edits other windows saved but this window hasn't received yet.
 // `options.dataScope` is the separate profile whose data the store shows, whose
 // channel settings sync under their own key. Those of the deleted separate
 // profiles in `options.removedProfileIds` are removed.
@@ -1894,6 +1896,10 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     return times !== null && typeof times === 'object' && !Array.isArray(times) ? times : {}
   }
   const localUpdatedAt = editTimes()
+  const savedEditTimeChanged = async key => {
+    const saved = await store.readSavedSettingEditTimes?.() ?? {}
+    return Object.hasOwn(saved, key) && saved[key] !== localUpdatedAt[key]
+  }
   const local = Object.fromEntries([
     [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
     // A profile with its own settings may show other values, which sync with that profile.
@@ -2015,7 +2021,10 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY &&
-          (!metadataEquals(currentValue, value) || settingEditedBetween(localUpdatedAt, editTimes(), key))) {
+          (!metadataEquals(currentValue, value) || settingEditedBetween(localUpdatedAt, editTimes(), key) ||
+            // Another window saves an edit's time before this one receives the edit.
+            // Saving a profile's own settings checks the saved times itself.
+            (!profileSettingsKey && await savedEditTimeChanged(key)))) {
         skip()
         continue
       }

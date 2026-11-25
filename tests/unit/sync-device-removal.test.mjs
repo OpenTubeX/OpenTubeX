@@ -54,6 +54,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     }
   }
   const actions = vm.runInNewContext(`({${deleteSource}})`, {
+    readSavedSettingEditTimes: async () => ({}),
     whenSyncServerSnapshotLoaded: async () => {},
     SyncServerClient: class {
       async getAccountSessions() {

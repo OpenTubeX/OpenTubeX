@@ -557,6 +557,16 @@ function saveSettingEdit(commit, settingId, save, editedAt = Date.now(), editedP
 const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
 
 /**
+ * The edit times saved for sync. Another window saves an edit's time before
+ * this window receives it, so these can be newer than the ones it shows.
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function readSavedSettingEditTimes() {
+  const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
+  return isPlainObject(saved) ? saved : {}
+}
+
+/**
  * Optimistic edits show their value before their edit time is saved, so sync
  * waits for this window's setting writes.
  * @returns {Promise<unknown> | null} settles once the writes in flight finish,
@@ -1713,8 +1723,7 @@ const customActions = {
       const current = await DBSettingHandlers.findValue(id)
       if (!sameSettingValue(syncedProfileSettings(current, isSynced), previous)) return
       // Edits save their edit times before their value, inside the lock this holds.
-      const savedUpdatedAt = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
-      if (settingEditedBetween(updatedAt, isPlainObject(savedUpdatedAt) ? savedUpdatedAt : {}, id)) return
+      if (settingEditedBetween(updatedAt, await readSavedSettingEditTimes(), id)) return
       if (!isPlainObject(current) && !await profileExists(profileId)) return
       const next = isPlainObject(settings)
         ? {

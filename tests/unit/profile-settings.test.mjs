@@ -340,6 +340,28 @@ test('settings edited and changed back while a sync saves keep that edit', async
   }
 })
 
+test('sync keeps a shared setting that another window edited and this one hasn\'t received yet', async () => {
+  const client = createClient([{ key: 'hideComments', value: true, updatedAt: 30 }])
+  const previous = { hideComments: { key: 'hideComments', value: false, updatedAt: 10 } }
+  const device = createDevice({})
+  device.state.settings.syncServerSettingUpdatedAt.hideComments = 10
+  // Another window hid comments at 35 and showed them again at 40.
+  let saved = { hideComments: 40 }
+  device.readSavedSettingEditTimes = async () => saved
+  const applied = []
+  device.dispatch = async action => { applied.push(action) }
+  const snapshot = await context.syncSettings(client, device, previous)
+  assert.deepEqual(applied, [])
+  assert.equal(client.entries.find(entry => entry.key === 'hideComments').updatedAt, 30)
+
+  // Once this window has the edit, the next sync uploads it.
+  device.state.settings.syncServerSettingUpdatedAt.hideComments = 40
+  saved = { hideComments: 40 }
+  await context.syncSettings(client, device, snapshot)
+  assert.deepEqual(applied, [])
+  assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === 'hideComments'))), { key: 'hideComments', value: false, updatedAt: 40 })
+})
+
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 /** The source of settings.js from `start` up to `end`, which must both be in it */
 const between = (start, end) => {
@@ -467,6 +489,7 @@ test('sync saves a profile\'s own settings only if none was edited since it read
     settingWrites: { track: (_id, run) => run() },
     runLockedSettingUpdate: (_id, run) => run().then(() => true),
     profileExists: async () => true,
+    readSavedSettingEditTimes: async () => structuredClone(saved.get('syncServerSettingUpdatedAt')),
     DBSettingHandlers: {
       findValue: async key => structuredClone(saved.get(key)),
       upsert: async (key, value) => { saved.set(key, structuredClone(value)) },
