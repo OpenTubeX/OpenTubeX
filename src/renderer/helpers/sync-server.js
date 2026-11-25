@@ -2020,11 +2020,14 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         else delete merged[key]
         if (mergesAgainstLists(key)) skippedSettings.add(key)
       }
+      const editedHere = () => !metadataEquals(profileSettingsKey ? currentValue : sharedSettingValue(store.state.settings, key), value) ||
+        settingEditedBetween(localUpdatedAt, editTimes(), key)
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY &&
-          (!metadataEquals(currentValue, value) || settingEditedBetween(localUpdatedAt, editTimes(), key) ||
-            // Another window saves an edit's time before this one receives the edit.
-            // Saving a profile's own settings checks the saved times itself.
-            (!profileSettingsKey && await savedEditTimeChanged(key)))) {
+          (editedHere() ||
+            // Another window saves an edit's time before this one receives the
+            // edit. This window can edit too while the times load. Saving a
+            // profile's own settings checks the saved times itself.
+            (!profileSettingsKey && (await savedEditTimeChanged(key) || editedHere())))) {
         skip()
         continue
       }

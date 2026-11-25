@@ -360,6 +360,19 @@ test('sync keeps a shared setting that another window edited and this one hasn\'
   await context.syncSettings(client, device, snapshot)
   assert.deepEqual(applied, [])
   assert.deepEqual(JSON.parse(JSON.stringify(client.entries.find(entry => entry.key === 'hideComments'))), { key: 'hideComments', value: false, updatedAt: 40 })
+
+  // While the sync loads the saved times, this window shows comments at 43
+  // and hides them again at 45.
+  client.entries = [{ key: 'hideComments', value: false, updatedAt: 50 }]
+  device.state.settings.hideComments = true
+  device.state.settings.syncServerSettingUpdatedAt.hideComments = 41
+  device.readSavedSettingEditTimes = async () => {
+    const times = { hideComments: 41 }
+    device.state.settings.syncServerSettingUpdatedAt = { hideComments: 45 }
+    return times
+  }
+  await context.syncSettings(client, device, { hideComments: { key: 'hideComments', value: true, updatedAt: 41 } })
+  assert.deepEqual(applied, [])
 })
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
