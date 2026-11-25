@@ -86,6 +86,20 @@ export const SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY = 'opentubex.subscriptionAu
 // The tab id the Electron refresh lock was acquired with. Progress reports to the
 // main process must use this id, as the active tab may change during the refresh.
 let electronRefreshOwnerTabId = null
+// Whether this renderer holds the refresh lock, from acquiring it until its
+// release is done.
+let refreshLockHeld = false
+
+/**
+ * Whether this renderer holds the shared refresh lock. Its own start, progress
+ * and finish events keep its state current then, ahead of the shared state:
+ * the main process can still deliver a progress broadcast after the refresh
+ * has finished here, which would bring the finished refresh back until the
+ * release reaches the renderer.
+ */
+export function holdsSubscriptionRefreshLock() {
+  return refreshLockHeld
+}
 
 /**
  * Cancellation state of the refresh this renderer is running, if any.
@@ -363,20 +377,36 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, { t, chan
     }
 
     electronRefreshOwnerTabId = ownerTabId
+    refreshLockHeld = true
     try {
       return await runRefresh()
     } finally {
       electronRefreshOwnerTabId = null
-      await window.ftElectron.subscriptionAutoRefresh.release(ownerTabId)
+      try {
+        await window.ftElectron.subscriptionAutoRefresh.release(ownerTabId)
+      } finally {
+        refreshLockHeld = false
+      }
     }
   }
 
   if (navigator.locks) {
-    return navigator.locks.request(
-      SUBSCRIPTION_REFRESH_LOCK_NAME,
-      { ifAvailable: true },
-      lock => lock ? runRefresh() : null
-    )
+    let acquired = false
+    try {
+      return await navigator.locks.request(
+        SUBSCRIPTION_REFRESH_LOCK_NAME,
+        { ifAvailable: true },
+        lock => {
+          if (!lock) return null
+          acquired = true
+          refreshLockHeld = true
+          return runRefresh()
+        }
+      )
+    } finally {
+      // The lock is released once the request settles
+      if (acquired) refreshLockHeld = false
+    }
   }
 
   // Without Web Locks, the synchronized state is the only sign of a refresh

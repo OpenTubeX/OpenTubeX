@@ -40,6 +40,7 @@ import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
+  holdsSubscriptionRefreshLock,
   notifyNewSubscriptionChannelErrors,
   notifySubscriptionChannelRefreshed,
   refreshSubscriptionLiveFromRemote,
@@ -466,6 +467,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       let state
       if (process.env.IS_ELECTRON) {
         state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+        if (holdsSubscriptionRefreshLock()) return
       } else if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         state = await getAndroidSubscriptionRefreshState()
         if (version !== androidSubscriptionRefreshStateVersion) return
@@ -499,6 +501,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         return
       } else if (navigator.locks) {
         const { held } = await navigator.locks.query()
+        if (holdsSubscriptionRefreshLock()) return
         const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
         if (!inProgress) {
           localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
@@ -1307,9 +1310,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       removeBackgroundResultsAvailableListener = window.ftElectron.subscriptionAutoRefresh.onBackgroundResultsAvailable(
         handleSubscriptionAutoRefreshVisibilityChange
       )
-      removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
-        applySubscriptionAutoRefreshState
-      )
+      removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(state => {
+        if (!holdsSubscriptionRefreshLock()) applySubscriptionAutoRefreshState(state)
+      })
       removeSubscriptionAutoRefreshCancelListener = window.ftElectron.subscriptionAutoRefresh.onCancelRequested(
         cancelSubscriptionRefresh
       )
