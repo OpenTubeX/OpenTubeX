@@ -160,8 +160,15 @@ export function formatCommentTranslation(translatedText) {
 
 // URLs, e-mail addresses, `#hashtags` and `@handles`. The translation service
 // translates the words in them too, which would break their links. Sentence
-// punctuation after a URL or handle stays outside of it.
-const PROTECTED_TOKEN_PATTERN = /\b(?:https?:\/\/|www\.)\S*[^\s.,;:!?'")\]]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+|(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_](?:[\p{L}\p{N}_.-]*[\p{L}\p{N}_])?/gu
+// punctuation after a URL or handle stays outside of it. URLs may contain
+// letters like `ü`, but end at CJK text, which these languages write right
+// after a URL and which URLs usually percent-encode.
+const CJK_CHARACTERS = String.raw`\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}\p{scx=Hangul}\u3000-\u303F\uFF00-\uFFEF`
+const PROTECTED_TOKEN_PATTERN = new RegExp([
+  String.raw`\b(?:https?:\/\/|www\.)[^\s${CJK_CHARACTERS}]*[^\s.,;:!?'")\]${CJK_CHARACTERS}]`,
+  String.raw`[\w.+-]+@[\w-]+(?:\.[\w-]+)+`,
+  String.raw`(?<![\p{L}\p{N}_])[#@][\p{L}\p{N}_](?:[\p{L}\p{N}_.-]*[\p{L}\p{N}_])?`,
+].join('|'), 'gu')
 // The service keeps numbered placeholders like `{0}` in place, even when it reorders the sentence.
 const PLACEHOLDER_PATTERN = /\{(\d+)\}/g
 

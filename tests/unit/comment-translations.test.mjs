@@ -106,6 +106,15 @@ test('restores links that the translation moved or attached words to', async () 
   assert.equal(translated, '@kanal をフォローして、https://example.com/b とhttps://example.com/a を比較してください。')
 })
 
+test('ends URLs before Japanese text that follows them', async () => {
+  const requests = []
+  await translateTextKeepingLayout('詳しくは https://example.com/helpをご覧ください。', async (text) => {
+    requests.push(text)
+    return 'See {0} for details.'
+  })
+  assert.deepEqual(requests, ['詳しくは {0}をご覧ください。'])
+})
+
 test('keeps merged lines and the links the translation dropped', async () => {
   const translated = await translateTextKeepingLayout(
     'Erste Zeile #eins\nzweite Zeile https://example.com/a',
