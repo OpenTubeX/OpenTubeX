@@ -7495,6 +7495,8 @@ function handlePause() {
   if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
     initialAutoplayCanceled = true
   }
+  // Also called directly, without a pause event.
+  updateAutoplayPending()
   const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
   if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
   // Only a pause during playback rewinds on resume. Ending, scrubbing,
