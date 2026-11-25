@@ -314,6 +314,11 @@ async function fetchReplies(commentThread) {
       })
     }
   }
+  // When the linked reply is the only one YouTube shows in its thread, it
+  // leaves out the button that loads the replies, so there are none to load.
+  if (!commentThread.is_prepopulated && !commentThread.comment_replies_data?.sub_threads.some(item => item.type === 'ContinuationItem')) {
+    return replies
+  }
   await commentThread.getReplies()
   collect(commentThread.replies)
   /** @type {any} */
