@@ -994,10 +994,9 @@ test.describe('watch page', () => {
 
   test('retries yt-dlp with its default clients for a limited live DVR manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
-      contentType: 'application/x-mpegURL',
-      body: '#EXTM3U\n'
-    }))
+    // An unplayable manifest would make the player's own stream error recovery
+    // extract again at an unpredictable time, adding calls to the list below.
+    await routeLiveHls(page, /^https:\/\/example\.invalid\/.*\.m3u8$/)
     await openMockedVideo(page)
 
     await app.electronApp.evaluate(({ ipcMain }) => {
@@ -1019,11 +1018,24 @@ test.describe('watch page', () => {
     })
 
     const watchView = await watchViewHandle(page)
+    // The toast expires after a few seconds, so count the notifications instead
+    // of the toasts still on screen at the end.
+    await watchView.evaluate((view) => {
+      const showTabToast = view.showTabToast
+      window.__tabToastMessages = []
+      view.showTabToast = (options) => {
+        window.__tabToastMessages.push(options.message)
+        return showTabToast(options)
+      }
+    })
     await watchView.evaluate((view) => view.handlePlaybackEngineChange('yt-dlp'))
 
     expect(await app.electronApp.evaluate(
       () => globalThis.__ytDlpLiveDvrFallbackDefaultClients
     )).toEqual([false, true])
+    await expect(page.locator('.toast', {
+      hasText: 'The preferred yt-dlp clients could not provide playable streams'
+    })).toHaveCount(1)
     expect(await watchView.evaluate((view) => ({
       activeEngine: view.activePlaybackEngine,
       manifest: view.manifestSrc
@@ -1042,9 +1054,9 @@ test.describe('watch page', () => {
     expect(await app.electronApp.evaluate(
       () => globalThis.__ytDlpLiveDvrFallbackDefaultClients
     )).toEqual([false, true, false, true])
-    await expect(page.locator('.toast', {
-      hasText: 'The preferred yt-dlp clients could not provide playable streams'
-    })).toHaveCount(1)
+    expect(await page.evaluate(() => window.__tabToastMessages.filter(
+      message => message.startsWith('The preferred yt-dlp clients could not provide playable streams')
+    ))).toHaveLength(1)
   })
 
   for (const scenario of ['preferred clients', 'default clients', 'authenticated default clients', 'anonymous extraction fails']) {
