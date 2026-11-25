@@ -6156,16 +6156,16 @@ export default defineComponent({
       this.markAsWatchedIfFinished(currentSeconds, true)
     },
 
-    /** Nothing plays after the ended video, so the player shows its end screen. */
-    stopAfterVideoEnded: function () {
-      tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
-      this.$refs.player?.stopAutoplay()
-    },
-
     handleVideoEnded: function () {
       // Android keeps its playback service for the next video until this
       // reports that nothing follows.
       if (!this.continueAfterVideoEnded()) this.stopAfterVideoEnded()
+    },
+
+    /** Nothing plays after the ended video, so the player shows its end screen. */
+    stopAfterVideoEnded: function () {
+      tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+      this.$refs.player?.stopAutoplay()
     },
 
     /** @returns {boolean} whether another video starts or is still coming */
