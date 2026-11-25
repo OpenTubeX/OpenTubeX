@@ -79,7 +79,7 @@ export const SYNC_SETTING_LABELS = {
   disableAbRepeat: 'Settings.Distraction Free Settings.Disable A-B Repeat',
   disableChannelLinks: 'Settings.Parental Control Settings.Disable Channel Links',
   displayVideoPlayButton: 'Settings.Player Settings.Display Play Button In Video Player',
-  enableCaptionTranslations: 'Settings.Player Settings.Caption Appearance.Enable Translations',
+  enableCaptionTranslations: 'Settings.Player Settings.Caption Appearance.Auto-select Translated Captions',
   autoTranslatedCaptionLocale: 'Video.Player.Auto-translate',
   secondaryCaptionLocale: 'Video.Player.Secondary Captions',
   enableClosedAppSubscriptionRefresh: 'Settings.Subscription Settings.Refresh Subscriptions While App Is Closed',

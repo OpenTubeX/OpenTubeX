@@ -962,7 +962,7 @@ Settings:
       Captions: Subtiitrid
       Preferred Language: Eelistatud subtiitrikeel
       Application Language: Rakenduse keel
-      Enable Translations: Luba subtiitrite tõlkimine
+      Auto-select Translated Captions: Vali tõlgitud subtiitrid automaatselt
       Text Color: Teksti värv
       Background Color: Taustavärv
       Background Opacity: Tausta läbipaistmatus
@@ -2497,7 +2497,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
     Switch to Audio in Background: 'Esitab helivorminguid, kui rakendus töötab taustal või ekraan on välja lülitatud, mis säästab andmesidet ja akut. Pilt pildis režiim säilitab video. Video naaseb, kui rakenduse uuesti avad. Eeldab, et esitus jätkub lukustatud ekraaniga.'
     Ignore Headphone Controls: 'Eirab Bluetooth-seadmetest, juhtmega kõrvaklappidest ja klaviatuuride meediaklahvidest tulevaid esitamise, pausi ja vahelejätmise käske, et kogemata kõrvaklappide puudutamine taasesitust ei katkestaks. Rakenduse ja meediateavituse juhtnupud töötavad edasi.'
-    Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
+    Auto-select Translated Captions: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada. Tõlgitud rajad jäävad mõlemal juhul subtiitrimenüüs saadavale.
     Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.
     Multiply Seek Interval by Playback Rate: Kui see on lubatud, korrutatakse kerimissammud (nooleklahvid ja J/L) praeguse esituskiirusega. Kui see on välja lülitatud, jäävad kerimissammud esituskiirusest olenemata samaks.
     Show Playback Rate Adjusted Timestamp: Kui see on lubatud ja esituskiirus erineb 1x kiirusest, kuvab pleier tavapärase ajamärgi järel sulgudes esituskiirusele kohandatud ajamärgi.

@@ -908,7 +908,7 @@ Settings:
       Captions: Subtítulos
       Preferred Language: Idioma preferido de los subtítulos
       Application Language: Idioma de la aplicación
-      Enable Translations: Activar traducciones de subtítulos
+      Auto-select Translated Captions: Seleccionar automáticamente subtítulos traducidos
       Text Color: Color del texto
       Background Color: Color del fondo
       Background Opacity: Opacidad del fondo
@@ -2455,7 +2455,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y proporciona controles multimedia de Android. Desactívalo para pausar cuando la aplicación deje de estar visible.'
     Switch to Audio in Background: 'Reproduce formatos de audio mientras la aplicación está en segundo plano o la pantalla está apagada, lo que ahorra datos y batería. La imagen en imagen mantiene el vídeo. El vídeo vuelve cuando abres la aplicación de nuevo. Requiere continuar la reproducción con la pantalla bloqueada.'
     Ignore Headphone Controls: 'Ignora los comandos de reproducción, pausa y salto de los dispositivos Bluetooth, los auriculares con cable y las teclas multimedia de los teclados, para que los toques accidentales en los auriculares no interrumpan la reproducción. Los controles de la aplicación y de la notificación multimedia siguen funcionando.'
-    Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el vídeo no ofrece una pista original coincidente.
+    Auto-select Translated Captions: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el vídeo no ofrece una pista original coincidente. Las pistas traducidas siguen disponibles en el menú de subtítulos en cualquier caso.
     Use Quick Playback Speed Bar: Muestra una barra rápida de velocidad de reproducción en los controles situados a la derecha del reproductor. Si está activado el guardado manual de la velocidad por canal, la barra también incluye un botón para guardar la velocidad del canal actual.
     Multiply Seek Interval by Playback Rate: Al activarlo, los intervalos de avance (teclas de flecha y J/L) se multiplican por la velocidad de reproducción actual. Si se desactiva, los intervalos permanecen constantes independientemente de la velocidad.
     Show Playback Rate Adjusted Timestamp: Al activarlo, si la velocidad de reproducción es distinta de 1x, el reproductor muestra entre paréntesis las marcas de tiempo ajustadas a la velocidad después de las normales.

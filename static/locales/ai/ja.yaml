@@ -962,7 +962,7 @@ Settings:
       Captions: 字幕
       Preferred Language: 優先する字幕言語
       Application Language: アプリの表示言語
-      Enable Translations: 字幕の翻訳を有効化
+      Auto-select Translated Captions: 翻訳字幕を自動選択
       Text Color: 文字色
       Background Color: 背景色
       Background Opacity: 背景の不透明度
@@ -2494,7 +2494,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'バックグラウンドで音声の再生を続け、Android のメディアコントロールを提供します。アプリが表示されなくなったときに一時停止するには無効にしてください。'
     Switch to Audio in Background: 'アプリがバックグラウンドにあるときや画面がオフのときに音声形式で再生し、データ通信量とバッテリーを節約します。ピクチャー・イン・ピクチャーでは動画のままです。アプリを再び開くと動画に戻ります。画面ロック中も再生を続ける設定が必要です。'
     Ignore Headphone Controls: 'Bluetooth デバイス、有線ヘッドホン、キーボードのメディアキーからの再生、一時停止、スキップのコマンドを無視し、イヤホンへの誤タップで再生が中断されないようにします。アプリ内とメディア通知のコントロールは引き続き使用できます。'
-    Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。
+    Auto-select Translated Captions: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。どちらの場合も、翻訳トラックは字幕メニューから選択できます。
     Use Quick Playback Speed Bar: プレーヤー右側の操作欄にクイック再生速度バーを表示します。チャンネルごとの再生速度を手動保存する設定が有効な場合は、現在のチャンネルに速度を保存するボタンも表示されます。
     Multiply Seek Interval by Playback Rate: 有効にすると、シーク間隔（矢印キーとJ/Lキー）に現在の再生速度を掛けます。無効にすると、再生速度に関係なくシーク間隔は一定です。
     Show Playback Rate Adjusted Timestamp: 有効で再生速度が1倍以外の場合、通常の時刻表示の後に、再生速度を反映した時刻を括弧内に表示します。

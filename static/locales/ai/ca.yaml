@@ -1183,7 +1183,7 @@ Settings:
       Captions: Subtítols
       Preferred Language: Llengua preferida dels subtítols
       Application Language: Llengua de l'aplicació
-      Enable Translations: Activa la traducció dels subtítols
+      Auto-select Translated Captions: Selecciona automàticament els subtítols traduïts
       Text Color: Color del text
       Background Color: Color del fons
       Background Opacity: Opacitat del fons
@@ -3044,7 +3044,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
     Switch to Audio in Background: 'Reprodueix formats d’àudio mentre l’aplicació és en segon pla o la pantalla està apagada, cosa que estalvia dades i bateria. La imatge en imatge conserva el vídeo. El vídeo torna quan tornes a obrir l’aplicació. Cal continuar la reproducció amb la pantalla bloquejada.'
     Ignore Headphone Controls: 'Ignora les ordres de reproducció, pausa i salt dels dispositius Bluetooth, els auriculars amb cable i les tecles multimèdia dels teclats, perquè els tocs accidentals als auriculars no interrompin la reproducció. Els controls de l''aplicació i de la notificació multimèdia continuen funcionant.'
-    Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
+    Auto-select Translated Captions: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida. Les pistes traduïdes continuen disponibles al menú de subtítols en tots dos casos.
     Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
     Default Media Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.
     Use Quick Playback Speed Bar: Mostra una barra ràpida de velocitat de reproducció als controls de la dreta del reproductor. Si està activat el desament manual de la velocitat per canal, la barra també inclou el botó per desar la velocitat del canal actual.

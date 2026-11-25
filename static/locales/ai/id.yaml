@@ -965,7 +965,7 @@ Settings:
       Captions: Takarir
       Preferred Language: Bahasa Takarir Pilihan
       Application Language: Bahasa Aplikasi
-      Enable Translations: Aktifkan Terjemahan Takarir
+      Auto-select Translated Captions: Pilih Otomatis Takarir Terjemahan
       Text Color: Warna Teks
       Background Color: Warna Latar
       Background Opacity: Opasitas Latar
@@ -2521,7 +2521,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'
     Switch to Audio in Background: 'Memutar format audio selama aplikasi berjalan di latar belakang atau layar mati, sehingga menghemat data dan baterai. Picture-in-Picture tetap menampilkan video. Video kembali saat Anda membuka aplikasi lagi. Memerlukan pemutaran yang berlanjut saat layar terkunci.'
     Ignore Headphone Controls: 'Mengabaikan perintah putar, jeda, dan lewati dari perangkat Bluetooth, headphone berkabel, dan tombol media pada keyboard, sehingga ketukan tidak sengaja pada earbud tidak mengganggu pemutaran. Kontrol di aplikasi dan di notifikasi media tetap berfungsi.'
-    Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.
+    Auto-select Translated Captions: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok. Trek terjemahan tetap tersedia di menu takarir dalam kedua kondisi.
     Use Quick Playback Speed Bar: Menampilkan bilah kecepatan pemutaran cepat di sisi kanan kontrol pemutar. Jika penyimpanan kecepatan pemutaran manual per saluran diaktifkan, bilah juga memuat tombol untuk menyimpan kecepatan bagi saluran saat ini.
     Multiply Seek Interval by Playback Rate: Jika diaktifkan, interval pencarian posisi (tombol panah dan J/L) dikalikan dengan kecepatan pemutaran saat ini. Jika dinonaktifkan, interval tetap sama pada kecepatan pemutaran apa pun.
     Show Playback Rate Adjusted Timestamp: Jika diaktifkan dan kecepatan pemutaran bukan 1x, pemutar menampilkan stempel waktu yang disesuaikan dengan kecepatan pemutaran dalam tanda kurung setelah stempel waktu biasa.

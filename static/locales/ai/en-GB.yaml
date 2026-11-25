@@ -947,7 +947,7 @@ Settings:
       Captions: Captions
       Preferred Language: Preferred Caption Language
       Application Language: Application Language
-      Enable Translations: Enable Caption Translations
+      Auto-select Translated Captions: Auto-select Translated Captions
       Text Color: Text Colour
       Background Color: Background Colour
       Background Opacity: Background Opacity
@@ -2490,7 +2490,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.'
     Switch to Audio in Background: 'Plays audio formats while the app is in the background or the screen is off, which saves data and battery. Picture-in-Picture keeps the video. The video returns when you open the app again. Requires continuing playback when the screen is locked.'
     Ignore Headphone Controls: 'Ignores play, pause, and skip commands from Bluetooth devices, wired headphones, and keyboard media keys, so accidental earbud taps don''t interrupt playback. Controls in the app and in the media notification keep working.'
-    Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
+    Auto-select Translated Captions: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track. Translated tracks stay available in the captions menu either way.
     Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.
     Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
     Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.

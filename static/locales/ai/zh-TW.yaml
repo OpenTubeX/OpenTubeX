@@ -962,7 +962,7 @@ Settings:
       Captions: 字幕
       Preferred Language: 偏好的字幕語言
       Application Language: 應用程式語言
-      Enable Translations: 啟用字幕翻譯
+      Auto-select Translated Captions: 自動選擇翻譯字幕
       Text Color: 文字色彩
       Background Color: 背景色彩
       Background Opacity: 背景不透明度
@@ -2497,7 +2497,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
     Switch to Audio in Background: '在應用程式於背景執行或螢幕關閉時播放音訊格式，以節省數據用量與電量。子母畫面會保留影片。重新開啟應用程式後會恢復影片。需要開啟「螢幕鎖定時繼續播放」。'
     Ignore Headphone Controls: '忽略來自藍牙裝置、有線耳機和鍵盤媒體鍵的播放、暫停和跳過指令，避免誤觸耳機中斷播放。應用程式內和媒體通知中的控制項仍可正常使用。'
-    Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
+    Auto-select Translated Captions: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。無論是否啟用，翻譯字幕軌都會保留在字幕選單中。
     Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。
     Multiply Seek Interval by Playback Rate: 啟用後，快轉與倒轉間隔（方向鍵及 J/L）會乘以目前的播放速率。停用後，無論播放速率為何，間隔都保持不變。
     Show Playback Rate Adjusted Timestamp: 啟用後，若播放速度不是 1x，播放器會在一般時間戳記後以括號顯示依播放速率調整的時間戳記。

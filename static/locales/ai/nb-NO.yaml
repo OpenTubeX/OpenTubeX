@@ -962,7 +962,7 @@ Settings:
       Captions: Undertekster
       Preferred Language: Foretrukket språk for undertekster
       Application Language: Programspråk
-      Enable Translations: Slå på oversettelse av undertekster
+      Auto-select Translated Captions: Velg oversatte undertekster automatisk
       Text Color: Tekstfarge
       Background Color: Bakgrunnsfarge
       Background Opacity: Gjennomsiktighet for bakgrunn
@@ -2499,7 +2499,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Fortsetter lydavspillingen i bakgrunnen og viser Android-mediekontroller. Slå av dette for å sette på pause når appen ikke lenger er synlig.'
     Switch to Audio in Background: 'Spiller av lydformater mens appen kjører i bakgrunnen eller skjermen er av, noe som sparer data og batteri. Bilde-i-bilde beholder videoen. Videoen kommer tilbake når du åpner appen igjen. Krever at avspillingen fortsetter når skjermen er låst.'
     Ignore Headphone Controls: 'Ignorerer avspillings-, pause- og hoppekommandoer fra Bluetooth-enheter, kablede hodetelefoner og medietaster på tastaturer, slik at utilsiktede trykk på øreplugger ikke avbryter avspillingen. Kontrollene i appen og i medievarselet fungerer fortsatt.'
-    Enable Caption Translations: Når dette er slått på, foretrekker undertekstknappen og hurtigtasten C et automatisk oversatt spor på det foretrukne undertekstspråket hvis videoen ikke har et samsvarende originalspor.
+    Auto-select Translated Captions: Når dette er slått på, foretrekker undertekstknappen og hurtigtasten C et automatisk oversatt spor på det foretrukne undertekstspråket hvis videoen ikke har et samsvarende originalspor. Oversatte spor er uansett tilgjengelige i undertekstmenyen.
     Use Quick Playback Speed Bar: Viser et hurtigfelt for avspillingshastighet til høyre blant spillerkontrollene. Hvis manuell lagring av avspillingshastighet per kanal er slått på, inneholder feltet også en knapp for å lagre hastigheten for den gjeldende kanalen.
     Multiply Seek Interval by Playback Rate: Når dette er slått på, multipliseres spoleintervallene (piltastene og J/L) med gjeldende avspillingshastighet. Når det er slått av, forblir spoleintervallene konstante uansett avspillingshastighet.
     Show Playback Rate Adjusted Timestamp: Når dette er slått på og avspillingshastigheten avviker fra 1x, viser spilleren hastighetsjusterte tidsstempler i parentes etter den vanlige tidsvisningen.

@@ -962,7 +962,7 @@ Settings:
       Captions: Alt Yazılar
       Preferred Language: Tercih Edilen Alt Yazı Dili
       Application Language: Uygulama Dili
-      Enable Translations: Alt Yazı Çevirilerini Etkinleştir
+      Auto-select Translated Captions: Çevrilmiş Alt Yazıları Otomatik Seç
       Text Color: Metin Rengi
       Background Color: Arka Plan Rengi
       Background Opacity: Arka Plan Opaklığı
@@ -2494,7 +2494,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
     Switch to Audio in Background: 'Uygulama arka plandayken veya ekran kapalıyken ses biçimlerini oynatır; bu da veri ve pilden tasarruf sağlar. Resim içinde Resim videoyu korur. Uygulamayı yeniden açtığınızda video geri gelir. Ekran kilitliyken oynatmanın devam etmesini gerektirir.'
     Ignore Headphone Controls: 'Bluetooth cihazlarından, kablolu kulaklıklardan ve klavyelerdeki medya tuşlarından gelen oynatma, duraklatma ve atlama komutlarını yok sayar; böylece kulaklığa yanlışlıkla dokunmak oynatmayı kesmez. Uygulamadaki ve medya bildirimindeki kontroller çalışmaya devam eder.'
-    Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
+    Auto-select Translated Captions: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer. Çevrilmiş parçalar her durumda alt yazı menüsünde kullanılabilir kalır.
     Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.
     Multiply Seek Interval by Playback Rate: Etkinleştirildiğinde sarma aralıkları (ok tuşları ve J/L) geçerli oynatma hızıyla çarpılır. Devre dışı bırakıldığında sarma aralıkları oynatma hızından bağımsız olarak sabit kalır.
     Show Playback Rate Adjusted Timestamp: Etkinleştirildiğinde ve oynatma hızı 1x'ten farklı olduğunda oynatıcı, normal zaman damgasından sonra parantez içinde oynatma hızına göre ayarlanmış zaman damgalarını gösterir.

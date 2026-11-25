@@ -1433,7 +1433,7 @@ Settings:
       Captions: Captions
       Preferred Language: Preferred Caption Language
       Application Language: Application Language
-      Enable Translations: Enable Caption Translations
+      Auto-select Translated Captions: Auto-select Translated Captions
       Text Color: Text Color
       Background Color: Background Color
       Background Opacity: Background Opacity
@@ -3591,7 +3591,7 @@ Tooltips:
   Player Settings:
     Enable Timestamp Notes: Adds a player button and the N shortcut that pause the video and open a note linking to the current moment. Notes can be copied as Markdown or, on desktop, added to Obsidian.
     Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
-    Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
+    Auto-select Translated Captions: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track. Translated tracks stay available in the captions menu either way.
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead
       of making a direct connection to YouTube.
     Default Media Format: Set the formats used when a video plays. DASH formats can

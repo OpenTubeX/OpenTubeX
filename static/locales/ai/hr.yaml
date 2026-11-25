@@ -967,7 +967,7 @@ Settings:
       Captions: Titlovi
       Preferred Language: Preferirani jezik titlova
       Application Language: Jezik aplikacije
-      Enable Translations: Omogući prijevode titlova
+      Auto-select Translated Captions: Automatski odaberi prevedene titlove
       Text Color: Boja teksta
       Background Color: Boja pozadine
       Background Opacity: Neprozirnost pozadine
@@ -2532,7 +2532,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Nastavlja reprodukciju zvuka u pozadini i pruža Android kontrole medija. Isključite ovo za pauziranje kada aplikacija više nije vidljiva.'
     Switch to Audio in Background: 'Reproducira audioformate dok je aplikacija u pozadini ili je zaslon isključen, čime štedi podatke i bateriju. Slika u slici zadržava video. Video se vraća kad ponovno otvorite aplikaciju. Zahtijeva nastavak reprodukcije kad je zaslon zaključan.'
     Ignore Headphone Controls: 'Zanemaruje naredbe za reprodukciju, pauzu i preskakanje s Bluetooth uređaja, žičanih slušalica i medijskih tipki na tipkovnicama, kako slučajni dodiri slušalica ne bi prekinuli reprodukciju. Kontrole u aplikaciji i u medijskoj obavijesti i dalje rade.'
-    Enable Caption Translations: Kada je omogućeno, gumb za titlove i prečac C daju prednost automatski prevedenom zapisu na željenom jeziku titlova ako videozapis nema odgovarajući izvorni zapis.
+    Auto-select Translated Captions: Kada je omogućeno, gumb za titlove i prečac C daju prednost automatski prevedenom zapisu na željenom jeziku titlova ako videozapis nema odgovarajući izvorni zapis. Prevedeni zapisi u svakom slučaju ostaju dostupni u izborniku titlova.
     Use Quick Playback Speed Bar: Prikazuje traku za brzu promjenu brzine reprodukcije među kontrolama reproduktora s desne strane. Ako je omogućeno ručno spremanje brzine reprodukcije po kanalu, traka sadrži i gumb za spremanje brzine za trenutačni kanal.
     Multiply Seek Interval by Playback Rate: Kada je omogućeno, razmaci premotavanja (tipke sa strelicama i J/L) množe se trenutačnom brzinom reprodukcije. Kada je isključeno, ostaju jednaki bez obzira na brzinu reprodukcije.
     Show Playback Rate Adjusted Timestamp: Kada je omogućeno i brzina reprodukcije nije 1x, reproduktor iza uobičajenog prikaza vremena u zagradama prikazuje vremenske oznake prilagođene brzini reprodukcije.

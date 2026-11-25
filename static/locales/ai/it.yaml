@@ -962,7 +962,7 @@ Settings:
       Captions: Sottotitoli
       Preferred Language: Lingua preferita dei sottotitoli
       Application Language: Lingua dell'applicazione
-      Enable Translations: Abilita traduzione dei sottotitoli
+      Auto-select Translated Captions: Seleziona automaticamente i sottotitoli tradotti
       Text Color: Colore del testo
       Background Color: Colore dello sfondo
       Background Opacity: Opacità dello sfondo
@@ -2494,7 +2494,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Mantiene l’audio in riproduzione in background e fornisce i controlli multimediali di Android. Disattiva questa opzione per mettere in pausa quando l’app non è più visibile.'
     Switch to Audio in Background: 'Riproduce i formati audio mentre l’app è in background o lo schermo è spento, risparmiando dati e batteria. Il Picture-in-Picture mantiene il video. Il video torna quando riapri l’app. Richiede di continuare la riproduzione con lo schermo bloccato.'
     Ignore Headphone Controls: 'Ignora i comandi di riproduzione, pausa e salto provenienti da dispositivi Bluetooth, cuffie con filo e tasti multimediali delle tastiere, così i tocchi accidentali sugli auricolari non interrompono la riproduzione. I controlli nell''app e nella notifica multimediale continuano a funzionare.'
-    Enable Caption Translations: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente.
+    Auto-select Translated Captions: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente. Le tracce tradotte restano comunque disponibili nel menu dei sottotitoli.
     Use Quick Playback Speed Bar: Mostra una barra rapida della velocità di riproduzione tra i controlli a destra del lettore. Se è abilitato il salvataggio manuale della velocità per canale, la barra include anche il pulsante per salvare la velocità del canale corrente.
     Multiply Seek Interval by Playback Rate: Se abilitato, gli intervalli di spostamento nella riproduzione, con i tasti freccia e J/L, vengono moltiplicati per la velocità corrente. Se disabilitato, restano costanti indipendentemente dalla velocità.
     Show Playback Rate Adjusted Timestamp: Se abilitato e la velocità di riproduzione è diversa da 1x, il lettore mostra tra parentesi i tempi adattati alla velocità dopo quelli normali.

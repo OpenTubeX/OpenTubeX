@@ -962,7 +962,7 @@ Settings:
       Captions: Tekstitys
       Preferred Language: Ensisijainen tekstityskieli
       Application Language: Sovelluksen kieli
-      Enable Translations: Ota tekstityskäännökset käyttöön
+      Auto-select Translated Captions: Valitse käännetyt tekstitykset automaattisesti
       Text Color: Tekstin väri
       Background Color: Taustan väri
       Background Opacity: Taustan peittävyys
@@ -2503,7 +2503,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
     Switch to Audio in Background: 'Toistaa äänimuotoja, kun sovellus on taustalla tai näyttö on sammuksissa, mikä säästää dataa ja akkua. Kuva kuvassa -tila säilyttää videon. Video palaa, kun avaat sovelluksen uudelleen. Edellyttää toiston jatkamista näytön ollessa lukittuna.'
     Ignore Headphone Controls: 'Ohittaa Bluetooth-laitteiden, langallisten kuulokkeiden ja näppäimistöjen medianäppäinten toisto-, tauko- ja ohituskomennot, jotta vahingossa tehdyt kuulokkeiden napautukset eivät keskeytä toistoa. Sovelluksen ja mediailmoituksen säätimet toimivat edelleen.'
-    Enable Caption Translations: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa.
+    Auto-select Translated Captions: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa. Käännetyt raidat ovat joka tapauksessa valittavissa tekstitysvalikossa.
     Use Quick Playback Speed Bar: Näyttää toistonopeuden pikapalkin soittimen säätimien oikeassa reunassa. Jos kanavakohtaisen toistonopeuden manuaalinen tallennus on käytössä, palkissa on myös painike nykyisen kanavan nopeuden tallentamiseen.
     Multiply Seek Interval by Playback Rate: Kun asetus on käytössä, siirtymäväli kerrotaan nykyisellä toistonopeudella käytettäessä nuolinäppäimiä tai J/L-näppäimiä. Kun asetus on poistettu käytöstä, siirtymäväli pysyy samana toistonopeudesta riippumatta.
     Show Playback Rate Adjusted Timestamp: Kun asetus on käytössä ja toistonopeus poikkeaa nopeudesta 1x, soitin näyttää tavallisen aikaleiman jälkeen sulkeissa toistonopeuteen suhteutetun aikaleiman.

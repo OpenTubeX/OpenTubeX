@@ -985,7 +985,7 @@ Settings:
       Captions: Apudskribo
       Preferred Language: Preferata lingvo de apudskribo
       Application Language: Lingvo de la aplikaĵo
-      Enable Translations: Ŝalti tradukojn de apudskribo
+      Auto-select Translated Captions: Aŭtomate elekti tradukitan apudskribon
       Text Color: Teksta koloro
       Background Color: Fona koloro
       Background Opacity: Fona opakeco
@@ -2543,7 +2543,7 @@ Tooltips:
   Player Settings:
     Rewind on Resume: "Saltas tiom da sekundoj malantaŭen kiam vi daŭrigas paŭzitan videon, por ke vi revidu la lastajn momentojn. Agordu al 0 por malŝalti."
     Minimum Pause Before Rewinding: "Malantaŭeniras nur kiam la video estis paŭzita almenaŭ tiom longe. Agordu al 0 por malantaŭeniri post ĉiu paŭzo."
-    Enable Caption Translations: Kiam ŝaltita, la apudskriba butono kaj la fulmoklavo C preferas aŭtomate tradukitan trakon en la preferata apudskriba lingvo, kiam la videaĵo ne provizas kongruan originalan trakon.
+    Auto-select Translated Captions: Kiam ŝaltita, la apudskriba butono kaj la fulmoklavo C preferas aŭtomate tradukitan trakon en la preferata apudskriba lingvo, kiam la videaĵo ne provizas kongruan originalan trakon. Tradukitaj trakoj ĉiukaze restas haveblaj en la apudskriba menuo.
     Use Quick Playback Speed Bar: Montras breton de rapidaj ludrapidoj en la ludilaj regiloj dekstre. Se permana konservado de ludrapido po kanalo estas ŝaltita, la breto ankaŭ enhavas la butonon por konservi la rapidon por la aktuala kanalo.
     Multiply Seek Interval by Playback Rate: Kiam ŝaltita, saltintervaloj (sagoklavoj kaj J/L) estas multobligitaj per la aktuala ludrapido. Kiam malŝaltita, saltintervaloj restas konstantaj sendepende de la ludrapido.
     Show Playback Rate Adjusted Timestamp: Kiam ŝaltita kaj la ludrapido malsamas ol 1x, la ludilo montras tempindikojn alĝustigitajn laŭ ludrapido inter krampoj post la normala tempindiko.

@@ -962,7 +962,7 @@ Settings:
       Captions: Titulky
       Preferred Language: Uprednostnený jazyk titulkov
       Application Language: Jazyk aplikácie
-      Enable Translations: Zapnúť preklady titulkov
+      Auto-select Translated Captions: Automaticky vyberať preložené titulky
       Text Color: Farba textu
       Background Color: Farba pozadia
       Background Opacity: Nepriehľadnosť pozadia
@@ -2494,7 +2494,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Ponechá zvuk prehrávať na pozadí a poskytne ovládanie médií systému Android. Vypnutím sa prehrávanie pozastaví, keď aplikácia prestane byť viditeľná.'
     Switch to Audio in Background: 'Prehráva zvukové formáty, keď aplikácia beží na pozadí alebo je obrazovka vypnutá, čo šetrí dáta aj batériu. Obraz v obraze video zachová. Video sa vráti, keď aplikáciu znova otvoríte. Vyžaduje pokračovanie prehrávania pri zamknutej obrazovke.'
     Ignore Headphone Controls: 'Ignoruje príkazy na prehrávanie, pozastavenie a preskočenie z Bluetooth zariadení, káblových slúchadiel a multimediálnych klávesov na klávesniciach, aby náhodné ťuknutia na slúchadlá neprerušili prehrávanie. Ovládanie v aplikácii a v mediálnom upozornení naďalej funguje.'
-    Enable Caption Translations: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku.
+    Auto-select Translated Captions: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku. Preložené stopy zostávajú v ponuke titulkov dostupné v oboch prípadoch.
     Use Quick Playback Speed Bar: V pravej časti ovládacích prvkov prehrávača zobrazí panel rýchlej zmeny rýchlosti prehrávania. Ak je zapnuté ručné ukladanie rýchlosti prehrávania pre jednotlivé kanály, panel obsahuje aj tlačidlo na uloženie rýchlosti aktuálneho kanála.
     Multiply Seek Interval by Playback Rate: Po zapnutí sa intervaly posunu pomocou klávesov so šípkami a J/L násobia aktuálnou rýchlosťou prehrávania. Po vypnutí zostávajú rovnaké bez ohľadu na rýchlosť prehrávania.
     Show Playback Rate Adjusted Timestamp: Ak je táto možnosť zapnutá a rýchlosť prehrávania sa líši od 1×, prehrávač za bežným časovým údajom zobrazí v zátvorkách čas upravený podľa rýchlosti prehrávania.

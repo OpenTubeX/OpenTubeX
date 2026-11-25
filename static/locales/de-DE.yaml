@@ -1190,7 +1190,7 @@ Settings:
       Captions: Untertitel
       Preferred Language: Bevorzugte Untertitelsprache
       Application Language: Anwendungssprache
-      Enable Translations: Untertitelübersetzungen aktivieren
+      Auto-select Translated Captions: Übersetzte Untertitel automatisch auswählen
       Text Color: Textfarbe
       Background Color: Hintergrundfarbe
       Background Opacity: Hintergrunddeckkraft
@@ -3278,7 +3278,7 @@ Tooltips:
   Player Settings:
     Enable Timestamp Notes: Fügt dem Player eine Schaltfläche und das Tastenkürzel N hinzu, die das Video pausieren und eine Notiz öffnen, die auf die aktuelle Stelle verlinkt. Notizen können als Markdown kopiert oder auf dem Desktop zu Obsidian hinzugefügt werden.
     Obsidian Vault: Name des Obsidian-Vaults für Zeitstempel-Notizen. Ist er gesetzt, können Notizen zu Obsidian hinzugefügt werden. Die Notizen eines Videos werden in einer nach dem Video benannten Notiz im Ordner für neue Notizen des Vaults gesammelt.
-    Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
+    Auto-select Translated Captions: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt. Übersetzte Spuren bleiben in beiden Fällen im Untertitelmenü verfügbar.
     Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
     Use Quick Playback Speed Bar: Zeigt in den Player-Steuerelementen auf der rechten Seite eine schnelle Wiedergabegeschwindigkeitsleiste an. Wenn das manuelle Speichern der kanalbezogenen Wiedergabegeschwindigkeit aktiviert ist, enthält die Leiste außerdem die Schaltfläche, um die Geschwindigkeit für den aktuellen Kanal zu speichern.

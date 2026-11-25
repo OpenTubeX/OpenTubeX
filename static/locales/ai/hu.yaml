@@ -962,7 +962,7 @@ Settings:
       Captions: Feliratok
       Preferred Language: Felirat előnyben részesített nyelve
       Application Language: Alkalmazás nyelve
-      Enable Translations: Feliratfordítások engedélyezése
+      Auto-select Translated Captions: Lefordított feliratok automatikus kiválasztása
       Text Color: Szövegszín
       Background Color: Háttérszín
       Background Opacity: Háttér átlátszatlansága
@@ -2495,7 +2495,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
     Switch to Audio in Background: 'Hangformátumokat játszik le, amíg az alkalmazás a háttérben fut, vagy a képernyő ki van kapcsolva, így adatot és akkumulátort takarít meg. A kép a képben mód megtartja a videót. A videó visszatér, amikor újra megnyitod az alkalmazást. A lejátszás folytatása szükséges zárolt képernyőnél.'
     Ignore Headphone Controls: 'Figyelmen kívül hagyja a Bluetooth-eszközök, a vezetékes fejhallgatók és a billentyűzetek médiabillentyűinek lejátszás, szünet és ugrás parancsait, hogy a fülhallgató véletlen megérintése ne szakítsa meg a lejátszást. Az alkalmazás és a médiaértesítés vezérlői továbbra is működnek.'
-    Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
+    Auto-select Translated Captions: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv. A lefordított sávok mindkét esetben elérhetők maradnak a feliratok menüjében.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.
     Multiply Seek Interval by Playback Rate: Bekapcsolva a tekerési időközök (nyílbillentyűk és J/L) az aktuális lejátszási sebességgel szorzódnak. Kikapcsolva az időközök a lejátszási sebességtől függetlenül változatlanok maradnak.
     Show Playback Rate Adjusted Timestamp: Bekapcsolva, ha a lejátszási sebesség eltér az 1x értéktől, a lejátszó a szokásos időbélyeg után zárójelben megjeleníti a lejátszási sebességhez igazított időbélyeget.

@@ -962,7 +962,7 @@ Settings:
       Captions: Azpitituluak
       Preferred Language: Azpitituluetarako hobetsitako hizkuntza
       Application Language: Aplikazioaren hizkuntza
-      Enable Translations: Gaitu azpitituluen itzulpena
+      Auto-select Translated Captions: Hautatu itzulitako azpitituluak automatikoki
       Text Color: Testuaren kolorea
       Background Color: Atzeko planoaren kolorea
       Background Opacity: Atzeko planoaren opakutasuna
@@ -2504,7 +2504,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
     Switch to Audio in Background: 'Audio-formatuak erreproduzitzen ditu aplikazioa atzeko planoan dagoen bitartean edo pantaila itzalita dagoenean, eta horrela datuak eta bateria aurrezten ditu. Irudia irudian moduak bideoa mantentzen du. Bideoa itzultzen da aplikazioa berriro irekitzean. Pantaila blokeatuta dagoenean erreprodukzioarekin jarraitzea eskatzen du.'
     Ignore Headphone Controls: 'Bluetooth gailuetatik, kabledun entzungailuetatik eta teklatuetako multimedia-tekletatik datozen erreprodukzio-, pausa- eta saltatze-aginduei ez die jaramonik egiten, entzungailuetan nahi gabe sakatzeak erreprodukzioa eten ez dezan. Aplikazioko eta multimedia-jakinarazpeneko kontrolek funtzionatzen jarraitzen dute.'
-    Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
+    Auto-select Translated Captions: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu. Itzulitako pistak azpitituluen menuan erabilgarri daude beti.
     Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
     Multiply Seek Interval by Playback Rate: Gaituta dagoenean, bilaketa-tarteak (gezi-teklak eta J/L) uneko erreprodukzio-abiadurarekin biderkatzen dira. Desgaituta dagoenean, tarteak ez dira aldatzen erreprodukzio-abiadura edozein dela ere.
     Show Playback Rate Adjusted Timestamp: Gaituta dagoenean eta erreprodukzio-abiadura 1x ez denean, erreproduzigailuak abiadurara doitutako denbora-markak erakusten ditu parentesi artean denbora-marka arruntaren ondoren.

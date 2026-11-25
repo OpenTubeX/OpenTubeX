@@ -1147,7 +1147,7 @@ Settings:
       Captions: Subtitrai
       Preferred Language: Pageidaujama subtitrų kalba
       Application Language: Programos kalba
-      Enable Translations: Įjungti subtitrų vertimą
+      Auto-select Translated Captions: Automatiškai pasirinkti išverstus subtitrus
       Text Color: Teksto spalva
       Background Color: Fono spalva
       Background Opacity: Fono nepermatomumas
@@ -2918,7 +2918,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Toliau leidžia garsą fone ir pateikia „Android“ medijos valdiklius. Išjunkite, kad atkūrimas būtų pristabdytas, kai programa nebematoma.'
     Switch to Audio in Background: 'Leidžia garso formatus, kol programa veikia fone arba ekranas išjungtas, taip taupydama duomenis ir bateriją. Vaizdo vaizde režimas išlaiko vaizdo įrašą. Vaizdo įrašas grįžta, kai vėl atidarote programą. Reikia, kad atkūrimas tęstųsi užrakinus ekraną.'
     Ignore Headphone Controls: 'Ignoruoja leidimo, pristabdymo ir praleidimo komandas iš Bluetooth įrenginių, laidinių ausinių ir klaviatūrų medijos klavišų, kad atsitiktiniai ausinių palietimai nenutrauktų atkūrimo. Valdikliai programoje ir medijos pranešime toliau veikia.'
-    Enable Caption Translations: Įjungus subtitrų mygtukas ir spartusis klavišas C teikia pirmenybę automatiškai išverstam takeliui pageidaujama subtitrų kalba, jei vaizdo įraše nėra atitinkamo originalaus takelio.
+    Auto-select Translated Captions: Įjungus subtitrų mygtukas ir spartusis klavišas C teikia pirmenybę automatiškai išverstam takeliui pageidaujama subtitrų kalba, jei vaizdo įraše nėra atitinkamo originalaus takelio. Bet kuriuo atveju išversti takeliai lieka pasiekiami subtitrų meniu.
     Use Quick Playback Speed Bar: Dešinėje leistuvo valdiklių pusėje rodo sparčiojo atkūrimo greičio juostą. Jei įjungtas rankinis atkūrimo greičio išsaugojimas kiekvienam kanalui, juostoje taip pat yra mygtukas dabartinio kanalo greičiui išsaugoti.
     Skip by Scrolling Over Video Player: Slinkimo ratuku persukti vaizdo įrašą kaip MPV.
     Multiply Seek Interval by Playback Rate: Įjungus persukimo intervalai (rodyklių klavišai ir J/L) dauginami iš dabartinio atkūrimo greičio. Išjungus persukimo intervalai nekinta, nepaisant atkūrimo greičio.

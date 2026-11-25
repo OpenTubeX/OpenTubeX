@@ -805,7 +805,6 @@ Settings:
       Captions: ຄຳບັນຍາຍ
       Preferred Language: ພາສາຂອງຄຳບັນຍາຍທີ່ຕ້ອງການ
       Application Language: ພາສາຂອງແອັບພລິເຄຊັນ
-      Enable Translations: ເປີດໃຊ້ການແປຄຳບັນຍາຍ
       Text Color: ສີຂໍ້ຄວາມ
       Background Color: ສີພື້ນຫຼັງ
       Background Opacity: ຄວາມໂປ່ງໃສຂອງພື້ນຫຼັງ
@@ -2210,7 +2209,6 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: ທີ່ຢູ່ຂອງໄຟລ໌ສະຄຣິບທີ່ຈະໃຫ້ເຮັດວຽກເມື່ອຖືກບລັອກ IP. OpenTubeX ຈະລໍຖ້າໃຫ້ມັນສຳເລັດ ແລ້ວຈຶ່ງໂຫຼດວິດີໂອໃໝ່.
   Player Settings:
-    Enable Caption Translations: ເມື່ອເປີດໃຊ້, ປຸ່ມຄຳບັນຍາຍ ແລະ ຄີລັດ C ຈະເລືອກໃຊ້ຄຳບັນຍາຍທີ່ແປອັດຕະໂນມັດ ຫາກວິດີໂອບໍ່ມີພາສາຕົ້ນສະບັບທີ່ກົງກັບຄວາມຕ້ອງການ.
     Proxy Videos Through Invidious: ຈະເຊື່ອມຕໍ່ຜ່ານ Invidious ເພື່ອສະແດງວິດີໂອ ແທນການເຊື່ອມຕໍ່ໂດຍກົງຫາ YouTube.
     Default Media Format: ຕັ້ງຄ່າຮູບແບບທີ່ໃຊ້ເມື່ອຫຼິ້ນວິດີໂອ. DASH ສາມາດຫຼິ້ນຄວາມລະອຽດສູງໄດ້. Legacy ຈຳກັດທີ່ 360p ແຕ່ປະຢັດແບນວິດ. Audio ແມ່ນສຽງຢ່າງດຽວ.
     Use Quick Playback Speed Bar: ສະແດງແຖບປັບຄວາມໄວໃນການຫຼິ້ນຢູ່ດ້ານຂວາຂອງຕົວຫຼິ້ນ.

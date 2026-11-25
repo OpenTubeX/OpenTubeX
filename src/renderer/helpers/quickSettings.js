@@ -224,7 +224,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
       toggleValues: ['off', 'always'],
     },
   },
-  ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Enable Translations', 'language', ['fas', 'closed-captioning']],
+  ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Auto-select Translated Captions', 'language', ['fas', 'closed-captioning']],
   ['enableCommentTranslations', 'Settings.General Settings.Comment Translation.Enable', 'language', ['fas', 'language']],
   ['enableDescriptionTranslations', 'Settings.General Settings.Comment Translation.Enable Description Translations', 'language', ['fas', 'language']],
   ['enablePostTranslations', 'Settings.General Settings.Comment Translation.Enable Post Translations', 'language', ['fas', 'language']],

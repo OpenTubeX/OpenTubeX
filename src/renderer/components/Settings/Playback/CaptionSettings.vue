@@ -14,11 +14,11 @@
       </div>
       <div class="captionToggle">
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Caption Appearance.Enable Translations')"
+          :label="t('Settings.Player Settings.Caption Appearance.Auto-select Translated Captions')"
           :compact="true"
           :default-value="enableCaptionTranslations"
           setting-key="enableCaptionTranslations"
-          :tooltip="t('Tooltips.Player Settings.Enable Caption Translations')"
+          :tooltip="t('Tooltips.Player Settings.Auto-select Translated Captions')"
           @change="updateEnableCaptionTranslations"
         />
       </div>

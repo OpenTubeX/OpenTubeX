@@ -962,7 +962,7 @@ Settings:
       Captions: Subtitrări
       Preferred Language: Limba preferată pentru subtitrări
       Application Language: Limba aplicației
-      Enable Translations: Activează traducerea subtitrărilor
+      Auto-select Translated Captions: Selectează automat subtitrările traduse
       Text Color: Culoarea textului
       Background Color: Culoarea fundalului
       Background Opacity: Opacitatea fundalului
@@ -2549,7 +2549,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Menține redarea audio în fundal și oferă comenzi media Android. Dezactivează pentru a întrerupe redarea când aplicația nu mai este vizibilă.'
     Switch to Audio in Background: 'Redă formate audio cât timp aplicația rulează în fundal sau ecranul este oprit, economisind date și baterie. Picture-in-Picture păstrează videoclipul. Videoclipul revine când redeschizi aplicația. Necesită continuarea redării când ecranul este blocat.'
     Ignore Headphone Controls: 'Ignoră comenzile de redare, pauză și salt de la dispozitivele Bluetooth, căștile cu fir și tastele media ale tastaturilor, astfel încât atingerile accidentale ale căștilor să nu întrerupă redarea. Comenzile din aplicație și din notificarea media funcționează în continuare.'
-    Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
+    Auto-select Translated Captions: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare. Pistele traduse rămân disponibile în meniul de subtitrări în ambele cazuri.
     Use Quick Playback Speed Bar: Afișează o bară rapidă pentru viteza de redare în partea dreaptă a comenzilor playerului. Dacă este activată salvarea manuală a vitezei de redare pentru fiecare canal, bara include și butonul pentru salvarea vitezei canalului curent.
     Multiply Seek Interval by Playback Rate: Când opțiunea este activată, intervalele de salt (tastele săgeată și J/L) sunt înmulțite cu viteza de redare curentă. Când este dezactivată, intervalele rămân constante indiferent de viteza de redare.
     Show Playback Rate Adjusted Timestamp: Când opțiunea este activată și viteza de redare diferă de 1x, playerul afișează între paranteze marcajele temporale ajustate la viteza de redare, după afișajul temporal normal.

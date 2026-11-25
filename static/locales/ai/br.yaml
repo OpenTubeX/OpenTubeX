@@ -962,7 +962,7 @@ Settings:
       Captions: "Istitloù"
       Preferred Language: "Yezh istitloù gwellañ-garet"
       Application Language: "Yezh an arload"
-      Enable Translations: "Gweredekaat treiñ an istitloù"
+      Auto-select Translated Captions: "Dibab ent emgefreek an istitloù troet"
       Text Color: "Liv an destenn"
       Background Color: "Liv an drekleur"
       Background Opacity: "Divoullder an drekleur"
@@ -2505,7 +2505,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'
     Switch to Audio in Background: 'Lenn a ra ar mentrezhoù son e-pad ma vez an arload en drekleur pe ma vez lazhet ar skramm, ar pezh a espern roadennoù hag ar batiri. Skeudenn-e-skeudenn a vir ar video. Distreiñ a ra ar video pa zigorit an arload en-dro. Ret eo kenderc’hel al lenn pa vez prennet ar skramm.'
     Ignore Headphone Controls: 'Ober a ra fae ouzh an urzhioù lenn, ehan ha lammat a zeu eus an trobarzhioù Bluetooth, ar selaouelloù orjalennek hag alc''hwezioù media ar c''hlavieroù, evit ma ne vo ket troc''het al lenn gant ur stokadenn dre fazi war ar selaouelloù. Kendalc''h a ra an arloadoù en arload hag er c''hemenn media da labourat.'
-    Enable Caption Translations: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ."
+    Auto-select Translated Captions: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ. Chom a ra ar roudennoù troet hegerz e lañser an istitloù e pep degouezh."
     Use Quick Playback Speed Bar: "Diskouez ur varrenn prim evit an tizh lenn e reolerezhioù al lenner war an tu dehou. Ma vez gweredekaet enrollañ tizh lenn pep chadenn gant an dorn, enderc'hel a ra ar varrenn ivez ar bouton da enrollañ an tizh evit ar chadenn vremanel."
     Multiply Seek Interval by Playback Rate: "Pa vez gweredekaet e vez lieskementet etrevezioù ar mont en-dro, gant ar birioù ha J/L, dre an tizh lenn bremanel. Pa vez diweredekaet e chom digemm an etrevezioù forzh an tizh lenn."
     Show Playback Rate Adjusted Timestamp: "Pa vez gweredekaet ha disheñvel an tizh lenn diouzh 1x, diskouez a ra al lenner mareoù reizhet diouzh an tizh lenn goude ar mare reizh."

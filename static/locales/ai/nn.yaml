@@ -1045,7 +1045,7 @@ Settings:
       Captions: Undertekstar
       Preferred Language: Føretrekt språk for undertekstar
       Application Language: Appspråk
-      Enable Translations: Slå på omsetjing av undertekstar
+      Auto-select Translated Captions: Vel omsette undertekstar automatisk
       Text Color: Tekstfarge
       Background Color: Bakgrunnsfarge
       Background Opacity: Dekkevne for bakgrunnen
@@ -2806,7 +2806,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Held fram med lydavspeling i bakgrunnen og viser Android-mediekontrollar. Slå av dette for å setje på pause når appen ikkje lenger er synleg.'
     Switch to Audio in Background: 'Spelar av lydformat medan appen køyrer i bakgrunnen eller skjermen er av, noko som sparar data og batteri. Bilete-i-bilete held på videoen. Videoen kjem tilbake når du opnar appen att. Krev at avspelinga held fram når skjermen er låst.'
     Ignore Headphone Controls: 'Ignorerer avspelings-, pause- og hoppekommandoar frå Bluetooth-einingar, kabla hovudtelefonar og medietastar på tastatur, slik at utilsikta trykk på øyreplugger ikkje avbryt avspelinga. Kontrollane i appen og i medievarselet fungerer framleis.'
-    Enable Caption Translations: Når dette er slått på, føretrekkjer teksteknappen og C-hurtigtasten eit automatisk omsett spor på det føretrekte tekstespråket dersom videoen ikkje har eit samsvarande originalspor.
+    Auto-select Translated Captions: Når dette er slått på, føretrekkjer teksteknappen og C-hurtigtasten eit automatisk omsett spor på det føretrekte tekstespråket dersom videoen ikkje har eit samsvarande originalspor. Omsette spor er uansett tilgjengelege i tekstemenyen.
     Use Quick Playback Speed Bar: Viser ei snøgglinje for avspelingsfart til høgre i spelarkontrollane. Dersom manuell lagring av avspelingsfart for kvar kanal er slått på, har linja òg ein knapp for å lagre farten for den gjeldande kanalen.
     Multiply Seek Interval by Playback Rate: Når dette er slått på, vert hoppeintervalla med piltastane og J/L multipliserte med den gjeldande avspelingsfarten. Når det er slått av, er hoppeintervalla dei same uavhengig av avspelingsfarten.
     Show Playback Rate Adjusted Timestamp: Når dette er slått på og avspelingsfarten ikkje er 1x, viser spelaren tidsstempel justerte etter avspelingsfarten i parentes etter den vanlege tidsvisinga.

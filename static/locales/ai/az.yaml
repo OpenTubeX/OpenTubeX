@@ -961,7 +961,7 @@ Settings:
       Captions: Titrlər
       Preferred Language: Üstünlük verilən titr dili
       Application Language: Tətbiq dili
-      Enable Translations: Titr tərcümələrini aktivləşdir
+      Auto-select Translated Captions: Tərcümə olunmuş titrləri avtomatik seç
       Text Color: Mətn rəngi
       Background Color: Fon rəngi
       Background Opacity: Fonun qeyri-şəffaflığı
@@ -2504,7 +2504,7 @@ Tooltips:
     Mono Audio: 'Sol və sağ səs kanallarını hər iki qulaqda səsləndirir. Videonun səsi qulaqlığın yalnız bir tərəfindən gələndə istifadə edin.'
     Normalize Loudness: 'Əksəriyyətindən yüksək səsli videoların səsini azaldır ki, videolar arasında səs səviyyəsi kəskin dəyişməsin. Sakit videolar öz səs səviyyəsini saxlayır. Yalnız Yerli API ilə yüklənən videolarda işləyir.'
     Pause on Stream Recovery: "Video yayımı uğursuz olduqda və pleyer onu yenidən yüklədikdə və ya başqa formata ya mühərrikə keçdikdə, oxutma dayandırılır və xəta siz bağlayana qədər pleyerin yuxarısında qalır. Söndürüldükdə oxutma davam edir və xəta qısa bildiriş kimi görünür."
-    Enable Caption Translations: Aktivləşdirildikdə, videoda uyğun orijinal titr treki yoxdursa, titr düyməsi və C qısayolu üstünlük verilən titr dilinə avtomatik tərcümə olunmuş trekə üstünlük verir.
+    Auto-select Translated Captions: Aktivləşdirildikdə, videoda uyğun orijinal titr treki yoxdursa, titr düyməsi və C qısayolu üstünlük verilən titr dilinə avtomatik tərcümə olunmuş trekə üstünlük verir. Tərcümə olunmuş treklər hər iki halda titr menyusunda əlçatan qalır.
     Use Quick Playback Speed Bar: Oynadıcının sağ tərəfdəki idarəetmə hissəsində sürətli oynatma sürəti panelini göstərir. Kanal üzrə oynatma sürətinin əl ilə saxlanması aktivdirsə, paneldə cari kanalın sürətini saxlamaq üçün düymə də olur.
     Multiply Seek Interval by Playback Rate: Aktivləşdirildikdə, vaxt üzrə keçid aralıqları (ox düymələri və J/L) cari oynatma sürətinə vurulur. Bağlandıqda keçid aralıqları oynatma sürətindən asılı olmayaraq sabit qalır.
     Show Playback Rate Adjusted Timestamp: Aktivləşdirildikdə və oynatma sürəti 1x-dən fərqli olduqda, oynadıcı adi vaxt göstəricisindən sonra mötərizədə oynatma sürətinə uyğunlaşdırılmış vaxt göstəricilərini göstərir.

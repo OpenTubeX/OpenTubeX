@@ -965,7 +965,7 @@ Settings:
       Captions: Capsiynau
       Preferred Language: Iaith capsiynau ddewisol
       Application Language: Iaith yr ap
-      Enable Translations: Galluogi cyfieithiadau capsiynau
+      Auto-select Translated Captions: Dewis capsiynau wedi'u cyfieithu'n awtomatig
       Text Color: Lliw testun
       Background Color: Lliw cefndir
       Background Opacity: Didreiddedd y cefndir
@@ -2532,7 +2532,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Yn cadw sain yn chwarae yn y cefndir ac yn darparu rheolyddion cyfryngau Android. Diffoddwch hyn i oedi pan nad yw’r ap yn weladwy mwyach.'
     Switch to Audio in Background: 'Yn chwarae fformatau sain tra bo’r ap yn y cefndir neu’r sgrin i ffwrdd, sy’n arbed data a batri. Mae Llun-mewn-Llun yn cadw’r fideo. Mae’r fideo’n dychwelyd pan fyddwch yn agor yr ap eto. Mae angen parhau i chwarae pan fydd y sgrin wedi’i chloi.'
     Ignore Headphone Controls: 'Yn anwybyddu gorchmynion chwarae, oedi a hepgor o ddyfeisiau Bluetooth, clustffonau â gwifren ac allweddi cyfryngau ar fysellfyrddau, fel nad yw tapiau damweiniol ar glustffonau yn torri ar draws y chwarae. Mae''r rheolyddion yn yr ap ac yn yr hysbysiad cyfryngau yn dal i weithio.'
-    Enable Caption Translations: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol.
+    Auto-select Translated Captions: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol. Mae traciau wedi'u cyfieithu ar gael yn newislen y capsiynau y naill ffordd neu'r llall.
     Use Quick Playback Speed Bar: Mae'n dangos bar cyflymder chwarae cyflym yn rheolyddion y chwaraewr ar y dde. Os yw cadw cyflymder chwarae â llaw fesul sianel wedi'i alluogi, mae'r bar hefyd yn cynnwys y botwm i gadw'r cyflymder ar gyfer y sianel bresennol.
     Multiply Seek Interval by Playback Rate: Pan fydd wedi'i alluogi, caiff cyfyngau neidio, gan gynnwys y bysellau saeth a J/L, eu lluosi â'r gyfradd chwarae bresennol. Pan fydd wedi'i analluogi, mae'r cyfyngau'n aros yn gyson beth bynnag fo'r gyfradd chwarae.
     Show Playback Rate Adjusted Timestamp: Pan fydd wedi'i alluogi a bod y cyflymder chwarae'n wahanol i 1x, mae'r chwaraewr yn dangos stampiau amser wedi'u haddasu yn ôl y gyfradd chwarae mewn cromfachau ar ôl y stamp amser arferol.

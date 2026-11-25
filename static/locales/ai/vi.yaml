@@ -962,7 +962,7 @@ Settings:
       Captions: Phụ đề
       Preferred Language: Ngôn ngữ phụ đề ưu tiên
       Application Language: Ngôn ngữ ứng dụng
-      Enable Translations: Bật dịch phụ đề
+      Auto-select Translated Captions: Tự động chọn phụ đề đã dịch
       Text Color: Màu chữ
       Background Color: Màu nền
       Background Opacity: Độ mờ nền
@@ -2511,7 +2511,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
     Switch to Audio in Background: 'Phát định dạng âm thanh khi ứng dụng chạy nền hoặc màn hình tắt, giúp tiết kiệm dữ liệu và pin. Hình trong hình vẫn giữ video. Video sẽ trở lại khi bạn mở lại ứng dụng. Yêu cầu tiếp tục phát khi màn hình bị khóa.'
     Ignore Headphone Controls: 'Bỏ qua các lệnh phát, tạm dừng và bỏ qua từ thiết bị Bluetooth, tai nghe có dây và phím đa phương tiện trên bàn phím, để việc vô tình chạm vào tai nghe không làm gián đoạn phát lại. Các điều khiển trong ứng dụng và trong thông báo đa phương tiện vẫn hoạt động.'
-    Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.
+    Auto-select Translated Captions: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp. Dù bật hay tắt, các bản phụ đề đã dịch vẫn có trong menu phụ đề.
     Use Quick Playback Speed Bar: Hiện thanh tốc độ phát nhanh trong phần điều khiển bên phải của trình phát. Nếu bật lưu tốc độ phát thủ công theo kênh, thanh này cũng có nút lưu tốc độ cho kênh hiện tại.
     Multiply Seek Interval by Playback Rate: Khi bật, khoảng tua bằng phím mũi tên và J/L được nhân với tốc độ phát hiện tại. Khi tắt, khoảng tua không đổi bất kể tốc độ phát.
     Show Playback Rate Adjusted Timestamp: Khi bật và tốc độ phát khác 1x, trình phát hiện mốc thời gian đã điều chỉnh theo tốc độ phát trong ngoặc đơn sau mốc thời gian thông thường.
