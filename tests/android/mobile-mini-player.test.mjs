@@ -461,7 +461,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         // media of one with the player of the other.
         await expect.poll(async () => {
           const box = await player.boundingBox()
-          return ['x', 'y', 'width', 'height'].every(side => Math.abs(box[side] - full[side]) < 1)
+          return box !== null && ['x', 'y', 'width', 'height'].every(side => Math.abs(box[side] - full[side]) < 1)
         }, { message: 'the restore drag must reach the inline player' }).toBe(true)
         await capture(`restoring-${scale}`)
         await t.test(`restore reaches the inline media layout before release at ${scale}%`, async () => {
