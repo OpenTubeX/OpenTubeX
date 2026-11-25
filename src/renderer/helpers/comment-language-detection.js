@@ -1,4 +1,9 @@
 const MIN_LANGUAGE_SCORE_MARGIN = 0.3
+// eld calls a result unreliable below 75% of the language's average score by
+// default, which rejects most real Korean text: names and a few English words
+// keep it well below that average. The margin against the target language
+// still keeps ambiguous text button-free.
+const MIN_RELIABILITY_RATIO = 0.5
 
 const CJK_CHARACTERS = String.raw`\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}\p{scx=Hangul}\u3000-\u303F\uFF00-\uFFEF`
 /**
@@ -7,7 +12,19 @@ const CJK_CHARACTERS = String.raw`\p{scx=Han}\p{scx=Hiragana}\p{scx=Katakana}\p{
  * after a URL and which URLs usually percent-encode.
  */
 export const URL_PATTERN_SOURCE = String.raw`\b(?:https?:\/\/|www\.)[^\s${CJK_CHARACTERS}]*[^\s.,;:!?'")\]${CJK_CHARACTERS}]`
-const URL_OR_MENTION_PATTERN = new RegExp(String.raw`(?:^|\s)@\S+|${URL_PATTERN_SOURCE}`, 'gu')
+// URLs, domains without a scheme, `@handles` and `#hashtags`, which are mostly
+// Latin and would outweigh short text in other scripts.
+const IGNORED_FOR_DETECTION_PATTERN = new RegExp([
+  String.raw`(?:^|\s)@\S+`,
+  URL_PATTERN_SOURCE,
+  String.raw`(?<![\p{L}\p{N}_@.])(?:[\p{L}\p{N}-]+\.)+[a-z]{2,}\b(?:\/[^\s${CJK_CHARACTERS}]*)?`,
+  String.raw`(?<![\p{L}\p{N}_])#[\p{L}\p{N}_]+`,
+].join('|'), 'gu')
+const LATIN_WORD_PATTERN = /[\p{scx=Latin}\p{M}\p{N}_'’-]*\p{scx=Latin}[\p{scx=Latin}\p{M}\p{N}_'’-]*/gu
+const NON_LATIN_LETTER_PATTERN = /[^\P{L}\p{scx=Latin}]/gu
+// About a short sentence in Korean, so that a single foreign word in an
+// English comment doesn't offer a translation.
+const MIN_NON_LATIN_LETTERS = 12
 
 // Languages included in eld's extrasmall (XS60) detector. Keeping the list
 // here lets Settings offer only languages that comment detection can identify.
@@ -65,19 +82,33 @@ export function detectCommentTranslationAvailability(
     return false
   }
 
-  const result = detector.detect(text.replaceAll(URL_OR_MENTION_PATTERN, ' '))
   const normalizedIgnoredLanguages = new Set(
     ignoredLanguages.map(normalizeCommentTranslationLanguageCode)
   )
-  if (
-    !result.language ||
-    !result.isReliable() ||
-    result.language === normalizedTarget ||
-    normalizedIgnoredLanguages.has(result.language)
-  ) {
-    return false
+  const offersTranslation = (detectedText) => {
+    const result = detector.detect(detectedText)
+    if (
+      !result.language ||
+      !result.isReliable(MIN_RELIABILITY_RATIO) ||
+      result.language === normalizedTarget ||
+      normalizedIgnoredLanguages.has(result.language)
+    ) {
+      return false
+    }
+
+    const scores = result.getScores()
+    return scores[result.language] - (scores[normalizedTarget] ?? 0) >= MIN_LANGUAGE_SCORE_MARGIN
   }
 
-  const scores = result.getScores()
-  return scores[result.language] - (scores[normalizedTarget] ?? 0) >= MIN_LANGUAGE_SCORE_MARGIN
+  const detectedText = text.replaceAll(IGNORED_FOR_DETECTION_PATTERN, ' ')
+  if (offersTranslation(detectedText)) {
+    return true
+  }
+
+  // Latin labels, names and brands can outweigh the actual text, such as a
+  // Korean description with a list of social media links.
+  const nonLatinText = detectedText.replaceAll(LATIN_WORD_PATTERN, ' ')
+  return nonLatinText !== detectedText &&
+    (nonLatinText.match(NON_LATIN_LETTER_PATTERN)?.length ?? 0) >= MIN_NON_LATIN_LETTERS &&
+    offersTranslation(nonLatinText)
 }

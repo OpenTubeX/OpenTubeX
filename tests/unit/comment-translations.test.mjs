@@ -13,11 +13,14 @@ test('does not offer translation for the target language or ambiguous text', asy
   assert.equal(await shouldOfferCommentTranslation('This comment is already in English.', 'en'), false)
   assert.equal(await shouldOfferCommentTranslation('Das ist bereits ein deutscher Kommentar.', 'de'), false)
   assert.equal(await shouldOfferCommentTranslation('Cool', 'en'), false)
+  assert.equal(await shouldOfferCommentTranslation('Shoutout to my Korean friends 안녕하세요 여러분', 'en'), false)
 })
 
 test('offers translation for a confidently detected different language', async () => {
   assert.equal(await shouldOfferCommentTranslation('Das ist ein deutscher Kommentar.', 'en'), true)
   assert.equal(await shouldOfferCommentTranslation('Este comentario está escrito en español.', 'en'), true)
+  // eld's default reliability threshold rejects most Korean text.
+  assert.equal(await shouldOfferCommentTranslation('오늘의 주인공은 바로 나! 생일 축하해 줘서 고마워요', 'en'), true)
 })
 
 test('terminates in-flight language detection with its worker', async (t) => {
@@ -129,7 +132,7 @@ test('keeps merged lines and the links the translation dropped', async () => {
   await assert.rejects(translateTextKeepingLayout('Text', async () => ' '))
 })
 
-test('ignores URLs when detecting the language', async () => {
+test('ignores links, hashtags and Latin labels when detecting the language', async () => {
   const description = [
     'Heute backen wir Brot.',
     'https://example.com/how-to-bake-bread-at-home',
@@ -137,4 +140,15 @@ test('ignores URLs when detecting the language', async () => {
     'https://example.com/the-ultimate-sourdough-starter-guide',
   ].join('\n')
   assert.equal(await shouldOfferCommentTranslation(description, 'en'), true)
+
+  const koreanDescription = [
+    '새 노래 연습 영상을 지금 공개합니다',
+    '#BAND #새노래',
+    '[Example Band Official SNS]',
+    '•Instagram : instagram.com/example_band',
+    '•TikTok : tiktok.com/@example_band',
+    '•Facebook : facebook.com/ExampleBand',
+    '•Weibo : weibo.com/n/example_band',
+  ].join('\n')
+  assert.equal(await shouldOfferCommentTranslation(koreanDescription, 'en'), true)
 })
