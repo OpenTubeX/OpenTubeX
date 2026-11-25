@@ -36,10 +36,20 @@
   grid-column: 3 / span 2;
 }
 
-/* The select grid stacks into one column here. Spanning the icons' track
-   too would hand that track the switches' width and squeeze the fields. */
+/* The select grid stacks into one column here, centered on the card. The
+   switches then form one block as wide as the widest of them, centered on
+   the card as well, with the switches lined up inside. Space after them
+   balances the marker gutter before them, as it does for the fields. */
 @container settings-content (width <= 800px) {
+  .generalSelectGrid > .switchColumnGrid.switchColumnGrid {
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+  }
+
   .switchColumnGrid > .switchColumn:nth-child(n) > :deep(*) {
     grid-column: 1;
+    inline-size: auto;
+    max-inline-size: 100%;
+    margin-inline: 0 12px;
   }
 }

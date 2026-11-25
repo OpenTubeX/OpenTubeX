@@ -952,4 +952,44 @@ function handleRestartPrompt(value) {
     inline-size: 100%;
   }
 }
+
+/* A select's icons sit after its field, so space before it balances them,
+   minus the marker gutter, and centers the field in its row. */
+.themeSelectRow :deep(.select) {
+  margin-inline-start: max(0px, var(--select-indicator-space) - var(--settings-marker-gutter, 0px));
+}
+
+/* Stacked, every select keeps room for all of its possible icons, so the
+   fields share both edges, and a track before them balances that room,
+   minus the marker gutter, so they are centered. When space runs out, the
+   track gives way before the fields narrow past their minimum. */
+@container settings-content (width <= 460px) {
+  .themeSelectRow {
+    --layout-select-indicator-space: calc(8px + 32px + 22px + 22px);
+
+    grid-template-columns:
+      clamp(
+        0px,
+        100% - var(--settings-stacked-field-min, 200px) - var(--settings-marker-gutter, 0px) - var(--layout-select-indicator-space),
+        var(--layout-select-indicator-space) - var(--settings-marker-gutter, 0px)
+      )
+      minmax(0, max-content);
+    column-gap: 0;
+
+    /* The balancing track already keeps the fields off the card's edges. */
+    padding-inline: 8px;
+  }
+
+  .themeSelectRow :deep(.select) {
+    --select-indicator-space: var(--layout-select-indicator-space);
+
+    grid-column: 2;
+    margin-inline-start: 0;
+  }
+
+  /* The Test Toast button keeps the whole row, not the balancing track. */
+  .themeSelectRow > .testToastAction {
+    grid-column: 1 / -1;
+  }
+}
 </style>

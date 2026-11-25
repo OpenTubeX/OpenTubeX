@@ -1,5 +1,6 @@
 .generalSelectGrid.generalSelectGrid {
   --general-select-indicator-track: calc(8px + 32px + 22px + 22px);
+  --general-select-min-field: var(--settings-stacked-field-min, 200px);
 
   /* Both fields are as wide as the widest one, and every select keeps room
      for all of its possible icons, so the two columns mirror each other and
@@ -53,7 +54,7 @@
 }
 
 .generalSelectGrid :deep(.select-text) {
-  min-inline-size: 200px;
+  min-inline-size: var(--general-select-min-field);
 }
 
 .generalSelectGrid :deep(.selectIndicators) {
@@ -109,11 +110,34 @@
 }
 
 @container settings-content (width <= 800px) {
+  /* The fields stack into one column, centered on the card: a track before
+     them balances the icons' room after them, minus the marker gutter. Those
+     tracks already keep the fields off the card's edges, so the padding can
+     shrink on phones. When space still runs out, the balancing track gives
+     way before the field narrows past its minimum, and long captions and
+     values are cut off instead. */
   .generalSelectGrid.generalSelectGrid {
-    grid-template-columns: minmax(0, max-content) max-content;
+    grid-template-columns:
+      clamp(
+        0px,
+        100% - var(--general-select-min-field) - 12px - var(--general-select-indicator-track),
+        var(--general-select-indicator-track) - 12px
+      )
+      minmax(0, max-content) var(--general-select-indicator-track);
     justify-content: center;
-    inline-size: auto;
-    padding-inline: max(20px, calc((100% - 460px) / 2));
+
+    /* As wide as the card, so the balancing track can resolve against it. */
+    inline-size: 100%;
+    padding-inline: max(8px, calc((100% - 460px) / 2));
+  }
+
+  .generalSelectGrid :deep(.select.contentSized) {
+    grid-column: 2 / span 2;
+  }
+
+  /* A caption longer than its field is cut off instead of running past it. */
+  .generalSelectGrid :deep(.select.outlined .selectLegend) {
+    max-inline-size: calc(100% - 12px - 24px);
   }
 
   /* stylelint-disable selector-max-compound-selectors -- the parser counts the "of .select" filter as compound selectors */

@@ -27,3 +27,11 @@
   flex: 1 1 220px;
   min-inline-size: 0;
 }
+
+/* Space after a select balances the marker gutter before it and space
+   before it balances its icons after it, so its field is centered. */
+.backupControls > :deep(.select) {
+  margin-inline:
+    max(0px, var(--select-indicator-space) - var(--settings-marker-gutter, 0px))
+    max(0px, var(--settings-marker-gutter, 0px) - var(--select-indicator-space));
+}

@@ -1,7 +1,7 @@
 /* The heading holds the tooltip, so the selects only keep room for their
    sync and reset icons. */
-.autoRefreshIntervalSelects.settingsSelectGrid > .select {
-  --select-indicator-space: calc(8px + 22px + 22px);
+.autoRefreshIntervalSelects.settingsSelectGrid {
+  --settings-select-indicator-space: calc(8px + 22px + 22px);
 }
 
 /* The four short selects share a row when it has room for them. */
