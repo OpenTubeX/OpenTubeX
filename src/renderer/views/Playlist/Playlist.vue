@@ -286,7 +286,7 @@ import {
   parseLocalPlaylistLastUpdated,
   updatePlaylistBookmarkMetadata,
 } from '../../helpers/playlist-bookmarks'
-import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
+import { fillMissingPlaylistVideoDurations, getPlaylistSortOrder, getSortedPlaylistItems, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 import {
@@ -461,8 +461,7 @@ const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOr
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
   if (!isUserPlaylistRequested.value) { return SORT_BY_VALUES.Custom }
-  const playlistSortOrder = selectedUserPlaylist.value?.sortOrder
-  return isPlaylistSortOrder(playlistSortOrder) ? playlistSortOrder : userPlaylistSortOrder.value
+  return getPlaylistSortOrder(selectedUserPlaylist.value, userPlaylistSortOrder.value)
 })
 
 const playlistId = computed(() => route.params.id)
@@ -741,6 +740,7 @@ const filteredPlaylistItems = computed(() => {
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
 const sortedPlaylistItems = computed(() => {
+  if (isSortedByYouTube(selectedUserPlaylist.value, sortOrder.value)) return shownPlaylistItems.value
   if (
     sortOrder.value === SORT_BY_VALUES.VideoDurationAscending ||
     sortOrder.value === SORT_BY_VALUES.VideoDurationDescending

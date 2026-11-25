@@ -12,9 +12,41 @@ export const SORT_BY_VALUES = {
   Custom: 'custom'
 }
 
+/** The sort orders YouTube also has, as its `playlistVideoOrder` values. */
+export const YOUTUBE_PLAYLIST_ORDERS = Object.freeze({
+  [SORT_BY_VALUES.Custom]: 0,
+  [SORT_BY_VALUES.DateAddedNewest]: 1,
+  [SORT_BY_VALUES.DateAddedOldest]: 2,
+  [SORT_BY_VALUES.PublishedNewest]: 4,
+  [SORT_BY_VALUES.PublishedOldest]: 5
+})
+
 /** Values written by a newer version are not sort orders this one knows. */
 export function isPlaylistSortOrder(value) {
   return Object.values(SORT_BY_VALUES).includes(value)
+}
+
+/**
+ * The sort order a user playlist shows: its own, or the setting.
+ * @param {{ sortOrder?: unknown } | null | undefined} playlist
+ * @param {string} defaultSortOrder the setting
+ * @returns {string}
+ */
+export function getPlaylistSortOrder(playlist, defaultSortOrder) {
+  return isPlaylistSortOrder(playlist?.sortOrder) ? /** @type {string} */ (playlist.sortOrder) : defaultSortOrder
+}
+
+/**
+ * Whether a playlist synced from YouTube shows its videos as saved for this
+ * sort order. They are saved in the order YouTube lists them, which follows
+ * the playlist's sort order there, also after videos were moved on YouTube.
+ * Sorting by the dates here would hide those moves. YouTube sorts Liked
+ * videos itself, so that one sorts here.
+ * @param {{ youTube?: { playlistId: string } | null } | null | undefined} playlist
+ * @param {string} sortOrder
+ */
+export function isSortedByYouTube(playlist, sortOrder) {
+  return !!playlist?.youTube && playlist.youTube.playlistId !== 'LL' && Object.hasOwn(YOUTUBE_PLAYLIST_ORDERS, sortOrder)
 }
 
 export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reversed = false) {

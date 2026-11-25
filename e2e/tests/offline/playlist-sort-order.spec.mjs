@@ -115,3 +115,114 @@ test('the watch page uses a sort preference saved during navigation', async ({ a
     contentType: 'image/png',
   })
 })
+
+test.describe('a playlist synced from YouTube', () => {
+  const syncedVideos = videos.map(item => ({ ...item, youTubeSetVideoId: `set-${item.videoId}` }))
+  /** @param {{ videoId: string, title: string }} item */
+  const tile = item => ({
+    tileRenderer: {
+      contentType: 'TILE_CONTENT_TYPE_VIDEO',
+      contentId: item.videoId,
+      metadata: {
+        tileMetadataRenderer: {
+          title: { simpleText: item.title },
+          lines: [{ lineRenderer: { items: [{ lineItemRenderer: { text: { simpleText: 'Test channel' } } }] } }],
+        },
+      },
+      header: { tileHeaderRenderer: { thumbnailOverlays: [{ thumbnailOverlayTimeStatusRenderer: { text: { simpleText: '1:00' } } }] } },
+      onLongPressCommand: {
+        showMenuCommand: {
+          menu: {
+            menuRenderer: {
+              items: [{
+                menuServiceItemRenderer: {
+                  serviceEndpoint: { playlistEditEndpoint: { actions: [{ action: 'ACTION_REMOVE_VIDEO', setVideoId: `set-${item.videoId}` }] } },
+                },
+              }],
+            },
+          },
+        },
+      },
+    },
+  })
+  const surface = content => ({ contents: { tvBrowseRenderer: { content: { tvSurfaceContentRenderer: { content } } } } })
+  // Bravo video was moved to the top on YouTube.
+  const youTubeVideos = [videos[2], videos[0], videos[1]]
+  const responses = {
+    FEplaylist_aggregation: surface({
+      gridRenderer: {
+        items: [{
+          tileRenderer: {
+            contentType: 'TILE_CONTENT_TYPE_PLAYLIST',
+            contentId: 'PLsortorder',
+            metadata: { tileMetadataRenderer: { title: { simpleText: 'Synced mix' } } },
+            header: { tileHeaderRenderer: { thumbnailOverlays: [{ thumbnailOverlayTimeStatusRenderer: { text: { simpleText: '3 videos' } } }] } },
+          },
+        }],
+      },
+    }),
+    VLPLsortorder: surface({
+      twoColumnRenderer: {
+        leftColumn: { entityMetadataRenderer: { title: { simpleText: 'Synced mix' }, description: {} } },
+        rightColumn: { playlistVideoListRenderer: { contents: youTubeVideos.map(tile) } },
+      },
+    }),
+  }
+
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        animationSpeed: 0,
+        userPlaylistSortOrder: 'custom',
+        playlistViewType: 'list',
+        youTubeAccount: {
+          credentials: {
+            access_token: 'test-access-token',
+            refresh_token: 'test-refresh-token',
+            // Far enough ahead that the sign-in is never refreshed.
+            expiry_date: '2999-01-01T00:00:00.000Z',
+            client: { client_id: 'test-client-id', client_secret: 'test-client-secret' },
+          },
+          profiles: [{ name: 'Test Channel', handle: '@testchannel', thumbnail: null, pageId: null }],
+          pageId: null,
+          channelId: 'UCtestchannel000000000000',
+          signInId: 'test-sign-in',
+        },
+        youTubeAccountSyncPlaylists: true,
+      },
+      playlists: [{
+        _id: 'synced',
+        playlistName: 'Synced mix',
+        description: '',
+        protected: false,
+        lastUpdatedAt,
+        // Sorted by date added, which YouTube switches to its manual order when a video is moved there.
+        sortOrder: 'date_added_ascending',
+        videos: syncedVideos,
+        youTube: { playlistId: 'PLsortorder', accountKey: 'test-sign-in\n', title: 'Synced mix', signature: null },
+      }],
+    },
+  })
+
+  test('shows the order YouTube has, also after videos moved there', async ({ page }) => {
+    await page.route('https://www.youtube.com/youtubei/v1/**', route => {
+      const url = route.request().url()
+      if (url.includes('/playlist/get_add_to_playlist')) {
+        return route.fulfill({ json: { contents: [{ addToPlaylistRenderer: { playlists: [{ playlistAddToOptionRenderer: { playlistId: 'PLsortorder' } }] } }] } })
+      }
+      const response = url.includes('/browse') ? responses[route.request().postDataJSON()?.browseId] : undefined
+      return response ? route.fulfill({ json: response }) : route.abort()
+    })
+
+    await goTo(page, 'userplaylists')
+    // The link's name starts with the synced icon's label.
+    await page.getByRole('link', { name: 'Synced mix' }).click()
+    await expect(page.locator('.sortSelect select')).toHaveValue('date_added_ascending')
+    await expect(titles(page)).toHaveText(youTubeVideos.map(item => item.title))
+
+    // YouTube has no title order, so that one sorts here.
+    await chooseSelectOption(page.locator('.sortSelect select'), 'video_title_ascending')
+    await expect(titles(page)).toHaveText(ascendingTitles)
+  })
+})
