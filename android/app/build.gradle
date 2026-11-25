@@ -115,8 +115,8 @@ if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateLibwebp) }
 // Replaces the older yt-dlp that youtubedl-android bundles, so fresh installs can
 // play videos before the first managed update.
 // .github/workflows/vendored-dependencies.yml opens a PR for each new release.
-def ytDlpVersion = '2026.10.26'
-def ytDlpSha256 = 'e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3'
+def ytDlpVersion = '2026.11.23'
+def ytDlpSha256 = 'e8665ed64d6b9172773e812f891fb707a0cb1ee8d9ef4fc1acb00cabee4c5256'
 def ytDlpOutput = layout.buildDirectory.dir('generated/yt-dlp')
 def downloadYtDlp = tasks.register('downloadYtDlp') {
     inputs.property('version', ytDlpVersion)
