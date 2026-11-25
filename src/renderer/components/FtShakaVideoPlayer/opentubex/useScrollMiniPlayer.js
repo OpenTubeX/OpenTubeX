@@ -375,6 +375,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     return Math.max(1, Math.abs(drag.to.top - drag.from.y))
   }
 
+  /** The length of the current drag's path between the inline player and the mini player. */
+  function getScrollMiniPlayerDragDistance() {
+    return inlineDrag ? getInlineDragDistance(inlineDrag) : Infinity
+  }
+
   function renderInlineDragProgress(progress) {
     const { from, to, restoring } = inlineDrag
     inlineDrag.progress = progress
@@ -2038,6 +2043,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     updateMobileMiniBarProgress,
     beginScrollMiniPlayerDrag,
     moveScrollMiniPlayerDrag,
+    getScrollMiniPlayerDragDistance,
     finishScrollMiniPlayerDrag,
     cancelScrollMiniPlayerDrag,
     deactivateScrollMiniPlayer,

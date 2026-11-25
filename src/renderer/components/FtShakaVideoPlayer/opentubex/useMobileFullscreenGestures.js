@@ -390,8 +390,13 @@ export function useMobileFullscreenGestures({
     }
     // Event times keep a busy main thread from slowing a measured fling.
     const elapsed = Math.max(1, event.timeStamp - gesture.startTime)
+    // A mini-player drag whose whole path is shorter, such as in a short
+    // landscape window at a larger UI Scale, commits past its halfway point.
+    const commitDistance = gesture.minimizing
+      ? Math.min(MOBILE_SWIPE_COMMIT_DISTANCE, miniPlayerDrag.distance() / 2)
+      : MOBILE_SWIPE_COMMIT_DISTANCE
     // A short swipe still commits when it is flung.
-    const swipeCommitted = gesture.distance >= MOBILE_SWIPE_COMMIT_DISTANCE || (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
+    const swipeCommitted = gesture.distance >= commitDistance || (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
     // Restore taps on the bar here rather than through its click. A finger that
     // drifts a few pixels starts a drag, and a tap that stops a page fling
     // reaches the bar without Chromium dispatching a click at all.
