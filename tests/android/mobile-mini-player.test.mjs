@@ -79,6 +79,51 @@ async function sampleAudioArtwork({ png, cropToSurface }) {
   }
 }
 
+/**
+ * Describes why native picture-in-picture did not show the artwork: the last
+ * screen sample, the page's PiP state, the app's and PiP windows and the
+ * display state, with the screen capture in ANDROID_ARTIFACT_DIR.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ png: Buffer, painted: object }} screen
+ * @param {(...args: string[]) => string} adbShell
+ */
+async function describePictureInPicture(page, { png, painted }, adbShell) {
+  const report = { painted }
+  try {
+    report.page = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement)
+      const artwork = document.querySelector('.ftVideoPlayer .musicAudioArtwork')
+      return {
+        body: document.body.className,
+        source: ['left', 'top', 'width', 'height'].map(name => root.getPropertyValue(`--android-pip-source-${name}`)),
+        artworkLoaded: artwork?.complete && artwork.naturalWidth > 0,
+        visibility: document.visibilityState,
+        focused: document.hasFocus(),
+      }
+    })
+  } catch (error) {
+    report.pageError = String(error?.message ?? error)
+  }
+  try {
+    // The app's and SystemUI's PiP windows: where they are and whether they drew.
+    report.windows = adbShell('dumpsys', 'window', 'windows').split(/\n(?=\s*Window #)/)
+      .filter(block => block.includes(androidAppId()) || /pip/i.test(block.split('\n')[0]))
+      .map(block => block.split('\n').map(line => line.trim())
+        .filter(line => /^Window #|^Frames:|isOnScreen=|isVisible=|mHasSurface=|mDrawState=|mShownAlpha=/.test(line)))
+    report.power = adbShell('dumpsys', 'power').split('\n').map(line => line.trim())
+      .filter(line => /^(mWakefulness=|Display Power: state=)/.test(line))
+  } catch (error) {
+    report.adbError = String(error?.message ?? error)
+  }
+  const directory = process.env.ANDROID_ARTIFACT_DIR
+  if (directory) {
+    await writeFile(`${directory}/picture-in-picture-failure.png`, png).catch(error => {
+      report.screenshotError = String(error?.message ?? error)
+    })
+  }
+  return `Picture-in-picture screen: ${JSON.stringify(report, null, 2)}`
+}
+
 for (const [audioOnly, landscape] of [[false, false], [true, true]]) {
   test(`mobile ${audioOnly ? 'music artwork' : '4:3 video'} fills the mini thumbnail and restores its inline layout in ${landscape ? 'landscape' : 'portrait'}`, {
     skip: !process.env.ANDROID_CDP_URL || (landscape && !process.env.ANDROID_SERIAL),
@@ -750,6 +795,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       await player.locator('.shaka-pip-button').first().evaluate(button => button.click())
       await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
       let checkError = null
+      let screen = null
       try {
         await expect.poll(() => {
           const tasks = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'dumpsys', 'activity', 'activities'], { encoding: 'utf8' })
@@ -759,10 +805,15 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         await expect.poll(async () => {
           const png = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p'], { maxBuffer: 16 * 1024 * 1024 })
           const painted = await page.evaluate(sampleAudioArtwork, { png: png.toString('base64'), cropToSurface: false })
+          screen = { png, painted }
           return painted.green
         }).toBeGreaterThan(100)
       } catch (error) {
-        checkError = error
+        // The check only fails on CI, so record what the launcher showed
+        // while the app is still in picture-in-picture.
+        checkError = screen
+          ? new Error(`${error.message}\n${await describePictureInPicture(page, screen, adb)}`, { cause: error })
+          : error
       }
       // SystemUI ignores the launch's request to expand picture-in-picture
       // while the window is still animating into it, so launch again until
