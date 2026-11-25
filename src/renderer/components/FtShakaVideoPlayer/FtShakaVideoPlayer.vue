@@ -3031,6 +3031,11 @@ function cancelAutoplayCountdown() {
   emit('autoplay-cancel')
 }
 
+// Watch reports when autoplay has nothing to start, for example offline.
+function stopAutoplay() {
+  autoplayCanceled.value = true
+}
+
 function playAutoplayVideoNow() {
   emit('autoplay-play-now')
 }
@@ -14096,6 +14101,7 @@ async function destroyPlayerRuntime() {
 
 defineExpose({
   isFullscreen,
+  stopAutoplay,
   hasLoaded,
   hasPlaybackPosition,
   scrollMiniPlayerActive,
