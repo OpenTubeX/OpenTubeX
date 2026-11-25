@@ -1258,7 +1258,7 @@ for (const { uiScale, size } of [
 }
 
 test('audio mini-player morphs suspend visualizer painting', { tag: '@performance' }, async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
+  const player = await openMobilePlayer(app, page, true, LANDSCAPE_PHONE)
   const watch = await watchViewHandle(page)
   await watch.evaluate(view => { view.musicMediaType = 'audioTrack' })
   await page.evaluate(async () => {
