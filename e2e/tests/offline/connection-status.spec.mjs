@@ -84,7 +84,7 @@ test.describe('full-window connection banner', () => {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('setShowProgressBarToast', false)
-      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 0 })
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'arrows-rotate'], message: '', percentage: 0 })
     })
     await expect(page.locator('.app > .progressBar')).toBeVisible()
     for (const safeArea of ['0px', '24px']) {

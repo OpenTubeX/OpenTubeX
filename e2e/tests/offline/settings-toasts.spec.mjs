@@ -378,7 +378,7 @@ test.describe('settings', () => {
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
     await page.evaluate(() => {
       const store = window.$store
-      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: 'Phone progress toast', percentage: 50 })
+      store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'arrows-rotate'], message: 'Phone progress toast', percentage: 50 })
     })
     await expect(progressToast).toBeVisible()
 

@@ -402,7 +402,7 @@
           @click="retryWaitingRequests"
         >
           <ft-icon
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             aria-hidden="true"
           />
           {{ $t('Video.Retry Now') }}
@@ -478,7 +478,7 @@
               :aria-label="$t('KeyboardShortcutPrompt.Mute')"
               @click.stop="toggleShortsMuted"
             >
-              <ft-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
+              <ft-icon :icon="['fas', shortsMuted ? 'volume-xmark' : 'volume-high']" />
             </button>
             <div
               class="shaka-range-container shortsVolumeSlider"
@@ -526,7 +526,7 @@
             :aria-label="$t('Video.More Options')"
             @click.stop="openShortsOverflowMenu($event)"
           >
-            <ft-icon :icon="['fas', 'ellipsis-v']" />
+            <ft-icon :icon="['fas', 'ellipsis-vertical']" />
           </button>
           <button
             type="button"
@@ -949,7 +949,7 @@
             <h2 class="fullscreenDockHeading">
               <FtIcon
                 class="fullscreenDockHeadingIcon"
-                :icon="['fas', 'info-circle']"
+                :icon="['fas', 'circle-info']"
               />
               {{ $t('Video.Metadata', 'Video information') }}
             </h2>
@@ -1704,7 +1704,7 @@
                   @click="previewSponsorBlockDraft(segment.id, 'inspect')"
                 >
                   <ft-icon
-                    :icon="['fas', 'search']"
+                    :icon="['fas', 'magnifying-glass']"
                     aria-hidden="true"
                   />
                   {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
@@ -1716,7 +1716,7 @@
                   @click="previewSponsorBlockDraft(segment.id, 'end')"
                 >
                   <ft-icon
-                    :icon="['fas', 'step-forward']"
+                    :icon="['fas', 'forward-step']"
                     aria-hidden="true"
                   />
                   {{ $t('Video.Player.SponsorBlock.EndActionLabel') }}
@@ -1755,7 +1755,7 @@
               @click="submitSponsorBlockDrafts"
             >
               <ft-icon
-                :icon="['fas', 'share-alt']"
+                :icon="['fas', 'share-nodes']"
                 aria-hidden="true"
               />
               {{ $t('Video.Player.SponsorBlock.SubmitSegments') }}
@@ -1857,7 +1857,7 @@
             @click.stop.prevent="dismissMobileMiniPlayer"
           >
             <ft-icon
-              :icon="['fas', 'times']"
+              :icon="['fas', 'xmark']"
               aria-hidden="true"
             />
           </button>
@@ -1874,7 +1874,7 @@
               @click.stop.prevent="$emit('skip-to-prev')"
             >
               <ft-icon
-                :icon="['fas', 'step-backward']"
+                :icon="['fas', 'backward-step']"
                 aria-hidden="true"
               />
             </button>
@@ -1922,7 +1922,7 @@
               @click.stop.prevent="$emit('skip-to-next')"
             >
               <ft-icon
-                :icon="['fas', 'step-forward']"
+                :icon="['fas', 'forward-step']"
                 aria-hidden="true"
               />
             </button>
@@ -1980,7 +1980,7 @@
           @focusin="handleScrollMiniPlayPauseMouseEnter"
           @mousedown.stop.prevent
         >
-          <ft-icon :icon="['fas', 'times']" />
+          <ft-icon :icon="['fas', 'xmark']" />
         </button>
         <button
           v-if="!scrollMiniPlayerStashed && canSkipPrevious"
@@ -1997,7 +1997,7 @@
           @mousedown.stop.prevent
         >
           <ft-icon
-            :icon="['fas', 'step-backward']"
+            :icon="['fas', 'backward-step']"
             aria-hidden="true"
           />
         </button>
@@ -2034,7 +2034,7 @@
           @mousedown.stop.prevent
         >
           <ft-icon
-            :icon="['fas', 'step-forward']"
+            :icon="['fas', 'forward-step']"
             aria-hidden="true"
           />
         </button>
@@ -5285,7 +5285,7 @@ function noteSeekHistoryJump(target) {
 /** @param {'back' | 'forward'} direction */
 function stepSeekHistory(direction) {
   const back = direction === 'back'
-  const icon = back ? 'undo' : 'redo'
+  const icon = back ? 'arrow-rotate-left' : 'redo'
   const step = back
     ? stepSeekHistoryBack(seekHistory.value, video.value.currentTime)
     : stepSeekHistoryForward(seekHistory.value, video.value.currentTime)
@@ -6032,7 +6032,7 @@ const {
   onTwoFingerDoubleTap: direction => {
     const index = navigateChapters(direction > 0 ? 'next' : 'restart')
     if (index === null) return false
-    showValueChange(props.chapters[index].title, direction > 0 ? 'step-forward' : 'step-backward', { revealControls: false })
+    showValueChange(props.chapters[index].title, direction > 0 ? 'forward-step' : 'backward-step', { revealControls: false })
     return true
   },
   getSwipeAction: side => process.env.IS_CAPACITOR
@@ -11245,7 +11245,7 @@ function changeVolume(step) {
 
   let messageIcon
   if (newValue <= 0) {
-    messageIcon = 'volume-mute'
+    messageIcon = 'volume-xmark'
   } else if (newValue > 0 && newValue < oldValue) {
     messageIcon = 'volume-low'
   } else if (newValue > 0 && newValue > oldValue) {
@@ -11713,7 +11713,7 @@ async function keyboardShortcutHandler(event) {
       const isMuted = !video_.muted
       video_.muted = isMuted
 
-      const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
+      const messageIcon = isMuted ? 'volume-xmark' : 'volume-high'
       const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
       showValueChange(message, messageIcon, { level: isMuted ? 0 : video_.volume })
       blurTooltipButtons()
@@ -11732,7 +11732,7 @@ async function keyboardShortcutHandler(event) {
 
       const localization = ui.getControls().getLocalization()
       const message = localization.resolve(enabled ? 'ON' : 'OFF')
-      showValueChange(message, ['step-forward', 'volume-xmark'], { invertContentOrder: true })
+      showValueChange(message, ['forward-step', 'volume-xmark'], { invertContentOrder: true })
       blurTooltipButtons()
       break
     }
@@ -14173,7 +14173,7 @@ let accumulatedSeekSeconds = 0
 // Gestures with live feedback take over the OSD while they run.
 const valueChangeOsd = computed(() => {
   if (videoZoomPinching.value) {
-    return { icons: ['search'], text: formatVideoZoom(videoZoomGestureZoom.value), level: null, invertContentOrder: false }
+    return { icons: ['magnifying-glass'], text: formatVideoZoom(videoZoomGestureZoom.value), level: null, invertContentOrder: false }
   }
   if (showTemporaryPlaybackRateIndicator.value) {
     return { icons: ['forward'], text: temporaryPlaybackRateIndicatorMessage.value, level: null, invertContentOrder: true }

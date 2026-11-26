@@ -11,7 +11,7 @@
       <div class="titleRow">
         <h2 class="pageTitle">
           <FtIcon
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             class="headingIcon"
           />
           {{ t("Search Filters.Search Results") }}
@@ -146,7 +146,7 @@
             @click="nextPage"
             @keydown.enter.space.prevent="nextPage"
           >
-            <FtIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
+            <FtIcon :icon="['fas', 'magnifying-glass']" /> {{ t("Search Filters.Fetch more results") }}
           </div>
         </FtAutoLoadNextPageWrapper>
         <p
@@ -561,7 +561,7 @@ async function performSearchLocal(payload) {
     showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       await performSearchInvidious(payload)
     } else {
       isLoading.value = false
@@ -755,7 +755,7 @@ async function nextPage() {
         if (requestId === searchRequestId) isLoadingMore.value = false
       }
     } else {
-      showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
+      showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'magnifying-glass'] })
     }
   } else {
     isLoadingMore.value = true

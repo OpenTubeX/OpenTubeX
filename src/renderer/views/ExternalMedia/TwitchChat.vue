@@ -28,7 +28,7 @@
           :aria-expanded="String(settingsMenuOpen)"
           @click="settingsMenuOpen = !settingsMenuOpen"
         >
-          <FtIcon :icon="['fas', 'sliders-h']" />
+          <FtIcon :icon="['fas', 'sliders']" />
         </button>
         <button
           type="button"
@@ -81,7 +81,7 @@
               :aria-expanded="String(settingsMenuOpen)"
               @click="settingsMenuOpen = !settingsMenuOpen"
             >
-              <FtIcon :icon="['fas', 'sliders-h']" />
+              <FtIcon :icon="['fas', 'sliders']" />
             </button>
             <button
               v-if="!phonePanelHeader"
@@ -116,7 +116,7 @@
           {{ errorMessage }}
         </p>
         <FtIcon
-          :icon="['fas', 'exclamation-circle']"
+          :icon="['fas', 'circle-exclamation']"
           class="errorIcon"
           aria-hidden="true"
         />

@@ -35,7 +35,7 @@
           <FtButton
             v-if="failedDownloads.length > 0"
             :label="t('Downloads.Retry All')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :text-color="null"
             :background-color="null"
             @click="queueAction('retry-all')"
@@ -54,7 +54,7 @@
           ref="bulkMenuButton"
           class="bulkMenuButton"
           :title="t('Video.More Options')"
-          :icon="['fas', 'ellipsis-v']"
+          :icon="['fas', 'ellipsis-vertical']"
           theme="base-no-default"
           @click="openBulkMenu"
         />
@@ -117,7 +117,7 @@
           class="downloadSearch"
           input-type="search"
           :placeholder="t('Search Bar.Search')"
-          :icon="['fas', 'search']"
+          :icon="['fas', 'magnifying-glass']"
           :label="t('Downloads.Search Completed')"
           :show-label="true"
           :show-action-button="false"
@@ -339,7 +339,7 @@ const clearableDownloads = computed(() => downloads.value.filter(download => (
 const bulkMenuItems = computed(() => [
   pausableDownloads.value.length > 0 && { label: t('Downloads.Pause All'), icon: ['fas', 'pause'], run: () => queueAction('pause-all') },
   resumableDownloads.value.length > 0 && { label: t('Downloads.Resume All'), icon: ['fas', 'play'], run: () => queueAction('resume-all') },
-  failedDownloads.value.length > 0 && { label: t('Downloads.Retry All'), icon: ['fas', 'sync'], run: () => queueAction('retry-all') },
+  failedDownloads.value.length > 0 && { label: t('Downloads.Retry All'), icon: ['fas', 'arrows-rotate'], run: () => queueAction('retry-all') },
   clearableDownloads.value.length > 0 && { label: t('Downloads.Clear Failed Canceled Skipped And Missing'), icon: ['fas', 'trash'], run: clearFailedAndMissing },
 ].filter(Boolean).map(item => ({ enabled: true, ...item })))
 const bulkMenuButton = useTemplateRef('bulkMenuButton')

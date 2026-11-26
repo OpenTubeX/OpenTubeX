@@ -136,7 +136,7 @@ async function loadDataLocalAsync(generation) {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       await loadDataInvidiousAsync(generation)
     } else {
       isLoading.value = false

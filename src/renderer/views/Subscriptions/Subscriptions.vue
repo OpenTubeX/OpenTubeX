@@ -128,7 +128,7 @@
                   v-if="currentTab === 'feeds' || currentNewFeedRssTab"
                   class="headerViewToggle headerManageFeeds"
                   :title="$t('Settings.Subscription Settings.Manage RSS Feeds')"
-                  :icon="['fas', 'edit']"
+                  :icon="['fas', 'pen-to-square']"
                   :padding="8"
                   :size="20"
                   theme="base-no-default"
@@ -362,7 +362,7 @@
         ]"
         :option-names="[$t('Yes'), $t('No'), $t('Confirmations.Never Ask Again')]"
         :option-values="['refresh', 'cancel', 'neverAskAgain']"
-        :option-icons="[['fas', 'sync'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
+        :option-icons="[['fas', 'arrows-rotate'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
         autosize
         @click="handleAllFeedsRefreshWarning"
       />
@@ -527,7 +527,7 @@ function handleFeedContextMenu(event) {
   const cancels = cancelsRss || cancelsPlatforms || cancelsSubscriptions
   const actions = [{
     label: cancels ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
-    icon: cancels ? ['fas', 'xmark'] : ['fas', 'sync'],
+    icon: cancels ? ['fas', 'xmark'] : ['fas', 'arrows-rotate'],
     run: cancels
       ? () => {
           if (cancelsRss) cancelRssFeedsRefresh()

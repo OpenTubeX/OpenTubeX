@@ -62,7 +62,7 @@
       <!-- While a refresh runs, the same button cancels it -->
       <FtIconButton
         :disabled="!refreshInProgress && disableRefresh"
-        :icon="refreshInProgress ? ['fas', 'xmark'] : ['fas', 'sync']"
+        :icon="refreshInProgress ? ['fas', 'xmark'] : ['fas', 'arrows-rotate']"
         class="refreshButton"
         :title="refreshInProgress ? t('Feed.Cancel Refresh') : refreshFeedButtonTitle"
         :size="12"

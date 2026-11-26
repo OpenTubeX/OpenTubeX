@@ -73,7 +73,7 @@
       <FtButton
         v-if="typeof modelValue !== 'string'"
         :label="t('User Playlists.Use Bookmark Icon')"
-        :icon="['fas', 'undo']"
+        :icon="['fas', 'arrow-rotate-left']"
         @click="emit('update:modelValue', 'bookmark')"
       />
     </div>

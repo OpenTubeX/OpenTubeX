@@ -299,33 +299,33 @@ const itemIcons = {
   'Expand Group': ['fas', 'expand'],
   'Load Tab': ['fas', 'download'],
   'Load Tabs': ['fas', 'download'],
-  'Manage Tab Groups…': ['fas', 'edit'],
+  'Manage Tab Groups…': ['fas', 'pen-to-square'],
   'Mark All as Seen': ['fas', 'check'],
-  'Move Tab': ['fas', 'exchange-alt'],
+  'Move Tab': ['fas', 'right-left'],
   'Move Tab to Group': ['fas', 'layer-group'],
   'Move Tab to Window': ['fas', 'display'],
-  'Move Tabs': ['fas', 'exchange-alt'],
+  'Move Tabs': ['fas', 'right-left'],
   'Move Tabs to Group': ['fas', 'layer-group'],
   'Move Tabs to Window': ['fas', 'display'],
   'New Incognito Tab': ['fas', 'user-secret'],
   'New Tab': ['fas', 'plus'],
   'New Window': ['fas', 'clone'],
   'Open in a New Tab': ['fas', 'arrow-up-right-from-square'],
-  'Open in a New Window': ['fas', 'external-link-alt'],
+  'Open in a New Window': ['fas', 'up-right-from-square'],
   'Open in an Incognito Tab': ['fas', 'user-secret'],
-  'Other Tabs': ['fas', 'times-circle'],
+  'Other Tabs': ['fas', 'circle-xmark'],
   Paste: ['fas', 'paste'],
   'Pin Tab': ['fas', 'thumbtack'],
   'Pin Tabs': ['fas', 'thumbtack'],
-  'Reload All Feeds': ['fas', 'sync'],
-  'Reload Live': ['fas', 'sync'],
-  'Reload Platforms': ['fas', 'sync'],
-  'Reload Posts': ['fas', 'sync'],
-  'Reload RSS Feeds': ['fas', 'sync'],
-  'Reload Shorts': ['fas', 'sync'],
-  'Reload Tab': ['fas', 'sync'],
-  'Reload Tabs': ['fas', 'sync'],
-  'Reload Videos': ['fas', 'sync'],
+  'Reload All Feeds': ['fas', 'arrows-rotate'],
+  'Reload Live': ['fas', 'arrows-rotate'],
+  'Reload Platforms': ['fas', 'arrows-rotate'],
+  'Reload Posts': ['fas', 'arrows-rotate'],
+  'Reload RSS Feeds': ['fas', 'arrows-rotate'],
+  'Reload Shorts': ['fas', 'arrows-rotate'],
+  'Reload Tab': ['fas', 'arrows-rotate'],
+  'Reload Tabs': ['fas', 'arrows-rotate'],
+  'Reload Videos': ['fas', 'arrows-rotate'],
   'Reopen Closed Tab': ['fas', 'clock-rotate-left'],
   'Save Image As…': ['fas', 'file-image'],
   'Select All': ['fas', 'check'],
@@ -349,17 +349,17 @@ function getItemIcon(item, parentLabel = '') {
   // Shown when an image icon fails to load.
   if (item.fallbackIcon) return item.fallbackIcon
   // Search engines until the main process resolves their icon
-  if (item.faviconSource) return ['fas', 'search']
+  if (item.faviconSource) return ['fas', 'magnifying-glass']
   if (colorLabels.has(item.label)) return ['fas', 'circle']
   if (item.label === 'To Beginning') return ['fas', verticalTabLayout.value ? 'arrow-up' : 'arrow-left']
   if (item.label === 'To End') return ['fas', verticalTabLayout.value ? 'arrow-down' : 'arrow-right']
   if (/^Close \d+ Tabs$/.test(item.label)) return ['fas', 'rectangle-xmark']
   if (/^Duplicate \d+ Tabs$/.test(item.label)) return ['fas', 'clone']
-  if (/^Search /.test(item.label)) return ['fas', 'search']
+  if (/^Search /.test(item.label)) return ['fas', 'magnifying-glass']
   if (/is too long for search/.test(item.label)) return ['fas', 'circle-exclamation']
   if (parentLabel === 'Move Tab to Window' || parentLabel === 'Move Tabs to Window') return ['fas', 'display']
   if (parentLabel === 'Move Tab to Group' || parentLabel === 'Move Tabs to Group') {
-    if (item.label === 'Manage Tab Groups…') return ['fas', 'edit']
+    if (item.label === 'Manage Tab Groups…') return ['fas', 'pen-to-square']
     if (item.label === 'Ungrouped') return ['fas', 'link-slash']
     return ['fas', 'layer-group']
   }

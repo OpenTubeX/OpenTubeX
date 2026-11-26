@@ -262,7 +262,7 @@
       <FtIconButton
         v-if="dropdownOptions.length > 0"
         class="optionsButton"
-        :icon="['fas', 'ellipsis-v']"
+        :icon="['fas', 'ellipsis-vertical']"
         :title="$t('Video.More Options')"
         theme="base-no-default"
         :size="18"

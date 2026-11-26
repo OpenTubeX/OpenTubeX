@@ -5,7 +5,7 @@
     :title="shareTitle"
     :theme="theme"
     :size="size"
-    :icon="['fas', 'share-alt']"
+    :icon="['fas', 'share-nodes']"
     :dropdown-modal-on-mobile="true"
     dropdown-position-x="left"
     dropdown-class="content-width"
@@ -289,7 +289,7 @@ const youtubeEmbedURL = computed(() => {
  */
 function linkActions(share, copy, open, embed = null) {
   return [
-    ...(canShare ? [{ icon: ['fas', 'share-alt'], label: t('Share.Share Link'), run: share }] : []),
+    ...(canShare ? [{ icon: ['fas', 'share-nodes'], label: t('Share.Share Link'), run: share }] : []),
     { icon: ['fas', 'copy'], label: t('Share.Copy Link'), run: copy },
     { icon: ['fas', 'globe'], label: t('Share.Open Link'), run: open },
     ...(embed

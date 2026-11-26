@@ -180,7 +180,7 @@
         <FtIconButton
           v-else-if="canRetry && !canPlay"
           :title="t('Downloads.Retry Download')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           theme="primary"
           :disabled="retrying"
           @click="emit('retry')"
@@ -195,7 +195,7 @@
         <FtIconButton
           ref="menuButton"
           :title="t('Video.More Options')"
-          :icon="['fas', 'ellipsis-v']"
+          :icon="['fas', 'ellipsis-vertical']"
           theme="base-no-default"
           @click="openMenu"
         />
@@ -244,7 +244,7 @@
           />
           <FtIconButton
             :title="t('Downloads.Cancel Download')"
-            :icon="['fas', 'times']"
+            :icon="['fas', 'xmark']"
             theme="destructive"
             @click="cancelDownload"
           />
@@ -253,7 +253,7 @@
           <FtIconButton
             v-if="canRetry"
             :title="t('Downloads.Retry Download')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             theme="primary"
             :disabled="retrying"
             @click="emit('retry')"
@@ -288,7 +288,7 @@
           />
           <FtIconButton
             :title="t('Downloads.Clear From List')"
-            :icon="['fas', 'times']"
+            :icon="['fas', 'xmark']"
             theme="secondary"
             @click="emit('clear')"
           />
@@ -432,9 +432,9 @@ const menuItems = computed(() => {
         { label: t('Downloads.Move Later'), icon: ['fas', 'arrow-down'], enabled: props.canMoveLater, run: () => emit('move', 1) }
       )
     }
-    items.push({ label: t('Downloads.Cancel Download'), icon: ['fas', 'times'], run: cancelDownload })
+    items.push({ label: t('Downloads.Cancel Download'), icon: ['fas', 'xmark'], run: cancelDownload })
   } else {
-    if (canRetry.value && canPlay.value) items.push({ label: t('Downloads.Retry Download'), icon: ['fas', 'sync'], enabled: !props.retrying, run: () => emit('retry') })
+    if (canRetry.value && canPlay.value) items.push({ label: t('Downloads.Retry Download'), icon: ['fas', 'arrows-rotate'], enabled: !props.retrying, run: () => emit('retry') })
     if (canPlay.value && !IS_IOS) items.push({ label: t('Video.Add to Queue'), icon: ['fas', 'add-to-queue'], run: () => emit('queue') })
     if (canAccessFiles.value) {
       items.push(
@@ -442,7 +442,7 @@ const menuItems = computed(() => {
         { label: t('Downloads.Remove File'), icon: ['fas', 'trash'], run: () => emit('remove') }
       )
     }
-    items.push({ label: t('Downloads.Clear From List'), icon: ['fas', 'times'], run: () => emit('clear') })
+    items.push({ label: t('Downloads.Clear From List'), icon: ['fas', 'xmark'], run: () => emit('clear') })
   }
   return items.map(item => ({ enabled: true, ...item }))
 })

@@ -1148,7 +1148,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'arrows-rotate'])
   }
 
   const subscriptionUpdates = []
@@ -1272,7 +1272,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'arrows-rotate'])
   }
 
   const subscriptionUpdates = []
@@ -1380,7 +1380,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'arrows-rotate'])
   }
 
   const subscriptionUpdates = []
@@ -1507,7 +1507,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast && shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'arrows-rotate'])
   }
 
   const subscriptionUpdates = []
@@ -1620,7 +1620,7 @@ async function getChannelPostsLocal(channel, t) {
     })
 
     if (store.getters.getBackendPreference === 'local' && store.getters.getBackendFallback) {
-      showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       return await getChannelPostsInvidious(channel, t)
     }
 
@@ -1679,7 +1679,7 @@ async function getChannelVideosLocalScraper(channel, t, failedAttempts = 0) {
         return await getChannelVideosLocalRSS(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
           return await getChannelVideosInvidiousScraper(channel, t, failedAttempts + 1)
         }
         return { videos: null }
@@ -1728,7 +1728,7 @@ async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
         return await getChannelVideosLocalScraper(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
           return await getChannelVideosInvidiousRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }
@@ -1891,7 +1891,7 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
     })
 
     if (failedAttempts === 0 && store.getters.getBackendFallback) {
-      showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       return await getChannelShortsInvidious(channel, t, failedAttempts + 1)
     }
 
@@ -2061,7 +2061,7 @@ async function getChannelLiveLocal(channel, t, failedAttempts = 0) {
         return await getChannelLiveLocalRSS(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
           return await getChannelLiveInvidious(channel, t, failedAttempts + 1)
         }
         return { videos: null }
@@ -2099,7 +2099,7 @@ async function getChannelLiveLocalRSS(channel, t, failedAttempts = 0) {
         return await getChannelLiveLocal(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+          showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
           return await getChannelLiveInvidiousRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }

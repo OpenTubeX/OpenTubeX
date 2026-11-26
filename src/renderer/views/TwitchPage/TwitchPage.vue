@@ -17,7 +17,7 @@
         :label="t('Twitch Page.Search')"
         :placeholder="t('Twitch Page.Search Placeholder')"
         :action-button-label="t('Twitch Page.Search')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :value="query"
         :maxlength="200"
         @click="search"
@@ -85,7 +85,7 @@
           <FtFlexBox>
             <FtButton
               :label="t('User Playlists.SinglePlaylistView.Retry')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               @click="loadBrowse"
             />
           </FtFlexBox>

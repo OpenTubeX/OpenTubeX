@@ -51,7 +51,7 @@
       @click="toggleEdit"
     >
       <FtIcon
-        :icon="['fas', 'edit']"
+        :icon="['fas', 'pen-to-square']"
         aria-hidden="true"
       />
     </button>

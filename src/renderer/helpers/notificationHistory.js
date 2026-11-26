@@ -26,7 +26,7 @@ export const NOTIFICATION_KIND_ICONS = {
   'download-started': ['fas', 'download'],
   'download-completed': ['fas', 'download'],
   'download-failed': ['fas', 'circle-exclamation'],
-  'app-update': ['fas', 'sync'],
+  'app-update': ['fas', 'arrows-rotate'],
   'sync-blocked': ['fas', 'triangle-exclamation'],
   'youtube-signed-out': ['fas', 'circle-user'],
   'youtube-subscriptions': ['fas', 'subscriptions'],

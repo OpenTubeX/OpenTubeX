@@ -16,7 +16,7 @@
         <p>{{ t('Home Page.Description') }}</p>
         <FtButton
           :label="customizing ? t('Home Page.Done') : t('Home Page.Customize')"
-          :icon="customizing ? ['fas', 'check'] : ['fas', 'sliders-h']"
+          :icon="customizing ? ['fas', 'check'] : ['fas', 'sliders']"
           :background-color="customizing ? 'var(--primary-color)' : 'var(--secondary-card-bg-color)'"
           :text-color="customizing ? 'var(--text-with-main-color)' : 'var(--primary-text-color)'"
           @click="customizing = !customizing"
@@ -181,7 +181,7 @@
             <FtIconButton
               v-if="recommendationsHaveHistory"
               :title="t('KeyboardShortcutPrompt.Refresh')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               :disabled="recommendationsLoading"
               theme="base-no-default"
               @click="refreshRecommendations"
@@ -697,7 +697,7 @@ async function toggleRecommendationFeedback(video, type) {
     icon: ['fas', 'eye-slash'],
     buttons: [{
       label: t('Undo'),
-      icon: ['fas', 'undo'],
+      icon: ['fas', 'arrow-rotate-left'],
       primary: true,
       // Skip if a reset or history removal cleared the record meanwhile.
       action: () => {

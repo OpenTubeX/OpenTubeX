@@ -183,7 +183,7 @@
         <FtIconButton
           v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
           :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-          :icon="['fas', 'external-link-alt']"
+          :icon="['fas', 'up-right-from-square']"
           class="externalPlayerIcon"
           theme="base"
           :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
@@ -521,7 +521,7 @@
             v-if="showVideoMenuButton"
             ref="videoMenuButton"
             class="optionsButton"
-            :icon="['fas', 'ellipsis-v']"
+            :icon="['fas', 'ellipsis-vertical']"
             :title="t('Video.More Options')"
             theme="base-no-default"
             :size="16"
@@ -1219,7 +1219,7 @@ const videoMenuOptions = computed(() => {
       ? [{
           label: t('Context Menu.Open in a New Window'),
           value: 'openNewWindow',
-          icon: ['fas', 'external-link-alt']
+          icon: ['fas', 'up-right-from-square']
         }]
       : []),
     ...(store.getters.getIncognitoTabsEnabled
@@ -1358,7 +1358,7 @@ const videoMenuOptions = computed(() => {
           {
             label: t('Video.Open in Invidious'),
             value: 'openInvidious',
-            icon: ['fas', 'external-link-alt']
+            icon: ['fas', 'up-right-from-square']
           }
         ]
       : [],
@@ -1381,7 +1381,7 @@ const videoMenuOptions = computed(() => {
             {
               label: t('Video.Open Channel in Invidious'),
               value: 'openInvidiousChannel',
-              icon: ['fas', 'external-link-alt']
+              icon: ['fas', 'up-right-from-square']
             }
           ]
         : [],
@@ -1600,7 +1600,7 @@ const videoContextMenuItems = computed(() => {
       ? openItems[0]
       : {
           label: t('Share.Open Link'),
-          icon: ['fas', 'external-link-alt'],
+          icon: ['fas', 'up-right-from-square'],
           enabled: true,
           submenu: openItems
         })
@@ -1623,7 +1623,7 @@ const videoContextMenuItems = computed(() => {
     rows.push({
       label: t('Share.Share Link'),
       actionId: 'share',
-      icon: ['fas', 'share-alt'],
+      icon: ['fas', 'share-nodes'],
       enabled: true,
       run: () => shareLink(getYoutubeVideoShareUrl(id.value, playlistSharable.value ? playlistIdFinal.value : ''))
     })

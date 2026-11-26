@@ -57,8 +57,8 @@ test('lists every running operation in the order they started', () => {
 
 test('ignores updates and repeated finishes after an operation finishes', () => {
   const store = createStore()
-  const first = startProgressBarOperation(store, { icon: ['fas', 'sync'], message: 'First', percentage: 0 })
-  const second = startProgressBarOperation(store, { icon: ['fas', 'sync'], message: 'Second', percentage: 0 })
+  const first = startProgressBarOperation(store, { icon: ['fas', 'arrows-rotate'], message: 'First', percentage: 0 })
+  const second = startProgressBarOperation(store, { icon: ['fas', 'arrows-rotate'], message: 'Second', percentage: 0 })
 
   first.finish()
   first.update({ message: 'Late update', percentage: 100 })

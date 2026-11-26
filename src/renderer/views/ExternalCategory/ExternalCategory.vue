@@ -14,7 +14,7 @@
       <FtFlexBox>
         <FtButton
           :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           @click="loadCategory"
         />
       </FtFlexBox>
@@ -159,7 +159,7 @@
           <FtFlexBox>
             <FtButton
               :label="t('User Playlists.SinglePlaylistView.Retry')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               @click="loadCategory"
             />
           </FtFlexBox>

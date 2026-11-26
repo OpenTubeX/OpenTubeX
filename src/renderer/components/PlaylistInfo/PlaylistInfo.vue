@@ -218,7 +218,7 @@
             <FtButton
               class="actionButton"
               :label="t('User Playlists.Save Changes')"
-              :icon="['fas', 'save']"
+              :icon="['fas', 'floppy-disk']"
               :disabled="playlistPersistenceDisabled"
               theme="primary"
               @click="savePlaylistInfo"
@@ -226,7 +226,7 @@
             <FtButton
               class="actionButton"
               :label="t('User Playlists.Cancel')"
-              :icon="['fas', 'times']"
+              :icon="['fas', 'xmark']"
               theme="secondary"
               variant="outlined"
               @click="exitEditMode"
@@ -238,7 +238,7 @@
               class="actionButton"
               data-overflow-key="edit"
               :title="t('User Playlists.Edit Playlist Info')"
-              :icon="['fas', 'edit']"
+              :icon="['fas', 'pen-to-square']"
               theme="secondary"
               @click="enterEditMode"
             >
@@ -272,7 +272,7 @@
               @click="addPlaylistToQueue"
             >
               <FtIcon
-                :icon="queueSnapshotPending ? ['fas', 'sync'] : ['fas', 'add-to-queue']"
+                :icon="queueSnapshotPending ? ['fas', 'arrows-rotate'] : ['fas', 'add-to-queue']"
                 :spin="queueSnapshotPending"
                 aria-hidden="true"
               />
@@ -301,7 +301,7 @@
               @click="unavailableVideoScan.cancel()"
             >
               <FtIcon
-                :icon="['fas', 'sync']"
+                :icon="['fas', 'arrows-rotate']"
                 spin
                 aria-hidden="true"
               />
@@ -326,7 +326,7 @@
               @click="openMoreOptionsMenu"
             >
               <FtIcon
-                :icon="moreOptionsPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
+                :icon="moreOptionsPending ? ['fas', 'arrows-rotate'] : ['fas', 'ellipsis']"
                 :spin="moreOptionsPending"
                 aria-hidden="true"
               />
@@ -411,7 +411,7 @@
         class="inputElement"
         input-type="search"
         :label="$t('User Playlists.SinglePlaylistView.Search for Videos')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="$t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="query"
@@ -813,7 +813,7 @@ const rowActions = computed(() => ({
   edit: {
     visible: isUserPlaylist.value,
     label: t('User Playlists.Edit Playlist Info'),
-    icon: ['fas', 'edit'],
+    icon: ['fas', 'pen-to-square'],
     run: enterEditMode,
   },
   save: {
@@ -1206,7 +1206,7 @@ async function exportAsFreeTubeDatabase() {
     if (response) {
       showToast({
         message: t('User Playlists.The playlist has been successfully exported'),
-        icon: ['fas', 'file-download'],
+        icon: ['fas', 'file-arrow-down'],
       })
     }
   } catch (error) {
@@ -1244,7 +1244,7 @@ async function exportAsYouTubeCsv() {
     if (response) {
       showToast({
         message: t('User Playlists.The playlist has been successfully exported'),
-        icon: ['fas', 'file-download'],
+        icon: ['fas', 'file-arrow-down'],
       })
     }
   } catch (error) {
@@ -1276,7 +1276,7 @@ async function exportAsListOfUrls() {
     if (response) {
       showToast({
         message: t('User Playlists.The playlist has been successfully exported'),
-        icon: ['fas', 'file-download'],
+        icon: ['fas', 'file-arrow-down'],
       })
     }
   } catch (error) {
@@ -1491,7 +1491,7 @@ function enableQuickBookmarkForThisPlaylist() {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
           }),
           time: 5000,
-          icon: ['fas', 'undo'],
+          icon: ['fas', 'arrow-rotate-left'],
         })
       },
       icon: ['fas', 'bookmark'],

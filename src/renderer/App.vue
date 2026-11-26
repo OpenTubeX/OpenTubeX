@@ -455,7 +455,7 @@
                   @click="shareMobileContextLink"
                 >
                   <FtIcon
-                    :icon="['fas', 'share-alt']"
+                    :icon="['fas', 'share-nodes']"
                     aria-hidden="true"
                   />
                   {{ t('Share.Share Link') }}
@@ -478,7 +478,7 @@
       @keydown.stop="handleFindbarNavigationShortcut"
     >
       <FtIcon
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         class="findbarIcon"
         aria-hidden="true"
       />
@@ -2093,7 +2093,7 @@ onMounted(async () => {
           message: t('Settings.Sync Settings.Previous Auto Sync Notice'),
           time: Infinity,
           dismissible: false,
-          icon: ['fas', 'sync'],
+          icon: ['fas', 'arrows-rotate'],
           verticalButtons: true,
           buttons: [{
             label: t('Dismiss'),
@@ -2101,7 +2101,7 @@ onMounted(async () => {
             action: dismissNotice,
           }, {
             label: t('Settings.Sync Settings.Enable Automatic Sync'),
-            icon: ['fas', 'sync'],
+            icon: ['fas', 'arrows-rotate'],
             primary: true,
             action: async () => {
               try {
@@ -2711,7 +2711,7 @@ function showAvailableUpdateToast() {
     }),
     time: Infinity,
     dismissible: false,
-    icon: ['fas', 'sync'],
+    icon: ['fas', 'arrows-rotate'],
     verticalButtons: true,
     buttons: [
       {

@@ -50,7 +50,7 @@
           ref="input"
           :label="editComment ? t('YouTube Account.Edit Comment') : parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
           :placeholder="t('Form Inputs.Enter Text')"
-          :icon="['fas', editComment ? 'edit' : parentId ? 'reply' : 'comment']"
+          :icon="['fas', editComment ? 'pen-to-square' : parentId ? 'reply' : 'comment']"
           :value="text"
           :maxlength="10000"
           :disabled="posting"
@@ -438,7 +438,7 @@ async function saveEdit(commentText) {
     await editYouTubeComment(target, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
     comments.updateComment(commentId, commentText, usedMentions)
     updateEditedWatchedComment(target, commentId, commentText)
-    showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'edit'] })
+    showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'pen-to-square'] })
     emit('done')
   } catch (error) {
     console.error(error)

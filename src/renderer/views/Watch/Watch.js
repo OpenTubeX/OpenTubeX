@@ -3757,7 +3757,7 @@ export default defineComponent({
             this.playbackEngineFallbackTarget = 'yt-dlp'
             this.showTabToast({
               message: this.t('Change Format.Built-in Fallback Template', { error: this.t('Video.IP block') }),
-              icon: ['fas', 'exchange-alt'],
+              icon: ['fas', 'right-left'],
             })
           }
         }
@@ -4481,7 +4481,7 @@ export default defineComponent({
         if (canFallback) {
           const errorMessage = this.t('Local API Error (Click to copy)')
           showApiErrorToast(errorMessage, handledError, this.showTabToast)
-          this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+          this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
           this.getVideoInformationInvidious(loadGeneration)
         } else {
           const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -4959,7 +4959,7 @@ export default defineComponent({
       this.showTabToast({
         message: this.t('Settings.Proxy Settings.Reloading video after IP block recovery'),
         time: longToastDurationMs,
-        icon: ['fas', 'sync'],
+        icon: ['fas', 'arrows-rotate'],
       })
       await this.reloadView()
       return true
@@ -5467,7 +5467,7 @@ export default defineComponent({
     handleWatchProgressManualSave() {
       // Should be called by manual action, settings should be checked in UI
       this._saveWatchProgress()
-      showToast({ message: this.t('Video.Watched Progress Saved'), icon: ['fas', 'save'] })
+      showToast({ message: this.t('Video.Watched Progress Saved'), icon: ['fas', 'floppy-disk'] })
     },
     // Called by manual actions, which check the settings in the UI
     handleChannelPlaybackSpeedManualSave() {
@@ -6314,7 +6314,7 @@ export default defineComponent({
       } else if (!this.isOffline && nextVideo?.videoId) {
         this.queuedPlaybackVideoId = nextVideo.videoId
         this.tabRouter.push(this.watchRouteForVideo(nextVideo))
-        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'forward-step'] })
       }
     },
 
@@ -6328,7 +6328,7 @@ export default defineComponent({
         this.$refs.watchVideoPlaylist?.playNextVideo()
       } else if (!this.hideRecommendedVideos && this.nextRecommendedVideo) {
         this.tabRouter.push(this.watchRouteForVideo(this.nextRecommendedVideo))
-        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'forward-step'] })
       }
     },
 
@@ -6382,7 +6382,7 @@ export default defineComponent({
         else requestQueuedPlayback(this.tabId, nextFullPath)
         this.tabRouter.push(route)
       }
-      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'forward-step'] })
       return true
     },
 
@@ -6397,7 +6397,7 @@ export default defineComponent({
       this.playlistAfterQueue = null
       if (autoplay) this.queuedPlaybackVideoId = route.path.slice('/watch/'.length)
       this.tabRouter.push(route)
-      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'forward-step'] })
       return true
     },
 
@@ -6454,7 +6454,7 @@ export default defineComponent({
 
       if (!hideToast) {
         this.stopAfterVideoEnded()
-        showToast({ message: this.t('Canceled next video autoplay'), icon: ['fas', 'times-circle'] })
+        showToast({ message: this.t('Canceled next video autoplay'), icon: ['fas', 'circle-xmark'] })
       }
     },
 
@@ -6473,7 +6473,7 @@ export default defineComponent({
      */
     showStreamRecoveryNotice: function (message) {
       if (!this.$store.getters.getPauseOnStreamRecovery) {
-        this.showTabToast({ message, icon: ['fas', 'sync'] })
+        this.showTabToast({ message, icon: ['fas', 'arrows-rotate'] })
         return
       }
 
@@ -7260,7 +7260,7 @@ export default defineComponent({
             this.ytDlpDefaultClientsFallbackToastShown = true
             this.showTabToast({
               message: this.t('Change Format.yt-dlp Default Clients Fallback'),
-              icon: ['fas', 'exchange-alt'],
+              icon: ['fas', 'right-left'],
             })
           }
         }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls, vr180)
@@ -8081,7 +8081,7 @@ export default defineComponent({
       if (failure) {
         this.showStreamRecoveryNotice(message)
       } else {
-        this.showTabToast({ message, icon: ['fas', 'sync'] })
+        this.showTabToast({ message, icon: ['fas', 'arrows-rotate'] })
       }
 
       const timestamp = this.getTimestamp()

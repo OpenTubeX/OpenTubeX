@@ -38,10 +38,10 @@ const PLAYBACK_COMMANDS = [
   ['playback.theatre', 'GENERAL', 'THEATRE_MODE', 'KeyboardShortcutPrompt.Theatre Mode', ['fas', 'display'], ['theater']],
   ['playback.fullwindow', 'GENERAL', 'FULLWINDOW', 'KeyboardShortcutPrompt.Full Window', ['fas', 'expand'], ['full window']],
   ['playback.pip', 'GENERAL', 'PICTURE_IN_PICTURE', 'KeyboardShortcutPrompt.Picture in Picture', ['fas', 'clone'], ['pip', 'picture-in-picture']],
-  ['playback.rewind', 'PLAYBACK', 'LARGE_REWIND', 'KeyboardShortcutPrompt.Large Rewind', ['fas', 'step-backward'], ['back', '10 seconds']],
+  ['playback.rewind', 'PLAYBACK', 'LARGE_REWIND', 'KeyboardShortcutPrompt.Large Rewind', ['fas', 'backward-step'], ['back', '10 seconds']],
   ['playback.forward', 'PLAYBACK', 'LARGE_FAST_FORWARD', 'KeyboardShortcutPrompt.Large Fast Forward', ['fas', 'forward'], ['skip', '10 seconds']],
-  ['playback.previous', 'PLAYBACK', 'SKIP_TO_PREV', 'KeyboardShortcutPrompt.Skip to Previous Video', ['fas', 'step-backward'], ['previous video']],
-  ['playback.next', 'PLAYBACK', 'SKIP_TO_NEXT', 'KeyboardShortcutPrompt.Skip to Next Video', ['fas', 'step-forward'], ['next video']],
+  ['playback.previous', 'PLAYBACK', 'SKIP_TO_PREV', 'KeyboardShortcutPrompt.Skip to Previous Video', ['fas', 'backward-step'], ['previous video']],
+  ['playback.next', 'PLAYBACK', 'SKIP_TO_NEXT', 'KeyboardShortcutPrompt.Skip to Next Video', ['fas', 'forward-step'], ['next video']],
   ['playback.screenshot', 'GENERAL', 'TAKE_SCREENSHOT', 'KeyboardShortcutPrompt.Take Screenshot', ['fas', 'file-image'], ['capture']],
   ['playback.timestamp-note', 'GENERAL', 'TAKE_TIMESTAMP_NOTE', 'Video.Player.Timestamp Notes.Take Note', ['fas', 'note-sticky'], ['markdown', 'obsidian', 'bookmark']],
   ['playback.quick-bookmark', 'GENERAL', 'TOGGLE_QUICK_BOOKMARK', 'KeyboardShortcutPrompt.Toggle Quick Bookmark', ['far', 'bookmark'], ['bookmarked', 'favorite']],
@@ -152,7 +152,7 @@ export function createCommandPaletteRegistry(context) {
 
   commands.push(command('settings.root', t('Settings.Settings'), groups.settings, {
     aliases: ['preferences', 'options'],
-    icon: ['fas', 'cog'],
+    icon: ['fas', 'gear'],
     shortcut: appShortcuts.NAVIGATE_TO_SETTINGS,
     run: () => openSettingsView(null),
   }))
@@ -198,7 +198,7 @@ export function createCommandPaletteRegistry(context) {
     }),
     command('app.about', t('About.About'), groups.navigation, {
       aliases: ['version', 'license'],
-      icon: ['fas', 'info-circle'],
+      icon: ['fas', 'circle-info'],
       run: () => openSettingsView('about'),
     }),
     ...(isLiteBuild
@@ -246,7 +246,7 @@ function addNavigationCommands(commands, context) {
     ['trending', '/trending', 'Trending.Trending', ['discover'], ['fas', 'fire']],
     ['popular', '/popular', 'Most Popular', ['popular videos'], ['fas', 'users']],
     ['playlists', '/userplaylists', 'Playlists', ['saved videos'], ['far', 'bookmark']],
-    ['history', '/history', 'History.History', ['watched videos'], ['fas', 'history']],
+    ['history', '/history', 'History.History', ['watched videos'], ['fas', 'clock-rotate-left']],
     ['stats', '/stats', 'Stats.Stats', ['watch statistics'], ['fas', 'chart-line']],
     ['twitch', '/twitch', 'Twitch Page.Twitch', ['live streams', 'categories'], ['fab', 'twitch']],
   ]
@@ -386,7 +386,7 @@ function addTabCommands(commands, context) {
     }),
     command('tabs.reload', t('KeyboardShortcutPrompt.Reload Tab'), groups.tabs, {
       aliases: ['refresh tab'],
-      icon: ['fas', 'sync'],
+      icon: ['fas', 'arrows-rotate'],
       shortcut: appShortcuts.RELOAD_TAB,
       disabledReason: desktopReason,
       run: reloadTabs,
@@ -532,7 +532,7 @@ function settingsSectionIcon(section) {
     focus: ['fas', 'bullseye'],
     privacy: ['fas', 'lock'],
     data: ['fas', 'database'],
-    sync: ['fas', 'sync'],
+    sync: ['fas', 'arrows-rotate'],
     advanced: ['fas', 'flask'],
   }[section]
 }

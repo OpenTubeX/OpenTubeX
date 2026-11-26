@@ -3,7 +3,7 @@
 // button stays next to the time, wherever it is in the order.
 export const CONTROL_BAR_BUTTON_DEFINITIONS = Object.freeze([
   { id: 'chapters', labelKey: 'Chapters.Chapters', icon: ['fas', 'list'] },
-  { id: 'quality', labelKey: 'Settings.Interface Customizer.Resolution', icon: ['fas', 'sliders-h'], desktopOnly: true },
+  { id: 'quality', labelKey: 'Settings.Interface Customizer.Resolution', icon: ['fas', 'sliders'], desktopOnly: true },
   { id: 'audioTracks', labelKey: 'Video.Player.Audio Tracks', icon: ['fas', 'podcast'], desktopOnly: true },
   { id: 'playbackRate', labelKey: 'Settings.Player Settings.Playback Speed', icon: ['fas', 'gauge'], desktopOnly: true },
   { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'], desktopOnly: true },

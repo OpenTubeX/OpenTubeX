@@ -389,7 +389,7 @@ const steps = computed(() => [
   },
   {
     id: 'search',
-    icon: ['fas', 'search'],
+    icon: ['fas', 'magnifying-glass'],
     title: t('Tutorial.Search.Title'),
     description: t('Tutorial.Search.Description'),
     target: '.searchContainer[data-tutorial="search"] .ft-input, .navSearchButton[data-tutorial="search"]'
@@ -405,7 +405,7 @@ const steps = computed(() => [
     : []),
   {
     id: 'profile',
-    icon: ['fas', 'sliders-h'],
+    icon: ['fas', 'sliders'],
     title: t('Tutorial.Profile Menu.Title'),
     description: process.env.IS_CAPACITOR ? t('Tutorial.Profile Menu.Touch Description') : t('Tutorial.Profile Menu.Description'),
     target: '[data-tutorial="quick-settings"]'

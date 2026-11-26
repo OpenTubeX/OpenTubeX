@@ -10,7 +10,7 @@
       </p>
       <FtButton
         :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
-        :icon="['fas', 'undo']"
+        :icon="['fas', 'arrow-rotate-left']"
         :text-color="null"
         :background-color="null"
         :disabled="!hasModifiedKeyboardShortcuts"
@@ -22,7 +22,7 @@
         input-type="search"
         :value="searchQuery"
         :label="$t('Search Bar.Search')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="$t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         @input="searchQuery = $event"
@@ -102,7 +102,7 @@
                         v-if="binding.modified"
                         class="resetShortcutButton"
                         :title="$t('KeyboardShortcutPrompt.Reset Shortcut', { action: shortcut.label })"
-                        :icon="['fas', 'undo']"
+                        :icon="['fas', 'arrow-rotate-left']"
                         :padding="6"
                         :size="14"
                         theme="base-no-default"
@@ -218,8 +218,8 @@ const shortcutConflictOptionNames = computed(() => shortcutConflictCanBeReassign
 )
 
 const shortcutConflictOptionIcons = computed(() => shortcutConflictCanBeReassigned.value
-  ? [['fas', 'keyboard'], ['fas', 'undo']]
-  : [['fas', 'undo']]
+  ? [['fas', 'keyboard'], ['fas', 'arrow-rotate-left']]
+  : [['fas', 'arrow-rotate-left']]
 )
 
 const shortcutConflictOptionValues = computed(() => shortcutConflictCanBeReassigned.value

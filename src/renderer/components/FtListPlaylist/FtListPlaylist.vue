@@ -125,7 +125,7 @@
           ref="menuButton"
           class="optionsButton"
           :title="t('Video.More Options')"
-          :icon="['fas', 'ellipsis-v']"
+          :icon="['fas', 'ellipsis-vertical']"
           theme="base-no-default"
           :size="16"
           @click="openPlaylistOptionsMenu"
@@ -213,7 +213,7 @@ const playlistMenuItems = computed(() => {
     items.push({
       label: t('Context Menu.Open in a New Window'),
       shortLabel: t('New Window'),
-      icon: ['fas', 'external-link-alt'],
+      icon: ['fas', 'up-right-from-square'],
       quickAction: true,
       run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
     })
@@ -229,7 +229,7 @@ const playlistMenuItems = computed(() => {
   if (externalPlayer.value !== '' && !isUserPlaylist.value) {
     items.push({
       label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
-      icon: ['fas', 'external-link-alt'],
+      icon: ['fas', 'up-right-from-square'],
       run: handleExternalPlayer,
     })
   }
@@ -490,7 +490,7 @@ async function enableQuickBookmarkForThisPlaylist() {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,
           }),
           time: 5000,
-          icon: ['fas', 'undo'],
+          icon: ['fas', 'arrow-rotate-left'],
         })
       },
       icon: ['fas', 'bookmark'],

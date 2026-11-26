@@ -12,7 +12,7 @@
       <FtButton
         v-if="failed"
         :label="t('Settings.Sync Settings.Try Again')"
-        :icon="['fas', 'sync']"
+        :icon="['fas', 'arrows-rotate']"
         @click="load()"
       />
       <!-- Later pages can have videos that are not hidden. -->

@@ -28,7 +28,7 @@ export function * iterateLocalVideoCommands(context) {
   }
 
   for (const video of history) {
-    const command = entry(video, sources.history, ['fas', 'history'], () => playLibraryVideo(video, videoRoute(video,
+    const command = entry(video, sources.history, ['fas', 'clock-rotate-left'], () => playLibraryVideo(video, videoRoute(video,
       context.saveVideoHistoryWithLastViewedPlaylist && video.lastViewedPlaylistId
         ? {
             playlistId: video.lastViewedPlaylistId,

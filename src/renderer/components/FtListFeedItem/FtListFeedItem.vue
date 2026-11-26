@@ -157,7 +157,7 @@
             ref="menuButton"
             class="optionsButton"
             :title="t('Video.More Options')"
-            :icon="['fas', 'ellipsis-v']"
+            :icon="['fas', 'ellipsis-vertical']"
             theme="base-no-default"
             :size="16"
             @click="openOptionsMenu"
@@ -414,7 +414,7 @@ const copyLinkItem = computed(() => ({
   run: () => copyToClipboard(props.data.url)
 }))
 const shareLinkItem = computed(() => process.env.IS_CAPACITOR
-  ? { label: t('Share.Share Link'), icon: ['fas', 'share-alt'], run: () => shareLink(props.data.url) }
+  ? { label: t('Share.Share Link'), icon: ['fas', 'share-nodes'], run: () => shareLink(props.data.url) }
   : null)
 // The queue opens the item's media page, like the item itself.
 const queueVideo = computed(() => ({
@@ -465,7 +465,7 @@ const menuItems = computed(() => {
     items.push({
       label: t('Context Menu.Open in a New Window'),
       shortLabel: t('New Window'),
-      icon: ['fas', 'external-link-alt'],
+      icon: ['fas', 'up-right-from-square'],
       quickAction: true,
       run: () => openElsewhere({ newWindow: true })
     })
@@ -534,7 +534,7 @@ const menuItems = computed(() => {
   items.push(copyLinkItem.value, {
     // Feeds that aren't from a supported platform link to any website
     label: platform.value ? t('Platforms.Open Website', { platform: platform.value.name }) : t('Share.Open Link'),
-    icon: platformIcon.value ?? ['fas', 'external-link-alt'],
+    icon: platformIcon.value ?? ['fas', 'up-right-from-square'],
     run: () => openExternalLink(props.data.url)
   })
   if (shareLinkItem.value) items.push(shareLinkItem.value)

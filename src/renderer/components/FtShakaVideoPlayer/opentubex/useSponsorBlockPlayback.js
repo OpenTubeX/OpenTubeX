@@ -841,7 +841,7 @@ export function useSponsorBlockPlayback({
    */
   function getSponsorBlockActionIcon(state, uuid) {
     const muted = getSegments().find(candidate => candidate.uuid === uuid)?.actionType === 'mute'
-    if (state === 'skipped') return ['fas', muted ? 'volume-high' : 'undo']
+    if (state === 'skipped') return ['fas', muted ? 'volume-high' : 'arrow-rotate-left']
     if (state === 'unskipped') return ['fas', muted ? 'volume-xmark' : 'redo']
     return ['fas', muted ? 'volume-xmark' : 'forward-fast']
   }

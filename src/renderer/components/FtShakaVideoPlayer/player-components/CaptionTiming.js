@@ -63,7 +63,7 @@ export class CaptionTiming extends shaka.ui.Element {
     this.input_.step = '0.1'
     this.input_.inputMode = 'decimal'
     inputLabel.append(this.offsetLabel_, this.input_)
-    const reset = this.createButton_('undo')
+    const reset = this.createButton_('arrow-rotate-left')
     reset.button.classList.add('ft-caption-timing-reset')
     this.resetButton_ = reset.button
     this.resetLabel_ = reset.label

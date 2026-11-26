@@ -24,7 +24,7 @@
       />
       <FtButton
         :label="t('Settings.Diagnostics.Save Report')"
-        :icon="['fas', 'file-download']"
+        :icon="['fas', 'file-arrow-down']"
         :disabled="busy || !store.getters.getDiagnosticLogging"
         @click="saveReport"
       />

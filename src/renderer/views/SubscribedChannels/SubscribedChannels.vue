@@ -40,7 +40,7 @@
             ref="searchBarChannels"
             input-type="search"
             :label="$t('Channels.Search bar placeholder')"
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             :placeholder="canFollowByAddress ? $t('Subscriptions.Platforms.Search Or Paste Channel') : $t('Form Inputs.Search Text Hint')"
             :value="query"
             :show-action-button="canFollowByAddress && queryIsAddress"

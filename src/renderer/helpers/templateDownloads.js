@@ -161,7 +161,7 @@ export function downloadTemplateMenuItems({ target, customize, t, locale }) {
   return [
     {
       label: t('Downloads.Customize Download'),
-      icon: ['fas', 'sliders-h'],
+      icon: ['fas', 'sliders'],
       enabled: true,
       run: customize
     },
