@@ -24,11 +24,21 @@ const expect = baseExpect.configure({ timeout: 30000 })
 // in native screenshots and recordings alike.
 const FIXTURE = { width: 640, height: 360, fps: 30, rgb: [192, 40, 144] }
 const BOX = { top: 150, height: 60, width: 80, speed: 240, travel: 560 }
+// The page around the player gets a color that neither the fixture, the
+// launcher nor the wallpaper share, so recordings show when Android's entry
+// animation crops the page instead of a video-only frame.
+const PAGE_RGB = [0, 255, 0]
+const PAGE_STYLE = `body:not(.androidPictureInPicture) .app, body:not(.androidPictureInPicture) .app *:not(.ftVideoPlayer, .ftVideoPlayer *) {
+  background: rgb(${PAGE_RGB.join(' ')}) !important;
+}`
 
 let browser
 let page
 let session
 let originalSettings
+// The default PiP window size while a double tap has enlarged it. Android
+// reuses the enlarged size for the next entry.
+let defaultPictureInPictureSize
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
 const screencap = () => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p'], { maxBuffer: 16 * 1024 * 1024 })
 const launchApp = () => adb('shell', 'am', 'start', '-n', `${androidAppId()}/org.opentubex.app.MainActivity`)
@@ -99,6 +109,12 @@ before(async () => {
     }]
   })
   await watch.dispose()
+  await page.evaluate(style => {
+    const element = document.createElement('style')
+    element.id = 'pip-lifecycle-page-color'
+    element.textContent = style
+    document.head.append(element)
+  }, PAGE_STYLE)
   await page.evaluate(() => { const video = document.querySelector('video'); video.loop = true; video.pause(); video.currentTime = 2 })
 })
 
@@ -110,6 +126,7 @@ after(async () => {
       await page.evaluate(async settings => {
         window.__stopPipLifecycleTrace?.()
         window.__androidTestNetwork?.restore()
+        document.querySelector('#pip-lifecycle-page-color')?.remove()
         document.querySelector('video')?.pause()
         const app = document.querySelector('#app').__vue_app__.config.globalProperties
         app.$store.commit('setUiScale', settings.scale)
@@ -175,6 +192,34 @@ function locateFixture(pixels, width, height) {
 }
 
 /**
+ * Counts the pixels of the page color in a frame's RGB pixels.
+ * @param {Uint8Array} pixels
+ */
+function countPagePixels(pixels) {
+  let count = 0
+  for (let offset = 0; offset < pixels.length; offset += 3) {
+    if (PAGE_RGB.every((value, channel) => Math.abs(pixels[offset + channel] - value) < 40)) count++
+  }
+  return count
+}
+
+/**
+ * Double-taps the PiP window, which switches between its default and its
+ * enlarged size.
+ * @param {string} message
+ */
+async function togglePictureInPictureSize(message) {
+  const [left, top, right, bottom] = pictureInPictureBounds()
+  const x = Math.round((left + right) / 2)
+  const y = Math.round((top + bottom) / 2)
+  const before = JSON.stringify([left, top, right, bottom])
+  adb('shell', `input tap ${x} ${y}; input tap ${x} ${y}`)
+  await expect.poll(() => JSON.stringify(pictureInPictureBounds()), { message }).not.toBe(before)
+}
+
+const pictureInPictureSize = ([left, top, right, bottom]) => ({ width: right - left, height: bottom - top })
+
+/**
  * Decodes a native screenshot to RGB pixels.
  * @param {Buffer} png
  */
@@ -222,6 +267,7 @@ async function assertRecordedEntry(remote, scale, trigger) {
     const frames = execFileSync('ffmpeg', ['-v', 'error', '-threads', '1', '-filter_threads', '1', '-i', path, '-vf',
       `fps=${fps},scale=${width}:${height}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: Math.ceil(duration * fps + 2) * frameBytes })
     let pipFrames = 0
+    let pageFrame
     const inline = []
     const entry = []
     let enteredAt
@@ -229,6 +275,14 @@ async function assertRecordedEntry(remote, scale, trigger) {
       const fixture = locateFixture(frames.subarray(offset, offset + frameBytes), width, height)
       if (!fixture) continue
       const time = offset / (frameBytes * fps)
+      // Once the window starts shrinking, it must show the video on black.
+      // Android's entry animation crops the window's frame down to the video,
+      // and showed the page around it when automatic entry left it in place,
+      // which an enlarged PiP window fills for most of the animation.
+      if (fixture.width < 260 || enteredAt !== undefined) {
+        const pagePixels = countPagePixels(frames.subarray(offset, offset + frameBytes))
+        if (pagePixels > 50) pageFrame ??= { time, pagePixels }
+      }
       // The inline player spans the screen's width; the window shrinks from
       // there into picture-in-picture.
       if (fixture.width >= 260) {
@@ -247,6 +301,7 @@ async function assertRecordedEntry(remote, scale, trigger) {
       if (time - enteredAt <= 4 && fixture.box !== null) entry.push({ time, box: fixture.box })
     }
     assert.ok(pipFrames > 2, 'the recording captured several native PiP frames')
+    assert.equal(pageFrame, undefined, 'native PiP entry must show only the video, not the page around it')
     assert.ok(inline.length > 15, `the recording shows the inline video's moving box: ${inline.length} frames`)
     assert.ok(entry.length > 15, `the recording shows the PiP video's moving box: ${entry.length} frames`)
     // Legacy Android's window animation and a busy software-rendered emulator
@@ -261,6 +316,15 @@ async function assertRecordedEntry(remote, scale, trigger) {
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
+}
+
+/** Double-taps the enlarged PiP window back to its default size. */
+async function restorePictureInPictureSize() {
+  await togglePictureInPictureSize('a second double tap restores the PiP window size')
+  // Android can move the restored window by a pixel.
+  await expect.poll(() => pictureInPictureSize(pictureInPictureBounds()).width, { message: 'the PiP window has its default size again' })
+    .toBe(defaultPictureInPictureSize.width)
+  defaultPictureInPictureSize = undefined
 }
 
 /** Waits until the video's bounds stay the same over two animation frames. */
@@ -376,6 +440,10 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       })), [['hidden', 'hidden'], ['hidden', 'hidden']], 'PiP hides document overflow on both axes')
       let bounds
       await expect.poll(() => (bounds = pictureInPictureBounds()), { message: 'the native PiP window has screen bounds' }).not.toBeNull()
+      if (defaultPictureInPictureSize) {
+        assert.ok(pictureInPictureSize(bounds).width > defaultPictureInPictureSize.width,
+          `the entry reuses the enlarged PiP window: ${JSON.stringify(bounds)}`)
+      }
       let [left, top, right, bottom] = bounds
       const boxes = []
       // DOM geometry alone misses Chromium's stale video/compositor buffers.
@@ -408,21 +476,16 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       await assertRecordedEntry(remote, scale, label)
       const api = Number(adb('shell', 'getprop', 'ro.build.version.sdk').trim())
       if (api >= 31 && trigger === 'button') {
-        // A double tap resizes the window, which must keep the video's geometry
-        // too. Android keeps the size for the next PiP window, so a second
-        // double tap restores it for the tests that follow.
-        const size = ([left, top, right, bottom]) => `${right - left}x${bottom - top}`
-        const original = size(pictureInPictureBounds())
-        for (const message of ['a double tap resizes the PiP window', 'a second double tap restores its size']) {
-          const [left, top, right, bottom] = pictureInPictureBounds()
-          const x = Math.round((left + right) / 2)
-          const y = Math.round((top + bottom) / 2)
-          const before = JSON.stringify([left, top, right, bottom])
-          adb('shell', `input tap ${x} ${y}; input tap ${x} ${y}`)
-          await expect.poll(() => JSON.stringify(pictureInPictureBounds()), { message }).not.toBe(before)
-        }
-        // Android can move the restored window by a pixel.
-        await expect.poll(() => size(pictureInPictureBounds()), { message: 'the PiP window has its original size again' }).toBe(original)
+        // A double tap enlarges the window, which must keep the video's
+        // geometry too. The next test's automatic entry reuses that size.
+        const size = pictureInPictureSize(pictureInPictureBounds())
+        await togglePictureInPictureSize('a double tap enlarges the PiP window')
+        assert.ok(pictureInPictureSize(pictureInPictureBounds()).width > size.width, 'the double tap enlarged the PiP window')
+        defaultPictureInPictureSize = size
+      } else if (defaultPictureInPictureSize) {
+        // Android would keep the enlarged size for the tests that follow.
+        await restorePictureInPictureSize()
+        ;[left, top, right, bottom] = pictureInPictureBounds()
       }
       await page.evaluate(() => window.__beginPipReturn())
       if (api >= 31 && trigger === 'home') {
@@ -456,6 +519,9 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
     } finally {
       await stopRecording()
       adb('shell', 'rm', '-f', remote)
+      if (defaultPictureInPictureSize && trigger === 'home' && pictureInPictureBounds()) {
+        await restorePictureInPictureSize().catch(error => console.warn('Could not restore the PiP window size', error))
+      }
       if (await page.evaluate(() => document.body.classList.contains('androidPictureInPicture'))) await leavePictureInPicture()
       trace ??= await page.evaluate(() => window.__stopPipLifecycleTrace?.())
       if (process.env.ANDROID_ARTIFACT_DIR) {

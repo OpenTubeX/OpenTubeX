@@ -48,6 +48,8 @@ test('swipe previews defer hidden control layout until the inline player settles
   let frames = 0
   let layouts = 0
   const scrollMiniPlayerDragStyle = { value: {} }
+  // A rendered control panel
+  const panel = { getClientRects: () => [{}] }
   let queued
   const schedule = vm.runInNewContext(`${layoutSource.slice(sourceStart, sourceEnd)}\nscheduleControlPanelLayout`, {
     isActiveTab: { value: true },
@@ -59,15 +61,15 @@ test('swipe previews defer hidden control layout until the inline player settles
     cancelAnimationFrame() {},
     updateControlPanelLayout() { layouts++ },
   })
-  schedule({})
+  schedule(panel)
   assert.equal(frames, 0, 'a held swipe does not schedule control measurements')
   scrollMiniPlayerDragStyle.value = null
-  schedule({})
+  schedule(panel)
   scrollMiniPlayerDragStyle.value = {}
   queued()
   assert.equal(layouts, 0, 'a new swipe cancels work queued before it began')
   scrollMiniPlayerDragStyle.value = null
-  schedule({})
+  schedule(panel)
   queued()
   assert.equal(layouts, 1, 'settled inline controls can be measured again')
 })
