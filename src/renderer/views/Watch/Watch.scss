@@ -1295,12 +1295,21 @@
 
 /* The Android fullscreen element contains the whole watch layout. Keep the
    player over it even before Vue applies its fullWindow class. */
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open)) {
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open, .\:popover-open)) {
   overflow: hidden;
   background: #000;
 }
 
-:global(.capacitorTabs .videoLayout:popover-open) {
+/* Without native popover, the polyfill cannot use the top layer: the route's
+   container would contain the fixed layout, and the route would stay below the
+   navigation bars, like it does in full window mode. */
+:global(.app.capacitorTabs > .routerView:has(.videoLayout.\:popover-open)) {
+  position: relative;
+  z-index: 1000;
+  container-type: normal;
+}
+
+:global(.capacitorTabs .videoLayout:is(:popover-open, .\:popover-open)) {
   position: fixed;
   inset: 0;
   inline-size: 100vw;
@@ -1312,7 +1321,7 @@
   border: 0;
 }
 
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer) {
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open, .\:popover-open) .videoArea .videoPlayer) {
   position: fixed;
   inset: 0;
   z-index: 4;
@@ -1322,7 +1331,7 @@
   margin: 0;
 }
 
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer .ftVideoPlayer) {
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open, .\:popover-open) .videoArea .videoPlayer .ftVideoPlayer) {
   inline-size: 100%;
   block-size: 100%;
   aspect-ratio: auto;

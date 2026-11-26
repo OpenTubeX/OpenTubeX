@@ -1,3 +1,8 @@
+import './helpers/polyfills'
+// Applies itself only where popover is missing: Chrome before 114, as in
+// Huawei's WebView, Firefox before 125 and Safari before 17. Popover styles
+// also need its .\:popover-open class, as CSS cannot be polyfilled.
+import '@oddbird/popover-polyfill'
 import './i18n/startupLocales'
 import { ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
