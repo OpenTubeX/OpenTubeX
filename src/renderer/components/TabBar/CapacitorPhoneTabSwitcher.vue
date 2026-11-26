@@ -125,7 +125,7 @@
                 class="capacitorPhoneTabHeaderButton"
                 :aria-label="t('Close')"
                 :title="t('Close')"
-                @click="closeSwitcher"
+                @click="closeSwitcherToPage"
               >
                 <FtIcon
                   :icon="['fas', 'xmark']"
@@ -845,7 +845,7 @@ const {
     emit('request-exit')
   },
   afterCreate: closeSwitcher,
-  afterActivate: closeSwitcher,
+  afterActivate: closeSwitcherToPage,
   afterClose: async () => {
     await nextTick()
     focusActiveTab()
@@ -978,6 +978,54 @@ const organizerSwipe = {
   }
 }
 defineExpose({ organizerSwipe })
+
+// Leaving the organizer for a page reverses the opening morph: the presented
+// page grows from its card back to full size. Other ways out fade instead.
+async function closeSwitcherToPage() {
+  if (!open.value || organizerTransition || activeView.value !== 'open') {
+    closeSwitcher()
+    return
+  }
+  const state = { animation: null }
+  organizerTransition = state
+  reopenHold.cancel()
+  clearSelection()
+  closeTabActions()
+  resetTabSwipe()
+  resetTabDrag()
+  // The organizer stays modal so taps cannot reach the app behind it, but its
+  // controls ignore taps meant for the growing page. Closing removes the
+  // dialog, so it never stays inert.
+  dialogRef.value.inert = true
+  skipDialogTransition.value = true
+  await nextTick()
+  if (organizerTransition !== state) return
+  const page = document.querySelector('.app > .routerView')
+  const preview = dialogRef.value
+    ?.querySelector(`[data-tab-id="${CSS.escape(presentedTabId.value)}"] .capacitorTabPreview`)
+  const scroll = openTabsScrollRef.value
+  const bounds = preview?.closest('.capacitorPhoneTabRow').getBoundingClientRect()
+  const viewport = scroll?.getBoundingClientRect()
+  const style = scroll && getComputedStyle(scroll)
+  // Like opening, require the whole card clear of the header and the
+  // floating bottom actions, which overlap the list's padding. Allow a pixel
+  // for the fractional scroll offsets of UI Scale.
+  if (!page || !bounds || !viewport || bounds.top < viewport.top + Number.parseFloat(style.paddingTop) - 1 ||
+    bounds.bottom > viewport.bottom - Number.parseFloat(style.paddingBottom) + 1) {
+    skipDialogTransition.value = false
+    organizerSwipe.cancel()
+    return
+  }
+  state.animation = createOrganizerSwipeAnimation(page, preview, dialogRef.value.closest('.capacitorPhoneTabOverlay'))
+  state.animation.update(1)
+  await state.animation.finish(false)
+  if (organizerTransition !== state) return
+  open.value = false
+  await nextTick()
+  state.animation.dispose()
+  organizerTransition = null
+  skipDialogTransition.value = false
+}
 
 const headerTitle = computed(() => {
   if (selecting.value) return t('Profile.{number} selected', { number: selectedTabIds.value.size })
