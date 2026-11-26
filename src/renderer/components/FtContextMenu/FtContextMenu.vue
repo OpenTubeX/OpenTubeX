@@ -290,6 +290,7 @@ const itemIcons = {
   'Copy Image Address': ['fas', 'link'],
   'Copy Invidious Link': ['fas', 'link'],
   'Copy Link': ['fas', 'link'],
+  'Copy Links': ['fas', 'link'],
   'Copy YouTube Link': ['fab', 'youtube'],
   'Copy YouTube Links': ['fab', 'youtube'],
   Copy: ['fas', 'copy'],

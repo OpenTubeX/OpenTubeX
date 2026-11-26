@@ -5,7 +5,7 @@ import { clipboard, ipcMain, net, session, shell } from 'electron'
 
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
-import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
+import { getTabShareLink } from '../renderer/helpers/share'
 import {
   buildSearchUrl,
   DEFAULT_SEARCH_ENGINES_SETTING,
@@ -300,12 +300,11 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       platforms: 'Reload Platforms',
       all: 'Reload All Feeds'
     }
-    const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
-      const route = tab.route?.fullPath ?? getOpenTubeXRouteFromUrl(tab.url)
-      return isShareableOpenTubeXRoute(route)
-        ? transformOpenTubeXRouteUrl(route, true)
-        : null
-    })
+    const contextMenuTabLinks = contextMenuTabs.map(tab => getTabShareLink(tab.route?.fullPath ?? getOpenTubeXRouteFromUrl(tab.url)))
+    const canCopyContextMenuTabLinks = contextMenuTabLinks.length > 0 && contextMenuTabLinks.every(Boolean)
+    const copyContextMenuTabLinksLabel = contextMenuTabLinks.every(link => link?.isYouTube)
+      ? isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link'
+      : isBulkTabAction ? 'Copy Links' : 'Copy Link'
 
     const moveTargets = contextMenuTab != null && manager != null
       ? TabManager.listMoveTargets(manager.browserWindow.id)
@@ -620,17 +619,17 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
         visible: contextMenuTab != null
       },
       {
-        label: contextMenuLabel(isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link'),
-        visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean),
+        label: contextMenuLabel(copyContextMenuTabLinksLabel),
+        visible: canCopyContextMenuTabLinks,
         click: () => {
-          if (!contextMenuTabYouTubeUrls.every(Boolean)) return
+          if (!canCopyContextMenuTabLinks) return
 
-          clipboard.writeText(contextMenuTabYouTubeUrls.join('\n'))
+          clipboard.writeText(contextMenuTabLinks.map(link => link.url).join('\n'))
         }
       },
       {
         type: 'separator',
-        visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean)
+        visible: canCopyContextMenuTabLinks
       },
       {
         label: contextMenuLabel(allSelectedTabsPinned

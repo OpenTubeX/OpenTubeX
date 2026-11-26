@@ -2327,6 +2327,7 @@ Context Menu:
   Selection Too Long: 選択範囲が検索には長すぎます（{count}文字超）
   Background Tab: バックグラウンドタブ
   Open in an Incognito Tab: シークレット タブで開く
+  Copy Links: "リンクをコピー"
 Tab Organizer:
   Tab History: "タブの履歴"
   Current Page: "現在のページ"
