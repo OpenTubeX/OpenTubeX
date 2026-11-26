@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -225,16 +225,20 @@ function measureFittedLabelWidth(text) {
   range.setEndAfter(names[names.length - 1])
   const textRects = [...range.getClientRects()].filter(rect => rect.width > 0)
   const box = text.getBoundingClientRect()
+  const style = getComputedStyle(text)
   // Client rects include transforms, such as the settings window's opening
   // morph from its button, while lines and the maximum width are in layout
-  // pixels. Scaled down that far, two lines are less than a pixel apart.
-  const scale = box.width / text.offsetWidth
+  // pixels. Scaled down that far, two lines are less than a pixel apart. The
+  // rounded offsetWidth would skew the scale enough to cut the width short.
+  const layoutWidth = ['width', 'paddingInlineStart', 'paddingInlineEnd', 'borderInlineStartWidth', 'borderInlineEndWidth']
+    .reduce((sum, property) => sum + Number.parseFloat(style[property]), 0)
+  const scale = box.width / layoutWidth
   if (!(scale > 0)) return ''
   const lineCount = new Set(textRects.map(rect => Math.round((rect.top - box.top) / scale))).size
   if (lineCount < 2) return ''
   const icons = text.querySelector('.switch-label-icons').getBoundingClientRect()
   const rects = icons.width > 0 ? [...textRects, icons] : textRects
-  const width = getComputedStyle(text).direction === 'rtl'
+  const width = style.direction === 'rtl'
     ? box.right - Math.min(...rects.map(rect => rect.left))
     : Math.max(...rects.map(rect => rect.right)) - box.left
   return width < box.width - scale ? `${Math.ceil(width / scale)}px` : ''
@@ -292,6 +296,12 @@ onMounted(() => {
   labelResizeObserver.observe(grid)
   labelResizeObserver.observe(text)
 })
+
+// A kept-alive page, such as the closed settings window, can come back in
+// another width, which the observer would only refit a frame after it shows.
+// Settings settles its layout during activation, so the fit waits for the
+// next frame, which is still before the reopened window first paints.
+onActivated(() => refitLabel?.())
 
 onBeforeUnmount(() => {
   labelResizeObserver?.disconnect()
