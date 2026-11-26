@@ -163,10 +163,10 @@ test.describe('watch page', () => {
     await summary.locator('summary').focus()
     await page.keyboard.press('Enter')
     await expect(summary).toHaveAttribute('open', '')
-    await expect(summary.locator('.summaryChevron')).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)')
+    await expect(summary.locator('.summaryChevron .ft-icon__glyph')).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)')
     await page.keyboard.press('Space')
     await expect(summary).not.toHaveAttribute('open')
-    await expect(summary.locator('.summaryChevron')).toHaveCSS('transform', 'none')
+    await expect(summary.locator('.summaryChevron .ft-icon__glyph')).toHaveCSS('transform', 'none')
     for (const trigger of ['collapse', 'replace', 'hide']) {
       await component.evaluate(async component => {
         const view = component.proxy

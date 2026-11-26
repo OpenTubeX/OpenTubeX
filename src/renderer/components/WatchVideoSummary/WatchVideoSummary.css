@@ -68,10 +68,15 @@
 
 .summaryChevron {
   flex-shrink: 0;
+}
+
+/* Rotate the glyph, since the watch layout animator counter-scales the
+   chevron with its own transform while the sidebar opens or closes. */
+.summaryChevron :deep(.ft-icon__glyph) {
   transition: transform var(--motion-default-spatial);
 }
 
-.videoSummary[open] .summaryChevron {
+.videoSummary[open] .summaryChevron :deep(.ft-icon__glyph) {
   transform: rotate(180deg);
 }
 
