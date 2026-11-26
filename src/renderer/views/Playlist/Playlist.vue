@@ -557,11 +557,11 @@ function remotePlaylistUpdatedAt() {
   return lastUpdatedDate.value?.getTime() ?? parseLocalPlaylistLastUpdated(lastUpdated.value)
 }
 
-async function refreshPlaylistBookmarkMetadata() {
-  const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
-  if (bookmark == null) return
+let bookmarkMetadataSave = Promise.resolve()
 
-  const updated = updatePlaylistBookmarkMetadata(bookmark, {
+function refreshPlaylistBookmarkMetadata() {
+  const id = playlistId.value
+  const metadata = {
     title: playlistTitle.value,
     description: playlistDescription.value,
     thumbnailUrl: playlistThumbnail.value || (firstVideoId.value
@@ -572,10 +572,19 @@ async function refreshPlaylistBookmarkMetadata() {
     uploaderName: channelName.value || playlistTitle.value,
     uploaderAvatar: channelThumbnail.value,
     updatedAt: remotePlaylistUpdatedAt(),
-  })
-  if (updated === bookmark) return
+  }
 
-  await store.dispatch('savePlaylistBookmark', updated)
+  // The original owner name can arrive while an earlier save is still running.
+  // Saving in order compares each refresh against what the previous one saved.
+  const save = bookmarkMetadataSave.then(async () => {
+    const bookmark = store.getters.getPlaylistBookmark(id)
+    if (bookmark == null) return
+
+    const updated = updatePlaylistBookmarkMetadata(bookmark, metadata)
+    if (updated !== bookmark) await store.dispatch('savePlaylistBookmark', updated)
+  })
+  bookmarkMetadataSave = save.catch(() => {})
+  return save
 }
 
 async function togglePlaylistBookmark() {
