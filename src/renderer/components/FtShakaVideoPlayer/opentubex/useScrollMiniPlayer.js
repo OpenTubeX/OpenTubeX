@@ -13,7 +13,6 @@ import {
 } from '../../../helpers/crossTabMiniPlayer'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
-import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import { watchNavigationKey } from '../../../tabs/TabContext'
 import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
 import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
@@ -1384,11 +1383,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         }
         watchNavigation.returnToVideo()
       }
-      if (process.env.IS_CAPACITOR) {
-        getCapacitorTabService().activateTab(tabId)
-      } else {
-        store.dispatch('activateTab', tabId)
-      }
+      store.dispatch('activateTab', tabId)
       return
     }
 

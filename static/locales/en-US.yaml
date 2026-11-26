@@ -3936,7 +3936,6 @@ CommandPalette:
     One Tab: Open another tab first
     Active Tab: This is the active tab
     Active Profile: This is the active profile
-    Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
   File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'

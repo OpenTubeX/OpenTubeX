@@ -206,7 +206,7 @@ export function createCommandPaletteRegistry(context) {
       : [command('downloads.open', t('Settings.Download Settings.Download Settings'), groups.downloads, {
           aliases: ['files', 'yt-dlp'],
           icon: ['fas', 'download'],
-          disabledReason: !isElectron && !process.env.IS_CAPACITOR ? t('CommandPalette.Unavailable.Desktop') : '',
+          disabledReason: !isElectron && !isCapacitor ? t('CommandPalette.Unavailable.Desktop') : '',
           run: () => openSettingsView('downloads'),
         })])
   )
@@ -216,6 +216,7 @@ export function createCommandPaletteRegistry(context) {
     groups,
     store,
     isElectron,
+    isCapacitor,
     appShortcuts,
     createTab,
     closeTabs,
@@ -223,7 +224,7 @@ export function createCommandPaletteRegistry(context) {
   })
   addProfileCommands(commands, { t, locale, groups, store, navigate })
   addPlaylistCommands(commands, { t, groups, store, navigate })
-  addDownloadCommands(commands, { t, groups, downloads, isElectron })
+  addDownloadCommands(commands, { t, groups, downloads, isElectron, isCapacitor })
   addPlaybackCommands(commands, {
     isCapacitor,
     t,
@@ -358,55 +359,58 @@ function addSettingsSearchCommands(commands, context) {
 }
 
 function addTabCommands(commands, context) {
-  const { t, groups, store, isElectron, appShortcuts, createTab, closeTabs, reloadTabs } = context
-  const desktopReason = isElectron ? '' : t('CommandPalette.Unavailable.Desktop')
+  const { t, groups, store, isElectron, isCapacitor, appShortcuts, createTab, closeTabs, reloadTabs } = context
+  if (isCapacitor && !store.getters.getTabsEnabled) return
+  const desktopReason = isElectron || isCapacitor ? '' : t('CommandPalette.Unavailable.Desktop')
+  // The mobile apps have no tab shortcuts
+  const shortcut = name => isElectron ? appShortcuts[name] : ''
   const tabs = store.getters.getTabs
 
   commands.push(
     command('tabs.new', t('KeyboardShortcutPrompt.New Tab'), groups.tabs, {
       aliases: ['open tab'],
       icon: ['fas', 'plus'],
-      shortcut: appShortcuts.NEW_TAB,
+      shortcut: shortcut('NEW_TAB'),
       disabledReason: desktopReason,
       run: createTab,
     }),
     command('tabs.newIncognito', t('KeyboardShortcutPrompt.New Incognito Tab'), groups.tabs, {
       aliases: ['private tab'],
       icon: ['fas', 'user-secret'],
-      shortcut: appShortcuts.NEW_INCOGNITO_TAB,
+      shortcut: shortcut('NEW_INCOGNITO_TAB'),
       disabledReason: desktopReason,
       run: () => store.dispatch('createTab', { makeActive: true, isIncognito: true }),
     }),
     command('tabs.close', t('KeyboardShortcutPrompt.Close Tab'), groups.tabs, {
       aliases: ['remove tab'],
       icon: ['fas', 'xmark'],
-      shortcut: appShortcuts.CLOSE_TAB,
+      shortcut: shortcut('CLOSE_TAB'),
       disabledReason: desktopReason,
       run: closeTabs,
     }),
     command('tabs.reload', t('KeyboardShortcutPrompt.Reload Tab'), groups.tabs, {
       aliases: ['refresh tab'],
       icon: ['fas', 'arrows-rotate'],
-      shortcut: appShortcuts.RELOAD_TAB,
+      shortcut: shortcut('RELOAD_TAB'),
       disabledReason: desktopReason,
       run: reloadTabs,
     }),
     command('tabs.restore', t('KeyboardShortcutPrompt.Reopen Closed Tab'), groups.tabs, {
       aliases: ['undo close tab'],
       icon: ['fas', 'clock-rotate-left'],
-      shortcut: appShortcuts.RESTORE_CLOSED_TAB,
+      shortcut: shortcut('RESTORE_CLOSED_TAB'),
       disabledReason: desktopReason,
       run: () => store.dispatch('restoreClosedTab'),
     }),
     command('tabs.next', t('KeyboardShortcutPrompt.Next Tab'), groups.tabs, {
       icon: ['fas', 'arrow-right'],
-      shortcut: appShortcuts.NEXT_TAB,
+      shortcut: shortcut('NEXT_TAB'),
       disabledReason: desktopReason || (tabs.length < 2 ? t('CommandPalette.Unavailable.One Tab') : ''),
       run: () => store.dispatch('nextTab'),
     }),
     command('tabs.previous', t('KeyboardShortcutPrompt.Previous Tab'), groups.tabs, {
       icon: ['fas', 'arrow-left'],
-      shortcut: appShortcuts.PREV_TAB,
+      shortcut: shortcut('PREV_TAB'),
       disabledReason: desktopReason || (tabs.length < 2 ? t('CommandPalette.Unavailable.One Tab') : ''),
       run: () => store.dispatch('prevTab'),
     })
@@ -419,7 +423,7 @@ function addTabCommands(commands, context) {
       aliases: ['activate tab', `tab ${index + 1}`],
       icon: getTabPageIcon(tab),
       iconUrl: getTabAvatarUrl(tab),
-      shortcut: index < 9 ? appShortcuts.SWITCH_TO_TAB.replace(/1(?:\.\.|-)9$/, String(index + 1)) : '',
+      shortcut: index < 9 ? shortcut('SWITCH_TO_TAB').replace(/1(?:\.\.|-)9$/, String(index + 1)) : '',
       disabledReason: tab.id === store.getters.getActiveTabId
         ? t('CommandPalette.Unavailable.Active Tab')
         : '',
@@ -460,18 +464,16 @@ function addPlaylistCommands(commands, { t, groups, store, navigate }) {
   }
 }
 
-function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
-  if (!isElectron && !process.env.IS_CAPACITOR) return
+function addDownloadCommands(commands, { t, groups, downloads, isElectron, isCapacitor }) {
+  if (!isElectron && !isCapacitor) return
   const activeStatuses = new Set(['preparing', 'downloading', 'processing'])
   for (const download of downloads) {
+    if (!activeStatuses.has(download.status)) continue
     commands.push(command(`downloads.cancel.${download.id}`, t('CommandPalette.Cancel Download', {
       title: download.title || download.id
     }), groups.downloads, {
       aliases: ['stop download', 'abort'],
       icon: ['fas', 'xmark'],
-      disabledReason: activeStatuses.has(download.status)
-        ? ''
-        : t('CommandPalette.Unavailable.Download Finished'),
       run: () => ytDlp.ytDlpCancelDownload(download.id),
       contextual: true,
     }))

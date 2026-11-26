@@ -3861,7 +3861,6 @@ CommandPalette:
     One Tab: Öffne zuerst einen weiteren Tab
     Active Tab: Dies ist der aktive Tab
     Active Profile: Dies ist das aktive Profil
-    Download Finished: Dieser Download läuft nicht mehr
     Video: Öffne zuerst ein Video
 Downloads:
   File Name Template Invalid: 'Verwende einen relativen Pfad im Download-Ordner ohne „..“, „~“, „$“, „%“ oder ein Präfix wie „thumbnail:“.'
