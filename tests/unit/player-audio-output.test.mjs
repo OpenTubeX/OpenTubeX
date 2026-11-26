@@ -69,16 +69,34 @@ class FakeAudioContext extends EventTarget {
 
 FakeAudioContext.instances = []
 
+// Like a media element, it fires volumechange in a later task when the volume changes.
+class FakeMediaElement extends EventTarget {
+  #volume = 1
+
+  get volume () {
+    return this.#volume
+  }
+
+  set volume (value) {
+    if (value === this.#volume) return
+    this.#volume = value
+    setTimeout(() => this.dispatchEvent(new Event('volumechange')))
+  }
+}
+
+globalThis.HTMLMediaElement = FakeMediaElement
+
+const elementVolume = element => Object.getOwnPropertyDescriptor(FakeMediaElement.prototype, 'volume').get.call(element)
+const nextTask = () => new Promise(resolve => setTimeout(resolve))
+
 function createVideo () {
-  return Object.assign(new EventTarget(), { tagName: 'VIDEO', paused: false })
+  return Object.assign(new FakeMediaElement(), { tagName: 'VIDEO', paused: false, muted: false })
 }
 
 function getGraph (context) {
-  const [voiceOver] = context.sources[0].connections
-  const [boost] = voiceOver.connections
-  const [loudness] = boost.connections
-  const [mono] = loudness.connections
-  return { voiceOver, boost, loudness, mono }
+  const [boost] = context.sources[0].connections
+  const [mono] = boost.connections
+  return { boost, mono }
 }
 
 function mountAudioOutput (video) {
@@ -94,7 +112,7 @@ function mountAudioOutput (video) {
   return { output, unmount: () => app.unmount() }
 }
 
-test('player audio stages share one media element source', async (t) => {
+test('gains below unity scale the element volume without Web Audio', async (t) => {
   const OriginalAudioContext = globalThis.AudioContext
   globalThis.AudioContext = FakeAudioContext
   FakeAudioContext.instances = []
@@ -104,34 +122,58 @@ test('player audio stages share one media element source', async (t) => {
 
   const element = createVideo()
   const mounted = mountAudioOutput(shallowRef(element))
+  mounted.output.attach(element)
+  element.volume = 0.8
 
-  // Unity gain leaves the element's audio untouched.
-  await mounted.output.setGain('boost', 1)
-  assert.equal(FakeAudioContext.instances.length, 0)
-
-  await mounted.output.setGain('voiceOver', 0.1)
-  await mounted.output.setGain('boost', 1.5)
+  await mounted.output.setGain('voiceOver', 0.5)
   await mounted.output.setGain('loudness', 0.5)
+  assert.equal(FakeAudioContext.instances.length, 0)
+  assert.equal(element.volume, 0.8)
+  assert.equal(elementVolume(element), 0.2)
 
+  // Volume boost needs Web Audio, which processes the scaled element output.
+  await mounted.output.setGain('boost', 1.5)
   const [context] = FakeAudioContext.instances
-  assert.equal(FakeAudioContext.instances.length, 1)
   assert.equal(context.sources.length, 1)
   assert.equal(context.sources[0].element, element)
-
-  const { voiceOver, boost, loudness, mono } = getGraph(context)
+  const { boost, mono } = getGraph(context)
   assert.deepEqual(mono.connections, [context.destination])
   assert.equal(mono.channelCountMode, 'max')
-  assert.equal(voiceOver.gain.value, 0.1)
   assert.equal(boost.gain.value, 1.5)
-  assert.equal(loudness.gain.value, 0.5)
 
   await mounted.output.setGain('voiceOver', 1)
-  assert.equal(voiceOver.gain.value, 1)
+  assert.equal(elementVolume(element), 0.4)
   assert.equal(boost.gain.value, 1.5)
-  assert.equal(context.sources.length, 1)
+  assert.throws(() => { element.volume = 1.5 }, { name: 'IndexSizeError' })
 
   mounted.unmount()
   assert.equal(context.closed, true)
+})
+
+test('only volume changes by the user reach volumechange listeners', async (t) => {
+  const element = createVideo()
+  const { output, unmount } = mountAudioOutput(shallowRef(element))
+  t.after(unmount)
+  output.attach(element)
+  let events = 0
+  element.addEventListener('volumechange', () => events++)
+
+  // Otherwise the player would save the attenuated volume as the user's.
+  await output.setGain('loudness', 0.5)
+  await nextTask()
+  assert.equal(events, 0)
+
+  element.volume = 0.6
+  await nextTask()
+  assert.equal(events, 1)
+
+  // A gain of 0 keeps the element silent, but the controls still follow the user.
+  await output.setGain('voiceOver', 0)
+  element.volume = 0.4
+  await nextTask()
+  assert.equal(events, 2)
+  assert.equal(element.volume, 0.4)
+  assert.equal(elementVolume(element), 0)
 })
 
 test('stage values set before the graph exists apply when it is built', async (t) => {
@@ -152,10 +194,9 @@ test('stage values set before the graph exists apply when it is built', async (t
   assert.equal(FakeAudioContext.instances.length, 0)
 
   video.value = createVideo()
-  await output.setGain('voiceOver', 0.5)
+  await output.setMono(true)
 
-  const { voiceOver, boost, mono } = getGraph(FakeAudioContext.instances[0])
-  assert.equal(voiceOver.gain.value, 0.5)
+  const { boost, mono } = getGraph(FakeAudioContext.instances[0])
   assert.equal(boost.gain.value, 2)
   assert.equal(mono.channelCountMode, 'explicit')
 })
