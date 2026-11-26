@@ -321,6 +321,7 @@ public class AndroidUiPlugin extends Plugin {
             notifyPictureInPictureEntering();
             setPictureInPictureScrollbars(true);
             surface().prepare(pictureInPictureSourceRect);
+            surface().showVideoOnly();
             if (getActivity().isFinishing() || getActivity().isDestroyed()) {
                 cancelPictureInPictureEntry();
                 call.reject("Activity closed before Picture-in-Picture entry");
@@ -554,8 +555,7 @@ public class AndroidUiPlugin extends Plugin {
             preparePictureInPictureSurface();
             return;
         }
-        notifyPictureInPictureEntering();
-        preparePictureInPictureSurface();
+        prepareAutomaticPictureInPictureEntry();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return;
         boolean entered = false;
         try {
@@ -573,6 +573,14 @@ public class AndroidUiPlugin extends Plugin {
             pictureInPictureSurface = new PictureInPictureSurface(getActivity(), getBridge().getWebView());
         }
         return pictureInPictureSurface;
+    }
+
+    /** Prepares automatic entry once, from whichever native callback comes first. */
+    void prepareAutomaticPictureInPictureEntry() {
+        if (surface().isShowingVideoOnly()) return;
+        notifyPictureInPictureEntering();
+        preparePictureInPictureSurface();
+        surface().showVideoOnly();
     }
 
     void preparePictureInPictureSurface() {

@@ -1,8 +1,11 @@
 package org.opentubex.app;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -24,6 +27,9 @@ final class PictureInPictureSurface {
     private View viewport;
     private int viewportWidth;
     private int viewportHeight;
+    private boolean videoOnly;
+    private Drawable viewportBackground;
+    private Rect clipBounds;
     private float pivotX;
     private float pivotY;
     private float scaleX;
@@ -89,6 +95,26 @@ final class PictureInPictureSurface {
         root.getViewTreeObserver().addOnGlobalLayoutListener(resized);
     }
 
+    /**
+     * Shows only the video, on black, once Android has confirmed the entry.
+     * Its entry animation crops the window's current frame down to the source
+     * rectangle, and automatic entry starts it before the renderer can paint
+     * its video-only page.
+     */
+    void showVideoOnly() {
+        if (root == null || videoOnly) return;
+        videoOnly = true;
+        clipBounds = webView.getClipBounds();
+        webView.setClipBounds(new Rect(Math.round(video.left), Math.round(video.top),
+            Math.round(video.right), Math.round(video.bottom)));
+        viewportBackground = viewport.getBackground();
+        viewport.setBackground(new ColorDrawable(Color.BLACK));
+    }
+
+    boolean isShowingVideoOnly() {
+        return videoOnly;
+    }
+
     void onModeChanged(boolean active, Runnable notifyRenderer) {
         if (root == null) {
             notifyRenderer.run();
@@ -144,6 +170,10 @@ final class PictureInPictureSurface {
         viewportParams.width = viewportWidth;
         viewportParams.height = viewportHeight;
         viewport.setLayoutParams(viewportParams);
+        if (videoOnly) {
+            viewport.setBackground(viewportBackground);
+            webView.setClipBounds(clipBounds);
+        }
         webView.setPivotX(pivotX);
         webView.setPivotY(pivotY);
         webView.setScaleX(scaleX);
@@ -158,6 +188,9 @@ final class PictureInPictureSurface {
         root = null;
         video = null;
         viewport = null;
+        videoOnly = false;
+        viewportBackground = null;
+        clipBounds = null;
     }
 
     private record Clipping(ViewGroup view, boolean children, boolean padding) {}
