@@ -405,7 +405,8 @@ function getContextParameters(event) {
   const editable = target?.closest('input, textarea, [contenteditable="true"]')
   const link = target?.closest('a[href]')
   const media = target?.closest('img, video')
-  const selectionText = getSelectionText(editable ?? target)
+  // Like browsers, never copy or search a password
+  const selectionText = editable instanceof HTMLInputElement && editable.type === 'password' ? '' : getSelectionText(editable ?? target)
   const isEditable = editable != null && !editable.matches(':disabled, [readonly]')
 
   return {
