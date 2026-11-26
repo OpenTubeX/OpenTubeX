@@ -53,6 +53,7 @@ import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExter
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
 import { disableSpellChecker } from './spellChecker'
+import { createRealtimeAudio } from './realtimeAudio'
 import { getObsidianAppendUri } from './obsidian'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
@@ -3229,7 +3230,27 @@ function runApp() {
     })
   })
 
+  const realtimeAudio = process.platform === 'linux'
+    ? createRealtimeAudio({
+        getAudioServicePids: () => app.getAppMetrics()
+          .filter(metric => metric.serviceName === 'audio.mojom.AudioService')
+          .map(metric => metric.pid)
+      })
+    : null
+
   app.on('web-contents-created', (_, webContents) => {
+    if (realtimeAudio) {
+      let audiblePid = 0
+      webContents.on('audio-state-changed', ({ audible }) => {
+        if (audiblePid) realtimeAudio.setAudible(audiblePid, false)
+        audiblePid = audible ? webContents.getOSProcessId() : 0
+        if (audiblePid) realtimeAudio.setAudible(audiblePid, true)
+      })
+      webContents.once('destroyed', () => {
+        if (audiblePid) realtimeAudio.setAudible(audiblePid, false)
+      })
+    }
+
     // When a main-frame document starts loading, the previous renderer is gone.
     // Drop its readiness entry so sendOpenUrlToWebContents queues messages until
     // the new renderer signals APP_READY again, instead of delivering to a
