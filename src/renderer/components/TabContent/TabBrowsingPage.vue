@@ -2,23 +2,26 @@
   <component
     :is="component"
     v-if="component"
+    ref="page"
   />
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, provide, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, provide, reactive, useTemplateRef, watch } from 'vue'
 import { routeLocationKey, routerKey } from 'vue-router'
 import { resolveRouteComponent } from '../../router/index'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
-import { tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
+import { browsingSuspendedKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
 
 const props = defineProps({
   tabId: { type: String, required: true },
   route: { type: Object, required: true },
   /** Whether the tab shows this page, rather than keeping it mounted for Back. */
   current: Boolean,
-  presented: Boolean
+  presented: Boolean,
+  /** Whether the page is kept hidden behind Watch. */
+  suspended: Boolean
 })
 
 const component = computed(() => resolveRouteComponent(props.route))
@@ -99,12 +102,42 @@ watch(() => props.current, current => {
 
 const presented = computed(() => props.presented)
 provide(tabPresentedKey, presented)
+provide(browsingSuspendedKey, computed(() => props.suspended))
+
+// A page kept behind Watch keeps the width it was shown at. Watch hides the
+// sidebar, and the wider page laid out its header, grids and cards again
+// during the thumbnail morph, and once more on Back, which then restored its
+// scroll position into rows of other heights.
+const page = useTemplateRef('page')
+let shownWidth = 0
+const widthObserver = new ResizeObserver(([entry]) => {
+  if (props.suspended) return
+  // The observed sizes are rounded to layout units, which a fractional UI
+  // Scale would round once more, so the page would still resize slightly.
+  let width = entry.target.getBoundingClientRect().width
+  // The width replaces the page's inline size, which its box-sizing applies to.
+  if (getComputedStyle(entry.target).boxSizing !== 'border-box') {
+    width -= entry.borderBoxSize[0].inlineSize - entry.contentBoxSize[0].inlineSize
+  }
+  if (width > 0) shownWidth = width
+})
+watch(() => page.value?.$el, (element, previous) => {
+  if (previous instanceof Element) widthObserver.unobserve(previous)
+  if (element instanceof Element) widthObserver.observe(element)
+}, { flush: 'post' })
+watch(() => props.suspended, suspended => {
+  const element = page.value?.$el
+  if (!(element instanceof HTMLElement)) return
+  if (suspended && shownWidth > 0) element.style.setProperty('--browsing-page-width', `${shownWidth}px`)
+  else element.style.removeProperty('--browsing-page-width')
+})
 provide('isTabActive', presented)
 provide('tabRoute', injectedRoute)
 provide(routeLocationKey, injectedRoute)
 provide(routerKey, router)
 
 onBeforeUnmount(() => {
+  widthObserver.disconnect()
   unregister()
   // Pages kept for Back, and the page Back leaves, unmount without the tab's
   // navigation hooks. Give them the cleanup a closing tab would.

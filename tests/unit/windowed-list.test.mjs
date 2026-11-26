@@ -340,3 +340,83 @@ test('remeasures nested shells only when a height-only resize restyles mounted r
   windowing.disconnect()
   assert.equal(viewport.listeners.size, 0)
 })
+
+test('suspended rows hold their content and catch up with fresh observations once resumed', () => {
+  let intersect, resize
+  const frames = []
+  const observed = { intersection: [], resize: [] }
+  const windowing = createListWindow({
+    IntersectionObserver: class { constructor(fn) { intersect = fn } observe(element) { observed.intersection.push(element) } unobserve() {} disconnect() {} },
+    ResizeObserver: class { constructor(fn) { resize = fn } observe(element) { observed.resize.push(element) } unobserve() {} disconnect() {} },
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length },
+    cancelAnimationFrame() {},
+  })
+  const runFrames = () => { while (frames.length > 0) for (const callback of frames.splice(0)) callback() }
+  let mounts = 0
+  let unmounts = 0
+  const mounted = new Map()
+  const rows = Array.from({ length: 4 }, () => {
+    const element = { getBoundingClientRect: () => ({ height: 100 }) }
+    mounted.set(element, true)
+    const handle = windowing.observe(element, {
+      mount() { if (!mounted.get(element)) mounts++; mounted.set(element, true) },
+      unmount() { unmounts++; mounted.set(element, false) },
+      isMounted: () => mounted.get(element),
+      isProtected: () => false,
+    })
+    return { element, handle }
+  })
+  const [top, , , visible] = rows.map(row => row.element)
+  const entries = (width, targets = rows.map(row => row.element)) => targets.map(target => ({ target, contentRect: { width, height: 100 } }))
+  // The page is scrolled down: only the last row is near.
+  resize(entries(300))
+  intersect(rows.map(({ element }) => ({ target: element, isIntersecting: element === visible })))
+  runFrames()
+  assert.deepEqual(rows.map(({ element }) => mounted.get(element)), [false, false, false, true])
+  mounts = 0
+  unmounts = 0
+
+  // Behind Watch, the window scrolls to the top and the page gets wider.
+  for (const { handle } of rows) handle.suspend()
+  intersect(rows.map(({ element }) => ({ target: element, isIntersecting: element === top })))
+  resize(entries(400))
+  for (const { handle } of rows) handle.refresh()
+  runFrames()
+  assert.deepEqual({ mounts, unmounts }, { mounts: 0, unmounts: 0 })
+
+  // Back restores the width and the scroll position before the rows resume,
+  // and observing them anew reports both.
+  observed.intersection.length = 0
+  observed.resize.length = 0
+  for (const { handle } of rows) handle.resume()
+  assert.equal(observed.intersection.length, rows.length)
+  assert.equal(observed.resize.length, rows.length)
+  resize(entries(300))
+  intersect(rows.map(({ element }) => ({ target: element, isIntersecting: element === visible })))
+  runFrames()
+  // Only the distant rows refreshed while suspended mount to measure again.
+  assert.equal(mounted.get(visible), true)
+  assert.equal(unmounts, mounts)
+  assert.equal(mounts, rows.length - 1)
+
+  // Without changes while suspended, resuming does no work.
+  mounts = 0
+  unmounts = 0
+  for (const { handle } of rows) handle.suspend()
+  for (const { handle } of rows) handle.resume()
+  resize(entries(300))
+  intersect(rows.map(({ element }) => ({ target: element, isIntersecting: element === visible })))
+  runFrames()
+  assert.deepEqual({ mounts, unmounts }, { mounts: 0, unmounts: 0 })
+
+  // A width that changed while suspended remeasures the distant shells.
+  for (const { handle } of rows) handle.suspend()
+  resize(entries(400))
+  for (const { handle } of rows) handle.resume()
+  resize(entries(250))
+  intersect(rows.map(({ element }) => ({ target: element, isIntersecting: element === visible })))
+  runFrames()
+  assert.equal(mounts, rows.length - 1)
+  assert.equal(mounted.get(visible), true)
+  windowing.disconnect()
+})

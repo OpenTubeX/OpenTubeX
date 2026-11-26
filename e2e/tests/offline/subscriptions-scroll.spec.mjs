@@ -1,4 +1,4 @@
-import { abortUnmockedRequest, test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, expectPageScrollWithinRenderedRange, test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -294,4 +294,51 @@ test('mobile header keeps focused controls visible and hides the taller New feed
   await expect(page.locator('[data-new-feed-tab="videos"]')).toBeInViewport()
   await page.locator('[data-subscription-feed-tab="videos"]').click()
   await expect(videosTab).toBeInViewport()
+})
+
+test('Back from a video shows the feed where it was, with cards sized for the window', { tag: '@scale' }, async ({ app, page }) => {
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
+  // Watch hides the open sidebar, which widens the feed kept behind it.
+  await page.evaluate(() => {
+    if (!window.$store.getters.getIsSideNavOpen) window.$store.commit('toggleSideNav')
+  })
+  await expect(page.getByText('Feed video 00')).toBeVisible()
+  const feedState = () => page.evaluate(() => {
+    const cards = [...document.querySelectorAll('.tabContent[aria-hidden="false"] [data-feed-item-key]')]
+    const card = cards.find(candidate => candidate.firstElementChild && candidate.getBoundingClientRect().top >= 150)
+    const box = card.getBoundingClientRect()
+    return { key: card.getAttribute('data-feed-item-key'), top: box.top, width: box.width }
+  })
+  const smallWindow = { width: 1200, height: 880 }
+  const largeWindow = { width: 1600, height: 900 }
+  await setWindowSize(app, page, smallWindow)
+  const smallWindowCardWidth = (await feedState()).width
+  await setWindowSize(app, page, largeWindow)
+  await scrollFeedTo(page, 1500)
+  const before = await feedState()
+
+  const openVideo = async () => {
+    await page.locator(`.tabContent[aria-hidden="false"] [data-feed-item-key="${before.key}"] .title`).click()
+    await expect(page).toHaveURL(/#\/watch\//)
+    await expect(page.locator('.tabContent[aria-hidden="false"] .browsingBehindWatch')).toHaveCount(1)
+  }
+  const goBack = async () => {
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+  }
+
+  await openVideo()
+  await goBack()
+  await expect.poll(async () => {
+    const after = await feedState()
+    return after.key === before.key && Math.abs(after.top - before.top) <= 1 && Math.abs(after.width - before.width) <= 0.5
+  }).toBe(true)
+  await expectPageScrollWithinRenderedRange(page)
+
+  // A window resized on Watch resizes the cards once the feed shows again.
+  await openVideo()
+  await setWindowSize(app, page, smallWindow)
+  await goBack()
+  await expect.poll(async () => Math.abs((await feedState()).width - smallWindowCardWidth)).toBeLessThanOrEqual(0.5)
+  await expectPageScrollWithinRenderedRange(page)
 })

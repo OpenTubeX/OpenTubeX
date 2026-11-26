@@ -39,6 +39,7 @@
           :route="page.route"
           :current="page.key === currentPageKey"
           :presented="isBrowsingPresented && page.key === currentPageKey"
+          :suspended="isWatchRoute && !watchPreviewing && page.key === currentPageKey"
           class="routerView"
           :class="page.key === currentPageKey
             ? { browsingBehindWatch: isWatchRoute, backSlidePage: RETAINS_PAGES }
@@ -522,7 +523,7 @@ function cancelLoaderSettle() {
   position: absolute;
   inset: 0;
   z-index: 0;
-  inline-size: 100%;
+  inline-size: var(--browsing-page-width, 100%);
   pointer-events: none;
   visibility: hidden;
 }

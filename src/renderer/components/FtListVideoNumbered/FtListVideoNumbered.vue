@@ -88,6 +88,7 @@ import { computed, inject, nextTick, onBeforeUnmount, provide, ref, useTemplateR
 import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
+import { useBrowsingSuspension } from '../../composables/useBrowsingSuspension'
 import { vFirstVisible } from '../../helpers/firstVisible'
 import { observeNestedWindowedListItem, observeWindowedListItem } from '../../helpers/windowedList'
 import store from '../../store/index'
@@ -255,6 +256,10 @@ const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 provide(thumbnailSizesKey, computed(() => getThumbnailListSizes(store.state.settings[thumbnailSizeSetting], 0.6)))
 if (windowed) {
   let windowItem = null
+  const isSuspended = useBrowsingSuspension({
+    suspend: () => windowItem?.suspend(),
+    resume: () => windowItem?.resume()
+  })
   watch(row, element => {
     windowItem?.dispose()
     windowItem = null
@@ -267,6 +272,7 @@ if (windowed) {
       isProtected: () => props.isVideoDragging ||
         element.contains(document.activeElement) ||
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
+      suspended: isSuspended(),
     })
   }, { flush: 'post' })
   // Title line limits, text settings, and list thumbnail sizes change row
