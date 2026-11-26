@@ -14,7 +14,7 @@
       @keydown.enter.space.prevent="openMoreOptions = !openMoreOptions"
     >
       <FtIcon
-        :icon="['fas', 'ellipsis-h']"
+        :icon="['fas', 'ellipsis']"
         class="navIcon"
         :class="applyNavIconExpand"
       />

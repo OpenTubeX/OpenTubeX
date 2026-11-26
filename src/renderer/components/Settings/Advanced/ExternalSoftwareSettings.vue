@@ -217,7 +217,7 @@
         :select-names="updateModeNames"
         :select-values="UPDATE_MODE_VALUES"
         :tooltip="t('Tooltips.External Software Settings.Managed Tool Updates')"
-        :icon="['fas', 'sync']"
+        :icon="['fas', 'arrows-rotate']"
         @change="updateExternalSoftwareUpdateMode"
       />
     </div>

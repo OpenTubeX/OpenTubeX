@@ -16,7 +16,7 @@
         </span>
         <span class="previewSearch">
           <FtIcon
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             aria-hidden="true"
           />
         </span>
@@ -108,7 +108,7 @@
         >
           <span class="previewNavIcon">
             <FtIcon
-              :icon="['fas', 'ellipsis-h']"
+              :icon="['fas', 'ellipsis']"
               aria-hidden="true"
             />
           </span>

@@ -91,11 +91,11 @@ const options = computed(() => {
     const items = [
       { label: `${formatDurationAsTimestamp(status.value.currentTime)} / ${formatDurationAsTimestamp(status.value.duration)}`, disabled: true },
       { label: status.value.paused ? t('Video.Player.Scroll Mini Player.Play') : t('Video.Player.Scroll Mini Player.Pause'), value: status.value.paused ? 'play' : 'pause', icon: ['fas', status.value.paused ? 'play' : 'pause'], disabled: busy.value },
-      { label: t('Video.Player.Google Cast.Rewind'), value: 'rewind', icon: ['fas', 'undo'], disabled: busy.value || props.isLive },
+      { label: t('Video.Player.Google Cast.Rewind'), value: 'rewind', icon: ['fas', 'arrow-rotate-left'], disabled: busy.value || props.isLive },
       { label: t('Video.Player.Google Cast.Forward'), value: 'forward', icon: ['fas', 'forward'], disabled: busy.value || props.isLive },
       { label: t('KeyboardShortcutPrompt.Volume Down'), value: 'volume-down', icon: ['fas', 'volume-low'], disabled: busy.value },
       { label: t('KeyboardShortcutPrompt.Volume Up'), value: 'volume-up', icon: ['fas', 'volume-high'], disabled: busy.value },
-      { label: status.value.muted ? t('Video.Player.SponsorBlock.MuteToastUnmute') : t('Video.Player.SponsorBlock.MuteActionType'), value: 'mute', icon: ['fas', status.value.muted ? 'volume-high' : 'volume-mute'], disabled: busy.value }
+      { label: status.value.muted ? t('Video.Player.SponsorBlock.MuteToastUnmute') : t('Video.Player.SponsorBlock.MuteActionType'), value: 'mute', icon: ['fas', status.value.muted ? 'volume-high' : 'volume-xmark'], disabled: busy.value }
     ]
     if (castCaptions.value.length) {
       items.push({ type: 'divider' },
@@ -118,7 +118,7 @@ const options = computed(() => {
         : devices.value.length === 0
           ? [{ label: protocolLabels.value.noDevices, disabled: true }]
           : devices.value.map(device => ({ label: device.name, value: `device-${device.id}`, icon: ['fas', 'cast'], disabled: busy.value }))
-  items.push({ type: 'divider' }, { label: t('Theme Discovery.Refresh'), value: 'refresh', icon: ['fas', 'sync'], disabled: loading.value || busy.value })
+  items.push({ type: 'divider' }, { label: t('Theme Discovery.Refresh'), value: 'refresh', icon: ['fas', 'arrows-rotate'], disabled: loading.value || busy.value })
   return items
 })
 

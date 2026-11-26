@@ -234,7 +234,7 @@
 
     <FtSettingsSection
       :title="t('Settings.Storage Settings.History Data')"
-      :icon="['fas', 'history']"
+      :icon="['fas', 'clock-rotate-left']"
     >
       <FtDataScopeNotice storage />
       <StorageItem

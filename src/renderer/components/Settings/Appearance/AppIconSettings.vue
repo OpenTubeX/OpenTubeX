@@ -60,7 +60,7 @@
     ]"
     :option-names="[t('App Icon.Restart'), t('Dismiss')]"
     :option-values="['restart', 'dismiss']"
-    :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
+    :option-icons="[['fas', 'arrows-rotate'], ['fas', 'xmark']]"
     :busy="busy"
     @click="handleAppliedPrompt"
   />

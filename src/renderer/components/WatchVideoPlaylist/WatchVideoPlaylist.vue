@@ -184,7 +184,7 @@
               >
                 <FtIcon
                   class="playlistIcon"
-                  :icon="['fas', 'random']"
+                  :icon="['fas', 'shuffle']"
                 />
               </button>
               <button
@@ -197,7 +197,7 @@
               >
                 <FtIcon
                   class="playlistIcon"
-                  :icon="['fas', 'exchange-alt']"
+                  :icon="['fas', 'right-left']"
                 />
               </button>
               <button
@@ -885,17 +885,17 @@ function toggleShuffle() {
   shuffleFromDefault = false
   if (shuffleEnabled.value) {
     shuffleEnabled.value = false
-    showToast({ message: t('Shuffle is now disabled'), icon: ['fas', 'random'] })
+    showToast({ message: t('Shuffle is now disabled'), icon: ['fas', 'shuffle'] })
   } else {
     shuffleEnabled.value = true
-    showToast({ message: t('Shuffle is now enabled'), icon: ['fas', 'random'] })
+    showToast({ message: t('Shuffle is now enabled'), icon: ['fas', 'shuffle'] })
     shufflePlaylistItems()
   }
 }
 
 function toggleReversePlaylist() {
   isLoading.value = true
-  showToast({ message: t('The playlist has been reversed'), icon: ['fas', 'exchange-alt'] })
+  showToast({ message: t('The playlist has been reversed'), icon: ['fas', 'right-left'] })
 
   reversePlaylist.value = !reversePlaylist.value
   persistReversePlaylistState()
@@ -1084,7 +1084,7 @@ function playNextVideo({ autoplay = false } = {}) {
 
     navigate()
 
-    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+    showToast({ message: t('Playing Next Video'), icon: ['fas', 'forward-step'] })
 
     if (doShufflePlaylistItems && expectedAutoSkipItem === null) {
       shufflePlaylistItems()
@@ -1098,7 +1098,7 @@ function playNextVideo({ autoplay = false } = {}) {
     }
 
     navigate()
-    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+    showToast({ message: t('Playing Next Video'), icon: ['fas', 'forward-step'] })
   }
   return staysOnRoute ? null : targetPlaylistItem.videoId
 }
@@ -1143,7 +1143,7 @@ function playPreviousVideo() {
     return
   }
 
-  showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
+  showToast({ message: t('Playing Previous Video'), icon: ['fas', 'backward-step'] })
 
   router.push(playlistItemRoute(targetPlaylistItem))
 }
@@ -1337,7 +1337,7 @@ async function getPlaylistInformationLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getPlaylistInformationInvidious()
     } else {
       isLoading.value = false

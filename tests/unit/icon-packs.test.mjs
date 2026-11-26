@@ -12,11 +12,10 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const rendererRoot = path.join(repoRoot, 'src/renderer')
 const iconRoot = path.join(rendererRoot, 'icons')
 const packs = ['material', 'remix']
-const aliases = await readJson('faAliasToCanon.json')
-const mapping = await readJson('faIconMap.json')
+const mapping = await readJson('iconMap.json')
 
 function resolveIconifyId(icon, pack) {
-  return resolveMappedIcon(icon, pack, aliases, mapping)
+  return resolveMappedIcon(icon, pack, mapping)
 }
 
 async function readJson(file) {

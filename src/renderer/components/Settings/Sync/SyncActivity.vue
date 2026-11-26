@@ -10,7 +10,7 @@
           class="activityIcon"
           aria-hidden="true"
         >
-          <FtIcon :icon="['fas', 'history']" />
+          <FtIcon :icon="['fas', 'clock-rotate-left']" />
         </span>
         <h3>
           {{ t('Settings.Sync Settings.Activity') }}
@@ -51,7 +51,7 @@
         ref="refreshButton"
         class="activityAction"
         :title="t('Theme Discovery.Refresh')"
-        :icon="['fas', 'sync']"
+        :icon="['fas', 'arrows-rotate']"
         :disabled="loading"
         :padding="11"
         :size="20"
@@ -393,7 +393,7 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
         ? 'Settings.Sync Settings.Item Renamed'
         : hasValue ? 'Settings.Sync Settings.Setting Changed' : 'Settings.Sync Settings.Item Updated'
   const icon = { added: 'plus', removed: 'minus', renamed: 'pencil' }[entry.action] ??
-    (hasValue ? 'sliders-h' : 'sync')
+    (hasValue ? 'sliders' : 'arrows-rotate')
   const setting = entry.parent || [labels.join(' · '),
     entry.action === 'updated' && !entry.key ? entry.item : null].filter(Boolean).join(' · ')
   return {

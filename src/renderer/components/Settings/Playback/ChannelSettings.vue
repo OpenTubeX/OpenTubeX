@@ -41,7 +41,7 @@
       <div class="manageButton">
         <FtButton
           :label="manageButtonLabel"
-          :icon="['fas', 'sliders-h']"
+          :icon="['fas', 'sliders']"
           @click="showManager = true"
         />
         <FtSyncedSettingIndicator
@@ -73,7 +73,7 @@
           class="channelSearch"
           input-type="search"
           :label="t('Settings.Channel Settings.Search Channels')"
-          :icon="['fas', 'search']"
+          :icon="['fas', 'magnifying-glass']"
           :placeholder="t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :value="searchQuery"
@@ -268,7 +268,7 @@
               class="addSubscribedChannelSearch"
               input-type="search"
               :label="t('Settings.Channel Settings.Search Channels')"
-              :icon="['fas', 'search']"
+              :icon="['fas', 'magnifying-glass']"
               :placeholder="t('Form Inputs.Search Text Hint')"
               :show-action-button="false"
               :value="addChannelSearchQuery"

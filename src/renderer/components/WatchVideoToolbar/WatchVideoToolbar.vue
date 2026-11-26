@@ -19,7 +19,7 @@
         v-if="overflowMenuOptions.length > 0"
         class="moreActions"
         :title="t('Video.More Options')"
-        :icon="['fas', 'ellipsis-h']"
+        :icon="['fas', 'ellipsis']"
         theme="base-no-default"
         dropdown-position-x="left"
         :dropdown-portal="dropdownPortal"

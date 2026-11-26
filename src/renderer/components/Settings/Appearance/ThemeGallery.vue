@@ -157,7 +157,7 @@
         <div class="themeActions">
           <FtButton
             :title="t('Theme Discovery.Discover Themes')"
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             @click="showThemeDiscovery = true"
           >
             <template #label>

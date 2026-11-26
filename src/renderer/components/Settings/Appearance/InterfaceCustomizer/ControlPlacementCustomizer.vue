@@ -6,7 +6,7 @@
     <div class="placementControls">
       <FtButton
         :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
-        :icon="['fas', 'undo']"
+        :icon="['fas', 'arrow-rotate-left']"
         :disabled="isDefault"
         theme="secondary"
         @click="resetPlacement"

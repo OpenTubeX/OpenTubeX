@@ -2,7 +2,7 @@
   <FtSettingsSubpage
     :open="open"
     :title="t('Theme Discovery.Discover Themes')"
-    :icon="['fas', 'search']"
+    :icon="['fas', 'magnifying-glass']"
     flush
     @close="emit('close')"
   >
@@ -10,7 +10,7 @@
       <div class="discoveryToolbar">
         <FtIconButton
           :title="t('Theme Discovery.Refresh')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           :disabled="loading"
           @click="load(true)"
         />
@@ -95,7 +95,7 @@
                 <div class="themeActions">
                   <FtButton
                     :label="installLabel(entry)"
-                    :icon="['fas', hasUpdate(entry) ? 'sync' : installed(entry) ? 'check' : 'download']"
+                    :icon="['fas', hasUpdate(entry) ? 'arrows-rotate' : installed(entry) ? 'check' : 'download']"
                     :disabled="installing !== null || (active(entry) && !hasUpdate(entry))"
                     theme="primary"
                     @click="install(entry)"

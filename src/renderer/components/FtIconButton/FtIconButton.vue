@@ -37,7 +37,6 @@
         <FtIcon
           class="overlayIcon"
           :icon="overlayIcon"
-          transform="shrink-7 up-1"
         />
       </FtIconLayers>
       <FtIcon
@@ -231,7 +230,7 @@ const props = defineProps({
   },
   icon: {
     type: [Array, Object],
-    default: () => ['fas', 'ellipsis-v']
+    default: () => ['fas', 'ellipsis-vertical']
   },
   overlayIcon: {
     type: Array,
@@ -332,7 +331,7 @@ const mobileDropdownActions = computed(() => props.mobileActions ?? props.dropdo
     }))
 
 const isKebabMenu = computed(() => (
-  Array.isArray(props.icon) && ['ellipsis-v', 'ellipsis-vertical'].includes(props.icon[1])
+  Array.isArray(props.icon) && props.icon[1] === 'ellipsis-vertical'
 ))
 
 const dropdownShown = ref(false)

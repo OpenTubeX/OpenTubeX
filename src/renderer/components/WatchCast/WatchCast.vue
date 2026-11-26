@@ -93,7 +93,7 @@
           @click="refreshAll"
         >
           <FtIcon
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :spin="refreshing"
             aria-hidden="true"
           />
@@ -154,7 +154,7 @@
           @click="choose(remoteSession.protocol, 'rewind')"
         >
           <FtIcon
-            :icon="['fas', 'undo']"
+            :icon="['fas', 'arrow-rotate-left']"
             aria-hidden="true"
           />
         </button>
@@ -196,7 +196,7 @@
           @click="choose(remoteSession.protocol, 'mute')"
         >
           <FtIcon
-            :icon="['fas', remoteSession.control.status.muted ? 'volume-mute' : 'volume-high']"
+            :icon="['fas', remoteSession.control.status.muted ? 'volume-xmark' : 'volume-high']"
             aria-hidden="true"
           />
         </button>

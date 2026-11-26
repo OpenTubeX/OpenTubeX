@@ -1,17 +1,7 @@
 import { addIcon } from '@iconify/vue/offline'
 import { ref } from 'vue'
 
-import {
-  facDeArrow,
-  facFluxer,
-  facHorizontalTabs,
-  facMatrix,
-  facPlaylistAdd,
-  facPlaylistCheck,
-  facRobotSlash,
-  facSponsorBlock,
-  facVerticalTabs
-} from '../customIcons.js'
+import { CUSTOM_ICONS } from './customIcons.js'
 
 /**
  * Register the pre-extracted Iconify glyphs used by the selected icon pack.
@@ -34,24 +24,8 @@ function registerCustomIcons() {
   if (customIconsRegistered) return
   customIconsRegistered = true
 
-  for (const custom of [
-    facVerticalTabs,
-    facHorizontalTabs,
-    facPlaylistAdd,
-    facPlaylistCheck,
-    facFluxer,
-    facMatrix
-  ]) {
-    const [width, height, , , path] = custom.icon
-    addIcon(`otx:${custom.iconName}`, {
-      body: `<path fill="currentColor" d="${path}" />`,
-      width,
-      height
-    })
-  }
-
-  for (const { iconName, body, width, height } of [facDeArrow, facSponsorBlock, facRobotSlash]) {
-    addIcon(`otx:${iconName}`, { body, width, height })
+  for (const [name, data] of Object.entries(CUSTOM_ICONS)) {
+    addIcon(`otx:${name}`, data)
   }
 }
 

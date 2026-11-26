@@ -24,7 +24,7 @@
           v-if="retryableRows.length > 1"
           class="channelErrorsRetryAll"
           :title="t('Subscriptions.Channel Errors.Retry All')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           :disabled="refreshInProgress"
           variant="text"
           @click="retrySubscriptionChannels(retryableRows, t)"
@@ -88,7 +88,7 @@
             v-else
             :label="t('User Playlists.SinglePlaylistView.Retry')"
             :aria-label="t('Subscriptions.Channel Errors.Retry Channel', { channel: row.name })"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :disabled="refreshInProgress"
             :background-color="null"
             :text-color="null"

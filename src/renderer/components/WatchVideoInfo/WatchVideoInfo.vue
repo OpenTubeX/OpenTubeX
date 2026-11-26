@@ -39,7 +39,7 @@
               :title="t('Video.AI-generated content')"
               class="videoBadge"
             >
-              <FtIcon :icon="['fas', 'info-circle']" />
+              <FtIcon :icon="['fas', 'circle-info']" />
               {{ t('Video.AI') }}
             </div>
             <div
@@ -280,7 +280,7 @@
           <FtIconButton
             v-if="inToolbar('externalPlayer')"
             :title="toolbarActions.externalPlayer.label"
-            :icon="['fas', 'external-link-alt']"
+            :icon="['fas', 'up-right-from-square']"
             theme="base-no-default"
             @click="handleExternalPlayer"
           />
@@ -690,7 +690,7 @@ const toolbarActions = computed(() => ({
   externalPlayer: {
     visible: !props.offline && USING_ELECTRON && externalPlayer.value !== '',
     label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
-    icon: ['fas', 'external-link-alt'],
+    icon: ['fas', 'up-right-from-square'],
     run: handleExternalPlayer
   },
   formats: {

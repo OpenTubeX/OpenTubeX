@@ -109,7 +109,7 @@
         input-type="search"
         :value="searchQuery"
         :label="t('Video.Transcript.Search')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         @input="searchQuery = $event"
@@ -500,7 +500,7 @@ async function saveTranscript() {
     )
 
     if (saved) {
-      showToast({ message: t('Video.Transcript.Saved'), icon: ['fas', 'save'] })
+      showToast({ message: t('Video.Transcript.Saved'), icon: ['fas', 'floppy-disk'] })
     }
   } catch (error) {
     console.error('Unable to save transcript', error)

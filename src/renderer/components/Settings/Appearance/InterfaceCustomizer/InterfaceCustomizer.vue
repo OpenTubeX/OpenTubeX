@@ -3,7 +3,7 @@
     <FtButton
       data-settings-subpage="customize-interface"
       :label="t('Settings.Interface Customizer.Customize Interface')"
-      :icon="['fas', 'sliders-h']"
+      :icon="['fas', 'sliders']"
       @click="open = true"
     />
   </div>
@@ -11,7 +11,7 @@
   <FtSettingsSubpage
     :open="open"
     :title="t('Settings.Interface Customizer.Customize Interface')"
-    :icon="['fas', 'sliders-h']"
+    :icon="['fas', 'sliders']"
     flush
     @close="open = false"
   >
@@ -236,7 +236,7 @@ const tabs = computed(() => {
     },
     {
       id: 'quickSettings',
-      icon: ['fas', 'sliders-h'],
+      icon: ['fas', 'sliders'],
       label: t('Settings.Quick Settings.Quick Settings'),
       syncKey: 'quickSettings',
       previewModes: [],

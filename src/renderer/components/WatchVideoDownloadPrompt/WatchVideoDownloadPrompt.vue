@@ -39,7 +39,7 @@
             v-if="isDirty"
             class="templateActionButton"
             :title="t('Downloads.Save Template')"
-            :icon="['fas', 'save']"
+            :icon="['fas', 'floppy-disk']"
             theme="secondary"
             @click="openSaveTemplatePrompt"
           />
@@ -392,7 +392,7 @@
           <FtButton
             v-if="downloadInProgress"
             :label="t('Downloads.Cancel Download')"
-            :icon="['fas', 'times-circle']"
+            :icon="['fas', 'circle-xmark']"
             theme="destructive"
             @click="cancelDownload"
           />
@@ -436,7 +436,7 @@
       <FtButtonGroup>
         <FtButton
           :label="t('Downloads.Save Template')"
-          :icon="['fas', 'save']"
+          :icon="['fas', 'floppy-disk']"
           theme="primary"
           :disabled="newTemplateName.trim() === '' || filenameTemplateInvalid"
           @click="saveTemplate"
@@ -660,7 +660,7 @@ function saveTemplate() {
   isDirty.value = false
   newTemplateName.value = ''
   showSaveTemplatePrompt.value = false
-  showToast({ message: t('Downloads.Template Saved', { name }), icon: ['fas', 'save'] })
+  showToast({ message: t('Downloads.Template Saved', { name }), icon: ['fas', 'floppy-disk'] })
 }
 function openSaveTemplatePrompt() {
   newTemplateName.value = selectedCustomTemplate.value?.name ?? ''

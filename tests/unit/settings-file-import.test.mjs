@@ -47,7 +47,7 @@ test('imports a settings object and a one-row settings database', async () => {
   for (const content of ['{"uiScale":125}', '\uFEFF{"uiScale":125}', '{"_id":"uiScale","value":125}\n']) {
     const result = await importFile(content)
     assert.deepEqual(result.applied, [{ uiScale: 125 }])
-    assert.equal(result.toasts.at(-1).icon[1], 'sliders-h')
+    assert.equal(result.toasts.at(-1).icon[1], 'sliders')
   }
 })
 

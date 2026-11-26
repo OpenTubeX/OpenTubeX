@@ -71,7 +71,7 @@
         <FtFlexBox class="signInActions">
           <FtButton
             :label="t('Settings.Sync Settings.Try Again')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             @click="start"
           />
         </FtFlexBox>

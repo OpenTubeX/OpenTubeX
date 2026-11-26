@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { chromium } from '@playwright/test'
 
 const require = createRequire(import.meta.url)
-const mappings = require('../src/renderer/icons/faIconMap.json')
+const mappings = require('../src/renderer/icons/iconMap.json')
 const names = ['display', 'eye', 'eye-slash', 'xmark', 'backward-step', 'play', 'pause', 'forward-step', 'rewind-10', 'forward-10', 'clone', 'power-off']
 const browser = await chromium.launch()
 try {
