@@ -60,7 +60,7 @@ function descriptionText(text) {
     text = text.replace(/<\/?(?:a|b|i|img|s)(?:\s[^>]*)?$/u, ' ')
   }
   // URLs go before entities, which can join their query parameters
-  return text.replaceAll(/<\/?[a-z][^>]*>/giu, ' ')
+  return text.replaceAll(/<\/?[a-z](?:[^>"']|"[^"]*"|'[^']*')*>/giu, ' ')
     .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
     .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
     .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
