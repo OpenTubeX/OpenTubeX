@@ -208,3 +208,31 @@ for (const eventFirst of [false, true]) {
     assert.ok(removedListeners.includes('backButton'), 'unmount removes the native back listener')
   })
 }
+
+test('iOS overlays that only resign activity do not count as the background', async () => {
+  const { IS_IOS } = process.env
+  const originalWindow = globalThis.window
+  const originalDocument = globalThis.document
+  process.env.IS_IOS = 'true'
+  globalThis.window = new EventTarget()
+  globalThis.document = Object.assign(new EventTarget(), { hidden: false })
+  try {
+    // A fresh instance registers the native scene listeners for iOS.
+    const { isAppHidden, isAppInBackground, setAndroidAppVisible } = await import('../../src/renderer/helpers/appVisibility.js?ios')
+    // Control Center, alerts and the app switcher make the app inactive.
+    setAndroidAppVisible(false)
+    assert.equal(isAppHidden(), true)
+    assert.equal(isAppInBackground(), false)
+    window.dispatchEvent(new Event('opentubex:enter-background'))
+    assert.equal(isAppInBackground(), true)
+    window.dispatchEvent(new Event('opentubex:enter-foreground'))
+    assert.equal(isAppInBackground(), false)
+  } finally {
+    if (IS_IOS === undefined) delete process.env.IS_IOS
+    else process.env.IS_IOS = IS_IOS
+    if (originalWindow === undefined) delete globalThis.window
+    else globalThis.window = originalWindow
+    if (originalDocument === undefined) delete globalThis.document
+    else globalThis.document = originalDocument
+  }
+})

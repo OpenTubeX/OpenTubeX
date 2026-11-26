@@ -46,6 +46,20 @@ export function waitForAndroidAppState(signal, previousState) {
   })
 }
 
+// iOS also resigns activity, which hides the app here, for Control Center,
+// Notification Center, the app switcher and system alerts. The native scene
+// reports when the app really leaves the screen.
+let iosInBackground = false
+if (process.env.IS_IOS) {
+  window.addEventListener('opentubex:enter-background', () => { iosInBackground = true })
+  window.addEventListener('opentubex:enter-foreground', () => { iosInBackground = false })
+}
+
+/** Unlike isAppHidden, excludes iOS overlays that leave the app on screen. */
+export function isAppInBackground() {
+  return process.env.IS_IOS ? iosInBackground : isAppHidden()
+}
+
 export function setAndroidAppVisible(visible) {
   const wasHidden = isAppHidden()
   androidVisible = visible

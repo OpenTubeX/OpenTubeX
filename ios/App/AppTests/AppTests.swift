@@ -148,11 +148,19 @@ final class AppTests: XCTestCase {
             window.addEventListener('opentubex:prepare-background', () => {
                 window.iosPreparedForBackground = true;
             }, { once: true });
+            window.iosSceneEvents = [];
+            for (const name of ['opentubex:enter-background', 'opentubex:enter-foreground']) {
+                window.addEventListener(name, () => window.iosSceneEvents.push(name), { once: true });
+            }
             """)
         let scene = try XCTUnwrap(webView.window?.windowScene)
         let delegate = try XCTUnwrap(scene.delegate as? SceneDelegate)
         delegate.sceneWillResignActive(scene)
         try await wait("window.iosPreparedForBackground === true")
+        // Only these switch playback to audio, unlike overlays that merely resign activity.
+        delegate.sceneDidEnterBackground(scene)
+        delegate.sceneWillEnterForeground(scene)
+        try await wait("iosSceneEvents.join() === 'opentubex:enter-background,opentubex:enter-foreground'")
     }
 
     var webView: WKWebView {
