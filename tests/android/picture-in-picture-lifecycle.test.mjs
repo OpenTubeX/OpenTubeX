@@ -318,6 +318,18 @@ async function assertRecordedEntry(remote, scale, trigger) {
   }
 }
 
+/**
+ * Tells whether the PiP window shows its menu. Android 17 draws the menu
+ * without a window of its own, but on every version it dims the video.
+ * @param {number[]} bounds the PiP window's screen bounds
+ */
+function pictureInPictureMenuShown([left, top, right, bottom]) {
+  if (/PipMenuView/.test(adb('shell', 'dumpsys', 'window', 'visible'))) return true
+  const { pixels, width, height } = decodeScreenshot(screencap())
+  const fixture = locateFixture(pixels, width, height)
+  return !fixture || fixture.count < (right - left) * (bottom - top) / 2
+}
+
 /** Double-taps the enlarged PiP window back to its default size. */
 async function restorePictureInPictureSize() {
   await togglePictureInPictureSize('a second double tap restores the PiP window size')
@@ -494,7 +506,7 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
         const y = String(Math.round((top + bottom) / 2))
         await expect(async () => {
           adb('shell', 'input', 'tap', x, y)
-          await baseExpect.poll(() => /PipMenuView/.test(adb('shell', 'dumpsys', 'window', 'visible')), { timeout: 5000 }).toBe(true)
+          await baseExpect.poll(() => pictureInPictureMenuShown([left, top, right, bottom]), { timeout: 5000 }).toBe(true)
           adb('shell', 'input', 'tap', x, y)
           await baseExpect(page.locator('body')).not.toHaveClass(/androidPictureInPicture(?:\s|$)/, { timeout: 5000 })
         }).toPass({ timeout: 60000 })
