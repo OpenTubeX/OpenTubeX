@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
-import { decryptSyncDocument, encryptSyncDocument, readSyncCollection } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, readSyncCollection, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { createWatchStatsHelpers } from '../helpers/sync-watch-stats.mjs'
 import { areJsonValuesEqual } from '../../src/renderer/helpers/jsonValues.js'
 import { readScopedSnapshot, scopedSyncCollection, syncScopeKey, writeScopedSnapshot } from '../../src/renderer/helpers/sync-data-scope.js'
@@ -53,7 +53,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
   class Client {
     async getEncryptedSyncCollection(collection) {
       assert.equal(collection, 'watchStats')
-      return { revision, payload: await encryptSyncDocument(remote, key, salt) }
+      return { revision, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext(collection)) }
     }
 
     async putEncryptedSyncCollection(collection, expectedRevision, payload) {
@@ -66,7 +66,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
         revision++
         throw Object.assign(new Error('Conflict'), { status: 409 })
       }
-      remote = await decryptSyncDocument(payload, key)
+      remote = await decryptSyncDocument(payload, key, syncCollectionContext(collection))
       return { revision: ++revision }
     }
   }
@@ -77,6 +77,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
     decryptSyncDocument,
     encryptSyncDocument,
     readSyncCollection,
+    syncCollectionContext,
     i18n: { global: { t: key => key } },
     ENCRYPTED_SYNC_RETRIES: 3,
     activityAccountKey: value => JSON.stringify([value.syncServerUrl, value.syncServerUsername, value.syncServerDeviceId]),

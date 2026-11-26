@@ -9,6 +9,9 @@ import { getTabAvatarPath } from '../../tabAvatarRoute.js'
 export const tabIdKey = Symbol('logical-tab-id')
 export const tabPresentedKey = Symbol('logical-tab-presented')
 export const tabLifecycleKey = Symbol('logical-tab-lifecycle')
+// Whether the browsing page is kept hidden behind Watch. The window scrolls
+// with Watch there, so the page's lists hold their cards until it shows.
+export const browsingSuspendedKey = Symbol('browsing-suspended')
 export const watchNavigationKey = Symbol('watch-navigation')
 // Starts a video in the tab's mini player without leaving the browsing page.
 export const playInBackgroundKey = Symbol('play-in-background')

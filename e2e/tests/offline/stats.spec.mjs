@@ -1,5 +1,5 @@
 import { defaultThemeClass, test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
-import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 /**
  * @param {Date} date
@@ -123,6 +123,7 @@ test.describe('historical watch time migration', () => {
 test.describe('synced watch stats', () => {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
+  const watchStatsContext = syncCollectionContext('watchStats')
   const laptop = Buffer.alloc(16, 3).toString('base64url')
   const phone = Buffer.alloc(16, 4).toString('base64url')
 
@@ -330,7 +331,7 @@ test.describe('synced watch stats', () => {
     let releaseUpload
     let revision = 1
     let devices = [{ deviceId: phone, deviceName: 'Pixel (old)', platform: 'android', days: { [today]: 1800, [yesterday]: 1800 } }]
-    let payload = await encryptSyncDocument(devices, key, salt)
+    let payload = await encryptSyncDocument(devices, key, salt, watchStatsContext)
     await page.route('https://sync.example/**', async route => {
       const { pathname } = new URL(route.request().url())
       if (pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, watch_stats: 1 } } })
@@ -347,7 +348,7 @@ test.describe('synced watch stats', () => {
           const request = route.request().postDataJSON()
           expect(request.revision).toBe(revision)
           payload = request.payload
-          devices = await decryptSyncDocument(payload, key)
+          devices = await decryptSyncDocument(payload, key, watchStatsContext)
           revision++
         }
         return route.fulfill({ json: { revision, payload } })
@@ -458,7 +459,7 @@ test.describe('synced watch stats', () => {
     const remote = [{ deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } }]
     let revision = 1
     let watchStatsSupported = true
-    let payload = await encryptSyncDocument(remote, key, salt)
+    let payload = await encryptSyncDocument(remote, key, salt, watchStatsContext)
     await page.route('https://sync.example/**', async route => {
       const { pathname } = new URL(route.request().url())
       if (pathname === '/health') {
@@ -592,7 +593,7 @@ test.describe('synced watch stats', () => {
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
     const syncAfterReset = await goToSettingsSection(page, 'sync')
     await syncAfterReset.getByRole('button', { name: 'Sync now', exact: true }).click()
-    await expect.poll(async () => decryptSyncDocument(payload, key)).toEqual([
+    await expect.poll(async () => decryptSyncDocument(payload, key, watchStatsContext)).toEqual([
       { deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } },
       { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {}, reset: { id: expect.any(String), at: expect.any(Number), epochs: { [laptop]: null }, generation: 1, origin: laptop, baselines: { [laptop]: {} } } },
     ])

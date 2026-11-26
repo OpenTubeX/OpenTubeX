@@ -266,9 +266,11 @@ async function toggleSync() {
   cursor: default;
 }
 
-/* Dim only the glyph so the state layer keeps its full strength. */
-.syncDisabled {
-  color: color-mix(in srgb, currentcolor 55%, transparent);
+/* Dim only the glyph so the state layer keeps its full strength. Opacity
+   instead of mixing the inherited currentcolor, which Android WebView 124
+   can keep stale when the theme changes. */
+.syncDisabled > * {
+  opacity: 0.55;
 }
 
 .indicatorDisabled {

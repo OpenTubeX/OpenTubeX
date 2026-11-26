@@ -3,9 +3,10 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { DBActions } from '../../src/constants.js'
-import { migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
+import { HISTORY_DESCRIPTION_MAX_LENGTH, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { createIdQuery } from '../../src/datastores/idQuery.js'
+import { DATASTORE_OPTIONS } from '../../src/datastores/datastoreOptions.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createDesktopDatastore, createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
@@ -39,6 +40,50 @@ test('serialized reads find nothing after the datastore was dropped', async t =>
 test('serialized reads refuse datastores that keep members in separate rows', async t => {
   const store = memory(t, { childField: 'videos' })
   await assert.rejects(store.findSerializedAsync(), /separate rows/)
+})
+
+test('history keeps the start of long descriptions, and shortens ones saved before the limit once, the same way', async t => {
+  // More code points than the limit, and more UTF-16 units than code points
+  const long = 'é😀'.repeat(HISTORY_DESCRIPTION_MAX_LENGTH) + 'end'
+  const capped = migrateLegacyHistoryRecord({ videoId: 'long', isWatched: true, description: long }).description
+  assert.equal([...capped].length, HISTORY_DESCRIPTION_MAX_LENGTH)
+  assert.ok(long.startsWith(capped) && capped.endsWith('😀'))
+  // Exactly the limit in code points, but longer in UTF-16 units
+  const fitting = { videoId: 'fitting', isWatched: true, description: 'é😀'.repeat(HISTORY_DESCRIPTION_MAX_LENGTH / 2) }
+  assert.equal(migrateLegacyHistoryRecord(fitting), fitting)
+
+  // A history saved before the limit
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  const saved = { _id: 'long', videoId: 'long', title: 'Ünïcode "quoted"\n', description: long, timeWatched: 7, watchProgress: 1, published: new Date(5) }
+  await new SqliteDatastore({ driver }).insertAsync([
+    saved,
+    { _id: 'fitting', ...fitting },
+    { _id: 'number', videoId: 'number', description: 12345 },
+    { _id: 'none', videoId: 'none', title: 'x'.repeat(HISTORY_DESCRIPTION_MAX_LENGTH * 2) },
+  ])
+  const stored = async () => new Map((await driver.execute([['SELECT id, data FROM docs']]))[0])
+  const before = await stored()
+
+  // Opening it shortens them before the first read, and keeps the other fields and dates
+  const history = new SqliteDatastore({ driver, ...DATASTORE_OPTIONS.history })
+  assert.deepEqual(await history.findAsync({ videoId: 'long' }), [{ ...saved, description: capped }])
+  const after = await stored()
+  for (const id of ['fitting', 'number', 'none']) assert.equal(after.get(id), before.get(id))
+  const [[[ran]]] = await driver.execute([['SELECT value FROM meta WHERE key = ?', [`update:historyDescriptions${HISTORY_DESCRIPTION_MAX_LENGTH}`]]])
+  assert.ok(ran > 0)
+  // Running it again changes nothing
+  await driver.execute([[DATASTORE_OPTIONS.history.updates[0].sql]])
+  assert.deepEqual(await stored(), after)
+
+  // It runs once: a long description saved afterwards stays until its record is next written
+  await new SqliteDatastore({ driver }).updateAsync({ _id: 'long' }, saved)
+  const reopened = new SqliteDatastore({ driver, ...DATASTORE_OPTIONS.history })
+  assert.equal((await reopened.findOneAsync({ _id: 'long' })).description, long)
+
+  // Importing a legacy history shortens them too
+  const imported = memory(t, { ...DATASTORE_OPTIONS.history, legacy: { read: async () => ({ data: [saved], indexes: [] }) } })
+  assert.deepEqual(await imported.findOneAsync({ _id: 'long' }), { ...saved, description: capped })
 })
 
 test('history loads newest first and keeps the newest record of each video', () => {

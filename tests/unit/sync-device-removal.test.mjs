@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 
-import { decryptSyncDocument, encryptSyncDocument, readSyncCollection } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, readSyncCollection, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDeviceSessions, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
 const component = await readFile(new URL('../../src/renderer/components/Settings/Sync/SyncAccountManagement.vue', import.meta.url), 'utf8')
@@ -62,10 +62,10 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
         return accountSessions()
       }
 
-      async getEncryptedSyncCollection() {
+      async getEncryptedSyncCollection(collection) {
         if (current && revoked) throw Object.assign(new Error('Session expired'), { status: 401 })
         if (otherLoginDuringCleanup) addLogin()
-        return { revision: puts, payload: await encryptSyncDocument(remote, key, salt) }
+        return { revision: puts, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext(collection)) }
       }
 
       async putEncryptedSyncCollection(collection, revision, payload) {
@@ -76,7 +76,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
           remote.devices['old-phone'].sessions.push(tabSet('concurrent-tabs'))
           throw Object.assign(new Error('Conflict'), { status: 409 })
         }
-        remote = await decryptSyncDocument(payload, key)
+        remote = await decryptSyncDocument(payload, key, syncCollectionContext(collection))
       }
     },
     trackSyncClient: client => client,
@@ -87,6 +87,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     decryptSyncDocument,
     encryptSyncDocument,
     readSyncCollection,
+    syncCollectionContext,
     removeSyncDeviceSessions,
     removeSyncSession,
     normalizeSyncSessionsDocument,

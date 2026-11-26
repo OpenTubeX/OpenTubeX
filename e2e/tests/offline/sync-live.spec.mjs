@@ -1,6 +1,6 @@
 import { rm } from 'node:fs/promises'
 import { test, expect, createUserDataDir, launchApp, abortUnmockedRequest, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, waitForAppReady, readDatastore } from '../../helpers/app.mjs'
-import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { encryptSyncDocument, decryptSyncDocument, SYNC_EVENT_CONTEXT, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { encryptSyncServerDeviceInfo } from '../../../src/renderer/helpers/sync-server-sessions.js'
 
 const key = Buffer.alloc(32, 1).toString('base64')
@@ -137,11 +137,11 @@ test.describe('automatic sync efficiency', () => {
       // A peer edits the server after our upload committed but before its
       // response arrives. Coalescing must still compare the newest revisions.
       const saved = collections.get('settings')
-      const remote = await decryptSyncDocument(saved.payload, key)
+      const remote = await decryptSyncDocument(saved.payload, key, syncCollectionContext('settings'))
       const autoplay = remote.find(entry => entry.key === 'autoplayVideos')
       autoplay.value = false
       autoplay.updatedAt = Date.now() + 10000
-      collections.set('settings', { revision: saved.revision + 1, payload: await encryptSyncDocument(remote, key, salt) })
+      collections.set('settings', { revision: saved.revision + 1, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext('settings')) })
       wake()
       releaseUpload()
       await syncing
@@ -209,7 +209,7 @@ test.describe('live sync', () => {
     let eventRequests = 0
     const payload = await encryptSyncDocument({
       version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }],
-    }, key, salt)
+    }, key, salt, SYNC_EVENT_CONTEXT)
     await page.route('https://sync.example/**', async route => {
       const request = route.request()
       const pathname = new URL(request.url()).pathname
@@ -335,17 +335,17 @@ test.describe('live sync', () => {
     await expect(auto).toBeChecked()
     await expect.poll(() => waiting.size).toBeGreaterThan(0)
     const baselineDownloads = downloads.length
-    const remote = await decryptSyncDocument(collections.get('settings').payload, key)
+    const remote = await decryptSyncDocument(collections.get('settings').payload, key, syncCollectionContext('settings'))
     const theme = remote.find(entry => entry.key === 'baseTheme')
     theme.value = 'light'
     theme.updatedAt = Date.now() + 10000
-    collections.set('settings', { revision: collections.get('settings').revision + 1, payload: await encryptSyncDocument(remote, key, salt) })
+    collections.set('settings', { revision: collections.get('settings').revision + 1, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext('settings')) })
     events.push({
       id: 'remote-activity',
       recipient: '',
       created_at: Date.now(),
       expires_at: Date.now() + 86400000,
-      payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }, { key: 'subscriptionChannelSettings', value: null }] }, key, salt)
+      payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }, { key: 'subscriptionChannelSettings', value: null }] }, key, salt, SYNC_EVENT_CONTEXT)
     })
     wake()
     await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).baseTheme).toBe('light')
@@ -388,7 +388,7 @@ test.describe('live sync', () => {
     await menu.getByRole('menuitem', { name: 'Phone', exact: true }).click()
     await expect.poll(() => sent.length).toBe(1)
     expect(sent[0].recipient).toBe(phone)
-    expect((await decryptSyncDocument(sent[0].payload, key)).videoId).toBe(videoId)
+    expect((await decryptSyncDocument(sent[0].payload, key, SYNC_EVENT_CONTEXT)).videoId).toBe(videoId)
     const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
     const otherSync = await goToSettingsSection(otherWindow, 'sync')
@@ -405,7 +405,7 @@ test.describe('live sync', () => {
       recipient: device,
       created_at: Date.now(),
       expires_at: Date.now() + 86400000,
-      payload: await encryptSyncDocument({ version: 1, type: 'openVideo', recipient: device, videoId, title: 'Remote video', position: 12, expiresAt: Date.now() + 86000000 }, key, salt)
+      payload: await encryptSyncDocument({ version: 1, type: 'openVideo', recipient: device, videoId, title: 'Remote video', position: 12, expiresAt: Date.now() + 86000000 }, key, salt, SYNC_EVENT_CONTEXT)
     })
     wake()
     await expect.poll(() => events.some(event => event.id === 'received-video')).toBe(false)

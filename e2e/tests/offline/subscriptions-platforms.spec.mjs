@@ -6,7 +6,7 @@ import { choosePickerPaths, expect, goTo, sel, test } from '../../helpers/app.mj
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
-import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { encryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { externalHistoryEntry } from '../../helpers/external-media-history.mjs'
 import { DBActions } from '../../../src/constants.js'
 
@@ -403,8 +403,8 @@ test.describe('Channels on other platforms', () => {
       const watchedAt = (await externalHistoryEntry(page, 'https://www.twitch.tv/videos/10012')).timeWatched
 
       await mockSyncServer(page, {
-        history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
-        seenRssItems: await encryptSyncDocument([{ key: `twitch:${CHANNEL.id}\n10012`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT)
+        history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT, syncCollectionContext('history')),
+        seenRssItems: await encryptSyncDocument([{ key: `twitch:${CHANNEL.id}\n10012`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT, syncCollectionContext('seenRssItems'))
       })
       expect(await syncWithSyncServer(page)).toEqual(['success', ''])
 

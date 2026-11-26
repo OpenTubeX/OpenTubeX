@@ -84,6 +84,18 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    public void onPause() {
+        // Automatic entry pauses the activity in Picture-in-Picture mode before
+        // Android's entry animation starts. onUserLeaveHint comes earlier but
+        // cannot tell whether entry starts, and onPictureInPictureUiStateChanged
+        // comes too late.
+        if (isInPictureInPictureMode()) {
+            ((AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance()).showPictureInPictureVideoOnly();
+        }
+        super.onPause();
+    }
+
+    @Override
     public void onStop() {
         hiddenAt = AndroidProxyRelay.clock.getAsLong();
         appLock.onStop();
@@ -225,6 +237,7 @@ public class MainActivity extends BridgeActivity {
             AndroidUiPlugin plugin = (AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance();
             plugin.notifyPictureInPictureEntering();
             plugin.preparePictureInPictureSurface();
+            plugin.showPictureInPictureVideoOnly();
         }
     }
 

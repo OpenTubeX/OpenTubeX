@@ -6,7 +6,7 @@ import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { createApp } from 'vue'
 import { installNetworkFetch } from './helpers/networkRecovery'
 import i18n from './i18n/index'
-import router from './router/index'
+import router, { preloadResolvedRoute } from './router/index'
 import store from './store/index'
 import { settingWritesSettled } from './store/modules/settings'
 import App from './App.vue'
@@ -54,10 +54,10 @@ app
   .use(store)
   .use(i18n)
 
-installViewTransitions(router)
+installViewTransitions(router, { preloadRoute: preloadResolvedRoute })
 installTitleTooltips()
 
-const tabNavigation = initializeTabNavigationService(router, store)
+const tabNavigation = initializeTabNavigationService(router, store, { preloadRoute: preloadResolvedRoute })
 
 if (isAndroidBackgroundRenderer) {
   // Loaded only here, as its datastore import would load NeDB at startup,

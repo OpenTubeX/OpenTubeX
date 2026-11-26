@@ -74,7 +74,7 @@ import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedP
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoDescriptionSections } from '../../helpers/video-description-sections'
 import { escapeHTML } from '../../helpers/feed-metadata'
-import { isAppHidden } from '../../helpers/appVisibility.js'
+import { isAppInBackground } from '../../helpers/appVisibility.js'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
@@ -1842,6 +1842,11 @@ export default defineComponent({
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     document.addEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
+    if (process.env.IS_IOS) {
+      // The native scene events can arrive after WebKit's visibilitychange.
+      window.addEventListener('opentubex:enter-background', this.handleBackgroundAudioVisibility)
+      window.addEventListener('opentubex:enter-foreground', this.handleBackgroundAudioVisibility)
+    }
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -1886,6 +1891,8 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     document.removeEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
+    window.removeEventListener('opentubex:enter-background', this.handleBackgroundAudioVisibility)
+    window.removeEventListener('opentubex:enter-foreground', this.handleBackgroundAudioVisibility)
     this.layoutAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
@@ -2667,7 +2674,7 @@ export default defineComponent({
         ? 'audio'
         : this.defaultVideoFormat
       // A video that starts in the background also plays audio until the app is visible.
-      this.formatBeforeBackground = this.formatBeforeBackground !== null && format !== 'audio' && isAppHidden() ? format : null
+      this.formatBeforeBackground = this.formatBeforeBackground !== null && format !== 'audio' && isAppInBackground() ? format : null
       this.activeFormat = this.formatBeforeBackground === null ? format : 'audio'
       if (backgroundStart) {
         this.queuedPlaybackVideoId = this.tabRoute.params.id
@@ -2680,21 +2687,24 @@ export default defineComponent({
     /**
      * Plays audio formats while the app is in the background or the screen
      * is off, where nobody can see the video, if the user enabled it.
-     * Android Picture-in-Picture keeps the app visible, so it keeps the video.
+     * Picture-in-Picture keeps the video: Android keeps the app visible, and
+     * iOS shows it while the app is hidden. iOS switches when the native scene
+     * enters the background, before WebKit pauses video there, and not for
+     * overlays such as Control Center that only make the app inactive.
      */
     switchToAudioInBackground() {
-      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !isAppHidden() || this.formatBeforeBackground !== null ||
+      if (!process.env.IS_CAPACITOR || !isAppInBackground() || this.formatBeforeBackground !== null ||
         !this.$store.getters.getSwitchToAudioInBackground ||
         // Playback pauses in the background without it.
         !this.$store.getters.getContinuePlaybackWhenScreenIsLocked ||
         this.activeFormat === 'audio' || !this.audioFormatAvailable || this.castingActive ||
-        !this.videoPlaying || !this.isPlaybackPresented()) return
+        !this.videoPlaying || !this.isPlaybackPresented() || this.$refs.player?.isInPictureInPicture()) return
       this.formatBeforeBackground = this.activeFormat
       this.activeFormat = 'audio'
     },
 
     handleBackgroundAudioVisibility() {
-      if (isAppHidden()) {
+      if (isAppInBackground()) {
         this.switchToAudioInBackground()
         return
       }

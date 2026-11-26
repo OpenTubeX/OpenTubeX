@@ -2200,6 +2200,7 @@ import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { mirrorControlStates } from '../../helpers/player/controlStateAttributes'
+import { isEnteringIosPictureInPicture } from '../../helpers/player/iosAutoPictureInPicture'
 import { keepControlsShown } from '../../helpers/player/keepControlsShown'
 import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
@@ -13876,6 +13877,12 @@ function isPaused() {
   return video.value.paused
 }
 
+/** Includes iOS Picture-in-Picture, which also counts while WebKit is starting it. */
+function isInPictureInPicture() {
+  return pictureInPictureActive.value || video.value?.webkitPresentationMode === 'picture-in-picture' ||
+    isEnteringIosPictureInPicture(video.value)
+}
+
 function pause() {
   initialAutoplayCanceled = true
   setFormatSwitchPaused(true)
@@ -14120,6 +14127,7 @@ defineExpose({
   exitPresentationModes,
 
   isPaused,
+  isInPictureInPicture,
   play,
   pause,
   suspendForShortsNavigation,

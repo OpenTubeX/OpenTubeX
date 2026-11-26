@@ -5,10 +5,42 @@ import AppShortcutsPlugin
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    private var bridge: CAPBridgeProtocol? { (window?.rootViewController as? OpenTubeXViewController)?.bridge }
+
     func sceneWillResignActive(_ scene: UIScene) {
         // Visibility events arrive after WebKit may have suspended inline video.
-        (window?.rootViewController as? OpenTubeXViewController)?.bridge?.triggerJSEvent(
-            eventName: "opentubex:prepare-background", target: "window")
+        bridge?.triggerJSEvent(eventName: "opentubex:prepare-background", target: "window")
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        // Control Center, alerts and the app switcher only resign activity. UIKit
+        // calls this before WebKit learns about the background, and WebKit runs
+        // this script before it suspends inline video, unlike the bridge's
+        // deferred events.
+        bridge?.webView?.evaluateJavaScript("window.dispatchEvent(new Event('opentubex:enter-background'))")
+        // Switching to audio reloads the stream, which plays nothing for a moment.
+        // iOS must not suspend the app before the audio starts.
+        endAudioSwitchTask()
+        let task = UIApplication.shared.beginBackgroundTask(withName: "Switch to audio") { [weak self] in
+            self?.endAudioSwitchTask()
+        }
+        audioSwitchTask = task
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+            if self?.audioSwitchTask == task { self?.endAudioSwitchTask() }
+        }
+    }
+
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        endAudioSwitchTask()
+        bridge?.webView?.evaluateJavaScript("window.dispatchEvent(new Event('opentubex:enter-foreground'))")
+    }
+
+    private var audioSwitchTask = UIBackgroundTaskIdentifier.invalid
+
+    private func endAudioSwitchTask() {
+        guard audioSwitchTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(audioSwitchTask)
+        audioSwitchTask = .invalid
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {

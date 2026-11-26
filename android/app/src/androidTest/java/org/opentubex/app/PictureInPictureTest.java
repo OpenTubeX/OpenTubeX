@@ -95,12 +95,16 @@ public class PictureInPictureTest {
                 int layoutWidth = view.getLayoutParams().width;
                 int layoutHeight = view.getLayoutParams().height;
                 boolean clips = parent.getClipChildren();
+                android.graphics.drawable.Drawable background = parent.getBackground();
                 int[] location = new int[2];
                 view.getLocationInWindow(location);
                 Rect source = new Rect(location[0], location[1] + 120, location[0] + 640, location[1] + 480);
                 PictureInPictureSurface surface = new PictureInPictureSurface(activity, view);
                 surface.prepare(source);
                 try {
+                    // Android's entry animation crops the window's current frame.
+                    surface.showVideoOnly();
+                    assertEquals("Only the video is drawn once entry is confirmed", new Rect(0, 120, 640, 480), view.getClipBounds());
                     View root = activity.getWindow().getDecorView();
                     root.measure(View.MeasureSpec.makeMeasureSpec(320, View.MeasureSpec.EXACTLY),
                         View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY));
@@ -124,16 +128,19 @@ public class PictureInPictureTest {
                     root.layout(0, 0, rootWidth, rootHeight);
                     surface.onModeChanged(false, () -> returned[0] = true);
                     assertTrue("Restore the page once its full native window is laid out", returned[0]);
+                    // The surface restores itself on return, before this cleanup.
+                    assertEquals(layoutWidth, view.getLayoutParams().width);
+                    assertEquals(layoutHeight, view.getLayoutParams().height);
+                    assertEquals(clips, parent.getClipChildren());
+                    assertNull("The page is drawn again after PiP", view.getClipBounds());
+                    assertTrue("The viewport gets its background back", background == parent.getBackground());
+                    assertEquals(1f, view.getScaleX(), 0f);
+                    assertEquals(1f, view.getScaleY(), 0f);
+                    assertEquals(0f, view.getTranslationX(), 0f);
+                    assertEquals(0f, view.getTranslationY(), 0f);
                 } finally {
                     surface.clear();
                 }
-                assertEquals(layoutWidth, view.getLayoutParams().width);
-                assertEquals(layoutHeight, view.getLayoutParams().height);
-                assertEquals(clips, parent.getClipChildren());
-                assertEquals(1f, view.getScaleX(), 0f);
-                assertEquals(1f, view.getScaleY(), 0f);
-                assertEquals(0f, view.getTranslationX(), 0f);
-                assertEquals(0f, view.getTranslationY(), 0f);
             });
         }
     }

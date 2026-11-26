@@ -1,5 +1,6 @@
 import { runCooperatively, runSynchronously } from './cooperativeTask.js'
 import { isExternalMediaHistoryId } from './externalMediaHistory.js'
+import { HISTORY_DESCRIPTION_MAX_LENGTH } from '../../history.js'
 
 const DAY = 24 * 60 * 60 * 1000
 const STOPWORDS = new Set(`
@@ -50,6 +51,21 @@ export function recommendationTokens(text) {
       (word.length >= 3 || /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(word)) && !STOPWORDS.has(word))
 }
 
+// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics
+function descriptionText(text) {
+  if (typeof text !== 'string') return text
+  // History keeps the first 500 code points of a description, which can end
+  // inside one of the tags that local API descriptions use
+  if (text.length >= HISTORY_DESCRIPTION_MAX_LENGTH && [...text].length >= HISTORY_DESCRIPTION_MAX_LENGTH) {
+    text = text.replace(/<\/?(?:a|b|i|img|s)(?:\s[^>]*)?$/u, ' ')
+  }
+  // URLs go before entities, which can join their query parameters
+  return text.replaceAll(/<\/?[a-z](?:[^>"']|"[^"]*"|'[^']*')*>/giu, ' ')
+    .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
+    .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
+    .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
+}
+
 export function recommendationFeatures(video) {
   const features = new Map()
   function add(text, weight, phrases = false) {
@@ -63,7 +79,7 @@ export function recommendationFeatures(video) {
     }
   }
   add(video?.title, 1, true)
-  add(video?.description, 0.18)
+  add(descriptionText(video?.description), 0.18)
   if (Array.isArray(video?.keywords)) add(video.keywords.join(' '), 1.4)
   return features
 }

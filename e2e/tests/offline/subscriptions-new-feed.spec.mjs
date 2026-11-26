@@ -1,7 +1,7 @@
 import { defaultThemeClass, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
-import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { encryptSyncDocument, decryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const now = Date.now()
 const HOUR = 3600000
@@ -882,15 +882,15 @@ test.describe('new subscriptions feed', () => {
     }))
     const retainedMarks = [...olderMarks.slice(marks.length), ...marks]
     const remote = {
-      history: await encryptSyncDocument([], key, salt),
+      history: await encryptSyncDocument([], key, salt, syncCollectionContext('history')),
       seenVideos: await encryptSyncDocument([
         ...olderMarks, ...marks,
         { videoId: watchedVideo.videoId, seenAt: now + 1, isMembersOnly: false },
-      ], key, salt),
+      ], key, salt, syncCollectionContext('seenVideos')),
       seenPosts: await encryptSyncDocument([
         { postId: 'new-post-1', seenAt: now },
         { postId: 'post-fetched-later', seenAt: now },
-      ], key, salt),
+      ], key, salt, syncCollectionContext('seenPosts')),
     }
     const uploads = []
     await page.route('https://seen-sync.example/**', async route => {
@@ -975,7 +975,7 @@ test.describe('new subscriptions feed', () => {
       const store = window.$store
       await store.dispatch('syncWithSyncServer')
     })
-    expect((await decryptSyncDocument(remote.seenPosts, key)).map(entry => entry.postId).sort())
+    expect((await decryptSyncDocument(remote.seenPosts, key, syncCollectionContext('seenPosts'))).map(entry => entry.postId).sort())
       .toEqual(['local-post', 'new-post-1', 'post-fetched-later'])
 
     await page.evaluate(async ({ channelId, videos }) => {
@@ -992,7 +992,7 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('Fetched after sync', { exact: true })).toHaveCount(0)
     expect(uploads).toContain('history')
     expect(uploads).toContain('seenVideos')
-    expect((await decryptSyncDocument(remote.seenVideos, key)).map(entry => entry.videoId).sort())
+    expect((await decryptSyncDocument(remote.seenVideos, key, syncCollectionContext('seenVideos'))).map(entry => entry.videoId).sort())
       .toEqual(retainedMarks.map(entry => entry.videoId).sort())
 
     const relaunched = await app.relaunch()

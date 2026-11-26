@@ -124,10 +124,50 @@ function isLegacyLibreTubeRecord(record) {
 }
 
 /**
+ * The most characters of a video's description that history keeps. Every
+ * window loads the whole history at startup, and only the list layout's
+ * two-line snippet and recommendations read the description.
+ */
+export const HISTORY_DESCRIPTION_MAX_LENGTH = 500
+
+/**
+ * The start of a description that history keeps. Like SQLite's `substr`,
+ * which shortens descriptions saved before the limit once (see
+ * `DATASTORE_OPTIONS`), this counts code points, so both keep the same text
+ * and no emoji gets split.
+ * @param {unknown} description
+ * @returns {unknown}
+ */
+export function capHistoryDescription(description) {
+  if (typeof description !== 'string' || description.length <= HISTORY_DESCRIPTION_MAX_LENGTH) return description
+  const start = description.slice(0, HISTORY_DESCRIPTION_MAX_LENGTH)
+  // Without surrogates, each code unit is a code point
+  if (!/[\uD800-\uDFFF]/.test(start)) return start
+  let end = 0
+  for (let count = 0; count < HISTORY_DESCRIPTION_MAX_LENGTH && end < description.length; count++) {
+    end += description.codePointAt(end) > 0xFFFF ? 2 : 1
+  }
+  return description.slice(0, end)
+}
+
+/**
+ * The record as history saves it, with the watched status older versions did
+ * not save and the description shortened.
  * @param {object} record
  * @returns {object}
  */
 export function migrateLegacyHistoryRecord(record) {
+  const migrated = migrateWatchedStatus(record)
+  const description = capHistoryDescription(migrated.description)
+  if (description === migrated.description) return migrated
+  return { ...migrated, description }
+}
+
+/**
+ * @param {object} record
+ * @returns {object}
+ */
+function migrateWatchedStatus(record) {
   if (typeof record.isWatched === 'boolean') {
     return record
   }

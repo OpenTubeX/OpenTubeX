@@ -1,16 +1,9 @@
 // @ts-check
 import Datastore from '@seald-io/nedb'
 import { PROFILE_DATASTORES, profileDatastorePrefix } from './profileDatastoreNames.js'
+import { DATASTORE_OPTIONS } from './datastoreOptions.js'
 
 export { profileDatastorePrefix }
-
-const options = {
-  // lastViewedPlaylistId keeps deleting a playlist from parsing the whole history
-  history: { indexes: ['videoId', 'lastViewedPlaylistId'] },
-  playlists: { childField: 'videos' },
-  'watch-stats': { indexes: ['date'] },
-  'video-metadata-cache': { indexes: ['videoId'] },
-}
 
 const legacyChangeListeners = new Set()
 
@@ -54,7 +47,7 @@ if (process.env.IS_ELECTRON_MAIN) {
   createDatastore = (name) => {
     const { filename, legacy } = desktopDatastorePaths(userDataPath, name)
     return createDesktopDatastore(filename, legacy, {
-      ...options[name],
+      ...DATASTORE_OPTIONS[name],
       // The notice about older versions' changes points to the profile folder.
       backupDirectory: userDataPath,
       createDriver,
@@ -63,14 +56,14 @@ if (process.env.IS_ELECTRON_MAIN) {
     })
   }
   createNewDatastore = (name, kind) => createDesktopDatastore(join(userDataPath, `${name}.sqlite`), null, {
-    ...options[kind],
+    ...DATASTORE_OPTIONS[kind],
     createDriver,
   })
 } else {
   const { createBrowserDatastore } = require('./sqliteBrowser.js')
   dbPath = (dbName) => `${dbName}.db`
-  createDatastore = (name) => createBrowserDatastore(name, options[name])
-  createNewDatastore = (name, kind) => createBrowserDatastore(name, { ...options[kind], legacy: false })
+  createDatastore = (name) => createBrowserDatastore(name, DATASTORE_OPTIONS[name])
+  createNewDatastore = (name, kind) => createBrowserDatastore(name, { ...DATASTORE_OPTIONS[kind], legacy: false })
 }
 
 export const settings = createDatastore('settings')

@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
-import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 
 export async function verifyCustomThemeSync(page, { phone = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
@@ -26,12 +26,12 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
     if (pathname === '/v1/encrypted_sync/settings') {
       if (method === 'PUT') {
         expect(body.revision).toBe(revision)
-        remote = await decryptSyncDocument(body.payload, key)
+        remote = await decryptSyncDocument(body.payload, key, syncCollectionContext('settings'))
         uploads.push(structuredClone(remote))
         revision++
         return { revision }
       }
-      return { revision, payload: await encryptSyncDocument(remote, key, salt) }
+      return { revision, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext('settings')) }
     }
     return []
   }

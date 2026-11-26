@@ -74,6 +74,8 @@ const toolbar = useTemplateRef('toolbar')
 const layout = ref('full')
 const overflowCount = ref(0)
 let layoutFrame = null
+// Whether a layout was skipped while Android's picture-in-picture hid the page
+let layoutPending = false
 // Moving the actions of a group to the More menu can remove the divider, so
 // the overflow keeps budgeting for it. Otherwise the freed space would bring
 // an action back, which brings the divider back too.
@@ -131,6 +133,13 @@ function getInlineMargins(style) {
  * within the same frame.
  */
 function updateLayout() {
+  // Native picture-in-picture shows only the video, and its layout changes
+  // resize the hidden page. Measuring forces a style recalculation of the
+  // whole document while the window enters picture-in-picture.
+  if (document.body.classList.contains('androidPictureInPicture')) {
+    layoutPending = true
+    return
+  }
   const element = toolbar.value
   const row = element?.parentElement
   if (!element || !row || row.clientWidth === 0) { return }
@@ -171,6 +180,12 @@ function scheduleLayout() {
   layoutFrame = requestAnimationFrame(updateLayout)
 }
 
+function layoutAfterPictureInPicture() {
+  if (!layoutPending) { return }
+  layoutPending = false
+  scheduleLayout()
+}
+
 const resizeObserver = new ResizeObserver(scheduleLayout)
 // Also catches actions that slotted components such as the cast button add
 const mutationObserver = new MutationObserver(scheduleLayout)
@@ -183,10 +198,12 @@ onMounted(() => {
   mutationObserver.observe(toolbar.value, { childList: true, subtree: true })
   // Hiding an action from the closed More menu changes no rendered toolbar rows
   watch(() => visibleOverflowOrder.value.join(), scheduleLayout)
+  window.addEventListener('opentubex:android-pip-restored', layoutAfterPictureInPicture)
   updateLayout()
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('opentubex:android-pip-restored', layoutAfterPictureInPicture)
   resizeObserver.disconnect()
   mutationObserver.disconnect()
   cancelAnimationFrame(layoutFrame)

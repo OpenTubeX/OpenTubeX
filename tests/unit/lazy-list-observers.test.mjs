@@ -105,6 +105,7 @@ test('Electron list cards wait for their first sighting on the shared observer',
     isOnAiSlopList: () => false,
     observeWindowedListItem: element => { windowed.push(element); return { dispose() {}, refresh() {} } },
     WINDOWED_LIST_OVERSCAN_PX: 0,
+    useBrowsingSuspension: () => () => false,
     usePlaylistDrag: () => ({
       dragVideo() {}, moveDraggedVideo() {}, afterDrag() {}, pointerDragging: Vue.ref(false), startPointerDrag() {}, moveWithKeyboard() {},
     }),

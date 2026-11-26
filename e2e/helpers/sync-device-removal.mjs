@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import * as releasedClient from '../../tests/helpers/released-sync-sessions.mjs'
-import { encryptSyncDocument, decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { encryptSyncDocument, decryptSyncDocument, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src/renderer/helpers/sync-sessions.js'
 import { goToSettingsSection } from './app.mjs'
@@ -128,11 +128,11 @@ export async function verifySyncDeviceRemoval(page, { phone = false, current = f
         }
         const body = request.postDataJSON()
         expect(body.revision).toBe(revision)
-        document = await decryptSyncDocument(body.payload, key)
+        document = await decryptSyncDocument(body.payload, key, syncCollectionContext('sessionsV2'))
         revision++
         return route.fulfill({ json: { revision } })
       }
-      return route.fulfill({ json: { revision, payload: await encryptSyncDocument(document, key, salt) } })
+      return route.fulfill({ json: { revision, payload: await encryptSyncDocument(document, key, salt, syncCollectionContext('sessionsV2')) } })
     }
     return route.fulfill({ status: 404, json: {} })
   }

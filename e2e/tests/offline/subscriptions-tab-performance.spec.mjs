@@ -126,3 +126,72 @@ test('opens background videos promptly from a large subscriptions feed', async (
   }
   await session.detach()
 })
+
+test('keeps the feed behind Watch as it was while a video opens and on Back', async ({ page }) => {
+  // Watch hides the open sidebar, which widened the feed kept behind it.
+  await page.evaluate(() => {
+    if (!window.$store.getters.getIsSideNavOpen) window.$store.commit('toggleSideNav')
+  })
+  await goTo(page, 'subscriptions')
+  await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
+  // Scroll like a reader, several screens down the feed.
+  await page.evaluate(async () => {
+    for (let top = 0; top <= 4000; top += 400) {
+      window.scrollTo(0, top)
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    }
+  })
+  await expect(page.locator('#subscriptionsPanel .feed-enter-active, #subscriptionsPanel .feed-enter-from')).toHaveCount(0)
+  await page.evaluate(() => {
+    const panel = document.querySelector('#subscriptionsPanel')
+    window.__behindWatchPanel = panel
+    const count = nodes => [...nodes].reduce((total, node) => total + (node instanceof Element
+      ? Number(node.matches('.ft-list-video')) + node.querySelectorAll('.ft-list-video').length
+      : 0), 0)
+    window.__behindWatchWork = { cardMounts: 0, cardUnmounts: 0, gridResizes: 0 }
+    window.__behindWatchObserver = new MutationObserver(records => {
+      for (const record of records) {
+        window.__behindWatchWork.cardMounts += count(record.addedNodes)
+        window.__behindWatchWork.cardUnmounts += count(record.removedNodes)
+      }
+    })
+    window.__behindWatchObserver.observe(panel, { childList: true, subtree: true })
+    const grid = panel.querySelector('.autoGrid')
+    const thumbnailSize = () => grid.style.getPropertyValue('--thumbnail-grid-size')
+    let size = thumbnailSize()
+    window.__behindWatchSizeObserver = new MutationObserver(() => {
+      if (thumbnailSize() !== size) window.__behindWatchWork.gridResizes++
+      size = thumbnailSize()
+    })
+    window.__behindWatchSizeObserver.observe(grid, { attributes: true, attributeFilter: ['style'] })
+  })
+  // Every distant card that would mount, leave or remeasure does so within
+  // a few frames of the layout change.
+  const settle = () => page.evaluate(async () => {
+    for (let frame = 0; frame < 30; frame++) await new Promise(resolve => requestAnimationFrame(resolve))
+  })
+  const takeWork = () => page.evaluate(() => {
+    // A replaced panel would hide its new cards from the observers.
+    const panel = window.__behindWatchPanel
+    const work = { ...window.__behindWatchWork, panelKept: panel.isConnected && panel === document.querySelector('#subscriptionsPanel') }
+    window.__behindWatchWork = { cardMounts: 0, cardUnmounts: 0, gridResizes: 0 }
+    return work
+  })
+  const visibleCard = await page.evaluate(() => [...document.querySelectorAll('#subscriptionsPanel .ft-list-video')]
+    .find(card => card.getBoundingClientRect().top > 200).querySelector('.title').getAttribute('href'))
+
+  await page.locator(`#subscriptionsPanel .ft-list-video .title[href="${visibleCard}"]`).click()
+  await expect(page).toHaveURL(/#\/watch\//)
+  await expect(page.locator('.tabContent[aria-hidden="false"] .browsingBehindWatch')).toHaveCount(1)
+  await settle()
+  expect(await takeWork(), 'opening a video must leave the hidden feed alone').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0, panelKept: true })
+
+  await page.locator(sel.backButton).click()
+  await expect(page).toHaveURL(/#\/subscriptions$/)
+  await settle()
+  expect(await takeWork(), 'Back must show the cards the feed kept').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0, panelKept: true })
+  await page.evaluate(() => {
+    window.__behindWatchObserver.disconnect()
+    window.__behindWatchSizeObserver.disconnect()
+  })
+})

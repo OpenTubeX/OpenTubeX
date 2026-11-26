@@ -20,22 +20,21 @@ import { forwardAndroidWebView } from '../tests/helpers/android-webview.mjs'
  * file starts with a restarted app, so that no page, stub or session state
  * of an earlier file leaks into it. Needs ffmpeg for the media fixtures.
  *
- * Usage: node _scripts/androidScriptTests.mjs [<test file>... | <shard> <shards>]
+ * Usage: node _scripts/androidScriptTests.mjs [<test file>... | <shard> <shards> | api37]
  */
 
 const METADATA = 'android/app/build/outputs/apk/debug/output-metadata.json'
+// rotation-fullscreen runs an instrumentation test from the androidTest APK.
+const TEST_METADATA = 'android/app/build/outputs/apk/androidTest/debug/output-metadata.json'
 const PERMISSIONS = ['android.permission.POST_NOTIFICATIONS']
 
 // The scripts to run, with their seconds on a local emulator, which balance
 // the shards. These scripts in tests/android stay out:
 // - chromecast-receiver needs a sender trusting a test CA, openchromecast and mpv.
-// - large-screen-fullscreen and local-network-permission need Android 17.
-// - mobile-performance runs in a desktop Chromium, not on the device.
-// - picture-in-picture-lifecycle looks for the colors and clock position of the
-//   demo video before its restyle, and reads the clock with tesseract.
-// - player-controls-rendering leaves a gap in the classic control bar on the
-//   emulator's WebView 124, but passes on current WebView and Chromium.
-// - rotation-fullscreen drives an instrumentation test, which needs the test APK.
+// - large-screen-fullscreen and local-network-permission need Android 17, so
+//   they run in their own list on an API 37 emulator.
+// - mobile-performance runs in a desktop Chromium, not on the device, and the
+//   E2E workflow runs it on every pull request.
 const SCRIPTS = [
   ['always-show-scrollbars', 9],
   ['audio-player-surfaces', 4],
@@ -65,8 +64,11 @@ const SCRIPTS = [
   ['offline-recommendations', 5],
   ['organizer-animation', 9],
   ['organizer-native-tap', 3],
+  ['picture-in-picture-lifecycle', 90],
   ['picture-in-picture-rendering', 8],
   ['playback-speed-hold', 29],
+  ['player-controls-rendering', 6],
+  ['rotation-fullscreen', 30],
   ['sabr-background-start', 214],
   ['sync-custom-themes', 3],
   ['sync-device-position', 19],
@@ -77,6 +79,15 @@ const SCRIPTS = [
   ['watch-scroll-range', 7],
 ]
 
+// Scripts that need Android 17. Pass `api37` to run them.
+const API_37_SCRIPTS = [
+  ['large-screen-fullscreen', 30],
+  ['local-network-permission', 15],
+]
+
+/** @param {[string, number]} script */
+const scriptFile = ([name]) => `tests/android/${name}.test.mjs`
+
 /**
  * Splits the scripts into shards of similar duration, longest first.
  * @param {number} shard
@@ -85,17 +96,21 @@ const SCRIPTS = [
 function shardScripts(shard, shards) {
   const totals = Array(shards).fill(0)
   const assigned = Array.from({ length: shards }, () => [])
-  for (const [name, seconds] of [...SCRIPTS].sort((a, b) => b[1] - a[1])) {
+  for (const script of [...SCRIPTS].sort((a, b) => b[1] - a[1])) {
     const index = totals.indexOf(Math.min(...totals))
-    totals[index] += seconds
-    assigned[index].push(`tests/android/${name}.test.mjs`)
+    totals[index] += script[1]
+    assigned[index].push(scriptFile(script))
   }
   return assigned[shard].sort()
 }
 
 const args = process.argv.slice(2)
 const shardArgs = args.length === 2 && args.every(arg => /^\d+$/.test(arg)) ? args.map(Number) : null
-const files = (shardArgs ? shardScripts(...shardArgs) : args.length > 0 ? args : SCRIPTS.map(([name]) => `tests/android/${name}.test.mjs`))
+const files = (shardArgs
+  ? shardScripts(...shardArgs)
+  : args.length === 1 && args[0] === 'api37'
+    ? API_37_SCRIPTS.map(scriptFile)
+    : args.length > 0 ? args : SCRIPTS.map(scriptFile))
   .map(file => resolve(file))
 if (shardArgs && files.length === 0) throw new Error(`Shard ${shardArgs[0]} of ${shardArgs[1]} has no scripts`)
 
@@ -122,8 +137,13 @@ async function waitFor(description, check, timeout = 120000) {
   }
 }
 
-const { applicationId, elements } = JSON.parse(readFileSync(METADATA, 'utf8'))
-const apk = resolve('android/app/build/outputs/apk/debug', elements[0].outputFile)
+/** @param {string} metadata */
+function apkPath(metadata) {
+  const { applicationId, elements } = JSON.parse(readFileSync(metadata, 'utf8'))
+  return { applicationId, apk: resolve(metadata, '..', elements[0].outputFile) }
+}
+
+const { applicationId, apk } = apkPath(METADATA)
 process.env.ANDROID_SERIAL = serial
 process.env.ANDROID_APP_ID = applicationId
 let forwardedPort = null
@@ -199,7 +219,7 @@ function prepareMedia() {
  * @param {string} file
  */
 function fileTimeout(file) {
-  const seconds = SCRIPTS.find(([name]) => file === resolve(`tests/android/${name}.test.mjs`))?.[1] ?? 60
+  const seconds = [...SCRIPTS, ...API_37_SCRIPTS].find(script => file === resolve(scriptFile(script)))?.[1] ?? 60
   return (120 + seconds * 6) * 1000
 }
 
@@ -234,6 +254,7 @@ const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 /** Runs the tests, retries failures once, and returns whether all passed. */
 async function main() {
   adb('install', '-r', apk)
+  if (existsSync(TEST_METADATA)) adb('install', '-r', '-t', apkPath(TEST_METADATA).apk)
   // Start from a fresh profile, like the CI emulator, which always shows the tutorial.
   adb('shell', 'pm', 'clear', applicationId)
   for (const permission of PERMISSIONS) adb('shell', 'pm', 'grant', applicationId, permission)

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRecommendationProfile, buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
+import { buildRecommendationProfile, buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationFeatures, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
 const DAY = 86400000
 const now = Date.UTC(2026, 8, 6)
 const watched = (videoId, extra = {}) => ({ videoId, title: 'Linux desktop customization', authorId: 'linux', author: 'Linux channel', lengthSeconds: 600, watchProgress: 500, timeWatched: now, type: 'video', ...extra })
@@ -86,6 +86,21 @@ test('handles a diverse thousand-video vocabulary without exceeding argument lim
   assert.ok(profile(history).interests.size > 100000)
 })
 
+test('description links and markup do not become topics', () => {
+  const description = 'Rust &amp; WebAssembly tutorial<br><a href="https://www.youtube.com/redirect?q=https%3A%2F%2Fexample.org">https://example.org/guide</a> see www.example.net'
+  assert.deepEqual([...recommendationFeatures({ description }).keys()].sort(), ['rust', 'see', 'tutorial', 'webassembly'])
+  // History keeps 500 characters of a description, which can end inside a tag
+  const cut = 'Rust tutorial ' + ' '.repeat(460) + '<a dir="auto" href="https://www.you'
+  assert.deepEqual([...recommendationFeatures({ description: cut }).keys()].sort(), ['rust', 'tutorial'])
+  // Plain-text descriptions can contain a lone angle bracket, also at the limit
+  const plain = 'Rust <3 WebAssembly, i<length tutorial'
+  assert.deepEqual([...recommendationFeatures({ description: plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
+  assert.deepEqual([...recommendationFeatures({ description: ' '.repeat(480) + plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
+  // A quoted `>` stays inside its tag
+  assert.deepEqual([...recommendationFeatures({ description: '<a title="2 > 1" href="https://example.com">Rust</a> tutorial' }).keys()].sort(), ['rust', 'tutorial'])
+  // Comparisons are not tags, and escaped query parameters stay part of their URL
+  assert.deepEqual([...recommendationFeatures({ description: 'Rust: when x < 10, compile WebAssembly; when x > 20, stop. https://example.org/?id=1&amp;campaign=sponsor' }).keys()].sort(), ['compile', 'rust', 'stop', 'webassembly'])
+})
 test('ignores malformed subscriptions while retaining channel strings and objects', () => {
   for (const subscriptions of [null, {}, 'channel']) {
     assert.deepEqual([...profile([], { subscriptions }).subscriptions], [])

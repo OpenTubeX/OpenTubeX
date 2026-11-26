@@ -208,6 +208,14 @@ export function useAdaptiveControlPanelLayout({
 
     controlPanelLayoutFrame = requestAnimationFrame(() => {
       controlPanelLayoutFrame = null
+      // Native picture-in-picture hides the controls. Measuring a copy of the
+      // hidden panel would only force style recalculations while the window
+      // enters picture-in-picture; showing the panel again resizes it, which
+      // measures then.
+      if (controlPanel.getClientRects().length === 0) {
+        controlPanelMeasurementPending = true
+        return
+      }
       if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
         const measure = controlPanelMeasurementPending
         controlPanelMeasurementPending = false

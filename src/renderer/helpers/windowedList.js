@@ -20,8 +20,9 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     let rowTop
     for (const item of widthRemeasures) {
       // A hidden row measures nothing and would keep its stale height, so it
-      // waits until the resize observer reports its box again.
-      if (item.hidden) continue
+      // waits until the resize observer reports its box again. A suspended
+      // row waits until its list resumes.
+      if (item.hidden || item.suspended) continue
       // A grid cell stretches to the stale shells beside it, so every cell of
       // a grid row is remounted in the same frame.
       const top = item.element.offsetTop
@@ -85,14 +86,22 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       const item = items.get(entry.target)
       if (!item) continue
       item.near = entry.isIntersecting
-      if (item.near) item.mount()
-      else item.release()
+      if (item.suspended) continue
+      if (item.near) {
+        item.mount()
+        continue
+      }
+      // A row that resumed or a list that was refreshed while suspended can
+      // still wait for its remeasure.
+      if (widthRemeasures.has(item)) scheduleRemeasure(item)
+      item.release()
     }
   }, nested ? { rootMargin: margin, scrollMargin: margin } : { rootMargin: margin })
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
-      if (!item) continue
+      // A suspended row observes its box anew when it resumes.
+      if (!item || item.suspended) continue
       const wasHidden = item.hidden
       item.hidden = entry.contentRect.width <= 0
       if (item.hidden) continue
@@ -110,7 +119,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
   })
 
   return {
-    observe(element, { mount, unmount, isMounted, isProtected }) {
+    observe(element, { mount, unmount, isMounted, isProtected, suspended = false }) {
       let retry = null
       let retryDelay = 1000
       const item = {
@@ -119,6 +128,9 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
         hidden: false,
         width: null,
         height: 0,
+        // A suspended row keeps its content and size, such as in a page kept
+        // hidden behind Watch, which owns the window's scroll position.
+        suspended,
         isMounted,
         mount() {
           widthRemeasures.delete(item)
@@ -129,10 +141,10 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
           mount()
         },
         release() {
-          if (!item.near && isMounted()) scheduleRelease(item)
+          if (!item.suspended && !item.near && isMounted()) scheduleRelease(item)
         },
         canEvict() {
-          if (item.near || !items.has(element)) return false
+          if (item.suspended || item.near || !items.has(element)) return false
           if (!isProtected()) return true
           clearTimeout(retry)
           retry = setTimeout(() => item.release(), retryDelay)
@@ -154,8 +166,26 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
           items.delete(element)
         },
         refresh() {
+          if (item.suspended) {
+            if (!isMounted()) widthRemeasures.add(item)
+            return
+          }
           item.mount()
           item.release()
+        },
+        suspend() {
+          item.suspended = true
+        },
+        resume() {
+          if (!item.suspended) return
+          item.suspended = false
+          // Whether the row is near and how wide it is are stale. Observing it
+          // anew reports them for the page's own layout and scroll position,
+          // and the width compares with the one before the row was suspended.
+          intersection.unobserve(element)
+          intersection.observe(element)
+          resize.unobserve(element)
+          resize.observe(element)
         },
       }
       items.set(element, item)
@@ -165,13 +195,17 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
         refresh: () => item.refresh(),
         // Mounts a row held back meanwhile, unless it has scrolled away again.
         mountIfNear: () => {
-          if (item.near && !item.isMounted()) item.mount()
+          if (!item.suspended && item.near && !item.isMounted()) item.mount()
         },
         // Restyled content changes the height a shell keeps. Distant shells
         // are remounted through the bounded queue to measure it again.
         remeasure: () => {
           if (!item.near && !item.isMounted() && item.height > 0) scheduleRemeasure(item)
         },
+        // Holds the row as it is, without mounting, evicting or remeasuring it,
+        // until it resumes and catches up with its position and width.
+        suspend: () => item.suspend(),
+        resume: () => item.resume(),
         dispose: () => item.dispose(),
         // The last height the resize observer or an eviction measured, or 0.
         measuredHeight: () => item.height,

@@ -248,10 +248,12 @@
     cursor: not-allowed;
   }
 
+  /* Opacity instead of mixing the inherited currentcolor, which Android
+     WebView 124 keeps stale on some of these spans when the theme changes. */
   .switch-label-name,
   .switch-label-description,
   .switch-label-leading-icon {
-    color: color-mix(in srgb, currentcolor 40%, transparent);
+    opacity: 0.4;
   }
 
   .switch-label-text::before,

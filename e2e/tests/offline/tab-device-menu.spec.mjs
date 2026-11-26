@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, SYNC_EVENT_CONTEXT } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const key = Buffer.alloc(32, 1).toString('base64')
 const salt = Buffer.alloc(16, 2).toString('base64')
@@ -83,7 +83,7 @@ for (const layout of ['desktop', 'phone']) {
     await expect(menu).toBeHidden()
     await expect.poll(() => sent.length).toBe(1)
     expect(sent[0].recipient).toBe(recipient)
-    const request = await decryptSyncDocument(sent[0].payload, key)
+    const request = await decryptSyncDocument(sent[0].payload, key, SYNC_EVENT_CONTEXT)
     expect(request.videoId).toBe(videoId)
     expect(request.title).toBe('Send this tab')
     await expect(page.getByText(/^Video sent\./)).toBeVisible()

@@ -1,11 +1,19 @@
 // @ts-check
 import { base64ToBytes, bytesToBase64 } from './sync-server-protocol.js'
 
-export const PRIVACY_VERSION = 1
+/** The payload format this version writes. */
+export const PRIVACY_VERSION = 2
+// Payloads of version 1 authenticate the same additional data for every
+// collection, so a server could serve one collection's payload as another's.
+// Version 1 shipped, so its payloads are still read until their next upload.
+const UNBOUND_PRIVACY_VERSION = 1
+/** The format of the privacy key itself, which pairing transfers. Payload versions do not change it. */
+export const PRIVACY_KEY_FORMAT = 1
 const PBKDF2_ITERATIONS = 600_000
 const PADDING_BLOCK_BYTES = 64 * 1024
 const COMPRESSED_LENGTH_BYTES = 4
-const ADDITIONAL_DATA = new TextEncoder().encode('OpenTubeX encrypted sync v1')
+const UNBOUND_ADDITIONAL_DATA = new TextEncoder().encode('OpenTubeX encrypted sync v1')
+const NEWER_VERSION_MESSAGE = 'Sync data was saved by a newer OpenTubeX version. Update OpenTubeX to sync.'
 const GZIP_COMPRESSION = 'gzip'
 const LEGACY_DOCUMENT_COLLECTIONS = [
   'subscriptions',
@@ -15,6 +23,31 @@ const LEGACY_DOCUMENT_COLLECTIONS = [
   'subscriptionGroups',
   'playlistBookmarks',
 ]
+
+/**
+ * What a payload holds, which its encryption authenticates, so a server cannot
+ * serve it in place of another.
+ * @param {string} collection The collection's name on the server
+ */
+export function syncCollectionContext(collection) {
+  return `collection:${collection}`
+}
+
+/** @param {string} collection The collection's name on the server */
+export function syncChangeContext(collection) {
+  return `change:${collection}`
+}
+
+/** Device requests and the activity the server shares as events. */
+export const SYNC_EVENT_CONTEXT = 'event'
+/** The single document of the original format, which only exists as version 1. */
+export const SYNC_LEGACY_DOCUMENT_CONTEXT = 'legacy'
+
+/** @param {string} context */
+function additionalData(context) {
+  if (typeof context !== 'string' || context === '') throw new TypeError('Missing encrypted sync context')
+  return new TextEncoder().encode(`OpenTubeX encrypted sync v2\n${context}`)
+}
 
 /** @param {BlobPart} bytes Bytes, or a string to compress as UTF-8 */
 async function transformBytes(bytes, TransformStream) {
@@ -68,10 +101,16 @@ async function derivePrivacyKey(passphrase, salt) {
 }
 
 function parseEnvelope(payload) {
+  let envelope
   try {
-    const envelope = JSON.parse(payload)
+    envelope = JSON.parse(payload)
+  } catch {}
+  if (Number.isSafeInteger(envelope?.version) && envelope.version > PRIVACY_VERSION) {
+    throw new Error(NEWER_VERSION_MESSAGE)
+  }
+  try {
     const compressed = envelope.compression != null
-    if (envelope.version !== PRIVACY_VERSION ||
+    if ((envelope.version !== PRIVACY_VERSION && envelope.version !== UNBOUND_PRIVACY_VERSION) ||
         envelope.kdf?.name !== 'PBKDF2' ||
         envelope.kdf?.hash !== 'SHA-256' ||
         envelope.kdf?.iterations !== PBKDF2_ITERATIONS ||
@@ -87,14 +126,16 @@ function parseEnvelope(payload) {
   }
 }
 
-async function decryptWithKey(payload, key, { allowLegacyDocument = false } = {}) {
+async function decryptWithKey(payload, key, context, { allowLegacyDocument = false } = {}) {
+  const bound = additionalData(context)
   const envelope = parseEnvelope(payload)
+  const unbound = envelope.version === UNBOUND_PRIVACY_VERSION
   try {
     const plaintext = new Uint8Array(await crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
         iv: base64ToBytes(envelope.cipher.iv),
-        additionalData: ADDITIONAL_DATA,
+        additionalData: unbound ? UNBOUND_ADDITIONAL_DATA : bound,
       },
       key,
       base64ToBytes(envelope.ciphertext)
@@ -114,9 +155,9 @@ async function decryptWithKey(payload, key, { allowLegacyDocument = false } = {}
       )
     }
     const document = JSON.parse(new TextDecoder().decode(documentBytes))
-    if (document.version !== PRIVACY_VERSION) throw new Error()
+    if (document.version !== envelope.version) throw new Error()
     if ('data' in document) return document.data
-    if (allowLegacyDocument && LEGACY_DOCUMENT_COLLECTIONS.some(collection => (
+    if (allowLegacyDocument && unbound && LEGACY_DOCUMENT_COLLECTIONS.some(collection => (
       Array.isArray(document[collection])
     ))) {
       return document
@@ -127,12 +168,17 @@ async function decryptWithKey(payload, key, { allowLegacyDocument = false } = {}
   }
 }
 
-export async function preparePrivacyKey(payload, passphrase) {
+/**
+ * @param {string | null | undefined} payload Encrypted data the key must decrypt, if the account has any
+ * @param {string} passphrase
+ * @param {string} [context] What the payload holds, required with a payload
+ */
+export async function preparePrivacyKey(payload, passphrase, context) {
   const salt = payload
     ? base64ToBytes(parseEnvelope(payload).kdf.salt)
     : crypto.getRandomValues(new Uint8Array(16))
   const key = await derivePrivacyKey(passphrase, salt)
-  if (payload) await decryptWithKey(payload, key, { allowLegacyDocument: true })
+  if (payload) await decryptWithKey(payload, key, context, { allowLegacyDocument: true })
   const rawKey = await crypto.subtle.exportKey('raw', key)
   return {
     key: bytesToBase64(new Uint8Array(rawKey)),
@@ -140,9 +186,14 @@ export async function preparePrivacyKey(payload, passphrase) {
   }
 }
 
-export async function decryptSyncDocument(payload, exportedKey) {
+/**
+ * @param {string | null | undefined} payload
+ * @param {string} exportedKey
+ * @param {string} context What the payload must hold, from {@link syncCollectionContext} or the other contexts
+ */
+export async function decryptSyncDocument(payload, exportedKey, context) {
   if (!payload) return null
-  return decryptWithKey(payload, await importPrivacyKey(exportedKey))
+  return decryptWithKey(payload, await importPrivacyKey(exportedKey), context)
 }
 
 export async function decryptLegacySyncDocument(payload, exportedKey) {
@@ -150,6 +201,7 @@ export async function decryptLegacySyncDocument(payload, exportedKey) {
   return decryptWithKey(
     payload,
     await importPrivacyKey(exportedKey),
+    SYNC_LEGACY_DOCUMENT_CONTEXT,
     { allowLegacyDocument: true }
   )
 }
@@ -158,9 +210,11 @@ export async function decryptLegacySyncDocument(payload, exportedKey) {
  * @param {unknown} data
  * @param {string} exportedKey
  * @param {string} salt
+ * @param {string} context What the payload holds, from {@link syncCollectionContext} or the other contexts
  * @param {{ paddingBytes?: number }} [options] Size of the padding blocks that hide the exact length
  */
-export async function encryptSyncDocument(data, exportedKey, salt, { paddingBytes = PADDING_BLOCK_BYTES } = {}) {
+export async function encryptSyncDocument(data, exportedKey, salt, context, { paddingBytes = PADDING_BLOCK_BYTES } = {}) {
+  const boundData = additionalData(context)
   const key = await importPrivacyKey(exportedKey)
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const json = JSON.stringify({ version: PRIVACY_VERSION, data })
@@ -180,7 +234,7 @@ export async function encryptSyncDocument(data, exportedKey, salt, { paddingByte
   }
   plaintext.set(payload, payloadOffset)
   const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv, additionalData: ADDITIONAL_DATA },
+    { name: 'AES-GCM', iv, additionalData: boundData },
     key,
     plaintext
   )

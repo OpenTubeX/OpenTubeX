@@ -460,6 +460,7 @@
 .sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
   .settingsSelectGrid > *,
   .generalSelectGrid > *,
+  .settingsRowControl > *,
   .switchColumn > *,
   .captionControl > *,
   .externalSoftwareToolControls > *,
@@ -618,6 +619,49 @@
        that center their controls center it too. */
     :deep(:not(.switchColumn) > .switch-ctn:not(.trailing)) {
       inline-size: fit-content;
+    }
+  }
+}
+
+/* On phones, stacked selects fill the card instead of taking their default
+   option's width, so long captions and values fit. The fields start at the
+   marker gutter and end where their own icons begin: a select keeps no room
+   for icons it does not show, and without icons, it keeps as much room after
+   its field as the marker gutter takes before it. The theme selects keep
+   lining up with the theme picker instead. */
+@container settings-content (width <= 460px) {
+  .sectionBody :deep(.select.contentSized:not(.generalSelectGrid > *)) {
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    margin-inline: 0;
+  }
+
+  /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
+  .sectionBody :deep(.select.contentSized:not(.themeControls *)) {
+    --select-reset-space: 0px;
+    --select-indicator-space: var(--settings-marker-gutter, 0px);
+  }
+  /* stylelint-enable length-zero-no-unit */
+
+  .sectionBody :deep(.select.contentSized:not(.themeControls *):has(.changedSettingIndicator)) {
+    --select-reset-space: 22px;
+  }
+
+  .sectionBody :deep(.select.contentSized:not(.themeControls *):has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
+    --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+  }
+
+  /* The placeholder only keeps a dragged slider's label from reflowing. */
+  .sectionBody :deep(.select.contentSized:not(.themeControls *) .changedSettingIndicatorPlaceholder) {
+    display: none;
+  }
+
+  .sectionBody :deep(.settingsSelectGrid) {
+    grid-template-columns: minmax(0, 1fr);
+
+    > .select {
+      grid-column: 1;
     }
   }
 }

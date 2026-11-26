@@ -103,7 +103,32 @@
     margin-block-start: 8px;
   }
 
+  /* Stacked fields fill the row and start where its text does; the marker
+     gutter moves into the space below the icon. A select keeps room only for
+     the icons it shows. */
   .settingsRowControl > :deep(.select) {
-    inline-size: 100%;
+    inline-size: calc(100% + var(--settings-marker-gutter, 0px));
+    max-inline-size: none;
+    margin-inline-start: calc(-1 * var(--settings-marker-gutter, 0px));
+  }
+
+  /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
+  .settingsRowControl > :deep(.select:not(:has(.changedSettingIndicator))) {
+    --select-reset-space: 0px;
+  }
+
+  .settingsRowControl > :deep(.select:not(:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder)))) {
+    --select-indicator-space: 0px;
+  }
+  /* stylelint-enable length-zero-no-unit */
+
+  /* The placeholder only keeps a dragged slider's label from reflowing. */
+  .settingsRowControl :deep(.changedSettingIndicatorPlaceholder) {
+    display: none;
+  }
+
+  /* A switch's track starts 6px into its box, after its touch area. */
+  .settingsRow .settingsRowControl > :deep(.switch-ctn) {
+    margin-inline-start: calc(-6px - var(--settings-marker-gutter, 0px));
   }
 }

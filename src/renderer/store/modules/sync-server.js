@@ -39,6 +39,9 @@ import {
   loadLegacySyncDocument,
   migrateLegacyPlaybackSpeedsToSettings,
   readSyncCollection,
+  SYNC_EVENT_CONTEXT,
+  SYNC_LEGACY_DOCUMENT_CONTEXT,
+  syncCollectionContext,
 } from '../../helpers/sync-server-privacy'
 import {
   assertValidPrivacyPassphrase,
@@ -739,7 +742,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const saved = await networkClient.putEncryptedSyncCollection(
           SYNC_DELETION_MARKS_COLLECTION,
           revision,
-          await encryptSyncDocument(marks, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
+          await encryptSyncDocument(
+            marks, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt,
+            syncCollectionContext(SYNC_DELETION_MARKS_COLLECTION)
+          )
         )
         collectionCache.put(SYNC_DELETION_MARKS_COLLECTION, saved.revision, marks, cacheIdentity)
         return true
@@ -1136,7 +1142,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 name, capabilities.collection_changes === 1 ? known?.revision ?? 0 : undefined
               ),
               known,
-              settings.syncServerPrivacyKey
+              settings.syncServerPrivacyKey,
+              name
             )
           }
           // The document, its baseline and the cache share this value. The sync
@@ -1267,7 +1274,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 )
             const activityPayload = activity
               ? await encryptSyncDocument(
-                  activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
+                  activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, SYNC_EVENT_CONTEXT
                 )
               : undefined
             try {
@@ -1282,7 +1289,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                   saved = await networkClient.appendEncryptedSyncChange(
                     name,
                     revision,
-                    await encryptSyncChange(change, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
+                    await encryptSyncChange(change, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, name),
                     activityPayload
                   )
                 } catch (error) {
@@ -1295,7 +1302,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               saved ??= await networkClient.putEncryptedSyncCollection(
                 name,
                 revision,
-                await encryptSyncDocument(data, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
+                await encryptSyncDocument(
+                  data, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, syncCollectionContext(name)
+                ),
                 activityPayload
               )
               collectionCache.put(name, saved.revision, data, cacheIdentity)
@@ -1311,7 +1320,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                   name, capabilities.collection_changes === 1 ? revision : undefined
                 ),
                 { revision, data: activityBefore },
-                settings.syncServerPrivacyKey
+                settings.syncServerPrivacyKey,
+                name
               )
               const retryDocument = createEmptySyncDocument()
               const remoteData = remote.data ?? null
@@ -1614,7 +1624,7 @@ const actions = {
         if (event.expires_at <= Date.now()) continue
         let value
         try {
-          value = await decryptSyncDocument(event.payload, settings.syncServerPrivacyKey)
+          value = await decryptSyncDocument(event.payload, settings.syncServerPrivacyKey, SYNC_EVENT_CONTEXT)
         } catch {
           // An unreadable event must not block all following device requests.
           continue
@@ -1715,7 +1725,9 @@ const actions = {
         !validateDeviceRequest(request, recipient)) throw new Error('Invalid device request')
     const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
     try {
-      const payload = await encryptSyncDocument(request, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
+      const payload = await encryptSyncDocument(
+        request, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, SYNC_EVENT_CONTEXT
+      )
       assertSyncEnabled(rootState, client)
       await client.sendDeviceRequest(recipient, payload)
     } finally {
@@ -1792,7 +1804,8 @@ const actions = {
           const payload = await encryptSyncDocument(
             nextSessions,
             settings.syncServerPrivacyKey,
-            settings.syncServerPrivacySalt
+            settings.syncServerPrivacySalt,
+            syncCollectionContext('sessionsV2')
           )
 
           // A reconnect can introduce another login while loading or retrying
@@ -1874,7 +1887,7 @@ const actions = {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
           assertCurrentAccount(client)
           const remote = await readSyncCollection(
-            'watchStats', await client.getEncryptedSyncCollection(collection, 0), null, settings.syncServerPrivacyKey
+            'watchStats', await client.getEncryptedSyncCollection(collection, 0), null, settings.syncServerPrivacyKey, collection
           )
           const devices = remote.data ?? []
           const records = await DBWatchStatsHandlers.find()
@@ -1892,7 +1905,9 @@ const actions = {
           const merged = mergeWatchStats(devices, records, settings.syncServerDeviceId,
             settings.syncServerDeviceName, current?.platform, savedReset)
           const next = replaceWatchStatsDevice(merged, settings.syncServerDeviceId, source.deviceId, overlap, Date.now())
-          const payload = await encryptSyncDocument(next, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
+          const payload = await encryptSyncDocument(
+            next, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, syncCollectionContext(collection)
+          )
           assertCurrentAccount(client)
           let saved
           try {
@@ -2033,7 +2048,11 @@ const actions = {
           : manifest.legacy_encrypted_data
             ? await client.getLegacyEncryptedSync()
             : null
-        const privacy = await preparePrivacyKeyFromPassphrase(remote?.payload, privacyPassphrase)
+        const privacy = await preparePrivacyKeyFromPassphrase(
+          remote?.payload,
+          privacyPassphrase,
+          firstCollection ? syncCollectionContext(firstCollection) : SYNC_LEGACY_DOCUMENT_CONTEXT
+        )
         privacyKey = privacy.key
         privacySalt = privacy.salt
       }

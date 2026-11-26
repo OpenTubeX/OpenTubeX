@@ -47,3 +47,37 @@ test('reduced motion opens the tab without measuring or cloning the thumbnail', 
   await context.morphThumbnailIntoNewTab(new Element(), async () => { created++; return { id: 'new-tab' } })
   assert.equal(created, 1)
 })
+
+test('a router navigation replaced while its morph destination loads starts no morph', async () => {
+  let started = 0
+  const hooks = {}
+  const thumbnail = { style: { viewTransitionName: 'video-morph' } }
+  let finishLoad
+  const context = vm.createContext({
+    HTMLElement: class {},
+    document: {
+      documentElement: { classList: { add() {}, remove() {}, toggle() {} } },
+      startViewTransition() { started++ }
+    },
+    isReducedMotionEnabled: () => false,
+    nextTick: () => Promise.resolve(),
+    setTimeout,
+    clearTimeout
+  })
+  vm.runInContext(source, context)
+  context.installViewTransitions({
+    beforeEach: callback => { hooks.beforeEach = callback },
+    beforeResolve: callback => { hooks.beforeResolve = callback }
+  }, { preloadRoute: () => new Promise(resolve => { finishLoad = resolve }) })
+  context.requestWatchPageViewTransition(null)
+  context.thumbnail = thumbnail
+  vm.runInContext('morphSourceElement = thumbnail', context)
+  hooks.beforeEach()
+  const guard = hooks.beforeResolve({ fullPath: '/watch/first' })
+  // Another navigation starts while the first one loads Watch's code.
+  hooks.beforeEach()
+  finishLoad()
+  await guard
+  assert.equal(started, 0)
+  assert.equal(thumbnail.style.viewTransitionName, '', 'the thumbnail gives up its shared name')
+})

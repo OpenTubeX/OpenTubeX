@@ -93,6 +93,7 @@ import {
 import { revealFirstVisible, vFirstVisible } from '../../helpers/firstVisible'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
+import { useBrowsingSuspension } from '../../composables/useBrowsingSuspension'
 
 import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
@@ -398,6 +399,10 @@ onBeforeUnmount(() => {
 const windowItemObserved = ref(false)
 let windowItem
 if (windowed) {
+  const isSuspended = useBrowsingSuspension({
+    suspend: () => windowItem?.suspend(),
+    resume: () => windowItem?.resume()
+  })
   function startWindowing(element) {
     windowItem = observeWindowedListItem(element, {
       mount: () => { visible.value = true },
@@ -416,6 +421,7 @@ if (windowed) {
           element.contains(document.activeElement) ||
           !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
       },
+      suspended: isSuspended(),
     })
     windowItemObserved.value = true
   }

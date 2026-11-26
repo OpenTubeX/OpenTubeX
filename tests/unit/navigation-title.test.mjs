@@ -41,7 +41,7 @@ function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test')
   return { route, setTitle }
 }
 
-function setup() {
+function setup(viewTransitions = {}) {
   const module = vm.runInNewContext(`${storeSource}; module`, {
     URL,
     URLSearchParams,
@@ -69,8 +69,10 @@ function setup() {
     translateWindowTitle: title => title,
     runPendingViewTransition: run => run(),
     cancelPendingViewTransition: () => {},
+    hasPendingViewTransition: () => false,
     getViewTransitionRequestId: () => 0,
     window: { setTimeout: () => 0, clearTimeout() {} },
+    ...viewTransitions,
   })
   const navigation = new Service(router, store)
   store.commit('setTabsState', {
@@ -81,7 +83,7 @@ function setup() {
       route: { path: '/channel/UC-test', fullPath: '/channel/UC-test' },
     }]
   })
-  return { store, navigation, tab: () => store.getters.getTabById('tab') }
+  return { store, router, navigation, tab: () => store.getters.getTabById('tab') }
 }
 
 test('minimizing Watch restores the loaded channel name without requiring its view to reload', async () => {
@@ -166,3 +168,35 @@ for (const mode of ['push', 'replace']) {
     assert.equal(changed.history.length, 2)
   })
 }
+
+test('a click made while a navigation waits for its morph destination opens without a morph', async () => {
+  let requestId = 1
+  const loads = []
+  const morphed = []
+  const cancelled = []
+  const { store, router, navigation, tab } = setup({
+    hasPendingViewTransition: () => !cancelled.length,
+    getViewTransitionRequestId: () => requestId,
+    cancelPendingViewTransition: id => cancelled.push(id),
+    loadMorphDestination: () => new Promise(resolve => loads.push(resolve)),
+    runPendingViewTransition: async update => {
+      await update()
+      morphed.push(store.getters.getTabById('tab').route.path)
+    },
+    // A presented navigation waits for a frame and restores the scroll position.
+    isAppHidden: () => true,
+    window: { setTimeout: () => 0, clearTimeout() {}, scrollTo() {} },
+  })
+  await router.push('/channel/UC-test')
+  store.commit('setPresentedTab', 'tab')
+  const first = navigation.push('tab', '/watch/first')
+  await new Promise(resolve => setTimeout(resolve))
+  // The second click requests its own morph while the first navigation waits.
+  requestId = 2
+  const second = navigation.push('tab', '/watch/second')
+  loads.shift()()
+  await Promise.all([first, second])
+  assert.equal(tab().route.path, '/watch/second')
+  assert.deepEqual(cancelled, [2], 'the first navigation hides the second click\'s thumbnail')
+  assert.deepEqual(morphed, ['/watch/second'], 'the second navigation runs without its cancelled morph')
+})
