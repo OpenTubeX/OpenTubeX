@@ -25,6 +25,29 @@ const HIGH_PRIORITY_THREADS = ['Media']
 const REALTIME_PRIORITY = 8
 const NICE_LEVEL = -10
 const RESCAN_INTERVAL = 5_000
+// RealtimeKit refuses temporarily, such as after a burst of requests, so a
+// failed thread is retried on the next scans
+const MAX_ATTEMPTS = 3
+// A lower inherited CPU time limit could stop an audio thread right away
+const MIN_REALTIME_TIME_LIMIT = 50_000
+
+/**
+ * Lowers the process's realtime CPU time limit to RealtimeKit's maximum, which
+ * RealtimeKit requires. An unprivileged process can't raise its hard limit, so
+ * a lower inherited limit stays.
+ * @param {number} pid
+ * @param {number} maximum in microseconds
+ * @returns {Promise<boolean>} whether its threads can safely run in realtime
+ */
+async function limitRealtimeTime(pid, maximum) {
+  const { stdout } = await execFileAsync('prlimit', ['--pid', String(pid), '--rttime', '--raw', '--noheadings', '--output=HARD'])
+  const hardLimit = stdout.trim() === 'unlimited' ? Infinity : Number(stdout.trim())
+  if (hardLimit > maximum) {
+    await execFileAsync('prlimit', ['--pid', String(pid), `--rttime=${maximum}:${maximum}`])
+    return true
+  }
+  return hardLimit >= MIN_REALTIME_TIME_LIMIT
+}
 
 /**
  * @typedef {{
@@ -96,16 +119,14 @@ async function readThreads(pid) {
  * @param {{
  *   getAudioServicePids: () => number[],
  *   connect?: () => RealtimeKitClient,
- *   setRealtimeTimeLimit?: (pid: number, microseconds: number) => Promise<void>,
+ *   limitRealtimeTime?: (pid: number, maximum: number) => Promise<boolean>,
  *   readThreads?: (pid: number) => Promise<Map<number, string>>
  * }} options
  */
 export function createRealtimeAudio({
   getAudioServicePids,
   connect = connectRealtimeKit,
-  setRealtimeTimeLimit = async (pid, microseconds) => {
-    await execFileAsync('prlimit', ['--pid', String(pid), `--rttime=${microseconds}:${microseconds}`])
-  },
+  limitRealtimeTime: limitProcessRealtimeTime = limitRealtimeTime,
   readThreads: listThreads = readThreads,
 }) {
   /** @type {Promise<{ client: RealtimeKitClient, priority: number, niceLevel: number, rtTime: number } | null> | null} */
@@ -113,8 +134,10 @@ export function createRealtimeAudio({
   let unavailable = false
   /** @type {Map<number, Set<number>>} thread IDs by process ID */
   const raised = new Map()
-  /** @type {Set<number>} */
-  const limitedPids = new Set()
+  /** @type {Map<number, Promise<boolean>>} whether each process's threads can run in realtime */
+  const realtimeAllowed = new Map()
+  /** @type {Map<number, Map<number, number>>} failed attempts by thread ID, by process ID */
+  const failures = new Map()
   /** @type {Map<number, number>} audible web contents by renderer process ID */
   const audibleRenderers = new Map()
   /** @type {ReturnType<typeof setInterval> | null} */
@@ -165,31 +188,43 @@ export function createRealtimeAudio({
     } catch {
       // The process exited
       raised.delete(pid)
-      limitedPids.delete(pid)
+      realtimeAllowed.delete(pid)
+      failures.delete(pid)
       return
     }
 
     // Forget exited threads, whose IDs the kernel can reuse
     const raisedThreads = new Set([...raised.get(pid) ?? []].filter(tid => threads.has(tid)))
     raised.set(pid, raisedThreads)
+    const failedThreads = new Map([...failures.get(pid) ?? []].filter(([tid]) => threads.has(tid)))
+    failures.set(pid, failedThreads)
     for (const [tid, name] of threads) {
-      if (raisedThreads.has(tid)) continue
+      if (raisedThreads.has(tid) || (failedThreads.get(tid) ?? 0) >= MAX_ATTEMPTS) continue
       const realtime = realtimeNames.includes(name)
       if (!realtime && !highPriorityNames.includes(name)) continue
-      // Marked first, so a failing thread isn't retried on every scan
-      raisedThreads.add(tid)
       try {
         if (realtime) {
           // RealtimeKit requires a CPU time limit, which stops a realtime thread that never yields
-          if (!limitedPids.has(pid)) {
-            await setRealtimeTimeLimit(pid, kit.rtTime)
-            limitedPids.add(pid)
+          let allowed = realtimeAllowed.get(pid)
+          if (!allowed) {
+            allowed = limitProcessRealtimeTime(pid, kit.rtTime)
+            realtimeAllowed.set(pid, allowed)
+            // A failed limit is checked again on the next attempt
+            allowed.catch(() => realtimeAllowed.delete(pid))
+          }
+          if (!await allowed) {
+            failedThreads.set(tid, MAX_ATTEMPTS)
+            if (!warned) console.warn(`Audio thread ${name} stays at normal priority, because its process has a low realtime CPU time limit`)
+            warned = true
+            continue
           }
           await kit.client.call('MakeThreadRealtimeWithPID', 'ttu', [pid, tid, kit.priority])
         } else {
           await kit.client.call('MakeThreadHighPriorityWithPID', 'tti', [pid, tid, kit.niceLevel])
         }
+        raisedThreads.add(tid)
       } catch (error) {
+        failedThreads.set(tid, (failedThreads.get(tid) ?? 0) + 1)
         // RealtimeKit refuses apps outside an active session for every thread
         if (!warned) console.warn(`Unable to raise the priority of audio thread ${name}`, error)
         warned = true
