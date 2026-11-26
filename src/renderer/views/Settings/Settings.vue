@@ -710,6 +710,8 @@ const canReturnFromDownloads = computed(() => (
 ))
 const isStandaloneViewOpen = computed(() => isAboutOpen.value || isDownloadsOpen.value)
 const showMinimizeButton = computed(() => {
+  // A window that always fills the app reopens from quick settings just as fast.
+  if (isMaximizationForced.value) return false
   if (isDownloadsOpen.value) return !store.getters.getMoveDownloadsToAppHeader
   if (isAboutOpen.value) return true
   return !store.getters.getMoveSettingsToAppHeader
