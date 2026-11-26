@@ -154,7 +154,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     handleScrollMiniControlsPointerMove,
     restoreScrollMiniPlayPause,
     resetScrollMiniPlayPause,
-  } = useScrollMiniPlayerControls({ scrollMiniPlayerActive, video })
+  } = useScrollMiniPlayerControls({
+    scrollMiniPlayerActive,
+    video,
+    getPlayingInterfaceHideDelay: () => store.getters.getPlayingInterfaceHideDelay,
+  })
 
   const crossTabMiniPlayerCandidate = {
     canShow: () => canShowCrossTabMiniPlayer(),
