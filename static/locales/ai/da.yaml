@@ -289,6 +289,7 @@ Subscriptions:
     Clips: Klip
     Refresh Errors: 1 kanal kunne ikke opdateres. | {count} kanaler kunne ikke opdateres.
     Content Tabs: Faner med platformindhold
+    Unfollow: Stop med at følge
 Trending:
   Music: Musik
   Load Error: Populært indhold kunne ikke indlæses.

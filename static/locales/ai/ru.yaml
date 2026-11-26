@@ -244,6 +244,7 @@ Subscriptions:
     Clips: Клипы
     Refresh Errors: Не удалось обновить {count} канал. | Не удалось обновить {count} канала. | Не удалось обновить {count} каналов.
     Content Tabs: Вкладки с материалами платформ
+    Unfollow: Перестать отслеживать
 Trending:
   Music: Музыка
   Load Error: Не удалось загрузить популярные видео.

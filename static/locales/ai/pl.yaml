@@ -154,6 +154,7 @@ Subscriptions:
     Clips: Klipy
     Refresh Errors: Nie udało się odświeżyć 1 kanału. | Nie udało się odświeżyć {count} kanałów. | Nie udało się odświeżyć {count} kanałów.
     Content Tabs: Karty treści z platform
+    Unfollow: Przestań obserwować
 Trending:
   Music: Muzyka
   Load Error: Nie udało się wczytać popularnych treści.

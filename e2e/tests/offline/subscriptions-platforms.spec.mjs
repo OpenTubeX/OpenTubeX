@@ -562,6 +562,46 @@ test.describe('Channels on other platforms', () => {
     await expect(page.locator('.channelHeader .channelName')).toHaveText('Other')
   })
 
+  test('follows, pins and copies a Twitch channel from its context menu', async ({ app, page }) => {
+    await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
+    await page.locator(sel.searchInput).fill('stream')
+    await page.locator(sel.searchInput).press('Enter')
+    await page.getByRole('combobox', { name: 'Platform' }).click()
+    await page.getByRole('option', { name: 'Twitch' }).click()
+    await page.getByRole('combobox', { name: 'Type' }).click()
+    await page.getByRole('option', { name: 'Channels' }).click()
+    const title = page.locator('.platformSearch .ft-list-channel .title')
+    await expect(title).toHaveText('Streamer')
+    const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    const readClipboard = () => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())
+    const pin = { id: `twitch:${CHANNEL.id}`, platform: 'twitch', channelId: CHANNEL.id, name: CHANNEL.name, thumbnail: AVATAR, url: `https://www.twitch.tv/${CHANNEL.login}` }
+
+    // Without the channel followed or pinned, the link loads the channel's address
+    await title.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
+    await expect.poll(readClipboard).toBe(pin.url)
+
+    await title.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Follow', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(CHANNEL)])
+
+    await title.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Pin to Navigation', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedChannels)).toEqual([pin])
+    const pinned = page.locator(`.sideNav .pinnedChannels a[href="#/external-channel?platform=twitch&id=${CHANNEL.id}"]`)
+    await expect(pinned).toHaveAttribute('title', CHANNEL.name)
+
+    await pinned.click({ button: 'right' })
+    await expect(menu.getByRole('menuitem', { name: 'Unfollow', exact: true })).toBeVisible()
+    await menu.getByRole('menuitem', { name: 'Unpin from Navigation', exact: true }).click()
+    await expect(pinned).toHaveCount(0)
+    expect(await page.evaluate(() => window.$store.getters.getPinnedChannels)).toEqual([])
+
+    await title.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: 'Unfollow', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([])
+  })
+
   test('browses Twitch, searches it for categories and opens a category with its live streams', async ({ page }) => {
     const chess = { slug: 'chess', displayName: 'Chess', viewersCount: 1200, boxArtURL: 'https://twitch.example.test/chess.jpg' }
     const streamOf = ({ id, login, name }) => ({

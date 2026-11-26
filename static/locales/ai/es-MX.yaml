@@ -300,6 +300,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: No se pudo actualizar 1 canal. | No se pudieron actualizar {count} canales. | No se pudieron actualizar {count} canales.
     Content Tabs: Pestañas de contenido de plataformas
+    Unfollow: Dejar de seguir
 Trending:
   Music: Música
   Sports: Deportes

@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Klippur
     Refresh Errors: Ekki tókst að uppfæra {count} rás. | Ekki tókst að uppfæra {count} rásir.
     Content Tabs: Flipar fyrir efni frá vettvöngum
+    Unfollow: Hætta að fylgja
 Trending:
   Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.

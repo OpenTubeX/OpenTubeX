@@ -289,6 +289,7 @@ Subscriptions:
     Clips: Клипови
     Refresh Errors: '{count} канал није могуће освежити. | {count} канала није могуће освежити. | {count} канала није могуће освежити.'
     Content Tabs: Картице са садржајем платформи
+    Unfollow: Престани да пратиш
 Trending:
   Music: Музика
   Load Error: Садржај у тренду није могао да се учита.

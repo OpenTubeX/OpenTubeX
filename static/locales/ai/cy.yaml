@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Clipiau
     Refresh Errors: Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli.
     Content Tabs: Tabiau cynnwys llwyfannau
+    Unfollow: Dad-ddilyn
 Trending:
   Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.

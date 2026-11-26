@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Klipp
     Refresh Errors: 1 kanal kunde inte uppdateras. | {count} kanaler kunde inte uppdateras.
     Content Tabs: Flikar för plattformsinnehåll
+    Unfollow: Sluta följa
 Trending:
   Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.

@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: '{count} chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées.'
     Content Tabs: Onglets des contenus des plateformes
+    Unfollow: Ne plus suivre
 Trending:
   Music: Musique
   Load Error: Les tendances n’ont pas pu être chargées.

@@ -177,7 +177,7 @@ const items = computed(() => filterAvailableNavigationItems(store.getters.getNav
 
 // Like the side navigation, pins move the fifth destination into More.
 const hasPins = computed(() => {
-  if (store.getters.getPinnedChannels.length > 0) return true
+  if (store.getters.getPinnedChannels.some(channel => supportsYtDlp || !channel.platform)) return true
   const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
   return pinnedIds.size > 0 && store.getters.getAllPlaylists.some(playlist => pinnedIds.has(playlist._id))
 })

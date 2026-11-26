@@ -187,7 +187,7 @@ import { forgetChannel, getRecentChannel, rememberChannel, startChannelLoad } fr
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
 import { useTabAvatar, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
-import { getPlatform, PLATFORM_ICONS } from '../../../platforms/index'
+import { getPlatform, getPlatformChannelKey, PLATFORM_ICONS } from '../../../platforms/index'
 
 const TAB_ICONS = {
   videos: ['fas', 'video'],
@@ -296,6 +296,7 @@ function showChannel(shown, tab) {
   setTabTitle(shown.name)
   if (shown.avatar) setTabAvatar(shown.avatar)
   currentTab.value = tab
+  store.dispatch('refreshPinnedChannelMetadata', { id: getPlatformChannelKey(shown), name: shown.name, thumbnail: shown.avatar })
 }
 
 /**

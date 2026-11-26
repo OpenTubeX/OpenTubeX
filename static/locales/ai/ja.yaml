@@ -285,6 +285,7 @@ Subscriptions:
     Clips: クリップ
     Refresh Errors: '{count} 件のチャンネルを更新できませんでした。'
     Content Tabs: プラットフォームのコンテンツのタブ
+    Unfollow: フォローを解除
 Trending:
   Music: 音楽
   Load Error: トレンドを読み込めませんでした。

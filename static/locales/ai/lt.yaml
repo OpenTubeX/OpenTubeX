@@ -319,6 +319,7 @@ Subscriptions:
     Clips: Klipai
     Refresh Errors: Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų.
     Content Tabs: Platformų turinio kortelės
+    Unfollow: Nebesekti
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.

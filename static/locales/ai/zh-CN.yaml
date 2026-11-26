@@ -285,6 +285,7 @@ Subscriptions:
     Clips: 剪辑
     Refresh Errors: '{count} 个频道无法刷新。'
     Content Tabs: 平台内容标签页
+    Unfollow: 取消关注
 Trending:
   Music: 音乐
   Load Error: 无法加载热门内容。

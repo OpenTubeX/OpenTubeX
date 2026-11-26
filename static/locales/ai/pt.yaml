@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: Não foi possível atualizar {count} canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais.
     Content Tabs: Separadores de conteúdo das plataformas
+    Unfollow: Deixar de seguir
 Trending:
   Music: Música
   Load Error: Não foi possível carregar as tendências.
