@@ -792,6 +792,7 @@ import {
   normalizeTabBarPosition
 } from './constants/tabBarPosition'
 import {
+  cacheCompletedTutorialAudience,
   getLastUsedVersion,
   getTutorialAudience,
   markTutorialCompleted,
@@ -1792,6 +1793,7 @@ function previewManagedExternalSoftwareUpdatePrompt(event) {
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
     const audience = getTutorialAudience(persistedAudience)
+    if (audience === 'completed') cacheCompletedTutorialAudience()
     if (audience === 'completed' || audience === 'existing') return false
     if (hasExistingInstallation === null) return false
 

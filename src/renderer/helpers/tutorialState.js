@@ -27,6 +27,17 @@ export function getTutorialAudience(persistedAudience) {
   return localAudience ?? persistedAudience ?? null
 }
 
+/**
+ * Brings localStorage's copy of a completed tutorial up to date. Chromium
+ * commits localStorage writes lazily, so an app stopped right after the
+ * tutorial can keep 'new' there, while the database kept the completion.
+ */
+export function cacheCompletedTutorialAudience() {
+  if (readLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY) !== 'completed') {
+    writeLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY, 'completed')
+  }
+}
+
 export async function setTutorialAudience(audience) {
   writeLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY, audience)
   try {
