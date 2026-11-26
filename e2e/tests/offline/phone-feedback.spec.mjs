@@ -9,6 +9,7 @@ test('starts download setup with a fixed template selector and footer', async ({
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
   const prompt = page.locator('.downloadPromptCard')
   await expect(prompt.locator('.templateSection')).toBeVisible()
   await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = 100000 })
@@ -40,6 +41,7 @@ test('clamps the download dialog when setup becomes progress', async ({ app, pag
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
   const prompt = page.locator('.downloadPromptCard')
   await prompt.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
   const setupHeight = (await prompt.boundingBox()).height

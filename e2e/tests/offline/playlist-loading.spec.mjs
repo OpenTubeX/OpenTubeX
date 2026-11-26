@@ -591,6 +591,7 @@ test.describe('YouTube playlist search', () => {
 
     await openPlaylistTab(page, '/playlist/search-test')
     await page.locator('.playlistInfo').getByTitle('Download Playlist').click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
     const selection = page.locator('.downloadPromptCard .videoSelection')
     await selection.locator('summary').click()
     await expect(selection.getByText('200. Playlist video 200', { exact: true })).toBeAttached()

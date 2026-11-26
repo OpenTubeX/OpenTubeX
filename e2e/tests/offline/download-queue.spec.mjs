@@ -158,6 +158,7 @@ test.describe('playlist video selection', () => {
     await goTo(page, 'userplaylists')
     await page.getByRole('link', { name: 'Selection playlist', exact: true }).click()
     await page.getByTitle('Download Playlist').click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
     const prompt = page.locator('.downloadPromptCard')
     const download = prompt.getByRole('button', { name: 'Download', exact: true })
     const selection = prompt.locator('.videoSelection')
