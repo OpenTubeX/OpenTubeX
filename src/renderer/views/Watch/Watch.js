@@ -1239,6 +1239,10 @@ export default defineComponent({
     dashFormatAvailable: function () {
       return this.manifestSrc !== null
     },
+    /** A downloaded recording of a stream that is still live is a regular file */
+    isLivePlayback: function () {
+      return this.isLive && !this.localFilePlayback
+    },
     legacyFormatAvailable: function () {
       return !this.isLive && !this.isPostLiveDvr && (this.legacyFormats.length > 0 || this.webLegacyFormatsLoadable)
     },

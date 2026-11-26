@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { test, expect, abortUnmockedRequest, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { openMockedVideo, seekAsViewer } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
 
 const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
@@ -128,6 +128,21 @@ test.describe('download of a video opened without it', () => {
     await expect.poll(() => video.evaluate(element => element.currentSrc)).not.toMatch(/^downloadmedia:/)
     const onlineStart = await video.evaluate(element => element.currentTime)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(onlineStart)
+  })
+
+  test('plays the recording of an ongoing livestream as a seekable file', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await expect(video).toHaveJSProperty('currentSrc', 'downloadmedia://file/1/jNQXAC9IVRw')
+    // YouTube still reports the stream as live after its recording was stopped.
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(view => { view.isLive = true })
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await video.evaluate(element => element.pause())
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    await expect(player.locator('.shaka-seek-bar')).toBeVisible()
+    await openPlayerOptions(player)
+    await expect(player.locator('.shaka-playbackrate-button')).toBeVisible()
   })
 })
 
