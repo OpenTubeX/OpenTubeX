@@ -705,7 +705,9 @@ public class MobileTabSelectionTest {
             try {
                 for (String layout : new String[] {"phone", "tablet"}) {
                     for (int scale : new int[] {100, 95}) {
-                        for (String closeMode : new String[] {"selected", "Before", "After", "Other"}) {
+                        for (String closeMode : new String[] {"selected", "Before", "After", "Other", "search"}) {
+                            // Searching filters only the phone switcher
+                            if (closeMode.equals("search") && !layout.equals("phone")) continue;
                             evaluate(view, STORE + ".commit('setCapacitorLayoutMode', '" + layout + "');" +
                                 STORE + ".commit('setUiScale', " + scale + ")");
                             String prefix = layout.equals("phone") ? "capacitorPhone" : "capacitorTablet";
@@ -755,7 +757,18 @@ public class MobileTabSelectionTest {
                             evaluate(view, "document.querySelector('" + viewport + "').scroll" + axis +
                                 " = document.querySelector('" + viewport + "').scroll" + dimension);
                             await(view, "document.querySelector('" + viewport + "').scroll" + axis + " > 20");
-                            if (closeMode.equals("selected")) {
+                            if (closeMode.equals("search")) {
+                                evaluate(view, "[...document.querySelectorAll('.capacitorPhoneTabHeader button')].find(button => button.title === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Tab Organizer.Search Label')).click()");
+                                await(view, "!!document.querySelector('.capacitorPhoneTabSearch input')");
+                                evaluate(view, """
+                                    (() => {
+                                        const input = document.querySelector('.capacitorPhoneTabSearch input');
+                                        input.value = 'no open tab matches this';
+                                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                                    })()
+                                    """);
+                                await(view, "document.querySelectorAll('" + row + "').length === 0 && !!document.querySelector('.capacitorPhoneTabEmpty')");
+                            } else if (closeMode.equals("selected")) {
                                 evaluate(view, String.format("""
                                     (() => {
                                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
@@ -776,7 +789,12 @@ public class MobileTabSelectionTest {
                                 clickText(view, ".capacitorTabActions button", closeMode.equals("Other")
                                     ? "Context Menu.Close Other Tabs" : "Context Menu.Close Tabs " + closeMode);
                             }
-                            await(view, "document.querySelectorAll('" + row + "').length === 1");
+                            if (!closeMode.equals("search")) {
+                                // Closing 5 or more tabs asks first, above the switcher on phones
+                                await(view, "!!document.querySelector('.prompt:has(.capacitorTabsPrompt) button')");
+                                evaluate(view, "document.querySelector('.prompt:has(.capacitorTabsPrompt) button').click()");
+                                await(view, "document.querySelectorAll('" + row + "').length === 1");
+                            }
                             await(view, "!document.querySelector('.capacitorTabSelectionControls, .capacitorTabSelectionFloating')");
                             if (closeMode.equals("selected")) {
                                 assertEquals("Every selected tab was removed, leaving the landing page", "true",
@@ -797,6 +815,17 @@ public class MobileTabSelectionTest {
                                 evaluate(view, "[...document.querySelectorAll('.capacitorPhoneTabHeader button')].find(button => button.title === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Close')).click()");
                                 await(view, "!document.querySelector('.capacitorPhoneTabDialog')");
                             }
+                            if (closeMode.equals("search")) {
+                                evaluate(view, """
+                                    window.mobileTabsReset = false;
+                                    (async () => {
+                                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                                        for (const tab of store.getters.getTabs.slice(1)) await store.dispatch('closeTab', tab.id);
+                                        window.mobileTabsReset = true;
+                                    })();
+                                    """);
+                                await(view, "window.mobileTabsReset === true && " + STORE + ".getters.getTabs.length === 1");
+                            }
                         }
                     }
                 }
@@ -808,6 +837,7 @@ public class MobileTabSelectionTest {
                     delete window.mobileTabsSaved;
                     delete window.mobileTabsSeeded;
                     delete window.mobileTabsOriginalIds;
+                    delete window.mobileTabsReset;
                     """, STORE, STORE, STORE));
             }
         }
