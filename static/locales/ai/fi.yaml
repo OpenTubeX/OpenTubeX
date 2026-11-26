@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Klipit
     Refresh Errors: 1 kanavaa ei voitu päivittää. | {count} kanavaa ei voitu päivittää.
     Content Tabs: Alustojen sisällön välilehdet
+    Unfollow: Lopeta seuraaminen
 Trending:
   Music: Musiikki
   Load Error: Nousussa olevia videoita ei voitu ladata.

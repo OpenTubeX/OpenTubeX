@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Clip
     Refresh Errors: Impossibile aggiornare 1 canale. | Impossibile aggiornare {count} canali. | Impossibile aggiornare {count} canali.
     Content Tabs: Schede dei contenuti delle piattaforme
+    Unfollow: Smetti di seguire
 Trending:
   Music: Musica
   Load Error: Impossibile caricare le tendenze.

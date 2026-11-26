@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Klipy
     Refresh Errors: 1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit.
     Content Tabs: Karty s obsahem platforem
+    Unfollow: Přestat sledovat
 Trending:
   Music: Hudba
   Load Error: Trendy se nepodařilo načíst.

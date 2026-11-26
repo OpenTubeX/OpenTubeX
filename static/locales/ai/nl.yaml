@@ -287,6 +287,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: 1 kanaal kon niet worden vernieuwd. | {count} kanalen konden niet worden vernieuwd.
     Content Tabs: Tabbladen voor platformcontent
+    Unfollow: Ontvolgen
 Trending:
   Music: Muziek
   Load Error: Trending kan niet worden geladen.

@@ -105,7 +105,7 @@
           :is="enableChannelLinks ? 'router-link' : 'span'"
           v-for="channel in pinnedChannels"
           :key="channel.id"
-          :to="`/channel/${channel.id}`"
+          :to="channel.route"
           :data-tab-title="channel.name"
           :data-pinned-id="channel.id"
           :class="enableChannelLinks ? '' : 'disabledIcon'"
@@ -246,6 +246,7 @@ import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { getVideoThumbnailUrl, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
+import { getPlatformChannelRoute } from '../../../platforms/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { createMobileNavigationScroll, lastScrollPosition, mobileNavigationMinimizePreview, readScrollPosition } from '../../helpers/mobileNavigationScroll'
@@ -313,13 +314,17 @@ const activeProfile = computed(() => {
   return store.getters.getActiveProfile
 })
 
-const pinnedChannels = computed(() => store.getters.getPinnedChannels.map(channel => {
+// Channels of other platforms only have pages where yt-dlp plays their media
+const pinnedChannels = computed(() => store.getters.getPinnedChannels.flatMap(channel => {
   channel = { ...channel, ...store.getters.getPinnedChannelMetadata[channel.id] }
+  if (channel.platform) {
+    return supportsYtDlp ? [{ ...channel, route: getPlatformChannelRoute(channel.platform, channel.channelId) }] : []
+  }
   let thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
   if (backendPreference.value === 'invidious') {
     thumbnail = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
   }
-  return { ...channel, thumbnail }
+  return [{ ...channel, thumbnail, route: { path: `/channel/${channel.id}` } }]
 }))
 
 const activeSubscriptions = computed(() => {
@@ -552,7 +557,8 @@ const mobilePinnedItems = computed(() => [
     key: `channel-${channel.id}`,
     id: channel.id,
     group: 'channel',
-    path: enableChannelLinks.value ? `/channel/${channel.id}` : null,
+    path: enableChannelLinks.value ? channel.route.path : null,
+    query: channel.route.query,
     label: channel.name,
     thumbnail: channel.thumbnail,
     icon: ['fas', 'circle-user'],

@@ -287,6 +287,7 @@ Subscriptions:
     Clips: مقاطع
     Refresh Errors: تعذّر تحديث {count} قناة. | تعذّر تحديث قناة واحدة. | تعذّر تحديث قناتين ({count}). | تعذّر تحديث {count} قنوات. | تعذّر تحديث {count} قناةً. | تعذّر تحديث {count} قناة.
     Content Tabs: علامات تبويب محتوى المنصات
+    Unfollow: إلغاء المتابعة
 Trending:
   Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.

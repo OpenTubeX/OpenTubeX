@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Klipid
     Refresh Errors: 1 kanalit ei õnnestunud värskendada. | {count} kanalit ei õnnestunud värskendada.
     Content Tabs: Platvormide sisu vahekaardid
+    Unfollow: Lõpeta jälgimine
 Trending:
   Music: Muusika
   Load Error: Trende ei saanud laadida.

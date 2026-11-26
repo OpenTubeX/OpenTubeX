@@ -285,6 +285,7 @@ Subscriptions:
     Clips: 剪輯
     Refresh Errors: '{count} 個頻道無法重新整理。'
     Content Tabs: 平台內容分頁
+    Unfollow: 取消追隨
 Trending:
   Music: 音樂
   Load Error: 無法載入熱門趨勢。

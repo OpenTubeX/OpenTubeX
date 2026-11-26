@@ -287,6 +287,7 @@ Subscriptions:
     Clips: Кліпи
     Refresh Errors: Не вдалося оновити {count} канал. | Не вдалося оновити {count} канали. | Не вдалося оновити {count} каналів.
     Content Tabs: Вкладки вмісту платформ
+    Unfollow: Припинити відстежувати
 Trending:
   Music: Музика
   Load Error: Не вдалося завантажити популярне.

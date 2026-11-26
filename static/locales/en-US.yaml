@@ -441,6 +441,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: 1 channel could not be refreshed. | {count} channels could not be refreshed.
     Content Tabs: Platform content tabs
+    Unfollow: Unfollow
 More: More
 Channels:
   Load More Channels: "Load more channels"

@@ -285,6 +285,7 @@ Subscriptions:
     Clips: Clipuri
     Refresh Errors: 1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate.
     Content Tabs: File pentru conținutul platformelor
+    Unfollow: Nu mai urmări
 Trending:
   Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.

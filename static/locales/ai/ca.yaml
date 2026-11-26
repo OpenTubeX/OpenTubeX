@@ -333,6 +333,7 @@ Subscriptions:
     Clips: Clips
     Refresh Errors: No s'ha pogut actualitzar 1 canal. | No s'han pogut actualitzar {count} canals. | No s'han pogut actualitzar {count} canals.
     Content Tabs: Pestanyes de contingut de plataformes
+    Unfollow: Deixa de seguir
 Channels:
   Load More Channels: "Carrega més canals"
   Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.
