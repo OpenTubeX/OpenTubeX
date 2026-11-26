@@ -1350,6 +1350,7 @@ Settings:
     Cleanup Complete: Hreinsun geymslu lokið
     Cleanup Failed: Hreinsun geymslu mistókst
   Subscription Settings:
+    Open Profile Manager: Opna umsýslu notkunarsniða
     Refresh These Feeds Together: "Uppfæra þessar veitur saman"
     Fetch Feed on Startup: Sækja efnisstraum við ræsingu
     Show New Content Feed: Sýna straum með nýju efni

@@ -1353,6 +1353,7 @@ Settings:
     Cleanup Complete: Почистването на хранилището завърши
     Cleanup Failed: Почистването на хранилището е неуспешно
   Subscription Settings:
+    Open Profile Manager: Отваряне на управлението на профили
     Refresh These Feeds Together: "Обновяване на тези емисии заедно"
     Fetch Feed on Startup: Зареждане на емисията при стартиране
     Show New Content Feed: Показване на емисията с ново съдържание

@@ -1371,6 +1371,7 @@ Settings:
     Cleanup Complete: Чишћење складишта је завршено
     Cleanup Failed: Чишћење складишта није успело
   Subscription Settings:
+    Open Profile Manager: Отвори управљање профилима
     Refresh These Feeds Together: "Освежавај ове изворе заједно"
     Fetch Feed on Startup: Преузми фид при покретању
     Show New Content Feed: Прикажи фид новог садржаја

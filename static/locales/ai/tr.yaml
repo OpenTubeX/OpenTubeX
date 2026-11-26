@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Depolama temizliği tamamlandı
     Cleanup Failed: Depolama temizliği başarısız oldu
   Subscription Settings:
+    Open Profile Manager: Profil Yöneticisini Aç
     Refresh These Feeds Together: "Bu akışları birlikte yenile"
     Fetch Feed on Startup: Başlangıçta Akışı Getir
     Show New Content Feed: Yeni İçerik Akışını Göster

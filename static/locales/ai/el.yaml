@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Η εκκαθάριση αποθηκευτικού χώρου ολοκληρώθηκε
     Cleanup Failed: Η εκκαθάριση αποθηκευτικού χώρου απέτυχε
   Subscription Settings:
+    Open Profile Manager: Άνοιγμα Διαχειριστή Προφίλ
     Refresh These Feeds Together: "Ανανέωση αυτών των ροών μαζί"
     Fetch Feed on Startup: Ανάκτηση ροής κατά την εκκίνηση
     Show New Content Feed: Εμφάνιση ροής νέου περιεχομένου

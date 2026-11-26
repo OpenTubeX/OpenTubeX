@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Tárhelytisztítás befejezve
     Cleanup Failed: A tárhelytisztítás sikertelen
   Subscription Settings:
+    Open Profile Manager: Profilkezelő megnyitása
     Refresh These Feeds Together: "Ezek a hírfolyamok együtt frissüljenek"
     Fetch Feed on Startup: Hírfolyam lekérése indításkor
     Show New Content Feed: Új tartalmak hírfolyamának megjelenítése

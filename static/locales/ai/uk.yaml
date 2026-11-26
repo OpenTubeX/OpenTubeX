@@ -1359,6 +1359,7 @@ Settings:
     Cleanup Complete: Очищення сховища завершено
     Cleanup Failed: Не вдалося очистити сховище
   Subscription Settings:
+    Open Profile Manager: Відкрити керування профілями
     Refresh These Feeds Together: "Оновлювати ці стрічки разом"
     Fetch Feed on Startup: Отримувати стрічку під час запуску
     Show New Content Feed: Показувати стрічку нового вмісту

@@ -32,7 +32,7 @@ test('does not announce complete success after an empty playlist fails and a lat
     showToast: options => messages.push(options.message),
     closeTakeoutImport: () => { closed = true },
   })
-  vm.runInContext(source.slice(source.indexOf('async function importSelectedTakeoutData()'), source.indexOf('function openProfileSettings()')), context)
+  vm.runInContext(source.slice(source.indexOf('async function importSelectedTakeoutData()'), source.indexOf('async function promptAndWriteToFile(')), context)
   await context.importSelectedTakeoutData()
   assert.deepEqual(imported, ['Failed', 'Success'])
   assert.deepEqual(messages, ['Settings.Data Settings.Unable to read file: playlists/Failed-videos.csv'])

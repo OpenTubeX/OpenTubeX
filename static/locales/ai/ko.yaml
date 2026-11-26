@@ -1542,6 +1542,7 @@ Settings:
     Cleanup Complete: 저장 공간 정리를 마쳤습니다
     Cleanup Failed: 저장 공간 정리에 실패했습니다
   Subscription Settings:
+    Open Profile Manager: 프로필 관리자 열기
     Refresh These Feeds Together: "이 피드를 함께 새로고침"
     Fetch Feed on Startup: 시작할 때 피드 가져오기
     Show New Content Feed: 새 콘텐츠 피드 표시

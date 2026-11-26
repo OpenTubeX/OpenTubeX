@@ -1350,6 +1350,7 @@ Settings:
     Cleanup Complete: Curățarea spațiului de stocare s-a încheiat
     Cleanup Failed: Curățarea spațiului de stocare a eșuat
   Subscription Settings:
+    Open Profile Manager: Deschide managerul de profiluri
     Refresh These Feeds Together: "Reîmprospătează aceste fluxuri împreună"
     Fetch Feed on Startup: Preia fluxul la pornire
     Show New Content Feed: Afișează fluxul de conținut nou

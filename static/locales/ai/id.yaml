@@ -1351,6 +1351,7 @@ Settings:
     Cleanup Complete: Pembersihan penyimpanan selesai
     Cleanup Failed: Pembersihan penyimpanan gagal
   Subscription Settings:
+    Open Profile Manager: Buka Pengelola Profil
     Refresh These Feeds Together: "Segarkan umpan ini bersamaan"
     Fetch Feed on Startup: Ambil Umpan Saat Aplikasi Dimulai
     Show New Content Feed: Tampilkan Umpan Konten Baru

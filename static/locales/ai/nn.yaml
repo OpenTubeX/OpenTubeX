@@ -1461,6 +1461,7 @@ Settings:
     Cleanup Complete: Lagringsoppryddinga er fullført
     Cleanup Failed: Lagringsoppryddinga mislykkast
   Subscription Settings:
+    Open Profile Manager: Opne profilbehandlar
     Refresh These Feeds Together: "Oppdater desse straumane saman"
     Fetch Feed on Startup: Hent straumen ved oppstart
     Show New Content Feed: Vis straumen med nytt innhald

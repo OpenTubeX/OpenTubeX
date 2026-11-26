@@ -1333,6 +1333,7 @@ Settings:
     Cleanup Complete: Storage cleanup finished
     Cleanup Failed: Storage cleanup failed
   Subscription Settings:
+    Open Profile Manager: Open Profile Manager
     Refresh These Feeds Together: "Refresh These Feeds Together"
     Show New Content Feed: Show New Content Feed
     RSS Feeds: RSS feeds

@@ -1359,6 +1359,7 @@ Settings:
     Cleanup Complete: Rematou a limpeza do almacenamento
     Cleanup Failed: Produciuse un erro ao limpar o almacenamento
   Subscription Settings:
+    Open Profile Manager: Abrir o xestor de perfís
     Refresh These Feeds Together: "Actualizar estas fontes xuntas"
     Fetch Feed on Startup: Obter a fonte ao iniciar
     Show New Content Feed: Amosar a fonte de contido novo

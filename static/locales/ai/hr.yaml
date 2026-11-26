@@ -1353,6 +1353,7 @@ Settings:
     Cleanup Complete: Čišćenje prostora za pohranu dovršeno
     Cleanup Failed: Čišćenje prostora za pohranu nije uspjelo
   Subscription Settings:
+    Open Profile Manager: Otvori upravljač profila
     Refresh These Feeds Together: "Osvježi ove sažetke zajedno"
     Fetch Feed on Startup: Dohvati sažetak sadržaja pri pokretanju
     Show New Content Feed: Prikaži sažetak novog sadržaja

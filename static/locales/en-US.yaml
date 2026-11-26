@@ -1906,6 +1906,7 @@ Settings:
     Cleanup Failed: Storage cleanup failed
   Subscription Settings:
     Subscription Settings: Subscription
+    Open Profile Manager: Open Profile Manager
     Fetch Feeds from RSS: Fetch Feeds from RSS
     Fetch Feed on Startup: Fetch Feed on Startup
     Show New Content Feed: Show New Content Feed
@@ -2163,7 +2164,6 @@ Settings:
     Invalid channel playback speeds file: No channel playback speeds were found in this file
     Channel playback speeds imported: 'Imported the playback speed of {count} channel | Imported the playback speeds of {count} channels'
     Channels not found: '{count} channel could not be found | {count} channels could not be found'
-    Manage Subscriptions: Manage Subscriptions
   Sync Settings:
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
     Revoke Session Partial Failure: "Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access."

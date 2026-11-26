@@ -882,6 +882,7 @@ Settings:
     Cleanup Complete: Czyszczenie pamięci zakończone
     Cleanup Failed: Czyszczenie pamięci nie powiodło się
   Subscription Settings:
+    Open Profile Manager: Otwórz menadżer profili
     Refresh These Feeds Together: "Odświeżaj te kanały razem"
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
     Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"

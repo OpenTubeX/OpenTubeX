@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Biltegiratzea garbitu da
     Cleanup Failed: Ezin izan da biltegiratzea garbitu
   Subscription Settings:
+    Open Profile Manager: Ireki profil-kudeatzailea
     Refresh These Feeds Together: "Freskatu jario hauek batera"
     Fetch Feed on Startup: Eskuratu jarioa abioan
     Show New Content Feed: Erakutsi eduki berriaren jarioa

@@ -1382,6 +1382,7 @@ Settings:
     Cleanup Complete: Ачыстка сховішча завершана
     Cleanup Failed: Не ўдалося ачысціць сховішча
   Subscription Settings:
+    Open Profile Manager: Адкрыць кіраванне профілямі
     Refresh These Feeds Together: "Абнаўляць гэтыя стужкі разам"
     Fetch Feed on Startup: Атрымліваць стужку пры запуску
     Show New Content Feed: Паказваць стужку новага змесціва

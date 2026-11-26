@@ -1475,6 +1475,7 @@ Settings:
     Cleanup Complete: Limpieza del almacenamiento finalizada
     Cleanup Failed: No se pudo limpiar el almacenamiento
   Subscription Settings:
+    Open Profile Manager: Abrir gestor de perfiles
     Refresh These Feeds Together: "Actualizar estas fuentes juntas"
     Fetch Feed on Startup: Obtener la fuente al iniciar
     Show New Content Feed: Mostrar la fuente de contenido nuevo

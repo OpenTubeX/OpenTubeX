@@ -1385,6 +1385,7 @@ Settings:
     Cleanup Complete: پاک‌سازی فضای ذخیره‌سازی تمام شد
     Cleanup Failed: پاک‌سازی فضای ذخیره‌سازی ناموفق بود
   Subscription Settings:
+    Open Profile Manager: باز کردن مدیر پروفایل
     Refresh These Feeds Together: "به‌روزرسانی هم‌زمان این خوراک‌ها"
     Fetch Feed on Startup: دریافت خوراک هنگام راه‌اندازی
     Show New Content Feed: نمایش خوراک محتوای جدید

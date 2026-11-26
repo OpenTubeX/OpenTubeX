@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Đã dọn dẹp bộ nhớ
     Cleanup Failed: Không thể dọn dẹp bộ nhớ
   Subscription Settings:
+    Open Profile Manager: Mở trình quản lý hồ sơ
     Refresh These Feeds Together: "Làm mới các bảng tin này cùng lúc"
     Fetch Feed on Startup: Tải bảng tin khi khởi động
     Show New Content Feed: Hiện bảng tin nội dung mới

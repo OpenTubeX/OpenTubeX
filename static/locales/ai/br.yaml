@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: "Echu eo naetaat ar c'hadaviñ"
     Cleanup Failed: "C'hwitet eo naetaat ar c'hadaviñ"
   Subscription Settings:
+    Open Profile Manager: Digeriñ merañ ar profiloù
     Refresh These Feeds Together: "Freskaat ar gwazhioù-mañ asambles"
     Fetch Feed on Startup: "Adtapout ar gwazh el loc'hañ"
     Show New Content Feed: "Diskouez gwazh an endalc'had nevez"

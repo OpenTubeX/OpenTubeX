@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: 儲存空間清理完成
     Cleanup Failed: 儲存空間清理失敗
   Subscription Settings:
+    Open Profile Manager: 開啟設定檔管理器
     Refresh These Feeds Together: "同時重新整理這些動態消息"
     Fetch Feed on Startup: 啟動時擷取動態
     Show New Content Feed: 顯示新內容動態

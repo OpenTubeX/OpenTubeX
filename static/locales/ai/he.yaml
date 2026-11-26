@@ -1363,6 +1363,7 @@ Settings:
     Cleanup Complete: ניקוי האחסון הושלם
     Cleanup Failed: ניקוי האחסון נכשל
   Subscription Settings:
+    Open Profile Manager: פתיחת מנהל הפרופילים
     Refresh These Feeds Together: "רענון הפידים האלה יחד"
     Fetch Feed on Startup: טעינת העדכונים בעת ההפעלה
     Show New Content Feed: הצגת עדכוני תוכן חדש

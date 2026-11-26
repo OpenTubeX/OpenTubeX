@@ -513,8 +513,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
       'Import subscriptions formats',
       'Import history formats',
       'Import playlists formats',
-      'Import search history formats',
-      'Manage Subscriptions'
+      'Import search history formats'
     ]
   },
   'caption-appearance': {
