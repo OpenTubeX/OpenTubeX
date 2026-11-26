@@ -151,3 +151,20 @@
   }
   /* stylelint-enable selector-max-compound-selectors */
 }
+
+/* On phones, the fields fill the card instead of staying centered, and each
+   select keeps room only for its own icons (see FtSettingsSection), so the
+   fields no longer share their end edge. The grid always reserves the marker
+   gutter before them, so a select without icons keeps as much room after. */
+@container settings-content (width <= 460px) {
+  .generalSelectGrid.generalSelectGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .generalSelectGrid :deep(.select.contentSized) {
+    --settings-marker-gutter: 12px;
+
+    grid-column: 1;
+    grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
+  }
+}
