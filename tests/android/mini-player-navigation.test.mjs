@@ -22,6 +22,10 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   }
   const originalRoute = await page.evaluate(() => location.hash)
+  // A video no other test opens. The app reuses a Watch page that an earlier
+  // test's cleanup or the restored session left for the same video, loaded
+  // without the stubs and with real comments.
+  const videoId = `mnv${Date.now().toString(36).slice(-8)}`
   const rotation = adb('settings', 'get', 'system', 'user_rotation')
   const automaticRotation = adb('settings', 'get', 'system', 'accelerometer_rotation')
   let settings
@@ -31,7 +35,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     adb('settings', 'put', 'system', 'user_rotation', '0')
     await page.locator('.profileTrigger').waitFor()
     await blockAppNetwork(page)
-    settings = await page.evaluate(fromChannel => {
+    settings = await page.evaluate(({ fromChannel, videoId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         VideoPlaybackEngine: 'built-in',
@@ -91,9 +95,9 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
       style.id = 'mini-navigation-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
       document.head.append(style)
-      location.hash = fromChannel ? '#/subscriptions' : '#/watch/jNQXAC9IVRw'
+      location.hash = fromChannel ? '#/subscriptions' : `#/watch/${videoId}`
       return saved
-    }, fromChannel)
+    }, { fromChannel, videoId })
     if (fromChannel) {
       await expect(page).toHaveURL(/#\/subscriptions/)
       // The channel page of an earlier test can stay retained, but hidden.
@@ -103,7 +107,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return store.getters.getTabById(store.getters.getActiveTabId)?.contentTitle
       })).toBe('Test channel')
-      await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
+      await page.evaluate(videoId => { location.hash = `#/watch/${videoId}` }, videoId)
     }
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
     watch = await replaceWatchVideo(page, {
@@ -215,9 +219,9 @@ test('fullscreen comment avatar navigation opens the channel and docks the same 
   const link = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
   const avatar = link.locator('.commentThumbnail, .commentThumbnailHidden').first()
   await expect(avatar).toBeVisible()
-  // A reused emulator may already have cached comments for the fixture video.
+  // The stubbed comment, whose author has no thumbnail to load.
   const destination = await link.getAttribute('href')
-  assert.match(destination, /^#\/channel\//)
+  assert.equal(destination, '#/channel/UC-test-commenter')
   await tap(avatar)
   await expect(page).toHaveURL(`https://localhost/${destination}`)
   await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
