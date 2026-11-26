@@ -63,7 +63,15 @@ export class CaptionTiming extends shaka.ui.Element {
     this.input_.step = '0.1'
     this.input_.inputMode = 'decimal'
     inputLabel.append(this.offsetLabel_, this.input_)
-    content.appendChild(inputLabel)
+    const reset = this.createButton_('undo')
+    reset.button.classList.add('ft-caption-timing-reset')
+    this.resetButton_ = reset.button
+    this.resetLabel_ = reset.label
+    // The button stays outside the label, which would otherwise add its text to the input's name.
+    const offsetRow = document.createElement('div')
+    offsetRow.classList.add('ft-caption-timing-offset-row')
+    offsetRow.append(inputLabel, reset.button)
+    content.appendChild(offsetRow)
 
     this.hint_ = document.createElement('p')
     content.appendChild(this.hint_)
@@ -76,10 +84,6 @@ export class CaptionTiming extends shaka.ui.Element {
     this.earlierLabel_ = earlier.label
     this.laterLabel_ = later.label
     adjustments.append(earlier.button, later.button)
-
-    const reset = this.createButton_('undo')
-    this.resetLabel_ = reset.label
-    content.appendChild(reset.button)
 
     this.eventManager.listen(this.button, 'click', event => {
       event.stopPropagation()
@@ -110,17 +114,23 @@ export class CaptionTiming extends shaka.ui.Element {
       const offset = this.input_.valueAsNumber
       this.input_.ariaInvalid = Number.isFinite(offset) ? 'false' : 'true'
       if (Number.isFinite(offset)) this.timing_.setOffset(offset)
+      this.updateReset_()
     })
     this.eventManager.listen(this.input_, 'change', () => this.updateOffset_())
     this.eventManager.listen(earlier.button, 'click', () => this.adjust_(-0.1))
     this.eventManager.listen(later.button, 'click', () => this.adjust_(0.1))
     this.eventManager.listen(reset.button, 'click', () => {
+      // The button disables itself, so keyboard focus moves on to the field it cleared.
+      // Pointer presses leave it, so that touch screens don't open their keyboard.
+      const keyboard = reset.button.matches(':focus-visible')
       this.timing_.setOffset(0)
       this.updateOffset_()
+      if (keyboard) this.input_.focus({ preventScroll: true })
     })
     this.eventManager.listen(events, 'localeChanged', () => this.updateStrings_())
     this.eventManager.listen(events, 'captionTimingChanged', () => {
-      if (document.activeElement !== this.input_) this.updateOffset_()
+      if (document.activeElement === this.input_) this.updateReset_()
+      else this.updateOffset_()
     })
     this.updateStrings_()
     this.updateOffset_()
@@ -148,6 +158,11 @@ export class CaptionTiming extends shaka.ui.Element {
   updateOffset_() {
     this.input_.value = String(this.timing_.getOffset())
     this.input_.ariaInvalid = 'false'
+    this.updateReset_()
+  }
+
+  updateReset_() {
+    this.resetButton_.disabled = this.timing_.getOffset() === 0
   }
 
   updateStrings_() {

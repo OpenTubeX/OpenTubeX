@@ -147,7 +147,9 @@
 }
 
 :deep(.ft-caption-timing-controls) {
+  display: flex;
   flex: 1 1 0;
+  flex-direction: column;
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -163,39 +165,69 @@
   display: grid;
   gap: 8px;
   padding: 8px;
+
+  /* Centered below the header while it fits, and scrolled from its start once it doesn't. */
+  margin-block: auto;
   color: #fff;
   white-space: normal;
+}
+
+/* Shaka indents the labels of submenus for the checkmark of their options. */
+:deep(.ft-caption-timing-content span) {
+  margin-inline-start: 0;
+}
+
+:deep(.ft-caption-timing-offset-row) {
+  display: flex;
+  flex-wrap: wrap;
+  place-content: center;
+  align-items: center;
+  gap: 8px 12px;
 }
 
 :deep(.ft-caption-timing-offset) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   font-size: 13px;
 }
 
+/* A filled field like `FtInput`, lightened for the always dark menu. */
 :deep(.ft-caption-timing-offset input) {
   box-sizing: border-box;
   inline-size: 90px;
-  min-block-size: var(--caption-timing-target-size, 36px);
-  padding: 6px;
-  border: 1px solid rgb(255 255 255 / 40%);
-  border-radius: calc(6px * var(--ui-roundness));
-  background: rgb(0 0 0 / 20%);
+  block-size: var(--caption-timing-target-size, 36px);
+  padding-block: 0;
+  padding-inline: 12px;
+  border: 0;
+  border-block-end: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
+  background: rgb(255 255 255 / 8%);
   color: inherit;
+  caret-color: var(--primary-color);
   font: inherit;
+  transition: border-color var(--motion-fast-effects), background-color var(--motion-fast-effects);
 }
 
-/* Outranks Shaka's keyboard focus ring for menus. */
-:deep(.shaka-controls-container .ft-caption-timing-offset input[type='number']:focus-visible) {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+:deep(.ft-caption-timing-offset input:hover) {
+  border-block-end-color: #fff;
+  background: rgb(255 255 255 / 14%);
+}
+
+/*
+  Like `FtInput`, the field shows focus with a thicker underline instead of the
+  focus ring. This outranks Shaka's keyboard focus ring for menus.
+*/
+/* stylelint-disable-next-line a11y/no-outline-none */
+:deep(.shaka-controls-container .ft-caption-timing-offset input[type='number']:focus) {
+  border-block-end-color: var(--primary-color);
+  outline: none;
+  box-shadow: inset 0 -2px 0 var(--primary-color);
 }
 
 :deep(.ft-caption-timing-offset input[aria-invalid='true']) {
-  border-color: var(--primary-color);
+  border-block-end-color: var(--primary-color);
 }
 
 :deep(.ft-caption-timing-controls p) {
@@ -215,8 +247,28 @@
   justify-content: center;
   gap: 8px;
   min-block-size: var(--caption-timing-target-size, 44px);
-  border-radius: calc(6px * var(--ui-roundness));
-  background: rgb(255 255 255 / 10%);
+  border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
+  background: rgb(255 255 255 / 7%);
+}
+
+/* Like the tiles of the other menus. */
+:deep(.ft-caption-timing-controls button:not(:disabled):is(:hover, :focus-visible)) {
+  background: rgb(255 255 255 / 20%);
+}
+
+:deep(.ft-caption-timing-controls button:disabled) {
+  background: rgb(255 255 255 / 7%);
+  cursor: default;
+  opacity: 0.38;
+}
+
+/* As tall as the offset field beside it, and only as wide as its label. */
+:deep(.ft-caption-timing-controls .ft-caption-timing-reset) {
+  inline-size: auto;
+  block-size: var(--caption-timing-target-size, 36px);
+  min-block-size: 0;
+  padding-block: 0;
+  padding-inline: 12px;
 }
 
 :deep(.ft-caption-timing-controls button > span),
