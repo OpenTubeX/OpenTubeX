@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 import { applyAnimationSpeed } from './animationSpeed'
+import { getFixedBackgroundInset } from './fixedBackground'
 import { isReducedMotionEnabled } from './reducedMotion'
 
 // Shared by the watch and external media pages, which use the same layout
@@ -90,21 +91,9 @@ export function createWatchLayoutAnimator() {
    * that box, so this runs again on scroll.
    */
   function placeFixedBackgrounds() {
-    const { clientWidth: viewportWidth, clientHeight: viewportHeight } = document.documentElement
     // Read every area before writing, so one area's write doesn't force a
     // layout for the next area's read.
-    const insets = [...insetElements].map(element => {
-      const rect = element.getBoundingClientRect()
-      const { m41: translateX, m42: translateY } = new DOMMatrixReadOnly(getComputedStyle(element).transform)
-      const left = rect.left - translateX + element.clientLeft
-      const top = rect.top - translateY + element.clientTop
-      return [element, [
-        -top,
-        left + element.clientWidth - viewportWidth,
-        top + element.clientHeight - viewportHeight,
-        -left
-      ].map(value => `${value}px`).join(' ')]
-    })
+    const insets = [...insetElements].map(element => [element, getFixedBackgroundInset(element)])
     insets.forEach(([element, inset]) => element.style.setProperty('--fixed-background-inset', inset))
   }
 

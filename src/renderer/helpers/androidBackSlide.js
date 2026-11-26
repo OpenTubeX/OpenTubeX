@@ -1,4 +1,5 @@
 import { applyAnimationSpeed } from './animationSpeed'
+import { getFixedBackgroundContainment } from './fixedBackground'
 import { isReducedMotionEnabled } from './reducedMotion'
 
 /** How far toward the swipe edge the view behind starts, as a share of the width. */
@@ -132,7 +133,11 @@ export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) 
       // Without this hint, Chromium paints the view again on every move.
       // Changing the hint repaints the view, so keep one that it already has.
       if (!getComputedStyle(element).willChange.split(',').some(hint => hint.trim() === 'transform')) {
+        // The hint would also move the view's card fields, see
+        // getFixedBackgroundContainment. Measure them before it changes styles.
+        const fields = getFixedBackgroundContainment(element)
         setStyle(element, 'will-change', 'transform')
+        for (const field of fields) setStyle(field.element, field.name, field.value)
       }
       if (!target.covered) setStyle(element, 'box-shadow', slide.shadow)
       for (const [name, value] of Object.entries(target.styles ?? {})) setStyle(element, name, value)
