@@ -69,6 +69,7 @@ function setup() {
     translateWindowTitle: title => title,
     runPendingViewTransition: run => run(),
     cancelPendingViewTransition: () => {},
+    hasPendingViewTransition: () => false,
     getViewTransitionRequestId: () => 0,
     window: { setTimeout: () => 0, clearTimeout() {} },
   })

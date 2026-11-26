@@ -4,6 +4,9 @@ import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
 
 export const VIDEO_MORPH_NAME = 'video-morph'
+// Long enough to load a route's code from disk while the app is busy, and
+// short enough that a stalled request does not hold the navigation back.
+const MORPH_DESTINATION_LOAD_TIMEOUT_MS = 500
 
 /** @type {HTMLElement | null} */
 let morphSourceElement = null
@@ -129,17 +132,40 @@ function waitForNewTabTarget(tabId) {
 }
 
 /**
+ * Waits for the code of a morph's destination before the morph starts. Its new
+ * snapshot is the destination's first render, which for a route that is still
+ * loading, such as on the first tap since launch, is its loading placeholder
+ * instead of the player. A route that loads slowly or fails is left to show it.
+ *
+ * @param {() => Promise<unknown>} load
+ */
+export async function loadMorphDestination(load) {
+  let timeout
+  try {
+    await Promise.race([
+      load(),
+      new Promise(resolve => { timeout = setTimeout(resolve, MORPH_DESTINATION_LOAD_TIMEOUT_MS) })
+    ])
+  } catch {
+    // The navigation loads and reports the route itself.
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+/**
  * Wrap navigations that were requested via {@linkcode requestWatchPageViewTransition}
  * in a View Transition. All other navigations are left untouched.
  *
  * @param {import('vue-router').Router} router
+ * @param {{ preloadRoute?: (route: import('vue-router').RouteLocationNormalized) => Promise<unknown> }} [options]
  */
-export function installViewTransitions(router) {
+export function installViewTransitions(router, { preloadRoute = () => Promise.resolve() } = {}) {
   if (typeof document === 'undefined' || typeof document.startViewTransition !== 'function') {
     return
   }
 
-  router.beforeResolve(() => {
+  router.beforeResolve(async (to) => {
     // Ignore stale requests from clicks whose navigation was cancelled
     if (navigationRequestedAt === 0 || Date.now() - navigationRequestedAt > 1000) {
       cleanupMorphSource()
@@ -152,6 +178,7 @@ export function installViewTransitions(router) {
     const shortMorph = shortMorphRequested
     shortMorphRequested = false
 
+    await loadMorphDestination(() => preloadRoute(to))
     return new Promise((resolve) => {
       const transition = document.startViewTransition(() => {
         // The old snapshot has been captured, so the thumbnail can give its

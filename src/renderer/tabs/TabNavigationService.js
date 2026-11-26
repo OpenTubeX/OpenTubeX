@@ -7,6 +7,7 @@ import {
   cancelPendingViewTransition,
   getViewTransitionRequestId,
   hasPendingViewTransition,
+  loadMorphDestination,
   runPendingViewTransition,
   takePendingViewTransition
 } from '../helpers/viewTransitions'
@@ -24,8 +25,13 @@ const NAVIGATION_FRAME_TIMEOUT_MS = 1000
 
 let service = null
 
-export function initializeTabNavigationService(router, store) {
-  service = new TabNavigationService(router, store)
+/**
+ * @param {import('vue-router').Router} router
+ * @param {object} store
+ * @param {{ preloadRoute?: (route: import('vue-router').RouteLocationResolved) => Promise<unknown> }} [options]
+ */
+export function initializeTabNavigationService(router, store, options) {
+  service = new TabNavigationService(router, store, options)
   return service
 }
 
@@ -37,9 +43,10 @@ export function getTabNavigationService() {
 }
 
 export class TabNavigationService {
-  constructor(router, store) {
+  constructor(router, store, { preloadRoute = () => Promise.resolve() } = {}) {
     this.router = router
     this.store = store
+    this.preloadRoute = preloadRoute
     this.latestTransitionRequestId = 0
     this.transitionQueue = Promise.resolve()
     this.pendingPresentation = null
@@ -396,6 +403,11 @@ export class TabNavigationService {
           history = history.slice(-MAX_LOGICAL_HISTORY_ENTRIES)
         }
         historyIndex = history.length - 1
+      }
+
+      if (componentChanged && hasPendingViewTransition() &&
+        this.store.getters.getPresentedTabId === tabId) {
+        await loadMorphDestination(() => this.preloadRoute(to))
       }
 
       const isPresented = this.store.getters.getPresentedTabId === tabId

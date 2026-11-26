@@ -4,7 +4,8 @@ export const ROUTE_PRELOAD_INTENT_DELAY_MS = 80
 
 /**
  * Loads the code of internal link destinations while the pointer rests on a
- * link or keyboard focus stays on it, so the click does not wait for it.
+ * link, keyboard focus stays on it or a touch presses it, so the click does
+ * not wait for it.
  * Only the route component's code is loaded: nothing mounts, fetches or
  * changes the route before the click.
  *
@@ -29,6 +30,13 @@ export function installRoutePreloadIntent({
     intentLink = null
   }
 
+  /** @param {Element} link */
+  const preloadLink = (link) => {
+    const path = link.getAttribute('href').slice(1)
+    // A failed preload leaves the click to load and report the route itself.
+    new Promise(resolve => resolve(preload(path))).catch(() => {})
+  }
+
   /** @param {Element | null} link */
   const startIntent = (link) => {
     if (link === intentLink) return
@@ -37,9 +45,7 @@ export function installRoutePreloadIntent({
     intentLink = link
     timer = setTimeout(() => {
       timer = null
-      const path = link.getAttribute('href').slice(1)
-      // A failed preload leaves the click to load and report the route itself.
-      new Promise(resolve => resolve(preload(path))).catch(() => {})
+      preloadLink(link)
     }, delay)
   }
 
@@ -48,6 +54,18 @@ export function installRoutePreloadIntent({
     // Touch and stylus taps have no hover phase before their click.
     if (event.pointerType !== 'mouse') return
     startIntent(findInternalLink(event.target))
+  }
+
+  /** @param {PointerEvent} event */
+  const handlePointerDown = (event) => {
+    cancel()
+    // A touch or stylus press is the first sign of a tap. Its click follows
+    // within a few frames, too soon for a cold route to load, and a thumbnail
+    // morph would then capture its loading placeholder instead of the player.
+    // A press that starts a scroll loads code that is only fetched once.
+    if (event.pointerType === 'mouse') return
+    const link = findInternalLink(event.target)
+    if (link !== null) preloadLink(link)
   }
 
   /** @param {FocusEvent} event */
@@ -74,7 +92,7 @@ export function installRoutePreloadIntent({
     ['focusout', handleFocusOut],
     // Content scrolling beneath a resting pointer is not intent.
     ['scroll', cancel],
-    ['pointerdown', cancel]
+    ['pointerdown', handlePointerDown]
   ]
   for (const [type, listener] of listeners) {
     target.addEventListener(type, listener, { capture: true, passive: true })
