@@ -794,6 +794,18 @@ export function createWebURL(path) {
 }
 
 /**
+ * Like `createWebURL`, for the data files under `static/` that keep their
+ * names between builds. The browser build adds a hash of their contents, so
+ * the service worker and the HTTP cache cannot serve an older build's copy.
+ * @param {string} path
+ * @returns {string}
+ */
+export function createStaticDataURL(path) {
+  const url = createWebURL(path)
+  return process.env.STATIC_DATA_VERSION ? `${url}?v=${process.env.STATIC_DATA_VERSION}` : url
+}
+
+/**
  * This formats the duration of a video in seconds into a user friendly timestamp.
  * It will return strings like LIVE or UPCOMING, without making any changes
  * @param {string|number} lengthSeconds the video duration in seconds or the strings LIVE or UPCOMING

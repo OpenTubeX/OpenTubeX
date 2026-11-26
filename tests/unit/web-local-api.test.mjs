@@ -50,7 +50,7 @@ test('the web build only offers Invidious instances that allow CORS, even with t
   const instances = await new Promise(resolve => {
     const actions = vm.runInNewContext(`({ ${instancesFromFileSource} })`, {
       process: { env: { SUPPORTS_LOCAL_API: true } },
-      createWebURL: path => path,
+      createStaticDataURL: path => path,
       fetch: async () => ({
         json: async () => [
           { url: 'https://cors.example', cors: true },

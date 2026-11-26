@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
 import { ref } from 'vue'
-import { createWebURL } from '../helpers/utils'
+import { createStaticDataURL } from '../helpers/utils'
 import { createPluralRules, expandMultipleOnlyPluralMessages } from './plurals'
 import { composeLocaleMessages, resolveMessagesWithFallback } from '../../localeComposition'
 // List of locales approved for use
@@ -46,7 +46,7 @@ async function fetchLocaleMessages(locale, source) {
   const extension = process.env.IS_ELECTRON && process.env.NODE_ENV !== 'development'
     ? 'json.br'
     : 'json'
-  const url = createWebURL(`/static/${directory}/${locale}.${extension}`)
+  const url = createStaticDataURL(`/static/${directory}/${locale}.${extension}`)
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`Unable to load ${source} locale "${locale}": ${response.status}`)

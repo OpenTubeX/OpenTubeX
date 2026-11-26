@@ -1,4 +1,4 @@
-import { createWebURL } from '../../helpers/utils'
+import { createStaticDataURL } from '../../helpers/utils'
 
 // replace with a Map after the Vue 3 and Pinia migrations
 const state = {
@@ -9,7 +9,7 @@ const getters = {}
 
 const actions = {
   async cachePlayerLocale({ commit }, locale) {
-    const url = createWebURL(`/static/shaka-player-locales/${locale}.json`)
+    const url = createStaticDataURL(`/static/shaka-player-locales/${locale}.json`)
 
     const response = await fetch(url)
     const data = await response.json()
