@@ -431,9 +431,10 @@ export class TabNavigationService {
       }
 
       if (isPresented) {
-        // A click made while this navigation waited requested its own morph,
-        // which its own navigation, queued behind this one, takes.
+        // A click made while this navigation waited would morph a thumbnail
+        // that this navigation hides, so that click opens without a morph.
         if (morphRequestId !== null && morphRequestId !== getViewTransitionRequestId()) {
+          cancelPendingViewTransition(getViewTransitionRequestId())
           await applyNavigation()
         } else {
           await runPendingViewTransition(applyNavigation)

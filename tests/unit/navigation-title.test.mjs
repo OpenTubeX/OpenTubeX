@@ -169,21 +169,23 @@ for (const mode of ['push', 'replace']) {
   })
 }
 
-test('a navigation waiting for its morph destination leaves a newer click\'s morph to that click', async () => {
+test('a click made while a navigation waits for its morph destination opens without a morph', async () => {
   let requestId = 1
   const loads = []
   const morphed = []
+  const cancelled = []
   const { store, router, navigation, tab } = setup({
-    hasPendingViewTransition: () => true,
+    hasPendingViewTransition: () => !cancelled.length,
     getViewTransitionRequestId: () => requestId,
-    // A presented navigation waits for a frame and restores the scroll position.
-    isAppHidden: () => true,
-    window: { setTimeout: () => 0, clearTimeout() {}, scrollTo() {} },
+    cancelPendingViewTransition: id => cancelled.push(id),
     loadMorphDestination: () => new Promise(resolve => loads.push(resolve)),
     runPendingViewTransition: async update => {
       await update()
       morphed.push(store.getters.getTabById('tab').route.path)
     },
+    // A presented navigation waits for a frame and restores the scroll position.
+    isAppHidden: () => true,
+    window: { setTimeout: () => 0, clearTimeout() {}, scrollTo() {} },
   })
   await router.push('/channel/UC-test')
   store.commit('setPresentedTab', 'tab')
@@ -195,5 +197,6 @@ test('a navigation waiting for its morph destination leaves a newer click\'s mor
   loads.shift()()
   await Promise.all([first, second])
   assert.equal(tab().route.path, '/watch/second')
-  assert.deepEqual(morphed, ['/watch/second'], 'only the second navigation runs the pending morph')
+  assert.deepEqual(cancelled, [2], 'the first navigation hides the second click\'s thumbnail')
+  assert.deepEqual(morphed, ['/watch/second'], 'the second navigation runs without its cancelled morph')
 })
