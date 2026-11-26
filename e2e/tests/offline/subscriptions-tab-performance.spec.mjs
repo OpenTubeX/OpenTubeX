@@ -144,6 +144,7 @@ test('keeps the feed behind Watch as it was while a video opens and on Back', as
   await expect(page.locator('#subscriptionsPanel .feed-enter-active, #subscriptionsPanel .feed-enter-from')).toHaveCount(0)
   await page.evaluate(() => {
     const panel = document.querySelector('#subscriptionsPanel')
+    window.__behindWatchPanel = panel
     const count = nodes => [...nodes].reduce((total, node) => total + (node instanceof Element
       ? Number(node.matches('.ft-list-video')) + node.querySelectorAll('.ft-list-video').length
       : 0), 0)
@@ -170,7 +171,9 @@ test('keeps the feed behind Watch as it was while a video opens and on Back', as
     for (let frame = 0; frame < 30; frame++) await new Promise(resolve => requestAnimationFrame(resolve))
   })
   const takeWork = () => page.evaluate(() => {
-    const work = { ...window.__behindWatchWork }
+    // A replaced panel would hide its new cards from the observers.
+    const panel = window.__behindWatchPanel
+    const work = { ...window.__behindWatchWork, panelKept: panel.isConnected && panel === document.querySelector('#subscriptionsPanel') }
     window.__behindWatchWork = { cardMounts: 0, cardUnmounts: 0, gridResizes: 0 }
     return work
   })
@@ -181,12 +184,12 @@ test('keeps the feed behind Watch as it was while a video opens and on Back', as
   await expect(page).toHaveURL(/#\/watch\//)
   await expect(page.locator('.tabContent[aria-hidden="false"] .browsingBehindWatch')).toHaveCount(1)
   await settle()
-  expect(await takeWork(), 'opening a video must leave the hidden feed alone').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0 })
+  expect(await takeWork(), 'opening a video must leave the hidden feed alone').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0, panelKept: true })
 
   await page.locator(sel.backButton).click()
   await expect(page).toHaveURL(/#\/subscriptions$/)
   await settle()
-  expect(await takeWork(), 'Back must show the cards the feed kept').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0 })
+  expect(await takeWork(), 'Back must show the cards the feed kept').toEqual({ cardMounts: 0, cardUnmounts: 0, gridResizes: 0, panelKept: true })
   await page.evaluate(() => {
     window.__behindWatchObserver.disconnect()
     window.__behindWatchSizeObserver.disconnect()
