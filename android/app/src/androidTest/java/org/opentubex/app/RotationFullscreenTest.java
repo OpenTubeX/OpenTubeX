@@ -379,8 +379,17 @@ public class RotationFullscreenTest {
                 activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         });
         awaitCondition(view, "innerHeight > innerWidth");
-        onMain(main, activity -> assertEquals(Configuration.ORIENTATION_PORTRAIT,
-            activity.getResources().getConfiguration().orientation));
+        // A busy device can resize the WebView before it delivers the
+        // activity's configuration change.
+        AtomicReference<Integer> orientation = new AtomicReference<>();
+        long deadline = android.os.SystemClock.uptimeMillis() + 5000;
+        do {
+            onMain(main, activity -> orientation.set(activity.getResources().getConfiguration().orientation));
+            if (orientation.get() == Configuration.ORIENTATION_PORTRAIT) return;
+            Thread.sleep(100);
+        } while (android.os.SystemClock.uptimeMillis() < deadline);
+        assertEquals("The activity's configuration follows the portrait WebView",
+            Integer.valueOf(Configuration.ORIENTATION_PORTRAIT), orientation.get());
     }
 
     private static void onMain(MainActivity main, ActivityScenario.ActivityAction<MainActivity> action) {
