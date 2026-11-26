@@ -976,12 +976,28 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await expect.poll(outputGain).toBe(2)
 
   // Another video in the same tab keeps the boost, and loudness
-  // normalization turns it down because YouTube reports it as louder.
+  // normalization turns it down because YouTube reports it as louder. It
+  // scales the element volume instead of adding Web Audio latency, and the
+  // volume controls and saved volumes keep the user's volume.
   await openMockedVideo(page, 'aqz-KE-bpKQ')
   await expect.poll(sourceCount).toBe(2)
-  await expect.poll(outputGain).toBe(1)
-  await page.evaluate(() => window.$store.dispatch('updateNormalizeLoudness', false))
   await expect.poll(outputGain).toBe(2)
+  const volumes = () => video.evaluate((element) => {
+    const elementVolume = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume').get.call(element)
+    return { user: element.volume, ratio: Math.round(elementVolume / element.volume * 100) / 100 }
+  })
+  await expect.poll(async () => (await volumes()).ratio).toBe(0.5)
+  const userVolume = (await volumes()).user
+  expect(userVolume).toBeGreaterThan(0)
+  await video.evaluate((element) => {
+    window.__volumeChanges = 0
+    element.addEventListener('volumechange', () => window.__volumeChanges++)
+  })
+  await page.evaluate(() => window.$store.dispatch('updateNormalizeLoudness', false))
+  await expect.poll(volumes).toEqual({ user: userVolume, ratio: 1 })
+  await expect.poll(outputGain).toBe(2)
+  await video.evaluate((element) => { element.volume /= 2 })
+  await expect.poll(() => page.evaluate(() => window.__volumeChanges)).toBe(1)
 
   // A new tab starts without a boost.
   await page.locator('.tabBar .newTabButton').click()
@@ -1004,6 +1020,12 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await openPlayerOptions(nextPlayer)
   await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
   await expect.poll(() => outputGain(1)).toBe(1)
+
+  // Without a boost, loudness normalization does not route the audio through Web Audio.
+  await page.evaluate(() => window.$store.dispatch('updateNormalizeLoudness', true))
+  await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect.poll(async () => (await volumes()).ratio).toBe(0.5)
+  expect(await sourceCount()).toBe(2)
 })
 
 test('mono audio plays every channel in both ears', async ({ app, page, attachScreenshot }) => {

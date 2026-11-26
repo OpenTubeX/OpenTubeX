@@ -4922,8 +4922,8 @@ const videoRotationFit = computed(() => getVideoRotationFit(
   videoIntrinsicSize.value,
 ))
 
-// Like skip silence and voice-over translation, this needs Web Audio
-// processing, which the player does not use on iOS.
+// Like skip silence, this needs Web Audio processing, which the player does
+// not use on iOS.
 const volumeBoostPossible = computed(() => !process.env.IS_IOS && store.getters.getShowVolumeBoostToggle)
 const volumeBoost = computed(() => {
   return volumeBoostPossible.value ? sanitizeVolumeBoost(store.getters.getTabVolumeBoost(mediaTabId)) : DEFAULT_VOLUME_BOOST
@@ -12606,6 +12606,8 @@ onMounted(async () => {
     !audioPlayerMode.value && !scrollMiniPlayerDismissed.value && (isActiveTab.value || isCrossTabMiniPlayerPresented.value)
   )
 
+  // iOS ignores the element volume, and the player applies no gains there.
+  if (!process.env.IS_IOS) playerAudioOutput.attach(videoElement)
   voiceOverTranslation.attach(videoElement)
   playerAudioOutput.setGain('boost', volumeBoost.value)
   playerAudioOutput.setMono(monoAudio.value)

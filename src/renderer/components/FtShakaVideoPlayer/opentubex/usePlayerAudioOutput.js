@@ -2,14 +2,23 @@ import { onBeforeUnmount } from 'vue'
 
 /** @typedef {'voiceOver' | 'boost' | 'loudness'} PlayerAudioGainStage */
 
+// These stages only turn the audio down, so they scale the element volume.
 /** @type {readonly PlayerAudioGainStage[]} */
-const GAIN_STAGES = ['voiceOver', 'boost', 'loudness']
+const ATTENUATION_STAGES = ['voiceOver', 'loudness']
+
+/** @type {PropertyDescriptor | undefined} */
+let nativeVolume
 
 /**
- * Routes the player's audio through gain stages that multiply with the
- * element volume, optionally downmixed to mono. The graph is only built once
- * a stage leaves unity gain or mono is enabled, because a media element can
- * never be detached from Web Audio again.
+ * Applies the player's output gains, which multiply with the volume the user
+ * chose, and optionally downmixes it to mono.
+ *
+ * Gains below unity scale the element volume, so the audio keeps Chromium's
+ * playback path. Web Audio output adds tens of milliseconds of latency, and on
+ * Bluetooth well over 100 ms, without delaying the video to match. Only volume
+ * boost and mono need Web Audio, so the graph is built once one of them is
+ * used, because a media element can never be detached from Web Audio again.
+ * The graph processes the audio after the element volume.
  *
  * A media element can only have one MediaElementAudioSourceNode, so all output
  * processing for the player must share this graph.
@@ -21,10 +30,16 @@ export function usePlayerAudioOutput(video) {
   const gains = { voiceOver: 1, boost: 1, loudness: 1 }
   let mono = false
 
+  /** @type {HTMLVideoElement | null} */
+  let volumeElement = null
+  let userVolume = 1
+  /** @type {((event: Event) => void) | null} */
+  let suppressAttenuationEvents = null
+
   /** @type {AudioContext | null} */
   let audioContext = null
-  /** @type {Record<PlayerAudioGainStage, GainNode> | null} */
-  let gainNodes = null
+  /** @type {GainNode | null} */
+  let boostNode = null
   /** @type {GainNode | null} */
   let monoNode = null
   /** @type {Promise<void> | null} */
@@ -32,6 +47,81 @@ export function usePlayerAudioOutput(video) {
   /** @type {HTMLVideoElement | null} */
   let routedVideo = null
   let destroyed = false
+
+  function attenuation() {
+    return ATTENUATION_STAGES.reduce((product, stage) => product * Math.min(1, Math.max(0, gains[stage])), 1)
+  }
+
+  function applyElementVolume() {
+    if (volumeElement) {
+      nativeVolume.set.call(volumeElement, userVolume * attenuation())
+    }
+  }
+
+  /**
+   * Makes `volume` report and set the user's volume, so the controls, saved
+   * volumes and other features never see the attenuation. Call it before the
+   * player sets its initial volume.
+   *
+   * @param {HTMLVideoElement} videoElement
+   */
+  function attach(videoElement) {
+    if (volumeElement) {
+      return
+    }
+
+    nativeVolume ??= Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume')
+    volumeElement = videoElement
+    userVolume = nativeVolume.get.call(videoElement)
+    Object.defineProperty(videoElement, 'volume', {
+      configurable: true,
+      enumerable: true,
+      get: () => userVolume,
+      set: (value) => {
+        const volume = Number(value)
+        if (!Number.isFinite(volume)) {
+          throw new TypeError(`The provided double value is non-finite: ${value}`)
+        }
+        if (volume < 0 || volume > 1) {
+          throw new DOMException(`The volume provided (${volume}) is outside the range [0, 1].`, 'IndexSizeError')
+        }
+        const previousVolume = userVolume
+        const previousElementVolume = nativeVolume.get.call(videoElement)
+        userVolume = volume
+        applyElementVolume()
+        // While a gain mutes the element, its volume stays 0 and fires no event.
+        if (volume !== previousVolume && nativeVolume.get.call(videoElement) === previousElementVolume) {
+          setTimeout(() => videoElement.dispatchEvent(new Event('volumechange')))
+        }
+      }
+    })
+
+    // A gain change also fires volumechange. Listeners on the element would
+    // take that for the user changing the volume, and save it for the channel.
+    let reported = { volume: userVolume, muted: videoElement.muted }
+    suppressAttenuationEvents = (event) => {
+      if (userVolume === reported.volume && videoElement.muted === reported.muted) {
+        event.stopImmediatePropagation()
+      } else {
+        reported = { volume: userVolume, muted: videoElement.muted }
+      }
+    }
+    // Capturing listeners on the target run before the others.
+    videoElement.addEventListener('volumechange', suppressAttenuationEvents, { capture: true })
+    applyElementVolume()
+  }
+
+  // The element is removed with the player, so its volume is not restored.
+  // Doing so would fire volumechange at listeners that may still run.
+  function detachVolume() {
+    if (!volumeElement) {
+      return
+    }
+    delete volumeElement.volume
+    volumeElement.removeEventListener('volumechange', suppressAttenuationEvents, { capture: true })
+    volumeElement = null
+    suppressAttenuationEvents = null
+  }
 
   // The element only plays through the graph, so an interruption that suspends
   // the context, such as a phone call on Android, would otherwise leave it silent.
@@ -62,19 +152,14 @@ export function usePlayerAudioOutput(video) {
       return
     }
 
-    /** @type {AudioNode} */
-    let output = audioContext.createMediaElementSource(videoElement)
-    const nodes = /** @type {Record<PlayerAudioGainStage, GainNode>} */ ({})
-    for (const stage of GAIN_STAGES) {
-      nodes[stage] = audioContext.createGain()
-      nodes[stage].gain.value = gains[stage]
-      output = output.connect(nodes[stage])
-    }
+    const source = audioContext.createMediaElementSource(videoElement)
+    const boost = audioContext.createGain()
+    boost.gain.value = gains.boost
     monoNode = audioContext.createGain()
     monoNode.channelCount = 1
     applyMono()
-    output.connect(monoNode).connect(audioContext.destination)
-    gainNodes = nodes
+    source.connect(boost).connect(monoNode).connect(audioContext.destination)
+    boostNode = boost
     routedVideo = videoElement
     audioContext.addEventListener('statechange', resumeWhilePlaying)
     audioContext.addEventListener('statechange', suspendWhilePaused)
@@ -91,7 +176,7 @@ export function usePlayerAudioOutput(video) {
     } catch (error) {
       console.warn('Unable to adjust player audio output', error)
     } finally {
-      if (!gainNodes) {
+      if (!boostNode) {
         setupPromise = null
       }
     }
@@ -110,18 +195,23 @@ export function usePlayerAudioOutput(video) {
   async function setGain(stage, value) {
     gains[stage] = value
 
-    if (!gainNodes && value !== 1) {
-      await ensureGraph()
-    }
-
-    if (!gainNodes) {
+    if (ATTENUATION_STAGES.includes(stage)) {
+      applyElementVolume()
       return
     }
 
-    const gain = gainNodes[stage].gain
+    if (!boostNode && value !== 1) {
+      await ensureGraph()
+    }
+
+    if (!boostNode) {
+      return
+    }
+
+    const gain = boostNode.gain
     const now = audioContext.currentTime
     gain.cancelScheduledValues(now)
-    gain.setTargetAtTime(gains[stage], now, 0.015)
+    gain.setTargetAtTime(gains.boost, now, 0.015)
   }
 
   /**
@@ -130,17 +220,18 @@ export function usePlayerAudioOutput(video) {
   async function setMono(enabled) {
     mono = enabled
 
-    if (!gainNodes && enabled) {
+    if (!boostNode && enabled) {
       await ensureGraph()
     }
 
-    if (gainNodes) {
+    if (boostNode) {
       applyMono()
     }
   }
 
   onBeforeUnmount(() => {
     destroyed = true
+    detachVolume()
     audioContext?.removeEventListener('statechange', resumeWhilePlaying)
     audioContext?.removeEventListener('statechange', suspendWhilePaused)
     routedVideo?.removeEventListener('play', resumeWhilePlaying)
@@ -149,10 +240,10 @@ export function usePlayerAudioOutput(video) {
     routedVideo = null
     audioContext?.close().catch(() => {})
     audioContext = null
-    gainNodes = null
+    boostNode = null
     monoNode = null
     setupPromise = null
   })
 
-  return { setGain, setMono }
+  return { attach, setGain, setMono }
 }
