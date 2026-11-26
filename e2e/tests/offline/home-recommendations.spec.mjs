@@ -598,6 +598,12 @@ test('hides disabled recommendations persistently and restores them through Home
   await hide.click()
   await expect(recommendations(page)).toHaveCount(0)
   expect(backend.requests).toEqual([])
+  // The section hides optimistically; a relaunch before the save would restore it.
+  await expect.poll(() => page.evaluate(async findAction => {
+    const settings = await window.ftElectron.dbSettings(findAction)
+    return settings.find(setting => setting._id === 'homeSectionLayout')?.value
+      ?.find(section => section.id === 'recommendations')?.visible
+  }, DBActions.GENERAL.FIND)).toBe(false)
 
   const relaunched = await app.relaunch()
   page = relaunched.page
