@@ -28,6 +28,7 @@ for (const [name, historyLength, presented, selecting, visible] of [
         canToggleActionTabLoaded: true,
         relatedTabIds: { before: [], after: [], other: [] },
         activeTabId: 'tab',
+        focusableTabId: 'tab',
         presentedTabId: presented ? 'tab' : 'other',
         selecting,
         selectedTabIds: new Set(),

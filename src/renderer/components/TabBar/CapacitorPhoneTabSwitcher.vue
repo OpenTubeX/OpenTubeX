@@ -236,7 +236,7 @@
                     :data-tab-id="tab.id"
                     :aria-selected="tab.id === activeTabId"
                     :aria-label="tabAriaLabel(tab)"
-                    :tabindex="tab.id === activeTabId ? 0 : -1"
+                    :tabindex="tab.id === focusableTabId ? 0 : -1"
                     @click="activateTab(tab.id, $event)"
                     @keydown="handleTabTargetKeydown($event, tab.id)"
                   >
@@ -699,6 +699,10 @@ const visibleTabs = computed(() => {
 })
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
+// The keyboard reaches the tabs through the active one, or the first result when a search hides it.
+const focusableTabId = computed(() => (
+  visibleTabs.value.some(tab => tab.id === activeTabId.value) ? activeTabId.value : visibleTabs.value[0]?.id ?? null
+))
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const presentedTab = computed(() => store.getters.getTabById(presentedTabId.value))
 const tabHistoryEntries = computed(() => presentedTab.value?.history.map((entry, index) => ({
