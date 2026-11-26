@@ -418,9 +418,22 @@ function measureHeader() {
 const headerResizeObserver = new ResizeObserver(measureHeader)
 // The scrollbar setting changes the actions' margin without resizing their box.
 watch(() => store.getters.getScrollbarThumbWidth, measureHeader, { flush: 'post' })
-const logicalHistoryState = computed(() => {
-  const tabId = store.getters.getPresentedTabId
-  return store.getters.getTabHistoryState(tabId)
+// The getter runs again whenever any tab changes, such as when a link opens in
+// a new one. Keep the previous state then so the header does not render again.
+const logicalHistoryState = computed(previous => {
+  const state = store.getters.getTabHistoryState(store.getters.getPresentedTabId)
+  return previous?.canGoBack === state.canGoBack &&
+    previous.canGoForward === state.canGoForward &&
+    previous.options.length === state.options.length &&
+    state.options.every((option, index) => {
+      const previousOption = previous.options[index]
+      return option.label === previousOption.label &&
+        option.value === previousOption.value &&
+        option.active === previousOption.active &&
+        option.icon === previousOption.icon
+    })
+    ? previous
+    : state
 })
 const navigationHistoryDropdownOptions = computed(() => {
   return usesLogicalTabs ? logicalHistoryState.value.options : []

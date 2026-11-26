@@ -92,10 +92,11 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // emits an event per step, which turned that into hundreds of forced layouts.
 let gridWidth = 0
 let active = true
+let hidden = false
 
 function updateGridSliderLimit() {
   const element = gridElement.value?.$el
-  if (element) setThumbnailGridVisible(element, active && props.grid && gridWidth > 0, thumbnailSizeSetting)
+  if (element) setThumbnailGridVisible(element, active && !hidden && props.grid && gridWidth > 0, thumbnailSizeSetting)
 }
 
 watch(() => props.grid, updateGridSliderLimit)
@@ -413,7 +414,18 @@ onMounted(() => {
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
 
-  resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const width = entry.contentRect.width
+    // A grid in a hidden tab has no width. Keep the cards sized for the last
+    // one: resizing them for it rendered every card again when a link opened
+    // in a new tab, and once more when switching back.
+    const nowHidden = width === 0 && gridWidth > 0
+    if (nowHidden !== hidden) {
+      hidden = nowHidden
+      updateGridSliderLimit()
+    }
+    if (!hidden) updateGridWidth(width)
+  })
   resizeObserver.observe(gridElement.value.$el)
   window.addEventListener('scroll', updatePageAtBottom, { passive: true })
   if (props.appear) enterTogether(gridElement.value.$el)
