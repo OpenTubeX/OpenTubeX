@@ -498,7 +498,7 @@ function closeLocalMenu(event) {
 watch(() => route.fullPath, () => close())
 
 async function openLocalMenu(event) {
-  const { items, x, y, contextEvent } = event.detail
+  const { items, x, y, anchorTop, contextEvent } = event.detail
   const request = ++openRequest
   touchFriendly.value = event.detail.touchFriendly === true
   localItems.value = items
@@ -515,10 +515,12 @@ async function openLocalMenu(event) {
     contextualMenu.items = getWebContextMenuItems(contextEvent.target, { ignoreLinks: true })
   }
   if (request !== openRequest) return
-  await showMenu(contextualMenu.items, contextualMenu.sessionId, x, y, request)
+  await showMenu(contextualMenu.items, contextualMenu.sessionId, x, y, request, false, anchorTop)
 }
 
-async function showMenu(menuItems, menuSessionId, clientX, clientY, request, focusFirstItem = false) {
+// `anchorTop` is the top of the button that opened the menu below it. The menu
+// opens above the button instead when it only fits there.
+async function showMenu(menuItems, menuSessionId, clientX, clientY, request, focusFirstItem = false, anchorTop = undefined) {
   items.value = menuItems
   resolveItemFavicons(items.value)
   sessionId.value = menuSessionId
@@ -556,9 +558,11 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request, foc
   const x = document.body.dir === 'rtl'
     ? clientX - menuWidth
     : clientX
+  const opensAbove = anchorTop !== undefined && clientY + menuHeight > window.innerHeight - 8 && anchorTop - menuHeight >= 8
+  if (opensAbove) anchor.value = { ...anchor.value, y: anchorTop }
   position.value = {
     x: Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8)),
-    y: Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
+    y: opensAbove ? anchorTop - menuHeight : Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
   }
   if (localItems.value || focusFirstItem) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
 }

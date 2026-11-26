@@ -23,6 +23,7 @@ test('download options fit horizontally and its Cancel button retains a border',
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
   const prompt = page.locator('.downloadPromptCard')
   await expect(prompt).toBeVisible()
   const advanced = prompt.locator('.advancedDownloadOptions')

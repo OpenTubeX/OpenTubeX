@@ -302,13 +302,15 @@
         <template #trailing>
           <FtButton
             v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
+            ref="downloadButton"
             class="downloadButton"
             :title="t('Downloads.Download Video')"
             :aria-label="t('Downloads.Download Video')"
+            aria-haspopup="menu"
             :icon="['fas', 'download']"
             theme="secondary"
             shape="square"
-            @click="emit('open-download')"
+            @click="openDownloadMenu"
           >
             <template #label>
               <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
@@ -350,7 +352,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -375,6 +377,8 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
+import { downloadTemplateMenuItems } from '../../helpers/templateDownloads'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatDate } from '../../helpers/dateFormat'
@@ -701,6 +705,22 @@ const toolbarActions = computed(() => ({
 const OVERFLOW_ORDER = ['metadataHistory', 'saveProgress', 'externalPlayer', 'formats', 'sponsorBlock', 'transcript', 'liveChat', 'quickBookmark']
 
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const downloadButton = useTemplateRef('downloadButton')
+const downloadMenuItems = computed(() => downloadTemplateMenuItems({
+  target: () => ({ videoId: props.id, title: props.title, thumbnail: props.videoThumbnail }),
+  customize: () => emit('open-download'),
+  t,
+  locale
+}))
+
+function openDownloadMenu() {
+  openButtonMenu(downloadButton.value.$el, downloadMenuItems, t('Downloads.Download Video'))
+}
+
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: downloadMenuItems }))
+})
 
 const liveChatToggleTitle = computed(() => {
   if (props.liveChatReplay) {

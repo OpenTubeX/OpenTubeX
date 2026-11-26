@@ -400,6 +400,7 @@ for (const { uiScale, iconPack, colorScheme } of [
         await clickInFullscreen(download.getByRole('button', { name: 'Cancel', exact: true }))
         await setPlayerFullscreen(page, false)
         await page.locator('.watchVideoInfo').getByRole('button', { name: 'Download Video', exact: true }).click()
+        await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
         await expect(page.locator('.downloadPromptCard')).toBeVisible()
         await page.locator('.downloadPromptCard').getByRole('button', { name: 'Cancel', exact: true }).click()
         await watch.evaluate(component => { component.proxy.$store.commit('setEnableDownloads', false) })

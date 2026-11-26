@@ -13,6 +13,8 @@ import {
 } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
 /** How the downloads page shows the demo video's size, which is above 10 KiB. */
@@ -358,6 +360,18 @@ test.describe('video downloads', () => {
     expect(passedArguments).toContain('--embed-thumbnail')
     await expect.poll(() => page.evaluate(() => Object.values(window.$store.getters.getYtDlpDownloads)
       .map(download => [download.status, download.template]))).toEqual([['completed', 'audio:mp3']])
+
+    // The download button under a video lists the same templates
+    await writeFile(capturedArgs, '')
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page, 'jNQXAC9IVRw', { waitForPlayback: false })
+    await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Video - 720p', exact: true }).click()
+
+    await expect.poll(() => readFile(capturedArgs, 'utf8')).toContain('jNQXAC9IVRw')
+    await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => Object.values(window.$store.getters.getYtDlpDownloads)
+      .map(download => [download.videoId, download.status, download.template]))).toContainEqual(['jNQXAC9IVRw', 'completed', 'video:720'])
   })
 
   test('requests automatic subtitles only when needed and can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
@@ -1339,6 +1353,7 @@ test.describe('list video actions', () => {
     })
 
     await page.getByTitle('Download Playlist').click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
 
     await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
     await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
@@ -1359,6 +1374,7 @@ test.describe('list video actions', () => {
     })
 
     await page.getByTitle('Download Playlist').click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
 
     await expect(page.getByText('50.0%', { exact: true })).toBeVisible()
     await expect(page.getByText('Media Type', { exact: true })).toHaveCount(0)

@@ -466,6 +466,7 @@ test.describe('phone UI', () => {
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: 360, height: 760 })
     await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
     const prompt = page.locator('.downloadPromptCard')
     const advanced = prompt.locator('.advancedDownloadOptions')
     await expect(advanced).not.toHaveAttribute('open')
