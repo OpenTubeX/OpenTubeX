@@ -187,6 +187,20 @@ test.describe('with all built-in external search engines enabled', () => {
     expect(searchWith.submenu.every(item => item.labelKey == null)).toBe(true)
   })
 
+  test('never offers to copy or search a selected password', async ({ page }) => {
+    const privacy = await goToSettingsSection(page, 'privacy')
+    const password = privacy.getByLabel('Password', { exact: true })
+    await password.fill('private-password')
+    await password.selectText()
+    await password.click({ button: 'right' })
+
+    const menu = page.locator('.contextMenu')
+    await expect(menu.getByRole('menuitem', { name: 'Paste' })).toBeEnabled()
+    await expect(menu.getByRole('menuitem', { name: 'Cut' })).toBeDisabled()
+    await expect(menu.getByRole('menuitem', { name: 'Copy' })).toBeDisabled()
+    await expect(menu.getByRole('menuitem', { name: /^Search/ })).toHaveCount(0)
+  })
+
   test('opens the fly-out towards the start without a horizontal scrollbar', async ({ page }) => {
     await goTo(page, 'settings')
     const input = page.locator('.settingsSearch input')
