@@ -1,3 +1,4 @@
+import './polyfills.js'
 import { executeBackgroundJob } from './background-job-operations.js'
 import { receiveJobValue, sendJobValue } from './background-job-transfer.js'
 

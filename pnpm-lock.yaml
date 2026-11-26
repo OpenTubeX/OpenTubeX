@@ -280,6 +280,9 @@ importers:
       '@material/material-color-utilities':
         specifier: ^0.4.0
         version: 0.4.0(patch_hash=b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378)
+      '@oddbird/popover-polyfill':
+        specifier: ^0.7.3
+        version: 0.7.3
       '@scure/bip39':
         specifier: ^2.4.0
         version: 2.4.0
@@ -1132,6 +1135,9 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@oddbird/popover-polyfill@0.7.3':
+    resolution: {integrity: sha512-uOY7RLqS1M12u+EzZHQ8vPSh3NjwDlb4qwJ1WDzQ0inZ14+47Vv0NNs+1Lh4PtX1nLiiCbfJyIxPRHsgBTvhvg==}
 
   '@ota-meshi/ast-token-store@0.3.0':
     resolution: {integrity: sha512-XRO0zi2NIUKq2lUk3T1ecFSld1fMWRKE6naRFGkgkdeosx7IslyUKNv5Dcb5PJTja9tHJoFu0v/7yEpAkrkrTg==}
@@ -5451,6 +5457,8 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
+
+  '@oddbird/popover-polyfill@0.7.3': {}
 
   '@ota-meshi/ast-token-store@0.3.0': {}
 

@@ -60,6 +60,7 @@ updates:
       - dependency-name: "@lezer/html"
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@material/material-color-utilities"
+      - dependency-name: "@oddbird/popover-polyfill"
       - dependency-name: "@playwright/test"
       - dependency-name: "@rspack/cli"
       - dependency-name: "@rspack/core"

@@ -1,3 +1,5 @@
+import './helpers/polyfills'
+import './helpers/popoverPolyfill'
 import './i18n/startupLocales'
 import { ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'

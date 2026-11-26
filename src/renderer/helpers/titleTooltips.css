@@ -32,7 +32,7 @@
     overlay var(--motion-fast-effects) allow-discrete;
 }
 
-.ftTitleTooltip:popover-open {
+.ftTitleTooltip:is(:popover-open, .\:popover-open) {
   opacity: 1;
   transform: none;
   transition:
@@ -47,7 +47,7 @@
 }
 
 @starting-style {
-  .ftTitleTooltip:popover-open {
+  .ftTitleTooltip:is(:popover-open, .\:popover-open) {
     opacity: 0;
     transform: scale(0.8);
   }
