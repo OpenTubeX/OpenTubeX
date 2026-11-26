@@ -588,7 +588,7 @@
 
     /* A checkbox's tooltip stays beside its label. :where() keeps this rule's
        specificity, which rules for specific tooltips rely on. */
-    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .dataItemTitle, .settingsRowTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip:not(:where(.checkboxTooltip))) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .dataItemTitle, .settingsRowTitle, .settingChip, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip:not(:where(.checkboxTooltip))) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
