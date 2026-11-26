@@ -4,17 +4,19 @@ import { after, before, test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { compileStyle } from 'vue/compiler-sfc'
 import { readScopedStyles } from '../helpers/component-styles.mjs'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 let browser
 let host
 let styles
 let layoutSource
 before(async () => {
-  browser = process.env.ANDROID_CDP_URL
-    ? await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-    : await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
-  host = process.env.ANDROID_CDP_URL ? appPage(browser) : await browser.newPage()
+  if (process.env.ANDROID_CDP_URL) {
+    ({ browser, page: host } = await connectAndroidApp())
+  } else {
+    browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
+    host = await browser.newPage()
+  }
   const css = await readScopedStyles(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url))
   const shakaCss = await readFile(new URL('../../node_modules/shaka-player/dist/controls.css', import.meta.url), 'utf8')
   styles = shakaCss + compileStyle({ source: css, filename: 'player.css', id: 'data-v-controls-test', scoped: true }).code
@@ -63,11 +65,16 @@ for (const [classic, scale] of [[false, 1.25], [true, 1]]) {
     try {
       const frame = await handle.asElement().contentFrame()
       await frame.locator('.shaka-controls-button-panel').waitFor()
-      const layout = () => frame.evaluate(layoutSource => {
+      const layout = () => frame.evaluate(async layoutSource => {
         const panel = document.querySelector('.shaka-controls-button-panel')
         // Exercise the component's actual layout function in this frame. The
         // frame has no OverlayScrollbars, so the speed preset scroll clamp is a no-op.
-        new Function(`const clampOverlayScrollLeft = () => {}\n${layoutSource}\nupdateControlPanelLayout(arguments[0])\nupdateRightControlGlass(arguments[0])`)(panel)
+        const updateRightControlGlass = new Function(`const clampOverlayScrollLeft = () => {}\n${layoutSource}\nupdateControlPanelLayout(arguments[0])\nreturn updateRightControlGlass`)(panel)
+        // Measure the layout users end up with. The chapter button animates
+        // into its compact size where interpolate-size is supported (Chromium
+        // 129 and later), and the right pill follows the buttons afterwards.
+        await Promise.all(document.getAnimations().map(animation => animation.finished))
+        updateRightControlGlass(panel)
         const visible = selector => getComputedStyle(panel.querySelector(selector)).display !== 'none'
         const rightGlass = panel.querySelector('.ft-right-control-glass')
         return {
@@ -79,6 +86,7 @@ for (const [classic, scale] of [[false, 1.25], [true, 1]]) {
           rightGlassStartOffset: rightGlass.getBoundingClientRect().left - panel.querySelector('.shaka-overflow-menu-button').getBoundingClientRect().left,
           rightGlassStartRadius: getComputedStyle(rightGlass).borderStartStartRadius,
           spacerWidth: panel.querySelector('.shaka-spacer').getBoundingClientRect().width,
+          captionsMinWidth: Number.parseFloat(getComputedStyle(panel.querySelector('.caption-toggle-button')).minWidth),
           rateBarExcessWidth: (() => {
             const rateBar = panel.querySelector('.ft-quick-playback-rate-bar')
             const style = getComputedStyle(rateBar)
@@ -99,7 +107,9 @@ for (const [classic, scale] of [[false, 1.25], [true, 1]]) {
       assert.equal(portrait.captions, false, JSON.stringify(portrait))
       assert.equal(portrait.settings, true)
       assert.equal(portrait.fullscreen, true)
-      assert.ok(portrait.spacerWidth < 1, JSON.stringify(portrait))
+      // Only the controls that do not fit move into settings: the space left
+      // over is too narrow for the captions button that moved last.
+      assert.ok(portrait.spacerWidth < portrait.captionsMinWidth, JSON.stringify(portrait))
       if (!classic) {
         assert.ok(Math.abs(portrait.rightGlassStartOffset) < 1, JSON.stringify(portrait))
         assert.notEqual(portrait.rightGlassStartRadius, '0px', JSON.stringify(portrait))
