@@ -1016,6 +1016,10 @@ Settings:
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
     Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
     Import subscription groups hint: Aby przydzielić kanały do grup, dodaj w pliku .csv po tytule kanału kolumnę z nazwami grup oddzielonymi średnikami albo zaimportuj plik .opml z folderami. Brakujące grupy zostaną utworzone.
+    Takeout description: "Importuj subskrypcje, playlisty, historię oglądania i historię wyszukiwania z pliku ZIP z Google Takeout."
+    Individual data: "Poszczególne dane"
+    Import: "Importuj"
+    Export: "Eksportuj"
   Sync Settings:
     Automatic Sync Paused: 'Automatyczna synchronizacja jest wstrzymana, ponieważ synchronizacja usunęłaby wcześniej zsynchronizowane elementy. Przejrzyj usunięcia, aby ją wznowić.'
     Review Deletions: 'Przejrzyj usunięcia'

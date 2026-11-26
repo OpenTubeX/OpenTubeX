@@ -1476,6 +1476,10 @@ Settings:
     Channels not found: "{count} channel could not be found | {count} channels could not be found"
     Playlists have been successfully imported: "1/{total} playlist has been successfully imported | {count}/{total} playlists have been successfully imported"
     Import subscription groups hint: To sort channels into groups, add a column after the channel title in a .csv file with group names separated by semicolons, or import an .opml file with folders. Missing groups are created.
+    Takeout description: "Import subscriptions, playlists, watch history, and search history from a Google Takeout ZIP file."
+    Individual data: "Individual data"
+    Import: "Import"
+    Export: "Export"
   Sync Settings:
     Signed Out After Restore: 'Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.'
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."

@@ -26,12 +26,12 @@
       />
       <FtButton
         :label="t('Subscriptions.RSS Feeds.Import OPML')"
-        :icon="['fas', 'folder-open']"
+        :icon="['fas', 'import']"
         @click="importOpml"
       />
       <FtButton
         :label="t('Subscriptions.RSS Feeds.Export OPML')"
-        :icon="['fas', 'file-download']"
+        :icon="['fas', 'export']"
         :disabled="feeds.length === 0"
         @click="exportOpml"
       />

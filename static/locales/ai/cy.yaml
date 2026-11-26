@@ -1499,6 +1499,10 @@ Settings:
     Channels not found: "Methwyd dod o hyd i {count} o sianeli | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} o sianeli"
     Playlists have been successfully imported: "Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd 1/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus"
     Import subscription groups hint: I drefnu sianeli yn grwpiau, ychwanegwch golofn ar ôl teitl y sianel mewn ffeil .csv gydag enwau grwpiau wedi'u gwahanu gan hanner colonau, neu mewnforiwch ffeil .opml gyda ffolderi. Caiff grwpiau coll eu creu.
+    Takeout description: "Mewnforio tanysgrifiadau, rhestrau chwarae, hanes gwylio a hanes chwilio o ffeil ZIP Google Takeout."
+    Individual data: "Data unigol"
+    Import: "Mewnforio"
+    Export: "Allforio"
   Sync Settings:
     Signed Out After Restore: 'Cafodd cysoni ei allgofnodi oherwydd i ddata''r ap hwn gael ei adfer o gopi wrth gefn neu o ddyfais arall. Mewngofnodwch eto i gysoni''r ddyfais hon.'
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."

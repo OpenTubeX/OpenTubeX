@@ -1498,6 +1498,10 @@ Settings:
     Channels not found: "{count} rás fannst ekki | {count} rásir fundust ekki"
     Playlists have been successfully imported: "{count}/{total} spilunarlisti fluttur inn | {count}/{total} spilunarlistar fluttir inn"
     Import subscription groups hint: Til að raða rásum í hópa skaltu bæta við dálki á eftir titli rásarinnar í .csv-skrá með hópaheitum aðskildum með semíkommum, eða flytja inn .opml-skrá með möppum. Hópar sem vantar eru búnir til.
+    Takeout description: "Flytja inn áskriftir, spilunarlista, áhorfsferil og leitarferil úr ZIP-skrá frá Google Takeout."
+    Individual data: "Einstök gögn"
+    Import: "Flytja inn"
+    Export: "Flytja út"
   Sync Settings:
     Signed Out After Restore: 'Samstillingu var skráð út vegna þess að þessi forritsgögn voru endurheimt úr öryggisafriti eða af öðru tæki. Skráðu þig inn aftur til að samstilla þetta tæki.'
     Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."

@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "{count} チャンネルの再生速度をインポートしました"
     Channels not found: "{count} チャンネルが見つかりませんでした"
     Import subscription groups hint: チャンネルをグループに分けるには、.csv ファイルでチャンネル名の後にセミコロン区切りのグループ名を記入した列を追加するか、フォルダーを含む .opml ファイルをインポートしてください。存在しないグループは作成されます。
+    Takeout description: "Google Takeout の ZIP ファイルから登録チャンネル、再生リスト、視聴履歴、検索履歴をインポートします。"
+    Individual data: "個別のデータ"
+    Import: "インポート"
+    Export: "エクスポート"
   Sync Settings:
     Signed Out After Restore: 'このアプリのデータがバックアップまたは別のデバイスから復元されたため、同期からサインアウトしました。このデバイスを同期するには、もう一度サインインしてください。'
     Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"

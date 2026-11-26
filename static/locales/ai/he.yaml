@@ -1522,6 +1522,10 @@ Settings:
     Channels not found: "{count} ערוץ לא נמצא | {count} ערוצים לא נמצאו | {count} ערוצים לא נמצאו"
     Playlists have been successfully imported: "יובאה בהצלחה 1/{total} רשימת נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה"
     Import subscription groups hint: כדי למיין ערוצים לקבוצות, יש להוסיף עמודה אחרי שם הערוץ בקובץ .csv עם שמות קבוצות מופרדים בנקודה-פסיק, או לייבא קובץ .opml עם תיקיות. קבוצות חסרות נוצרות.
+    Takeout description: "ייבוא מינויים, פלייליסטים, היסטוריית צפייה והיסטוריית חיפוש מקובץ ZIP של Google Takeout."
+    Individual data: "נתונים בודדים"
+    Import: "ייבוא"
+    Export: "ייצוא"
   Sync Settings:
     Signed Out After Restore: 'הסנכרון נותק כי נתוני האפליקציה האלה שוחזרו מגיבוי או ממכשיר אחר. יש להתחבר שוב כדי לסנכרן את המכשיר הזה.'
     Revoke Session Tabs Warning: "גם קבוצות הכרטיסיות המסונכרנות של המכשיר הזה יימחקו."

@@ -1538,6 +1538,10 @@ Settings:
     Channels not found: "{count} kanal kunne ikke findes | {count} kanaler kunne ikke findes"
     Playlists have been successfully imported: "1/{total} playliste blev importeret | {count}/{total} playlister blev importeret"
     Import subscription groups hint: For at sortere kanaler i grupper skal du tilføje en kolonne efter kanaltitlen i en .csv-fil med gruppenavne adskilt af semikoloner eller importere en .opml-fil med mapper. Manglende grupper oprettes.
+    Takeout description: "Importér abonnementer, playlister, visningshistorik og søgehistorik fra en ZIP-fil fra Google Takeout."
+    Individual data: "Individuelle data"
+    Import: "Importér"
+    Export: "Eksportér"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen blev logget ud, fordi disse appdata blev gendannet fra en sikkerhedskopi eller en anden enhed. Log ind igen for at synkronisere denne enhed.'
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."

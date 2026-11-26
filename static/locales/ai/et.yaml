@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
     Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
     Import subscription groups hint: Kanalite rühmadesse jaotamiseks lisa .csv-failis kanali pealkirja järele veerg semikoolonitega eraldatud rühmade nimedega või impordi kaustadega .opml-fail. Puuduvad rühmad luuakse.
+    Takeout description: "Impordi tellimused, esitusloendid, vaatamisajalugu ja otsinguajalugu Google Takeouti ZIP-failist."
+    Individual data: "Üksikud andmed"
+    Import: "Impordi"
+    Export: "Ekspordi"
   Sync Settings:
     Signed Out After Restore: 'Sünkroonimisest logiti välja, sest need rakenduse andmed taastati varukoopiast või teisest seadmest. Selle seadme sünkroonimiseks logi uuesti sisse.'
     Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."

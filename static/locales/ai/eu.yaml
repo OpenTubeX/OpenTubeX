@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
     Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
     Import subscription groups hint: Kanalak taldeetan sailkatzeko, gehitu .csv fitxategi batean kanalaren izenburuaren ondoren puntu eta komaz bereizitako talde-izenak dituen zutabe bat, edo inportatu karpetak dituen .opml fitxategi bat. Falta diren taldeak sortu egiten dira.
+    Takeout description: "Inportatu harpidetzak, erreprodukzio-zerrendak, ikusitakoen historia eta bilaketa-historia Google Takeout-eko ZIP fitxategi batetik."
+    Individual data: "Banakako datuak"
+    Import: "Inportatu"
+    Export: "Esportatu"
   Sync Settings:
     Signed Out After Restore: 'Sinkronizazioaren saioa itxi da, aplikazioaren datu hauek babeskopia batetik edo beste gailu batetik leheneratu direlako. Hasi saioa berriro gailu hau sinkronizatzeko.'
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."

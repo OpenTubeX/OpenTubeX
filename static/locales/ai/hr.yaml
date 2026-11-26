@@ -1503,6 +1503,10 @@ Settings:
     Channels not found: "{count} kanal nije pronađen | {count} kanala nisu pronađena | {count} kanala nije pronađeno"
     Playlists have been successfully imported: "Uspješno uvezena {count}/{total} zbirka | Uspješno uvezene {count}/{total} zbirke | Uspješno uvezeno {count}/{total} zbirki"
     Import subscription groups hint: Za razvrstavanje kanala u grupe dodaj stupac nakon naslova kanala u .csv datoteci s nazivima grupa odvojenima točkom sa zarezom ili uvezi .opml datoteku s mapama. Nedostajuće grupe se stvaraju.
+    Takeout description: "Uvezi pretplate, popise za reprodukciju, povijest gledanja i povijest pretraživanja iz ZIP datoteke Google Takeouta."
+    Individual data: "Pojedinačni podaci"
+    Import: "Uvezi"
+    Export: "Izvezi"
   Sync Settings:
     Signed Out After Restore: 'Sinkronizacija je odjavljena jer su ovi podaci aplikacije vraćeni iz sigurnosne kopije ili s drugog uređaja. Ponovno se prijavite kako biste sinkronizirali ovaj uređaj.'
     Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."

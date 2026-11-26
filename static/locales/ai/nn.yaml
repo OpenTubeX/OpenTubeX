@@ -1654,6 +1654,10 @@ Settings:
     Channels not found: "{count} kanal vart ikkje funnen | {count} kanalar vart ikkje funne"
     Playlists have been successfully imported: "1/{total} speleliste vart importert | {count}/{total} spelelister vart importerte"
     Import subscription groups hint: For å sortere kanalar i grupper legg du til ein kolonne etter kanaltittelen i ei .csv-fil med gruppenamn skilde med semikolon, eller importerer ei .opml-fil med mapper. Manglande grupper vert oppretta.
+    Takeout description: "Importer abonnement, spelelister, sjåarlogg og søkjelogg frå ei ZIP-fil frå Google Takeout."
+    Individual data: "Enkeltdata"
+    Import: "Importer"
+    Export: "Eksporter"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringa vart logga ut fordi desse appdataa vart gjenoppretta frå ein tryggleikskopi eller ei anna eining. Logg på igjen for å synkronisere denne eininga.'
     Revoke Session Tabs Warning: "Dei synkroniserte fanesetta til denne eininga vert òg sletta."

@@ -247,6 +247,10 @@
     "ri": "fullscreen-line",
     "material": "open-in-full-rounded"
   },
+  "export": {
+    "ri": "logout-box-r-line",
+    "material": "output-rounded"
+  },
   "external-link-alt": {
     "ri": "arrow-right-up-box-line",
     "material": "open-in-new-down"
@@ -406,6 +410,10 @@
   "icons": {
     "ri": "shapes-line",
     "material": "category-outline"
+  },
+  "import": {
+    "ri": "login-box-line",
+    "material": "input-rounded"
   },
   "info-circle": {
     "ri": "information-line",

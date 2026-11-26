@@ -1444,6 +1444,10 @@ Settings:
     Channels not found: "No se ha podido encontrar {count} canal | No se han podido encontrar {count} canales | No se han podido encontrar {count} canales"
     Playlists have been successfully imported: "Se importó correctamente 1/{total} lista de reproducción | Se importaron correctamente {count}/{total} listas de reproducción | Se importaron correctamente {count}/{total} listas de reproducción"
     Import subscription groups hint: Para ordenar los canales en grupos, añade una columna después del título del canal en un archivo .csv con los nombres de los grupos separados por punto y coma, o importa un archivo .opml con carpetas. Los grupos que falten se crean.
+    Takeout description: "Importa suscripciones, listas de reproducción, historial de reproducciones e historial de búsqueda desde un archivo ZIP de Google Takeout."
+    Individual data: "Datos individuales"
+    Import: "Importar"
+    Export: "Exportar"
   Sync Settings:
     Signed Out After Restore: 'Se ha cerrado la sesión de sincronización porque estos datos de la aplicación se restauraron desde una copia de seguridad o desde otro dispositivo. Vuelve a iniciar sesión para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."

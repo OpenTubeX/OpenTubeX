@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "已匯入 {count} 個頻道的播放速度"
     Channels not found: "找不到 {count} 個頻道"
     Import subscription groups hint: 若要將頻道分入群組，請在 .csv 檔案中的頻道標題後新增一欄，填入以分號分隔的群組名稱，或匯入含有資料夾的 .opml 檔案。不存在的群組會自動建立。
+    Takeout description: "從 Google Takeout ZIP 檔案匯入訂閱內容、播放清單、觀看記錄和搜尋記錄。"
+    Individual data: "個別資料"
+    Import: "匯入"
+    Export: "匯出"
   Sync Settings:
     Signed Out After Restore: '由於此應用程式資料是從備份或其他裝置還原的，同步已登出。請重新登入以同步此裝置。'
     Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"
