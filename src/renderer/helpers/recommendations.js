@@ -54,7 +54,7 @@ export function recommendationTokens(text) {
 // The history keeps 500 characters, which can end inside a tag.
 function descriptionText(text) {
   return typeof text === 'string'
-    ? text.replaceAll(/<[^>]*(?:>|$)/gu, ' ')
+    ? text.replaceAll(/<(?:[^>]*>|\/?[a-z][^>]*$)/giu, ' ')
         .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
         .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
         .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
