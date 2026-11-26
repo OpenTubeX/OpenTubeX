@@ -1842,7 +1842,11 @@ export default defineComponent({
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     document.addEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
-    if (process.env.IS_IOS) window.addEventListener('opentubex:enter-background', this.handleBackgroundAudioVisibility)
+    if (process.env.IS_IOS) {
+      // The native scene events can arrive after WebKit's visibilitychange.
+      window.addEventListener('opentubex:enter-background', this.handleBackgroundAudioVisibility)
+      window.addEventListener('opentubex:enter-foreground', this.handleBackgroundAudioVisibility)
+    }
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -1888,6 +1892,7 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     document.removeEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
     window.removeEventListener('opentubex:enter-background', this.handleBackgroundAudioVisibility)
+    window.removeEventListener('opentubex:enter-foreground', this.handleBackgroundAudioVisibility)
     this.layoutAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
