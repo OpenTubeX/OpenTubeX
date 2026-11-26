@@ -460,6 +460,7 @@
 .sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
   .settingsSelectGrid > *,
   .generalSelectGrid > *,
+  .settingsRowControl > *,
   .switchColumn > *,
   .captionControl > *,
   .externalSoftwareToolControls > *,
