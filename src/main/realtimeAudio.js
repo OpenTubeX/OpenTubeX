@@ -32,9 +32,9 @@ const MAX_ATTEMPTS = 3
 const MIN_REALTIME_TIME_LIMIT = 50_000
 
 /**
- * Lowers the process's realtime CPU time limit to RealtimeKit's maximum, which
+ * Sets the process's realtime CPU time limit to RealtimeKit's maximum, which
  * RealtimeKit requires. An unprivileged process can't raise its hard limit, so
- * a lower inherited limit stays.
+ * a lower inherited hard limit stays, and the soft limit is raised to it.
  * @param {number} pid
  * @param {number} maximum in microseconds
  * @returns {Promise<boolean>} whether its threads can safely run in realtime
@@ -42,13 +42,13 @@ const MIN_REALTIME_TIME_LIMIT = 50_000
 async function limitRealtimeTime(pid, maximum) {
   const { stdout } = await execFileAsync('prlimit', ['--pid', String(pid), '--rttime', '--raw', '--noheadings', '--output=SOFT,HARD'])
   const [softLimit, hardLimit] = stdout.trim().split(/\s+/).map(limit => limit === 'unlimited' ? Infinity : Number(limit))
-  let limit = softLimit
-  if (hardLimit > maximum) {
-    await execFileAsync('prlimit', ['--pid', String(pid), `--rttime=${maximum}:${maximum}`])
-    limit = maximum
+  // RealtimeKit's maximum is configurable, and the soft limit may be raised up to the hard one
+  const limit = Math.min(hardLimit, maximum)
+  if (limit < MIN_REALTIME_TIME_LIMIT) return false
+  if (softLimit !== limit || hardLimit !== limit) {
+    await execFileAsync('prlimit', ['--pid', String(pid), `--rttime=${limit}:${limit}`])
   }
-  // The soft limit stops the thread first, and RealtimeKit's maximum is configurable
-  return limit >= MIN_REALTIME_TIME_LIMIT
+  return true
 }
 
 /**
