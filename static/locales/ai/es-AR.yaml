@@ -95,7 +95,7 @@ Search Filters:
   Features:
     360 Video: Video 360
     VR180: VR180
-  Clear Filters: Limpiar Filtros
+  Clear Filters: Restablecer filtros
 Stats:
   Left of daily limit: "Te quedan {duration} de tu límite diario de {limit}"
   Daily limit reached: "Alcanzaste el límite diario de {limit}"

@@ -94,7 +94,7 @@ Search Filters:
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순
-  Clear Filters: 필터 지우기
+  Clear Filters: 필터 초기화
 Stats:
   Left of daily limit: "일일 한도 {limit} 중 {duration} 남음"
   Daily limit reached: "일일 한도 {limit}에 도달함"

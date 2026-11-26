@@ -127,7 +127,7 @@ test.describe('search history suggestions', () => {
 
     await goTo(page, 'history')
     await page.locator('.navFilterButton').click()
-    await page.locator('.clearFilterButton').click()
+    await page.locator('.resetFiltersButton').click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('.navFilterButton')).not.toHaveClass(/filterChanged/)
 
