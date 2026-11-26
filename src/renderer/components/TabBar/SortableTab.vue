@@ -374,7 +374,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border: 1px solid transparent;
   transition: transform 0.2s ease;
   position: relative;
-  user-select: none;
   touch-action: none;
   will-change: transform;
 }

@@ -10,6 +10,7 @@
   min-block-size: var(--top-tab-bar-height, 32px);
   padding-inline: var(--tab-bar-inline-padding);
   gap: 2px;
+  user-select: none;
   position: sticky;
   inset-block-start: 0;
   z-index: 5;
