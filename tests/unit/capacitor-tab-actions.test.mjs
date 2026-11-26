@@ -375,3 +375,29 @@ test('closing the bulk action menu restores focus after Escape and while an acti
   assert.equal(context.showActions.value, false)
   assert.deepEqual(focused, ['more', 'controls'])
 })
+
+test('the reopen button taps from the keyboard after its list was opened, but not after a touch hold', async () => {
+  const holdSource = (await readFile(new URL('../../src/renderer/components/TabBar/useHoldAction.js', import.meta.url), 'utf8'))
+    .replace(/^import .*\n/gm, '')
+    .replace('export function', 'function')
+  const timers = []
+  const context = vm.createContext({
+    lightHaptic() {},
+    window: { setTimeout: callback => timers.push(callback), clearTimeout() {} },
+  })
+  vm.runInContext(holdSource, context)
+  const calls = []
+  const hold = context.useHoldAction(() => calls.push('hold'))
+  const tap = () => calls.push('tap')
+
+  hold.keydown({ key: 'ContextMenu', preventDefault() {} })
+  hold.click({ detail: 0 }, tap)
+  assert.deepEqual(calls, ['hold', 'tap'])
+
+  calls.length = 0
+  hold.start({ button: 0 })
+  timers.pop()()
+  hold.click({ detail: 1 }, tap)
+  hold.click({ detail: 1 }, tap)
+  assert.deepEqual(calls, ['hold', 'tap'], 'only the click ending the hold is skipped')
+})

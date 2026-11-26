@@ -528,7 +528,7 @@
                 @pointerleave="reopenHold.cancel"
                 @contextmenu.prevent="reopenHold.contextMenu"
                 @keydown="reopenHold.keydown"
-                @click="reopenHold.click(() => restoreClosedTab())"
+                @click="reopenHold.click($event, () => restoreClosedTab())"
               >
                 <FtIcon
                   :icon="['fas', 'clock-rotate-left']"
@@ -1558,9 +1558,11 @@ async function cancelSelection() {
   if (hadFocus && !dialogRef.value?.contains(document.activeElement)) focusActiveTab()
 }
 
+// The active tab, or the first search result while a search hides it
 function focusActiveTab() {
+  if (!focusableTabId.value) return
   dialogRef.value
-    ?.querySelector('.capacitorPhoneTabTarget[aria-selected="true"]')
+    ?.querySelector(`.capacitorPhoneTabTarget[data-tab-id="${CSS.escape(focusableTabId.value)}"]`)
     ?.focus({ preventScroll: true })
 }
 

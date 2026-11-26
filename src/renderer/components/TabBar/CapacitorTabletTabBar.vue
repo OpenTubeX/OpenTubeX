@@ -184,7 +184,7 @@
       @pointerleave="reopenHold.cancel"
       @contextmenu.prevent.stop="reopenHold.contextMenu"
       @keydown="reopenHold.keydown"
-      @click="reopenHold.click(() => restoreClosedTab())"
+      @click="reopenHold.click($event, () => restoreClosedTab())"
     >
       <FtIcon
         :icon="['fas', 'clock-rotate-left']"

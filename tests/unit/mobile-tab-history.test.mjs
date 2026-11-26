@@ -78,30 +78,35 @@ for (const [name, historyLength, presented, selecting, visible] of [
   })
 }
 
-test('returning from tab history restores focus to the active card without scrolling', async () => {
-  const start = source.indexOf('async function selectView(')
-  let focused = false
-  const context = vm.createContext({
-    clearSelection() {},
-    activeView: { value: 'history' },
-    activeScrollRef: () => ({ scrollTop: 0 }),
-    viewScrollTop: { open: 120, history: 0 },
-    stopObservingContent() {},
-    nextTick: async () => {},
-    restoreOverlayScrollTop(_element, offset) { assert.equal(offset, 120) },
-    observeActiveContent() {},
-    showSyncedTabsView: { value: true },
-    dialogRef: {
-      value: {
-        querySelector: selector => selector === '.capacitorPhoneTabTarget[aria-selected="true"]'
-          ? { focus(options) { assert.equal(options.preventScroll, true); focused = true } }
-          : { focus() { assert.fail('Focus must return to the card rather than the Open tabs header') } }
-      }
-    },
+// A search can hide the active card, so focus falls back to the first result.
+for (const [view, focusableTabId] of [['history', 'active'], ['closed', 'first-result']]) {
+  test(`returning from the ${view} view restores focus to the ${focusableTabId} card without scrolling`, async () => {
+    const start = source.indexOf('async function selectView(')
+    let focused = false
+    const context = vm.createContext({
+      clearSelection() {},
+      activeView: { value: view },
+      activeScrollRef: () => ({ scrollTop: 0 }),
+      viewScrollTop: { open: 120, [view]: 0 },
+      stopObservingContent() {},
+      nextTick: async () => {},
+      restoreOverlayScrollTop(_element, offset) { assert.equal(offset, 120) },
+      observeActiveContent() {},
+      showSyncedTabsView: { value: true },
+      focusableTabId: { value: focusableTabId },
+      CSS: { escape: value => value },
+      dialogRef: {
+        value: {
+          querySelector: selector => selector === `.capacitorPhoneTabTarget[data-tab-id="${focusableTabId}"]`
+            ? { focus(options) { assert.equal(options.preventScroll, true); focused = true } }
+            : { focus() { assert.fail('Focus must return to the card rather than the Open tabs header') } }
+        }
+      },
+    })
+    vm.runInContext(source.slice(start, source.indexOf('function activeScrollRef()', start)), context)
+    const focusStart = source.indexOf('function focusActiveTab()')
+    vm.runInContext(source.slice(focusStart, source.indexOf('function handleDialogKeydown(', focusStart)), context)
+    await context.selectView('open', true)
+    assert.equal(focused, true)
   })
-  vm.runInContext(source.slice(start, source.indexOf('function activeScrollRef()', start)), context)
-  const focusStart = source.indexOf('function focusActiveTab()')
-  vm.runInContext(source.slice(focusStart, source.indexOf('function handleDialogKeydown(', focusStart)), context)
-  await context.selectView('open', true)
-  assert.equal(focused, true)
-})
+}

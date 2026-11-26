@@ -46,13 +46,16 @@ export function useHoldAction(hold, isHoldOpen = () => false) {
       event.preventDefault()
       runHold()
     },
-    /** @param {() => void} tap */
-    click(tap) {
-      if (held) {
-        held = false
-        return
-      }
-      tap()
+    /**
+     * Skips only the click that ends a pointer hold. Keyboard clicks
+     * (detail 0) always tap, even right after the ContextMenu key.
+     * @param {MouseEvent} event
+     * @param {() => void} tap
+     */
+    click(event, tap) {
+      const endsHold = held && event.detail !== 0
+      held = false
+      if (!endsHold) tap()
     },
   }
 }
