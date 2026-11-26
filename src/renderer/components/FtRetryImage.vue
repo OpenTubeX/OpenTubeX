@@ -101,7 +101,7 @@ const isLoading = computed(() => !hasLoaded.value && !hasFailed.value && !!prefe
 const fallbackIconName = computed(() => Array.isArray(props.fallbackIcon) ? props.fallbackIcon[1] : props.fallbackIcon)
 const isAvatar = computed(() => fallbackIconName.value === 'circle-user')
 // Keep semantic badges and action icons legible while their images load.
-const useSkeleton = computed(() => !['user-check', 'link', 'magnifying-glass'].includes(fallbackIconName.value))
+const useSkeleton = computed(() => !['user-check', 'link', 'search', 'magnifying-glass'].includes(fallbackIconName.value))
 let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
