@@ -92,8 +92,10 @@ test('description links and markup do not become topics', () => {
   // History keeps 500 characters of a description, which can end inside a tag
   const cut = 'Rust tutorial ' + ' '.repeat(460) + '<a dir="auto" href="https://www.you'
   assert.deepEqual([...recommendationFeatures({ description: cut }).keys()].sort(), ['rust', 'tutorial'])
-  // Plain-text descriptions can contain a lone angle bracket
-  assert.deepEqual([...recommendationFeatures({ description: 'Rust <3 WebAssembly, i<length tutorial' }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
+  // Plain-text descriptions can contain a lone angle bracket, also at the limit
+  const plain = 'Rust <3 WebAssembly, i<length tutorial'
+  assert.deepEqual([...recommendationFeatures({ description: plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
+  assert.deepEqual([...recommendationFeatures({ description: ' '.repeat(480) + plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
 })
 test('ignores malformed subscriptions while retaining channel strings and objects', () => {
   for (const subscriptions of [null, {}, 'channel']) {

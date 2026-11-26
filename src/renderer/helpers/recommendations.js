@@ -54,8 +54,11 @@ export function recommendationTokens(text) {
 // Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics
 function descriptionText(text) {
   if (typeof text !== 'string') return text
-  // History keeps the start of a description, which can end inside a tag
-  if (text.length >= HISTORY_DESCRIPTION_MAX_LENGTH) text = text.replace(/<\/?[a-z][^>]*$/iu, ' ')
+  // History keeps the first 500 code points of a description, which can end
+  // inside one of the tags that local API descriptions use
+  if (text.length >= HISTORY_DESCRIPTION_MAX_LENGTH && [...text].length >= HISTORY_DESCRIPTION_MAX_LENGTH) {
+    text = text.replace(/<\/?(?:a|b|i|img|s)(?:\s[^>]*)?$/u, ' ')
+  }
   return text.replaceAll(/<[^>]*>/gu, ' ')
     .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
     .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
