@@ -50,10 +50,11 @@ export function recommendationTokens(text) {
       (word.length >= 3 || /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(word)) && !STOPWORDS.has(word))
 }
 
-// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics
+// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics.
+// The history keeps 500 characters, which can end inside a tag.
 function descriptionText(text) {
   return typeof text === 'string'
-    ? text.replaceAll(/<[^>]*>/gu, ' ')
+    ? text.replaceAll(/<[^>]*(?:>|$)/gu, ' ')
         .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
         .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
         .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
