@@ -84,13 +84,25 @@ export function usePlaylistDownloadVideos() {
     const requests = preferInvidious ? [invidious, local] : [local, invidious]
     if (!process.env.SUPPORTS_LOCAL_API || !store.getters.getBackendFallback) requests.length = 1
 
+    let loaded = false
     for (const request of requests) {
       try {
-        const page = await request()
-        if (requestGeneration === generation) applyPage(page)
+        let page = await request()
+        if (requestGeneration !== generation) return
+        applyPage(page)
+        loaded = true
+        // The prompt shows the selection for two or more videos, so cross pages
+        // whose entries are all unavailable
+        while (videos.value.length < 2 && nextPage !== null) {
+          page = await nextPage()
+          if (requestGeneration !== generation) return
+          applyPage(page)
+        }
         return
       } catch (error) {
         console.error(error)
+        // A later page failing keeps the videos loaded so far
+        if (loaded || requestGeneration !== generation) return
       }
     }
   }
