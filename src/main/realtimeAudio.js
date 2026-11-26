@@ -40,13 +40,15 @@ const MIN_REALTIME_TIME_LIMIT = 50_000
  * @returns {Promise<boolean>} whether its threads can safely run in realtime
  */
 async function limitRealtimeTime(pid, maximum) {
-  const { stdout } = await execFileAsync('prlimit', ['--pid', String(pid), '--rttime', '--raw', '--noheadings', '--output=HARD'])
-  const hardLimit = stdout.trim() === 'unlimited' ? Infinity : Number(stdout.trim())
+  const { stdout } = await execFileAsync('prlimit', ['--pid', String(pid), '--rttime', '--raw', '--noheadings', '--output=SOFT,HARD'])
+  const [softLimit, hardLimit] = stdout.trim().split(/\s+/).map(limit => limit === 'unlimited' ? Infinity : Number(limit))
+  let limit = softLimit
   if (hardLimit > maximum) {
     await execFileAsync('prlimit', ['--pid', String(pid), `--rttime=${maximum}:${maximum}`])
-    return true
+    limit = maximum
   }
-  return hardLimit >= MIN_REALTIME_TIME_LIMIT
+  // The soft limit stops the thread first, and RealtimeKit's maximum is configurable
+  return limit >= MIN_REALTIME_TIME_LIMIT
 }
 
 /**
