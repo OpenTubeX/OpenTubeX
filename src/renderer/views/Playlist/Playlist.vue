@@ -268,7 +268,7 @@ import {
   getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
   getOriginalChannelName,
-  parseLocalPlaylistVideo,
+  parseLocalPlaylistPage,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -899,14 +899,6 @@ function getPlaylistInfo() {
 }
 
 const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
-
-// Keeps each video's playlist position, which the entries the parser drops would otherwise shift
-function parseLocalPlaylistPage(items, offset) {
-  return items.flatMap((item, index) => {
-    const video = parseLocalPlaylistVideo(item)
-    return video == null ? [] : [{ ...video, index: offset + index }]
-  })
-}
 
 function resetState() {
   playlistRequestGeneration++

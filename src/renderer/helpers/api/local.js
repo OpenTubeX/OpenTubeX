@@ -231,6 +231,18 @@ export async function getLocalPlaylist(id, signal) {
 }
 
 /**
+ * Keeps each video's playlist position, which the entries the parser drops would otherwise shift.
+ * @param {import('youtubei.js').YT.Playlist['items']} items
+ * @param {number} offset the number of playlist entries before this page
+ */
+export function parseLocalPlaylistPage(items, offset) {
+  return items.flatMap((item, index) => {
+    const video = parseLocalPlaylistVideo(item)
+    return video == null ? [] : [{ ...video, index: offset + index }]
+  })
+}
+
+/**
  * Playlists without an author link name their channel in the subtitle.
  * @param {import('youtubei.js').YT.Playlist['info']} info
  */

@@ -606,6 +606,26 @@ test.describe('YouTube playlist search', () => {
     expect(payload.videoIds.slice(0, 2)).toEqual(['video-00000', 'video-00003'])
     expect(payload.playlistIndexes.slice(0, 2)).toEqual([1, 4])
     expect(payload.playlistIndexes.at(-1)).toBe(200)
+
+    // The context menu of the saved playlist loads its videos for the selection too
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
+    await page.getByTitle('Save Playlist').click()
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Pagination test playlist' }).click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Download Playlist', exact: true }).click()
+    await selection.locator('summary').click()
+    await expect(selection.getByText('200. Playlist video 200', { exact: true })).toBeAttached()
+    await expect(selection.getByText('Loading the remaining videos…')).toHaveCount(0)
+    await selection.getByText('1. Playlist video 1', { exact: true }).click()
+    await page.locator('.downloadPromptCard').getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads.length)).toBe(2)
+    const savedPayload = await app.electronApp.evaluate(() => globalThis.selectionDownloadPayloads[1])
+    expect(savedPayload.playlistId).toBe('search-test')
+    expect(savedPayload.videoIds.slice(0, 2)).toEqual(['video-00002', 'video-00003'])
+    expect(savedPayload.playlistIndexes.slice(0, 2)).toEqual([3, 4])
+    expect(savedPayload.playlistIndexes.at(-1)).toBe(200)
   })
 
   test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
