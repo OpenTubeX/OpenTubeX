@@ -130,6 +130,7 @@
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
+      card-class="flex-column"
       @click="closeReleaseNotes"
     >
       <template #label="{ labelId }">

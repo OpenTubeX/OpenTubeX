@@ -727,12 +727,17 @@
 
 .changeLogTitle {
   overflow-wrap: break-word;
+  text-align: center;
+  text-wrap: balance;
   margin-block-end: 16px;
 }
 
+/* The card is a flex column, so the release notes take whatever height the
+   title, update command, and buttons leave inside it. */
 .changeLogText {
+  flex: 0 1 auto;
   overflow-y: scroll;
-  block-size: 40vh;
+  min-block-size: min(40vh, 240px);
   display: block;
   margin-block-end: 16px;
   margin-inline: calc(-1 * var(--prompt-padding-inline));
@@ -741,8 +746,13 @@
 }
 
 .changeLogUpdateCommand {
+  align-self: center;
+  box-sizing: border-box;
+  min-inline-size: min(100%, 20em);
+  max-inline-size: min(100%, 36em);
   margin-block: 0 16px;
   overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .changeLogUpdateCommand code {
@@ -1157,10 +1167,6 @@
 
   .flexBox {
     margin-block: 60px -75px;
-  }
-
-  .changeLogText {
-    block-size: 65vh;
   }
 
   /* The placeholder names the field, so phones give the icon's room to the query. */

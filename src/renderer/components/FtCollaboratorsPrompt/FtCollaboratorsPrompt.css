@@ -8,7 +8,7 @@
   letter-spacing: -0.01em;
   margin-block: 0 12px;
   margin-inline: 0;
-  text-align: start;
+  text-align: center;
 }
 
 /* Collaborators form one segmented group: large outer corners, tight inner ones. */
@@ -79,9 +79,21 @@
 
 @media screen and (width <= 460px) {
   .collaboratorRow {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: column;
     gap: 8px;
+  }
+
+  /* A name too long to fit beside the avatar moves below it instead of wrapping
+     next to it. */
+  .collaboratorLink {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 8px;
+  }
+
+  .collaboratorText {
+    text-align: center;
   }
 
   .collaboratorsList {
