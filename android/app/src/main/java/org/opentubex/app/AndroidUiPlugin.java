@@ -555,8 +555,13 @@ public class AndroidUiPlugin extends Plugin {
             preparePictureInPictureSurface();
             return;
         }
-        prepareAutomaticPictureInPictureEntry();
+        notifyPictureInPictureEntering();
+        preparePictureInPictureSurface();
+        // Android 12 to 14 decide after this hint whether automatic entry
+        // starts, and the user can deny PiP for the app. Show only the video
+        // once onPause confirms the entry, so an ordinary exit keeps the page.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return;
+        surface().showVideoOnly();
         boolean entered = false;
         try {
             entered = PictureInPicture.enter(getActivity(), pictureInPictureAspectRatio, false,
@@ -575,11 +580,16 @@ public class AndroidUiPlugin extends Plugin {
         return pictureInPictureSurface;
     }
 
-    /** Prepares automatic entry once, from whichever native callback comes first. */
-    void prepareAutomaticPictureInPictureEntry() {
-        if (surface().isShowingVideoOnly()) return;
-        notifyPictureInPictureEntering();
-        preparePictureInPictureSurface();
+    /**
+     * Shows only the video once Android has confirmed automatic entry.
+     * onUserLeaveHint has usually notified the renderer and pinned the
+     * viewport already, so notify the renderer only when it has not.
+     */
+    void showPictureInPictureVideoOnly() {
+        if (!surface().isPrepared()) {
+            notifyPictureInPictureEntering();
+            preparePictureInPictureSurface();
+        }
         surface().showVideoOnly();
     }
 

@@ -111,10 +111,6 @@ final class PictureInPictureSurface {
         viewport.setBackground(new ColorDrawable(Color.BLACK));
     }
 
-    boolean isShowingVideoOnly() {
-        return videoOnly;
-    }
-
     void onModeChanged(boolean active, Runnable notifyRenderer) {
         if (root == null) {
             notifyRenderer.run();
