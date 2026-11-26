@@ -22,7 +22,7 @@ for (const [name, historyLength, presented, selecting, visible] of [
       data: () => ({
         tabs: [tab],
         actionTab: tab,
-        actionTabYoutubeUrl: null,
+        actionTabShareLink: null,
         canToggleActionTabLoaded: true,
         relatedTabIds: { before: [], after: [], other: [] },
         activeTabId: 'tab',
@@ -52,7 +52,7 @@ for (const [name, historyLength, presented, selecting, visible] of [
         selectActionTab() {},
         closeRelatedTabs() {},
         closeActionTab() {},
-        copyActionTabYoutubeLink() {},
+        copyActionTabLink() {},
         closeTabActions() {},
         duplicateActionTab() {},
         reloadActionTab() {},

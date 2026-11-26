@@ -432,14 +432,14 @@
               :related-tab-ids="relatedTabIds"
               :tab="actionTab"
               :title="actionTab ? tabTitle(actionTab) : ''"
-              :youtube-url="actionTabYoutubeUrl"
+              :share-link="actionTabShareLink"
               :can-toggle-loaded="canToggleActionTabLoaded"
               :show-history="!selecting && actionTab?.id === presentedTabId && actionTab?.history.length > 1"
               mode="phone"
               @select="selectActionTab"
               @close-related="closeRelatedTabs"
               @close="closeActionTab"
-              @copy-youtube-link="copyActionTabYoutubeLink"
+              @copy-link="copyActionTabLink"
               @dismiss="closeTabActions"
               @duplicate="duplicateActionTab"
               @reload="reloadActionTab"
@@ -670,7 +670,7 @@ const {
   closeSelectedTabs,
   runSelectedTabAction,
   actionTab,
-  actionTabYoutubeUrl,
+  actionTabShareLink,
   activateTab: activateTabAction,
   canToggleActionTabLoaded,
   closeActionTab,
@@ -678,7 +678,7 @@ const {
   closeTabActions,
   createTab,
   createIncognitoTab,
-  copyActionTabYoutubeLink,
+  copyActionTabLink,
   duplicateActionTab,
   handleTabTargetKeydown,
   openTabActions,

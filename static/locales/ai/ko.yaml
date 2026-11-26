@@ -2705,6 +2705,7 @@ Context Menu:
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
   Background Tab: 백그라운드 탭
   Open in an Incognito Tab: 시크릿 탭에서 열기
+  Copy Links: "링크 복사"
 Tab Organizer:
   Tab History: "탭 기록"
   Current Page: "현재 페이지"

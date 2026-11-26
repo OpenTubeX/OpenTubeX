@@ -104,16 +104,16 @@
                 {{ t('Context Menu.Select Tab') }}
               </button>
               <button
-                v-if="youtubeUrl"
+                v-if="shareLink"
                 type="button"
                 role="menuitem"
-                @click="emit('copy-youtube-link')"
+                @click="emit('copy-link')"
               >
                 <FtIcon
-                  :icon="['fab', 'youtube']"
+                  :icon="shareLink.isYouTube ? ['fab', 'youtube'] : ['fas', 'link']"
                   aria-hidden="true"
                 />
-                {{ t('Context Menu.Copy YouTube Link') }}
+                {{ shareLink.isYouTube ? t('Context Menu.Copy YouTube Link') : t('Context Menu.Copy Link') }}
               </button>
               <button
                 v-if="deviceMenuItem"
@@ -258,8 +258,8 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  youtubeUrl: {
-    type: String,
+  shareLink: {
+    type: Object,
     default: null,
   },
   canToggleLoaded: {
@@ -276,7 +276,7 @@ const emit = defineEmits([
   'select',
   'close-related',
   'close',
-  'copy-youtube-link',
+  'copy-link',
   'dismiss',
   'closed',
   'duplicate',

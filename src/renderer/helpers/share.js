@@ -1,3 +1,5 @@
+import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
+
 /**
  * @param {string} currentInvidiousInstanceUrl
  * @param {string} videoId
@@ -65,6 +67,34 @@ export function isShareableOpenTubeXRoute(route) {
 
   return ['/channel', '/watch', '/hashtag', '/post'].some(p => route.startsWith(p)) ||
     (route.startsWith('/playlist') && !/playlistType=user/.test(route))
+}
+
+/**
+ * The address of the media from another site that an `/external-media` route plays.
+ * @param {string | null | undefined} route
+ * @returns {string | null}
+ */
+export function getExternalMediaRouteUrl(route) {
+  if (!route?.startsWith('/external-media?')) return null
+
+  const url = new URLSearchParams(route.slice(route.indexOf('?') + 1).split('#')[0]).get('url')
+  return isYtDlpMediaUrl(url) ? url : null
+}
+
+/**
+ * The link to copy for a tab's route: its YouTube address, or the address of
+ * media from another site.
+ * @param {string | null | undefined} route
+ * @returns {{ url: string, isYouTube: boolean } | null}
+ */
+export function getTabShareLink(route) {
+  if (isShareableOpenTubeXRoute(route)) {
+    const url = transformOpenTubeXRouteUrl(route, true)
+    return url ? { url, isYouTube: true } : null
+  }
+
+  const url = getExternalMediaRouteUrl(route)
+  return url ? { url, isYouTube: false } : null
 }
 
 /**

@@ -2327,6 +2327,7 @@ Context Menu:
   Selection Too Long: 所选内容过长，无法搜索（超过 {count} 个字符）
   Background Tab: 后台标签页
   Open in an Incognito Tab: 在无痕标签页中打开
+  Copy Links: "复制链接"
 Tab Organizer:
   Tab History: "标签页历史记录"
   Current Page: "当前页面"

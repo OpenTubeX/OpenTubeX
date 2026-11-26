@@ -1,7 +1,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
+import { getTabShareLink } from '../../helpers/share'
 import { copyToClipboard, showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 
@@ -48,12 +48,7 @@ export function useCapacitorTabActions({
   const actionTab = computed(() => (
     tabs.value.find(tab => tab.id === actionTabId.value) ?? null
   ))
-  const actionTabYoutubeUrl = computed(() => {
-    const route = actionTab.value?.route?.fullPath
-    return isShareableOpenTubeXRoute(route)
-      ? transformOpenTubeXRouteUrl(route, true)
-      : null
-  })
+  const actionTabShareLink = computed(() => getTabShareLink(actionTab.value?.route?.fullPath))
   const canToggleActionTabLoaded = computed(() => {
     const tab = actionTab.value
     if (!tab || tab.loadState === 'mounting' || tab.loadState === 'unloading') return false
@@ -255,14 +250,14 @@ export function useCapacitorTabActions({
     await afterDuplicate()
   }
 
-  async function copyActionTabYoutubeLink() {
-    const url = actionTabYoutubeUrl.value
-    if (!url) return
+  async function copyActionTabLink() {
+    const link = actionTabShareLink.value
+    if (!link) return
 
     closeTabActions()
-    await copyToClipboard(url, {
-      messageOnSuccess: t('Share.YouTube URL copied to clipboard')
-    })
+    await copyToClipboard(link.url, link.isYouTube
+      ? { messageOnSuccess: t('Share.YouTube URL copied to clipboard') }
+      : undefined)
   }
 
   async function reloadActionTab() {
@@ -310,7 +305,7 @@ export function useCapacitorTabActions({
     closeSelectedTabs,
     runSelectedTabAction,
     actionTab,
-    actionTabYoutubeUrl,
+    actionTabShareLink,
     activateTab,
     canToggleActionTabLoaded,
     closeActionTab,
@@ -318,7 +313,7 @@ export function useCapacitorTabActions({
     closeTabActions,
     createTab,
     createIncognitoTab,
-    copyActionTabYoutubeLink,
+    copyActionTabLink,
     duplicateActionTab,
     handleTabTargetKeydown,
     openTabActions,
