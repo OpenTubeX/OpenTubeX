@@ -47,11 +47,15 @@ test('reorders the control bar and moves removed buttons into the player menu', 
   await page.evaluate(buttons => window.$store.dispatch('updateControlBarButtons', buttons), selected)
   await expect.poll(() => barButtons(player)).toEqual(selected)
 
-  // The bar's last button, not the fullscreen button, reaches the screen edge.
+  // The play button, behind the hidden skip button, and the bar's last button,
+  // not the fullscreen button, reach the screen edges.
   await setPlayerFullscreen(page, true)
   await expect.poll(() => player.locator('.shaka-controls-button-panel > button').evaluateAll(elements => elements
-    .filter(element => !element.classList.contains('shaka-play-button') && getComputedStyle(element, '::before').content !== 'none')
-    .map(element => element.className))).toEqual([expect.stringContaining('shaka-overflow-menu-button')])
+    .filter(element => getComputedStyle(element, '::before').content !== 'none')
+    .map(element => element.className))).toEqual([
+    expect.stringContaining('shaka-play-button'),
+    expect.stringContaining('shaka-overflow-menu-button')
+  ])
   await setPlayerFullscreen(page, false)
 
   await openPlayerOptions(player)

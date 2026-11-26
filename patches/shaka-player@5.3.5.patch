@@ -12,7 +12,7 @@ index 6aff7bc5a52c14fd685158b75ec11a1c619ee367..a0c4ac6916cc2021a7a1edb56f6ee96e
  // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
  declare namespace shaka.extern {
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index a3596c9aa5af1236ec90588617fcf18685064397..633842cdf977ac277c1d2f83bbd35b614ac05005 100644
+index a3596c9aa5af1236ec90588617fcf18685064397..260799ecd57290bed487401a8ee89c0e9acf4e41 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -520,7 +520,7 @@ function zo(a,b=!1){var c=f=>{if(f.fullMimeTypes&&f.fullMimeTypes.size>1&&a.i.ha
@@ -158,6 +158,15 @@ index a3596c9aa5af1236ec90588617fcf18685064397..633842cdf977ac277c1d2f83bbd35b61
  alwaysShowVolumeBar:!1,shortcuts:{small_rewind:"ArrowLeft",small_fast_forward:"ArrowRight",large_rewind:"PageDown",large_fast_forward:"PageUp",home:"Home",end:"End",captions:"c",fullscreen:"f",mute:"m",picture_in_picture:"p",increase_video_speed:">",decrease_video_speed:"<",play:"k",take_screenshot:"u",last_frame:",",next_frame:"."},menuOpenUntilUserClosesIt:!0,allowTogglePresentationTime:!0,showRemainingTimeInPresentationTime:!1,enableVrDeviceMotion:!0,enableVrWheelZoom:!1,showUIAlways:!1,showUIAlwaysOnAudioOnly:!0,
  preferIntlDisplayNames:!0,mediaSession:{enabled:!0,handleMetadata:!0,handleActions:!0,handlePosition:!0,supportedActions:c,allowAutoPiP:!0},captionsStyles:!0,captionsFontScaleFactors:[.5,.75,1,1.25,1.5,1.75,2],captionsStyleElements:"captions-font-family captions-font-color captions-size captions-background-color captions-background-opacity captions-character-edge-style captions-font-opacity captions-position captions-style-reset".split(" "),documentPictureInPicture:{enabled:!0,preferInitialWindowPlacement:!1,
  disallowReturnToOpener:!1},showUIOnPaused:!0,customTrackLabel:()=>"",showBufferingSpinner:!0};if(a.rh()){b.bigButtons=["skip_previous_always","play_pause_buffering","skip_next_always"];b.customContextMenu=!1;b.singleClickForPlayAndPause=!1;b.seekOnTaps=!0;b.enableTooltips=!1;a=gb();b.enableFullscreenOnRotation=a.j()!=="WEBKIT";b.forceLandscapeOnFullscreen=!0;b.controlPanelElements=b.controlPanelElements.map(e=>e==="mute_volume"?"mute":e);let d=["play_pause","skip_previous","skip_next"];b.controlPanelElements=
+@@ -2168,7 +2168,7 @@ function tS(a,b){var c=a.controls.h,d=c.playbackRateSliderStep;sS(a,Math.max(c.p
+ var wS=class extends rR{constructor(a,b){super(a,b,bO.PLAYBACK_RATE);this.I=this.controls.h;this.button.classList.add("shaka-playbackrate-button");this.menu.classList.add("shaka-playback-rates");this.button.classList.add("shaka-tooltip-status");this.isSubMenu||(this.l=U("span"),this.l.classList.add("shaka-overflow-playback-rate-mark"),this.button.appendChild(this.l));this.j=this.i=this.F=this.h=null;rS(this);this.eventManager.ia(this.player,["loaded","ratechange"],()=>{vS(this)});this.updateLocalizedStrings();
+ vS(this)}release(){this.h&&(this.h.release(),this.h=null);super.release()}updateLocalizedStrings(){this.backButton.ariaLabel=this.localization.resolve("BACK");var a=this.localization.resolve("PLAYBACK_RATE");this.button.ariaLabel=a;this.nameSpan.textContent=a;this.backSpan.textContent=a}};y("shaka.ui.PlaybackRateSelection",wS);var xS=class{create(a,b){return new wS(a,b)}};GQ("playback_rate",new xS);OP("playback_rate",new xS);function yS(a,b){b!=a.h.textContent&&(a.h.textContent=b)}
+ function zS(a){var b=a.controls.O,c=a.controls.Ec(),d=a.player.ya(),e=d.end-d.start;isFinite(e)?a.player.wa()?(c=Math.max(0,Math.floor(d.end-c)),e=e>=3600,c>=1||b?(yS(a,"- "+kO(c,e)),a.h.disabled=!1):(yS(a,a.localization.resolve("LIVE")),a.h.disabled=!0)):(b=e>=3600,c=Math.max(0,c-d.start),e&&(c=Math.min(c,e)),d=kO(c,b),!a.i&&e&&(d="-"+kO(e-c,b)),e&&(d+=" / "+kO(e,b)),yS(a,d),a.h.disabled=!a.controls.h.allowTogglePresentationTime):(yS(a,a.localization.resolve("LIVE")),a.h.disabled=!0)}
+-var AS=class extends aO{constructor(a,b){super(a,b);this.h=Jl();this.h.classList.add("shaka-current-time");yS(this,"0:00");this.parent.appendChild(this.h);this.i=!this.controls.h.showRemainingTimeInPresentationTime;this.eventManager.B(this.h,"click",()=>{this.controls.Fa()&&(this.player.wa()?this.video.currentTime=this.player.ya().end:(this.i=!this.i,zS(this)))});this.eventManager.B(this.player,"loading",()=>{Y(this.h,!0)});this.eventManager.B(this.controls,"timeandseekrangeupdated",()=>{zS(this)});
++var AS=class extends aO{constructor(a,b){super(a,b);this.h=Jl();this.h.classList.add("shaka-current-time");yS(this,"0:00");this.parent.appendChild(this.h);this.i=!this.controls.h.showRemainingTimeInPresentationTime;zS(this);this.eventManager.B(this.h,"click",()=>{this.controls.Fa()&&(this.player.wa()?this.video.currentTime=this.player.ya().end:(this.i=!this.i,zS(this)))});this.eventManager.B(this.player,"loading",()=>{Y(this.h,!0)});this.eventManager.B(this.controls,"timeandseekrangeupdated",()=>{zS(this)});
+ this.eventManager.B(this.player,"trackschanged",()=>{this.player.wa()&&(this.h.ariaLabel=this.localization.resolve("SKIP_TO_LIVE"))});this.eventManager.B(this.adManager,dw,()=>{Y(this.h,!this.ad.isLinear())});this.eventManager.B(this.adManager,jw,()=>{Y(this.h,!0)})}};y("shaka.ui.PresentationTimeTracker",AS);OP("time_and_duration",new class{create(a,b){return new AS(a,b)}});function BS(a){hO(a.menu);var b=CS(a);if(b.length>1){let e=a.h.getCurrentItemIndex(),f=a.h.getItems(),g=b.some(h=>h.metadata&&h.metadata.poster);for(let h of b){let k=f.indexOf(h);b=k===e;let l=Jl();l.setAttribute("role","menuitem");l.classList.add("shaka-queue-item");l.setAttribute("data-queue-index",String(k));b&&l.classList.add("shaka-queue-item-current");if(g){var c=U("div");c.classList.add("shaka-queue-poster");if(h.metadata.poster){var d=U("img");d.draggable=!1;d.setAttribute("loading","lazy");
+ d.alt=h.metadata.title||"";d.src=h.metadata.poster;c.appendChild(d)}l.appendChild(c)}c=U("div");c.classList.add("shaka-queue-item-text");d=U("span");d.classList.add("shaka-queue-item-title");d.textContent=h.metadata.title;c.appendChild(d);b&&c.appendChild(iO());l.appendChild(c);a.eventManager.B(l,"click",()=>{a.controls.Fa()&&a.h.playItem(k)});a.menu.appendChild(l)}Y(a.button,!a.isSubMenuOpened);gO(a.menu)}else Y(a.button,!1)}
+ function CS(a){return a.h?a.h.getItems().filter(b=>b.metadata?.title):[]}
 @@ -2180,7 +2180,7 @@ GQ("recenter_vr",new GS);OP("recenter_vr",new GS);async function HS(a,b=!1){if(a
  (await a.i.cancelWatchAvailability(a.j),a.j=-1);a.h.ariaPressed=a.i?.state=="connected"?"true":"false"}function IS(a){a.l||(a.i.state=="disconnected"?a.o.use(bO.CAST):a.o.use(bO.EXIT_CAST))}
  var JS=class extends aO{constructor(a,b){super(a,b);a=gb();this.l=a.P();this.h=Jl();this.h.classList.add("shaka-remote-button");this.h.classList.add("shaka-tooltip");this.h.classList.add("shaka-no-propagation");this.h.ariaPressed="false";this.o=new eO(this.h,this.l?bO.AIRPLAY:bO.CAST);b=U("label");b.classList.add("shaka-overflow-button-label");b.classList.add("shaka-overflow-menu-only");this.u=U("span");b.appendChild(this.u);this.m=U("span");this.m.classList.add("shaka-current-selection-span");b.appendChild(this.m);
@@ -521,6 +530,21 @@ index e3242df55e38d600ffb6e49939bcd2ddd488bef9..d5cd1ee1c0e59518bc7965902bf9634f
   * @property {boolean} preferVideoFullScreenInVisionOS
   *   If true, we will use the fullscreen API of the video element itself if it
   *   is available in Vision OS. This is useful to be able to access 3D
+diff --git a/ui/presentation_time.js b/ui/presentation_time.js
+index 4ed5d1d9c9968e9ccb94775f59b981f8dc44d528..c328a442abd15d28f0aca4d61a050f51a6b638b8 100644
+--- a/ui/presentation_time.js
++++ b/ui/presentation_time.js
+@@ -37,6 +37,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
+     this.showProgress_ =
+         !this.controls.getConfig().showRemainingTimeInPresentationTime;
+ 
++    // Controls rebuild on every configure. Show the current time right away
++    // instead of 0:00 until the next refresh tick.
++    this.updateTime_();
++
+     this.eventManager.listen(this.currentTime_, 'click', () => {
+       if (!this.controls.isOpaque()) {
+         return;
 diff --git a/ui/range_element.js b/ui/range_element.js
 index d85839a80edc90dad46acdc2b74b412efa5ff838..fa472411ca8783db233e4caae57c160808691550 100644
 --- a/ui/range_element.js

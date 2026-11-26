@@ -2204,7 +2204,7 @@ import { normalizeHoldPlaybackRateMultiplier } from '../../helpers/holdPlaybackR
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { getChapterNavigationTarget } from '../../helpers/player/chapterNavigation'
-import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, toRef, useId, useTemplateRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -5340,11 +5340,8 @@ const contextMenuElements = computed(() => {
 
 function getBigButtons(showPlayButton, mobile) {
   if (!mobile && !showPlayButton) return []
-  return [
-    ...(props.canSkipPrevious ? ['ft_skip_previous'] : []),
-    'play_pause',
-    ...(props.canSkipNext ? ['ft_skip_next'] : [])
-  ]
+  // The skip buttons hide themselves while there is nothing to skip to.
+  return ['ft_skip_previous', 'play_pause', 'ft_skip_next']
 }
 
 const uiConfig = computed(() => {
@@ -5611,16 +5608,6 @@ const uiConfig = computed(() => {
   if (!useVrMode.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'recenter_vr')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'toggle_stereoscopic')
-  }
-
-  // Only offer skipping where there actually is a video to skip to. The watch
-  // view knows where those come from, a playlist or the watch queue.
-  if (!props.canSkipPrevious) {
-    removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_previous')
-  }
-
-  if (!props.canSkipNext) {
-    removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_next')
   }
 
   return uiConfig
@@ -11085,6 +11072,11 @@ function registerSponsorBlockHighlightButton() {
 }
 
 function registerSkipButtons() {
+  // Only offer skipping where there actually is a video to skip to. The watch
+  // view knows where those come from, a playlist or the watch queue.
+  const canSkipNext = toRef(props, 'canSkipNext')
+  const canSkipPrevious = toRef(props, 'canSkipPrevious')
+
   // skip to next video button
   events.addEventListener('nextVideo', () => {
     emit('skip-to-next')
@@ -11092,7 +11084,7 @@ function registerSkipButtons() {
 
   class SkipNextButtonFactory {
     create(rootElement, controls) {
-      return new SkipButton(events, rootElement, controls, 'next')
+      return new SkipButton(events, canSkipNext, rootElement, controls, 'next')
     }
   }
 
@@ -11107,7 +11099,7 @@ function registerSkipButtons() {
 
   class SkipPreviousButtonFactory {
     create(rootElement, controls) {
-      return new SkipButton(events, rootElement, controls, 'previous')
+      return new SkipButton(events, canSkipPrevious, rootElement, controls, 'previous')
     }
   }
 

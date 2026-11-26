@@ -1,4 +1,5 @@
 import shaka from 'shaka-player'
+import { watch } from 'vue'
 
 import i18n from '../../../i18n/index'
 import { KeyboardShortcuts, PlayerIcons } from '../../../../constants'
@@ -7,11 +8,12 @@ import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
 export class SkipButton extends shaka.ui.Element {
   /**
    * @param {EventTarget} events
+   * @param {import('vue').Ref<boolean>} available
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    * @param {'next'|'previous'} type
    */
-  constructor(events, parent, controls, type = 'next') {
+  constructor(events, available, parent, controls, type = 'next') {
     super(parent, controls)
 
     this.type_ = type
@@ -51,7 +53,20 @@ export class SkipButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    // The button stays registered and only hides while there is nothing to
+    // skip to. Adding or removing it would rebuild every control, which
+    // flashes their initial state whenever autoplay is toggled.
+    /** @private */
+    this.stopAvailableWatch_ = watch(available, (isAvailable) => {
+      this.button_.classList.toggle('shaka-hidden', !isAvailable)
+    }, { immediate: true })
+
     this.updateLocalisedStrings_()
+  }
+
+  release() {
+    this.stopAvailableWatch_()
+    super.release()
   }
 
   /** @private */

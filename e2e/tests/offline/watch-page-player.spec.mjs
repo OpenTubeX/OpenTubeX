@@ -1360,7 +1360,7 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
     component.recommendedVideos = [{ videoId: '9bZkp7q19f0', title: 'Recommended', type: 'video' }]
   })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  const skipButtons = player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button')
+  const skipButtons = player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button:not(.shaka-hidden)')
   const mediaActions = () => page.evaluate(() => ({
     next: typeof window.mediaActions.nexttrack === 'function',
     previous: typeof window.mediaActions.previoustrack === 'function'
@@ -1370,13 +1370,17 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
   await expect.poll(mediaActions).toEqual({ next: false, previous: false })
   await expect(skipButtons).toHaveCount(0)
 
-  // The new skip button rebuilds the controls while the click still bubbles,
-  // which must not reach the player surface and pause playback.
+  // The click must not reach the player surface and pause playback. The skip
+  // button only shows, since rebuilding the controls would reset them to their
+  // initial state, such as a 0:00 time, for a moment.
   await player.hover()
+  const timeDisplay = await player.locator('.shaka-current-time:not(.ft-playback-adjusted-time)').elementHandle()
   await player.locator('.shaka-controls-button-panel > .autoplay-toggle').click()
   await expect.poll(mediaActions).toEqual({ next: true, previous: false })
   await expect(skipButtons).toHaveCount(1)
   expect(await video.evaluate(element => element.paused)).toBe(false)
+  expect(await timeDisplay.evaluate(element => element.isConnected)).toBe(true)
+  await timeDisplay.dispose()
 
   await page.evaluate(() => window.mediaActions.nexttrack({ action: 'nexttrack' }))
   await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0$/)
@@ -1429,7 +1433,7 @@ test('desktop skip buttons flank the centered play button without a backdrop', {
   await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  const buttons = player.locator('.shaka-big-buttons-container > button')
+  const buttons = player.locator('.shaka-big-buttons-container > button:not(.shaka-hidden)')
   const centerOf = (locator) => locator.evaluate(element => {
     const bounds = element.getBoundingClientRect()
     return { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
@@ -1442,7 +1446,7 @@ test('desktop skip buttons flank the centered play button without a backdrop', {
   await expect(buttons.nth(1)).toHaveClass(/shaka-play-button/)
   await expect(buttons.nth(2)).toHaveClass(/skip-next-button/)
   // The control bar keeps its own skip buttons on desktop.
-  await expect(player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button')).toHaveCount(2)
+  await expect(player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button:not(.shaka-hidden)')).toHaveCount(2)
 
   const styles = await buttons.evaluateAll(elements => elements.map(element => {
     const { backgroundColor, boxShadow } = getComputedStyle(element)
