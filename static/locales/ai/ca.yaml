@@ -120,7 +120,7 @@ Search Filters:
     Location: Ubicació
     HDR: HDR
     VR180: VR180
-  Clear Filters: Neteja els filtres
+  Clear Filters: Restableix els filtres
 Stats:
   Left of daily limit: "Queden {duration} del vostre límit diari de {limit}"
   Daily limit reached: "S'ha arribat al límit diari de {limit}"

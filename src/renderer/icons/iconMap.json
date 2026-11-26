@@ -287,10 +287,6 @@
     "ri": "filter-3-line",
     "material": "filter-alt-outline"
   },
-  "filter-circle-xmark": {
-    "ri": "filter-off-line",
-    "material": "filter-alt-off-outline"
-  },
   "fire": {
     "ri": "fire-line",
     "material": "local-fire-department-outline"

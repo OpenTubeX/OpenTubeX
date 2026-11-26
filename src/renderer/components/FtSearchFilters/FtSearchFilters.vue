@@ -6,28 +6,12 @@
     @click="hideSearchFilters"
   >
     <template #label="{ labelId }">
-      <div class="titleContainer">
-        <h2
-          :id="labelId"
-          class="center"
-        >
-          {{ title }}
-        </h2>
-        <button
-          type="button"
-          class="clearFilterButton"
-          :aria-label="$t('Search Filters.Clear Filters')"
-          :title="$t('Search Filters.Clear Filters')"
-          :style="{visibility: (searchFilterValueChanged ? 'visible' : 'hidden')}"
-          @click="clearFilters"
-        >
-          <FtIcon
-            class="clearFilterIcon"
-            aria-hidden="true"
-            :icon="['fas', 'filter-circle-xmark']"
-          />
-        </button>
-      </div>
+      <h2
+        :id="labelId"
+        class="center"
+      >
+        {{ title }}
+      </h2>
     </template>
 
     <FtFlexBox class="radioFlexBox">
@@ -69,7 +53,14 @@
       />
     </FtFlexBox>
     <template #footer>
-      <div class="searchFilterCloseButtonContainer">
+      <FtButtonGroup>
+        <FtButton
+          class="resetFiltersButton"
+          :label="$t('Search Filters.Clear Filters')"
+          :icon="['fas', 'arrow-rotate-left']"
+          :disabled="!searchFilterValueChanged"
+          @click="clearFilters"
+        />
         <FtButton
           :label="$t('Close')"
           :icon="['fas', 'xmark']"
@@ -77,7 +68,7 @@
           text-color="null"
           @click="hideSearchFilters"
         />
-      </div>
+      </FtButtonGroup>
     </template>
   </FtPrompt>
 </template>
@@ -90,6 +81,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 
 import store from '../../store/index'

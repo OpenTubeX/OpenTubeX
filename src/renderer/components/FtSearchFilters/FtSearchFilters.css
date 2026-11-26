@@ -13,48 +13,6 @@
   margin-inline: auto;
 }
 
-.searchFilterCloseButtonContainer {
-  display: flex;
-  justify-content: center;
-}
-
-.titleContainer {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.5rem;
-  flex: 0 0 auto;
-  block-size: auto;
-}
-
-.clearFilterButton {
-  --icon-width: 1em;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border-style: none;
-  background-color: transparent;
-  color: var(--primary-text-color);
-  cursor: pointer;
-  font-size: 20px;
-  line-height: 1em;
-  padding: 10px;
-  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-
-  &:hover {
-    background-color: var(--side-nav-hover-color);
-    color: var(--side-nav-hover-text-color);
-  }
-
-  &:active {
-    border-radius: var(--shape-corner-medium);
-    background-color: var(--side-nav-active-color);
-    color: var(--side-nav-active-text-color);
-  }
-}
-
 @media (width > 680px) and (height > 600px) and (not (any-pointer: coarse)) {
   /* Half the 40px state layer keeps it inside the column regardless of font height. */
   .searchRadio {
@@ -76,21 +34,15 @@
     padding-block-start: 0;
   }
 
+  /* Shrinks to the widest group so the stacked groups center together and keep their radios aligned. */
   .radioFlexBox {
     flex-flow: column;
+    inline-size: fit-content;
+    max-inline-size: 100%;
   }
 }
 
 @media (width <= 600px), (height <= 600px) {
-  .titleContainer {
-    flex-wrap: wrap;
-  }
-
-  .clearFilterButton {
-    min-inline-size: var(--phone-touch-target, 48px);
-    min-block-size: var(--phone-touch-target, 48px);
-  }
-
   .searchRadio :deep(input[type='radio'] + label),
   .searchRadio :deep(input[type='checkbox'] + label) {
     box-sizing: border-box;

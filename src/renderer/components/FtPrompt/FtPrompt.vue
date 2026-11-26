@@ -297,10 +297,11 @@ function handleClick(event) {
 
 /**
  * Queried on use, since content such as a pager can replace its buttons.
+ * Disabled buttons cannot take focus, so they are skipped.
  * @returns {HTMLElement[]}
  */
 function getPromptButtons() {
-  return Array.from(promptCard.value?.$el.querySelectorAll('.btn.ripple, .iconButton, .promptAction') ?? [])
+  return Array.from(promptCard.value?.$el.querySelectorAll(':is(.btn.ripple, .iconButton, .promptAction):not(:disabled)') ?? [])
 }
 
 /**
