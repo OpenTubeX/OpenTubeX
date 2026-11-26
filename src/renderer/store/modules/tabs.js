@@ -394,6 +394,11 @@ const actions = {
   },
 
   async createTab({ rootGetters }, options = {}) {
+    if (process.env.IS_CAPACITOR) {
+      return await getCapacitorTabService().createTab(options.route, '', options.makeActive !== false, {
+        incognito: options.isIncognito === true,
+      })
+    }
     if (!process.env.IS_ELECTRON) return null
 
     const tabOptions = options.route || options.url
@@ -404,6 +409,10 @@ const actions = {
   },
 
   activateTab(_context, tabId) {
+    if (process.env.IS_CAPACITOR) {
+      getCapacitorTabService().activateTab(tabId)
+      return
+    }
     if (!process.env.IS_ELECTRON) return
     window.ftElectron.tabs.activate(tabId)
   },
@@ -415,6 +424,11 @@ const actions = {
   },
 
   async closeTab(_context, tabId) {
+    if (process.env.IS_CAPACITOR) {
+      // Closing the last tab replaces it with a landing tab
+      await getCapacitorTabService().closeTab(tabId)
+      return true
+    }
     if (!process.env.IS_ELECTRON) return false
     const result = await window.ftElectron.tabs.close(tabId)
     return result?.hasRemainingTabs ?? false
@@ -519,16 +533,16 @@ const actions = {
     }
   },
 
-  nextTab({ state }) {
-    if (!process.env.IS_ELECTRON || state.tabs.length <= 1) return
+  nextTab({ state, dispatch }) {
+    if (state.tabs.length <= 1) return
     const currentIndex = state.tabs.findIndex(tab => tab.id === state.activeTabId)
-    window.ftElectron.tabs.activate(state.tabs[(currentIndex + 1) % state.tabs.length].id)
+    dispatch('activateTab', state.tabs[(currentIndex + 1) % state.tabs.length].id)
   },
 
-  prevTab({ state }) {
-    if (!process.env.IS_ELECTRON || state.tabs.length <= 1) return
+  prevTab({ state, dispatch }) {
+    if (state.tabs.length <= 1) return
     const currentIndex = state.tabs.findIndex(tab => tab.id === state.activeTabId)
-    window.ftElectron.tabs.activate(state.tabs[(currentIndex - 1 + state.tabs.length) % state.tabs.length].id)
+    dispatch('activateTab', state.tabs[(currentIndex - 1 + state.tabs.length) % state.tabs.length].id)
   }
 }
 

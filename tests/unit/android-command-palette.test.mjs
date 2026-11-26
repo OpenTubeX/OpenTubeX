@@ -42,22 +42,26 @@ test('opening the ordinary command registry does not read the video library', ()
   }))
 })
 
-test('download settings commands respect Android availability', () => {
+test('download and tab commands respect Android availability', () => {
   let openedSection
   let openedSearch
   const commands = createRegistry({
     isElectron: false,
-    downloads: [],
+    downloads: [{ id: 'finished', status: 'finished' }, { id: 'running', status: 'downloading' }],
     isCapacitor: true,
     routePath: '/history',
     routeAvailable: () => true,
     t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getCustomThemes: [] } },
+    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getTabsEnabled: true, getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getCustomThemes: [] } },
     openSettingsSection: section => { openedSection = section },
     openSettingsSearchResult: (section, match) => { openedSearch = { section, match } },
   })
   assert.ok(!commands.some(command => command.id === 'playback.fullwindow'))
+  assert.deepEqual(commands.filter(command => command.id.startsWith('downloads.cancel.')).map(command => command.id), ['downloads.cancel.running'])
+  const tabCommands = commands.filter(command => ['tabs.new', 'tabs.close', 'tabs.reload', 'tabs.restore'].includes(command.id))
+  assert.equal(tabCommands.length, 4)
+  assert.ok(tabCommands.every(command => command.disabledReason === '' && command.shortcut === ''))
   const downloads = commands.find(command => command.id === 'settings.download')
   assert.equal(downloads.disabledReason, '')
   const results = commands.filter(command => command.id.startsWith('settings.search.download.'))
