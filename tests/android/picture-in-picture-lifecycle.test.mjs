@@ -120,9 +120,18 @@ before(async () => {
 
 after(async () => {
   if (!browser) return
+  const available = () => !page.isClosed() && originalSettings
+  // Restore the app even when it cannot leave PiP, and still report why.
+  let exitError
   try {
-    if (!page.isClosed() && originalSettings) {
-      if (await page.evaluate(() => document.body.classList.contains('androidPictureInPicture'))) await leavePictureInPicture()
+    if (available() && await page.evaluate(() => document.body.classList.contains('androidPictureInPicture'))) {
+      await leavePictureInPicture()
+    }
+  } catch (error) {
+    exitError = error
+  }
+  try {
+    if (available()) {
       await page.evaluate(async settings => {
         window.__stopPipLifecycleTrace?.()
         window.__androidTestNetwork?.restore()
@@ -136,7 +145,12 @@ after(async () => {
         await app.$router.push(settings.route)
       }, originalSettings)
     }
-  } finally { await browser.close() }
+  } catch (error) {
+    throw exitError ? new AggregateError([exitError, error], 'Could not leave PiP or restore the app') : error
+  } finally {
+    await browser.close()
+  }
+  if (exitError) throw exitError
 })
 
 /**
@@ -203,21 +217,29 @@ function countPagePixels(pixels) {
   return count
 }
 
+const pictureInPictureSize = ([left, top, right, bottom]) => ({ width: right - left, height: bottom - top })
+
 /**
  * Double-taps the PiP window, which switches between its default and its
- * enlarged size.
+ * enlarged size, and returns its new bounds.
+ * @param {boolean} enlarge whether the window must grow or shrink
  * @param {string} message
  */
-async function togglePictureInPictureSize(message) {
-  const [left, top, right, bottom] = pictureInPictureBounds()
+async function togglePictureInPictureSize(enlarge, message) {
+  const before = pictureInPictureBounds()
+  const [left, top, right, bottom] = before
   const x = Math.round((left + right) / 2)
   const y = Math.round((top + bottom) / 2)
-  const before = JSON.stringify([left, top, right, bottom])
   adb('shell', `input tap ${x} ${y}; input tap ${x} ${y}`)
-  await expect.poll(() => JSON.stringify(pictureInPictureBounds()), { message }).not.toBe(before)
+  let after
+  await expect.poll(() => {
+    after = pictureInPictureBounds()
+    if (!after) return false
+    const change = pictureInPictureSize(after).width - pictureInPictureSize(before).width
+    return enlarge ? change > 0 : change < 0
+  }, { message }).toBe(true)
+  return after
 }
-
-const pictureInPictureSize = ([left, top, right, bottom]) => ({ width: right - left, height: bottom - top })
 
 /**
  * Decodes a native screenshot to RGB pixels.
@@ -271,18 +293,22 @@ async function assertRecordedEntry(remote, scale, trigger) {
     const inline = []
     const entry = []
     let enteredAt
+    let entryStarted = false
     for (let offset = 0; offset < frames.length; offset += frameBytes) {
-      const fixture = locateFixture(frames.subarray(offset, offset + frameBytes), width, height)
-      if (!fixture) continue
+      const frame = frames.subarray(offset, offset + frameBytes)
+      const fixture = locateFixture(frame, width, height)
       const time = offset / (frameBytes * fps)
-      // Once the window starts shrinking, it must show the video on black.
-      // Android's entry animation crops the window's frame down to the video,
-      // and showed the page around it when automatic entry left it in place,
+      // Once the window starts shrinking, it must show the video on black,
+      // including in frames that crop the video away entirely. Android's
+      // entry animation crops the window's frame down to the video, and
+      // showed the page around it when automatic entry left it in place,
       // which an enlarged PiP window fills for most of the animation.
-      if (fixture.width < 260 || enteredAt !== undefined) {
-        const pagePixels = countPagePixels(frames.subarray(offset, offset + frameBytes))
+      entryStarted ||= !!fixture && fixture.width < 260
+      if (entryStarted) {
+        const pagePixels = countPagePixels(frame)
         if (pagePixels > 50) pageFrame ??= { time, pagePixels }
       }
+      if (!fixture) continue
       // The inline player spans the screen's width; the window shrinks from
       // there into picture-in-picture.
       if (fixture.width >= 260) {
@@ -330,13 +356,14 @@ function pictureInPictureMenuShown([left, top, right, bottom]) {
   return !fixture || fixture.count < (right - left) * (bottom - top) / 2
 }
 
-/** Double-taps the enlarged PiP window back to its default size. */
+/** Double-taps the enlarged PiP window back to its default size, and returns its bounds. */
 async function restorePictureInPictureSize() {
-  await togglePictureInPictureSize('a second double tap restores the PiP window size')
+  let bounds = await togglePictureInPictureSize(false, 'a second double tap restores the PiP window size')
   // Android can move the restored window by a pixel.
-  await expect.poll(() => pictureInPictureSize(pictureInPictureBounds()).width, { message: 'the PiP window has its default size again' })
-    .toBe(defaultPictureInPictureSize.width)
+  await expect.poll(() => (bounds = pictureInPictureBounds()) && pictureInPictureSize(bounds).width,
+    { message: 'the PiP window has its default size again' }).toBe(defaultPictureInPictureSize.width)
   defaultPictureInPictureSize = undefined
+  return bounds
 }
 
 /** Waits until the video's bounds stay the same over two animation frames. */
@@ -435,13 +462,18 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
         { message: 'screenrecord starts' }).toBe('recording')
       // Record inline playback first, which shows how smoothly this device
       // plays the video.
-      await page.evaluate(() => {
+      const inlineFrames = FIXTURE.fps * 1.5 + 1
+      await page.evaluate(required => {
         const video = document.querySelector('video')
+        let callback
         window.__pipInlineFrames = 0
-        const count = () => { window.__pipInlineFrames++; video.requestVideoFrameCallback(count) }
-        video.requestVideoFrameCallback(count)
-      })
-      await page.waitForFunction(fps => window.__pipInlineFrames > fps * 1.5, FIXTURE.fps)
+        const count = () => {
+          callback = ++window.__pipInlineFrames < required ? video.requestVideoFrameCallback(count) : undefined
+        }
+        callback = video.requestVideoFrameCallback(count)
+        window.__stopPipInlineFrames = () => { if (callback !== undefined) video.cancelVideoFrameCallback(callback) }
+      }, inlineFrames)
+      await page.waitForFunction(required => window.__pipInlineFrames >= required, inlineFrames, { timeout: 30000 })
       if (trigger === 'home') adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
       else await page.evaluate(() => document.querySelector('.ftVideoPlayer .shaka-pip-button').click())
       await page.waitForFunction(() => document.body.classList.contains('androidPictureInPicture') && !document.body.classList.contains('androidPictureInPictureEntering'),
@@ -491,13 +523,11 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
         // A double tap enlarges the window, which must keep the video's
         // geometry too. The next test's automatic entry reuses that size.
         const size = pictureInPictureSize(pictureInPictureBounds())
-        await togglePictureInPictureSize('a double tap enlarges the PiP window')
-        assert.ok(pictureInPictureSize(pictureInPictureBounds()).width > size.width, 'the double tap enlarged the PiP window')
+        await togglePictureInPictureSize(true, 'a double tap enlarges the PiP window')
         defaultPictureInPictureSize = size
       } else if (defaultPictureInPictureSize) {
         // Android would keep the enlarged size for the tests that follow.
-        await restorePictureInPictureSize()
-        ;[left, top, right, bottom] = pictureInPictureBounds()
+        ;[left, top, right, bottom] = await restorePictureInPictureSize()
       }
       await page.evaluate(() => window.__beginPipReturn())
       if (api >= 31 && trigger === 'home') {
@@ -540,6 +570,9 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
         await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}-trace.json`, JSON.stringify(trace))
       }
       await page.evaluate(() => {
+        window.__stopPipInlineFrames?.()
+        delete window.__stopPipInlineFrames
+        delete window.__pipInlineFrames
         document.querySelector('video')?.pause()
         document.querySelector('#pip-offscreen-content')?.remove()
         window.scrollTo(0, 0)
@@ -606,10 +639,18 @@ for (const scale of [100, 125]) {
         png = screencap()
         const screen = decodeScreenshot(png)
         const [left, top, right, bottom] = bounds
-        pixels = [0.03, 0.15, 0.85, 0.97].flatMap(y => [0.1, 0.5, 0.9].map(x => {
-          const offset = (Math.round(top + (bottom - top) * y) * screen.width + Math.round(left + (right - left) * x)) * 3
+        const points = [0.03, 0.15, 0.85, 0.97].flatMap(y => [0.1, 0.5, 0.9].map(x =>
+          [Math.round(left + (right - left) * x), Math.round(top + (bottom - top) * y)]))
+        // Bounds from a window that Android is still moving can lie outside
+        // the screenshot. Retry with fresh ones.
+        if (points.some(([x, y]) => x < 0 || y < 0 || x >= screen.width || y >= screen.height)) {
+          pixels = { outside: points, screen: [screen.width, screen.height] }
+          return false
+        }
+        pixels = points.map(([x, y]) => {
+          const offset = (y * screen.width + x) * 3
           return [...screen.pixels.subarray(offset, offset + 3)]
-        }))
+        })
         return pixels.every(rgb => rgb.every((value, index) => Math.abs(value - FIXTURE.rgb[index]) < 24))
       }, { message: 'PiP must show video at every edge without clipping or black bands' }).toBe(true)
       if (process.env.ANDROID_ARTIFACT_DIR) {
