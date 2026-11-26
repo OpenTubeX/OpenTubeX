@@ -680,6 +680,11 @@ Settings:
       Tooltip: Încarcă comentariile la deschiderea paginii și încarcă mai multe pe măsură ce derulezi.
     Haptic Feedback: Feedback haptic
     Ignore System Haptics Setting: Ignoră setarea haptică a sistemului
+    Sections:
+      Startup and Tabs: Pornire și file
+      Language and Region: Limbă și regiune
+      System: Sistem
+      Browsing: Navigare
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -1426,6 +1431,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Bunăstare digitală"
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
+      Subscriptions and Channels: Abonamente și canale
+      Blocked Content: Conținut blocat
     Hide Channel Avatars: Ascunde avatarurile canalelor
     Shorten View Counts: Abreviază numărul de vizionări, comentarii și aprecieri ale comentariilor
     Hide Live Chat Replay: Ascunde reluarea chatului în direct
@@ -1440,6 +1447,39 @@ Settings:
     Add: Adaugă
     Remove: Elimină
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
+    Rows:
+      Video Lists: Liste de videoclipuri
+      Video Lists Description: Fluxuri, rezultate de căutare, pagini de canale și În continuare
+      App Interface: Interfața aplicației
+      Engagement: Interacțiune
+      Comments and Chat: Comentarii și chat
+      Recommendations: Recomandări
+      Player Extras: Funcții suplimentare ale playerului
+    Chips:
+      Channel Avatars: Avatarurile canalelor
+      Subscriber Counts: Număr de abonați
+      Live Streams: Stream-uri live
+      Upcoming Premieres: Premiere viitoare
+      Playlist Stats: Statisticile listei de redare
+      Recommendation Details: Motivele recomandărilor
+      Sharing Actions: Butoane de sharing
+      Watched in Subscriptions: Videoclipuri vizionate în abonamente
+      Watched in Search and Recommendations: Videoclipuri vizionate în căutare și recomandări
+      Startup Splash: Ecran de pornire
+      Header Sync Indicator: Indicator de sincronizare din antet
+      Featured Channels: Canale recomandate
+      Likes and Dislikes: Like-uri și dislike-uri
+      Comment Likes: Aprecierile comentariilor
+      Popularity Graph: Grafic de popularitate
+      Repeat Stats: Statistici de repetare
+      Profile Pictures in Comments: Imagini de profil în comentarii
+      Live Chat: Chat live
+      Live Chat Replay: Reluarea chatului în direct
+      End-Screen Recommendations: Recomandări de pe ecranul de final
+      End-Screen Annotations: Adnotări de pe ecranul final
+      Paid Promotion Badge: Insigna de promovare plătită
+      A-B Repeat: Repetare A-B
+      Full Screen Video Title: Titlul videoclipului în fereastră completă și pe ecran complet
   Data Settings:
     Backup separate profile data: "Această copie de rezervă conține și datele unui profil separat ({count}), care sunt restaurate în acel profil. | Această copie de rezervă conține și datele a {count} profiluri separate, care sunt restaurate în acele profiluri. | Această copie de rezervă conține și datele a {count} de profiluri separate, care sunt restaurate în acele profiluri."
     Subscription cache file: "Acest fișier stochează în cache doar videoclipurile din abonamentele tale, nu și canalele. Alege în schimb profiles.db sau un export al abonamentelor."

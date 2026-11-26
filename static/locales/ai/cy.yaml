@@ -681,6 +681,11 @@ Settings:
       Tooltip: Llwytho sylwadau pan fydd y dudalen yn agor a llwytho rhagor o sylwadau wrth i chi sgrolio.
     Haptic Feedback: Adborth haptig
     Ignore System Haptics Setting: Anwybyddu gosodiad haptig y system
+    Sections:
+      Startup and Tabs: Cychwyn a thabiau
+      Language and Region: Iaith a rhanbarth
+      System: System
+      Browsing: Pori
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -1427,6 +1432,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Llesiant Digidol"
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
+      Subscriptions and Channels: Tanysgrifiadau a sianeli
+      Blocked Content: Cynnwys wedi'i rwystro
     Hide Channel Avatars: Cuddio afatarau sianeli
     Shorten View Counts: Byrhau cyfrif gwylwyr, sylwadau a hoffiadau sylwadau
     Hide Live Chat Replay: Cuddio ailchwarae sgwrs fyw
@@ -1439,6 +1446,39 @@ Settings:
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
+    Rows:
+      Video Lists: Rhestrau fideos
+      Video Lists Description: Ffrydiau, canlyniadau chwilio, tudalennau sianeli a Nesaf
+      App Interface: Rhyngwyneb yr ap
+      Engagement: Ymgysylltu
+      Comments and Chat: Sylwadau a sgwrsio
+      Recommendations: Argymhellion
+      Player Extras: Ychwanegion y chwaraewr
+    Chips:
+      Channel Avatars: Afatarau sianeli
+      Subscriber Counts: Niferoedd tanysgrifwyr
+      Live Streams: Ffrydiau byw
+      Upcoming Premieres: Cyflwyniadau i ddod
+      Playlist Stats: Ystadegau’r rhestr chwarae
+      Recommendation Details: Rhesymau argymhellion
+      Sharing Actions: Gweithredoedd rhannu
+      Watched in Subscriptions: Fideos a wyliwyd mewn tanysgrifiadau
+      Watched in Search and Recommendations: Fideos a wyliwyd mewn chwiliadau ac argymhellion
+      Startup Splash: Sgrin gychwyn
+      Header Sync Indicator: Dangosydd cysoni yn y pennyn
+      Featured Channels: Sianeli nodwedd
+      Likes and Dislikes: Hoffi a chasáu
+      Comment Likes: Hoffi sylwadau
+      Popularity Graph: Graff poblogrwydd
+      Repeat Stats: Ystadegau ailadrodd
+      Profile Pictures in Comments: Lluniau proffil mewn sylwadau
+      Live Chat: Sgwrsio byw
+      Live Chat Replay: Ailchwarae sgwrs fyw
+      End-Screen Recommendations: Argymhellion y sgrin ddiwedd
+      End-Screen Annotations: Anodiadau'r sgrin ddiwedd
+      Paid Promotion Badge: Bathodyn hyrwyddiad taledig
+      A-B Repeat: Ailadrodd A-B
+      Full Screen Video Title: Teitl y fideo mewn ffenestr lawn a sgrin lawn
   Data Settings:
     Backup separate profile data: "Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffil hwnnw. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} broffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} phroffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny."
     Subscription cache file: "Mae'r ffeil hon ond yn storio fideos o'ch tanysgrifiadau, nid y sianeli. Dewiswch profiles.db neu allforiad tanysgrifiadau yn lle."

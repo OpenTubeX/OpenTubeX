@@ -3,7 +3,7 @@
     ref="selectRoot"
     class="select"
     :data-setting-key="settingKey || undefined"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent, labelHidden: hideLabel }"
     @focusout="handleFocusOut"
   >
     <select
@@ -99,7 +99,10 @@
       class="selectOutline"
       role="presentation"
     >
-      <legend class="selectLegend">
+      <legend
+        v-if="!hideLabel"
+        class="selectLegend"
+      >
         <label
           :id="`${id}-label`"
           class="select-label"
@@ -122,6 +125,11 @@
         </label>
       </legend>
     </fieldset>
+    <span
+      v-if="hideLabel"
+      :id="`${id}-label`"
+      class="selectHiddenLabel"
+    >{{ placeholder }}</span>
     <span
       class="selectIndicators"
     >
@@ -347,6 +355,12 @@ const props = defineProps({
     validator: value => ['filled', 'outlined'].includes(value)
   },
   sizeToContent: {
+    type: Boolean,
+    default: false
+  },
+  // Keeps the label for assistive technology only, for a select whose name
+  // is shown beside it, such as the title of a settings row
+  hideLabel: {
     type: Boolean,
     default: false
   },

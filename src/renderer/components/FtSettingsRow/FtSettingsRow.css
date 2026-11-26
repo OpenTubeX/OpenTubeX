@@ -1,0 +1,109 @@
+/* A Material 3 list item like the Data and Storage rows: a leading icon, the
+   setting's name with an optional supporting line, and its control at the end. */
+.settingsRow {
+  column-gap: 16px;
+  display: grid;
+  grid-template:
+    'icon text control' auto
+    / 40px minmax(0, 1fr) auto;
+  padding-block: calc(12px * var(--ui-density, 1));
+}
+
+.settingsRow + .settingsRow {
+  border-block-start: 1px solid var(--divider-color);
+}
+
+.settingsRow.stacked {
+  grid-template:
+    'icon text' auto
+    '. control' auto
+    / 40px minmax(0, 1fr);
+}
+
+.settingsRowIcon {
+  align-items: center;
+  align-self: start;
+  background-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 18%, transparent);
+  block-size: 40px;
+  border-radius: var(--shape-corner-medium);
+  color: var(--primary-text-color);
+  display: flex;
+  font-size: 18px;
+  grid-area: icon;
+  inline-size: 40px;
+  justify-content: center;
+}
+
+.settingsRowText {
+  align-self: center;
+  grid-area: text;
+  min-inline-size: 0;
+}
+
+.settingsRowTitle {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  text-wrap: pretty;
+}
+
+.settingsRowTooltip {
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-inline-start: 4px;
+  vertical-align: middle;
+}
+
+.settingsRowDescription {
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin-block: 2px 0;
+  text-wrap: pretty;
+}
+
+.settingsRowControl {
+  align-items: center;
+  align-self: center;
+  display: flex;
+  grid-area: control;
+  justify-content: flex-end;
+  min-inline-size: 0;
+}
+
+.stacked .settingsRowControl {
+  justify-content: flex-start;
+  margin-block-start: 10px;
+}
+
+/* Controls keep their own margins elsewhere; inside a row the row spaces them. */
+.settingsRowControl > :deep(*) {
+  margin: 0;
+}
+
+/* Selects share one width, so the controls of a list line up at both edges. */
+.settingsRowControl > :deep(.select) {
+  inline-size: 260px;
+  max-inline-size: 100%;
+}
+
+/* Narrow sections put a row's control below its text, like the Data rows. */
+@container settings-content (width <= 560px) {
+  .settingsRow:not(.stacked) {
+    grid-template:
+      'icon text' auto
+      '. control' auto
+      / 40px minmax(0, 1fr);
+  }
+
+  .settingsRow:not(.stacked) .settingsRowControl {
+    justify-content: flex-start;
+    margin-block-start: 8px;
+  }
+
+  .settingsRowControl > :deep(.select) {
+    inline-size: 100%;
+  }
+}

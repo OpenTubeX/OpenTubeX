@@ -680,6 +680,11 @@ Settings:
       Tooltip: Kargañ an evezhiadennoù pa vez digoret ar bajenn ha kargañ muioc'h a evezhiadennoù en ur zibunañ.
     Haptic Feedback: Adstumm haptek
     Ignore System Haptics Setting: Na deurvout arventenn haptek ar reizhiad
+    Sections:
+      Startup and Tabs: Loc'hañ hag ivinelloù
+      Language and Region: Yezh ha rannvro
+      System: Reizhiad
+      Browsing: Merdeiñ
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Yec'hed niverel"
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
+      Subscriptions and Channels: Koumanantoù ha chadennoù
+      Blocked Content: Endalc'had stanket
     Hide Channel Avatars: "Kuzhat skeudennoù ar chadennoù"
     Shorten View Counts: "Berraat niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù"
     Hide Live Chat Replay: "Kuzhat adlenn ar flapañ war-eeun"
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: "Diskouez titl ar video"
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
+    Rows:
+      Video Lists: Rolloù videoioù
+      Video Lists Description: Gwazhioù, disoc'hoù klask, pajennoù chadennoù ha Da-heul
+      App Interface: Etrefas an arload
+      Engagement: Kevredigezh
+      Comments and Chat: Evezhiadennoù ha flap
+      Recommendations: Erbedadennoù
+      Player Extras: Elfennoù ouzhpenn al lenner
+    Chips:
+      Channel Avatars: Skeudennoù ar chadennoù
+      Subscriber Counts: Niver a goumananterien
+      Live Streams: Skignañ war-eeun
+      Upcoming Premieres: Rakskignañ da zont
+      Playlist Stats: Stadegoù ar roll-lenn
+      Recommendation Details: Abegoù an erbedadennoù
+      Sharing Actions: Doareoù da rannañ
+      Watched in Subscriptions: Videoioù sellet outo er c'houmanantoù
+      Watched in Search and Recommendations: Videoioù sellet outo er c'hlask hag en erbedadennoù
+      Startup Splash: Skramm loc'hañ
+      Header Sync Indicator: Meneger sinkronelaat en talbenn
+      Featured Channels: Chadennoù lakaet war-wel
+      Likes and Dislikes: Bizied-meud ha bizied-traoñ
+      Comment Likes: Bizied-meud an evezhiadennoù
+      Popularity Graph: Graf poblegezh
+      Repeat Stats: Stadegoù an adlenn
+      Profile Pictures in Comments: Skeudennoù profil en evezhiadennoù
+      Live Chat: Flap war-eeun
+      Live Chat Replay: Adlenn ar flap war-eeun
+      End-Screen Recommendations: Erbedadennoù ar skramm echuiñ
+      End-Screen Annotations: Notennoù ar skramm echuiñ
+      Paid Promotion Badge: Badj bruderezh paeet
+      A-B Repeat: Adlenn A-B
+      Full Screen Video Title: Titl ar video er prenestr leun hag er skramm leun
   Data Settings:
     Backup separate profile data: "Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profil-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} brofil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} a brofiloù distag, a vo assavet er profiloù-se. | Er gopi wareziñ-mañ emañ ivez roadennoù {count} profil distag, a vo assavet er profiloù-se."
     Subscription cache file: "Ar restr-mañ a vir ar videoioù eus ho koumanantoù hepken, ket ar chadennoù. Dibabit profiles.db pe un ezporzhiadur koumanantoù en e lec'h."

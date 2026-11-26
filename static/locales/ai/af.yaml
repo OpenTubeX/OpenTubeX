@@ -846,6 +846,11 @@ Settings:
       Tooltip: Laai kommentaar wanneer die blad oopmaak en laai meer kommentaar soos jy blaai.
     Haptic Feedback: Haptiese terugvoer
     Ignore System Haptics Setting: Ignoreer stelsel se haptiese instelling
+    Sections:
+      Startup and Tabs: Opstart en oortjies
+      Language and Region: Taal en streek
+      System: Stelsel
+      Browsing: Blaai
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekskieslys-soektog
     Description: Kies watter soekenjins verskyn wanneer u regs op geselekteerde teks klik. Soektogte word in u verstekblaaier oopgemaak.
@@ -1608,6 +1613,8 @@ Settings:
     Sections:
       Digital Wellbeing: Digitale welstand
       Visible While Paused: Sigbaar terwyl gepouseer in volle venster / volskerm
+      Subscriptions and Channels: Intekeninge en kanale
+      Blocked Content: Geblokkeerde inhoud
     Hide Channel Avatars: Versteek kanaalavatars
     Shorten View Counts: Verkort getalle van kyke, kommentaar en kommentaar-hou-van’s
     Hide Live Chat Replay: Versteek herspeel van regstreekse klets
@@ -1626,6 +1633,39 @@ Settings:
     Paused Interface Hide Delay: Versteekvertraging van koppelvlak tydens pouse
     Add: Voeg by
     Remove: Verwyder
+    Rows:
+      Video Lists: Videolyste
+      Video Lists Description: Voere, soekresultate, kanaalblaaie en Volgende
+      App Interface: Toepassingskoppelvlak
+      Engagement: Interaksie
+      Comments and Chat: Kommentaar en klets
+      Recommendations: Aanbevelings
+      Player Extras: Spelerekstras
+    Chips:
+      Channel Avatars: Kanaalavatars
+      Subscriber Counts: Intekenaartellings
+      Live Streams: Direkte strome
+      Upcoming Premieres: Komende premières
+      Playlist Stats: Snitlysstatistieke
+      Recommendation Details: Aanbevelingsredes
+      Sharing Actions: Deel-aksies
+      Watched in Subscriptions: Gekykte video’s in intekeninge
+      Watched in Search and Recommendations: Gekykte video’s in soektogte en aanbevelings
+      Startup Splash: Opstartskerm
+      Header Sync Indicator: Sinkroniseringsaanwyser in kopstuk
+      Featured Channels: Uitgeligte kanale
+      Likes and Dislikes: Hou van en Hou nie van
+      Comment Likes: Hou van op kommentare
+      Popularity Graph: Gewildheidsgrafiek
+      Repeat Stats: Herhaalstatistieke
+      Profile Pictures in Comments: Profielprente in kommentaar
+      Live Chat: Regstreekse klets
+      Live Chat Replay: Herspeel van regstreekse klets
+      End-Screen Recommendations: Eindskermaanbevelings
+      End-Screen Annotations: Eindskermaantekeninge
+      Paid Promotion Badge: Kenteken vir betaalde promosie
+      A-B Repeat: A-B-herhaling
+      Full Screen Video Title: Videotitel in volle venster en volskerm
   Data Settings:
     Backup separate profile data: "Hierdie rugsteun bevat ook die data van {count} afsonderlike profiel, wat in daardie profiel herstel word. | Hierdie rugsteun bevat ook die data van {count} afsonderlike profiele, wat in daardie profiele herstel word."
     Subscription cache file: "Hierdie lêer kas net die video's van jou intekeninge, nie die kanale nie. Kies eerder profiles.db of 'n uitvoer van intekeninge."

@@ -56,6 +56,25 @@
     padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin));
   }
 
+  /* Each row spaces itself evenly above and below its content, so a list of
+     rows that starts or ends a card replaces the card's padding there. This
+     keeps the first and last rows as balanced as the ones between them. */
+  &:has(> :deep(.settingsRows:first-child)) {
+    padding-block-start: 0;
+  }
+
+  &:has(> :deep(.settingsRows:last-child)) {
+    padding-block-end: 0;
+  }
+
+  > :deep(.settingsRows:first-child) {
+    padding-block-start: 0;
+  }
+
+  > :deep(.settingsRows:last-child) {
+    padding-block-end: 0;
+  }
+
   /* A switch's label padding already adds space below it. Compact switches
      have no margin, so their row makes up the rest. */
   > :deep(:last-child > .switch-ctn:not(.compact):last-child) {
@@ -569,7 +588,7 @@
 
     /* A checkbox's tooltip stays beside its label. :where() keeps this rule's
        specificity, which rules for specific tooltips rely on. */
-    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .dataItemTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip:not(:where(.checkboxTooltip))) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .dataItemTitle, .settingsRowTitle, .settingChip, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip:not(:where(.checkboxTooltip))) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;

@@ -36,7 +36,7 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     await expect(buttons.first()).toBeVisible()
     expect(await buttons.evaluateAll(elements => Math.min(...elements.map(el => el.getBoundingClientRect().height)))).toBeGreaterThanOrEqual(47.99)
     expect(await buttons.evaluateAll(elements => elements.every(el => el.scrollWidth <= el.clientWidth + 1))).toBe(true)
-    const longLabel = page.locator('.settingsSearchResultMatch').filter({ hasText: 'Display Titles Without Excessive Capitalisation And Punctuation' })
+    const longLabel = page.locator('.settingsSearchResultMatch').filter({ hasText: 'Display Titles Without Excessive Capitalization And Punctuation' })
     await expect(longLabel).toHaveCount(1)
     expect(await longLabel.evaluate(element => {
       const range = document.createRange()

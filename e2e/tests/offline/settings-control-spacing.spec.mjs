@@ -33,12 +33,12 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
     await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
   })
 
-  test('General select columns leave enough room for their de-DE captions', async ({ app, page, uiScale }, testInfo) => {
+  test('General rows keep long de-DE titles readable beside their controls', async ({ app, page, uiScale }, testInfo) => {
     const locale = 'de-DE'
     const general = await goToSettingsSection(page, 'general')
     const content = page.locator('.settingsContent')
     await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
-    for (const width of [1000, 900, 801, 800, 650, 450, 800, 1000]) {
+    for (const width of [1000, 800, 561, 560, 450, 1000]) {
       await content.evaluate(element => { element.scrollTop = element.scrollHeight })
       // Keep a 480 CSS px viewport so the forced 450px content still fits at 125%.
       await resize(app, page, width === 450 ? Math.round(480 * uiScale / 100) : 1600, uiScale)
@@ -47,27 +47,26 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
         await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlight)
         for (const direction of ['ltr', 'rtl']) {
           await page.evaluate(value => { document.body.dir = value }, direction)
-          const captions = await general.locator('.generalSelectGrid .select-placeholder').evaluateAll(elements => elements.map(element => {
-            const field = element.closest('.select').querySelector('.select-text').getBoundingClientRect()
-            const caption = element.getBoundingClientRect()
-            const arrow = element.closest('.select').querySelector('.iconSelect').getBoundingClientRect()
+          const rows = await general.locator('.settingsRow').evaluateAll(elements => elements.map(row => {
+            const bounds = row.getBoundingClientRect()
+            const title = row.querySelector('.settingsRowTitle')
+            const control = row.querySelector('.settingsRowControl > *')?.getBoundingClientRect()
+            const text = row.querySelector('.settingsRowText').getBoundingClientRect()
             return {
-              text: element.textContent,
-              clipped: element.scrollWidth - element.clientWidth,
-              outsideField: Math.max(field.left - caption.left, caption.right - field.right, field.left - arrow.left, arrow.right - field.right)
+              title: title.textContent.trim(),
+              clipped: title.scrollWidth - title.clientWidth,
+              outsideRow: control ? Math.max(bounds.left - control.left, control.right - bounds.right) : 0,
+              // Beside the text, a control must not cover it; below it, it starts after the text.
+              overlap: control && control.top < text.bottom - 1
+                ? Math.max(0, Math.min(text.right, control.right) - Math.max(text.left, control.left))
+                : 0
             }
           }))
-          const widths = await general.locator('.generalSelectGrid .select-text').evaluateAll((elements, columns) => {
-            const groups = Array.from({ length: columns }, () => [])
-            elements.forEach((element, index) => groups[index % columns].push(element.getBoundingClientRect().width))
-            return groups.map(group => Math.max(...group) - Math.min(...group))
-          }, width > 800 ? 2 : 1)
-          for (const difference of widths) expect.soft(difference, `${locale} ${width}px column field widths`).toBeLessThanOrEqual(0.1)
-          // Narrow cards keep the stacked fields centered and cut long captions off instead.
-          if (width > 450) {
-            for (const caption of captions) expect.soft(caption.clipped, `${locale} ${width}px ${caption.text}`).toBeLessThanOrEqual(1)
+          for (const row of rows) {
+            expect.soft(row.clipped, `${locale} ${width}px ${row.title}`).toBeLessThanOrEqual(1)
+            expect.soft(row.outsideRow, `${locale} ${width}px ${direction} ${row.title} control`).toBeLessThanOrEqual(1)
+            expect.soft(row.overlap, `${locale} ${width}px ${direction} ${row.title} overlap`).toBeLessThanOrEqual(1)
           }
-          for (const caption of captions) expect.soft(caption.outsideField, `${locale} ${width}px ${direction} ${caption.text} caption and arrow`).toBeLessThanOrEqual(1)
         }
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
@@ -78,8 +77,8 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
         return element.scrollTop <= maximum + 1
       })).toBe(true)
       if (uiScale === 100 && width === 1000) {
-        await general.locator('.generalSelectGrid').scrollIntoViewIfNeeded()
-        await captureAppFramebuffer(app, testInfo, `general-readable-captions-${locale}`)
+        await general.locator('.settingsRow').first().scrollIntoViewIfNeeded()
+        await captureAppFramebuffer(app, testInfo, `general-readable-rows-${locale}`)
       }
     }
   })

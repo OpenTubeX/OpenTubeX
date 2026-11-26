@@ -685,6 +685,11 @@ Settings:
       Tooltip: Opmerkingen laden wanneer de pagina opent en meer opmerkingen laden terwijl je scrolt.
     Haptic Feedback: Haptische feedback
     Ignore System Haptics Setting: Haptische systeeminstelling negeren
+    Sections:
+      Startup and Tabs: Opstarten en tabbladen
+      Language and Region: Taal en regio
+      System: Systeem
+      Browsing: Bladeren
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
@@ -1439,6 +1444,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitaal welzijn"
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
+      Subscriptions and Channels: Abonnementen en kanalen
+      Blocked Content: Geblokkeerde inhoud
     Hide Channel Avatars: Kanaalavatars verbergen
     Shorten View Counts: Aantallen weergaven, reacties en vind-ik-leuks bij reacties inkorten
     Hide Live Chat Replay: Herhaling van livechat verbergen
@@ -1453,6 +1460,39 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
+    Rows:
+      Video Lists: Videolijsten
+      Video Lists Description: Feeds, zoekresultaten, kanaalpagina's en Volgende
+      App Interface: App-interface
+      Engagement: Interactie
+      Comments and Chat: Opmerkingen en chat
+      Recommendations: Aanbevelingen
+      Player Extras: Spelerextra's
+    Chips:
+      Channel Avatars: Kanaalavatars
+      Subscriber Counts: Aantal abonnees
+      Live Streams: Livestreams
+      Upcoming Premieres: Aankomende premières
+      Playlist Stats: Afspeellijststatistieken
+      Recommendation Details: Redenen voor aanbevelingen
+      Sharing Actions: Deelacties
+      Watched in Subscriptions: Bekeken video's in abonnementen
+      Watched in Search and Recommendations: Bekeken video's in zoekresultaten en aanbevelingen
+      Startup Splash: Opstartscherm
+      Header Sync Indicator: Synchronisatie-indicator in de appkop
+      Featured Channels: Uitgelichte kanalen
+      Likes and Dislikes: Likes en dislikes
+      Comment Likes: Likes op opmerkingen
+      Popularity Graph: Populariteitsgrafiek
+      Repeat Stats: Herhaalstatistieken
+      Profile Pictures in Comments: Profielfoto's in opmerkingen
+      Live Chat: Livechat
+      Live Chat Replay: Herhaling van livechat
+      End-Screen Recommendations: Aanbevelingen op het eindscherm
+      End-Screen Annotations: Eindschermannotaties
+      Paid Promotion Badge: Label voor betaalde promotie
+      A-B Repeat: A-B-herhaling
+      Full Screen Video Title: Videotitel in volledig venster en volledig scherm
   Data Settings:
     Backup separate profile data: "Deze back-up bevat ook de gegevens van {count} apart profiel, die in dat profiel worden hersteld. | Deze back-up bevat ook de gegevens van {count} aparte profielen, die in die profielen worden hersteld."
     Subscription cache file: "Dit bestand bevat alleen een cache van de video's van je abonnementen, niet de kanalen. Kies in plaats daarvan profiles.db of een export van abonnementen."

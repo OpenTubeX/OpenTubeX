@@ -693,6 +693,11 @@ Settings:
       Tooltip: பக்கம் திறக்கும்போது கருத்துகளை ஏற்றவும், உருட்டும்போது மேலும் கருத்துகளை ஏற்றவும்.
     Haptic Feedback: ஹாப்டிக் பின்னூட்டம்
     Ignore System Haptics Setting: கணினியின் ஹாப்டிக் அமைப்பைப் புறக்கணி
+    Sections:
+      Startup and Tabs: தொடக்கமும் தாவல்களும்
+      Language and Region: மொழியும் பிராந்தியமும்
+      System: கணினி
+      Browsing: உலாவல்
   Context Menu Search Settings:
     Context Menu Search Settings: சூழல் மெனுத் தேடல்
     Description: தேர்ந்தெடுத்த உரையை வலது கிளிக் செய்யும்போது தோன்ற வேண்டிய தேடுபொறிகளைத் தேர்ந்தெடுக்கவும். தேடல்கள் உங்கள் இயல்புநிலை உலாவியில் திறக்கும்.
@@ -1445,6 +1450,8 @@ Settings:
     Sections:
       Digital Wellbeing: "டிஜிட்டல் நலவாழ்வு"
       Visible While Paused: முழுச் சாளரம் / முழுத்திரையில் இடைநிறுத்தியிருக்கும்போது தெரிபவை
+      Subscriptions and Channels: சந்தாக்களும் சேனல்களும்
+      Blocked Content: தடுக்கப்பட்ட உள்ளடக்கம்
     Hide Channel Avatars: சேனல் அவதார்களை மறை
     Shorten View Counts: பார்வை, கருத்து மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கு
     Hide Live Chat Replay: நேரலை அரட்டை மறுஇயக்கத்தை மறை
@@ -1459,6 +1466,39 @@ Settings:
     Add: சேர்
     Remove: அகற்று
     Hide Channel Shows: சேனல் "நிகழ்ச்சிகள்" தாவலை மறைக்கவும்
+    Rows:
+      Video Lists: காணொளிப் பட்டியல்கள்
+      Video Lists Description: ஊட்டங்கள், தேடல் முடிவுகள், சேனல் பக்கங்கள் மற்றும் அடுத்து
+      App Interface: பயன்பாட்டு இடைமுகம்
+      Engagement: ஈடுபாடு
+      Comments and Chat: கருத்துகளும் அரட்டையும்
+      Recommendations: பரிந்துரைகள்
+      Player Extras: பிளேயர் கூடுதல் அம்சங்கள்
+    Chips:
+      Channel Avatars: சேனல் அவதார்கள்
+      Subscriber Counts: சந்தாதாரர் எண்ணிக்கைகள்
+      Live Streams: நேரலை ஒளிபரப்புகள்
+      Upcoming Premieres: வரவிருக்கும் பிரீமியர்கள்
+      Playlist Stats: பிளேலிஸ்ட் புள்ளிவிவரங்கள்
+      Recommendation Details: பரிந்துரைக் காரணங்கள்
+      Sharing Actions: பகிர்வு செயல்கள்
+      Watched in Subscriptions: சந்தாக்களில் பார்த்த வீடியோக்கள்
+      Watched in Search and Recommendations: தேடல் மற்றும் பரிந்துரைகளில் பார்த்த வீடியோக்கள்
+      Startup Splash: தொடக்கத் திரை
+      Header Sync Indicator: தலைப்பில் ஒத்திசைவு காட்டி
+      Featured Channels: பிரத்யேக சேனல்கள்
+      Likes and Dislikes: விருப்பங்களும் விருப்பமின்மைகளும்
+      Comment Likes: கருத்து விருப்பங்கள்
+      Popularity Graph: பிரபலத்தன்மை வரைபடம்
+      Repeat Stats: மீளியக்கப் புள்ளிவிவரங்கள்
+      Profile Pictures in Comments: கருத்துகளில் சுயவிவரப் படங்கள்
+      Live Chat: நேரடி அரட்டை
+      Live Chat Replay: நேரலை அரட்டை மறுஇயக்கம்
+      End-Screen Recommendations: இறுதித் திரைப் பரிந்துரைகள்
+      End-Screen Annotations: இறுதித் திரைக் குறிப்புகள்
+      Paid Promotion Badge: கட்டண விளம்பர அடையாளம்
+      A-B Repeat: A-B மீளியக்கம்
+      Full Screen Video Title: முழுச் சாளரம் மற்றும் முழுத்திரையில் காணொளித் தலைப்பு
   Data Settings:
     Backup separate profile data: "இந்தக் காப்புப் பிரதியில் {count} தனிச் சுயவிவரத்தின் தரவும் உள்ளது, அது அந்தச் சுயவிவரத்தில் மீட்டமைக்கப்படும். | இந்தக் காப்புப் பிரதியில் {count} தனிச் சுயவிவரங்களின் தரவும் உள்ளது, அவை அந்தச் சுயவிவரங்களில் மீட்டமைக்கப்படும்."
     Subscription cache file: "இந்தக் கோப்பு உங்கள் சந்தாக்களின் வீடியோக்களை மட்டுமே தற்காலிகமாகச் சேமிக்கிறது, அலைவரிசைகளை அல்ல. அதற்குப் பதிலாக profiles.db அல்லது சந்தா ஏற்றுமதியைத் தேர்ந்தெடுக்கவும்."

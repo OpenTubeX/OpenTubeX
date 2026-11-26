@@ -680,6 +680,11 @@ Settings:
       Tooltip: A hozzászólások betöltése az oldal megnyitásakor, görgetéskor pedig további hozzászólások betöltése.
     Haptic Feedback: Haptikus visszajelzés
     Ignore System Haptics Setting: Rendszer haptikus beállításának figyelmen kívül hagyása
+    Sections:
+      Startup and Tabs: Indítás és lapok
+      Language and Region: Nyelv és régió
+      System: Rendszer
+      Browsing: Böngészés
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitális jóllét"
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
+      Subscriptions and Channels: Feliratkozások és csatornák
+      Blocked Content: Letiltott tartalom
     Hide Channel Avatars: Csatornaavatarok elrejtése
     Shorten View Counts: Megtekintések, hozzászólások és hozzászóláskedvelések számának rövidítése
     Hide Live Chat Replay: Élő csevegés visszajátszásának elrejtése
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Videó címének megjelenítése
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
+    Rows:
+      Video Lists: Videólisták
+      Video Lists Description: Hírfolyamok, keresési találatok, csatornaoldalak és Következő
+      App Interface: Alkalmazásfelület
+      Engagement: Interakciók
+      Comments and Chat: Hozzászólások és csevegés
+      Recommendations: Ajánlások
+      Player Extras: További lejátszófunkciók
+    Chips:
+      Channel Avatars: Csatornaavatarok
+      Subscriber Counts: Feliratkozók száma
+      Live Streams: Élő közvetítések
+      Upcoming Premieres: Közelgő bemutatók
+      Playlist Stats: Lejátszási lista statisztikái
+      Recommendation Details: Ajánlási okok
+      Sharing Actions: Megosztási műveletek
+      Watched in Subscriptions: Megtekintett videók a feliratkozásokban
+      Watched in Search and Recommendations: Megtekintett videók a keresésben és az ajánlásokban
+      Startup Splash: Indítóképernyő
+      Header Sync Indicator: Fejléc szinkronizálási jelzője
+      Featured Channels: Kiemelt csatornák
+      Likes and Dislikes: Kedvelések és nemtetszések
+      Comment Likes: Hozzászólások kedvelései
+      Popularity Graph: Népszerűségi grafikon
+      Repeat Stats: Ismétlési statisztikák
+      Profile Pictures in Comments: Profilképek a hozzászólásokban
+      Live Chat: Élő csevegés
+      Live Chat Replay: Élő csevegés visszajátszása
+      End-Screen Recommendations: Záróképernyős ajánlások
+      End-Screen Annotations: Záróképernyő elemei
+      Paid Promotion Badge: Fizetett promóció jelvénye
+      A-B Repeat: A-B ismétlés
+      Full Screen Video Title: Videó címe teljes ablakos és teljes képernyős módban
   Data Settings:
     Backup separate profile data: "Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek abba a profilba állíthatók vissza. | Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek azokba a profilokba állíthatók vissza."
     Subscription cache file: "Ez a fájl csak a feliratkozásaid videóit tárolja gyorsítótárban, a csatornákat nem. Válaszd helyette a profiles.db fájlt vagy egy feliratkozás-exportot."

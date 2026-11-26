@@ -698,6 +698,11 @@ Settings:
       Tooltip: Last inn kommentarar når sida opnar seg, og last inn fleire medan du blar.
     Haptic Feedback: Haptisk tilbakemelding
     Ignore System Haptics Setting: Ignorer systeminnstillinga for haptisk tilbakemelding
+    Sections:
+      Startup and Tabs: Oppstart og faner
+      Language and Region: Språk og region
+      System: System
+      Browsing: Navigering
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.
@@ -1545,6 +1550,8 @@ Settings:
       Watch Page: Avspelingsside
       General: Generelt
       Visible While Paused: Synleg ved pause i fullt vindauge eller på fullskjerm
+      Subscriptions and Channels: Abonnement og kanalar
+      Blocked Content: Blokkert innhald
     Hide Channel Avatars: Gøym kanalavatarar
     Shorten View Counts: Forkort talet på visingar, kommentarar og likerklikk på kommentarar
     Hide Live Chat Replay: Gøym opptak av direktepraten
@@ -1579,6 +1586,39 @@ Settings:
     Paused Interface Hide Delay: Forseinking før grensesnittet blir gøymt ved pause
     Add: Legg til
     Remove: Fjern
+    Rows:
+      Video Lists: Videolister
+      Video Lists Description: Straumar, søkjeresultat, kanalsider og Neste
+      App Interface: Appgrensesnitt
+      Engagement: Engasjement
+      Comments and Chat: Kommentarar og chat
+      Recommendations: Tilrådingar
+      Player Extras: Ekstra avspelarfunksjonar
+    Chips:
+      Channel Avatars: Kanalavatarar
+      Subscriber Counts: Tal på abonnentar
+      Live Streams: Direktesendingar
+      Upcoming Premieres: Komande premierar
+      Playlist Stats: Spelelistestatistikk
+      Recommendation Details: Årsaker til tilrådingar
+      Sharing Actions: Delehandlingar
+      Watched in Subscriptions: Sette videoar i abonnement
+      Watched in Search and Recommendations: Sette videoar i søk og tilrådingar
+      Startup Splash: Oppstartsskjerm
+      Header Sync Indicator: Synkroniseringsindikator i apphovudet
+      Featured Channels: Framheva kanalar
+      Likes and Dislikes: Videogunst
+      Comment Likes: Kommentargunst
+      Popularity Graph: Popularitetsgraf
+      Repeat Stats: Gjentakingsstatistikk
+      Profile Pictures in Comments: Profilbilete i kommentarar
+      Live Chat: Direktechat
+      Live Chat Replay: Opptak av direktepraten
+      End-Screen Recommendations: Tilrådingar på sluttskjermen
+      End-Screen Annotations: Merknader på sluttskjermen
+      Paid Promotion Badge: Merket for betalt marknadsføring
+      A-B Repeat: A-B-gjentaking
+      Full Screen Video Title: Videotittel i fullt vindauge og på fullskjerm
   Data Settings:
     Backup separate profile data: "Denne tryggingskopien inneheld også dataa til {count} separat profil, som blir gjenoppretta i den profilen. | Denne tryggingskopien inneheld også dataa til {count} separate profilar, som blir gjenoppretta i desse profilane."
     Subscription cache file: "Denne fila mellomlagrar berre videoane frå abonnementa dine, ikkje kanalane. Vel profiles.db eller ein eksport av abonnement i staden."

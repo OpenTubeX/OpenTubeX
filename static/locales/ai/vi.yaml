@@ -680,6 +680,11 @@ Settings:
       Tooltip: Tải bình luận khi mở trang và tải thêm khi bạn cuộn.
     Haptic Feedback: Phản hồi xúc giác
     Ignore System Haptics Setting: Bỏ qua cài đặt xúc giác của hệ thống
+    Sections:
+      Startup and Tabs: Khởi động và thẻ
+      Language and Region: Ngôn ngữ và khu vực
+      System: Hệ thống
+      Browsing: Duyệt
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Sức khỏe kỹ thuật số"
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
+      Subscriptions and Channels: Đăng ký và kênh
+      Blocked Content: Nội dung bị chặn
     Hide Channel Avatars: Ẩn ảnh đại diện kênh
     Shorten View Counts: Rút gọn số lượt xem, bình luận và lượt thích bình luận
     Hide Live Chat Replay: Ẩn bản phát lại trò chuyện trực tiếp
@@ -1436,6 +1443,39 @@ Settings:
     Show Bottom Right Actions Dock: Hiện thanh thao tác dưới bên phải
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
     Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
+    Rows:
+      Video Lists: Danh sách video
+      Video Lists Description: Bảng tin, kết quả tìm kiếm, trang kênh và Tiếp theo
+      App Interface: Giao diện ứng dụng
+      Engagement: Tương tác
+      Comments and Chat: Bình luận và trò chuyện
+      Recommendations: Đề xuất
+      Player Extras: Tính năng bổ sung của trình phát
+    Chips:
+      Channel Avatars: Ảnh đại diện kênh
+      Subscriber Counts: Số người đăng ký
+      Live Streams: Phát trực tiếp
+      Upcoming Premieres: Video sắp ra mắt
+      Playlist Stats: Thống kê danh sách phát
+      Recommendation Details: Lý do đề xuất
+      Sharing Actions: Nút chia sẻ
+      Watched in Subscriptions: Video đã xem trong mục đăng ký
+      Watched in Search and Recommendations: Video đã xem trong tìm kiếm và đề xuất
+      Startup Splash: Màn hình khởi động
+      Header Sync Indicator: Chỉ báo đồng bộ hóa trên thanh đầu
+      Featured Channels: Các kênh nổi bật
+      Likes and Dislikes: Lượt thích và không thích
+      Comment Likes: Lượt thích bình luận
+      Popularity Graph: Biểu đồ mức độ phổ biến
+      Repeat Stats: Thống kê lặp lại
+      Profile Pictures in Comments: Ảnh đại diện trong bình luận
+      Live Chat: Chat trực tiếp
+      Live Chat Replay: Bản phát lại trò chuyện trực tiếp
+      End-Screen Recommendations: Đề xuất trên màn hình kết thúc
+      End-Screen Annotations: Chú thích ở màn hình kết thúc
+      Paid Promotion Badge: Huy hiệu quảng cáo trả phí
+      A-B Repeat: Lặp A-B
+      Full Screen Video Title: Tiêu đề video ở chế độ toàn cửa sổ và toàn màn hình
   Data Settings:
     Backup separate profile data: "Bản sao lưu này cũng chứa dữ liệu của {count} hồ sơ riêng biệt, sẽ được khôi phục vào các hồ sơ đó."
     Subscription cache file: "Tệp này chỉ lưu bộ nhớ đệm video từ các kênh bạn đăng ký, không phải bản thân các kênh. Hãy chọn profiles.db hoặc tệp xuất danh sách đăng ký."

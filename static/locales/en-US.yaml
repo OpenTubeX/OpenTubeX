@@ -825,6 +825,11 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Sections:
+      Startup and Tabs: Startup and Tabs
+      Language and Region: Language and Region
+      System: System
+      Browsing: Browsing
     Stop Watching: "Stop watching"
     No Watched Comments: "No comments are being watched. Watch a comment with the bell button next to it."
     Your Comment: "Your comment"
@@ -1982,6 +1987,42 @@ Settings:
       Watch Page: Watch Page
       General: General
       Visible While Paused: Visible While Paused in Full Window / Full Screen
+      Subscriptions and Channels: Subscriptions and Channels
+      Blocked Content: Blocked Content
+    Rows:
+      Video Lists: Video Lists
+      Video Lists Description: Feeds, search results, channel pages, and Up Next
+      App Interface: App Interface
+      Engagement: Engagement
+      Comments and Chat: Comments and Chat
+      Recommendations: Recommendations
+      Player Extras: Player Extras
+    # Short names of what each Hide switch hides, shown on its chip
+    Chips:
+      Channel Avatars: Channel Avatars
+      Subscriber Counts: Subscriber Counts
+      Live Streams: Live Streams
+      Upcoming Premieres: Upcoming Premieres
+      Playlist Stats: Playlist Stats
+      Recommendation Details: Recommendation Reasons
+      Sharing Actions: Sharing Actions
+      Watched in Subscriptions: Watched Videos in Subscriptions
+      Watched in Search and Recommendations: Watched Videos in Search and Recommendations
+      Startup Splash: Startup Splash
+      Header Sync Indicator: Header Sync Indicator
+      Featured Channels: Featured Channels
+      Likes and Dislikes: Likes and Dislikes
+      Comment Likes: Comment Likes
+      Popularity Graph: Popularity Graph
+      Repeat Stats: Repeat Stats
+      Profile Pictures in Comments: Profile Pictures in Comments
+      Live Chat: Live Chat
+      Live Chat Replay: Live Chat Replay
+      End-Screen Recommendations: End-Screen Recommendations
+      End-Screen Annotations: End-Screen Annotations
+      Paid Promotion Badge: Paid Promotion Badge
+      A-B Repeat: A-B Repeat
+      Full Screen Video Title: Video Title in Full Window and Full Screen
     Hide Video Views: Hide Video Views
     Hide Channel Avatars: Hide Channel Avatars
     Shorten View Counts: Shorten View, Comment and Comment Like Counts
@@ -1997,7 +2038,7 @@ Settings:
     Hide Active Subscriptions: Hide Active Subscriptions
     Hide Comments: Hide Comments
     Hide Profile Pictures in Comments: Hide Profile Pictures in Comments
-    Display Titles Without Excessive Capitalisation: Display Titles Without Excessive Capitalisation And Punctuation
+    Display Titles Without Excessive Capitalisation: Display Titles Without Excessive Capitalization And Punctuation
     Hide Live Streams: Hide Live Streams
     Hide Upcoming Premieres: Hide Upcoming Premieres
     Hide Sharing Actions: Hide Sharing Actions

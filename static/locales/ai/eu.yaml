@@ -680,6 +680,11 @@ Settings:
       Tooltip: Kargatu iruzkinak orria irekitzean eta kargatu gehiago korritu ahala.
     Haptic Feedback: Erantzun haptikoa
     Ignore System Haptics Setting: Ez ikusi egin sistemaren ezarpen haptikoari
+    Sections:
+      Startup and Tabs: Abioa eta fitxak
+      Language and Region: Hizkuntza eta eskualdea
+      System: Sistema
+      Browsing: Nabigazioa
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Ongizate digitala"
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
+      Subscriptions and Channels: Harpidetzak eta kanalak
+      Blocked Content: Blokeatutako edukia
     Hide Channel Avatars: Ezkutatu kanalen abatarrak
     Shorten View Counts: Laburtu ikustaldien, iruzkinen eta iruzkinetako atsegiteen kopuruak
     Hide Live Chat Replay: Ezkutatu zuzeneko txataren errepikapena
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Erakutsi bideoaren izenburua
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
+    Rows:
+      Video Lists: Bideo-zerrendak
+      Video Lists Description: Jarioak, bilaketa-emaitzak, kanalen orriak eta Hurrengoa
+      App Interface: Aplikazioaren interfazea
+      Engagement: Parte-hartzea
+      Comments and Chat: Iruzkinak eta txata
+      Recommendations: Gomendioak
+      Player Extras: Erreproduzitzailearen gehigarriak
+    Chips:
+      Channel Avatars: Kanalen abatarrak
+      Subscriber Counts: Harpidedun kopuruak
+      Live Streams: Zuzeneko emanaldiak
+      Upcoming Premieres: Datozen estreinaldiak
+      Playlist Stats: Erreprodukzio-zerrendaren estatistikak
+      Recommendation Details: Gomendioen arrazoiak
+      Sharing Actions: Partekatze-ekintzak
+      Watched in Subscriptions: Ikusitako bideoak harpidetzetan
+      Watched in Search and Recommendations: Ikusitako bideoak bilaketan eta gomendioetan
+      Startup Splash: Abio-pantaila
+      Header Sync Indicator: Goiburuko sinkronizazio-adierazlea
+      Featured Channels: Nabarmendutako kanalak
+      Likes and Dislikes: Atsegiteak eta desatsegiteak
+      Comment Likes: Iruzkinen atsegiteak
+      Popularity Graph: Ospearen grafikoa
+      Repeat Stats: Errepikapenen estatistikak
+      Profile Pictures in Comments: Profileko argazkiak iruzkinetan
+      Live Chat: Zuzeneko txata
+      Live Chat Replay: Zuzeneko txataren errepikapena
+      End-Screen Recommendations: Amaierako pantailako gomendioak
+      End-Screen Annotations: Amaierako pantailako oharpenak
+      Paid Promotion Badge: Ordainpeko sustapenaren bereizgarria
+      A-B Repeat: A-B errepikapena
+      Full Screen Video Title: Bideoaren izenburua leiho osoan eta pantaila osoan
   Data Settings:
     Backup separate profile data: "Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horretan leheneratzen dira. | Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horietan leheneratzen dira."
     Subscription cache file: "Fitxategi honek zure harpidetzetako bideoak soilik gordetzen ditu cachean, ez kanalak. Aukeratu profiles.db edo harpidetzen esportazio bat."

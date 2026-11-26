@@ -733,6 +733,11 @@ Settings:
       Tooltip: صفحہ کھلنے پر تبصرے لوڈ کریں اور اسکرول کرتے ہوئے مزید تبصرے لوڈ کریں۔
     Haptic Feedback: ہیپٹک فیڈبیک
     Ignore System Haptics Setting: سسٹم کی ہیپٹک ترتیب نظر انداز کریں
+    Sections:
+      Startup and Tabs: آغاز اور ٹیبز
+      Language and Region: زبان اور خطہ
+      System: سسٹم
+      Browsing: براؤزنگ
   Context Menu Search Settings:
     Context Menu Search Settings: کانٹیکسٹ مینو تلاش
     Description: منتخب کریں کہ منتخب متن پر رائٹ کلک کرنے پر کون سے سرچ انجن ظاہر ہوں۔ تلاشیں آپ کے ڈیفالٹ براؤزر میں کھلتی ہیں۔
@@ -1486,6 +1491,8 @@ Settings:
     Sections:
       Digital Wellbeing: ڈیجیٹل ویل بیئنگ
       Visible While Paused: پوری ونڈو / فل اسکرین میں رکنے پر نظر آنے والے
+      Subscriptions and Channels: سبسکرپشنز اور چینلز
+      Blocked Content: بلاک شدہ مواد
     Hide Channel Avatars: چینل اوتار چھپائیں
     Shorten View Counts: ویوز، کمنٹس اور کمنٹ لائکس کی تعداد مختصر کریں
     Hide Live Chat Replay: لائیو چیٹ ری پلے چھپائیں
@@ -1501,6 +1508,39 @@ Settings:
     Add: شامل کریں
     Remove: ہٹائیں
     Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
+    Rows:
+      Video Lists: ویڈیو فہرستیں
+      Video Lists Description: فیڈز، تلاش کے نتائج، چینل کے صفحات اور اگلا
+      App Interface: ایپ انٹرفیس
+      Engagement: مشغولیت
+      Comments and Chat: کمنٹس اور چیٹ
+      Recommendations: تجاویز
+      Player Extras: پلیئر کی اضافی خصوصیات
+    Chips:
+      Channel Avatars: چینل اوتار
+      Subscriber Counts: سبسکرائبرز کی تعداد
+      Live Streams: لائیو اسٹریمز
+      Upcoming Premieres: آنے والے پریمیئرز
+      Playlist Stats: پلے لسٹ کے اعداد و شمار
+      Recommendation Details: سفارشات کی وجوہات
+      Sharing Actions: شیئرنگ ایکشنز
+      Watched in Subscriptions: سبسکرپشنز میں دیکھی گئی ویڈیوز
+      Watched in Search and Recommendations: تلاش اور تجاویز میں دیکھی گئی ویڈیوز
+      Startup Splash: آغاز کی اسپلیش اسکرین
+      Header Sync Indicator: ہیڈر کا سنک اشارہ
+      Featured Channels: فیچرڈ چینلز
+      Likes and Dislikes: لائکس اور ڈسلائکس
+      Comment Likes: کمنٹس کے لائکس
+      Popularity Graph: مقبولیت کا گراف
+      Repeat Stats: دہرانے کے اعداد و شمار
+      Profile Pictures in Comments: کمنٹس میں پروفائل تصویریں
+      Live Chat: لائیو چیٹ
+      Live Chat Replay: لائیو چیٹ ری پلے
+      End-Screen Recommendations: اختتامی اسکرین کی تجاویز
+      End-Screen Annotations: اختتامی اسکرین کی تشریحات
+      Paid Promotion Badge: معاوضہ شدہ تشہیر کا بیج
+      A-B Repeat: A-B ریپیٹ
+      Full Screen Video Title: پوری ونڈو اور فل اسکرین میں ویڈیو کا عنوان
   Data Settings:
     Backup separate profile data: "اس بیک اپ میں {count} الگ پروفائل کا ڈیٹا بھی شامل ہے، جو اسی پروفائل میں بحال کیا جائے گا۔ | اس بیک اپ میں {count} الگ پروفائلز کا ڈیٹا بھی شامل ہے، جو انہی پروفائلز میں بحال کیا جائے گا۔"
     Subscription cache file: "یہ فائل صرف آپ کی سبسکرپشنز کی ویڈیوز کو کیش کرتی ہے، چینلز کو نہیں۔ اس کے بجائے profiles.db یا سبسکرپشنز کی ایکسپورٹ منتخب کریں۔"

@@ -800,6 +800,11 @@ Settings:
       Tooltip: Įkelti komentarus atidarius puslapį ir slenkant įkelti daugiau.
     Haptic Feedback: Haptinis atsakas
     Ignore System Haptics Setting: Nepaisyti sistemos haptikos nustatymo
+    Sections:
+      Startup and Tabs: Paleidimas ir kortelės
+      Language and Region: Kalba ir regionas
+      System: Sistema
+      Browsing: Naršymas
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -1642,6 +1647,8 @@ Settings:
       Digital Wellbeing: "Skaitmeninė gerovė"
       Subscriptions Page: Prenumeratų puslapis
       Visible While Paused: Rodoma pristabdžius viso lango arba viso ekrano režimu
+      Subscriptions and Channels: Prenumeratos ir kanalai
+      Blocked Content: Užblokuotas turinys
     Hide Channel Avatars: Slėpti kanalų pseudoportretus
     Shorten View Counts: Trumpinti peržiūrų, komentarų ir komentarų patiktukų skaičius
     Hide Live Chat Replay: Slėpti tiesioginio pokalbio įrašą
@@ -1673,6 +1680,39 @@ Settings:
     Paused Interface Hide Delay: Pristabdytos sąsajos slėpimo delsa
     Add: Pridėti
     Remove: Pašalinti
+    Rows:
+      Video Lists: Vaizdo įrašų sąrašai
+      Video Lists Description: Sklaidos kanalai, paieškos rezultatai, kanalų puslapiai ir Sekantis
+      App Interface: Programos sąsaja
+      Engagement: Įsitraukimas
+      Comments and Chat: Komentarai ir pokalbiai
+      Recommendations: Rekomendacijos
+      Player Extras: Grotuvo priedai
+    Chips:
+      Channel Avatars: Kanalų pseudoportretai
+      Subscriber Counts: Prenumeratorių skaičius
+      Live Streams: Tiesioginės transliacijos
+      Upcoming Premieres: Būsimos premjeros
+      Playlist Stats: Grojaraščio statistika
+      Recommendation Details: Rekomendacijų priežastys
+      Sharing Actions: Bendrinimo veiksmai
+      Watched in Subscriptions: Peržiūrėti vaizdo įrašai prenumeratose
+      Watched in Search and Recommendations: Peržiūrėti vaizdo įrašai paieškoje ir rekomendacijose
+      Startup Splash: Paleidimo ekranas
+      Header Sync Indicator: Sinchronizavimo indikatorius antraštėje
+      Featured Channels: Teminiai kanalai
+      Likes and Dislikes: Patinka ir nepatinka
+      Comment Likes: Komentarų įvertinimai
+      Popularity Graph: Populiarumo grafikas
+      Repeat Stats: Kartojimo statistika
+      Profile Pictures in Comments: Profilio nuotraukos komentaruose
+      Live Chat: Tiesioginė diskusija
+      Live Chat Replay: Tiesioginio pokalbio įrašas
+      End-Screen Recommendations: Pabaigos ekrano rekomendacijos
+      End-Screen Annotations: Pabaigos užsklandos anotacijos
+      Paid Promotion Badge: Mokamos reklamos ženklelis
+      A-B Repeat: A–B kartojimas
+      Full Screen Video Title: Vaizdo įrašo pavadinimas viso lango ir viso ekrano režimu
   Data Settings:
     Backup separate profile data: "Šioje atsarginėje kopijoje taip pat yra {count} atskiro profilio duomenys, kurie atkuriami į tą profilį. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius."
     Subscription cache file: "Šiame faile talpinami tik jūsų prenumeratų vaizdo įrašai, o ne kanalai. Vietoj jo pasirinkite profiles.db arba prenumeratų eksportą."

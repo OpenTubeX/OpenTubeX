@@ -680,6 +680,11 @@ Settings:
       Tooltip: Lataa kommentit sivun avautuessa ja lataa lisää vierittäessäsi.
     Haptic Feedback: Haptinen palaute
     Ignore System Haptics Setting: Ohita järjestelmän haptiikka-asetus
+    Sections:
+      Startup and Tabs: Käynnistys ja välilehdet
+      Language and Region: Kieli ja alue
+      System: Järjestelmä
+      Browsing: Selaaminen
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitaalinen hyvinvointi"
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa
+      Subscriptions and Channels: Tilaukset ja kanavat
+      Blocked Content: Estetty sisältö
     Hide Channel Avatars: Piilota kanavien profiilikuvat
     Shorten View Counts: Lyhennä katselukertojen, kommenttien ja kommenttien tykkäysten määrät
     Hide Live Chat Replay: Piilota livekeskustelun tallenne
@@ -1436,6 +1443,39 @@ Settings:
     Show Bottom Right Actions Dock: Näytä toimintopalkki oikeassa alakulmassa
     Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
     Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
+    Rows:
+      Video Lists: Videoluettelot
+      Video Lists Description: Syötteet, hakutulokset, kanavasivut ja Seuraavaksi
+      App Interface: Sovelluksen käyttöliittymä
+      Engagement: Vuorovaikutus
+      Comments and Chat: Kommentit ja keskustelu
+      Recommendations: Suositukset
+      Player Extras: Soittimen lisäominaisuudet
+    Chips:
+      Channel Avatars: Kanavien profiilikuvat
+      Subscriber Counts: Tilaajamäärät
+      Live Streams: Suorat lähetykset
+      Upcoming Premieres: Tulevat ensiesitykset
+      Playlist Stats: Soittolistan tilastot
+      Recommendation Details: Suositusten syyt
+      Sharing Actions: Jakamistoiminnot
+      Watched in Subscriptions: Katsotut videot tilauksissa
+      Watched in Search and Recommendations: Katsotut videot haussa ja suosituksissa
+      Startup Splash: Käynnistysruutu
+      Header Sync Indicator: Otsakepalkin synkronoinnin ilmaisin
+      Featured Channels: Esillä olevat kanavat
+      Likes and Dislikes: Tykkäykset ja eitykkäykset
+      Comment Likes: Kommenttien tykkäykset
+      Popularity Graph: Suosiokaavio
+      Repeat Stats: Toistotilastot
+      Profile Pictures in Comments: Profiilikuvat kommenteissa
+      Live Chat: Live-keskustelu
+      Live Chat Replay: Livekeskustelun tallenne
+      End-Screen Recommendations: Loppunäytön suositukset
+      End-Screen Annotations: Loppuruudun merkinnät
+      Paid Promotion Badge: Maksetun mainonnan tunnus
+      A-B Repeat: A-B-toisto
+      Full Screen Video Title: Videon nimi koko ikkunan ja koko näytön tilassa
   Data Settings:
     Backup separate profile data: "Tämä varmuuskopio sisältää myös {count} erillisen profiilin tiedot, jotka palautetaan kyseiseen profiiliin. | Tämä varmuuskopio sisältää myös {count} erillisen profiilin tiedot, jotka palautetaan kyseisiin profiileihin."
     Subscription cache file: "Tämä tiedosto tallentaa välimuistiin vain tilaustesi videot, ei kanavia. Valitse sen sijaan profiles.db tai tilausten vienti."

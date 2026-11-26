@@ -685,6 +685,11 @@ Settings:
       Tooltip: טעינת תגובות בעת פתיחת הדף וטעינת תגובות נוספות בזמן הגלילה.
     Haptic Feedback: משוב רטט
     Ignore System Haptics Setting: התעלמות מהגדרת המשוב הרטט של המערכת
+    Sections:
+      Startup and Tabs: הפעלה וכרטיסיות
+      Language and Region: שפה ואזור
+      System: מערכת
+      Browsing: גלישה
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.
@@ -1439,6 +1444,8 @@ Settings:
     Sections:
       Digital Wellbeing: "רווחה דיגיטלית"
       Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא
+      Subscriptions and Channels: מינויים וערוצים
+      Blocked Content: תוכן חסום
     Hide Channel Avatars: הסתרת תמונות ערוצים
     Shorten View Counts: קיצור מספרי צפיות, תגובות ולייקים לתגובות
     Hide Live Chat Replay: הסתרת ההפעלה החוזרת של הצ'אט החי
@@ -1453,6 +1460,39 @@ Settings:
     Add: הוספה
     Remove: הסרה
     Hide Channel Shows: הסתר את לשונית "תוכניות" של הערוץ
+    Rows:
+      Video Lists: רשימות סרטונים
+      Video Lists Description: עדכונים, תוצאות חיפוש, עמודי ערוצים והסרטון הבא
+      App Interface: ממשק היישום
+      Engagement: מעורבות
+      Comments and Chat: תגובות וצ׳אט
+      Recommendations: המלצות
+      Player Extras: תוספות לנגן
+    Chips:
+      Channel Avatars: תמונות ערוצים
+      Subscriber Counts: מספרי מנויים
+      Live Streams: תזרימים חיים
+      Upcoming Premieres: בכורות קרובות
+      Playlist Stats: נתונים סטטיסטיים של הפלייליסט
+      Recommendation Details: סיבות ההמלצות
+      Sharing Actions: פעולות שיתוף
+      Watched in Subscriptions: סרטונים שנצפו במינויים
+      Watched in Search and Recommendations: סרטונים שנצפו בחיפוש ובהמלצות
+      Startup Splash: מסך הפתיחה
+      Header Sync Indicator: מחוון הסנכרון בכותרת
+      Featured Channels: ערוצים מומלצים
+      Likes and Dislikes: לייקים ודיסלייקים
+      Comment Likes: לייקים על תגובות
+      Popularity Graph: גרף הפופולריות
+      Repeat Stats: נתוני חזרה
+      Profile Pictures in Comments: תמונות פרופיל בתגובות
+      Live Chat: צ׳אט חי
+      Live Chat Replay: הפעלה חוזרת של הצ׳אט החי
+      End-Screen Recommendations: המלצות במסך הסיום
+      End-Screen Annotations: הערות במסך הסיום
+      Paid Promotion Badge: תגית קידום ממומן
+      A-B Repeat: חזרה A-B
+      Full Screen Video Title: כותרת הסרטון בחלון מלא ובמסך מלא
   Data Settings:
     Backup separate profile data: "הגיבוי הזה כולל גם את הנתונים של פרופיל נפרד אחד ({count}), והם ישוחזרו לאותו פרופיל. | הגיבוי הזה כולל גם את הנתונים של שני פרופילים נפרדים ({count}), והם ישוחזרו לאותם פרופילים. | הגיבוי הזה כולל גם את הנתונים של {count} פרופילים נפרדים, והם ישוחזרו לאותם פרופילים."
     Subscription cache file: "קובץ זה שומר במטמון רק את הסרטונים מהמינויים שלך, לא את הערוצים. יש לבחור במקום זאת profiles.db או ייצוא של המינויים."

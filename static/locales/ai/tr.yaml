@@ -680,6 +680,11 @@ Settings:
       Tooltip: Sayfa açıldığında yorumları yükle ve kaydırdıkça daha fazla yorum yükle.
     Haptic Feedback: Dokunsal geri bildirim
     Ignore System Haptics Setting: Sistemin dokunsal ayarını yok say
+    Sections:
+      Startup and Tabs: Başlangıç ve sekmeler
+      Language and Region: Dil ve bölge
+      System: Sistem
+      Browsing: Gezinme
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Dijital Denge"
       Visible While Paused: Tam Pencere / Tam Ekranda Duraklatıldığında Görünür
+      Subscriptions and Channels: Abonelikler ve kanallar
+      Blocked Content: Engellenen içerik
     Hide Channel Avatars: Kanal Avatarlarını Gizle
     Shorten View Counts: İzlenme, Yorum ve Yorum Beğeni Sayılarını Kısalt
     Hide Live Chat Replay: Canlı Sohbet Tekrarını Gizle
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Video Başlığını Göster
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
+    Rows:
+      Video Lists: Video listeleri
+      Video Lists Description: Akışlar, arama sonuçları, kanal sayfaları ve Sonraki
+      App Interface: Uygulama arayüzü
+      Engagement: Etkileşim
+      Comments and Chat: Yorumlar ve sohbet
+      Recommendations: Öneriler
+      Player Extras: Ek oynatıcı özellikleri
+    Chips:
+      Channel Avatars: Kanal avatarları
+      Subscriber Counts: Abone sayıları
+      Live Streams: Canlı yayınlar
+      Upcoming Premieres: Yaklaşan ilk gösterimler
+      Playlist Stats: Oynatma listesi istatistikleri
+      Recommendation Details: Öneri nedenleri
+      Sharing Actions: Paylaşım eylemleri
+      Watched in Subscriptions: Aboneliklerde izlenmiş videolar
+      Watched in Search and Recommendations: Aramada ve önerilerde izlenmiş videolar
+      Startup Splash: Başlangıç ekranı
+      Header Sync Indicator: Başlıktaki eşitleme göstergesi
+      Featured Channels: Öne çıkan kanallar
+      Likes and Dislikes: Beğenmeler ve beğenmemeler
+      Comment Likes: Yorum beğenmeleri
+      Popularity Graph: Popülerlik grafiği
+      Repeat Stats: Tekrar istatistikleri
+      Profile Pictures in Comments: Yorumlardaki profil resimleri
+      Live Chat: Canlı sohbet
+      Live Chat Replay: Canlı sohbet tekrarı
+      End-Screen Recommendations: Bitiş ekranı önerileri
+      End-Screen Annotations: Bitiş ekranı ek açıklamaları
+      Paid Promotion Badge: Ücretli tanıtım rozeti
+      A-B Repeat: A-B tekrarı
+      Full Screen Video Title: Tam pencerede ve tam ekranda video başlığı
   Data Settings:
     Backup separate profile data: "Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profile geri yüklenir. | Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profillere geri yüklenir."
     Subscription cache file: "Bu dosya yalnızca aboneliklerinizdeki videoları önbelleğe alır, kanalları değil. Bunun yerine profiles.db dosyasını veya bir abonelik dışa aktarımını seçin."

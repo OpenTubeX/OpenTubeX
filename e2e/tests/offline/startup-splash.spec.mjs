@@ -189,7 +189,7 @@ test('distraction-free switch disables the early splash in new windows and can r
   await expect(toggle).not.toBeChecked()
 
   for (const hidden of [true, false]) {
-    await settings.locator('label.switch-label').filter({ hasText: 'Hide Startup Splash' }).click()
+    await toggle.click()
     await expect(toggle).toBeChecked({ checked: hidden })
     await expect.poll(async () => latestSettings(
       readDatastore(app.userDataDir, 'settings')
@@ -199,7 +199,7 @@ test('distraction-free switch disables the early splash in new windows and can r
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
         await testInfo.attach(`hide-startup-splash-setting-${colorScheme}`, {
-          body: await settings.locator('.switchColumnGrid').first().screenshot(), contentType: 'image/png'
+          body: await settings.locator('.settingsRow').filter({ has: page.getByRole('checkbox', { name: /^Hide Startup Splash/ }) }).screenshot(), contentType: 'image/png'
         })
       }
     }

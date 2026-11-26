@@ -680,6 +680,11 @@ Settings:
       Tooltip: Φόρτωση σχολίων όταν ανοίγει η σελίδα και φόρτωση περισσότερων καθώς κάνετε κύλιση.
     Haptic Feedback: Απτική ανάδραση
     Ignore System Haptics Setting: Παράβλεψη ρύθμισης απτικής ανάδρασης συστήματος
+    Sections:
+      Startup and Tabs: Εκκίνηση και καρτέλες
+      Language and Region: Γλώσσα και περιοχή
+      System: Σύστημα
+      Browsing: Περιήγηση
   Context Menu Search Settings:
     Context Menu Search Settings: Αναζήτηση από το μενού περιβάλλοντος
     Description: Επιλέξτε ποιες μηχανές αναζήτησης θα εμφανίζονται όταν κάνετε δεξί κλικ σε επιλεγμένο κείμενο. Οι αναζητήσεις ανοίγουν στο προεπιλεγμένο πρόγραμμα περιήγησης.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Ψηφιακή ευεξία"
       Visible While Paused: Ορατά κατά την παύση σε πλήρες παράθυρο / πλήρη οθόνη
+      Subscriptions and Channels: Συνδρομές και κανάλια
+      Blocked Content: Αποκλεισμένο περιεχόμενο
     Hide Channel Avatars: Απόκρυψη εικόνων προφίλ καναλιών
     Shorten View Counts: Συντόμευση πλήθους προβολών, σχολίων και θετικών ψήφων σχολίων
     Hide Live Chat Replay: Απόκρυψη επανάληψης ζωντανής συνομιλίας
@@ -1436,6 +1443,39 @@ Settings:
     Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
     Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
+    Rows:
+      Video Lists: Λίστες βίντεο
+      Video Lists Description: Ροές, αποτελέσματα αναζήτησης, σελίδες καναλιών και Επόμενο
+      App Interface: Διεπαφή εφαρμογής
+      Engagement: Αλληλεπίδραση
+      Comments and Chat: Σχόλια και συνομιλία
+      Recommendations: Προτάσεις
+      Player Extras: Επιπλέον λειτουργίες προγράμματος αναπαραγωγής
+    Chips:
+      Channel Avatars: Εικόνες προφίλ καναλιών
+      Subscriber Counts: Αριθμός συνδρομητών
+      Live Streams: Ζωντανές ροές
+      Upcoming Premieres: Επερχόμενες πρεμιέρες
+      Playlist Stats: Στατιστικά λίστας αναπαραγωγής
+      Recommendation Details: Αιτίες προτάσεων
+      Sharing Actions: Ενέργειες κοινής χρήσης
+      Watched in Subscriptions: Βίντεο που έχετε δει στις συνδρομές
+      Watched in Search and Recommendations: Βίντεο που έχετε δει στην αναζήτηση και στις προτάσεις
+      Startup Splash: Οθόνη εκκίνησης
+      Header Sync Indicator: Ένδειξη συγχρονισμού στην κεφαλίδα
+      Featured Channels: Προτεινόμενα κανάλια
+      Likes and Dislikes: «Μου αρέσει» και «Δεν μου αρέσει»
+      Comment Likes: «Μου αρέσει» στα σχόλια
+      Popularity Graph: Γράφημα δημοτικότητας
+      Repeat Stats: Στατιστικά επανάληψης
+      Profile Pictures in Comments: Εικόνες προφίλ στα σχόλια
+      Live Chat: Ζωντανή συνομιλία
+      Live Chat Replay: Επανάληψη ζωντανής συνομιλίας
+      End-Screen Recommendations: Προτάσεις στην οθόνη τέλους
+      End-Screen Annotations: Σχόλια τέλους βίντεο
+      Paid Promotion Badge: Σήμα πληρωμένης προώθησης
+      A-B Repeat: Επανάληψη A-B
+      Full Screen Video Title: Τίτλος βίντεο σε πλήρες παράθυρο και πλήρη οθόνη
   Data Settings:
     Backup separate profile data: "Αυτό το αντίγραφο ασφαλείας περιέχει επίσης τα δεδομένα {count} χωριστού προφίλ, τα οποία επαναφέρονται σε αυτό το προφίλ. | Αυτό το αντίγραφο ασφαλείας περιέχει επίσης τα δεδομένα {count} χωριστών προφίλ, τα οποία επαναφέρονται σε αυτά τα προφίλ."
     Subscription cache file: "Αυτό το αρχείο αποθηκεύει προσωρινά μόνο τα βίντεο από τις συνδρομές σας, όχι τα κανάλια. Επιλέξτε profiles.db ή μια εξαγωγή συνδρομών."

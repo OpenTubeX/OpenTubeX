@@ -812,6 +812,11 @@ Settings:
       Tooltip: Naloži komentarje ob odprtju strani in med pomikanjem naloži več komentarjev.
     Haptic Feedback: Haptični odziv
     Ignore System Haptics Setting: Prezri sistemsko nastavitev haptike
+    Sections:
+      Startup and Tabs: Zagon in zavihki
+      Language and Region: Jezik in regija
+      System: Sistem
+      Browsing: Brskanje
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.
@@ -1665,6 +1670,8 @@ Settings:
       Watch Page: Stran za ogled
       General: Splošno
       Visible While Paused: Vidno med premorom v celotnem oknu/celozaslonskem načinu
+      Subscriptions and Channels: Naročnine in kanali
+      Blocked Content: Blokirana vsebina
     Hide Channel Avatars: Skrij slike kanalov
     Shorten View Counts: Skrajšaj število ogledov, komentarjev in všečkov komentarjev
     Hide Live Chat Replay: Skrij ponovitev klepeta v živo
@@ -1701,6 +1708,39 @@ Settings:
     Paused Interface Hide Delay: Zakasnitev skrivanja vmesnika med premorom
     Add: Dodaj
     Remove: Odstrani
+    Rows:
+      Video Lists: Seznami videoposnetkov
+      Video Lists Description: Viri, rezultati iskanja, strani kanalov in Naslednje na sporedu
+      App Interface: Vmesnik aplikacije
+      Engagement: Sodelovanje
+      Comments and Chat: Komentarji in klepet
+      Recommendations: Priporočila
+      Player Extras: Dodatki predvajalnika
+    Chips:
+      Channel Avatars: Slike kanalov
+      Subscriber Counts: Število naročnikov
+      Live Streams: Prenosi v živo
+      Upcoming Premieres: Prihajajoče premiere
+      Playlist Stats: Statistika seznama predvajanja
+      Recommendation Details: Razlogi za priporočila
+      Sharing Actions: Dejanja za deljenje
+      Watched in Subscriptions: Gledani videoposnetki v naročninah
+      Watched in Search and Recommendations: Gledani videoposnetki v iskanju in priporočilih
+      Startup Splash: Začetni zaslon
+      Header Sync Indicator: Kazalnik sinhronizacije v glavi
+      Featured Channels: Izpostavljeni kanali
+      Likes and Dislikes: Všečki in nevšečki
+      Comment Likes: Všečki komentarjev
+      Popularity Graph: Graf priljubljenosti
+      Repeat Stats: Statistika ponavljanja
+      Profile Pictures in Comments: Profilne slike v komentarjih
+      Live Chat: Klepet v živo
+      Live Chat Replay: Ponovitev klepeta v živo
+      End-Screen Recommendations: Priporočila na končnem zaslonu
+      End-Screen Annotations: Pripisi na končnem zaslonu
+      Paid Promotion Badge: Oznaka plačane promocije
+      A-B Repeat: Ponavljanje A-B
+      Full Screen Video Title: Naslov videoposnetka v celotnem oknu in celozaslonskem načinu
   Data Settings:
     Backup separate profile data: "Ta varnostna kopija vsebuje tudi podatke {count} ločenega profila, ki se obnovijo v ta profil. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v ta profila. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile."
     Subscription cache file: "Ta datoteka hrani v predpomnilniku samo videoposnetke iz vaših naročnin, ne kanalov. Namesto nje izberite profiles.db ali izvoz naročnin."

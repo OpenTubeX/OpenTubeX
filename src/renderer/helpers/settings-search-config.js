@@ -1,4 +1,5 @@
 const GENERAL_EVERYDAY_KEYS = new Set([
+  'Sections',
   'Avoid translation',
   'Auto Load Comments',
   'Auto Load Next Page',
@@ -15,7 +16,6 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'System Tray',
   'New Tab Position',
   'Open Deep Links In New Window',
-  'Reduced Motion',
   'Region for Trending',
   'Reply Notifications',
   'Startup Behavior',
@@ -36,6 +36,7 @@ const GENERAL_APPEARANCE_KEYS = new Set([
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',
+  'Reduced Motion',
   'Show Thumbnail Previews',
   'Show Video Menu Button',
   'Thumbnail Preference',
@@ -65,8 +66,6 @@ const GENERAL_PROVIDER_KEYS = new Set([
   'View all Invidious instance information',
   'Yattee Server'
 ])
-
-const WATCH_STATISTICS_KEYS = new Set(['Enable Watch Statistics', 'Week Starts On'])
 
 const SCHEDULED_BACKUP_KEYS = new Set([
   'Scheduled backups', 'Scheduled backup description', 'Choose backup folder',
@@ -104,6 +103,15 @@ const THEME_GALLERY_KEYS = new Set([
   'Custom Theme'
 ])
 
+// Distraction Free strings for the player's interface, shown in Playback.
+const PLAYER_INTERFACE_KEYS = new Set([
+  'Playing Interface Hide Delay',
+  'Paused Interface Hide Delay',
+  'Show Player Controls',
+  'Show Video Title',
+  'Show Bottom Right Actions Dock'
+])
+
 const QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS = new Set([
   'Quick Playback Speed Bar Manager',
   'Add Playback Speed',
@@ -126,10 +134,6 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'general',
     key: 'Settings.General Settings',
     include: GENERAL_EVERYDAY_KEYS
-  }, {
-    type: 'privacy',
-    key: 'Settings.Privacy Settings',
-    include: WATCH_STATISTICS_KEYS
   }, {
     type: 'context-menu-search',
     key: 'Settings.Context Menu Search Settings'
@@ -209,6 +213,10 @@ export const SETTINGS_SEARCH_SOURCES = {
     include: QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS,
     subpage: 'quick-playback-speed'
   }, {
+    type: 'distraction',
+    key: 'Settings.Distraction Free Settings',
+    include: PLAYER_INTERFACE_KEYS
+  }, {
     type: 'caption-appearance',
     key: 'Settings.Player Settings.Caption Appearance'
   }, {
@@ -229,6 +237,9 @@ export const SETTINGS_SEARCH_SOURCES = {
     exclude: new Set([
       'Hide Active Subscriptions',
       'Digital Wellbeing',
+      // The chips' short names; search lists their switches' full labels.
+      'Chips',
+      ...PLAYER_INTERFACE_KEYS
     ]),
     tab: 'distraction'
   }, {
@@ -264,7 +275,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   privacy: [{
     type: 'privacy',
     key: 'Settings.Privacy Settings',
-    exclude: new Set([...PRIVACY_STORAGE_KEYS, ...WATCH_STATISTICS_KEYS])
+    exclude: PRIVACY_STORAGE_KEYS
   }, {
     type: 'general',
     key: 'Settings.General Settings',
@@ -386,6 +397,11 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
   // The System Tray options only show in its menu.
   general: {
     'Settings.General Settings.System Tray': 'useTrayIcon'
+  },
+  // Chips whose visible text their full label doesn't contain add it to their name.
+  distraction: {
+    'Settings.Distraction Free Settings.Hide Recommended Videos': 'hideRecommendedVideos',
+    'Settings.Distraction Free Settings.Hide Videos on Watch': 'hideWatchedSubs'
   },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',
@@ -535,7 +551,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
 }
 
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
-  distraction: new Set(['Sections.Digital Wellbeing']),
+  distraction: new Set(['Sections.Digital Wellbeing', 'Sections.Visible While Paused']),
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
   player: new Set(['Lights Off', 'Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),

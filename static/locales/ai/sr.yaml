@@ -690,6 +690,11 @@ Settings:
       Tooltip: Учитај коментаре при отварању странице и учитавај још док се помераш.
     Haptic Feedback: Хаптичка повратна информација
     Ignore System Haptics Setting: Занемари системско подешавање хаптике
+    Sections:
+      Startup and Tabs: Покретање и картице
+      Language and Region: Језик и регион
+      System: Систем
+      Browsing: Прегледање
   Context Menu Search Settings:
     Context Menu Search Settings: Претрага из контекстног менија
     Description: Изаберите претраживаче који се приказују када кликнете десним тастером на изабрани текст. Претраге се отварају у подразумеваном прегледачу.
@@ -1447,6 +1452,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Дигитално благостање"
       Visible While Paused: Видљиво током паузе у целом прозору / преко целог екрана
+      Subscriptions and Channels: Праћења и канали
+      Blocked Content: Блокирани садржај
     Hide Channel Avatars: Сакриј аватаре канала
     Shorten View Counts: Скрати број прегледа, коментара и свиђања коментара
     Hide Live Chat Replay: Сакриј снимак ћаскања уживо
@@ -1461,6 +1468,39 @@ Settings:
     Add: Додај
     Remove: Уклони
     Hide Channel Shows: Сакриј картицу „Емисије“ на каналу
+    Rows:
+      Video Lists: Листе видео-снимака
+      Video Lists Description: Извори, резултати претраге, странице канала и Следеће
+      App Interface: Интерфејс апликације
+      Engagement: Интеракција
+      Comments and Chat: Коментари и ћаскање
+      Recommendations: Препоруке
+      Player Extras: Додаци плејера
+    Chips:
+      Channel Avatars: Аватари канала
+      Subscriber Counts: Број пратилаца
+      Live Streams: Стримови уживо
+      Upcoming Premieres: Предстојеће премијере
+      Playlist Stats: Статистика плејлисте
+      Recommendation Details: Разлози препорука
+      Sharing Actions: Радње дељења
+      Watched in Subscriptions: Одгледани видео снимци у праћењима
+      Watched in Search and Recommendations: Одгледани видео снимци у претрази и препорукама
+      Startup Splash: Почетни екран
+      Header Sync Indicator: Показатељ синхронизације у заглављу
+      Featured Channels: Истакнути канали
+      Likes and Dislikes: Свиђања и несвиђања
+      Comment Likes: Свиђања коментара
+      Popularity Graph: Графикон популарности
+      Repeat Stats: Статистика понављања
+      Profile Pictures in Comments: Слике профила у коментарима
+      Live Chat: Ћаскање уживо
+      Live Chat Replay: Снимак ћаскања уживо
+      End-Screen Recommendations: Препоруке на завршном екрану
+      End-Screen Annotations: Напомене на завршном екрану
+      Paid Promotion Badge: Ознака плаћене промоције
+      A-B Repeat: A-B понављање
+      Full Screen Video Title: Наслов видео-снимка у целом прозору и преко целог екрана
   Data Settings:
     Backup separate profile data: "Ова резервна копија садржи и податке {count} одвојеног профила, који се враћају у тај профил. | Ова резервна копија садржи и податке за {count} одвојена профила, који се враћају у те профиле. | Ова резервна копија садржи и податке за {count} одвојених профила, који се враћају у те профиле."
     Subscription cache file: "Ова датотека само кешира видео снимке из ваших претплата, не и канале. Уместо ње изаберите profiles.db или извоз претплата."

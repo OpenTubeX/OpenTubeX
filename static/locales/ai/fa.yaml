@@ -704,6 +704,11 @@ Settings:
       Tooltip: نظرات را هنگام باز شدن صفحه بارگذاری کن و هنگام پیمایش نظرات بیشتری بارگذاری کن.
     Haptic Feedback: بازخورد لمسی
     Ignore System Haptics Setting: نادیده گرفتن تنظیم بازخورد لمسی سیستم
+    Sections:
+      Startup and Tabs: راه‌اندازی و زبانه‌ها
+      Language and Region: زبان و منطقه
+      System: سیستم
+      Browsing: مرور
   Context Menu Search Settings:
     Context Menu Search Settings: جست‌وجوی منوی زمینه
     Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.
@@ -1461,6 +1466,8 @@ Settings:
     Sections:
       Digital Wellbeing: "سلامت دیجیتال"
       Visible While Paused: نمایش هنگام توقف در پنجرهٔ کامل / تمام‌صفحه
+      Subscriptions and Channels: اشتراک‌ها و کانال‌ها
+      Blocked Content: محتوای مسدودشده
     Hide Channel Avatars: پنهان‌کردن آواتار کانال‌ها
     Shorten View Counts: کوتاه‌کردن شمار بازدید، دیدگاه‌ها و پسند دیدگاه‌ها
     Hide Live Chat Replay: پنهان‌کردن بازپخش گفت‌وگوی زنده
@@ -1475,6 +1482,39 @@ Settings:
     Add: افزودن
     Remove: حذف
     Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
+    Rows:
+      Video Lists: فهرست‌های ویدیو
+      Video Lists Description: خوراک‌ها، نتایج جستجو، صفحه‌های کانال و «تا بعدی»
+      App Interface: رابط برنامه
+      Engagement: تعامل
+      Comments and Chat: نظرات و گفت‌وگو
+      Recommendations: پیشنهادها
+      Player Extras: امکانات اضافی پخش‌کننده
+    Chips:
+      Channel Avatars: آواتار کانال‌ها
+      Subscriber Counts: تعداد دنبال‌کنندگان
+      Live Streams: پخش‌های زنده
+      Upcoming Premieres: اولین نمایش‌های آینده
+      Playlist Stats: آمار فهرست پخش
+      Recommendation Details: دلیل پیشنهادها
+      Sharing Actions: فعالیت‌های اشتراک‌گذاری
+      Watched in Subscriptions: ویدیوهای تماشاشده در اشتراک‌ها
+      Watched in Search and Recommendations: ویدیوهای تماشاشده در جستجو و پیشنهادها
+      Startup Splash: صفحهٔ آغازین
+      Header Sync Indicator: نشانگر همگام‌سازی در سربرگ
+      Featured Channels: کانال‌های ویژه
+      Likes and Dislikes: لایک‌ها و دیسلایک‌ها
+      Comment Likes: لایک‌های نظرات
+      Popularity Graph: نمودار محبوبیت
+      Repeat Stats: آمار تکرار
+      Profile Pictures in Comments: تصاویر پروفایل در نظرات
+      Live Chat: چت زنده
+      Live Chat Replay: بازپخش گفت‌وگوی زنده
+      End-Screen Recommendations: پیشنهادهای صفحهٔ پایانی
+      End-Screen Annotations: حاشیه‌نویسی‌های صفحهٔ پایانی
+      Paid Promotion Badge: نشان تبلیغ پولی
+      A-B Repeat: تکرار A-B
+      Full Screen Video Title: عنوان ویدیو در پنجرهٔ کامل و تمام‌صفحه
   Data Settings:
     Backup separate profile data: "این پشتیبان شامل داده‌های {count} نمایهٔ جدا نیز هست که در همان نمایه بازیابی می‌شود. | این پشتیبان شامل داده‌های {count} نمایهٔ جدا نیز هست که در همان نمایه‌ها بازیابی می‌شوند."
     Subscription cache file: "این فایل فقط ویدیوهای اشتراک‌های شما را در حافظهٔ پنهان نگه می‌دارد، نه خود کانال‌ها را. به‌جای آن profiles.db یا یک خروجی اشتراک‌ها را انتخاب کنید."

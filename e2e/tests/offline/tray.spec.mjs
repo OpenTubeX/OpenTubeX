@@ -42,10 +42,10 @@ test('the system tray menu keeps hiding windows tied to its icon and background 
     return [getters.getUseTrayIcon, getters.getHideToTrayOnClose, getters.getHideToTrayOnMinimize]
   })
   const trayDestroyed = () => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())
-  const requiredTooltip = general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })
+  const requiredNote = general.locator('.settingsRow').filter({ has: page.getByRole('combobox', { name: 'System tray' }) }).locator('.settingsRowDescription')
 
   await tray.click()
-  await expect(requiredTooltip).toHaveCount(0)
+  await expect(requiredNote).toHaveCount(0)
 
   // Turning the icon off stops hiding windows to the tray.
   await option('Close to tray').click()
@@ -65,7 +65,7 @@ test('the system tray menu keeps hiding windows tied to its icon and background 
   await page.keyboard.press('Escape')
 
   await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
-  await expect(requiredTooltip).toBeVisible()
+  await expect(requiredNote).toBeVisible()
   await expect.poll(trayDestroyed).toBe(false)
   await tray.click()
   await expect(option('Show icon')).toHaveAttribute('aria-selected', 'true')
@@ -76,7 +76,7 @@ test('the system tray menu keeps hiding windows tied to its icon and background 
   await page.keyboard.press('Escape')
 
   await setting(page, 'updateEnableClosedAppSubscriptionRefresh', false)
-  await expect(requiredTooltip).toHaveCount(0)
+  await expect(requiredNote).toHaveCount(0)
   await expect.poll(trayDestroyed).toBe(true)
 })
 

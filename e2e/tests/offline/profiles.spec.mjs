@@ -476,7 +476,7 @@ test.describe('profile with its own settings', () => {
     await expect(hideLiveChat.locator('.profileSettingIndicator')).toHaveCount(0)
 
     // Changes while it is active only apply to it.
-    await hideLiveChat.locator('label.switch-label').click()
+    await hideLiveChat.getByRole('checkbox').click()
     await expect(hideLiveChat.locator('.profileSettingIndicator')).toBeVisible()
     await expect.poll(saved).toEqual([false, false, { hideComments: true, hideLiveChat: true }])
 

@@ -691,6 +691,11 @@ Settings:
       Tooltip: Indlæs kommentarer, når siden åbnes, og indlæs flere, mens du ruller.
     Haptic Feedback: Haptisk feedback
     Ignore System Haptics Setting: Ignorer systemets indstilling for haptisk feedback
+    Sections:
+      Startup and Tabs: Opstart og faner
+      Language and Region: Sprog og område
+      System: System
+      Browsing: Browsing
   Context Menu Search Settings:
     Context Menu Search Settings: Søgning i genvejsmenuen
     Description: Vælg, hvilke søgemaskiner der vises, når du højreklikker på markeret tekst. Søgninger åbnes i din standardbrowser.
@@ -1449,6 +1454,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digital trivsel"
       Visible While Paused: Synligt ved pause i helt vindue eller fuld skærm
+      Subscriptions and Channels: Abonnementer og kanaler
+      Blocked Content: Blokeret indhold
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antal visninger, kommentarer og likes på kommentarer
     Hide Live Chat Replay: Skjul genafspilning af livechat
@@ -1463,6 +1470,39 @@ Settings:
     Add: Tilføj
     Remove: Fjern
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
+    Rows:
+      Video Lists: Videolister
+      Video Lists Description: Feeds, søgeresultater, kanalsider og Næste
+      App Interface: Appens brugerflade
+      Engagement: Engagement
+      Comments and Chat: Kommentarer og chat
+      Recommendations: Anbefalinger
+      Player Extras: Ekstra afspillerfunktioner
+    Chips:
+      Channel Avatars: Kanalavatarer
+      Subscriber Counts: Antal abonnenter
+      Live Streams: Livestreams
+      Upcoming Premieres: Kommende premierer
+      Playlist Stats: Playliststatistik
+      Recommendation Details: Årsager til anbefalinger
+      Sharing Actions: Delingshandlinger
+      Watched in Subscriptions: Sete videoer i abonnementer
+      Watched in Search and Recommendations: Sete videoer i søgning og anbefalinger
+      Startup Splash: Opstartsskærm
+      Header Sync Indicator: Synkroniseringsindikator i topbjælken
+      Featured Channels: Fremhævede kanaler
+      Likes and Dislikes: Likes og dislikes
+      Comment Likes: Likes på kommentarer
+      Popularity Graph: Popularitetsgraf
+      Repeat Stats: Gentagelsesstatistik
+      Profile Pictures in Comments: Profilbilleder i kommentarer
+      Live Chat: Livechat
+      Live Chat Replay: Genafspilning af livechat
+      End-Screen Recommendations: Anbefalinger på slutskærmen
+      End-Screen Annotations: Annoteringer på slutskærmen
+      Paid Promotion Badge: Mærkat for betalt promovering
+      A-B Repeat: A-B-gentagelse
+      Full Screen Video Title: Videotitel i helt vindue og fuld skærm
   Data Settings:
     Backup separate profile data: "Denne sikkerhedskopi indeholder også data fra {count} adskilt profil, som gendannes i den profil. | Denne sikkerhedskopi indeholder også data fra {count} adskilte profiler, som gendannes i de profiler."
     Subscription cache file: "Denne fil gemmer kun videoerne fra dine abonnementer i cachen, ikke kanalerne. Vælg profiles.db eller en eksport af abonnementer i stedet."

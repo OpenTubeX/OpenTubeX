@@ -686,6 +686,7 @@
         @change="updateDefaultViewingMode"
       />
     </FtFlexBox>
+    <PlayerInterfaceSettings />
     <h4 class="groupTitle">
       {{ t('Settings.Player Settings.Sections.Shorts') }}
     </h4>
@@ -976,6 +977,7 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import PlayerInterfaceSettings from './PlayerInterfaceSettings.vue'
 import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtSliderGrid from '../../FtSliderGrid/FtSliderGrid.vue'

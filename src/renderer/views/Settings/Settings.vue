@@ -1529,7 +1529,8 @@ async function openSearchResult(sectionType, match) {
         : null
       const control = settingsSection ?? labelElement?.closest(
         '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
-        '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry'
+        '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry, ' +
+        '.settingChip, .settingsRow'
       ) ?? labelElement
       target = control?.classList.contains('ft-input-component')
         ? control.querySelector('.ft-input')

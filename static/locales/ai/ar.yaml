@@ -685,6 +685,11 @@ Settings:
       Tooltip: حمّل التعليقات عند فتح الصفحة وحمّل المزيد منها أثناء التمرير.
     Haptic Feedback: الاهتزاز اللمسي
     Ignore System Haptics Setting: تجاهل إعداد الاهتزاز اللمسي في النظام
+    Sections:
+      Startup and Tabs: بدء التشغيل وعلامات التبويب
+      Language and Region: اللغة والمنطقة
+      System: النظام
+      Browsing: التصفح
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.
@@ -1435,6 +1440,8 @@ Settings:
     Sections:
       Digital Wellbeing: "الرفاهية الرقمية"
       Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة
+      Subscriptions and Channels: الاشتراكات والقنوات
+      Blocked Content: المحتوى المحظور
     Hide Channel Avatars: إخفاء الصور الرمزية للقناة
     Shorten View Counts: تقصير أعداد المشاهدات والتعليقات والإعجابات بالتعليقات
     Hide Live Chat Replay: إخفاء إعادة تشغيل الدردشة المباشرة
@@ -1449,6 +1456,39 @@ Settings:
     Add: إضافة
     Remove: إزالة
     Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
+    Rows:
+      Video Lists: قوائم الفيديو
+      Video Lists Description: الخلاصات ونتائج البحث وصفحات القنوات والتالي
+      App Interface: واجهة التطبيق
+      Engagement: التفاعل
+      Comments and Chat: التعليقات والدردشة
+      Recommendations: التوصيات
+      Player Extras: إضافات المشغل
+    Chips:
+      Channel Avatars: الصور الرمزية للقنوات
+      Subscriber Counts: أعداد المشتركين
+      Live Streams: البث المباشر
+      Upcoming Premieres: العروض الأولى القادمة
+      Playlist Stats: إحصاءات قائمة التشغيل
+      Recommendation Details: أسباب التوصيات
+      Sharing Actions: إجراءات المشاركة
+      Watched in Subscriptions: الفيديوهات التي شاهدتها في الاشتراكات
+      Watched in Search and Recommendations: الفيديوهات التي شاهدتها في البحث والتوصيات
+      Startup Splash: شاشة بدء التشغيل
+      Header Sync Indicator: مؤشر المزامنة في الترويسة
+      Featured Channels: القنوات المميزة
+      Likes and Dislikes: الإعجاب وعدم الإعجاب
+      Comment Likes: إعجابات التعليقات
+      Popularity Graph: مخطط الشعبية
+      Repeat Stats: إحصاءات التكرار
+      Profile Pictures in Comments: صور الملف الشخصي في التعليقات
+      Live Chat: الدردشة المباشرة
+      Live Chat Replay: إعادة تشغيل الدردشة المباشرة
+      End-Screen Recommendations: اقتراحات شاشة النهاية
+      End-Screen Annotations: التعليقات التوضيحية على شاشة النهاية
+      Paid Promotion Badge: شارة الترويج المدفوعة
+      A-B Repeat: تكرار A-B
+      Full Screen Video Title: عنوان الفيديو في النافذة الكاملة والشاشة الكاملة
   Data Settings:
     Backup separate profile data: "تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملف شخصي منفصل، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات ملف شخصي منفصل واحد ({count})، وستُستعاد إلى ذلك الملف الشخصي. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات ملفين شخصيين منفصلين ({count})، وستُستعاد إلى هذين الملفين الشخصيين. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملفات شخصية منفصلة، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملفًا شخصيًا منفصلًا، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملف شخصي منفصل، وستُستعاد إلى تلك الملفات الشخصية."
     Subscription cache file: "يخزّن هذا الملف مقاطع الفيديو من اشتراكاتك مؤقتًا فقط، وليس القنوات. اختر profiles.db أو ملف تصدير للاشتراكات بدلًا منه."

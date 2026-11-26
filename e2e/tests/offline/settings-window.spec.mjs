@@ -702,13 +702,6 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).not.toHaveClass(/compactSettings/)
 
-    // General's switches and selects each stack into one column.
-    for (const controls of ['.switchColumnGrid .switch-ctn', ':scope > .select .select-text']) {
-      expect(await page.locator('.generalSelectGrid').first().evaluate((grid, controls) => {
-        return new Set(Array.from(grid.querySelectorAll(controls), control => Math.round(control.getBoundingClientRect().left))).size
-      }, controls)).toBe(1)
-    }
-
     const content = page.locator('.settingsContent')
     expect(await content.evaluate(element => {
       const rightEdge = element.getBoundingClientRect().right

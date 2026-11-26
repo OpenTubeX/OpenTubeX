@@ -703,6 +703,11 @@ Settings:
       Tooltip: Загружаць каментарыі пры адкрыцці старонкі і дагружаць іх падчас прагорткі.
     Haptic Feedback: Тактыльны водгук
     Ignore System Haptics Setting: Ігнараваць сістэмную наладу тактыльнага водгуку
+    Sections:
+      Startup and Tabs: Запуск і ўкладкі
+      Language and Region: Мова і рэгіён
+      System: Сістэма
+      Browsing: Навігацыя
   Context Menu Search Settings:
     Context Menu Search Settings: Пошук з кантэкстнага меню
     Description: Выберыце пошукавыя сістэмы, якія будуць паказвацца пасля націскання правай кнопкай мышы на вылучаным тэксце. Вынікі адкрываюцца ў прадвызначаным браўзеры.
@@ -1458,6 +1463,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Лічбавы дабрабыт"
       Visible While Paused: Бачныя падчас паўзы ў поўным акне або поўнаэкранным рэжыме
+      Subscriptions and Channels: Падпіскі і каналы
+      Blocked Content: Заблакіраванае змесціва
     Hide Channel Avatars: Хаваць аватары каналаў
     Shorten View Counts: Скарачаць колькасць праглядаў, каментарыяў і ўпадабанняў каментарыяў
     Hide Live Chat Replay: Хаваць паўтор жывога чата
@@ -1472,6 +1479,39 @@ Settings:
     Add: Дадаць
     Remove: Выдаліць
     Hide Channel Shows: Схаваць укладку «Шоу» канала
+    Rows:
+      Video Lists: Спісы відэа
+      Video Lists Description: Стужкі, вынікі пошуку, старонкі каналаў і «Далей»
+      App Interface: Інтэрфейс праграмы
+      Engagement: Узаемадзеянне
+      Comments and Chat: Каментарыі і чат
+      Recommendations: Рэкамендацыі
+      Player Extras: Дадаткі плэера
+    Chips:
+      Channel Avatars: Аватары каналаў
+      Subscriber Counts: Колькасць падпісчыкаў
+      Live Streams: Жывыя эфіры
+      Upcoming Premieres: Будучыя прэм'еры
+      Playlist Stats: Статыстыка плэйліста
+      Recommendation Details: Прычыны рэкамендацый
+      Sharing Actions: Дзеянні абагульвання
+      Watched in Subscriptions: Прагледжаныя відэа ў падпісках
+      Watched in Search and Recommendations: Прагледжаныя відэа ў пошуку і рэкамендацыях
+      Startup Splash: Стартавы экран
+      Header Sync Indicator: Індыкатар сінхранізацыі ў загалоўку
+      Featured Channels: Прапанаваныя каналы
+      Likes and Dislikes: Лайкі і дызлайкі
+      Comment Likes: Лайкі да каментарыяў
+      Popularity Graph: Графік папулярнасці
+      Repeat Stats: Статыстыка паўтораў
+      Profile Pictures in Comments: Фатаграфіі профіляў у каментарыях
+      Live Chat: Жывы чат
+      Live Chat Replay: Паўтор жывога чата
+      End-Screen Recommendations: Рэкамендацыі на канчатковым экране
+      End-Screen Annotations: Анатацыі на канцавой застаўцы
+      Paid Promotion Badge: Пазнака платнай рэкламы
+      A-B Repeat: Паўтор A-B
+      Full Screen Video Title: Назва відэа ў поўным акне і поўнаэкранным рэжыме
   Data Settings:
     Backup separate profile data: "Гэтая рэзервовая копія таксама змяшчае даныя {count} асобнага профілю, якія будуць адноўлены ў гэты профіль. | Гэтая рэзервовая копія таксама змяшчае даныя {count} асобных профіляў, якія будуць адноўлены ў гэтыя профілі. | Гэтая рэзервовая копія таксама змяшчае даныя {count} асобных профіляў, якія будуць адноўлены ў гэтыя профілі."
     Subscription cache file: "Гэты файл толькі кэшуе відэа з вашых падпісак, а не самі каналы. Выберыце замест яго profiles.db або экспарт падпісак."
