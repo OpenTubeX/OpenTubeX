@@ -79,6 +79,7 @@ function fixture() {
     SeekFilmstrip,
     store,
     isReducedMotionEnabled: () => false,
+    applyAnimationSpeed: animation => animation,
     i18n: { global: { t: key => key } },
     window,
     document: {},

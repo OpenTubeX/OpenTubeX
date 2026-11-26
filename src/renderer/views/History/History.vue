@@ -649,15 +649,23 @@ const browseData = computed(() => filterHistoryByDateAndChannel(historyCacheSort
 }))
 
 function clearBrowseFilters() {
+  // The sync watcher below would replace the route once per cleared filter.
+  applyingRouteState = true
   fromDate.value = ''
   toDate.value = ''
   channel.value = ''
+  applyingRouteState = false
+  saveBrowseFilters()
+}
+
+function saveBrowseFilters() {
+  searchDataLimit.value = 100
+  saveStateInRouter()
 }
 
 watch([fromDate, toDate, channel], () => {
   if (applyingRouteState) return
-  searchDataLimit.value = 100
-  saveStateInRouter()
+  saveBrowseFilters()
 }, { flush: 'sync' })
 
 const hasUnwatchedHistory = computed(() => {

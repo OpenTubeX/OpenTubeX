@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 
+import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
 
 export const VIDEO_MORPH_NAME = 'video-morph'
@@ -8,6 +9,7 @@ export const VIDEO_MORPH_NAME = 'video-morph'
 let morphSourceElement = null
 let navigationRequestedAt = 0
 let shortMorphRequested = false
+let morphRequestId = 0
 
 /**
  * Request that the next router navigation runs inside a View Transition,
@@ -24,6 +26,10 @@ export function requestWatchPageViewTransition(linkElement, { isShort, allowVisi
     return
   }
 
+  // An earlier request that was never consumed (a cancelled or same-route
+  // navigation) must not keep the shared name: a duplicate aborts the morph.
+  clearMorphSourceName()
+  morphRequestId++
   navigationRequestedAt = Date.now()
   const link = linkElement instanceof HTMLElement
     ? linkElement.closest('a')
@@ -40,12 +46,14 @@ export function requestWatchPageViewTransition(linkElement, { isShort, allowVisi
   const thumbnail = findThumbnail(linkElement)
 
   // Players in hidden background tabs don't count because display: none
-  // elements aren't captured. Recommendations explicitly allow a visible
-  // player: its name is assigned only after the old thumbnail snapshot.
-  const hasVisiblePlayer = Array.from(document.querySelectorAll('.videoPlayer'))
-    .some((el) => el.offsetParent !== null)
+  // elements aren't captured, nor do the transparent neighbor tabs kept laid
+  // out for page swipes, which TabContent excludes from the shared name.
+  // Recommendations explicitly allow a visible player: its name is assigned
+  // only after the old thumbnail snapshot.
+  const hasVisiblePlayer = !allowVisiblePlayer && Array.from(document.querySelectorAll('.videoPlayer'))
+    .some((el) => el.offsetParent !== null && !el.closest('.pageSwipePrewarm'))
 
-  if (thumbnail instanceof HTMLElement && (!hasVisiblePlayer || allowVisiblePlayer)) {
+  if (thumbnail instanceof HTMLElement && !hasVisiblePlayer) {
     morphSourceElement = thumbnail
     thumbnail.style.viewTransitionName = VIDEO_MORPH_NAME
   }
@@ -58,9 +66,11 @@ export function requestWatchPageViewTransition(linkElement, { isShort, allowVisi
  * @param {() => Promise<{ id?: string } | null>} createTab creates the background tab
  */
 export async function morphThumbnailIntoNewTab(linkElement, createTab) {
-  const thumbnail = !isReducedMotionEnabled() && linkElement instanceof HTMLElement
+  const found = !isReducedMotionEnabled() && linkElement instanceof HTMLElement
     ? findThumbnail(linkElement)
     : null
+  // Only an image can be cloned below; loading skeletons and icons are skipped.
+  const thumbnail = found instanceof HTMLImageElement ? found : null
   const source = thumbnail?.getBoundingClientRect()
   // Capture only the source geometry. Document View Transitions delay creation
   // until the old snapshot and freeze rendering while the new tab mounts.
@@ -86,13 +96,13 @@ export async function morphThumbnailIntoNewTab(linkElement, createTab) {
     height: `${source.height}px`
   })
   document.body.append(image)
-  const animation = image.animate([
+  const animation = applyAnimationSpeed(image.animate([
     { transform: 'none', opacity: 1 },
     {
       transform: `translate(${destination.x - source.x}px, ${destination.y - source.y}px) scale(${destination.width / source.width}, ${destination.height / source.height})`,
       opacity: 0
     }
-  ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' })
+  ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }))
   animation.finished.then(() => image.remove(), () => image.remove())
 }
 
@@ -274,8 +284,13 @@ export function takePendingViewTransition(maxAge = 1000) {
 function animateMorphOnCompositor(transition) {
   transition.ready.then(() => {
     const pseudoElement = `::view-transition-group(${VIDEO_MORPH_NAME})`
-    const effect = document.getAnimations()
-      .find(animation => animation.effect?.pseudoElement === pseudoElement)
+    const animations = document.getAnimations()
+      .filter(animation => animation.effect?.pseudoElement?.startsWith('::view-transition'))
+    // The global animationstart hook only covers element animations, so the
+    // transition's pseudo-elements need the configured speed applied here.
+    animations.forEach(applyAnimationSpeed)
+    const effect = animations
+      .find(animation => animation.effect.pseudoElement === pseudoElement)
       ?.effect
     const [from, to] = effect?.getKeyframes() ?? []
     const width = parseFloat(from?.width)
@@ -314,6 +329,24 @@ function animateMorphOnCompositor(transition) {
 function cleanupMorphSource() {
   navigationRequestedAt = 0
   shortMorphRequested = false
+  clearMorphSourceName()
+}
+
+/** Identifies the latest thumbnail morph request, see {@linkcode cancelPendingViewTransition}. */
+export function getViewTransitionRequestId() {
+  return morphRequestId
+}
+
+/**
+ * Forget a pending thumbnail morph whose navigation will not happen.
+ * @param {number | null} requestId the request made for that navigation; a
+ * newer click's request is left alone
+ */
+export function cancelPendingViewTransition(requestId) {
+  if (requestId === morphRequestId) cleanupMorphSource()
+}
+
+function clearMorphSourceName() {
   if (morphSourceElement) {
     morphSourceElement.style.viewTransitionName = ''
     morphSourceElement = null
@@ -321,6 +354,11 @@ function cleanupMorphSource() {
 }
 
 function findThumbnail(linkElement) {
-  return linkElement.querySelector('.thumbnailImage') ??
-    linkElement.closest('.ft-list-video')?.querySelector('.thumbnailImage')
+  const container = linkElement.querySelector('.thumbnailImage')
+    ? linkElement
+    : linkElement.closest('.ft-list-video')
+  // FtRetryImage keeps its unloaded image as a hidden 1px box and shows a
+  // placeholder with the same class, which is what the user actually sees.
+  return container?.querySelector('.thumbnailImage.retryImagePlaceholder') ??
+    container?.querySelector('.thumbnailImage')
 }

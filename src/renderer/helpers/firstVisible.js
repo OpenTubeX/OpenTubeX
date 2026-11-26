@@ -47,6 +47,19 @@ export function revealFirstVisible(element) {
   callback()
 }
 
+/**
+ * Calls the function once the element first intersects the viewport.
+ * @param {Element} element
+ * @param {() => void} callback
+ * @returns {() => void} stops observing
+ */
+export function observeFirstVisible(element, callback) {
+  update(element, callback)
+  return () => {
+    if (callbacks.get(element) === callback) stop(element)
+  }
+}
+
 /** Calls the bound function once the element first intersects the viewport. Bind `false` to stop observing. */
 export const vFirstVisible = {
   mounted: (element, { value }) => update(element, value),

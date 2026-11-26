@@ -68,6 +68,8 @@ function setup() {
     START_LOCATION,
     translateWindowTitle: title => title,
     runPendingViewTransition: run => run(),
+    cancelPendingViewTransition: () => {},
+    getViewTransitionRequestId: () => 0,
     window: { setTimeout: () => 0, clearTimeout() {} },
   })
   const navigation = new Service(router, store)

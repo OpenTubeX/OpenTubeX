@@ -52,6 +52,7 @@ import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, rememberMissingThumbnail, skipMissingThumbnails, thumbnailSizesKey } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
+import { observeFirstVisible } from '../helpers/firstVisible'
 
 defineOptions({ inheritAttrs: false })
 
@@ -108,7 +109,8 @@ let retryTimeoutId
 let nativeRecoveryTimeoutId
 let finishNativeRecovery
 let skeletonTimeoutId
-let visibilityObserver
+/** @type {(() => void) | undefined} */
+let stopObservingVisibility
 let imageIsVisible = false
 let sourceVersion = 0
 
@@ -136,16 +138,15 @@ function checkCachedImage({ el: image }) {
     // Lazy images can remain unrequested offscreen. Give them their full loading
     // deadline once visible, without restarting it when scrolling away and back.
     if (image.loading !== 'lazy' || imageIsVisible) startLoadingTimeout()
-    else if (!visibilityObserver) {
-      visibilityObserver = new IntersectionObserver(entries => {
-        if (!entries.some(entry => entry.isIntersecting)) return
-        // The first sighting is all the deadline needs. Observers kept alive
-        // for every loaded avatar made each rendered frame more expensive.
+    else if (!stopObservingVisibility) {
+      // The first sighting is all the deadline needs. Observers kept alive
+      // for every loaded avatar made each rendered frame more expensive, and
+      // offscreen images share one observer while they wait.
+      stopObservingVisibility = observeFirstVisible(image, () => {
+        stopObservingVisibility = undefined
         imageIsVisible = true
-        stopVisibilityObserver()
         startLoadingTimeout()
       })
-      visibilityObserver.observe(image)
     }
     return
   }
@@ -157,8 +158,8 @@ function checkCachedImage({ el: image }) {
 }
 
 function stopVisibilityObserver() {
-  visibilityObserver?.disconnect()
-  visibilityObserver = undefined
+  stopObservingVisibility?.()
+  stopObservingVisibility = undefined
 }
 
 function resetSource(src, isFallback = false) {

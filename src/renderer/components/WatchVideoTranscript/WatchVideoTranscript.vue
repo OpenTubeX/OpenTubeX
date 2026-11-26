@@ -339,7 +339,9 @@ watch(
       segments.value = parseTranscript(await response.text())
       emit('loaded', segments.value.length > 0)
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      // Resolving the URL can still fail after a newer selection aborted this
+      // request, which must not mark the newer transcript as failed.
+      if (error.name !== 'AbortError' && !controller.signal.aborted) {
         console.error('Unable to load transcript', error)
         loadFailed.value = true
       }
