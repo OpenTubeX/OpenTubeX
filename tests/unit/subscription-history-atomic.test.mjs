@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
-import { migrateLegacyHistoryRecord } from '../../src/history.js'
+import { capHistoryDescription, HISTORY_DESCRIPTION_MAX_LENGTH, migrateLegacyHistoryRecord } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import * as seenMarks from '../../src/seenMarks.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
@@ -23,7 +23,7 @@ async function fixture(marks = []) {
   const errors = []
   const { Settings, History } = vm.runInNewContext(
     source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {')) + '\n({Settings, History})',
-    { db, ...seenVideos, ...seenMarks, ...seenMarkSettings, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
+    { db, ...seenVideos, ...seenMarks, ...seenMarkSettings, capHistoryDescription, migrateLegacyHistoryRecord, ...secretSettings, getSecretCipher, migrateStoredSettings, console: { error: error => errors.push(error) } }
   )
   return { db, Settings, History, errors }
 }
@@ -176,13 +176,14 @@ test('metadata repair preserves watch state and does not recreate deleted histor
   const { db, History } = await fixture()
   const result = await History.updateSubscriptionState({
     metadata: [
-      { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered', pendingDurationRepair: true },
+      { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered', description: 'd'.repeat(HISTORY_DESCRIPTION_MAX_LENGTH + 100), pendingDurationRepair: true },
       { videoId: 'deleted', lengthSeconds: 120 }
     ]
   })
   assert.equal(result.records.length, 1)
   const saved = await db.history.findOneAsync({ videoId: 'video' })
   assert.equal(saved.lengthSeconds, 120)
+  assert.equal(saved.description, 'd'.repeat(HISTORY_DESCRIPTION_MAX_LENGTH))
   assert.equal(saved.pendingDurationRepair, true)
   assert.equal(saved.watchProgress, 12)
   assert.equal(saved.timeWatched, 1)

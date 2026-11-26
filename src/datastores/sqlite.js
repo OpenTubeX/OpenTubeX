@@ -47,10 +47,14 @@ const SQL = {
   removeAll: 'DELETE FROM docs',
   removeAllChildren: 'DELETE FROM children',
   getMeta: 'SELECT value FROM meta WHERE key = ?',
+  getMetas: 'SELECT key, value FROM meta WHERE key IN (SELECT value FROM json_each(?))',
   setMeta: 'INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value',
   setBase: 'INSERT INTO legacy_base (id, hash) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET hash = excluded.hash',
   removeBase: 'DELETE FROM legacy_base WHERE id = ?',
 }
+
+/** The `meta` key that keeps that an update ran, see `SqliteDatastore`. */
+const updateKey = update => `update:${update.key}`
 
 /**
  * Primary keys keep strings and numbers as native SQLite values, so `'5'` and
@@ -235,11 +239,16 @@ export class SqliteDatastore {
    * @param {LegacySource} [options.legacy]
    * @param {string} [options.childField]
    * @param {string[]} [options.indexes] scalar fields used for indexed equality lookups
+   * @param {{ key: string, sql: string }[]} [options.updates] statements that bring documents
+   *   saved by older versions up to date. Each runs once per database, when it opens, before
+   *   any read; `meta` keeps that it ran under `update:<key>`. Any rerun must leave documents
+   *   unchanged, since it can follow an interrupted run or a downgrade.
    * @param {(result: { changed: number, deleted: number, backup?: string }) => void} [options.onLegacyChanges]
    * @param {(result: { documents: number }) => void} [options.onLegacyImported] after importing an existing legacy file
    */
-  constructor({ driver, legacy, childField, indexes = [], onLegacyChanges, onLegacyImported }) {
+  constructor({ driver, legacy, childField, indexes = [], updates = [], onLegacyChanges, onLegacyImported }) {
     this.driver = driver
+    this.updates = updates
     this.legacy = legacy
     this.childField = childField
     this.indexes = new Set(indexes)
@@ -332,8 +341,11 @@ export class SqliteDatastore {
       throw new Error(`This library was created by a newer version of OpenTubeX (schema ${version})`)
     }
     const hasMeta = schemaEntries.some(([type, name]) => type === 'table' && name === 'meta')
+    const meta = new Map(hasMeta
+      ? await this._query(SQL.getMetas, [JSON.stringify(['state', ...this.updates.map(updateKey)])])
+      : [])
     // A new database gets its tables and indexes in the import's commit transaction.
-    if (!hasMeta || await this._meta('state') !== 'ready') {
+    if (meta.get('state') !== 'ready') {
       await this._import(!hasMeta)
       return
     }
@@ -353,9 +365,17 @@ export class SqliteDatastore {
     const missingIndexStatements = [...this.indexes]
       .filter(field => !existingIndexes.has(`docs_${field}`) || !existingIndexes.has(`docs_${field}_arrays`))
       .flatMap(field => this._indexStatements(field))
-    if (missingIndexStatements.length > 0) {
-      await this._execute(missingIndexStatements, true)
-    }
+    // In one commit, as each commit waits for the disk.
+    await this._execute([
+      ...missingIndexStatements,
+      ...this._updateStatements(this.updates.filter(update => !meta.has(updateKey(update)))),
+    ], true)
+  }
+
+  /** Statements that run `updates` and keep that they ran. */
+  _updateStatements(updates) {
+    const now = Date.now()
+    return updates.flatMap(update => [[update.sql], [SQL.setMeta, [updateKey(update), now]]])
   }
 
   async _readLegacy() {
@@ -414,6 +434,8 @@ export class SqliteDatastore {
     batch.push(
       [SQL.setMeta, ['legacyFingerprint', fingerprint]],
       [SQL.setMeta, ['importedAt', Date.now()]],
+      // Imported documents can come from a version before them.
+      ...this._updateStatements(this.updates),
       [`PRAGMA user_version = ${SCHEMA_VERSION}`],
       ["INSERT INTO meta (key, value) SELECT 'state', 'ready' WHERE (SELECT count(*) FROM docs) = ? AND (SELECT count(*) FROM children) = ?", [docs.length, childCount]],
       // In the same commit, as each commit waits for the disk.
@@ -486,6 +508,8 @@ export class SqliteDatastore {
         return
       }
     }
+    // The older version can have saved documents the updates would change.
+    if (changed) statements.push(...this._updateStatements(this.updates))
     statements.push([SQL.setMeta, ['legacyFingerprint', fingerprint]])
     await this._execute(statements, true)
     if (changed || deleted) this.onLegacyChanges?.({ changed, deleted, backup })

@@ -9,7 +9,7 @@ import { migrateStoredSettings } from '../settingsMigrations'
 import { getSecretCipher } from '../secretCipher'
 import { decodeSettings, encodeSetting, migrateSecretSettings } from '../secretSettings'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
-import { hasReachedWatchedThreshold, mergeUndatedHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
+import { capHistoryDescription, hasReachedWatchedThreshold, mergeUndatedHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
@@ -396,6 +396,7 @@ class History {
               for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
                 if (patch[key] !== undefined) fields[key] = patch[key]
               }
+              if (fields.description !== undefined) fields.description = capHistoryDescription(fields.description)
               return Object.keys(fields).length === 0 ? [] : [{ query: { videoId: patch.videoId }, update: { $set: fields } }]
             })
         let failedCount = 0
