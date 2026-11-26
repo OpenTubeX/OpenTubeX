@@ -71,15 +71,16 @@ function isMistypedRecoveryPhrase(passphrase) {
  * that only resembles a recovery phrase.
  * @param {string | null | undefined} payload Encrypted data the key must decrypt, if the account has any
  * @param {string} passphrase
+ * @param {string} [context] What the payload holds, required with a payload
  */
-export async function preparePrivacyKeyFromPassphrase(payload, passphrase) {
+export async function preparePrivacyKeyFromPassphrase(payload, passphrase, context) {
   const phrase = normalizeRecoveryPhrase(passphrase)
   if (!payload) return preparePrivacyKey(payload, phrase ?? passphrase)
 
   let lastError
   for (const candidate of new Set([phrase ?? passphrase, passphrase])) {
     try {
-      return await preparePrivacyKey(payload, candidate)
+      return await preparePrivacyKey(payload, candidate, context)
     } catch (error) {
       lastError = error
     }

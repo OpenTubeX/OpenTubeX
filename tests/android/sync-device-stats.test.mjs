@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
-import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 // Run against a current debug APK on a locked emulator with its WebView forwarded.
@@ -37,7 +37,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
     const local = await page.evaluate(() => ({ ...document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchSecondsByDate }))
     const oldDays = Object.fromEntries(Object.entries(local).map(([date, seconds]) => [date, seconds / 2]))
     oldDays['2020-01-01'] = (local['2020-01-01'] ?? 0) + 1800
-    payload = await encryptSyncDocument([{ deviceId: oldId, deviceName: 'Pixel (old)', platform: 'android', days: oldDays }], key, salt)
+    payload = await encryptSyncDocument([{ deviceId: oldId, deviceName: 'Pixel (old)', platform: 'android', days: oldDays }], key, salt, syncCollectionContext('watchStats'))
     await page.exposeBinding('__statsRepairNativeRequest', async (_source, options) => {
       const pathname = new URL(options.url).pathname
       const method = options.method ?? 'GET'
@@ -141,7 +141,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
     await expect(picker.getByRole('button')).toHaveCount(2)
     await picker.scrollIntoViewIfNeeded()
     if (process.env.ANDROID_STATS_RECORDING) await page.waitForTimeout(1500)
-    const repaired = await decryptSyncDocument(payload, key)
+    const repaired = await decryptSyncDocument(payload, key, syncCollectionContext('watchStats'))
     assert.equal(repaired.length, 1)
     assert.deepEqual(repaired[0].replacedDevices[0].days, oldDays)
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
@@ -154,7 +154,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
       await expect(total).toContainText('0 min')
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
       await expect(total).toContainText('0 min')
-      const cleared = await decryptSyncDocument(payload, key)
+      const cleared = await decryptSyncDocument(payload, key, syncCollectionContext('watchStats'))
       assert.deepEqual(cleared[0].days, {})
       assert.deepEqual(cleared[0].reset.baselines[oldId], oldDays)
       await page.evaluate(async () => {

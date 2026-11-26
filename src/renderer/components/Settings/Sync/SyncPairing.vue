@@ -491,9 +491,10 @@ import {
   syncServerTokenAccountId,
 } from '../../../helpers/sync-server-pairing'
 import {
-  PRIVACY_VERSION,
+  PRIVACY_KEY_FORMAT,
   decryptLegacySyncDocument,
   decryptSyncDocument,
+  syncCollectionContext,
 } from '../../../helpers/sync-server-privacy'
 import { SyncServerClient, normalizeSyncServerUrl } from '../../../helpers/sync-server'
 import { isSyncServerOidcUsername } from '../../../helpers/sync-server-oidc'
@@ -838,7 +839,7 @@ async function verifyPrivacyKey(client, privacyKey) {
     // `since` keeps newer servers from refusing a collection with appended changes.
     const collection = await client.getEncryptedSyncCollection(firstCollection, 0)
     if (!collection.payload) throw new Error(t('Settings.Sync Settings.Pairing Verification Unavailable'))
-    await decryptSyncDocument(collection.payload, privacyKey)
+    await decryptSyncDocument(collection.payload, privacyKey, syncCollectionContext(firstCollection))
     return
   }
   if (manifest.legacy_encrypted_data) {
@@ -1098,7 +1099,7 @@ async function approvePairing() {
           token: approval.token,
           key: props.privacyKey,
           salt: props.privacySalt,
-          version: PRIVACY_VERSION,
+          version: PRIVACY_KEY_FORMAT,
           verificationCode: approval.verificationCode,
         }
       )

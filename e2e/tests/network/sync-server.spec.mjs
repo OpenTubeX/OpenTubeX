@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp, readDatastore } from '../../helpers/app.mjs'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
-import { decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
@@ -955,7 +955,7 @@ test.describe('OpenTubeX sync server', () => {
       const releasedRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/history`, { headers: { Authorization: releasedToken } })
       expect(releasedRead.status).toBe(200)
       const privacyKey = await page.evaluate(() => window.$store.state.settings.syncServerPrivacyKey)
-      const history = await decryptSyncDocument((await releasedRead.json()).payload, privacyKey)
+      const history = await decryptSyncDocument((await releasedRead.json()).payload, privacyKey, syncCollectionContext('history'))
       expect(history.map(entry => entry.metadata.position_millis)).toEqual([150_000])
 
       await sync(other.page)
@@ -1023,7 +1023,7 @@ test.describe('OpenTubeX sync server', () => {
       const response = await fetch(`${syncServerUrl}/v1/encrypted_sync/${collection}?since=0`, { headers: { Authorization: token } })
       expect(response.ok).toBe(true)
       const { payload } = await response.json()
-      return payload ? decryptSyncDocument(payload, privacyKey) : null
+      return payload ? decryptSyncDocument(payload, privacyKey, syncCollectionContext(collection)) : null
     }
 
     try {

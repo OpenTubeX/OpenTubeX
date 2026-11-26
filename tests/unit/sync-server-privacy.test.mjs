@@ -11,6 +11,9 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
   readSyncCollection,
+  SYNC_EVENT_CONTEXT,
+  SYNC_LEGACY_DOCUMENT_CONTEXT,
+  syncCollectionContext,
 } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { applyRemoteHistoryChanges } from '../../src/renderer/helpers/sync-history-merge.js'
 import { encryptSyncDocument as encryptSyncDocumentInline } from '../../src/renderer/helpers/sync-server-privacy-crypto.js'
@@ -21,6 +24,7 @@ import {
 } from '../../src/renderer/helpers/sync-server-recovery-phrase.js'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
+import * as released from '../helpers/released-sync-privacy-crypto.mjs'
 
 test('decrypts the original single-document encrypted sync format', async () => {
   const passphrase = 'legacy-privacy-passphrase'
@@ -40,18 +44,20 @@ test('decrypts the original single-document encrypted sync format', async () => 
     await decryptLegacySyncDocument(payload, privacy.key),
     document
   )
-  await assert.doesNotReject(() => preparePrivacyKey(payload, passphrase))
+  await assert.doesNotReject(() => preparePrivacyKey(payload, passphrase, SYNC_LEGACY_DOCUMENT_CONTEXT))
   await assert.rejects(
-    () => decryptSyncDocument(payload, privacy.key),
+    () => decryptSyncDocument(payload, privacy.key, syncCollectionContext('subscriptions')),
     /corrupted sync data/
   )
 })
+
+const SUBSCRIPTIONS = syncCollectionContext('subscriptions')
 
 async function encryptedPayload(passphrase) {
   const privacy = await preparePrivacyKeyFromPassphrase(null, passphrase)
   return {
     privacy,
-    payload: await encryptSyncDocumentInline({ subscriptions: [] }, privacy.key, privacy.salt),
+    payload: await encryptSyncDocumentInline([], privacy.key, privacy.salt, SUBSCRIPTIONS),
   }
 }
 
@@ -61,16 +67,16 @@ test('a recovery phrase unlocks its data with the case and spacing keyboards add
   const { privacy, payload } = await encryptedPayload(phrase)
 
   const typed = `  ${phrase[0].toUpperCase()}${phrase.slice(1).replaceAll(' ', '   ')}\n`
-  assert.equal((await preparePrivacyKeyFromPassphrase(payload, typed)).key, privacy.key)
+  assert.equal((await preparePrivacyKeyFromPassphrase(payload, typed, SUBSCRIPTIONS)).key, privacy.key)
 })
 
 test('a custom passphrase of word-list words still unlocks data saved with it as typed', async () => {
   const passphrase = 'Abandon Ability Able About Above Absent Absorb Abstract Absurd Abuse Access Accident'
   // An earlier version derived the key from the passphrase as typed.
   const privacy = await preparePrivacyKey(null, passphrase)
-  const payload = await encryptSyncDocumentInline({ subscriptions: [] }, privacy.key, privacy.salt)
+  const payload = await encryptSyncDocumentInline([], privacy.key, privacy.salt, SUBSCRIPTIONS)
 
-  assert.equal((await preparePrivacyKeyFromPassphrase(payload, passphrase)).key, privacy.key)
+  assert.equal((await preparePrivacyKeyFromPassphrase(payload, passphrase, SUBSCRIPTIONS)).key, privacy.key)
 })
 
 test('names a typo in a recovery phrase that fails to unlock data, but accepts it for new data', async () => {
@@ -78,7 +84,7 @@ test('names a typo in a recovery phrase that fails to unlock data, but accepts i
   const { payload } = await encryptedPayload(words.join(' '))
   const mistyped = words.with(3, `${words[3]}x`).join(' ')
 
-  await assert.rejects(() => preparePrivacyKeyFromPassphrase(payload, mistyped), {
+  await assert.rejects(() => preparePrivacyKeyFromPassphrase(payload, mistyped, SUBSCRIPTIONS), {
     message: RECOVERY_PHRASE_TYPO_MESSAGE,
   })
   // Without data it may be a custom passphrase that only resembles a phrase.
@@ -250,7 +256,7 @@ test('replays many history changes with one pass over the history, keeping the l
     { upserts: [historyEntry('d', 6)], deletions: ['c'] },
   ]
   const changes = await Promise.all(changeList.map(async (change, index) => ({
-    revision: index + 2, payload: await encryptSyncChange(change, privacy.key, privacy.salt),
+    revision: index + 2, payload: await encryptSyncChange(change, privacy.key, privacy.salt, 'history'),
   })))
   // Arrays derived from it count each pass over the history too.
   let passes = 0
@@ -272,10 +278,10 @@ test('replays many history changes with one pass over the history, keeping the l
 test('reads full and incremental collection responses with their changes', async () => {
   const privacy = await preparePrivacyKey(null, 'change-log-passphrase')
   const base = [historyEntry('a'), historyEntry('b')]
-  const payload = await encryptSyncDocument(base, privacy.key, privacy.salt)
+  const payload = await encryptSyncDocument(base, privacy.key, privacy.salt, syncCollectionContext('history'))
   const changes = [
-    { revision: 3, payload: await encryptSyncChange({ upserts: [historyEntry('a', 2)], deletions: [] }, privacy.key, privacy.salt) },
-    { revision: 4, payload: await encryptSyncChange({ upserts: [], deletions: ['b'] }, privacy.key, privacy.salt) },
+    { revision: 3, payload: await encryptSyncChange({ upserts: [historyEntry('a', 2)], deletions: [] }, privacy.key, privacy.salt, 'history') },
+    { revision: 4, payload: await encryptSyncChange({ upserts: [], deletions: ['b'] }, privacy.key, privacy.salt, 'history') },
   ]
   // Small changes are not padded to the size of a collection.
   assert.ok(changes[0].payload.length < payload.length / 4)
@@ -302,8 +308,98 @@ test('reads full and incremental collection responses with their changes', async
     await assert.rejects(readSyncCollection('history', response, null, privacy.key), /Invalid encrypted sync response/)
   }
   // A collection whose change format this version does not know cannot be applied.
+  const settingsChange = { revision: 3, payload: await encryptSyncChange({ key: 'value' }, privacy.key, privacy.salt, 'settings') }
   await assert.rejects(
-    readSyncCollection('settings', { revision: 3, payload, base_revision: 2, changes: changes.slice(0, 1) }, null, privacy.key),
+    readSyncCollection('settings', {
+      revision: 3,
+      payload: await encryptSyncDocument([], privacy.key, privacy.salt, syncCollectionContext('settings')),
+      base_revision: 2,
+      changes: [settingsChange],
+    }, null, privacy.key),
     /newer OpenTubeX version/
   )
+})
+
+test('reads collections and passphrase checks that released versions encrypted without a collection', async () => {
+  const passphrase = 'released-privacy-passphrase'
+  const privacy = await released.preparePrivacyKey(null, passphrase)
+  const subscriptions = [{ id: 'UC-released', name: 'Released' }]
+  const payload = await released.encryptSyncDocument(subscriptions, privacy.key, privacy.salt)
+
+  assert.deepEqual(
+    await readSyncCollection('subscriptions', { revision: 1, payload }, null, privacy.key),
+    { revision: 1, data: subscriptions }
+  )
+  assert.equal((await preparePrivacyKey(payload, passphrase, SUBSCRIPTIONS)).key, privacy.key)
+  // Their history changes too.
+  const change = await released.encryptSyncDocument({ upserts: [historyEntry('a')], deletions: [] }, privacy.key, privacy.salt)
+  assert.deepEqual(
+    (await readSyncCollection('history', { revision: 2, payload: null, base_revision: 1, changes: [{ revision: 2, payload: change }] },
+      { revision: 1, data: [] }, privacy.key)).data,
+    [historyEntry('a')]
+  )
+})
+
+test('binds each payload to its collection, which released versions refuse instead of misreading', async () => {
+  const privacy = await preparePrivacyKey(null, 'bound-privacy-passphrase')
+  const subscriptions = [{ id: 'UC-bound', name: 'Bound' }]
+  const payload = await encryptSyncDocument(subscriptions, privacy.key, privacy.salt, SUBSCRIPTIONS)
+  assert.equal(JSON.parse(payload).version, 2)
+  assert.deepEqual(await readSyncCollection('subscriptions', { revision: 1, payload }, null, privacy.key), { revision: 1, data: subscriptions })
+  // A separate profile's collection is a different one.
+  assert.deepEqual(
+    await readSyncCollection('subscriptions', {
+      revision: 1, payload: await encryptSyncDocument(subscriptions, privacy.key, privacy.salt, syncCollectionContext('subscriptions.profile')),
+    }, null, privacy.key, 'subscriptions.profile'),
+    { revision: 1, data: subscriptions }
+  )
+
+  // A server serves another collection's payload, a separate profile's, a change, or an event in its place.
+  const history = { upserts: [historyEntry('a')], deletions: [] }
+  for (const swapped of [
+    await encryptSyncDocument([], privacy.key, privacy.salt, syncCollectionContext('seenPosts')),
+    await encryptSyncDocument([], privacy.key, privacy.salt, syncCollectionContext('subscriptions.profile')),
+    await encryptSyncChange(history, privacy.key, privacy.salt, 'subscriptions'),
+    await encryptSyncDocument([], privacy.key, privacy.salt, SYNC_EVENT_CONTEXT),
+  ]) {
+    await assert.rejects(readSyncCollection('subscriptions', { revision: 2, payload: swapped }, null, privacy.key), /corrupted sync data/)
+  }
+  const fullHistory = await encryptSyncDocument(history, privacy.key, privacy.salt, syncCollectionContext('history'))
+  await assert.rejects(
+    readSyncCollection('history', { revision: 2, payload: null, base_revision: 1, changes: [{ revision: 2, payload: fullHistory }] },
+      { revision: 1, data: [] }, privacy.key),
+    /corrupted sync data/
+  )
+
+  // A released version stops the sync before it merges or uploads anything.
+  await assert.rejects(released.decryptSyncDocument(payload, privacy.key), /Unsupported or invalid encrypted sync data/)
+  await assert.rejects(released.preparePrivacyKey(payload, 'bound-privacy-passphrase'), /Unsupported or invalid encrypted sync data/)
+  // This version tells the user to update when a later one changes the format again.
+  await assert.rejects(
+    readSyncCollection('subscriptions', { revision: 2, payload: JSON.stringify({ ...JSON.parse(payload), version: 3 }) }, null, privacy.key),
+    /newer OpenTubeX version/
+  )
+})
+
+test('refuses a decrypted collection of the wrong form', async () => {
+  const privacy = await released.preparePrivacyKey(null, 'shape-privacy-passphrase')
+  // Released versions encrypted every collection alike, so only the form tells them apart.
+  for (const [collection, data] of [
+    ['subscriptions', { upserts: [], deletions: [] }],
+    ['history', { version: 1, type: 'activity', changes: [] }],
+    ['notificationDismissals', []],
+    ['settings', null],
+    ['separateProfiles', 'profiles'],
+  ]) {
+    const payload = await released.encryptSyncDocument(data, privacy.key, privacy.salt)
+    await assert.rejects(readSyncCollection(collection, { revision: 1, payload }, null, privacy.key), /Invalid encrypted sync data/, collection)
+  }
+  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [] }
+  assert.deepEqual((await readSyncCollection('notificationDismissals', {
+    revision: 1, payload: await released.encryptSyncDocument(dismissals, privacy.key, privacy.salt),
+  }, null, privacy.key)).data, dismissals)
+  // A sync uploads empty tab sets as null.
+  assert.equal((await readSyncCollection('sessionsV2', {
+    revision: 1, payload: await released.encryptSyncDocument(null, privacy.key, privacy.salt),
+  }, null, privacy.key)).data, null)
 })

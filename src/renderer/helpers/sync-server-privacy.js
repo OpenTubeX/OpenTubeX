@@ -2,21 +2,37 @@
 import * as privacy from './sync-server-privacy-crypto.js'
 import { runBackgroundJob } from './background-jobs.js'
 import { applyRemoteHistoryChanges } from './sync-history-merge.js'
+import { SYNC_DELETION_MARKS_COLLECTION } from './sync-deletions.js'
 
-export const PRIVACY_VERSION = privacy.PRIVACY_VERSION
+export const PRIVACY_KEY_FORMAT = privacy.PRIVACY_KEY_FORMAT
+export const SYNC_EVENT_CONTEXT = privacy.SYNC_EVENT_CONTEXT
+export const SYNC_LEGACY_DOCUMENT_CONTEXT = privacy.SYNC_LEGACY_DOCUMENT_CONTEXT
+export const syncCollectionContext = privacy.syncCollectionContext
 export const getPrivacySalt = privacy.getPrivacySalt
 export const preparePrivacyKey = privacy.preparePrivacyKey
 
-export function decryptSyncDocument(payload, exportedKey) {
-  return runBackgroundJob('decryptSyncDocument', { payload, exportedKey })
+/**
+ * @param {string | null | undefined} payload
+ * @param {string} exportedKey
+ * @param {string} context What the payload must hold, from {@link syncCollectionContext} or the other contexts
+ */
+export function decryptSyncDocument(payload, exportedKey, context) {
+  return runBackgroundJob('decryptSyncDocument', { payload, exportedKey, context })
 }
 
 export function decryptLegacySyncDocument(payload, exportedKey) {
   return runBackgroundJob('decryptLegacySyncDocument', { payload, exportedKey })
 }
 
-export function encryptSyncDocument(data, exportedKey, salt, options) {
-  return runBackgroundJob('encryptSyncDocument', { data, exportedKey, salt, options })
+/**
+ * @param {unknown} data
+ * @param {string} exportedKey
+ * @param {string} salt
+ * @param {string} context What the payload holds, from {@link syncCollectionContext} or the other contexts
+ * @param {{ paddingBytes?: number }} [options]
+ */
+export function encryptSyncDocument(data, exportedKey, salt, context, options) {
+  return runBackgroundJob('encryptSyncDocument', { data, exportedKey, salt, context, options })
 }
 
 // A change usually holds a few entries. Collection-sized padding would make
@@ -26,8 +42,16 @@ const SYNC_CHANGE_PADDING_BYTES = 4 * 1024
 /** Collections whose sync uploads may append a change instead of the full value. */
 export const SYNC_CHANGE_COLLECTIONS = new Set(['history'])
 
-export function encryptSyncChange(change, exportedKey, salt) {
-  return encryptSyncDocument(change, exportedKey, salt, { paddingBytes: SYNC_CHANGE_PADDING_BYTES })
+/**
+ * @param {{ upserts: unknown[], deletions: string[] }} change
+ * @param {string} exportedKey
+ * @param {string} salt
+ * @param {string} collection The collection's name on the server
+ */
+export function encryptSyncChange(change, exportedKey, salt, collection) {
+  return encryptSyncDocument(change, exportedKey, salt, privacy.syncChangeContext(collection), {
+    paddingBytes: SYNC_CHANGE_PADDING_BYTES,
+  })
 }
 
 function assertKnownSyncChange(collection, change) {
@@ -37,19 +61,51 @@ function assertKnownSyncChange(collection, change) {
   }
 }
 
+const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+// Older versions saved tabs as a list, and a sync may upload no tabs yet.
+const isSessions = value => value === null || Array.isArray(value) || isRecord(value)
+
+/** The form of each collection's value, which the merges rely on. */
+const SYNC_COLLECTION_SHAPES = {
+  subscriptions: Array.isArray,
+  playlists: Array.isArray,
+  playlistBookmarks: Array.isArray,
+  history: Array.isArray,
+  watchStats: Array.isArray,
+  liveReminders: Array.isArray,
+  notificationDismissals: isRecord,
+  seenVideos: Array.isArray,
+  seenPosts: Array.isArray,
+  seenRssItems: Array.isArray,
+  playbackSpeeds: Array.isArray,
+  profiles: Array.isArray,
+  separateProfiles: Array.isArray,
+  settings: Array.isArray,
+  sessions: isSessions,
+  sessionsV2: isSessions,
+  [SYNC_DELETION_MARKS_COLLECTION]: Array.isArray,
+}
+
+function assertSyncCollectionShape(collection, data) {
+  if (!Object.hasOwn(SYNC_COLLECTION_SHAPES, collection)) throw new Error(`Unknown sync collection ${collection}`)
+  if (!SYNC_COLLECTION_SHAPES[collection](data)) throw new Error('Invalid encrypted sync data')
+}
+
 /**
  * Decrypts a collection response and applies its appended changes.
  * @param {string} collection
  * @param {{ revision: number, payload?: string | null, base_revision?: number, changes?: { revision: number, payload: string }[] }} response
  * @param {{ revision: number, data: any } | null} base The value the request's `since` revision refers to
  * @param {string} exportedKey
+ * @param {string} [name] The collection's name on the server, which a separate profile's collections add their scope to
  * @returns {Promise<{ revision: number, data: any }>} `data` is undefined for a collection that was never uploaded
  */
-export async function readSyncCollection(collection, response, base, exportedKey) {
+export async function readSyncCollection(collection, response, base, exportedKey, name = collection) {
   let data
   let revision
   if (response.payload) {
-    data = await decryptSyncDocument(response.payload, exportedKey)
+    data = await decryptSyncDocument(response.payload, exportedKey, syncCollectionContext(name))
+    assertSyncCollectionShape(collection, data)
     revision = response.base_revision ?? response.revision
   } else if (response.revision > 0) {
     // The server omits the payload when the changes extend `since`.
@@ -71,7 +127,7 @@ export async function readSyncCollection(collection, response, base, exportedKey
   const upserts = new Map()
   const deletions = new Set()
   for (const { payload } of changes) {
-    const change = await decryptSyncDocument(payload, exportedKey)
+    const change = await decryptSyncDocument(payload, exportedKey, privacy.syncChangeContext(name))
     assertKnownSyncChange(collection, change)
     for (const id of change.deletions) {
       upserts.delete(id)
@@ -89,7 +145,6 @@ export async function readSyncCollection(collection, response, base, exportedKey
 
 export function createEmptySyncDocument() {
   return {
-    version: PRIVACY_VERSION,
     subscriptions: [],
     playlists: [],
     history: [],
@@ -148,7 +203,6 @@ export async function loadLegacySyncDocument(client) {
   )
 
   return {
-    version: PRIVACY_VERSION,
     subscriptions,
     playlists,
     history: history ?? [],

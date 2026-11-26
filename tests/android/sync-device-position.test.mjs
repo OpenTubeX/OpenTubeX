@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { expect } from '@playwright/test'
 import { seekAsViewer } from '../../e2e/helpers/player.mjs'
-import { decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, SYNC_EVENT_CONTEXT } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { connectAndroidApp } from '../helpers/android-webview.mjs'
 
 function findWatchComponent() {
@@ -145,7 +145,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     await page.getByRole('menuitem', { name: 'Open on another device', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Test laptop', exact: true }).click()
     await expect.poll(() => !!sent).toBe(true)
-    const request = await decryptSyncDocument(sent.payload, key)
+    const request = await decryptSyncDocument(sent.payload, key, SYNC_EVENT_CONTEXT)
     assert.equal(request.position, 4.75)
     assert.equal(request.videoId, 'jNQXAC9IVRw')
     const received = await page.evaluate(async () => {
@@ -175,7 +175,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     await page.getByRole('menuitem', { name: 'Open on another device', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Test laptop', exact: true }).click()
     await expect.poll(() => sent.payload !== previousPayload).toBe(true)
-    const nextVideo = await decryptSyncDocument(sent.payload, key)
+    const nextVideo = await decryptSyncDocument(sent.payload, key, SYNC_EVENT_CONTEXT)
     assert.equal(nextVideo.videoId, 'aqz-KE-bpKQ')
     assert.equal(nextVideo.position, 0)
     await organizer.getByRole('button', { name: 'Close', exact: true }).click()

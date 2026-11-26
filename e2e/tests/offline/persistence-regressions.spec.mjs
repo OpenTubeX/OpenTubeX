@@ -1,6 +1,6 @@
 import { test, expect, latestSettings, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { DBActions } from '../../../src/constants.js'
-import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 test('encrypted subscription retries retain concurrent remote edits', async ({ page }) => {
   const key = Buffer.alloc(32, 7).toString('base64')
@@ -22,7 +22,7 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
     } else if (pathname === '/v1/encrypted_sync') {
       response = { collections: [{ collection: 'subscriptions' }] }
     } else if (pathname === '/v1/encrypted_sync/subscriptions' && request.method() === 'GET') {
-      response = { revision, payload: await encryptSyncDocument(remote, key, salt) }
+      response = { revision, payload: await encryptSyncDocument(remote, key, salt, syncCollectionContext('subscriptions')) }
     } else if (pathname === '/v1/encrypted_sync/subscriptions' && request.method() === 'PUT') {
       const body = request.postDataJSON()
       if (conflicts === 0) {
@@ -33,7 +33,7 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
         return
       }
       expect(body.revision).toBe(revision)
-      remote = await decryptSyncDocument(body.payload, key)
+      remote = await decryptSyncDocument(body.payload, key, syncCollectionContext('subscriptions'))
       revision++
       response = { revision }
     } else {

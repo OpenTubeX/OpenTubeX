@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { expect } from '@playwright/test'
-import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const key = Buffer.alloc(32, 1).toString('base64')
@@ -39,15 +39,15 @@ export async function createTakeoutSyncServer() {
   return {
     url: `http://127.0.0.1:${server.address().port}`,
     async playlists() {
-      return decryptSyncDocument(collections.get('playlists').payload, key)
+      return decryptSyncDocument(collections.get('playlists').payload, key, syncCollectionContext('playlists'))
     },
     async history() {
-      return decryptSyncDocument(collections.get('history').payload, key)
+      return decryptSyncDocument(collections.get('history').payload, key, syncCollectionContext('history'))
     },
     async setHistory(entries) {
       collections.set('history', {
         revision: (collections.get('history')?.revision ?? 0) + 1,
-        payload: await encryptSyncDocument(entries, key, salt),
+        payload: await encryptSyncDocument(entries, key, salt, syncCollectionContext('history')),
       })
     },
     async close() {

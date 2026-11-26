@@ -1,6 +1,6 @@
 import * as releasedClient from '../../tests/helpers/released-sync-sessions.mjs'
 import { expect } from '@playwright/test'
-import { preparePrivacyKey, encryptSyncDocument, decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { preparePrivacyKey, encryptSyncDocument, decryptSyncDocument, syncCollectionContext } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { goToSettingsSection, waitForAppReady } from './app.mjs'
@@ -130,10 +130,10 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
           return { status: conflict ? 409 : 503, data: 'Fixture upload failure', headers: {}, url: options.url }
         }
         expect(body.revision).toBe(revision)
-        document = await decryptSyncDocument(body.payload, key)
+        document = await decryptSyncDocument(body.payload, key, syncCollectionContext('sessionsV2'))
         revision++
       }
-      data = { revision, payload: await encryptSyncDocument(document, key, salt) }
+      data = { revision, payload: await encryptSyncDocument(document, key, salt, syncCollectionContext('sessionsV2')) }
     } else status = 404
     return { status, data: status === 204 ? '' : JSON.stringify(data), headers: {}, url: options.url }
   }

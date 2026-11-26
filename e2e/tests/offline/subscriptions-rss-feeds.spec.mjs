@@ -16,7 +16,7 @@ import {
   setWindowSize,
   waitForAppReady
 } from '../../helpers/app.mjs'
-import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { encryptSyncDocument, decryptSyncDocument, syncCollectionContext } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { DBActions } from '../../../src/constants.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { externalHistoryEntry, saveExternalHistoryEntry } from '../../helpers/external-media-history.mjs'
@@ -1241,8 +1241,8 @@ test.describe('with new items', () => {
     await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
 
     const remote = {
-      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/1', now - 60000)], SYNC_KEY, SYNC_SALT),
-      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-3`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT),
+      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/1', now - 60000)], SYNC_KEY, SYNC_SALT, syncCollectionContext('history')),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-3`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT, syncCollectionContext('seenRssItems')),
     }
     await mockSyncServer(page, remote)
     expect(await syncWithSyncServer(page)).toEqual(['success', ''])
@@ -1263,8 +1263,8 @@ test.describe('with new items', () => {
     const item = panel.locator('.ft-list-item', { hasText: 'Brand new VOD' })
 
     const remote = {
-      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/4', Date.now())], SYNC_KEY, SYNC_SALT),
-      seenRssItems: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/4', Date.now())], SYNC_KEY, SYNC_SALT, syncCollectionContext('history')),
+      seenRssItems: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT, syncCollectionContext('seenRssItems')),
     }
     await mockSyncServer(page, remote)
     expect(await syncWithSyncServer(page)).toEqual(['success', ''])
@@ -1337,8 +1337,8 @@ test.describe('with new items', () => {
     await refresh.click()
     await expect(titles).toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD'])
     await mockSyncServer(page, {
-      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
-      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-1`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT)
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT, syncCollectionContext('history')),
+      seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-1`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT, syncCollectionContext('seenRssItems'))
     })
     expect(await syncWithSyncServer(page)).toEqual(['success', ''])
 
@@ -1352,12 +1352,12 @@ test.describe('with new items', () => {
 
   test('syncs the seen items with history', async ({ page }) => {
     const remote = {
-      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT, syncCollectionContext('history')),
       seenRssItems: await encryptSyncDocument([
         { key: `${RSS_URL}\nvod-4`, seenAt: now },
         // Seen on another device before it loads here
         { key: `${RSS_URL}\nvod-6`, seenAt: now }
-      ], SYNC_KEY, SYNC_SALT)
+      ], SYNC_KEY, SYNC_SALT, syncCollectionContext('seenRssItems'))
     }
     await loadNewItems(page)
     await mockSyncServer(page, remote)
@@ -1390,7 +1390,7 @@ test.describe('with new items', () => {
     await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Seen' }).click()
     await expect(newItems).toHaveCount(0)
     await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
-    expect((await decryptSyncDocument(remote.seenRssItems, SYNC_KEY)).map(entry => entry.key)).toEqual([
+    expect((await decryptSyncDocument(remote.seenRssItems, SYNC_KEY, syncCollectionContext('seenRssItems'))).map(entry => entry.key)).toEqual([
       `${RSS_URL}\nvod-4`,
       `${RSS_URL}\nvod-5`,
       `${RSS_URL}\nvod-6`

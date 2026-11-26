@@ -48,6 +48,8 @@ import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src
 import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
 import * as profileSettings from '../../src/profileSettings.js'
 
+const collectionContext = privacy.syncCollectionContext
+
 // These modules use bundler imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
 function withoutImports (source) {
@@ -606,7 +608,7 @@ for (const [collection, idKey, setting, capability] of [
           return {
             revision: 1,
             payload: await privacy.encryptSyncDocument([{ [idKey]: 'peer-entry', seenAt: 1000 }],
-              f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+              f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext(collection)),
           }
         }
       },
@@ -640,7 +642,7 @@ for (const [collection, idKey, setting, capability] of [
         if (seenRequests.length > 0) {
           const upload = seenRequests.find(request => request.method === 'PUT')
           assert.ok(!upload.body.includes('private-seen-entry'))
-          const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
+          const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey, collectionContext(collection))
           assert.equal(entries[0][idKey], 'private-seen-entry')
         }
       })
@@ -650,7 +652,7 @@ for (const [collection, idKey, setting, capability] of [
   test(`${collection} upload conflicts retain marks added by both devices`, async () => {
     const key = Buffer.alloc(32, 1).toString('base64')
     const salt = Buffer.alloc(16, 2).toString('base64')
-    const remote = await privacy.encryptSyncDocument([{ [idKey]: 'other-device', seenAt: 2000 }], key, salt)
+    const remote = await privacy.encryptSyncDocument([{ [idKey]: 'other-device', seenAt: 2000 }], key, salt, collectionContext(collection))
     let uploads = 0
     const f = fixture({
       syncServerSyncHistory: true,
@@ -667,7 +669,7 @@ for (const [collection, idKey, setting, capability] of [
     await f.actions.syncWithSyncServer(f.context)
     assert.equal(f.context.state.syncServerStatus, 'success')
     const upload = f.requests.filter(request => request.method === 'PUT' && request.url.endsWith(`/${collection}`)).at(-1)
-    const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, key)
+    const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, key, collectionContext(collection))
     assert.deepEqual(entries.map(entry => entry[idKey]), ['local-device', 'other-device'])
     assert.equal(uploads, 2)
   })
@@ -696,7 +698,7 @@ test('a subscription removed during an upload conflict stays removed, and unsent
       if (!url.endsWith('/encrypted_sync/subscriptions')) return
       if (options.method === 'PUT') {
         if (++uploads === 1) return new Response('{}', { status: 409 })
-        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('subscriptions'))
         return { revision: 3 }
       }
       // Another device removed the downloaded subscription before this upload.
@@ -704,7 +706,7 @@ test('a subscription removed during an upload conflict stays removed, and unsent
       if (uploads === 0) channels.push({ id: 'remote-channel', name: 'Remote subscription' })
       return {
         revision: uploads === 0 ? 1 : 2,
-        payload: await privacy.encryptSyncDocument(channels, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        payload: await privacy.encryptSyncDocument(channels, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('subscriptions')),
       }
     },
   })
@@ -744,11 +746,11 @@ test('a separate profile syncs its library only in its own collections and never
       if (path === '/v1/encrypted_sync/separateProfiles' && !options.method) {
         // Another device deleted the profile `gone-1`, and a newer version added
         // one this version can't read.
-        return { revision: 1, payload: await privacy.encryptSyncDocument([entry('separate-1'), entry('gone-1'), newer], key, salt) }
+        return { revision: 1, payload: await privacy.encryptSyncDocument([entry('separate-1'), entry('gone-1'), newer], key, salt, collectionContext('separateProfiles')) }
       }
       if (options.method === 'PUT') {
         const body = JSON.parse(options.body)
-        uploads[path.split('/').at(-1)] = { activity: body.activity, data: await privacy.decryptSyncDocument(body.payload, key) }
+        uploads[path.split('/').at(-1)] = { activity: body.activity, data: await privacy.decryptSyncDocument(body.payload, key, collectionContext(path.split('/').at(-1))) }
         return { revision: 2 }
       }
     },
@@ -800,7 +802,7 @@ for (const failure of ['deletion', 'later upload']) {
     const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
     const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
     // This device deleted `gone-1`, which the server still lists.
-    let listed = { revision: 1, payload: await privacy.encryptSyncDocument([entry('kept-1'), entry('gone-1')], key, salt) }
+    let listed = { revision: 1, payload: await privacy.encryptSyncDocument([entry('kept-1'), entry('gone-1')], key, salt, collectionContext('separateProfiles')) }
     let failing = true
     const respond = async (url, options) => {
       const path = new URL(url).pathname
@@ -826,7 +828,7 @@ for (const failure of ['deletion', 'later upload']) {
 
     await assert.rejects(f.actions.syncWithSyncServer(f.context))
     // The upload no longer lists the profile, but the baseline keeps it until its data is gone.
-    assert.deepEqual((await privacy.decryptSyncDocument(listed.payload, key)).map(profile => profile.id), ['kept-1'])
+    assert.deepEqual((await privacy.decryptSyncDocument(listed.payload, key, collectionContext('separateProfiles'))).map(profile => profile.id), ['kept-1'])
     assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).separateProfiles).sort(), ['gone-1', 'kept-1'])
 
     failing = false
@@ -884,7 +886,7 @@ test('a separate profile does not sync its library without server support', asyn
   assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats|seenVideos)/.test(request.url)), [])
   // The separate profile's channel settings stay here, while the shared settings and RSS seen marks sync.
   const settingsUpload = f.requests.find(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings'))
-  const keys = (await privacy.decryptSyncDocument(JSON.parse(settingsUpload.body).payload, key)).map(entry => entry.key)
+  const keys = (await privacy.decryptSyncDocument(JSON.parse(settingsUpload.body).payload, key, collectionContext('settings'))).map(entry => entry.key)
   assert.ok(keys.includes('subscriptionChannelSettings'))
   assert.ok(!keys.some(key => key.startsWith('subscriptionChannelSettings.')))
   assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/seenRssItems')))
@@ -921,7 +923,7 @@ test('encrypted accounts still sync when the server supports encryption', async 
   assert.ok(uploads[0].url.endsWith('/encrypted_sync/subscriptions'))
   const document = await privacy.decryptSyncDocument(
     JSON.parse(uploads[0].body).payload,
-    f.settings.syncServerPrivacyKey
+    f.settings.syncServerPrivacyKey, collectionContext('subscriptions')
   )
   assert.equal(document[0].name, 'Private subscription')
 })
@@ -1042,12 +1044,12 @@ for (const source of ['plaintext', 'single document', 'collection']) {
       },
     })
     const legacyPayload = await encryptLegacyDocument({
-      ...privacy.createEmptySyncDocument(), playbackSpeeds: speeds,
+      ...privacy.createEmptySyncDocument(), version: 1, playbackSpeeds: speeds,
     }, { key: f.settings.syncServerPrivacyKey, salt: f.settings.syncServerPrivacySalt })
     if (source === 'collection') {
       collections.set('playbackSpeeds', {
         revision: 1,
-        payload: await privacy.encryptSyncDocument(speeds, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        payload: await privacy.encryptSyncDocument(speeds, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('playbackSpeeds')),
       })
     }
 
@@ -1060,7 +1062,7 @@ for (const source of ['plaintext', 'single document', 'collection']) {
       assert.equal(f.requests.some(request => request.method === 'PUT' &&
         request.url.endsWith('/encrypted_sync/playbackSpeeds')), false)
       const settings = await privacy.decryptSyncDocument(
-        collections.get('settings').payload, f.settings.syncServerPrivacyKey
+        collections.get('settings').payload, f.settings.syncServerPrivacyKey, collectionContext('settings')
       )
       assert.deepEqual(JSON.parse(settings.find(entry => entry.key === 'channelPlaybackSpeeds').value), expected)
       assert.deepEqual(JSON.parse(f.settings.channelPlaybackSpeeds), expected)
@@ -1172,7 +1174,7 @@ test('other devices apply shared deletions without asking, while a server that l
   const puts = []
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
-  collections.set('subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt) })
+  collections.set('subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt, collectionContext('subscriptions')) })
   const respond = async (url, options) => {
     const path = new URL(url).pathname
     if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, sync_deletions: 1 } }
@@ -1223,7 +1225,7 @@ test('a failed transfer of the shared deletions does not stop the sync, and a la
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const collections = new Map([
-    ['subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt) }],
+    ['subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt, collectionContext('subscriptions')) }],
   ])
   let marksAvailable = false
   const respond = async (url, options) => {
@@ -1263,7 +1265,7 @@ test('a failed transfer of the shared deletions does not stop the sync, and a la
   assert.equal(deleting.context.state.syncServerDeletionMarksPending, false)
 
   // A device that still had the channels did not see the deletions as data loss.
-  collections.set('subscriptions', { revision: 3, payload: await privacy.encryptSyncDocument([], key, salt) })
+  collections.set('subscriptions', { revision: 3, payload: await privacy.encryptSyncDocument([], key, salt, collectionContext('subscriptions')) })
   const other = fixture(settings, { encrypted: true, respond })
   other.context.rootState.profiles.profileList[0].subscriptions = structuredClone(LOST_CHANNELS)
   await other.actions.syncWithSyncServer(other.context)
@@ -1430,7 +1432,7 @@ for (const restored of ['by its check', 'just before it ran']) {
       browser: true,
       respond: async (url, options) => {
         if (options.method === 'PUT' && url.endsWith('/encrypted_sync/subscriptions')) {
-          uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('subscriptions'))
         }
       },
       // Android blocked the hidden app's check when the connection returned; the job has network access.
@@ -1492,7 +1494,7 @@ test('a failed reconnect makes the next background sync merge the offline edits'
   // The next job only checks the server for changes, which it has none of, and
   // the last successful sync was recent.
   await f.periodicTasks[0]()
-  const saved = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const saved = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey, collectionContext('settings'))
   assert.deepEqual(JSON.parse(saved.find(entry => entry.key === 'channelPlaybackSpeeds').value), { channel: 1.5 },
     'the offline edit is uploaded')
 })
@@ -1562,13 +1564,13 @@ test('unchanged collection revisions skip downloads and uploads; remote changes 
   f.requests.length = 0
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.requests.some(request => request.url.includes('/encrypted_sync/')), false)
-  const remote = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const remote = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey, collectionContext('settings'))
   const entry = remote.find(entry => entry.key === 'channelPlaybackSpeeds')
   entry.value = JSON.stringify({ channel: 1.5 })
   entry.updatedAt = Date.now() + 1000
   collections.set('settings', {
     revision: collections.get('settings').revision + 1,
-    payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+    payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('settings')),
   })
   f.requests.length = 0
   await f.actions.syncWithSyncServer(f.context)
@@ -1852,7 +1854,7 @@ test('remote-only checks process changed revisions and keep message delivery on 
   const f = liveFixture()
   await f.actions.syncWithSyncServer(f.context)
   const remote = [{ id: 'private-channel', name: 'Private subscription' }, { id: 'remote-channel', name: 'Remote channel' }]
-  f.collections.set('subscriptions', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  f.collections.set('subscriptions', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('subscriptions')) })
   f.requests.length = 0
   f.dispatched.length = 0
   await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
@@ -1935,11 +1937,11 @@ test('bookmark upload conflicts persist the merged baseline and local bookmarks'
       if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
       if (options.method === 'PUT') {
         if (++uploads === 1) return new Response('{}', { status: 409 })
-        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('playlistBookmarks'))
         return { revision: 2 }
       }
       if (!uploads) return { revision: 0, payload: null }
-      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('playlistBookmarks')) }
     },
   })
   await f.actions.syncWithSyncServer(f.context)
@@ -1959,7 +1961,7 @@ test('a failed upload after a bookmark conflict keeps unsent bookmarks out of th
       if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
       if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
       if (!uploads) return { revision: 0, payload: null }
-      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('playlistBookmarks')) }
     },
   })
   await assert.rejects(f.actions.syncWithSyncServer(f.context))
@@ -1979,7 +1981,7 @@ for (const conflict of [true, false]) {
         if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
         if (conflict && !uploads) return { revision: 0, payload: null }
         const remote = ['saved', 'unsaved'].map(id => ({ playlist: { id, title: id }, videos: [] }))
-        return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+        return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('playlists')) }
       },
     })
     const dispatch = f.context.dispatch
@@ -2021,14 +2023,14 @@ test('a shared tab closed during an upload conflict stays closed', async () => {
       if (!url.endsWith('/encrypted_sync/sessionsV2')) return
       if (options.method === 'PUT') {
         if (++uploads === 1) return new Response('{}', { status: 409 })
-        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('sessionsV2'))
         return { revision: 3 }
       }
       // Another device opens a shared tab, then closes it before this upload.
       return {
         revision: uploads + 1,
         payload: await privacy.encryptSyncDocument(document(uploads === 0 ? [first, second] : [first]),
-          f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+          f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('sessionsV2')),
       }
     },
   })
@@ -2050,13 +2052,13 @@ test('a bookmark removed during a second upload conflict stays removed', async (
       if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
       if (options.method === 'PUT') {
         if (++uploads < 3) return new Response('{}', { status: 409 })
-        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('playlistBookmarks'))
         return { revision: 3 }
       }
       if (!uploads) return { revision: 0, payload: null }
       // Another device saves a bookmark, then removes it before the third upload.
       const entries = uploads === 1 ? [bookmarks.playlistBookmarkForSync(remote)] : []
-      return { revision: uploads, payload: await privacy.encryptSyncDocument(entries, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      return { revision: uploads, payload: await privacy.encryptSyncDocument(entries, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('playlistBookmarks')) }
     },
   })
   await f.actions.syncWithSyncServer(f.context)
@@ -2099,7 +2101,7 @@ test('automatic sync retries reminders after notification permission becomes ava
       if (url.endsWith('/encrypted_sync/liveReminders')) {
         return {
           revision: 1,
-          payload: await privacy.encryptSyncDocument([reminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+          payload: await privacy.encryptSyncDocument([reminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('liveReminders')),
         }
       }
     },
@@ -2155,14 +2157,14 @@ test('a skipped reminder merge after a 409 keeps the prior snapshot and does not
       if (url.endsWith('/encrypted_sync/liveReminders')) {
         if (options.method === 'PUT') {
           uploads++
-          if (uploads > 1) uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          if (uploads > 1) uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('liveReminders'))
           return uploads === 1 ? new Response('{}', { status: 409 }) : { revision: 2 }
         }
         return uploads === 0
           ? { revision: 0, payload: null }
           : {
               revision: 1,
-              payload: await privacy.encryptSyncDocument([remoteReminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+              payload: await privacy.encryptSyncDocument([remoteReminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('liveReminders')),
             }
       }
     },
@@ -2236,7 +2238,7 @@ test('a failed upload keeps the applied server settings as the baseline, so remo
     f.settings.syncServerSettingUpdatedAt = { ...f.settings.syncServerSettingUpdatedAt, [key]: Date.now() }
   }
   const remote = async () => Object.fromEntries((await privacy.decryptSyncDocument(
-    collections.get('settings').payload, a.settings.syncServerPrivacyKey
+    collections.get('settings').payload, a.settings.syncServerPrivacyKey, collectionContext('settings')
   )).map(entry => [entry.key, entry.value]))
   await a.actions.syncWithSyncServer(a.context)
   await b.actions.syncWithSyncServer(b.context)
@@ -2300,7 +2302,7 @@ test('a failed setting save keeps its baseline, so the next sync applies the ser
 
   await a.actions.syncWithSyncServer(a.context)
   assert.equal(a.settings.autoplayVideos, false)
-  const remote = await privacy.decryptSyncDocument(server.collections.get('settings').payload, a.settings.syncServerPrivacyKey)
+  const remote = await privacy.decryptSyncDocument(server.collections.get('settings').payload, a.settings.syncServerPrivacyKey, collectionContext('settings'))
   assert.equal(remote.find(entry => entry.key === 'autoplayVideos').value, false)
 })
 
@@ -2312,7 +2314,7 @@ test('a failed upload keeps what the sync applied as the baseline, so removals o
   const b = fixture({ syncServerSyncPlaylists: true, playlistBookmarks: [], syncServerDeviceId: 'phone' }, { encrypted: true, respond })
   const subscriptions = f => f.context.rootState.profiles.profileList[0].subscriptions
   const remote = async collection => (await privacy.decryptSyncDocument(
-    collections.get(collection).payload, a.settings.syncServerPrivacyKey
+    collections.get(collection).payload, a.settings.syncServerPrivacyKey, collectionContext(collection)
   ))
   await a.actions.syncWithSyncServer(a.context)
   await b.actions.syncWithSyncServer(b.context)
@@ -2367,7 +2369,7 @@ for (const [scenario, desktopKeys, phoneKeys] of [
         if (options.method === 'PUT') {
           const body = JSON.parse(options.body)
           writes.push(collection)
-          documents.push(await privacy.decryptSyncDocument(body.payload, Buffer.alloc(32, 1).toString('base64')))
+          documents.push(await privacy.decryptSyncDocument(body.payload, Buffer.alloc(32, 1).toString('base64'), collectionContext(collection)))
           collections.set(collection, { revision: body.revision + 1, payload: body.payload })
         }
         return collections.get(collection) ?? { revision: 0, payload: null }
@@ -2390,7 +2392,7 @@ for (const [scenario, desktopKeys, phoneKeys] of [
       const received = { key: CUSTOM_THEMES_SYNC_KEY, value: phoneThemes, updatedAt: 10 }
       collections.set('settings', {
         revision: 1,
-        payload: await privacy.encryptSyncDocument([received], a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt),
+        payload: await privacy.encryptSyncDocument([received], a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt, collectionContext('settings')),
       })
       for (const f of [a, b]) {
         f.settings.syncServerSnapshot = JSON.stringify({ settings: { [CUSTOM_THEMES_SYNC_KEY]: received } })
@@ -2408,10 +2410,10 @@ for (const [scenario, desktopKeys, phoneKeys] of [
     await b.actions.syncWithSyncServer(b.context)
     // A peer can serialize the same entries in another order. Do not echo it.
     const saved = collections.get('settings')
-    const reordered = (await privacy.decryptSyncDocument(saved.payload, a.settings.syncServerPrivacyKey)).reverse()
+    const reordered = (await privacy.decryptSyncDocument(saved.payload, a.settings.syncServerPrivacyKey, collectionContext('settings'))).reverse()
     collections.set('settings', {
       revision: saved.revision + 1,
-      payload: await privacy.encryptSyncDocument(reordered, a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt),
+      payload: await privacy.encryptSyncDocument(reordered, a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt, collectionContext('settings')),
     })
     writes.length = 0
     for (let notification = 0; notification < 4; notification++) {
@@ -2438,11 +2440,11 @@ test('a user edit during remote collection application schedules a follow-up upl
   const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
   f.context.rootState.syncServer = f.context.state
   await f.actions.syncWithSyncServer(f.context)
-  const remote = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const remote = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey, collectionContext('settings'))
   const entry = remote.find(entry => entry.key === 'autoplayVideos')
   entry.value = false
   entry.updatedAt = Date.now() + 1000
-  f.collections.set('settings', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  f.collections.set('settings', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('settings')) })
   let releaseRemote
   let reachedRemote
   const blocked = new Promise(resolve => { releaseRemote = resolve })
@@ -2471,7 +2473,7 @@ test('a user edit during remote collection application schedules a follow-up upl
   assert.ok(f.dispatched.some(([action, options]) => action === 'syncWithSyncServer' && options.automatic && !options.remoteOnly))
   await f.actions.syncWithSyncServer(f.context, { automatic: true })
   assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
-  const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey, collectionContext('settings'))
   assert.equal(saved.find(entry => entry.key === 'autoplayVideos').value, true)
 })
 
@@ -2554,7 +2556,7 @@ test('cleared activity stays hidden after reauthentication while newer activity 
   })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   const event = id => ({ id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 })
   events = [event('0001'), event('0002')]
   await f.actions.refreshSyncServerEvents(f.context)
@@ -2590,7 +2592,7 @@ test('a download already in flight cannot restore cleared activity', async () =>
   })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   const events = ['0001', '0002'].map(id => ({
     id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000,
   }))
@@ -2618,7 +2620,7 @@ test('an in-flight activity refresh cannot commit after the username changes bef
   })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   const events = [{ id: '0001', recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
   const accountKey = JSON.stringify([f.settings.syncServerUrl, 'alice', 'laptop']).replaceAll('.', '\\u002e')
   f.settings.syncServerActivityClearedThrough = { [accountKey]: '0001' }
@@ -2758,7 +2760,7 @@ test('a new live device message is delivered after an older activity response fi
     title: 'Local fixture',
     position: 12,
     expiresAt: Date.now() + 60000,
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   const dispatch = f.context.dispatch
   f.context.dispatch = async (action, value) => {
     if (action === 'refreshSyncServerEvents') return f.actions.refreshSyncServerEvents(f.context, value)
@@ -2809,7 +2811,7 @@ test('a device request replayed under new event ids opens only once', async () =
     title: 'Video',
     position: 0,
     expiresAt: Date.now() + 60000,
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   await f.actions.refreshSyncServerEvents(f.context)
   ids = ['third']
   await f.actions.refreshSyncServerEvents(f.context)
@@ -2850,7 +2852,7 @@ test('a device request opens only after its receipt is saved', async () => {
     title: 'Video',
     position: 0,
     expiresAt: Date.now() + 60000,
-  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
   // A receipt that cannot be saved would let the next refresh open the video again
   await f.actions.refreshSyncServerEvents(f.context).catch(() => {})
   assert.deepEqual(opened, [])
@@ -2901,10 +2903,10 @@ for (const conflict of [false, true]) {
             }
             return new Response('Retry', { status: conflict ? 409 : 503 })
           }
-          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('sessionsV2'))
           revision++
         }
-        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('sessionsV2')) }
       }
     })
     if (!conflict) {
@@ -2969,10 +2971,10 @@ for (const platform of ['mobile', 'desktop']) {
           if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
           if (options.method === 'PUT') {
             puts++
-            remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+            remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('sessionsV2'))
             revision++
           }
-          return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+          return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('sessionsV2')) }
         }
       })
       if (['ambiguous', 'missing', 'wrong-device'].includes(login)) {
@@ -3020,10 +3022,10 @@ test('a reclamation conflict rechecks login identity against refreshed revocatio
           revision++
           return new Response('Conflict', { status: 409 })
         }
-        remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('sessionsV2'))
         revision++
       }
-      return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('sessionsV2')) }
     },
   })
   await assert.rejects(f.actions.syncWithSyncServer(f.context), /Tab Sync Revocation Pending/)
@@ -3072,10 +3074,10 @@ for (const initiallyEmpty of [false, true]) {
         if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
         if (options.method === 'PUT') {
           puts++
-          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('sessionsV2'))
           revision++
         }
-        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('sessionsV2')) }
       }
     })
     const cleaned = structuredClone(remote)
@@ -3084,7 +3086,7 @@ for (const initiallyEmpty of [false, true]) {
     assert.ok(f.commits.some(([name, value]) => name === 'setSyncServerError' && value === 'Settings.Sync Settings.Tab Sync Revocation Pending'))
     const subscriptionUpload = f.requests.find(request => request.method === 'PUT' && request.url.endsWith('/v1/encrypted_sync/subscriptions'))
     assert.ok(subscriptionUpload)
-    const subscriptions = await privacy.decryptSyncDocument(JSON.parse(subscriptionUpload.body).payload, f.settings.syncServerPrivacyKey)
+    const subscriptions = await privacy.decryptSyncDocument(JSON.parse(subscriptionUpload.body).payload, f.settings.syncServerPrivacyKey, collectionContext('subscriptions'))
     assert.equal(subscriptions[0].id, 'private-channel')
     assert.equal(puts, 0)
     assert.deepEqual(remote, cleaned)
@@ -3126,7 +3128,7 @@ for (const rememberHistory of [false, true]) {
         title: 'Video',
         position,
         expiresAt: Date.now() + 60000,
-      }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+      }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, privacy.SYNC_EVENT_CONTEXT)
       await f.actions.refreshSyncServerEvents(f.context)
       assert.equal(opened.length, 1)
 
@@ -3343,10 +3345,10 @@ for (const supported of [true, false]) {
         if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'notificationDismissals', revision: 1 }], legacy_data: false }
         if (url.endsWith('/encrypted_sync/notificationDismissals')) {
           if (options.method === 'PUT') {
-            uploads.push(await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey))
+            uploads.push(await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey, collectionContext('notificationDismissals')))
             return { revision: 2 }
           }
-          return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+          return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt, collectionContext('notificationDismissals')) }
         }
       },
     })

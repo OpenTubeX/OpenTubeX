@@ -528,7 +528,7 @@ test.describe('with notification sync', () => {
   })
 
   test('notifications read or removed on another device are handled here, and the other way around', async ({ app, page }) => {
-    const { encryptSyncDocument, decryptSyncDocument } = await import('../../../src/renderer/helpers/sync-server-privacy.js')
+    const { encryptSyncDocument, decryptSyncDocument, syncCollectionContext } = await import('../../../src/renderer/helpers/sync-server-privacy.js')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await mockSystemNotifications(app)
     const [removedElsewhere, readElsewhere, readHere] = await announceUploads(page, ['c', 'b', 'a'])
@@ -544,7 +544,7 @@ test.describe('with notification sync', () => {
           { key: `video:/watch/${removedElsewhere}`, at: now, removedAt: now },
           { key: `video:/watch/${readElsewhere}`, at: now }
         ]
-      }, key, salt)
+      }, key, salt, syncCollectionContext('notificationDismissals'))
     }
     await page.route('https://sync-notifications.example/**', async route => {
       const request = route.request()
@@ -586,7 +586,7 @@ test.describe('with notification sync', () => {
     await expect(bell).not.toHaveAttribute('data-unread-count')
     expect(await sync()).toBe('success')
     expect(remote.revision).toBe(2)
-    const uploaded = await decryptSyncDocument(remote.payload, key)
+    const uploaded = await decryptSyncDocument(remote.payload, key, syncCollectionContext('notificationDismissals'))
     expect(uploaded.dismissals.map(({ key, removedAt }) => [key, removedAt !== undefined]).toSorted()).toStrictEqual([
       [`video:/watch/${readHere}`, false],
       [`video:/watch/${readElsewhere}`, false],
