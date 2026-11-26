@@ -457,7 +457,16 @@ async function install(entry) {
   flex-shrink: 0;
   align-items: center;
   gap: 16px;
-  margin-block-end: 16px;
+
+  /* The prompt card pads its top by only 3px; match its 16px side inset. */
+  margin-block: 13px 16px;
+}
+
+@media (width <= 600px), (height <= 600px) {
+  /* Phone prompts already pad the card's top by its 12px side inset. */
+  .screenshotHeader {
+    margin-block-start: 0;
+  }
 }
 
 .screenshotHeader h2 {
