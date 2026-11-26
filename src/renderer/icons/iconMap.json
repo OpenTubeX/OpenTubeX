@@ -219,6 +219,10 @@
     "ri": "download-line",
     "material": "download-rounded"
   },
+  "downloading": {
+    "ri": "download-cloud-2-line",
+    "material": "downloading-rounded"
+  },
   "pen-to-square": {
     "ri": "edit-line",
     "material": "edit-outline"

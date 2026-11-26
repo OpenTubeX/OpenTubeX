@@ -48,6 +48,7 @@
         @input="updateYtDlpDownloadCustomArgs"
       />
       <FtSelect
+        :icon="['fas', 'downloading']"
         :placeholder="t('Settings.Download Settings.Concurrent Downloads')"
         :value="ytDlpMaxConcurrentDownloads"
         setting-key="ytDlpMaxConcurrentDownloads"
