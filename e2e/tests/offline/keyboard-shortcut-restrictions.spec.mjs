@@ -37,7 +37,7 @@ test('assigns and runs a shortcut for the tab organizer', async ({ page }) => {
 test('closing cached shortcuts dismisses conflicts and releases the page scroll lock', async ({ page }) => {
   await page.keyboard.press('Shift+?')
   const dialog = page.getByRole('dialog', { name: 'Settings', exact: true })
-  await expect(page.locator('.keyboardShortcutPromptEmbedded')).toBeVisible()
+  await expect(page.locator('.keyboardShortcutPrompt')).toBeVisible()
   const originalOverflow = await page.evaluate(() => document.documentElement.style.overflow)
   const shortcut = page.locator('[data-shortcut-path="APP.GENERAL.FOCUS_SEARCH"]')
   const originalBinding = await shortcut.textContent()
@@ -50,7 +50,7 @@ test('closing cached shortcuts dismisses conflicts and releases the page scroll 
   expect(await page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(false)
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
   await page.keyboard.press('Shift+?')
-  await expect(page.locator('.keyboardShortcutPromptEmbedded')).toBeVisible()
+  await expect(page.locator('.keyboardShortcutPrompt')).toBeVisible()
   await expect(page.locator('.prompt')).toHaveCount(0)
   await expect(shortcut).toHaveText(originalBinding)
   await expect(shortcut).not.toHaveClass(/recording/)

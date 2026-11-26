@@ -1,29 +1,8 @@
 <template>
-  <component
-    :is="embedded ? 'div' : FtPrompt"
+  <div
     class="keyboardShortcutPrompt"
-    :class="{ keyboardShortcutPromptEmbedded: embedded }"
-    :label="embedded ? undefined : $t('KeyboardShortcutPrompt.Keyboard Shortcuts')"
-    :inert="embedded && pendingShortcutConflict === null ? undefined : pendingShortcutConflict !== null"
-    @click="handleContainerClick"
+    :inert="pendingShortcutConflict !== null || undefined"
   >
-    <template
-      v-if="!embedded"
-      #label="{ labelId }"
-    >
-      <div class="titleAndCloseButton">
-        <h2 :id="labelId">
-          {{ $t('KeyboardShortcutPrompt.Keyboard Shortcuts') }}
-        </h2>
-        <FtIconButton
-          :title="$t('Close')"
-          :icon="['fas', 'xmark']"
-          theme="destructive"
-          @click="hideKeyboardShortcutPrompt"
-        />
-      </div>
-    </template>
-
     <div class="shortcutToolbar">
       <p class="editHint">
         {{ $t('KeyboardShortcutPrompt.Edit Hint') }}
@@ -52,7 +31,7 @@
 
     <div
       ref="shortcutScroller"
-      v-overlay-scrollbars="embedded"
+      v-overlay-scrollbars
       class="shortcutColumns"
     >
       <div
@@ -138,7 +117,7 @@
         </div>
       </div>
     </div>
-  </component>
+  </div>
 
   <FtPrompt
     v-if="pendingShortcutConflict"
@@ -178,12 +157,6 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 const { t, locale } = useI18n()
-const { embedded } = defineProps({
-  embedded: {
-    type: Boolean,
-    default: false
-  }
-})
 const isMac = process.platform === 'darwin'
 // Only one boundary action is available at a time, so they can share a binding.
 const sponsorBlockBoundaryShortcuts = new Set(['START_SPONSORBLOCK_SEGMENT', 'END_SPONSORBLOCK_SEGMENT'])
@@ -195,7 +168,6 @@ const shortcutContent = useTemplateRef('shortcutContent')
 let contentResizeObserver = null
 
 onMounted(() => {
-  if (!embedded) return
   contentResizeObserver = new ResizeObserver(() => {
     if (shortcutScroller.value?.clientHeight > 0) {
       clampOverlayScrollTop(shortcutScroller.value, shortcutContent.value)
@@ -415,16 +387,6 @@ const hasModifiedKeyboardShortcuts = computed(() => shortcutColumns.value.some(c
 const localizedShortcutNameToShortcutsMappings = computed(() =>
   getKeyboardShortcutLabelMappings(t, process.env.IS_CAPACITOR)
 )
-
-function hideKeyboardShortcutPrompt() {
-  store.dispatch('hideKeyboardShortcutPrompt')
-}
-
-function handleContainerClick() {
-  if (!embedded) {
-    hideKeyboardShortcutPrompt()
-  }
-}
 
 function getLocalizedShortcutNamesAndValues(dictionary, dictionaryPath, includedShortcutCodes = Object.keys(dictionary)) {
   const shortcutNameToShortcutsMappings = localizedShortcutNameToShortcutsMappings.value

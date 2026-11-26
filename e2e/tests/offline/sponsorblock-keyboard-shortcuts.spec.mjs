@@ -83,7 +83,7 @@ test('assigns searchable SponsorBlock shortcuts and resets them', async ({ page 
 
   await page.getByRole('button', { name: 'Reset to defaults', exact: true }).click()
   await expect(page.locator('.shortcutButton')).toHaveText(defaultBindings)
-  await page.locator('.keyboardShortcutPromptEmbedded').screenshot({ path: testInfo.outputPath('sponsorblock-shortcuts.png') })
+  await page.locator('.keyboardShortcutPrompt').screenshot({ path: testInfo.outputPath('sponsorblock-shortcuts.png') })
 })
 
 test('reserves Space for playback when assigning SponsorBlock shortcuts', async ({ app, page }, testInfo) => {
@@ -188,7 +188,7 @@ test('ignores editable fields, disabled submission, inactive tabs and repeated k
   await expect.poll(() => drafts(page)).toHaveLength(1)
 
   await page.keyboard.press('Shift+?')
-  await expect(page.locator('.keyboardShortcutPromptEmbedded')).toBeVisible()
+  await expect(page.locator('.keyboardShortcutPrompt')).toBeVisible()
   await page.keyboard.press('Alt+x')
   expect(await drafts(page)).toHaveLength(1)
   await page.locator('.settingsCloseButton').click()

@@ -284,7 +284,7 @@
             v-show="protectedSettingsVisible"
             class="settingsSubpageScroll settingsKeyboardShortcutPage"
           >
-            <FtKeyboardShortcutPrompt embedded />
+            <FtKeyboardShortcutPrompt />
           </div>
         </template>
         <template v-else>
