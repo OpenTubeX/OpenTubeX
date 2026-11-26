@@ -1,22 +1,22 @@
 import { ref } from 'vue'
 
-const SCROLL_MINI_PLAY_PAUSE_HIDE_MS = 3000
 const SCROLL_MINI_VOLUME_HIDE_MS = 1000
 const SCROLL_MINI_POINTER_REVEAL_SUPPRESS_MS = 250
 const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
 
 /**
  * Shows and hides the scroll mini-player's controls and volume popup.
- * During playback the controls hide after a delay, but not while the volume
- * slider is open, and come back on hover or when the pointer moves over the
- * player.
+ * During playback the controls hide after the regular player's playing
+ * interface hide delay, but not while the volume slider is open, and come back
+ * on hover or when the pointer moves over the player.
  *
  * @param {{
  *   scrollMiniPlayerActive: import('vue').Ref<boolean>,
- *   video: import('vue').Ref<HTMLVideoElement | null>
+ *   video: import('vue').Ref<HTMLVideoElement | null>,
+ *   getPlayingInterfaceHideDelay: () => number
  * }} options
  */
-export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video }) {
+export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, getPlayingInterfaceHideDelay }) {
   const scrollMiniPlayPauseVisible = ref(true)
   const scrollMiniVolumeExpanded = ref(false)
 
@@ -81,7 +81,7 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video }) {
       } else if (video.value && !video.value.paused) {
         hideScrollMiniPlayPause()
       }
-    }, SCROLL_MINI_PLAY_PAUSE_HIDE_MS)
+    }, (Number(getPlayingInterfaceHideDelay()) || 3) * 1000)
   }
 
   /** @param {boolean} [autoHide] */
