@@ -431,7 +431,13 @@ export class TabNavigationService {
       }
 
       if (isPresented) {
-        await runPendingViewTransition(applyNavigation)
+        // A click made while this navigation waited requested its own morph,
+        // which its own navigation, queued behind this one, takes.
+        if (morphRequestId !== null && morphRequestId !== getViewTransitionRequestId()) {
+          await applyNavigation()
+        } else {
+          await runPendingViewTransition(applyNavigation)
+        }
         await nextTick()
         await nextAnimationFrame()
         if (!preserveScroll) {
