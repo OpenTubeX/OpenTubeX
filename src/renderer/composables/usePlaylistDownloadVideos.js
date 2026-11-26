@@ -1,4 +1,4 @@
-import { ref, shallowRef } from 'vue'
+import { onScopeDispose, ref, shallowRef } from 'vue'
 
 import store from '../store/index'
 import { usesInvidiousApi } from '../../apiBackends'
@@ -123,6 +123,9 @@ export function usePlaylistDownloadVideos() {
       if (requestGeneration === generation) videosLoading.value = false
     }
   }
+
+  // Stops loading pages for a prompt that unmounted with its playlist
+  onScopeDispose(reset)
 
   return { videos, moreVideosAvailable, videosLoading, loadFirstPage, loadRemainingPages, reset }
 }
