@@ -93,6 +93,8 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 let gridWidth = 0
 let active = true
 let hidden = false
+// A hidden grid has nothing to measure, so it applies the change once shown.
+let phoneWidthChangedWhileHidden = false
 
 function updateGridSliderLimit() {
   const element = gridElement.value?.$el
@@ -403,6 +405,10 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
 function handlePhoneWidthChange() {
   const element = gridElement.value?.$el
   if (!element || gridWidth === 0) return
+  if (hidden) {
+    phoneWidthChangedWhileHidden = true
+    return
+  }
   const style = getComputedStyle(element)
   const horizontalInsets = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
     .reduce((total, property) => total + (Number.parseFloat(style[property]) || 0), 0)
@@ -424,7 +430,9 @@ onMounted(() => {
       hidden = nowHidden
       updateGridSliderLimit()
     }
-    if (!hidden) updateGridWidth(width)
+    if (hidden) return
+    updateGridWidth(width, phoneWidthChangedWhileHidden)
+    phoneWidthChangedWhileHidden = false
   })
   resizeObserver.observe(gridElement.value.$el)
   window.addEventListener('scroll', updatePageAtBottom, { passive: true })
