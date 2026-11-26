@@ -2624,6 +2624,18 @@ a:visited {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* The morph paints above the page snapshot, which would cover a detached mini
+   player beside the destination player. Capture it separately and keep it on
+   top. Named in both snapshots, it stays in place instead of fading in. */
+.crossTabMiniPlayerLayer > .ftVideoPlayer {
+  view-transition-name: match-element;
+  view-transition-class: floating-mini-player;
+}
+
+::view-transition-group(*.floating-mini-player) {
+  z-index: 1;
+}
+
 /* Animate only a thumbnail copy; creating a background tab must not wait for
    document snapshots or freeze the subscriptions feed while it loads. */
 .newTabThumbnailMorph {
