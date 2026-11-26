@@ -92,10 +92,13 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // emits an event per step, which turned that into hundreds of forced layouts.
 let gridWidth = 0
 let active = true
+let hidden = false
+// A hidden grid has nothing to measure, so it applies the change once shown.
+let phoneWidthChangedWhileHidden = false
 
 function updateGridSliderLimit() {
   const element = gridElement.value?.$el
-  if (element) setThumbnailGridVisible(element, active && props.grid && gridWidth > 0, thumbnailSizeSetting)
+  if (element) setThumbnailGridVisible(element, active && !hidden && props.grid && gridWidth > 0, thumbnailSizeSetting)
 }
 
 watch(() => props.grid, updateGridSliderLimit)
@@ -402,6 +405,10 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
 function handlePhoneWidthChange() {
   const element = gridElement.value?.$el
   if (!element || gridWidth === 0) return
+  if (hidden) {
+    phoneWidthChangedWhileHidden = true
+    return
+  }
   const style = getComputedStyle(element)
   const horizontalInsets = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
     .reduce((total, property) => total + (Number.parseFloat(style[property]) || 0), 0)
@@ -413,7 +420,20 @@ onMounted(() => {
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
 
-  resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const width = entry.contentRect.width
+    // A grid in a hidden tab has no width. Keep the cards sized for the last
+    // one: resizing them for it rendered every card again when a link opened
+    // in a new tab, and once more when switching back.
+    const nowHidden = width === 0 && gridWidth > 0
+    if (nowHidden !== hidden) {
+      hidden = nowHidden
+      updateGridSliderLimit()
+    }
+    if (hidden) return
+    updateGridWidth(width, phoneWidthChangedWhileHidden)
+    phoneWidthChangedWhileHidden = false
+  })
   resizeObserver.observe(gridElement.value.$el)
   window.addEventListener('scroll', updatePageAtBottom, { passive: true })
   if (props.appear) enterTogether(gridElement.value.$el)

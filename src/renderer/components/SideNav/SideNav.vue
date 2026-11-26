@@ -149,10 +149,13 @@
         v-if="!hideActiveSubscriptions"
         class="mobileHidden"
       >
+        <!-- The navigation renders again when a watch page collapses it, which
+             must not render every subscribed channel again with it. -->
         <component
           :is="enableChannelLinks ? 'router-link' : 'span'"
           v-for="channel in displayedActiveSubscriptions"
           :key="channel.id"
+          v-memo="[channel.id, channel.name, channel.thumbnail, isOpen, enableChannelLinks]"
           :to="`/channel/${channel.id}`"
           :data-tab-title="channel.name"
           :class="enableChannelLinks ? '' : 'disabledIcon'"

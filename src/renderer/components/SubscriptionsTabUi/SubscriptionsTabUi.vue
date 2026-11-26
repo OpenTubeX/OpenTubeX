@@ -291,11 +291,12 @@ const restrictedPlaybackConfigured = computed(() => (
 ))
 
 const filteredVideoList = computed(() => {
-  // Copy after in-place cache mutations so the rendered page receives fresh
-  // props even though the full cached array stays non-reactive.
-  let videoList = subscriptionEntryVersion.value === 0
-    ? props.videoList
-    : props.videoList.slice()
+  // Seen marks change cached entries in place, which their cards observe
+  // through their reactive data. Only the New feed filters by them, so other
+  // feeds keep their list: rendering it again updates every card.
+  let videoList = props.onlyShowNew && subscriptionEntryVersion.value !== 0
+    ? props.videoList.slice()
+    : props.videoList
 
   if (!props.isCommunity) {
     videoList = filterMembersOnlySubscriptionVideos(
@@ -338,6 +339,8 @@ const filteredVideoList = computed(() => {
 })
 
 const hasNewContent = computed(() => {
+  // The entries' seen state changes in place, outside this computed's tracking.
+  subscriptionEntryVersion.value // eslint-disable-line no-unused-expressions
   return filteredVideoList.value.some(entry => {
     return entry.isNewInSubscriptionFeed === true &&
       (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
