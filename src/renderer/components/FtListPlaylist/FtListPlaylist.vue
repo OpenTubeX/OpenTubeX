@@ -141,6 +141,10 @@
       :video-count="playlistMetadata.videoCount"
       :title="playlistMetadata.title"
       :thumbnail="downloadThumbnail"
+      :videos="isUserPlaylist ? data.videos : downloadVideos"
+      :more-videos-available="!isUserPlaylist && moreDownloadVideosAvailable"
+      :videos-loading="!isUserPlaylist && downloadVideosLoading"
+      @select-videos="loadRemainingDownloadVideos"
       @close="showDownloadPrompt = false"
     />
   </div>
@@ -165,6 +169,7 @@ import store from '../../store/index'
 import { getDataScope } from '../../../datastores/handlers/index'
 
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
+import { usePlaylistDownloadVideos } from '../../composables/usePlaylistDownloadVideos'
 import { copyToClipboard, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -323,6 +328,20 @@ const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
+})
+
+// The prompt's video selection lists a YouTube playlist's videos, which this item doesn't have
+const {
+  videos: downloadVideos,
+  moreVideosAvailable: moreDownloadVideosAvailable,
+  videosLoading: downloadVideosLoading,
+  loadFirstPage: loadFirstDownloadVideosPage,
+  loadRemainingPages: loadRemainingDownloadVideos,
+  reset: resetDownloadVideos
+} = usePlaylistDownloadVideos()
+watch(showDownloadPrompt, (shown) => {
+  if (shown && !isUserPlaylist.value) loadFirstDownloadVideosPage(playlistMetadata.value.playlistId)
+  else resetDownloadVideos()
 })
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
