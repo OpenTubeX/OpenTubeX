@@ -46,8 +46,8 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="capacitor-phone-tab-dialog-title"
-            :data-android-back-nested="activeView === 'history' || selecting || undefined"
-            :inert="organizerGesture || sessionToDelete !== null || sessionToOpen !== null"
+            :data-android-back-nested="activeView === 'history' || activeView === 'closed' || selecting || searchOpen || undefined"
+            :inert="organizerGesture || sessionToDelete !== null || sessionToOpen !== null || multipleTabsActionPromptOpen"
           >
             <header
               class="capacitorPhoneTabHeader"
@@ -67,7 +67,7 @@
                 />
               </button>
               <button
-                v-else-if="activeView === 'history'"
+                v-else-if="activeView === 'history' || activeView === 'closed'"
                 type="button"
                 class="capacitorPhoneTabHeaderButton"
                 :aria-label="t('Back')"
@@ -89,8 +89,36 @@
                   v-else-if="activeView === 'history'"
                   dir="auto"
                 >{{ presentedTab ? tabTitle(presentedTab) : '' }}</span>
-                <span v-else>{{ t('Settings.Sync Settings.Tabs From Other Devices') }}</span>
+                <span v-else-if="activeView === 'synced'">{{ t('Settings.Sync Settings.Tabs From Other Devices') }}</span>
               </div>
+              <button
+                v-if="selecting"
+                type="button"
+                class="capacitorPhoneTabHeaderButton"
+                :aria-label="t('Tab Organizer.Select All')"
+                :title="t('Tab Organizer.Select All')"
+                :disabled="visibleTabs.every(tab => selectedTabIds.has(tab.id))"
+                @click="selectAllTabs(visibleTabs.map(tab => tab.id))"
+              >
+                <FtIcon
+                  :icon="['fas', 'check-double']"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                v-else-if="activeView === 'open'"
+                type="button"
+                class="capacitorPhoneTabHeaderButton"
+                :aria-label="t('Tab Organizer.Search Label')"
+                :title="t('Tab Organizer.Search Label')"
+                :aria-pressed="searchOpen"
+                @click="searchOpen ? closeSearch() : openSearch()"
+              >
+                <FtIcon
+                  :icon="['fas', 'magnifying-glass']"
+                  aria-hidden="true"
+                />
+              </button>
               <button
                 v-if="!selecting"
                 type="button"
@@ -106,7 +134,7 @@
               </button>
             </header>
             <FtTabs
-              v-if="showSyncedTabsView && activeView !== 'history'"
+              v-if="showSyncedTabsView && (activeView === 'open' || activeView === 'synced')"
               class="capacitorPhoneTabViewTabs"
               role="tablist"
               :aria-label="t('Tab Organizer.Title')"
@@ -138,6 +166,24 @@
                 {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
               </button>
             </FtTabs>
+            <label
+              v-if="activeView === 'open' && searchOpen"
+              class="capacitorPhoneTabSearch"
+            >
+              <FtIcon
+                :icon="['fas', 'magnifying-glass']"
+                aria-hidden="true"
+              />
+              <input
+                ref="searchInputRef"
+                v-model="searchQuery"
+                type="search"
+                autocomplete="off"
+                enterkeyhint="search"
+                :placeholder="t('Tab Organizer.Search Label')"
+                :aria-label="t('Tab Organizer.Search Label')"
+              >
+            </label>
             <div
               v-if="activeView === 'open'"
               id="capacitor-phone-open-tabs-panel"
@@ -153,8 +199,15 @@
                 role="tablist"
                 :aria-label="t('Tab Organizer.Title')"
               >
+                <p
+                  v-if="visibleTabs.length === 0"
+                  class="capacitorPhoneTabEmpty"
+                  role="status"
+                >
+                  {{ t('Tab Organizer.No Open Results') }}
+                </p>
                 <div
-                  v-for="tab in tabs"
+                  v-for="tab in visibleTabs"
                   :key="tab.id"
                   class="capacitorPhoneTabRow"
                   :class="{
@@ -198,6 +251,18 @@
                         v-if="tab.isIncognito"
                         :icon="['fas', 'user-secret']"
                         class="capacitorPhoneTabIncognitoIcon"
+                        aria-hidden="true"
+                      />
+                      <FtIcon
+                        v-if="isTabPlaying(tab)"
+                        :icon="['fas', 'play']"
+                        class="capacitorPhoneTabStateIcon"
+                        aria-hidden="true"
+                      />
+                      <FtIcon
+                        v-else-if="tab.isUnloaded && tab.automaticallyUnloaded"
+                        :icon="['fas', 'memory']"
+                        class="capacitorPhoneTabStateIcon"
                         aria-hidden="true"
                       />
                       <span dir="auto">{{ tabTitle(tab) }}</span>
@@ -337,6 +402,52 @@
               </div>
             </div>
             <div
+              v-else-if="activeView === 'closed'"
+              ref="closedScrollRef"
+              v-overlay-scrollbars
+              class="capacitorPhoneTabHistory"
+            >
+              <div
+                ref="closedContentRef"
+                class="capacitorPhoneTabHistoryContent"
+              >
+                <div class="capacitorPhoneClosedTabsHeader">
+                  <button
+                    type="button"
+                    class="capacitorPhoneSyncedTabButton dangerButton"
+                    @click="clearClosedTabs"
+                  >
+                    <FtIcon
+                      :icon="['fas', 'trash']"
+                      aria-hidden="true"
+                    />
+                    {{ t('Tab Organizer.Clear') }}
+                  </button>
+                </div>
+                <button
+                  v-for="tab in closedTabs"
+                  :key="tab.id"
+                  type="button"
+                  class="capacitorPhoneTabHistoryEntry"
+                  :aria-label="`${t('Restore')}: ${tab.title || tab.route.fullPath}`"
+                  @click="restoreClosedTab(tab.id)"
+                >
+                  <FtIcon
+                    :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                    aria-hidden="true"
+                  />
+                  <span
+                    class="historyEntryLabel"
+                    dir="auto"
+                  >{{ tab.title || tab.route.fullPath }}</span>
+                  <FtIcon
+                    :icon="['fas', 'clock-rotate-left']"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
               v-else
               ref="historyScrollRef"
               v-overlay-scrollbars
@@ -382,6 +493,8 @@
               :can-unpin="canUnpinSelectedTabs"
               :can-load="canLoadSelectedTabs"
               :can-unload="canUnloadSelectedTabs"
+              :can-copy-links="canCopySelectedTabLinks"
+              :all-youtube-links="selectedTabLinks.every(link => link?.isYouTube)"
               floating
               @action="runSelectedTabAction"
               @close="closeSelectedTabs"
@@ -407,8 +520,15 @@
                 type="button"
                 class="capacitorPhoneTabSecondaryAction capacitorPhoneTabReopen"
                 :aria-label="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
+                :aria-description="t('Tab Organizer.Recently Closed Hint')"
                 :title="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
-                @click="restoreClosedTab"
+                @pointerdown="reopenHold.start"
+                @pointerup="reopenHold.cancel"
+                @pointercancel="reopenHold.cancel"
+                @pointerleave="reopenHold.cancel"
+                @contextmenu.prevent="reopenHold.contextMenu"
+                @keydown="reopenHold.keydown"
+                @click="reopenHold.click(() => restoreClosedTab())"
               >
                 <FtIcon
                   :icon="['fas', 'clock-rotate-left']"
@@ -454,7 +574,7 @@
     <FtPrompt
       v-if="sessionToOpen"
       :busy="isOpeningSession"
-      card-class="capacitorPhoneSessionPrompt"
+      card-class="capacitorTabsPrompt"
       :label="t('Settings.Sync Settings.Open All Tabs Confirmation')"
       :extra-labels="[formatDeviceSessionLabel(sessionToOpen, t)]"
       :option-names="[t('Settings.Sync Settings.Open All Tabs'), t('Cancel')]"
@@ -465,7 +585,7 @@
     />
     <FtPrompt
       v-if="sessionToDelete"
-      card-class="capacitorPhoneSessionPrompt"
+      card-class="capacitorTabsPrompt"
       :label="t('Delete')"
       :extra-labels="[formatDeviceSessionLabel(sessionToDelete, t)]"
       :option-names="[t('Delete'), t('Cancel')]"
@@ -482,7 +602,7 @@
 import FtTabs from '../FtTabs/FtTabs.vue'
 import { useChannelTabAvatars } from '../../composables/useChannelTabAvatars'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
@@ -504,9 +624,11 @@ import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
 import { useCapacitorTabActions } from './useCapacitorTabActions'
+import { useHoldAction } from './useHoldAction'
 import { getTabGridReorder } from './tabGridReorder'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
+import { multipleTabsActionConfirmationKey } from '../../tabs/multipleTabsActionConfirmation'
 
 const props = defineProps({
   enabled: {
@@ -515,7 +637,10 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['request-exit'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const multipleTabsActionConfirmation = inject(multipleTabsActionConfirmationKey, null)
+// The shared bulk tab prompt opens above the organizer, which must not take focus from it.
+const multipleTabsActionPromptOpen = computed(() => multipleTabsActionConfirmation?.open.value === true)
 const open = ref(false)
 const organizerGesture = ref(false)
 const skipDialogTransition = ref(false)
@@ -535,6 +660,11 @@ const syncedTabsScrollRef = useTemplateRef('syncedTabsScrollRef')
 const syncedTabsContentRef = useTemplateRef('syncedTabsContentRef')
 const historyScrollRef = useTemplateRef('historyScrollRef')
 const historyContentRef = useTemplateRef('historyContentRef')
+const closedScrollRef = useTemplateRef('closedScrollRef')
+const closedContentRef = useTemplateRef('closedContentRef')
+const searchInputRef = useTemplateRef('searchInputRef')
+const searchOpen = ref(false)
+const searchQuery = ref('')
 
 if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
   // Back from tab history slides it off toward the open tabs, which come in behind it.
@@ -542,9 +672,9 @@ if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     if (!dialog) return
     onCleanup(registerAndroidBackView(dialog, options => createAndroidBackSlidePreview({
       ...options,
-      getTarget: () => activeView.value === 'history' && !selecting.value && historyScrollRef.value
+      getTarget: () => (activeView.value === 'history' || activeView.value === 'closed') && !selecting.value && activeScrollRef()
         ? {
-            element: historyScrollRef.value,
+            element: activeScrollRef(),
             area: dialog,
             // Nothing waits behind it, so it casts no shadow.
             styles: { 'box-shadow': 'none' },
@@ -558,6 +688,15 @@ if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
   })
 }
 const tabs = computed(() => store.getters.getTabs)
+const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase(locale.value))
+const visibleTabs = computed(() => {
+  const needle = normalizedSearchQuery.value
+  if (needle.length === 0) return tabs.value
+  return tabs.value.filter(tab => [tabTitle(tab), tab.route.fullPath]
+    .join(' ')
+    .toLocaleLowerCase(locale.value)
+    .includes(needle))
+})
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
@@ -628,7 +767,7 @@ const dragOffsets = ref({})
 const dragSettling = ref(false)
 const suppressDragTransition = ref(false)
 let contentResizeObserver = null
-const viewScrollTop = { open: 0, synced: 0, history: 0 }
+const viewScrollTop = { open: 0, synced: 0, history: 0, closed: 0 }
 // Pointer samples are transient: updating them must not render the entire grid.
 const swipe = {
   tabId: null,
@@ -662,7 +801,10 @@ const {
   canUnpinSelectedTabs,
   canLoadSelectedTabs,
   canUnloadSelectedTabs,
+  canCopySelectedTabLinks,
+  selectedTabLinks,
   clearSelection,
+  selectAllTabs,
   toggleTabSelection,
   selectActionTab,
   relatedTabIds,
@@ -681,6 +823,7 @@ const {
   copyActionTabLink,
   duplicateActionTab,
   handleTabTargetKeydown,
+  isTabPlaying,
   openTabActions,
   reloadActionTab,
   tabAriaLabel,
@@ -834,6 +977,7 @@ defineExpose({ organizerSwipe })
 
 const headerTitle = computed(() => {
   if (selecting.value) return t('Profile.{number} selected', { number: selectedTabIds.value.size })
+  if (activeView.value === 'closed') return t('Tab Organizer.Recently Closed')
   return activeView.value === 'history' ? t('Tab Organizer.Tab History') : t('Tab Organizer.Title')
 })
 
@@ -850,7 +994,7 @@ async function selectView(view, focus = false) {
   observeActiveContent()
   if (!focus) return
 
-  if (view === 'open' && (previousView === 'history' || !showSyncedTabsView.value)) {
+  if (view === 'open' && (previousView === 'history' || previousView === 'closed' || !showSyncedTabsView.value)) {
     focusActiveTab()
     return
   }
@@ -862,12 +1006,45 @@ async function selectView(view, focus = false) {
 
 function activeScrollRef() {
   if (activeView.value === 'history') return historyScrollRef.value
+  if (activeView.value === 'closed') return closedScrollRef.value
   return activeView.value === 'open' ? openTabsScrollRef.value : syncedTabsScrollRef.value
 }
 
 function activeContentRef() {
   if (activeView.value === 'history') return historyContentRef.value
+  if (activeView.value === 'closed') return closedContentRef.value
   return activeView.value === 'open' ? openTabsContentRef.value : syncedTabsContentRef.value
+}
+
+async function openSearch() {
+  searchOpen.value = true
+  await nextTick()
+  searchInputRef.value?.focus({ preventScroll: true })
+}
+
+async function closeSearch() {
+  const hadFocus = dialogRef.value?.contains(document.activeElement)
+  searchOpen.value = false
+  searchQuery.value = ''
+  await nextTick()
+  if (hadFocus && !dialogRef.value?.contains(document.activeElement)) focusActiveTab()
+}
+
+async function openClosedTabs() {
+  if (closedTabs.value.length === 0) return
+  clearSelection()
+  closeTabActions()
+  viewScrollTop.closed = 0
+  await selectView('closed')
+  closedContentRef.value?.querySelector('.capacitorPhoneTabHistoryEntry')?.focus({ preventScroll: true })
+}
+
+// A tap reopens the last closed tab; holding it, or its context menu, lists them all.
+const reopenHold = useHoldAction(openClosedTabs, () => activeView.value === 'closed')
+
+// The emptied list returns to the open tabs, see the closed tab count watcher.
+async function clearClosedTabs() {
+  await store.dispatch('clearClosedTabs')
 }
 
 async function openTabHistory() {
@@ -910,6 +1087,7 @@ function stopObservingContent() {
 
 function closeSwitcher() {
   organizerSwipe.cancel()
+  reopenHold.cancel()
   clearSelection()
   closeTabActions()
   resetTabSwipe()
@@ -921,10 +1099,13 @@ function restoreTriggerFocus() {
   triggerRef.value?.focus({ preventScroll: true })
 }
 
-async function restoreClosedTab() {
+/**
+ * @param {string | null} [closedTabId] the most recently closed tab if omitted
+ */
+async function restoreClosedTab(closedTabId = null) {
   if (closedTabs.value.length === 0) return
 
-  await getCapacitorTabService().restoreClosedTab()
+  await getCapacitorTabService().restoreClosedTab(closedTabId)
   closeSwitcher()
 }
 
@@ -1046,6 +1227,12 @@ function startTabGesture(event, tabId) {
         isPinned: tabs.value.find(tab => tab.id === id).isPinned === true,
       }
     })
+    // Filtered rows hide their neighbors, so reordering waits for the full list.
+    if (normalizedSearchQuery.value.length > 0) {
+      openTabActions(tabId)
+      lightHaptic()
+      return
+    }
     dragScrollStart = openTabsScrollRef.value.scrollTop
     const viewport = openTabsScrollRef.value
     const contentBottom = openTabsContentRef.value.getBoundingClientRect().bottom
@@ -1376,8 +1563,9 @@ function focusActiveTab() {
 function handleDialogKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
-    if (activeView.value === 'history') selectView('open', true)
+    if (activeView.value === 'history' || activeView.value === 'closed') selectView('open', true)
     else if (selecting.value) cancelSelection()
+    else if (searchOpen.value) closeSearch()
     else closeSwitcher()
     return
   }
@@ -1438,6 +1626,20 @@ watch(() => [props.enabled, presentedTabId.value, store.getters.isAnyPromptOpen]
   if (organizerGesture.value) organizerSwipe.cancel()
 })
 
+// Each opening starts with every tab, like the desktop organizer.
+watch(open, (isOpen) => {
+  if (isOpen) return
+  searchOpen.value = false
+  searchQuery.value = ''
+})
+
+watch(normalizedSearchQuery, async () => {
+  if (drag.ready) cancelTabGesture()
+  await nextTick()
+  if (openTabsScrollRef.value) restoreOverlayScrollTop(openTabsScrollRef.value, 0)
+  clampActiveContentScroll()
+})
+
 watch(showSyncedTabsView, (visible) => {
   if (!visible && activeView.value === 'synced') selectView('open')
 })
@@ -1447,15 +1649,20 @@ watch(() => tabs.value.map(tab => `${tab.id}:${tab.isPinned}`).join(','), () => 
 })
 
 watch(
-  () => [tabs.value.length, tabHistoryEntries.value.length, ...otherDeviceSessions.value.map(session => session.tabs.length)],
+  () => [visibleTabs.value.length, closedTabs.value.length, tabHistoryEntries.value.length, ...otherDeviceSessions.value.map(session => session.tabs.length)],
   async () => {
     await nextTick()
     clampActiveContentScroll()
   }
 )
 
+watch(() => closedTabs.value.length, length => {
+  if (length === 0 && activeView.value === 'closed') selectView('open', true)
+})
+
 onBeforeUnmount(() => {
   disposed = true
+  reopenHold.cancel()
   // Honor accepted closes even when the organizer disappears before animation ends.
   for (const { timer, finish } of pendingSwipeCloses.values()) {
     window.clearTimeout(timer)

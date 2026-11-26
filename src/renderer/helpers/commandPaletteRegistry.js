@@ -362,8 +362,8 @@ function addTabCommands(commands, context) {
   const { t, groups, store, isElectron, isCapacitor, appShortcuts, createTab, closeTabs, reloadTabs } = context
   if (isCapacitor && !store.getters.getTabsEnabled) return
   const desktopReason = isElectron || isCapacitor ? '' : t('CommandPalette.Unavailable.Desktop')
-  // The mobile apps have no tab shortcuts
-  const shortcut = name => isElectron ? appShortcuts[name] : ''
+  // Hardware keyboards use the same tab shortcuts in the mobile apps
+  const shortcut = name => isElectron || isCapacitor ? appShortcuts[name] : ''
   const tabs = store.getters.getTabs
 
   commands.push(

@@ -2940,6 +2940,7 @@ Tab Organizer:
   Close Tab: Tanca {title}
   No Open Results: Cap pestanya oberta coincideix amb la cerca.
   Recently Closed: Tancades recentment
+  Recently Closed Hint: "Mantén premut per veure totes les pestanyes tancades recentment"
   Clear: Neteja
   No Closed Results: Cap pestanya tancada recentment coincideix amb la cerca.
   Drag Tab: Arrossegueu per moure-la a un grup

@@ -2,7 +2,29 @@
   <div
     v-if="floating"
     class="capacitorTabSelectionFloating"
+    @keydown.esc="onEscape"
   >
+    <div
+      v-if="showActions"
+      v-overlay-scrollbars
+      class="capacitorTabSelectionMenu floatingMenu"
+      role="group"
+      :aria-label="t('More')"
+    >
+      <button
+        v-for="action in secondaryActions"
+        :key="action.name"
+        type="button"
+        :disabled="busy"
+        @click="run(action.name)"
+      >
+        <FtIcon
+          :icon="action.icon"
+          aria-hidden="true"
+        />
+        {{ action.label }}
+      </button>
+    </div>
     <div
       ref="toolbar"
       class="capacitorTabSelectionToolbar"
@@ -19,7 +41,23 @@
         @click="runToolbarAction($event, action.name)"
       >
         <FtIcon
-          :icon="['fas', action.icon]"
+          :icon="action.icon"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        v-if="secondaryActions.length > 0"
+        ref="moreButton"
+        type="button"
+        class="capacitorTabSelectionToolbarButton"
+        :disabled="busy"
+        :aria-label="t('More')"
+        :title="t('More')"
+        :aria-expanded="showActions"
+        @click="showActions ? closeActions() : showActions = true"
+      >
+        <FtIcon
+          :icon="['fas', 'ellipsis-vertical']"
           aria-hidden="true"
         />
       </button>
@@ -48,7 +86,7 @@
     <button
       ref="moreButton"
       type="button"
-      :disabled="busy || count === 0"
+      :disabled="busy || (count === 0 && !canSelectAll)"
       :aria-expanded="showActions"
       @click="showActions ? closeActions() : showActions = true"
     >
@@ -88,14 +126,26 @@
       :aria-label="t('More')"
     >
       <button
-        v-for="action in actions"
+        v-if="canSelectAll"
+        type="button"
+        :disabled="busy"
+        @click="selectAll"
+      >
+        <FtIcon
+          :icon="['fas', 'check-double']"
+          aria-hidden="true"
+        />
+        {{ t('Tab Organizer.Select All') }}
+      </button>
+      <button
+        v-for="action in [...actions, ...secondaryActions]"
         :key="action.name"
         type="button"
         :disabled="busy"
         @click="run(action.name)"
       >
         <FtIcon
-          :icon="['fas', action.icon]"
+          :icon="action.icon"
           aria-hidden="true"
         />
         {{ action.label }}
@@ -116,20 +166,41 @@ const props = defineProps({
   canUnpin: { type: Boolean, default: false },
   canLoad: { type: Boolean, default: false },
   canUnload: { type: Boolean, default: false },
+  canCopyLinks: { type: Boolean, default: false },
+  allYoutubeLinks: { type: Boolean, default: false },
+  // The phone header offers Select All, the tablet strip has no room for it.
+  canSelectAll: { type: Boolean, default: false },
   // Phones show every action in a floating toolbar; the tablet tab strip keeps the compact row.
   floating: { type: Boolean, default: false },
 })
-const emit = defineEmits(['close', 'cancel', 'action'])
+const emit = defineEmits(['close', 'cancel', 'action', 'select-all'])
 const { t } = useI18n()
 const showActions = ref(false)
 const moreButton = useTemplateRef('moreButton')
 const controlsRoot = useTemplateRef('controlsRoot')
 const actions = computed(() => [
-  { name: 'pin', label: t('Context Menu.Pin Tabs'), icon: 'thumbtack', enabled: props.canPin },
-  { name: 'unpin', label: t('Context Menu.Unpin Tabs'), icon: 'thumbtack-slash', enabled: props.canUnpin },
-  { name: 'load', label: t('Context Menu.Load Tabs'), icon: 'download', enabled: props.canLoad },
-  { name: 'unload', label: t('Context Menu.Unload Tabs'), icon: 'right-from-bracket', enabled: props.canUnload },
-  { name: 'reload', label: t('Context Menu.Reload Tabs'), icon: 'arrows-rotate', enabled: props.count > 0 },
+  { name: 'pin', label: t('Context Menu.Pin Tabs'), icon: ['fas', 'thumbtack'], enabled: props.canPin },
+  { name: 'unpin', label: t('Context Menu.Unpin Tabs'), icon: ['fas', 'thumbtack-slash'], enabled: props.canUnpin },
+  { name: 'load', label: t('Context Menu.Load Tabs'), icon: ['fas', 'download'], enabled: props.canLoad },
+  { name: 'unload', label: t('Context Menu.Unload Tabs'), icon: ['fas', 'right-from-bracket'], enabled: props.canUnload },
+  { name: 'reload', label: t('Context Menu.Reload Tabs'), icon: ['fas', 'arrows-rotate'], enabled: props.count > 0 },
+].filter(action => action.enabled))
+// Phones keep these in an overflow menu, so the toolbar fits narrow screens.
+const secondaryActions = computed(() => [
+  {
+    name: 'duplicate',
+    label: props.count === 1 ? t('Context Menu.Duplicate Tab') : t('Context Menu.Duplicate Multiple Tabs', { count: props.count }, props.count),
+    icon: ['fas', 'clone'],
+    enabled: props.count > 0,
+  },
+  {
+    name: 'copy-links',
+    label: props.allYoutubeLinks
+      ? props.count === 1 ? t('Context Menu.Copy YouTube Link') : t('Context Menu.Copy YouTube Links')
+      : props.count === 1 ? t('Context Menu.Copy Link') : t('Context Menu.Copy Links'),
+    icon: props.allYoutubeLinks ? ['fab', 'youtube'] : ['fas', 'link'],
+    enabled: props.canCopyLinks,
+  },
 ].filter(action => action.enabled))
 const toolbar = useTemplateRef('toolbar')
 let refocusToolbar = false
@@ -170,6 +241,15 @@ async function run(action) {
   emit('action', action)
   await closeActions()
 }
+
+async function selectAll() {
+  emit('select-all')
+  await closeActions()
+}
+
+watch(() => props.count, count => {
+  if (props.floating && count === 0) showActions.value = false
+})
 </script>
 
 <style scoped>
@@ -214,6 +294,12 @@ button {
   font: inherit;
   cursor: pointer;
   transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.capacitorTabSelectionMenu.floatingMenu {
+  inset-block: auto calc(100% + 8px);
+  inset-inline: auto 0;
+  pointer-events: auto;
 }
 
 .capacitorTabSelectionMenu button {

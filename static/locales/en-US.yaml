@@ -3473,6 +3473,7 @@ Tab Organizer:
   Close Tab: Close {title}
   No Open Results: No open tabs match this search.
   Recently Closed: Recently Closed
+  Recently Closed Hint: "Touch and hold to see all recently closed tabs"
   Clear: Clear
   No Closed Results: No recently closed tabs match this search.
   Drag Tab: Drag to move to a group

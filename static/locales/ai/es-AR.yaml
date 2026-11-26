@@ -2849,6 +2849,7 @@ Tab Organizer:
   Close Tab: Cerrar {title}
   No Open Results: Ninguna pestaña abierta coincide con la búsqueda.
   Recently Closed: Cerradas recientemente
+  Recently Closed Hint: "Mantené presionado para ver todas las pestañas cerradas recientemente"
   Clear: Borrar
   No Closed Results: Ninguna pestaña cerrada recientemente coincide con la búsqueda.
   Drag Tab: Arrastrár para mover a un grupo

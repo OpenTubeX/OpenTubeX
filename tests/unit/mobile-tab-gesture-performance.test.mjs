@@ -57,6 +57,8 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     disposed: false,
     onBeforeUnmount: callback => { unmount = callback },
     organizerSwipe: { cancel() {} },
+    reopenHold: { cancel() {} },
+    normalizedSearchQuery: ref(''),
     stopObservingContent() {},
     releaseModalLock() {},
     console: { error: (...args) => errors.push(args) },

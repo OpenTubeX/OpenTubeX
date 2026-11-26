@@ -2426,6 +2426,7 @@ Tab Organizer:
   Close Tab: Sulge {title}
   No Open Results: Ükski avatud vahekaart ei vasta otsingule.
   Recently Closed: Hiljuti suletud
+  Recently Closed Hint: "Puudutage pikalt, et näha kõiki hiljuti suletud vahekaarte"
   Clear: Tühjenda
   No Closed Results: Ükski hiljuti suletud vaheleht ei vasta sellele otsingule.
   Drag Tab: Lohista rühma teisaldamiseks

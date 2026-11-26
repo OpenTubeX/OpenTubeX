@@ -2378,6 +2378,7 @@ Tab Organizer:
   Close Tab: Fechar {title}
   No Open Results: Nenhuma guia aberta corresponde a esta pesquisa.
   Recently Closed: Fechados recentemente
+  Recently Closed Hint: "Toque e segure para ver todas as guias fechadas recentemente"
   Clear: Limpar
   No Closed Results: Nenhuma guia fechada recentemente corresponde a esta pesquisa.
   Drag Tab: Arraste para mover para um grupo

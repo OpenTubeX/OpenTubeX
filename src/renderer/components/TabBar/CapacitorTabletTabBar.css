@@ -189,10 +189,15 @@
   object-fit: cover;
 }
 
-.capacitorTabletTabIncognitoIcon {
+.capacitorTabletTabStateIcon {
   flex: 0 0 auto;
   inline-size: 16px;
   block-size: 16px;
+}
+
+/* Pinned, playing, and unloaded markers sit beside the incognito one */
+.capacitorTabletTabStateIcon + .capacitorTabletTabStateIcon {
+  margin-inline-start: -4px;
 }
 
 .capacitorTabletTabTitle {

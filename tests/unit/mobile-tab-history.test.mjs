@@ -7,7 +7,7 @@ import { renderToString } from 'vue/server-renderer'
 
 const source = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
 const menuSource = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabActionsMenu.vue', import.meta.url), 'utf8')
-const row = source.match(/<div\s+v-for="tab in tabs"[\s\S]*?<\/div>/)[0]
+const row = source.match(/<div\s+v-for="tab in visibleTabs"[\s\S]*?<\/div>/)[0]
 const menu = source.match(/<CapacitorTabActionsMenu[\s\S]*?\/>/)[0]
 const historyButton = menuSource.match(/<button\s+v-if="showHistory"[\s\S]*?<\/button>/)[0]
 const render = compile(`<div>${row}${menu}</div>`)
@@ -21,6 +21,8 @@ for (const [name, historyLength, presented, selecting, visible] of [
       render,
       data: () => ({
         tabs: [tab],
+        visibleTabs: [tab],
+        isTabPlaying: () => false,
         actionTab: tab,
         actionTabShareLink: null,
         canToggleActionTabLoaded: true,

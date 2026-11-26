@@ -73,9 +73,27 @@
               />
             </span>
             <FtIcon
+              v-if="tab.isPinned"
+              :icon="['fas', 'thumbtack']"
+              class="capacitorTabletTabStateIcon"
+              aria-hidden="true"
+            />
+            <FtIcon
               v-if="tab.isIncognito"
               :icon="['fas', 'user-secret']"
-              class="capacitorTabletTabIncognitoIcon"
+              class="capacitorTabletTabStateIcon"
+              aria-hidden="true"
+            />
+            <FtIcon
+              v-if="isTabPlaying(tab)"
+              :icon="['fas', 'play']"
+              class="capacitorTabletTabStateIcon"
+              aria-hidden="true"
+            />
+            <FtIcon
+              v-else-if="tab.isUnloaded && tab.automaticallyUnloaded"
+              :icon="['fas', 'memory']"
+              class="capacitorTabletTabStateIcon"
               aria-hidden="true"
             />
             <span
@@ -119,7 +137,11 @@
       :can-unpin="canUnpinSelectedTabs"
       :can-load="canLoadSelectedTabs"
       :can-unload="canUnloadSelectedTabs"
+      :can-copy-links="canCopySelectedTabLinks"
+      :all-youtube-links="selectedTabLinks.every(link => link?.isYouTube)"
+      :can-select-all="tabs.some(tab => !selectedTabIds.has(tab.id))"
       @action="runSelectedTabAction"
+      @select-all="selectAllTabs(tabs.map(tab => tab.id))"
       @close="closeSelectedTabs"
       @cancel="clearSelection"
     />
@@ -149,6 +171,26 @@
         aria-hidden="true"
       />
     </button>
+    <button
+      v-if="!selecting && closedTabs.length > 0"
+      type="button"
+      class="capacitorTabletNewTab"
+      :aria-label="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
+      :aria-description="t('Tab Organizer.Recently Closed Hint')"
+      :title="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
+      @pointerdown="reopenHold.start"
+      @pointerup="reopenHold.cancel"
+      @pointercancel="reopenHold.cancel"
+      @pointerleave="reopenHold.cancel"
+      @contextmenu.prevent.stop="reopenHold.contextMenu"
+      @keydown="reopenHold.keydown"
+      @click="reopenHold.click(() => restoreClosedTab())"
+    >
+      <FtIcon
+        :icon="['fas', 'clock-rotate-left']"
+        aria-hidden="true"
+      />
+    </button>
     <Teleport to="body">
       <CapacitorTabActionsMenu
         :related-tab-ids="relatedTabIds"
@@ -168,13 +210,20 @@
         @toggle-loaded="toggleActionTabLoaded"
         @toggle-pinned="toggleActionTabPinned"
       />
+      <CapacitorClosedTabsMenu
+        :open="closedTabsMenuOpen"
+        @dismiss="closedTabsMenuOpen = false"
+        @closed="releaseTabActions"
+        @restore="restoreClosedTab"
+        @clear="clearClosedTabs"
+      />
     </Teleport>
   </div>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { fixedTabWidthStyle } from '../../constants/tabWidth'
@@ -185,6 +234,9 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
+import CapacitorClosedTabsMenu from './CapacitorClosedTabsMenu.vue'
+import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
+import { useHoldAction } from './useHoldAction'
 import { useCapacitorTabActions } from './useCapacitorTabActions'
 import { useTabletTabReorder } from './useTabletTabReorder'
 
@@ -198,6 +250,8 @@ const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const tabs = computed(() => store.getters.getTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
+const closedTabs = computed(() => store.getters.getClosedTabs)
+const closedTabsMenuOpen = ref(false)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const tabWidthStyle = computed(() => fixedTabWidthStyle(store.getters.getFixedTabWidth))
 const {
@@ -209,7 +263,10 @@ const {
   canUnpinSelectedTabs,
   canLoadSelectedTabs,
   canUnloadSelectedTabs,
+  canCopySelectedTabLinks,
+  selectedTabLinks,
   clearSelection,
+  selectAllTabs,
   toggleTabSelection,
   selectActionTab,
   relatedTabIds,
@@ -228,6 +285,7 @@ const {
   copyActionTabLink,
   duplicateActionTab,
   handleTabTargetKeydown,
+  isTabPlaying,
   openTabActions,
   reloadActionTab,
   tabAriaLabel,
@@ -304,9 +362,28 @@ watch(activeTabId, async () => {
 
 watch(tabs, () => nextTick(clampTabsScroll), { flush: 'post' })
 
+// A tap reopens the last closed tab; holding it, or its context menu, lists them all.
+const reopenHold = useHoldAction(() => {
+  closeTabActions()
+  closedTabsMenuOpen.value = true
+}, () => closedTabsMenuOpen.value)
+
+/**
+ * @param {string | null} [closedTabId] the most recently closed tab if omitted
+ */
+async function restoreClosedTab(closedTabId = null) {
+  closedTabsMenuOpen.value = false
+  await getCapacitorTabService().restoreClosedTab(closedTabId)
+}
+
+async function clearClosedTabs() {
+  closedTabsMenuOpen.value = false
+  await store.dispatch('clearClosedTabs')
+}
+
 let tabActionsLocked = false
 let tabToFocus = null
-watch(() => actionTab.value !== null, (isOpen) => {
+watch(() => actionTab.value !== null || closedTabsMenuOpen.value, (isOpen) => {
   if (isOpen && !tabActionsLocked) {
     lockBodyScroll()
     store.commit('addOpenPrompt', promptId)
@@ -315,7 +392,7 @@ watch(() => actionTab.value !== null, (isOpen) => {
 })
 
 function releaseTabActions() {
-  if (actionTab.value || !tabActionsLocked) return
+  if (actionTab.value || closedTabsMenuOpen.value || !tabActionsLocked) return
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
   tabActionsLocked = false
@@ -345,6 +422,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   tabsResizeObserver?.disconnect()
+  reopenHold.cancel()
+  closedTabsMenuOpen.value = false
   closeTabActions()
   releaseTabActions()
 })

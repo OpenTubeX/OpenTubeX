@@ -73,7 +73,7 @@ test('retains complete Capacitor sessions with more than twenty tabs', () => {
   assert.equal(session.tabs.length, 44)
 
   session = closeCapacitorTab(session, 'tab-43', HOME_ROUTE)
-  session = restoreClosedCapacitorTab(session, () => 'tab-restored')
+  session = restoreClosedCapacitorTab(session, null, () => 'tab-restored')
   assert.equal(session.tabs.length, 44)
   assert.equal(session.tabs.at(-1).id, 'tab-restored')
 })
@@ -213,12 +213,44 @@ test('retains closed Capacitor tabs and restores the newest one with its history
     ['/watch/video', '/watch/next']
   )
 
-  session = restoreClosedCapacitorTab(session, () => 'tab-restored')
+  session = restoreClosedCapacitorTab(session, null, () => 'tab-restored')
   assert.equal(session.closedTabs.length, 0)
   assert.equal(session.activeTabId, 'tab-restored')
   assert.equal(session.tabs.at(-1).id, 'tab-restored')
   assert.equal(session.tabs.at(-1).route.fullPath, '/watch/next')
   assert.equal(session.tabs.at(-1).historyIndex, 1)
+})
+
+test('restores an older closed Capacitor tab and keeps the newer ones', () => {
+  let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-home')
+  session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-older'))
+  session = addCapacitorTab(session, createCapacitorTab({ path: '/watch/newer', fullPath: '/watch/newer' }, 'Newer', 'tab-newer'))
+  session = closeCapacitorTab(session, 'tab-older', HOME_ROUTE)
+  session = closeCapacitorTab(session, 'tab-newer', HOME_ROUTE)
+
+  assert.equal(restoreClosedCapacitorTab(session, 'missing'), session)
+  session = restoreClosedCapacitorTab(session, 'tab-older', () => 'tab-restored')
+  assert.deepEqual(session.closedTabs.map(tab => tab.id), ['tab-newer'])
+  assert.equal(session.activeTabId, 'tab-restored')
+  assert.equal(session.tabs.at(-1).route.fullPath, '/watch/video')
+})
+
+test('marks tabs unloaded to free memory until they load again, also after a restart', () => {
+  let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-home')
+  session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-video'), false)
+  session = unloadCapacitorTab(session, 'tab-video', true)
+  assert.equal(session.tabs[1].automaticallyUnloaded, true)
+
+  const restored = restoreCapacitorTabSession({
+    activeTabId: 'tab-home',
+    tabs: session.tabs.map(tab => ({ ...tab, isUnloaded: tab.loadState === 'unloaded', loadState: undefined }))
+  }, HOME_ROUTE)
+  assert.equal(restored.tabs[1].automaticallyUnloaded, true)
+
+  session = loadCapacitorTab(session, 'tab-video')
+  assert.equal(session.tabs[1].automaticallyUnloaded, false)
+  session = unloadCapacitorTab(session, 'tab-video')
+  assert.equal(session.tabs[1].automaticallyUnloaded, false)
 })
 
 test('converts a Capacitor session on Android WebViews without Array.toReversed', () => {

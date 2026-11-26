@@ -47,9 +47,13 @@ function setup(t, options = {}) {
   }
   const context = vm.createContext({
     computed,
+    inject: () => options.confirmation ?? null,
     nextTick,
     ref,
     watch,
+    MULTIPLE_TABS_CONFIRM_THRESHOLD: 5,
+    multipleTabsActionConfirmationKey: Symbol('confirmation'),
+    tabMediaCoordinator: { getPlaybackState: () => 'none' },
     useI18n: () => ({ t: key => key }),
     getCapacitorTabService: () => service,
     showToast: toast => calls.push(['toast', toast.message]),
@@ -107,6 +111,26 @@ test('close selection closes exactly the selected tabs and clears selection', as
   assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned', 'middle'])
   assert.deepEqual(calls, [['close', 'first'], ['close', 'last'], ['afterClose']])
   assert.equal(actions.selecting.value, false)
+})
+
+test('closing several tabs asks first and keeps them all when cancelled', async t => {
+  const prompts = []
+  let answer = false
+  const { actions, tabs, calls } = setup(t, {
+    confirmation: { confirm: async (count, action) => { prompts.push([count, action]); return answer } },
+  })
+  tabs.value = [...tabs.value, { id: 'fifth' }, { id: 'sixth' }]
+  actions.openTabActions('pinned')
+  await actions.closeRelatedTabs('other')
+  assert.deepEqual(prompts, [[5, 'close']])
+  assert.equal(tabs.value.length, 6)
+  assert.equal(actions.closingTabs.value, false)
+
+  answer = true
+  actions.openTabActions('pinned')
+  await actions.closeRelatedTabs('other')
+  assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned'])
+  assert.equal(calls.filter(call => call[0] === 'close').length, 5)
 })
 
 test('selection actions change only eligible selected tabs', async t => {
@@ -320,6 +344,8 @@ test('closing the bulk action menu restores focus after Escape and while an acti
     showActions: { value: true },
     moreButton: { value: { get disabled() { return props.busy }, focus() { focused.push('more') } } },
     controlsRoot: { value: { focus() { focused.push('controls') } } },
+    props,
+    watch() {},
     nextTick: async () => {},
     emit(event, action) {
       assert.equal(event, 'action')

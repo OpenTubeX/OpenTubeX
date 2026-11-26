@@ -121,12 +121,18 @@ export function loadCapacitorTab(session, tabId) {
       loadState: 'mounting',
       mountRevision: tab.mountRevision + 1,
       isLoading: true,
-      isPlaying: false
+      isPlaying: false,
+      automaticallyUnloaded: false
     }
   })
 }
 
-export function unloadCapacitorTab(session, tabId) {
+/**
+ * @param {object} session
+ * @param {string} tabId
+ * @param {boolean} [automatically] unloaded to free memory, not by the user
+ */
+export function unloadCapacitorTab(session, tabId, automatically = false) {
   return updateCapacitorTabRuntime(session, tabId, tab => {
     if (tab.loadState === 'unloaded' || tab.loadState === 'unloading') return tab
 
@@ -135,6 +141,7 @@ export function unloadCapacitorTab(session, tabId) {
       loadState: 'unloaded',
       isLoading: false,
       isPlaying: false,
+      automaticallyUnloaded: automatically,
       refreshKey: tab.refreshKey + 1
     }
   })
@@ -147,7 +154,8 @@ export function reloadCapacitorTab(session, tabId) {
     mountRevision: tab.mountRevision + 1,
     refreshKey: tab.refreshKey + 1,
     isLoading: true,
-    isPlaying: false
+    isPlaying: false,
+    automaticallyUnloaded: false
   }))
 }
 
@@ -200,10 +208,21 @@ export function closeCapacitorTab(session, tabId, fallbackRoute) {
   }
 }
 
-export function restoreClosedCapacitorTab(session, createId = () => window.crypto.randomUUID()) {
+/**
+ * Reopens the most recently closed tab, or the closed tab with the given ID.
+ * @param {object} session
+ * @param {string | null} [closedTabId]
+ * @param {() => string} [createId]
+ */
+export function restoreClosedCapacitorTab(session, closedTabId = null, createId = () => window.crypto.randomUUID()) {
   if (!Array.isArray(session.closedTabs) || session.closedTabs.length === 0) return session
 
-  const closedTab = session.closedTabs.at(-1)
+  const closedIndex = closedTabId == null
+    ? session.closedTabs.length - 1
+    : session.closedTabs.findIndex(tab => tab.id === closedTabId)
+  if (closedIndex === -1) return session
+
+  const closedTab = session.closedTabs[closedIndex]
   const tab = normalizePersistedTab({
     ...closedTab,
     id: createId(),
@@ -222,7 +241,7 @@ export function restoreClosedCapacitorTab(session, createId = () => window.crypt
   return {
     ...session,
     tabs,
-    closedTabs: session.closedTabs.slice(0, -1),
+    closedTabs: session.closedTabs.filter((_tab, index) => index !== closedIndex),
     activeTabId: tab.id,
     selectionRevision: session.selectionRevision + 1
   }
@@ -345,7 +364,8 @@ function normalizePersistedTab(tab, rememberHistory = true) {
       ? tab.refreshKey
       : 0,
     isLoading: tab.isLoading === true,
-    isPlaying: tab.isPlaying === true
+    isPlaying: tab.isPlaying === true,
+    automaticallyUnloaded: tab.automaticallyUnloaded === true && normalizeLoadState(tab) === 'unloaded'
   }
 }
 
