@@ -165,6 +165,8 @@ export function installViewTransitions(router, { preloadRoute = () => Promise.re
     return
   }
 
+  let navigations = 0
+  router.beforeEach(() => { navigations++ })
   router.beforeResolve(async (to) => {
     // Ignore stale requests from clicks whose navigation was cancelled
     if (navigationRequestedAt === 0 || Date.now() - navigationRequestedAt > 1000) {
@@ -178,7 +180,13 @@ export function installViewTransitions(router, { preloadRoute = () => Promise.re
     const shortMorph = shortMorphRequested
     shortMorphRequested = false
 
+    const navigation = navigations
     await loadMorphDestination(() => preloadRoute(to))
+    // A newer navigation replaces this one, which must not wrap that one in its morph
+    if (navigation !== navigations) {
+      if (source) source.style.viewTransitionName = ''
+      return
+    }
     return new Promise((resolve) => {
       const transition = document.startViewTransition(() => {
         // The old snapshot has been captured, so the thumbnail can give its
