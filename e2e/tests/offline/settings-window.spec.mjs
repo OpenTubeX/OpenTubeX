@@ -702,11 +702,11 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).not.toHaveClass(/compactSettings/)
 
-    // General's switches and selects each stack into one column.
-    for (const controls of ['.switchColumnGrid .switch-ctn', ':scope > .select .select-text']) {
-      expect(await page.locator('.generalSelectGrid').first().evaluate((grid, controls) => {
-        return new Set(Array.from(grid.querySelectorAll(controls), control => Math.round(control.getBoundingClientRect().left))).size
-      }, controls)).toBe(1)
+    // General's rows keep their icons in one column, and their selects one width.
+    for (const [controls, measure] of [['.settingsRowIcon', 'left'], ['.settingsRowControl > .select .select-text', 'width']]) {
+      expect(await page.locator('.settingsContent > [data-section="general"]').evaluate((general, [controls, measure]) => {
+        return new Set(Array.from(general.querySelectorAll(controls), control => Math.round(control.getBoundingClientRect()[measure]))).size
+      }, [controls, measure])).toBe(1)
     }
 
     const content = page.locator('.settingsContent')

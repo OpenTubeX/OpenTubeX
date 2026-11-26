@@ -681,6 +681,11 @@ Settings:
       Tooltip: Muat komentar saat halaman dibuka dan muat lebih banyak komentar saat Anda menggulir.
     Haptic Feedback: Umpan balik haptik
     Ignore System Haptics Setting: Abaikan setelan haptik sistem
+    Sections:
+      Startup and Tabs: Mulai aplikasi dan tab
+      Language and Region: Bahasa dan wilayah
+      System: Sistem
+      Browsing: Penjelajahan
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.
@@ -1427,6 +1432,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Kesejahteraan Digital"
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
+      Subscriptions and Channels: Langganan dan kanal
+      Blocked Content: Konten yang diblokir
     Hide Channel Avatars: Sembunyikan Avatar Saluran
     Shorten View Counts: Persingkat Jumlah Penayangan, Komentar dan Suka Komentar
     Hide Live Chat Replay: Sembunyikan Pemutaran Ulang Chat Langsung
@@ -1439,6 +1446,39 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
     Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
+    Rows:
+      Video Lists: Daftar video
+      Video Lists Description: Umpan, hasil pencarian, halaman kanal, dan Akan Datang
+      App Interface: Antarmuka aplikasi
+      Engagement: Interaksi
+      Comments and Chat: Komentar dan obrolan
+      Recommendations: Rekomendasi
+      Player Extras: Fitur tambahan pemutar
+    Chips:
+      Channel Avatars: Avatar kanal
+      Subscriber Counts: Jumlah pelanggan
+      Live Streams: Siaran langsung
+      Upcoming Premieres: Tayangan perdana mendatang
+      Playlist Stats: Statistik daftar putar
+      Recommendation Details: Alasan rekomendasi
+      Sharing Actions: Tindakan berbagi
+      Watched in Subscriptions: Video yang sudah ditonton di langganan
+      Watched in Search and Recommendations: Video yang sudah ditonton di pencarian dan rekomendasi
+      Startup Splash: Layar pembuka
+      Header Sync Indicator: Indikator sinkronisasi di header
+      Featured Channels: Kanal unggulan
+      Likes and Dislikes: Suka dan tidak suka
+      Comment Likes: Suka pada komentar
+      Popularity Graph: Grafik popularitas
+      Repeat Stats: Statistik pengulangan
+      Profile Pictures in Comments: Gambar profil di komentar
+      Live Chat: Obrolan langsung
+      Live Chat Replay: Pemutaran ulang obrolan langsung
+      End-Screen Recommendations: Rekomendasi layar akhir
+      End-Screen Annotations: Anotasi layar akhir
+      Paid Promotion Badge: Lencana promosi berbayar
+      A-B Repeat: Pengulangan A-B
+      Full Screen Video Title: Judul video dalam jendela penuh dan layar penuh
   Data Settings:
     Backup separate profile data: "Cadangan ini juga berisi data {count} profil terpisah, yang dipulihkan ke profil tersebut."
     Subscription cache file: "File ini hanya menyimpan cache video dari langganan Anda, bukan salurannya. Pilih profiles.db atau ekspor langganan sebagai gantinya."

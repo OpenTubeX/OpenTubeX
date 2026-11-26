@@ -683,6 +683,11 @@ Settings:
       Tooltip: Зареждане на коментарите при отваряне на страницата и на още коментари при превъртане.
     Haptic Feedback: Хаптична обратна връзка
     Ignore System Haptics Setting: Игнориране на системната настройка за хаптика
+    Sections:
+      Startup and Tabs: Стартиране и раздели
+      Language and Region: Език и регион
+      System: Система
+      Browsing: Разглеждане
   Context Menu Search Settings:
     Context Menu Search Settings: Търсене от контекстното меню
     Description: Изберете кои търсачки да се показват при щракване с десния бутон върху избран текст. Търсенията се отварят в стандартния ви браузър.
@@ -1429,6 +1434,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Дигитално благополучие"
       Visible While Paused: Видими при поставяне на пауза в режим на цял прозорец / цял екран
+      Subscriptions and Channels: Абонаменти и канали
+      Blocked Content: Блокирано съдържание
     Hide Channel Avatars: Скриване на аватарите на каналите
     Shorten View Counts: Съкращаване на броя гледания, коментари и харесвания на коментари
     Hide Live Chat Replay: Скриване на повторението на чата на живо
@@ -1443,6 +1450,39 @@ Settings:
     Add: Добавяне
     Remove: Премахване
     Hide Channel Shows: Скриване на раздел "Предавания"
+    Rows:
+      Video Lists: Списъци с видеоклипове
+      Video Lists Description: Емисии, резултати от търсене, страници на канали и „Следващ“
+      App Interface: Интерфейс на приложението
+      Engagement: Взаимодействие
+      Comments and Chat: Коментари и чат
+      Recommendations: Препоръки
+      Player Extras: Допълнения на плейъра
+    Chips:
+      Channel Avatars: Аватари на каналите
+      Subscriber Counts: Брой абонати
+      Live Streams: Предавания на живо
+      Upcoming Premieres: Предстоящи премиери
+      Playlist Stats: Статистика на плейлиста
+      Recommendation Details: Причини за препоръките
+      Sharing Actions: Действия за споделяне
+      Watched in Subscriptions: Гледани видеа в абонаментите
+      Watched in Search and Recommendations: Гледани видеа в търсенето и препоръките
+      Startup Splash: Начален екран
+      Header Sync Indicator: Индикатор за синхронизиране в заглавната лента
+      Featured Channels: Препоръчани канали
+      Likes and Dislikes: Харесвания и нехаресвания
+      Comment Likes: Харесвания на коментари
+      Popularity Graph: Графика на популярността
+      Repeat Stats: Статистика на повторенията
+      Profile Pictures in Comments: Профилни снимки в коментарите
+      Live Chat: Чат на живо
+      Live Chat Replay: Повторение на чата на живо
+      End-Screen Recommendations: Препоръки на крайния екран
+      End-Screen Annotations: Пояснения в крайния екран
+      Paid Promotion Badge: Значка за платена реклама
+      A-B Repeat: Повторение A-B
+      Full Screen Video Title: Заглавие на видеото в цял прозорец и цял екран
   Data Settings:
     Backup separate profile data: "Това архивно копие съдържа и данните на {count} отделен профил, които се възстановяват в този профил. | Това архивно копие съдържа и данните на {count} отделни профила, които се възстановяват в тези профили."
     Subscription cache file: "Този файл само кешира видеоклиповете от абонаментите ви, не каналите. Изберете profiles.db или експорт на абонаменти."

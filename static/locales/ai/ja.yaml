@@ -680,6 +680,11 @@ Settings:
       Tooltip: ページを開いたときにコメントを読み込み、スクロールに合わせてさらに読み込みます。
     Haptic Feedback: 触覚フィードバック
     Ignore System Haptics Setting: システムの触覚フィードバック設定を無視
+    Sections:
+      Startup and Tabs: 起動とタブ
+      Language and Region: 言語と地域
+      System: システム
+      Browsing: 閲覧
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "デジタル ウェルビーイング"
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
+      Subscriptions and Channels: 登録チャンネルとチャンネル
+      Blocked Content: ブロックしたコンテンツ
     Hide Channel Avatars: チャンネルのアバターを非表示
     Shorten View Counts: 視聴回数、コメント数、コメントの高評価数を省略表示
     Hide Live Chat Replay: ライブチャットのリプレイを非表示
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: 動画タイトルを表示
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
+    Rows:
+      Video Lists: 動画リスト
+      Video Lists Description: フィード、検索結果、チャンネル ページ、次の動画
+      App Interface: アプリのインターフェース
+      Engagement: エンゲージメント
+      Comments and Chat: コメントとチャット
+      Recommendations: おすすめ
+      Player Extras: プレーヤーの追加機能
+    Chips:
+      Channel Avatars: チャンネルのアバター
+      Subscriber Counts: チャンネル登録者数
+      Live Streams: ライブ配信
+      Upcoming Premieres: 今後のプレミア公開
+      Playlist Stats: 再生リストの統計
+      Recommendation Details: おすすめの理由
+      Sharing Actions: 共有ボタン
+      Watched in Subscriptions: 登録チャンネルの視聴済み動画
+      Watched in Search and Recommendations: 検索とおすすめの視聴済み動画
+      Startup Splash: 起動画面
+      Header Sync Indicator: ヘッダーの同期インジケーター
+      Featured Channels: おすすめチャンネル
+      Likes and Dislikes: 高評価と低評価
+      Comment Likes: コメントの高評価
+      Popularity Graph: 人気度グラフ
+      Repeat Stats: リピート統計
+      Profile Pictures in Comments: コメント欄のプロフィール写真
+      Live Chat: ライブチャット
+      Live Chat Replay: ライブチャットのリプレイ
+      End-Screen Recommendations: 終了画面のおすすめ
+      End-Screen Annotations: 終了画面のアノテーション
+      Paid Promotion Badge: 有料プロモーションのバッジ
+      A-B Repeat: A-Bリピート
+      Full Screen Video Title: 全ウィンドウ表示・全画面表示での動画タイトル
   Data Settings:
     Backup separate profile data: "このバックアップには、独立した {count} 件のプロフィールのデータも含まれており、それぞれのプロフィールに復元されます。"
     Subscription cache file: "このファイルには登録チャンネルの動画のキャッシュだけが含まれ、チャンネル自体は含まれません。代わりに profiles.db または登録チャンネルのエクスポートを選択してください。"

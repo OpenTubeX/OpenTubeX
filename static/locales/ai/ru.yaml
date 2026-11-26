@@ -639,6 +639,11 @@ Settings:
       Tooltip: Загружать комментарии при открытии страницы и подгружать новые при прокрутке.
     Haptic Feedback: Тактильная отдача
     Ignore System Haptics Setting: Игнорировать системную настройку тактильной отдачи
+    Sections:
+      Startup and Tabs: Запуск и вкладки
+      Language and Region: Язык и регион
+      System: Система
+      Browsing: Навигация
   Context Menu Search Settings:
     Context Menu Search Settings: Поиск из контекстного меню
     Description: Выберите поисковые системы, которые будут доступны при нажатии правой кнопкой мыши на выделенный текст. Результаты поиска откроются в браузере по умолчанию.
@@ -1383,6 +1388,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Цифровое благополучие"
       Visible While Paused: Показывать во время паузы в полнооконном и полноэкранном режимах
+      Subscriptions and Channels: Подписки и каналы
+      Blocked Content: Заблокированный контент
     Hide Channel Avatars: Скрывать аватары каналов
     Shorten View Counts: Сокращать числа просмотров, комментариев и отметок «Нравится» у комментариев
     Hide Live Chat Replay: Скрывать запись чата трансляции
@@ -1395,6 +1402,39 @@ Settings:
     Show Bottom Right Actions Dock: Показывать панель действий в правом нижнем углу
     Paused Interface Hide Delay: Задержка скрытия интерфейса во время паузы
     Hide Channel Shows: Скрыть вкладку «Шоу» канала
+    Rows:
+      Video Lists: Списки видео
+      Video Lists Description: Ленты, результаты поиска, страницы каналов и «Следующий»
+      App Interface: Интерфейс приложения
+      Engagement: Взаимодействие
+      Comments and Chat: Комментарии и чат
+      Recommendations: Рекомендации
+      Player Extras: Дополнительные функции плеера
+    Chips:
+      Channel Avatars: Аватары каналов
+      Subscriber Counts: Число подписчиков
+      Live Streams: Прямые трансляции
+      Upcoming Premieres: Предстоящие премьеры
+      Playlist Stats: Статистика плейлиста
+      Recommendation Details: Причины рекомендаций
+      Sharing Actions: Действия «Поделиться»
+      Watched in Subscriptions: Просмотренные видео в подписках
+      Watched in Search and Recommendations: Просмотренные видео в поиске и рекомендациях
+      Startup Splash: Стартовый экран
+      Header Sync Indicator: Индикатор синхронизации в заголовке
+      Featured Channels: Избранные каналы
+      Likes and Dislikes: Лайки и дизлайки
+      Comment Likes: Лайки комментариев
+      Popularity Graph: График популярности
+      Repeat Stats: Статистика повторов
+      Profile Pictures in Comments: Изображения профилей в комментариях
+      Live Chat: Чат прямой трансляции
+      Live Chat Replay: Запись чата трансляции
+      End-Screen Recommendations: Рекомендации на конечном экране
+      End-Screen Annotations: Элементы конечной заставки
+      Paid Promotion Badge: Метка платной рекламы
+      A-B Repeat: Повтор A-B
+      Full Screen Video Title: Название видео в полнооконном и полноэкранном режимах
   Data Settings:
     Backup separate profile data: "Эта резервная копия также содержит данные {count} отдельного профиля, которые будут восстановлены в этот профиль. | Эта резервная копия также содержит данные {count} отдельных профилей, которые будут восстановлены в эти профили. | Эта резервная копия также содержит данные {count} отдельных профилей, которые будут восстановлены в эти профили."
     Subscription cache file: "Этот файл лишь кеширует видео из ваших подписок, а не сами каналы. Выберите вместо него profiles.db или экспорт подписок."

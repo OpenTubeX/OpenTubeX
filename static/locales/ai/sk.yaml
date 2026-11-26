@@ -680,6 +680,11 @@ Settings:
       Tooltip: Načíta komentáre pri otvorení stránky a pri posúvaní načíta ďalšie.
     Haptic Feedback: Haptická odozva
     Ignore System Haptics Setting: Ignorovať systémové nastavenie haptiky
+    Sections:
+      Startup and Tabs: Spustenie a karty
+      Language and Region: Jazyk a oblasť
+      System: Systém
+      Browsing: Prehliadanie
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitálna pohoda"
       Visible While Paused: Viditeľné počas pozastavenia v režime celého okna alebo celej obrazovky
+      Subscriptions and Channels: Odbery a kanály
+      Blocked Content: Blokovaný obsah
     Hide Channel Avatars: Skryť avatary kanálov
     Shorten View Counts: Skrátiť počty pozretí, komentárov a označení Páči sa mi to pri komentároch
     Hide Live Chat Replay: Skryť záznam živého četu
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Zobraziť názov videa
     Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
+    Rows:
+      Video Lists: Zoznamy videí
+      Video Lists Description: Kanály, výsledky vyhľadávania, stránky kanálov a Ďalšie
+      App Interface: Rozhranie aplikácie
+      Engagement: Interakcia
+      Comments and Chat: Komentáre a chat
+      Recommendations: Odporúčania
+      Player Extras: Doplnky prehrávača
+    Chips:
+      Channel Avatars: Avatary kanálov
+      Subscriber Counts: Počty odberateľov
+      Live Streams: Živé prenosy
+      Upcoming Premieres: Nadchádzajúce premiéry
+      Playlist Stats: Štatistiky playlistu
+      Recommendation Details: Dôvody odporúčaní
+      Sharing Actions: Akcie zdieľania
+      Watched in Subscriptions: Pozreté videá v odberoch
+      Watched in Search and Recommendations: Pozreté videá vo vyhľadávaní a odporúčaniach
+      Startup Splash: Úvodná obrazovka
+      Header Sync Indicator: Indikátor synchronizácie v hlavičke
+      Featured Channels: Odporúčané kanály
+      Likes and Dislikes: Hodnotenie videa
+      Comment Likes: Hodnotenie komentárov
+      Popularity Graph: Graf popularity
+      Repeat Stats: Štatistiky opakovania
+      Profile Pictures in Comments: Profilové obrázky v komentároch
+      Live Chat: Živý chat
+      Live Chat Replay: Záznam živého četu
+      End-Screen Recommendations: Odporúčania na záverečnej obrazovke
+      End-Screen Annotations: Poznámky na záverečnej obrazovke
+      Paid Promotion Badge: Označenie platenej propagácie
+      A-B Repeat: Opakovanie A-B
+      Full Screen Video Title: Názov videa v režime celého okna a celej obrazovky
   Data Settings:
     Backup separate profile data: "Táto záloha obsahuje aj údaje {count} samostatného profilu, ktoré sa obnovia do tohto profilu. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov. | Táto záloha obsahuje aj údaje {count} samostatných profilov, ktoré sa obnovia do týchto profilov."
     Subscription cache file: "Tento súbor obsahuje iba vyrovnávaciu pamäť videí z vašich odberov, nie samotné kanály. Namiesto neho vyberte profiles.db alebo export odberov."

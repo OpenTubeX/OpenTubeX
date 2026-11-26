@@ -497,7 +497,7 @@
 .select.outlined .selectOutline {
   display: block;
   position: absolute;
-  inset-block: calc(-7px * var(--font-scale, 1)) 0;
+  inset-block: var(--select-outline-block-start, calc(-7px * var(--font-scale, 1))) 0;
   inset-inline: var(--select-outline-inline-start, 0) var(--select-indicator-space);
   min-inline-size: 0;
   margin: 0;
@@ -518,7 +518,7 @@
 .select.contentSized.outlined .selectOutline {
   position: relative;
   inset-block: auto;
-  margin-block-start: calc(-7px * var(--font-scale, 1));
+  margin-block-start: var(--select-outline-block-start, calc(-7px * var(--font-scale, 1)));
 }
 
 .select.outlined .selectLegend {
@@ -544,11 +544,11 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .select.outlined .selectOutline {
-    inset-block-start: calc(-9px * var(--font-scale, 1));
+    inset-block-start: var(--select-outline-block-start, calc(-9px * var(--font-scale, 1)));
   }
 
   .select.contentSized.outlined .selectOutline {
-    margin-block-start: calc(-9px * var(--font-scale, 1));
+    margin-block-start: var(--select-outline-block-start, calc(-9px * var(--font-scale, 1)));
   }
 
   .select.outlined .selectLegend,
@@ -580,6 +580,20 @@
 
 .select-text:disabled ~ .selectOutline :is(.select-icon, .select-label-text) {
   opacity: 0.38;
+}
+
+/* Without a legend the outline has no notch to center on the field's top edge. */
+.labelHidden {
+  --select-outline-block-start: 0;
+}
+
+.selectHiddenLabel {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
 }
 
 /* BOTTOM BARS ================================= */

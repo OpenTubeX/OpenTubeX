@@ -680,6 +680,11 @@ Settings:
       Tooltip: Charger les commentaires à l’ouverture de la page, puis en charger davantage pendant le défilement.
     Haptic Feedback: Retour haptique
     Ignore System Haptics Setting: Ignorer le réglage haptique du système
+    Sections:
+      Startup and Tabs: Démarrage et onglets
+      Language and Region: Langue et région
+      System: Système
+      Browsing: Navigation
   Context Menu Search Settings:
     Context Menu Search Settings: Recherche du menu contextuel
     Description: Choisissez les moteurs de recherche proposés lorsque vous faites un clic droit sur du texte sélectionné. Les recherches s’ouvrent dans votre navigateur par défaut.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Bien-être numérique"
       Visible While Paused: Visible pendant la pause en mode pleine fenêtre ou plein écran
+      Subscriptions and Channels: Abonnements et chaînes
+      Blocked Content: Contenu bloqué
     Hide Channel Avatars: Masquer les avatars des chaînes
     Shorten View Counts: Abréger le nombre de vues, de commentaires et de mentions J’aime sur les commentaires
     Hide Live Chat Replay: Masquer la rediffusion du chat en direct
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Afficher le titre de la vidéo
     Show Bottom Right Actions Dock: Afficher la barre d’actions en bas à droite
     Paused Interface Hide Delay: Délai avant le masquage de l’interface en pause
+    Rows:
+      Video Lists: Listes de vidéos
+      Video Lists Description: Flux, résultats de recherche, pages de chaînes et À suivre
+      App Interface: Interface de l’application
+      Engagement: Interactions
+      Comments and Chat: Commentaires et chat
+      Recommendations: Recommandations
+      Player Extras: Extras du lecteur
+    Chips:
+      Channel Avatars: Avatars des chaînes
+      Subscriber Counts: Nombre d’abonnés
+      Live Streams: Flux en direct
+      Upcoming Premieres: Avant-premières à venir
+      Playlist Stats: Statistiques de la playlist
+      Recommendation Details: Raisons des recommandations
+      Sharing Actions: Actions de partage
+      Watched in Subscriptions: Vidéos visionnées dans les abonnements
+      Watched in Search and Recommendations: Vidéos visionnées dans la recherche et les recommandations
+      Startup Splash: Écran de démarrage
+      Header Sync Indicator: Indicateur de synchronisation dans l’en-tête
+      Featured Channels: Chaînes en vedette
+      Likes and Dislikes: J’aime et Je n’aime pas
+      Comment Likes: J’aime dans les commentaires
+      Popularity Graph: Graphique de popularité
+      Repeat Stats: Statistiques de répétition
+      Profile Pictures in Comments: Photos de profil dans les commentaires
+      Live Chat: Chat en direct
+      Live Chat Replay: Rediffusion du chat en direct
+      End-Screen Recommendations: Recommandations de fin de vidéo
+      End-Screen Annotations: Annotations de fin de vidéo
+      Paid Promotion Badge: Badge de promotion rémunérée
+      A-B Repeat: Répétition A-B
+      Full Screen Video Title: Titre de la vidéo en pleine fenêtre et en plein écran
   Data Settings:
     Backup separate profile data: "Cette sauvegarde contient aussi les données de {count} profil séparé, qui sont restaurées dans ce profil. | Cette sauvegarde contient aussi les données de {count} de profils séparés, qui sont restaurées dans ces profils. | Cette sauvegarde contient aussi les données de {count} profils séparés, qui sont restaurées dans ces profils."
     Subscription cache file: "Ce fichier ne met en cache que les vidéos de vos abonnements, pas les chaînes. Choisissez plutôt profiles.db ou une exportation des abonnements."

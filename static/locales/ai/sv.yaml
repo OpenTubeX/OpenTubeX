@@ -680,6 +680,11 @@ Settings:
       Tooltip: Ladda kommentarer när sidan öppnas och ladda fler när du rullar.
     Haptic Feedback: Haptisk återkoppling
     Ignore System Haptics Setting: Ignorera systemets inställning för haptik
+    Sections:
+      Startup and Tabs: Start och flikar
+      Language and Region: Språk och region
+      System: System
+      Browsing: Navigering
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitalt välmående"
       Visible While Paused: Synligt under paus i helfönster eller helskärm
+      Subscriptions and Channels: Prenumerationer och kanaler
+      Blocked Content: Blockerat innehåll
     Hide Channel Avatars: Dölj kanalavatarer
     Shorten View Counts: Förkorta antal visningar, kommentarer och gilla-markeringar på kommentarer
     Hide Live Chat Replay: Dölj repriser av livechattar
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Visa videotitel
     Show Bottom Right Actions Dock: Visa åtgärdsfältet längst ned till höger
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
+    Rows:
+      Video Lists: Videolistor
+      Video Lists Description: Flöden, sökresultat, kanalsidor och Kommer härnäst
+      App Interface: Appens gränssnitt
+      Engagement: Engagemang
+      Comments and Chat: Kommentarer och chatt
+      Recommendations: Rekommendationer
+      Player Extras: Extra spelarfunktioner
+    Chips:
+      Channel Avatars: Kanalavatarer
+      Subscriber Counts: Antal prenumeranter
+      Live Streams: Direktsändningar
+      Upcoming Premieres: Kommande premiärer
+      Playlist Stats: Spellistestatistik
+      Recommendation Details: Orsaker till rekommendationer
+      Sharing Actions: Delningsåtgärder
+      Watched in Subscriptions: Sedda videor i prenumerationer
+      Watched in Search and Recommendations: Sedda videor i sökningar och rekommendationer
+      Startup Splash: Startskärm
+      Header Sync Indicator: Synkroniseringsindikator i apphuvudet
+      Featured Channels: Utvalda kanaler
+      Likes and Dislikes: Gilla- och ogillamarkeringar
+      Comment Likes: Gillamarkeringar på kommentarer
+      Popularity Graph: Popularitetsgraf
+      Repeat Stats: Upprepningsstatistik
+      Profile Pictures in Comments: Profilbilder i kommentarer
+      Live Chat: Livechatt
+      Live Chat Replay: Repriser av livechattar
+      End-Screen Recommendations: Rekommendationer på slutskärmen
+      End-Screen Annotations: Slutskärmsnoteringar
+      Paid Promotion Badge: Märket för betald marknadsföring
+      A-B Repeat: A-B-upprepning
+      Full Screen Video Title: Videotitel i helfönster och helskärm
   Data Settings:
     Backup separate profile data: "Den här säkerhetskopian innehåller också data från {count} separat profil, som återställs till den profilen. | Den här säkerhetskopian innehåller också data från {count} separata profiler, som återställs till de profilerna."
     Subscription cache file: "Den här filen cachar bara videorna från dina prenumerationer, inte kanalerna. Välj profiles.db eller en export av prenumerationer i stället."

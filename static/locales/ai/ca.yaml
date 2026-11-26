@@ -820,6 +820,11 @@ Settings:
       Tooltip: Carrega els comentaris en obrir la pàgina i carrega’n més mentre et desplaces.
     Haptic Feedback: Resposta hàptica
     Ignore System Haptics Setting: Ignora la configuració hàptica del sistema
+    Sections:
+      Startup and Tabs: Inici i pestanyes
+      Language and Region: Llengua i regió
+      System: Sistema
+      Browsing: Navegació
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
@@ -1699,6 +1704,8 @@ Settings:
       Watch Page: Pàgina de reproducció
       General: General
       Visible While Paused: Visible durant la pausa a finestra completa o pantalla completa
+      Subscriptions and Channels: Subscripcions i canals
+      Blocked Content: Contingut bloquejat
     Hide Channel Avatars: Oculta els avatars dels canals
     Shorten View Counts: Abreuja els recomptes de visualitzacions, de comentaris i de m'agrades dels comentaris
     Hide Live Chat Replay: Oculta la repetició del xat en directe
@@ -1741,6 +1748,39 @@ Settings:
     Paused Interface Hide Delay: Retard per ocultar la interfície en pausa
     Add: Afegeix
     Remove: Elimina
+    Rows:
+      Video Lists: Llistes de vídeos
+      Video Lists Description: Canals, resultats de cerca, pàgines de canals i A continuació
+      App Interface: Interfície de l'aplicació
+      Engagement: Interacció
+      Comments and Chat: Comentaris i xat
+      Recommendations: Recomanacions
+      Player Extras: Extres del reproductor
+    Chips:
+      Channel Avatars: Avatars dels canals
+      Subscriber Counts: Nombre de subscriptors
+      Live Streams: Emissions en directe
+      Upcoming Premieres: Properes estrenes
+      Playlist Stats: Estadístiques de la llista de reproducció
+      Recommendation Details: Motius de les recomanacions
+      Sharing Actions: Accions per compartir
+      Watched in Subscriptions: Vídeos vistos a les subscripcions
+      Watched in Search and Recommendations: Vídeos vistos a la cerca i les recomanacions
+      Startup Splash: Pantalla d’inici
+      Header Sync Indicator: Indicador de sincronització de la capçalera
+      Featured Channels: Canals destacats
+      Likes and Dislikes: M'agrada i No m'agrada
+      Comment Likes: M'agrada dels comentaris
+      Popularity Graph: Gràfic de popularitat
+      Repeat Stats: Estadístiques de repetició
+      Profile Pictures in Comments: Imatges de perfil als comentaris
+      Live Chat: Xat en directe
+      Live Chat Replay: Repetició del xat en directe
+      End-Screen Recommendations: Recomanacions de la pantalla final
+      End-Screen Annotations: Anotacions de la pantalla final
+      Paid Promotion Badge: Insígnia de promoció de pagament
+      A-B Repeat: Repetició A-B
+      Full Screen Video Title: Títol del vídeo a finestra completa i pantalla completa
   Data Settings:
     Backup separate profile data: "Aquesta còpia de seguretat també conté les dades de {count} perfil separat, que es restaura en aquest perfil. | Aquesta còpia de seguretat també conté les dades de {count} de perfils separats, que es restauren en aquests perfils. | Aquesta còpia de seguretat també conté les dades de {count} perfils separats, que es restauren en aquests perfils."
     Subscription cache file: "Aquest fitxer només desa a la memòria cau els vídeos de les teves subscripcions, no els canals. Tria profiles.db o una exportació de subscripcions."

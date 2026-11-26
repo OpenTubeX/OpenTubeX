@@ -680,6 +680,11 @@ Settings:
       Tooltip: Hlaða athugasemdum þegar síðan opnast og hlaða fleirum þegar þú flettir.
     Haptic Feedback: Snertisvörun
     Ignore System Haptics Setting: Hunsa kerfisstillingu snertisvörunar
+    Sections:
+      Startup and Tabs: Ræsing og flipar
+      Language and Region: Tungumál og svæði
+      System: Kerfi
+      Browsing: Vafur
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -1426,6 +1431,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Stafræn vellíðan"
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
+      Subscriptions and Channels: Áskriftir og rásir
+      Blocked Content: Útilokað efni
     Hide Channel Avatars: Fela auðkennismyndir rása
     Shorten View Counts: Stytta tölur yfir áhorf, athugasemdir og líkar við athugasemdir
     Hide Live Chat Replay: Fela endurspilun beinspjalls
@@ -1437,6 +1444,39 @@ Settings:
     Show Video Title: Sýna heiti myndbands
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
+    Rows:
+      Video Lists: Myndskeiðalistar
+      Video Lists Description: Straumar, leitarniðurstöður, rásasíður og Næst í spilun
+      App Interface: Viðmót forritsins
+      Engagement: Þátttaka
+      Comments and Chat: Athugasemdir og spjall
+      Recommendations: Meðmæli
+      Player Extras: Aukaeiginleikar spilara
+    Chips:
+      Channel Avatars: Auðkennismyndir rása
+      Subscriber Counts: Fjöldi áskrifenda
+      Live Streams: Streymi í beinni
+      Upcoming Premieres: Væntanlegar frumsýningar
+      Playlist Stats: Tölfræði spilunarlista
+      Recommendation Details: Ástæður tillagna
+      Sharing Actions: Deiliaðgerðir
+      Watched in Subscriptions: Skoðuð myndskeið í áskriftum
+      Watched in Search and Recommendations: Skoðuð myndskeið í leit og meðmælum
+      Startup Splash: Upphafsskjár
+      Header Sync Indicator: Samstillingarvísir í haus
+      Featured Channels: Rásir í deiglunni
+      Likes and Dislikes: Líkar og mislíkar
+      Comment Likes: Líkar við athugasemdir
+      Popularity Graph: Vinsældarit
+      Repeat Stats: Tölfræði endurtekninga
+      Profile Pictures in Comments: Auðkennismyndir í athugasemdum
+      Live Chat: Spjall í beinni
+      Live Chat Replay: Endurspilun beinspjalls
+      End-Screen Recommendations: Tillögur á lokaskjá
+      End-Screen Annotations: Skýringar á lokaskjá
+      Paid Promotion Badge: Merki um greidda kynningu
+      A-B Repeat: A-B-endurtekning
+      Full Screen Video Title: Heiti myndskeiðs í heilum glugga og á öllum skjánum
   Data Settings:
     Backup separate profile data: "Þetta afrit inniheldur einnig gögn {count} aðskilins notandasniðs, sem eru endurheimt í það notandasnið. | Þetta afrit inniheldur einnig gögn {count} aðskilinna notandasniða, sem eru endurheimt í þau notandasnið."
     Subscription cache file: "Þessi skrá geymir aðeins myndskeið úr áskriftunum þínum í skyndiminni, ekki rásirnar. Veldu frekar profiles.db eða útflutning áskrifta."

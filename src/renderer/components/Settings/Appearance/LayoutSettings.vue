@@ -50,6 +50,16 @@
         :icon="['fas', 'underline']"
         @change="store.dispatch('updateLinkUnderline', $event)"
       />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
+        :value="store.getters.getReducedMotion"
+        setting-key="reducedMotion"
+        :select-names="reducedMotionNames"
+        :select-values="REDUCED_MOTION_VALUES"
+        :icon="['fas', 'gauge']"
+        @change="store.dispatch('updateReducedMotion', $event)"
+      />
     </FtFlexBox>
     <div
       v-if="usingElectron"
@@ -524,6 +534,14 @@ const capacitorLayoutModeNames = computed(() => [
 ])
 
 const MODAL_BACKDROP_VALUES = ['blur', 'dim']
+const REDUCED_MOTION_VALUES = ['system', 'on', 'off']
+
+const reducedMotionNames = computed(() => [
+  t('Settings.General Settings.Reduced Motion.System'),
+  t('Settings.General Settings.Reduced Motion.Force On'),
+  t('Settings.General Settings.Reduced Motion.Force Off')
+])
+
 const modalBackdropNames = computed(() => [
   t('Settings.Theme Settings.Modal Backdrop.Dim and Blur'),
   t('Settings.Theme Settings.Modal Backdrop.Dim Only')

@@ -680,6 +680,11 @@ Settings:
       Tooltip: 打开页面时加载评论，并在滚动时加载更多评论。
     Haptic Feedback: 触感反馈
     Ignore System Haptics Setting: 忽略系统触感设置
+    Sections:
+      Startup and Tabs: 启动和标签页
+      Language and Region: 语言和地区
+      System: 系统
+      Browsing: 浏览
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "数字健康"
       Visible While Paused: 全窗口或全屏暂停时显示
+      Subscriptions and Channels: 订阅和频道
+      Blocked Content: 已屏蔽的内容
     Hide Channel Avatars: 隐藏频道头像
     Shorten View Counts: 简写观看次数、评论数和评论点赞数
     Hide Live Chat Replay: 隐藏直播聊天回放
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: 显示视频标题
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
+    Rows:
+      Video Lists: 视频列表
+      Video Lists Description: 订阅源、搜索结果、频道页和接下来播放
+      App Interface: 应用界面
+      Engagement: 互动
+      Comments and Chat: 评论和聊天
+      Recommendations: 推荐
+      Player Extras: 播放器附加功能
+    Chips:
+      Channel Avatars: 频道头像
+      Subscriber Counts: 订阅者人数
+      Live Streams: 直播
+      Upcoming Premieres: 即将到来的首映
+      Playlist Stats: 播放列表统计信息
+      Recommendation Details: 推荐原因
+      Sharing Actions: 分享操作
+      Watched in Subscriptions: 订阅中已观看的视频
+      Watched in Search and Recommendations: 搜索和推荐中已观看的视频
+      Startup Splash: 启动画面
+      Header Sync Indicator: 标题栏同步指示器
+      Featured Channels: 精选频道
+      Likes and Dislikes: 喜欢与不喜欢
+      Comment Likes: 评论点赞
+      Popularity Graph: 热度图
+      Repeat Stats: 循环统计
+      Profile Pictures in Comments: 评论中的个人资料图片
+      Live Chat: 在线聊天
+      Live Chat Replay: 直播聊天回放
+      End-Screen Recommendations: 片尾画面推荐内容
+      End-Screen Annotations: 片尾画面注释
+      Paid Promotion Badge: 付费推广徽章
+      A-B Repeat: A-B 循环
+      Full Screen Video Title: 全窗口和全屏时的视频标题
   Data Settings:
     Backup separate profile data: "此备份还包含 {count} 个独立个人资料的数据，这些数据将恢复到对应的个人资料中。"
     Subscription cache file: "此文件只缓存了你订阅中的视频，不包含频道本身。请改为选择 profiles.db 或订阅导出文件。"

@@ -685,6 +685,11 @@ Settings:
       Tooltip: Cargar os comentarios ao abrir a páxina e cargar máis mentres te desprazas.
     Haptic Feedback: Resposta háptica
     Ignore System Haptics Setting: Ignorar a configuración háptica do sistema
+    Sections:
+      Startup and Tabs: Inicio e lapelas
+      Language and Region: Idioma e rexión
+      System: Sistema
+      Browsing: Navegación
   Context Menu Search Settings:
     Context Menu Search Settings: Busca no menú contextual
     Description: Escolle os motores de busca que aparecen ao premer co botón dereito sobre o texto seleccionado. As buscas ábrense no navegador predeterminado.
@@ -1435,6 +1440,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Benestar dixital"
       Visible While Paused: Visibles durante a pausa en xanela completa ou pantalla completa
+      Subscriptions and Channels: Subscricións e canles
+      Blocked Content: Contido bloqueado
     Hide Channel Avatars: Ocultar os avatares das canles
     Shorten View Counts: Abreviar as cifras de visualizacións, de comentarios e de valoracións positivas dos comentarios
     Hide Live Chat Replay: Ocultar a repetición da conversa en directo
@@ -1449,6 +1456,39 @@ Settings:
     Add: Engadir
     Remove: Eliminar
     Hide Channel Shows: Agochar a lapela "Programas" da canle
+    Rows:
+      Video Lists: Listas de vídeos
+      Video Lists Description: Fontes, resultados de busca, páxinas de canles e Seguintes
+      App Interface: Interface da aplicación
+      Engagement: Interacción
+      Comments and Chat: Comentarios e conversa
+      Recommendations: Recomendacións
+      Player Extras: Extras do reprodutor
+    Chips:
+      Channel Avatars: Avatares das canles
+      Subscriber Counts: Número de subscritores
+      Live Streams: Emisións en directo
+      Upcoming Premieres: Próximas estreas
+      Playlist Stats: Estatísticas da lista de reprodución
+      Recommendation Details: Motivos das recomendacións
+      Sharing Actions: Accións de uso compartido
+      Watched in Subscriptions: Vídeos vistos nas subscricións
+      Watched in Search and Recommendations: Vídeos vistos na busca e nas recomendacións
+      Startup Splash: Pantalla de inicio
+      Header Sync Indicator: Indicador de sincronización da cabeceira
+      Featured Channels: Canles destacadas
+      Likes and Dislikes: Likes e dislikes
+      Comment Likes: Likes dos comentarios
+      Popularity Graph: Gráfico de popularidade
+      Repeat Stats: Estatísticas de repetición
+      Profile Pictures in Comments: Imaxes de perfil nos comentarios
+      Live Chat: Conversa en directo
+      Live Chat Replay: Repetición da conversa en directo
+      End-Screen Recommendations: Recomendacións da pantalla final
+      End-Screen Annotations: Anotacións da pantalla final
+      Paid Promotion Badge: Distintivo de promoción pagada
+      A-B Repeat: Repetición A-B
+      Full Screen Video Title: Título do vídeo en xanela completa e pantalla completa
   Data Settings:
     Backup separate profile data: "Esta copia de seguranza tamén contén os datos de {count} perfil separado, que se restaura nese perfil. | Esta copia de seguranza tamén contén os datos de {count} perfís separados, que se restauran eses perfís."
     Subscription cache file: "Este ficheiro só garda na caché os vídeos das túas subscricións, non as canles. Escolle profiles.db ou unha exportación de subscricións."

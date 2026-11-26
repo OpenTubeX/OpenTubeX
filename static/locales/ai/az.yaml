@@ -682,6 +682,11 @@ Settings:
       Tooltip: Səhifə açılanda şərhləri yüklə və sürüşdürdükcə daha çox şərh yüklə.
     Haptic Feedback: Haptik rəy
     Ignore System Haptics Setting: Sistemin haptik ayarına məhəl qoyma
+    Sections:
+      Startup and Tabs: Başlanğıc və vərəqlər
+      Language and Region: Dil və bölgə
+      System: Sistem
+      Browsing: Gəzinti
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekst menyusunda axtarış
     Description: Seçilmiş mətnə sağ kliklədikdə görünəcək axtarış sistemlərini seçin. Axtarışlar ilkin brauzerinizdə açılır.
@@ -1423,6 +1428,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Rəqəmsal Rifah"
       Visible While Paused: Tam pəncərədə / tam ekranda fasilə zamanı görünənlər
+      Subscriptions and Channels: Abunəliklər və kanallar
+      Blocked Content: Bloklanmış məzmun
     Hide Channel Avatars: Kanal avatarlarını gizlət
     Shorten View Counts: Baxış, şərh və şərh bəyənmə saylarını qısalt
     Hide Live Chat Replay: Canlı söhbətin təkrarını gizlət
@@ -1437,6 +1444,39 @@ Settings:
     Show Video Title: Video başlığını göstər
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
+    Rows:
+      Video Lists: Video siyahıları
+      Video Lists Description: Lentlər, axtarış nəticələri, kanal səhifələri və Növbəti
+      App Interface: Tətbiq interfeysi
+      Engagement: Qarşılıqlı əlaqə
+      Comments and Chat: Şərhlər və söhbət
+      Recommendations: Tövsiyələr
+      Player Extras: Oynadıcı əlavələri
+    Chips:
+      Channel Avatars: Kanal avatarları
+      Subscriber Counts: Abunəçi sayları
+      Live Streams: Canlı yayımlar
+      Upcoming Premieres: Yaxınlaşan premyeralar
+      Playlist Stats: Pleylist statistikası
+      Recommendation Details: Tövsiyə səbəbləri
+      Sharing Actions: Paylaşım fəaliyyətləri
+      Watched in Subscriptions: Abunəliklərdə baxılmış videolar
+      Watched in Search and Recommendations: Axtarışda və tövsiyələrdə baxılmış videolar
+      Startup Splash: Başlanğıc ekranı
+      Header Sync Indicator: Başlıqdakı sinxronizasiya göstəricisi
+      Featured Channels: Seçilmiş kanallar
+      Likes and Dislikes: Bəyənmələr və bəyənməmələr
+      Comment Likes: Şərh bəyənmələri
+      Popularity Graph: Populyarlıq qrafiki
+      Repeat Stats: Təkrar statistikası
+      Profile Pictures in Comments: Şərhlərdəki profil şəkilləri
+      Live Chat: Canlı söhbət
+      Live Chat Replay: Canlı söhbətin təkrarı
+      End-Screen Recommendations: Son ekran tövsiyələri
+      End-Screen Annotations: Son ekran qeydləri
+      Paid Promotion Badge: Ödənişli tanıtım nişanı
+      A-B Repeat: A-B təkrarı
+      Full Screen Video Title: Tam pəncərədə və tam ekranda video başlığı
   Data Settings:
     Backup separate profile data: "Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profilə bərpa olunur. | Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profillərə bərpa olunur."
     Subscription cache file: "Bu fayl yalnız abunəliklərinizin videolarını keşləyir, kanalları yox. Bunun əvəzinə profiles.db və ya abunəlik ixracını seçin."

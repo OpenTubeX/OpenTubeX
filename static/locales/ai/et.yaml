@@ -680,6 +680,11 @@ Settings:
       Tooltip: Laadi kommentaarid lehe avamisel ja laadi kerimisel rohkem kommentaare.
     Haptic Feedback: Haptiline tagasiside
     Ignore System Haptics Setting: Eira süsteemi haptika seadet
+    Sections:
+      Startup and Tabs: Käivitamine ja vahekaardid
+      Language and Region: Keel ja piirkond
+      System: Süsteem
+      Browsing: Sirvimine
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Digitaalne heaolu"
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
+      Subscriptions and Channels: Tellimused ja kanalid
+      Blocked Content: Blokeeritud sisu
     Hide Channel Avatars: Peida kanalite avatarid
     Shorten View Counts: Lühenda vaatamiste, kommentaaride ja kommentaaride meeldimiste arvu
     Hide Live Chat Replay: Peida otsevestluse kordus
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Kuva video pealkiri
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
+    Rows:
+      Video Lists: Videoloendid
+      Video Lists Description: Vood, otsingutulemused, kanalite vaated ja Järgmisena
+      App Interface: Rakenduse liides
+      Engagement: Kaasatus
+      Comments and Chat: Kommentaarid ja vestlus
+      Recommendations: Soovitused
+      Player Extras: Pleieri lisad
+    Chips:
+      Channel Avatars: Kanalite avatarid
+      Subscriber Counts: Tellijate arv
+      Live Streams: Otseülekanded
+      Upcoming Premieres: Tulevased esilinastused
+      Playlist Stats: Esitusloendi statistika
+      Recommendation Details: Soovituste põhjused
+      Sharing Actions: Jagamistoimingud
+      Watched in Subscriptions: Vaadatud videod tellimustes
+      Watched in Search and Recommendations: Vaadatud videod otsingus ja soovitustes
+      Startup Splash: Käivituskuva
+      Header Sync Indicator: Päise sünkroonimisnäidik
+      Featured Channels: Soovitatud kanalid
+      Likes and Dislikes: Meeldimised ja mittemeeldimised
+      Comment Likes: Kommentaaride meeldimised
+      Popularity Graph: Populaarsuse graafik
+      Repeat Stats: Korduste statistika
+      Profile Pictures in Comments: Kommentaaride profiilipildid
+      Live Chat: Otsevestlus
+      Live Chat Replay: Otsevestluse kordus
+      End-Screen Recommendations: Lõpuekraani soovitused
+      End-Screen Annotations: Lõpuekraani märkused
+      Paid Promotion Badge: Tasulise reklaami märk
+      A-B Repeat: A-B-kordus
+      Full Screen Video Title: Video pealkiri täisaknas ja täisekraanil
   Data Settings:
     Backup separate profile data: "See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse sellesse profiili. | See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse neisse profiilidesse."
     Subscription cache file: "See fail puhverdab ainult sinu tellimuste videoid, mitte kanaleid. Vali selle asemel profiles.db või tellimuste eksport."

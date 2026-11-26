@@ -1,5 +1,5 @@
 <template>
-  <div class="settingsCategory hideFirstSectionTitle">
+  <div class="settingsCategory">
     <GeneralSettings />
     <CommentSettings />
     <TranslationSettings v-if="SUPPORTS_LOCAL_API" />

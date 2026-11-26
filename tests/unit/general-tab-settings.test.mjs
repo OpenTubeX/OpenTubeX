@@ -7,11 +7,10 @@ import { renderToString } from 'vue/server-renderer'
 
 const source = await readFile(new URL('../../src/renderer/components/Settings/General/GeneralSettings.vue', import.meta.url), 'utf8')
 const keys = ['landingPage', 'newTabPosition', 'tabCloseFocus', 'startupBehavior']
-const selects = [...source.matchAll(/<FtSelect\s[\s\S]*?\/>/g)]
-  .map(([template]) => template)
-  .filter(template => keys.some(key => template.includes(`setting-key="${key}"`)))
-assert.equal(selects.length, keys.length)
-const render = compile(`<div>${selects.join('\n')}</div>`)
+// The Startup and Tabs section, the first of the General page, holds the tab settings.
+const startupSection = source.match(/<FtSettingsSection[\s\S]*?<\/FtSettingsSection>/)[0]
+for (const key of keys) assert.ok(startupSection.includes(`setting-key="${key}"`), key)
+const render = compile(`<div>${startupSection}</div>`)
 
 for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
   ['desktop', true, false], ['mobile', false, true], ['web', false, false],
@@ -21,9 +20,10 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
       USING_ELECTRON,
       IS_CAPACITOR,
       t: key => key,
-      store: { getters: { getTabsEnabled: true } },
+      store: { getters: { getTabsEnabled: true }, dispatch: () => {} },
       defaultPageNames: [],
       defaultPageValues: [],
+      defaultPageIcons: [],
       NEW_TAB_POSITION_VALUES: [],
       TAB_CLOSE_FOCUS_VALUES: [],
       STARTUP_BEHAVIOR_VALUES: [],
@@ -34,10 +34,12 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
       bindings[`update${key[0].toUpperCase()}${key.slice(1)}`] = () => {}
     }
     const app = createSSRApp({ render, setup: () => bindings })
-    app.component('FtSelect', {
-      inheritAttrs: false,
-      setup: (_props, { attrs }) => () => h('select', { 'data-setting': attrs['setting-key'] }),
-    })
+    const control = { inheritAttrs: false, setup: (_props, { attrs }) => () => h('select', { 'data-setting': attrs['setting-key'] }) }
+    const container = { setup: (_props, { slots }) => () => h('div', slots.default?.({})) }
+    app.component('FtSelect', control)
+    app.component('FtToggleSwitch', control)
+    app.component('FtSettingsSection', container)
+    app.component('FtSettingsRow', container)
     const html = await renderToString(app)
     for (const key of keys) {
       assert.equal(html.includes(`data-setting="${key}"`), key === 'landingPage' || USING_ELECTRON || IS_CAPACITOR, key)

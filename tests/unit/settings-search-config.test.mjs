@@ -171,6 +171,20 @@ test('distraction free search results open the tab of their setting', () => {
   assert.equal(values.filter(match => match.label === 'Digital Wellbeing').length, 1)
   // Select options are not settings of their own.
   assert.equal(values.some(match => match.label === 'Pause Playback'), false)
+  // The player's hide delays and paused interface live in Playback.
+  assert.equal(values.some(match => match.label === 'Playing Interface Hide Delay'), false)
+  const playback = createSettingsSearchIndex({
+    sections: [{ type: 'playback', title: 'Playback', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store,
+    usingElectron: true,
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }).get('playback')
+  assert.ok(playback.some(match => match.label === 'Playing Interface Hide Delay'))
+  assert.ok(playback.some(match => match.label === 'Show Bottom Right Actions Dock'))
 })
 
 for (const [platform, usingElectron, isCapacitor] of [

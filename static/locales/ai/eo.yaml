@@ -719,6 +719,11 @@ Settings:
       Tooltip: Ŝargi komentojn kiam la paĝo malfermiĝas kaj ŝargi pliajn dum vi rulumas.
     Haptic Feedback: Haptika reago
     Ignore System Haptics Setting: Ignori la sisteman agordon pri haptiko
+    Sections:
+      Startup and Tabs: Startigo kaj langetoj
+      Language and Region: Lingvo kaj regiono
+      System: Sistemo
+      Browsing: Foliumado
   Context Menu Search Settings:
     Context Menu Search Settings: Serĉo per kunteksta menuo
     Description: Elektu, kiuj serĉiloj aperas kiam vi dekstre alklakas elektitan tekston. Serĉoj malfermiĝas en via defaŭlta retumilo.
@@ -1462,6 +1467,8 @@ Settings:
     Sections:
       Digital Wellbeing: Cifereca bonfarto
       Visible While Paused: Videbla dum paŭzo en plena fenestro / plena ekrano
+      Subscriptions and Channels: Abonoj kaj kanaloj
+      Blocked Content: Blokita enhavo
     Hide Channel Avatars: Kaŝi kanalajn avatarojn
     Shorten View Counts: Mallongigi nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj
     Hide Live Chat Replay: Kaŝi reludon de tujelsenda babilejo
@@ -1474,6 +1481,39 @@ Settings:
     Show Video Title: Montri titolon de videaĵo
     Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
+    Rows:
+      Video Lists: Videaĵlistoj
+      Video Lists Description: Fluoj, serĉrezultoj, kanalopaĝoj kaj Sekve
+      App Interface: Interfaco de la aplikaĵo
+      Engagement: Interagado
+      Comments and Chat: Komentoj kaj babilejo
+      Recommendations: Rekomendoj
+      Player Extras: Ludilaj aldonaĵoj
+    Chips:
+      Channel Avatars: Kanalaj avataroj
+      Subscriber Counts: Nombroj de abonantoj
+      Live Streams: Tujelsendoj
+      Upcoming Premieres: Venontaj premieroj
+      Playlist Stats: Statistikoj de ludlisto
+      Recommendation Details: Kialoj de rekomendoj
+      Sharing Actions: Kunhavigaj agoj
+      Watched in Subscriptions: Spektitaj videaĵoj en abonoj
+      Watched in Search and Recommendations: Spektitaj videaĵoj en serĉo kaj rekomendoj
+      Startup Splash: Starta ekrano
+      Header Sync Indicator: Sinkroniga indikilo en la kapo
+      Featured Channels: Rekomenditaj kanaloj
+      Likes and Dislikes: Ŝatoj kaj malŝatoj
+      Comment Likes: Ŝatoj de komentoj
+      Popularity Graph: Populareca grafikaĵo
+      Repeat Stats: Ripetaj statistikoj
+      Profile Pictures in Comments: Avataroj en komentoj
+      Live Chat: Tujelsenda babilejo
+      Live Chat Replay: Reludo de tujelsenda babilejo
+      End-Screen Recommendations: Finekranaj rekomendoj
+      End-Screen Annotations: Finekranaj komentaroj
+      Paid Promotion Badge: Insigno de pagita reklamo
+      A-B Repeat: A-B-ripeto
+      Full Screen Video Title: Titolo de videaĵo en plena fenestro kaj plena ekrano
   Data Settings:
     Backup separate profile data: "Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} aparta profilo, kiuj restariĝos en tiu profilo. | Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} apartaj profiloj, kiuj restariĝos en tiuj profiloj."
     Subscription cache file: "Ĉi tiu dosiero nur kaŝmemoras la videojn de viaj abonoj, ne la kanalojn. Elektu anstataŭe profiles.db aŭ eksporton de abonoj."

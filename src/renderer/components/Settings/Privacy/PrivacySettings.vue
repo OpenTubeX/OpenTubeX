@@ -28,6 +28,14 @@
           setting-key="saveVideoHistoryWithLastViewedPlaylist"
           @change="updateSaveVideoHistoryWithLastViewedPlaylist"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Enable Watch Statistics')"
+          compact
+          :disabled="!rememberHistory"
+          :default-value="enableWatchStats"
+          setting-key="enableWatchStats"
+          @change="store.dispatch('updateEnableWatchStats', $event)"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -129,6 +137,17 @@
         size-to-content
         @change="updateWatchedProgressSavingMode"
       />
+      <FtSelect
+        size-to-content
+        :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
+        :value="store.getters.getStatsWeekStartsOn"
+        setting-key="statsWeekStartsOn"
+        :select-names="weekStartNames"
+        :select-values="WEEK_START_VALUES"
+        :icon="['fas', 'chart-line']"
+        :disabled="!rememberHistory || !enableWatchStats"
+        @change="store.dispatch('updateStatsWeekStartsOn', $event)"
+      />
     </div>
     <FtFlexBox>
       <FtSlider
@@ -169,7 +188,22 @@ function updateInternetConnectivityChecks(value) {
   store.dispatch('updateInternetConnectivityChecks', value)
 }
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableWatchStats = computed(() => store.getters.getEnableWatchStats)
+
+const WEEK_START_VALUES = ['0', '1', '2', '3', '4', '5', '6']
+const weekStartNames = computed(() => {
+  const formatter = new Intl.DateTimeFormat(locale.value, { weekday: 'long' })
+  const sunday = new Date(2024, 0, 7, 12)
+
+  return WEEK_START_VALUES.map((_, index) => {
+    const date = new Date(sunday)
+    date.setDate(date.getDate() + index)
+    return formatter.format(date)
+  })
+})
 
 const retentionTitleId = useId()
 const USING_ELECTRON = process.env.IS_ELECTRON

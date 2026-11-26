@@ -591,6 +591,11 @@ Settings:
     Advanced Description: Backends, Pufferung, externe Tools, Proxy und Diagnose
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Sections:
+      Startup and Tabs: Start und Tabs
+      Language and Region: Sprache und Region
+      System: System
+      Browsing: Stöbern
     Stop Watching: "Nicht mehr beobachten"
     No Watched Comments: "Es werden keine Kommentare beobachtet. Beobachte einen Kommentar mit der Glocke daneben."
     Your Comment: "Dein Kommentar"
@@ -1750,6 +1755,41 @@ Settings:
       Watch Page: Während dem Anschauen
       Subscriptions Page: Abos
       Visible While Paused: Bei pausierter Wiedergabe im Vollfenster/Vollbild sichtbar
+      Subscriptions and Channels: Abos und Kanäle
+      Blocked Content: Blockierte Inhalte
+    Rows:
+      Video Lists: Videolisten
+      Video Lists Description: Feeds, Suchergebnisse, Kanalseiten und „Nächster Titel“
+      App Interface: App-Oberfläche
+      Engagement: Interaktionen
+      Comments and Chat: Kommentare und Chat
+      Recommendations: Empfehlungen
+      Player Extras: Player-Extras
+    Chips:
+      Channel Avatars: Kanalavatare
+      Subscriber Counts: Abozahlen
+      Live Streams: Livestreams
+      Upcoming Premieres: Anstehende Premieren
+      Playlist Stats: Playlist-Statistiken
+      Recommendation Details: Empfehlungsgründe
+      Sharing Actions: Aktionen zum Teilen
+      Watched in Subscriptions: Angesehene Videos in Abos
+      Watched in Search and Recommendations: Angesehene Videos in Suche und Empfehlungen
+      Startup Splash: Startbildschirm
+      Header Sync Indicator: Synchronisierungsanzeige
+      Featured Channels: Hervorgehobene Kanäle
+      Likes and Dislikes: Likes und Dislikes
+      Comment Likes: Likes bei Kommentaren
+      Popularity Graph: Beliebtheitsdiagramm
+      Repeat Stats: Wiederholungsstatistik
+      Profile Pictures in Comments: Profilbilder in Kommentaren
+      Live Chat: Live-Chat
+      Live Chat Replay: Livechat-Wiederholung
+      End-Screen Recommendations: Empfehlungen im Abspann
+      End-Screen Annotations: Anmerkungen im Abspann
+      Paid Promotion Badge: Hinweis auf bezahlte Werbung
+      A-B Repeat: A-B-Wiederholung
+      Full Screen Video Title: Videotitel im Vollfenster/Vollbild
     Hide Channel Podcasts: 'Tab „Podcasts“ im Kanal ausblenden'
     Hide Subscriptions Videos: Videos aus Abos ausblenden
     Hide Subscriptions Shorts: Shorts aus Abos ausblenden

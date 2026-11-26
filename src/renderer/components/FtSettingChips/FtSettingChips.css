@@ -1,0 +1,103 @@
+.settingChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Material 3 filter chips. A checked chip hides what it names, so it is
+   filled and crosses its name out. */
+.settingChip {
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--secondary-text-color) 65%, transparent);
+  border-radius: var(--shape-corner-small);
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.875rem;
+  gap: 6px;
+  line-height: 1.25rem;
+  min-block-size: 32px;
+  padding-block: 5px;
+  padding-inline: 8px 12px;
+  position: relative;
+  transition: background-color var(--motion-fast-effects), border-color var(--motion-fast-effects);
+  user-select: none;
+}
+
+.settingChip:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.settingChip.checked {
+  background-color: var(--selected-container-color);
+  border-color: transparent;
+}
+
+.settingChip.checked:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--selected-container-color));
+}
+
+.settingChip.checked .settingChipText {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentcolor 60%, transparent);
+}
+
+.settingChipIcon {
+  block-size: 18px;
+  display: block;
+  color: var(--secondary-text-color);
+  flex: none;
+  inline-size: 18px;
+}
+
+.settingChip.checked .settingChipIcon {
+  color: var(--primary-text-color);
+}
+
+.settingChip.disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.settingChip.disabled:hover {
+  background-color: transparent;
+}
+
+.settingChip.checked.disabled:hover {
+  background-color: var(--selected-container-color);
+}
+
+/* The checkbox stays focusable and named for assistive technology, while the
+   chip around it shows its state and focus. */
+.settingChipInput {
+  appearance: none;
+  block-size: 100%;
+  cursor: inherit;
+  inline-size: 100%;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+/* stylelint-disable-next-line a11y/no-outline-none -- the chip shows the focus ring */
+.settingChipInput:focus-visible {
+  outline: none;
+}
+
+.settingChip:has(.settingChipInput:focus-visible) {
+  outline: var(--focus-border-width) solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* The indicators are buttons above the transparent checkbox. */
+.settingChip :deep(.syncedSettingIndicator),
+.settingChip :deep(.changedSettingIndicator) {
+  margin-inline-start: 0;
+  z-index: 1;
+}
+
+/* A chip may grow by its reset button; reserving the space would pad every chip. */
+.settingChip :deep(.changedSettingIndicatorPlaceholder) {
+  display: none;
+}

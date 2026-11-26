@@ -33,7 +33,7 @@ test('Distraction Free hides playlist stats and saves the preference', async ({ 
   const focus = await goToSettingsSection(page, 'focus')
   const toggle = focus.getByRole('checkbox', { name: 'Hide Playlist Stats' })
   await expect(toggle).not.toBeChecked()
-  await toggle.locator('..').locator('label.switch-label').click()
+  await toggle.click()
   await expect(toggle).toBeChecked()
   await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
 

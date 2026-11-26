@@ -680,6 +680,11 @@ Settings:
       Tooltip: Carica i commenti all’apertura della pagina e caricane altri mentre scorri.
     Haptic Feedback: Feedback aptico
     Ignore System Haptics Setting: Ignora l’impostazione aptica di sistema
+    Sections:
+      Startup and Tabs: Avvio e schede
+      Language and Region: Lingua e regione
+      System: Sistema
+      Browsing: Navigazione
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.
@@ -1424,6 +1429,8 @@ Settings:
     Sections:
       Digital Wellbeing: "Benessere digitale"
       Visible While Paused: Visibile durante la pausa in finestra intera o a schermo intero
+      Subscriptions and Channels: Iscrizioni e canali
+      Blocked Content: Contenuti bloccati
     Hide Channel Avatars: Nascondi avatar dei canali
     Shorten View Counts: Abbrevia conteggi delle visualizzazioni, dei commenti e dei Mi piace ai commenti
     Hide Live Chat Replay: Nascondi replica della chat dal vivo
@@ -1435,6 +1442,39 @@ Settings:
     Show Video Title: Mostra titolo del video
     Show Bottom Right Actions Dock: Mostra barra delle azioni in basso a destra
     Paused Interface Hide Delay: Ritardo prima di nascondere l'interfaccia in pausa
+    Rows:
+      Video Lists: Elenchi di video
+      Video Lists Description: Feed, risultati di ricerca, pagine dei canali e Prossimi video
+      App Interface: Interfaccia dell'app
+      Engagement: Interazioni
+      Comments and Chat: Commenti e chat
+      Recommendations: Consigli
+      Player Extras: Extra del lettore
+    Chips:
+      Channel Avatars: Avatar dei canali
+      Subscriber Counts: Numero di iscritti
+      Live Streams: Video dal vivo
+      Upcoming Premieres: Prossime Première
+      Playlist Stats: Statistiche della playlist
+      Recommendation Details: Motivi dei consigli
+      Sharing Actions: Azioni di condivisione
+      Watched in Subscriptions: Video visualizzati nelle iscrizioni
+      Watched in Search and Recommendations: Video visualizzati nella ricerca e nei consigli
+      Startup Splash: Schermata di avvio
+      Header Sync Indicator: Indicatore di sincronizzazione nell'intestazione
+      Featured Channels: Canali in evidenza
+      Likes and Dislikes: Mi piace e Non mi piace
+      Comment Likes: Mi piace dei commenti
+      Popularity Graph: Grafico di popolarità
+      Repeat Stats: Statistiche di ripetizione
+      Profile Pictures in Comments: Immagini del profilo nei commenti
+      Live Chat: Chat dal vivo
+      Live Chat Replay: Replica della chat dal vivo
+      End-Screen Recommendations: Consigli nella schermata finale
+      End-Screen Annotations: Annotazioni della schermata finale
+      Paid Promotion Badge: Badge delle promozioni a pagamento
+      A-B Repeat: Ripetizione A-B
+      Full Screen Video Title: Titolo del video in finestra intera e a schermo intero
   Data Settings:
     Backup separate profile data: "Questo backup contiene anche i dati di {count} profilo separato, che vengono ripristinati in quel profilo. | Questo backup contiene anche i dati di {count} di profili separati, che vengono ripristinati in quei profili. | Questo backup contiene anche i dati di {count} profili separati, che vengono ripristinati in quei profili."
     Subscription cache file: "Questo file memorizza nella cache solo i video delle tue iscrizioni, non i canali. Scegli invece profiles.db o un'esportazione delle iscrizioni."

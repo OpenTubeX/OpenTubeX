@@ -666,6 +666,11 @@ Settings:
       Tooltip: Load comments when the page opens and load more comments as you scroll.
     Haptic Feedback: Haptic feedback
     Ignore System Haptics Setting: Ignore system haptics setting
+    Sections:
+      Startup and Tabs: Startup and tabs
+      Language and Region: Language and region
+      System: System
+      Browsing: Browsing
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -1391,6 +1396,8 @@ Settings:
       Stop Autoplay at Bedtime and After the Daily Limit: "Stop Autoplay at Bedtime and After the Daily Limit"
     Sections:
       Digital Wellbeing: "Digital Wellbeing"
+      Subscriptions and Channels: Subscriptions and channels
+      Blocked Content: Blocked content
     Hide Popularity Graph: "Hide Popularity Graph"
     AI Video Summaries: AI video summaries
     Hide: Hide
@@ -1417,6 +1424,39 @@ Settings:
     Add: Add
     Remove: Remove
     Hide Channel Shows: Hide Channel "Shows" Tab
+    Rows:
+      Video Lists: Video lists
+      Video Lists Description: Feeds, search results, channel pages and Up Next
+      App Interface: App interface
+      Engagement: Engagement
+      Comments and Chat: Comments and chat
+      Recommendations: Recommendations
+      Player Extras: Player extras
+    Chips:
+      Channel Avatars: Channel avatars
+      Subscriber Counts: Subscriber counts
+      Live Streams: Live streams
+      Upcoming Premieres: Upcoming premieres
+      Playlist Stats: Playlist stats
+      Recommendation Details: Recommendation reasons
+      Sharing Actions: Sharing actions
+      Watched in Subscriptions: Watched videos in subscriptions
+      Watched in Search and Recommendations: Watched videos in search and recommendations
+      Startup Splash: Startup splash
+      Header Sync Indicator: Header sync indicator
+      Featured Channels: Featured channels
+      Likes and Dislikes: Likes and dislikes
+      Comment Likes: Comment likes
+      Popularity Graph: Popularity graph
+      Repeat Stats: Repeat stats
+      Profile Pictures in Comments: Profile pictures in comments
+      Live Chat: Live chat
+      Live Chat Replay: Live chat replay
+      End-Screen Recommendations: End-screen recommendations
+      End-Screen Annotations: End-screen annotations
+      Paid Promotion Badge: Paid promotion badge
+      A-B Repeat: A-B repeat
+      Full Screen Video Title: Video title in full window and full screen
   Data Settings:
     Backup separate profile data: "This backup also contains the data of {count} separate profile, which is restored into that profile. | This backup also contains the data of {count} separate profiles, which is restored into those profiles."
     Subscription cache file: "This file only caches the videos from your subscriptions, not the channels. Choose profiles.db or a subscriptions export instead."
