@@ -2764,7 +2764,6 @@ Tooltips:
     Voice-over Translation: Stuur die video-ID, duur en gekose taal na die nie-amptelike Yandex-stemoorvertaaldiens wanneer u ’n vertaling versoek. By verstek gedeaktiveer.
     Hold to Speed Up: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik met die gekose waarde te vermenigvuldig.
     Ambient Mode: Meng die video se kleure in die area rondom die speler in.
-    Mono Audio: Speel die linker- en regteroudiokanale in albei ore. Gebruik dit wanneer ’n video se klank slegs uit een kant van u oorfone kom.
     Normalize Loudness: 'Maak video''s sagter wat harder as die meeste is, sodat die volume nie tussen video''s spring nie. Sagte video''s behou hul volume. Werk slegs vir video''s wat met die plaaslike API gelaai is.'
     Default Volume: Gedeaktiveer terwyl Onthou volume geaktiveer is. Skakel Onthou volume af om ’n vaste beginvolume vir elke video te stel.
     Parallel Segment Loading: |

@@ -256,7 +256,6 @@ export const SYNC_SETTING_LABELS = {
   rememberSearchHistory: 'Settings.Privacy Settings.Remember Search History',
   rememberTabNavigationHistory: 'Settings.General Settings.Remember Tab Navigation History',
   rememberVolume: 'Settings.Player Settings.Remember Volume',
-  monoAudio: 'Settings.Player Settings.Mono Audio',
   normalizeLoudness: 'Settings.Player Settings.Normalize Loudness',
   enableTimestampNotes: 'Settings.Player Settings.Timestamp Notes.Enable',
   obsidianVault: 'Settings.Player Settings.Timestamp Notes.Obsidian Vault',

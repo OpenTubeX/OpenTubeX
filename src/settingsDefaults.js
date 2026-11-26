@@ -467,7 +467,6 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableSeekHistory: false,
     showLightsOffToggle: false,
     showVolumeBoostToggle: false,
-    monoAudio: false,
     normalizeLoudness: true,
     showMonoAudioToggle: false,
     showMirrorVideoToggle: false,

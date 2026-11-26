@@ -1021,8 +1021,8 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
       return connect.call(this, target, ...args)
     }
   })
-  const leftOnlyOutput = () => page.evaluate(async () => {
-    let node = window.__playerSources.at(-1)
+  const leftOnlyOutput = (index = -1) => page.evaluate(async (index) => {
+    let node = window.__playerSources.at(index)
     if (!node) return null
     while (node.__targets[0] !== node.context.destination) {
       node = node.__targets[0]
@@ -1040,7 +1040,7 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
     source.start()
     const rendered = await context.startRendering()
     return [rendered.getChannelData(0)[0], rendered.getChannelData(1)[0]]
-  })
+  }, index)
 
   await openDemoVideo({ app, page })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -1063,25 +1063,33 @@ test('mono audio plays every channel in both ears', async ({ app, page, attachSc
   await expect(monoButton).toHaveAttribute('aria-pressed', 'true')
   await attachScreenshot('mono audio toggle')
   await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
-  expect(await page.evaluate(() => window.$store.getters.getMonoAudio)).toBe(true)
 
-  // The setting applies to every video, so the next one starts in mono.
+  // Another video in the same tab stays in mono.
   await openMockedVideo(page, 'aqz-KE-bpKQ')
   await expect.poll(() => page.evaluate(() => window.__playerSources.length)).toBe(2)
   await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
 
-  await player.hover()
-  await openPlayerOptions(player)
-  await monoButton.click()
-  await expect(monoButton).toHaveAttribute('aria-pressed', 'false')
-  await expect.poll(leftOnlyOutput).toEqual([1, 0])
+  // A new tab starts in stereo.
+  await page.locator('.tabBar .newTabButton').click()
+  await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+  const nextPlayer = page.locator(`${activeTab} .ftVideoPlayer`)
+  await openMockedVideo(page)
+  await nextPlayer.hover()
+  await openPlayerOptions(nextPlayer)
+  const nextMonoButton = nextPlayer.locator('.shaka-overflow-menu .mono-audio-button')
+  await expect(nextMonoButton).toHaveAttribute('aria-pressed', 'false')
+  expect(await page.evaluate(() => window.__playerSources.length)).toBe(2)
 
-  // Hiding the toggle leaves the setting itself in charge.
-  await page.evaluate(() => window.$store.dispatch('updateMonoAudio', true))
-  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+  // Hiding the toggle also returns the background tab to stereo, and showing
+  // it again does not resume mono.
   await page.evaluate(() => window.$store.dispatch('updateShowMonoAudioToggle', false))
-  await expect(monoButton).toHaveCount(0)
-  await expect.poll(leftOnlyOutput).toEqual([0.5, 0.5])
+  await expect(nextMonoButton).toHaveCount(0)
+  await expect.poll(() => leftOnlyOutput(1)).toEqual([1, 0])
+  await page.evaluate(() => window.$store.dispatch('updateShowMonoAudioToggle', true))
+  await nextPlayer.hover()
+  await openPlayerOptions(nextPlayer)
+  await expect(nextMonoButton).toHaveAttribute('aria-pressed', 'false')
+  expect(await leftOnlyOutput(1)).toEqual([1, 0])
 })
 
 test.describe('mobile player menus', { tag: '@scale' }, () => {

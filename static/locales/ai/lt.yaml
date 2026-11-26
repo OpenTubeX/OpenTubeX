@@ -2912,7 +2912,6 @@ Tooltips:
   Player Settings:
     Rewind on Resume: "Tęsiant pristabdytą vaizdo įrašą grįžtama tiek sekundžių atgal, kad vėl pamatytumėte paskutines akimirkas. Nustatykite 0, kad išjungtumėte."
     Minimum Pause Before Rewinding: "Atsuka atgal tik tada, kai vaizdo įrašas buvo pristabdytas bent tiek laiko. Nustatykite 0, kad atsuktų po kiekvienos pauzės."
-    Mono Audio: 'Leidžia kairįjį ir dešinįjį garso kanalus abiem ausims. Naudokite, kai vaizdo įrašo garsas sklinda tik iš vienos ausinių pusės.'
     Normalize Loudness: 'Pritildo vaizdo įrašus, kurie garsesni už daugumą, kad garsumas nešokinėtų tarp vaizdo įrašų. Tylūs vaizdo įrašai išlaiko savo garsumą. Veikia tik su vaizdo įrašais, įkeltais per vietinį API.'
     Pause on Stream Recovery: "Kai vaizdo srautas nepavyksta ir grotuvas jį įkelia iš naujo arba perjungia į kitą formatą ar variklį, atkūrimas pristabdomas, o klaida lieka grotuvo viršuje, kol ją uždarysite. Išjungus atkūrimas tęsiamas, o klaida trumpai parodoma kaip pranešimas."
     Continue Playback When Screen Is Locked: 'Toliau leidžia garsą fone ir pateikia „Android“ medijos valdiklius. Išjunkite, kad atkūrimas būtų pristabdytas, kai programa nebematoma.'
