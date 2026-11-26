@@ -1,28 +1,32 @@
 import assert from 'node:assert/strict'
-import { execFile } from 'node:child_process'
+import { execFile, execFileSync } from 'node:child_process'
 import { writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { promisify } from 'node:util'
 import test from 'node:test'
 import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
-import { connectAndroidApp } from '../helpers/android-webview.mjs'
+import { androidAppId, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 const run = promisify(execFile)
+const serial = process.env.ANDROID_SERIAL
+const sdk = serial?.startsWith('emulator-') ? Number(execFileSync('adb', ['-s', serial, 'shell', 'getprop', 'ro.build.version.sdk'], { encoding: 'utf8' })) : 0
 
-// Install the current debug APK, hold the emulator's lab and port locks, and
-// forward its WebView. Start with ACCESS_LOCAL_NETWORK revoked and its
-// user-set/user-fixed permission flags cleared, outside the app process.
+// Run against a current debug APK on an Android 17 emulator with
+// `_scripts/androidScriptTests.mjs api37`, or forward its WebView socket and
+// set ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> and ANDROID_SERIAL.
 test('Android 17 denies LAN sync until consent and retries successfully after a grant', {
-  skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_NETWORK_SERIAL,
+  skip: !process.env.ANDROID_CDP_URL || sdk < 37,
   timeout: 180000,
 }, async () => {
-  const serial = process.env.ANDROID_NETWORK_SERIAL
-  assert.match(serial, /^emulator-\d+$/)
   const adb = async (...args) => (await run('adb', ['-s', serial, ...args], {
     timeout: 20000, maxBuffer: 8 * 1024 * 1024,
   })).stdout
-  assert.equal((await adb('shell', 'getprop', 'ro.build.version.sdk')).trim(), '37')
+  // Ask from scratch: revoke the permission and forget the earlier answer.
+  // Revoking stops the app, which connectAndroidApp starts again.
+  const permission = 'android.permission.ACCESS_LOCAL_NETWORK'
+  await adb('shell', 'pm', 'revoke', androidAppId(), permission)
+  await adb('shell', 'pm', 'clear-permission-flags', androidAppId(), permission, 'user-set', 'user-fixed')
   const requests = []
   const server = createServer((request, response) => {
     requests.push(request.url)
@@ -56,7 +60,7 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
     ;({ browser, page } = await connectAndroidApp())
     await page.locator('.profileTrigger').waitFor()
     const permission = await page.evaluate(() => window.Capacitor.nativePromise('AndroidLocalNetwork', 'checkPermissions', {}))
-    assert.notEqual(permission.localNetwork, 'granted', 'Revoke ACCESS_LOCAL_NETWORK and clear its flags outside the app, then restart and forward its WebView before this test')
+    assert.notEqual(permission.localNetwork, 'granted', 'the app starts without local network access')
     saved = await page.evaluate(url => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {

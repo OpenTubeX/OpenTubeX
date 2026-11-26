@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFile } from 'node:child_process'
+import { execFile, execFileSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 import test from 'node:test'
@@ -8,16 +8,17 @@ import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 
 const run = promisify(execFile)
+const serial = process.env.ANDROID_SERIAL
+const sdk = serial?.startsWith('emulator-') ? Number(execFileSync('adb', ['-s', serial, 'shell', 'getprop', 'ro.build.version.sdk'], { encoding: 'utf8' })) : 0
 
-// Use a current debug APK on a locked emulator with its WebView forwarded.
+// Run against a current debug APK on an Android 17 emulator with
+// `_scripts/androidScriptTests.mjs api37`, or forward its WebView socket and
+// set ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port> and ANDROID_SERIAL.
 test('Android 17 fullscreen and playback survive large-screen resizing at fractional UI scales', {
-  skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_LARGE_SCREEN_SERIAL,
+  skip: !process.env.ANDROID_CDP_URL || sdk < 37,
   timeout: 180000,
 }, async () => {
-  const serial = process.env.ANDROID_LARGE_SCREEN_SERIAL
-  assert.match(serial, /^emulator-\d+$/)
   const adb = async (...args) => (await run('adb', ['-s', serial, ...args], { timeout: 20000 })).stdout
-  assert.equal((await adb('shell', 'getprop', 'ro.build.version.sdk')).trim(), '37')
   const originalSize = (await adb('shell', 'wm', 'size')).match(/Override size: (\d+x\d+)/)?.[1]
   const originalDensity = (await adb('shell', 'wm', 'density')).match(/Override density: (\d+)/)?.[1]
   const { browser, page } = await connectAndroidApp()
