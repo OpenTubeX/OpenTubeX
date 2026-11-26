@@ -50,7 +50,7 @@
           >
             <FtIcon
               class="settingsWindowIcon"
-              :icon="['fas', 'cog']"
+              :icon="['fas', 'gear']"
               aria-hidden="true"
             />
             <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
@@ -61,7 +61,7 @@
           >
             <FtIcon
               class="settingsWindowIcon"
-              :icon="['fas', 'cog']"
+              :icon="['fas', 'gear']"
               aria-hidden="true"
             />
             <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
@@ -148,7 +148,7 @@
         ref="settingsSearchInputRef"
         class="settingsSearch"
         variant="rounded"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         input-type="search"
         :value="settingsSearchQuery"
         :placeholder="t('Settings.Search Settings')"
@@ -722,7 +722,7 @@ const windowTitle = computed(() => {
 })
 const standaloneViewIcon = computed(() => isDownloadsOpen.value
   ? ['fas', 'download']
-  : ['fas', 'info-circle'])
+  : ['fas', 'circle-info'])
 
 const settingsComponentsData = computed(() => [
   {
@@ -838,7 +838,7 @@ const settingsComponentsData = computed(() => [
     description: supportsYouTubeAccount
       ? t('Settings.Categories.Accounts and Sync Description')
       : t('Settings.Categories.Sync Description'),
-    icon: ['fas', 'sync'],
+    icon: ['fas', 'arrows-rotate'],
     hue: 170,
     group: 3,
     component: AccountsSection,
@@ -847,7 +847,7 @@ const settingsComponentsData = computed(() => [
         {
           id: 'sync',
           label: t('Settings.Sync Settings.Sync Settings'),
-          icon: ['fas', 'sync']
+          icon: ['fas', 'arrows-rotate']
         },
         {
           id: 'youtube-account',

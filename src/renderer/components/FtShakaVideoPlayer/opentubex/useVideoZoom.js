@@ -213,7 +213,7 @@ export function useVideoZoom({
       updateVideoZoom(newZoom)
     }
 
-    showValueChange(formatVideoZoom(newZoom), 'search')
+    showValueChange(formatVideoZoom(newZoom), 'magnifying-glass')
   }
 
   /**
@@ -599,7 +599,7 @@ export function useVideoZoom({
     if (!stale) {
       if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
       updateVideoZoom(finalZoom)
-      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', { revealControls: false })
+      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'magnifying-glass', { revealControls: false })
     }
     videoZoomGestureZoom.value = null
     videoZoomPinchStart = null

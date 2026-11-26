@@ -52,7 +52,7 @@ export function downloadSwipeAction(download, { t, cancel, remove }) {
   if (!active && !(download.destination && download.availability !== 'missing')) return null
   return {
     label: active ? t('Downloads.Cancel Download') : t('Downloads.Remove File'),
-    icon: ['fas', active ? 'times' : 'trash'],
+    icon: ['fas', active ? 'xmark' : 'trash'],
     undo: true,
     run: () => active ? cancel(download) : remove(download),
   }

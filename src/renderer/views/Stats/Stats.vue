@@ -549,7 +549,7 @@ async function handleResetStats(option) {
   if (option !== 'reset' || !isLocalDeviceSelected.value) { return }
 
   await store.dispatch('clearWatchStats')
-  showToast({ message: t('Stats.Reset success'), icon: ['fas', 'undo'] })
+  showToast({ message: t('Stats.Reset success'), icon: ['fas', 'arrow-rotate-left'] })
 }
 
 function toDateKey(date) {

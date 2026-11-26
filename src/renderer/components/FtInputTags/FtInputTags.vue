@@ -85,7 +85,7 @@
             @click="removeTag(tag)"
           >
             <FtIcon
-              :icon="['fas', 'times']"
+              :icon="['fas', 'xmark']"
             />
           </button>
         </li>

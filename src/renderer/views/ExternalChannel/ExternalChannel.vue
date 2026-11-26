@@ -155,7 +155,7 @@
               @click="loadMore"
               @keydown.enter.space.prevent="loadMore"
             >
-              <FtIcon :icon="['fas', 'search']" /> {{ t('Search Filters.Fetch more results') }}
+              <FtIcon :icon="['fas', 'magnifying-glass']" /> {{ t('Search Filters.Fetch more results') }}
             </div>
           </FtAutoLoadNextPageWrapper>
         </template>

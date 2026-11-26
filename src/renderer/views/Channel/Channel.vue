@@ -317,7 +317,7 @@
             @click="handleFetchMore"
             @keydown.enter.space.prevent="handleFetchMore"
           >
-            <FtIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
+            <FtIcon :icon="['fas', 'magnifying-glass']" /> {{ $t("Search Filters.Fetch more results") }}
           </div>
         </FtAutoLoadNextPageWrapper>
       </div>
@@ -1152,7 +1152,7 @@ async function getChannelLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       // Callers that restore a search wait for the channel that replaces this one
       return getChannelInfoInvidious()
     } else {
@@ -1218,7 +1218,7 @@ async function getChannelAboutLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1511,7 +1511,7 @@ async function getChannelVideosLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1686,7 +1686,7 @@ async function getChannelShortsLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1838,7 +1838,7 @@ async function getChannelLiveLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1983,7 +1983,7 @@ async function getChannelPlaylistsLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getPlaylistsInvidious()
     } else {
       isLoading.value = false
@@ -2096,7 +2096,7 @@ async function getChannelReleasesLocal() {
     showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       channelInvidiousReleases()
     } else {
       isLoading.value = false
@@ -2207,7 +2207,7 @@ async function getChannelPodcastsLocal() {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       channelInvidiousPodcasts()
     } else {
       isLoading.value = false
@@ -2309,7 +2309,7 @@ async function getChannelCoursesLocal() {
     showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       channelInvidiousCourses()
     } else {
       isLoading.value = false
@@ -2411,7 +2411,7 @@ async function getChannelShowsLocal() {
     showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       channelInvidiousShows()
     } else {
       isLoading.value = false
@@ -2532,7 +2532,7 @@ async function getCommunityPostsLocal() {
     showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       getCommunityPostsInvidious()
     } else {
       isLoading.value = false
@@ -2672,7 +2672,7 @@ async function searchChannelLocal() {
         showToast({
           message: t('Channel.This channel does not allow searching'),
           time: 5000,
-          icon: ['fas', 'search'],
+          icon: ['fas', 'magnifying-glass'],
         })
         showSearchBar.value = false
         return
@@ -2722,7 +2722,7 @@ async function searchChannelLocal() {
     showApiErrorToast(errorMessage, err)
 
     if (isNewSearch && backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       searchChannelInvidious()
     } else {
       isSearchTabLoading.value = false

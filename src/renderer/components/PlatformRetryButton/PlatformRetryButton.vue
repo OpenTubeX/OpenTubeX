@@ -10,7 +10,7 @@
   <FtButton
     v-else
     :label="t('User Playlists.SinglePlaylistView.Retry')"
-    :icon="['fas', 'sync']"
+    :icon="['fas', 'arrows-rotate']"
     @click="emit('retry')"
   />
 </template>

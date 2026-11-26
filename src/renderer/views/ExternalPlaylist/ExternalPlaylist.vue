@@ -14,7 +14,7 @@
       <FtFlexBox>
         <FtButton
           :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           @click="loadPlaylist"
         />
       </FtFlexBox>
@@ -93,7 +93,7 @@
           @click="loadMore"
           @keydown.enter.space.prevent="loadMore"
         >
-          <FtIcon :icon="['fas', 'search']" /> {{ t('Search Filters.Fetch more results') }}
+          <FtIcon :icon="['fas', 'magnifying-glass']" /> {{ t('Search Filters.Fetch more results') }}
         </div>
       </FtAutoLoadNextPageWrapper>
     </FtCard>

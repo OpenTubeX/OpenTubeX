@@ -34,7 +34,7 @@
     :title="resetLabel"
     @click.prevent.stop="resetToDefault"
   >
-    <FtIcon :icon="['fas', 'undo']" />
+    <FtIcon :icon="['fas', 'arrow-rotate-left']" />
   </button>
   <!-- Kept as reserved space rather than left out: a control that grows by an
        icon the moment its value leaves the default reflows, which can re-wrap
@@ -44,7 +44,7 @@
     class="changedSettingIndicatorPlaceholder"
     aria-hidden="true"
   >
-    <FtIcon :icon="['fas', 'undo']" />
+    <FtIcon :icon="['fas', 'arrow-rotate-left']" />
   </span>
 </template>
 

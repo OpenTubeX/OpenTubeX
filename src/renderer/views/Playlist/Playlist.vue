@@ -24,7 +24,7 @@
         <FtButton
           v-if="playlistErrorRetryable"
           :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           background-color="var(--primary-color)"
           text-color="var(--text-with-main-color)"
           @click="getPlaylistInfo"
@@ -199,7 +199,7 @@
             </p>
             <FtButton
               :label="t('User Playlists.SinglePlaylistView.Retry')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               @click="getNextPage"

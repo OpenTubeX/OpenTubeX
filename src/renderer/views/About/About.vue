@@ -133,14 +133,14 @@ const chunks = computed(() => [
     lines: [
       [
         { icon: ['fas', 'globe'], label: t('About.Website'), href: 'https://opentubex.org/' },
-        { icon: ['fas', 'file-download'], label: t('About.Downloads'), href: 'https://opentubex.org/downloads/' },
+        { icon: ['fas', 'file-arrow-down'], label: t('About.Downloads'), href: 'https://opentubex.org/downloads/' },
         { icon: ['fas', 'file-lines'], label: t('About.Changelog'), href: 'https://opentubex.org/changelog/' },
       ],
       [{ icon: ['fab', 'github'], label: t('About.GitHub releases'), href: 'https://github.com/OpenTubeX/OpenTubeX/releases' }],
     ],
   },
   {
-    icon: ['fas', 'question-circle'],
+    icon: ['fas', 'circle-question'],
     title: t('About.Help'),
     lines: [
       [
@@ -148,7 +148,7 @@ const chunks = computed(() => [
         { icon: ['fas', 'comment'], label: t('About.Discussions'), href: 'https://github.com/OpenTubeX/OpenTubeX/discussions/' },
       ],
       [{ icon: ['fas', 'graduation-cap'], label: t('About.Show tutorial'), action: showTutorial }],
-      [{ icon: ['fas', 'exclamation-circle'], label: t('About.Report a problem'), href: 'https://github.com/OpenTubeX/OpenTubeX/issues' }],
+      [{ icon: ['fas', 'circle-exclamation'], label: t('About.Report a problem'), href: 'https://github.com/OpenTubeX/OpenTubeX/issues' }],
     ],
     note: t('About.Please check for duplicates before posting'),
   },

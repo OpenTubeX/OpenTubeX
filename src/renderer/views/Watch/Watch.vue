@@ -86,7 +86,7 @@
               <span>{{ $t('Video.Waiting For Connection') }}</span>
               <FtButton
                 :label="$t('Video.Retry Now')"
-                :icon="['fas', 'sync']"
+                :icon="['fas', 'arrows-rotate']"
                 background-color="var(--primary-color)"
                 text-color="var(--text-with-main-color)"
                 @click="retryWaitingRequests"
@@ -112,7 +112,7 @@
               <span>{{ $t('Video.Waiting For Connection') }}</span>
               <FtButton
                 :label="$t('Video.Retry Now')"
-                :icon="['fas', 'sync']"
+                :icon="['fas', 'arrows-rotate']"
                 background-color="var(--primary-color)"
                 text-color="var(--text-with-main-color)"
                 @click="retryWaitingRequests"
@@ -410,7 +410,7 @@
                 class="errorWrapper"
               >
                 <ft-icon
-                  :icon="customErrorIcon || ['fas', 'exclamation-circle']"
+                  :icon="customErrorIcon || ['fas', 'circle-exclamation']"
                   aria-hidden="true"
                   class="errorIcon"
                 />
@@ -443,7 +443,7 @@
                       v-if="canRetryWithOtherPlaybackEngine"
                       class="errorActionButton"
                       :label="retryWithOtherPlaybackEngineLabel"
-                      :icon="['fas', 'sync']"
+                      :icon="['fas', 'arrows-rotate']"
                       :text-color="null"
                       :background-color="null"
                       @click="retryWithOtherPlaybackEngine"
@@ -595,7 +595,7 @@
           >
             <FtIconButton
               :title="shortsCommentsText"
-              :icon="['fas', 'comment-alt']"
+              :icon="['fas', 'message']"
               :aria-pressed="shortsCommentsOpen"
               theme="base"
               @click="toggleShortsComments"

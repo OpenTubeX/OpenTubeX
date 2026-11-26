@@ -36,7 +36,7 @@
           />
           <FtIconButton
             :title="t('Settings.Theme Settings.Custom Theme.Share Theme')"
-            :icon="['fas', 'share-alt']"
+            :icon="['fas', 'share-nodes']"
             @click="shareTheme"
           />
         </div>
@@ -108,14 +108,14 @@
         />
         <FtButton
           :label="t('Settings.Theme Settings.Custom Theme.Reset Colors')"
-          :icon="['fas', 'undo']"
+          :icon="['fas', 'arrow-rotate-left']"
           :disabled="isUsingThemeSourceColors"
           @click="resetTheme"
         />
         <FtButton
           v-if="savedTheme"
           :label="t('Settings.Theme Settings.Custom Theme.Discard Changes')"
-          :icon="['fas', 'undo']"
+          :icon="['fas', 'arrow-rotate-left']"
           :disabled="!hasChanges"
           @click="discardChanges"
         />

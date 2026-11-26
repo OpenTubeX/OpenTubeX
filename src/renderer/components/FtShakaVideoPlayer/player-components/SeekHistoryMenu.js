@@ -24,7 +24,7 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
     this.stopIconWatch_ = watch(currentIconPack, () => {
       const svg = this.icon.getSvgElement()
       svg.setAttribute('viewBox', '0 0 24 24')
-      render(h(Icon, { icon: resolveIconifyId('history'), width: 24, height: 24 }), svg)
+      render(h(Icon, { icon: resolveIconifyId('clock-rotate-left'), width: 24, height: 24 }), svg)
     }, { immediate: true })
 
     this.button.classList.add('seek-history-button', 'shaka-tooltip-status')

@@ -18,7 +18,7 @@
         :value="preset"
         :select-names="presetNames"
         :select-values="presetValues"
-        :icon="['fas', 'sliders-h']"
+        :icon="['fas', 'sliders']"
         :is-changed="preset !== 'default'"
         @change="applyPreset"
         @reset="applyPreset('default')"

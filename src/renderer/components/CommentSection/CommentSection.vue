@@ -69,7 +69,7 @@
             :disabled="offline"
             @click="reloadCommentData"
           >
-            <FtIcon :icon="['fas', 'sync']" />
+            <FtIcon :icon="['fas', 'arrows-rotate']" />
           </button>
           <button
             v-if="!phonePanelHeader || (!commentsDisabled && !phoneHeaderOverflow)"
@@ -90,7 +90,7 @@
             @click="openPhoneHeaderOverflowMenu($event.currentTarget)"
           >
             <FtIcon
-              :icon="['fas', 'ellipsis-v']"
+              :icon="['fas', 'ellipsis-vertical']"
               aria-hidden="true"
             />
           </button>
@@ -161,7 +161,7 @@
         <FtIconButton
           :title="$t('Comments.Reload Comments')"
           :disabled="offline"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           :size="14"
           :padding="8"
           class="reloadComments"
@@ -189,7 +189,7 @@
         <FtInput
           input-type="search"
           :label="$t('Comments.Search loaded comments')"
-          :icon="['fas', 'search']"
+          :icon="['fas', 'magnifying-glass']"
           :placeholder="$t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :value="commentSearchQuery"
@@ -661,7 +661,7 @@
           <FtIconButton
             :title="$t('Comments.Reload Comments')"
             :disabled="offline"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :size="12"
             :padding="8"
             class="reloadComments"
@@ -2127,7 +2127,7 @@ const phoneHeaderOverflowActions = computed(() => [
     : [{ label: t('Global.Sort By'), icon: ['fas', 'arrow-down-short-wide'], enabled: !props.offline, submenu: sortSheetActions.value }],
   {
     label: t('Comments.Reload Comments'),
-    icon: ['fas', 'sync'],
+    icon: ['fas', 'arrows-rotate'],
     enabled: !props.offline,
     run: reloadCommentData
   },
@@ -2663,7 +2663,7 @@ async function getCommentDataLocal(more = false) {
       moreCommentsLoadFailed.value = true
     } else if (backendFallback.value && backendPreference.value === 'local') {
       localCommentsInstance = undefined
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       if (props.isPostComments) {
         return getPostCommentsInvidious()
       } else {
@@ -2866,7 +2866,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     if (isMissingReplyResponseError(err)) {
       if (canFallBack) {
-        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
         await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
         return
       }
@@ -2890,7 +2890,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (canFallBack) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'right-left'] })
       await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
     } else {
       // The comments stay, as another backend could only load them again from the first page.

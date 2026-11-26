@@ -239,7 +239,7 @@ async function unlinkLatestYouTubePlaylist(id) {
  */
 export async function importYouTubeWatchHistory() {
   const message = count => i18n.global.t('Settings.YouTube Account Settings.Importing Watch History', { count })
-  const progress = startProgressBarOperation(store, { icon: ['fas', 'history'], message: message(0), percentage: 0 })
+  const progress = startProgressBarOperation(store, { icon: ['fas', 'clock-rotate-left'], message: message(0), percentage: 0 })
   // The import goes to the profile active when it started.
   const scope = getDataScope()
   try {

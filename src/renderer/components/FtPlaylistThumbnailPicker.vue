@@ -29,7 +29,7 @@
       <FtButton
         v-if="modelValue"
         :label="t('User Playlists.Restore Default Thumbnail')"
-        :icon="['fas', 'undo']"
+        :icon="['fas', 'arrow-rotate-left']"
         :disabled="loading"
         @click="emit('update:modelValue', '')"
       />

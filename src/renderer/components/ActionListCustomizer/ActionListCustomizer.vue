@@ -65,7 +65,7 @@
     </div>
     <FtButton
       :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
-      :icon="['fas', 'undo']"
+      :icon="['fas', 'arrow-rotate-left']"
       :disabled="isDefaultItems"
       theme="secondary"
       @click="resetItems"

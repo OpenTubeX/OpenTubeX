@@ -33,7 +33,7 @@
           >
             <div class="externalMediaStateContent">
               <FtIcon
-                :icon="['fas', 'exclamation-circle']"
+                :icon="['fas', 'circle-exclamation']"
                 class="externalMediaErrorIcon"
                 aria-hidden="true"
               />
@@ -49,7 +49,7 @@
                 v-if="isExternalMediaUrl(mediaUrl)"
                 class="externalMediaRetry"
                 :label="t('User Playlists.SinglePlaylistView.Retry')"
-                :icon="['fas', 'sync']"
+                :icon="['fas', 'arrows-rotate']"
                 @click="loadMedia(route.query.url)"
               />
               <FtButton
@@ -1487,7 +1487,7 @@ function playNextQueuedItem() {
     requestQueuedPlayback(tabId, fullPath)
     router.push(location)
   }
-  showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+  showToast({ message: t('Playing Next Video'), icon: ['fas', 'forward-step'] })
   return true
 }
 

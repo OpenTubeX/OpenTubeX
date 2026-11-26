@@ -1873,7 +1873,7 @@ function runApp() {
     return [
       {
         label: dockMediaLabels.previous,
-        icon: iconFor('step-backward'),
+        icon: iconFor('backward-step'),
         enabled: actions.has('previoustrack'),
         click: () => requestDockMediaAction('previoustrack', windowId)
       },
@@ -1886,7 +1886,7 @@ function runApp() {
       },
       {
         label: dockMediaLabels.next,
-        icon: iconFor('step-forward'),
+        icon: iconFor('forward-step'),
         enabled: actions.has('nexttrack'),
         click: () => requestDockMediaAction('nexttrack', windowId)
       }
@@ -1910,7 +1910,7 @@ function runApp() {
           },
           {
             label: trayTranslate('Close'),
-            icon: iconFor('times'),
+            icon: iconFor('xmark'),
             click: () => {
               trayClick(window)
               trayClosingWindowIds.add(window.id)

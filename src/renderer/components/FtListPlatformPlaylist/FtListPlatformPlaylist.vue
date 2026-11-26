@@ -83,7 +83,7 @@
           ref="menuButton"
           class="optionsButton"
           :title="t('Video.More Options')"
-          :icon="['fas', 'ellipsis-v']"
+          :icon="['fas', 'ellipsis-vertical']"
           theme="base-no-default"
           :size="16"
           @click="openOptionsMenu(menuButton.$el.querySelector('button'))"
@@ -152,7 +152,7 @@ const menuItems = computed(() => {
     items.push({
       label: t('Context Menu.Open in a New Window'),
       shortLabel: t('New Window'),
-      icon: ['fas', 'external-link-alt'],
+      icon: ['fas', 'up-right-from-square'],
       quickAction: true,
       run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewWindow: true })
     })
@@ -171,11 +171,11 @@ const menuItems = computed(() => {
     run: () => copyToClipboard(props.playlist.url)
   }, {
     label: t('Platforms.Open Website', { platform: platform.value?.name ?? props.playlist.platform }),
-    icon: PLATFORM_ICONS[props.playlist.platform] ?? ['fas', 'external-link-alt'],
+    icon: PLATFORM_ICONS[props.playlist.platform] ?? ['fas', 'up-right-from-square'],
     run: () => openExternalLink(props.playlist.url)
   })
   if (process.env.IS_CAPACITOR) {
-    items.push({ label: t('Share.Share Link'), icon: ['fas', 'share-alt'], run: () => shareLink(props.playlist.url) })
+    items.push({ label: t('Share.Share Link'), icon: ['fas', 'share-nodes'], run: () => shareLink(props.playlist.url) })
   }
   return items.map(item => item.type === 'separator' ? item : { enabled: true, ...item })
 })

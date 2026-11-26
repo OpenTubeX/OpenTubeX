@@ -31,7 +31,7 @@
         class="channelSearchInput"
         input-type="search"
         :label="t('Channels.Search bar placeholder')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="query"

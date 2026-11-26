@@ -12,7 +12,7 @@
       @blur="setFocused(false)"
       @click="dialogOpen = noHover"
     >
-      <FtIcon :icon="['fas', 'question-circle']" />
+      <FtIcon :icon="['fas', 'circle-question']" />
     </button>
     <!-- Touch screens cannot hover, and a tap would leave a focus tooltip stuck open. -->
     <FtPrompt

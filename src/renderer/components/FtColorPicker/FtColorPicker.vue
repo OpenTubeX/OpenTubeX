@@ -51,7 +51,7 @@
               :disabled="resetDisabled"
               @click="resetColor"
             >
-              <FtIcon :icon="['fas', 'undo']" />
+              <FtIcon :icon="['fas', 'arrow-rotate-left']" />
             </button>
             <button
               type="button"

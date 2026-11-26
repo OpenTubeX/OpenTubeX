@@ -54,7 +54,7 @@
           class="searchInput"
           input-type="search"
           :label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-          :icon="['fas', 'search']"
+          :icon="['fas', 'magnifying-glass']"
           :placeholder="t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :maxlength="255"

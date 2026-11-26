@@ -10,7 +10,7 @@
           tabindex="-1"
         >
           <FtIcon
-            :icon="['fas', 'history']"
+            :icon="['fas', 'clock-rotate-left']"
             class="headingIcon"
           />
           {{ t('History.History') }}
@@ -126,7 +126,7 @@
         class="historySearch"
         input-type="search"
         :label="t('History.Search bar placeholder')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="query"

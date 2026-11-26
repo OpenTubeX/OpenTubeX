@@ -65,7 +65,7 @@
             @click="reset"
           >
             <FtIcon
-              :icon="['fas', 'undo']"
+              :icon="['fas', 'arrow-rotate-left']"
               aria-hidden="true"
             />
             <span>{{ t('Home Page.Reset recommendations') }}</span>
@@ -109,7 +109,7 @@ const choices = computed(() => [
   {
     label: t('Home Page.Balanced'),
     description: t('Home Page.Balanced description'),
-    icon: ['fas', 'exchange-alt'],
+    icon: ['fas', 'right-left'],
     value: 0.2,
   },
   {

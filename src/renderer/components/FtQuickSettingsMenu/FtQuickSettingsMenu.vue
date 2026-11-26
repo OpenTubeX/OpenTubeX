@@ -66,7 +66,7 @@
           :aria-label="t('Profile.Profile Settings')"
           @click="openProfileSettings"
         >
-          <FtIcon :icon="['fas', 'sliders-h']" />
+          <FtIcon :icon="['fas', 'sliders']" />
         </button>
       </template>
       <Transition
@@ -110,7 +110,7 @@
                 :title="t('Profile.Profile Settings')"
                 @click="openProfileSettings"
               >
-                <FtIcon :icon="['fas', 'sliders-h']" />
+                <FtIcon :icon="['fas', 'sliders']" />
               </button>
             </header>
             <div
@@ -218,7 +218,7 @@
                   :title="t('Settings.Quick Settings.All Settings')"
                   @click="openSettings"
                 >
-                  <FtIcon :icon="['fas', 'cog']" />
+                  <FtIcon :icon="['fas', 'gear']" />
                 </button>
               </Teleport>
             </div>
@@ -482,7 +482,7 @@
                     type="button"
                     @click="openAbout"
                   >
-                    <FtIcon :icon="['fas', 'info-circle']" />
+                    <FtIcon :icon="['fas', 'circle-info']" />
                     <span>{{ t('About.About') }}</span>
                     <FtIcon
                       class="linkArrow"

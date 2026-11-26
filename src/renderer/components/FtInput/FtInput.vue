@@ -544,7 +544,7 @@ function renderMoreRows() {
 }
 const removeButtonSelectedIndex = ref(-1)
 const removalMade = ref(false)
-const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'search'])
+const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'magnifying-glass'])
 
 // The template also requires rows or a preview, as slots are not reactive here.
 const showOptions = computed(() => {
@@ -725,7 +725,7 @@ async function handleActionIconChange() {
 
   if (!inputDataPresent.value && props.forceActionButtonIconName === null) {
     // Change back to default icon if text is blank
-    actionButtonIconName.value = ['fas', 'search']
+    actionButtonIconName.value = ['fas', 'magnifying-glass']
     return
   }
 
@@ -768,13 +768,13 @@ async function handleActionIconChange() {
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {
         // Search with text
-        actionButtonIconName.value = ['fas', 'search']
+        actionButtonIconName.value = ['fas', 'magnifying-glass']
       }
     }
   } catch (ex) {
     // On exception, consider text as invalid URL
     if (requestId === actionIconRequestId && props.forceActionButtonIconName === null) {
-      actionButtonIconName.value = ['fas', 'search']
+      actionButtonIconName.value = ['fas', 'magnifying-glass']
     }
 
     // Rethrow exception

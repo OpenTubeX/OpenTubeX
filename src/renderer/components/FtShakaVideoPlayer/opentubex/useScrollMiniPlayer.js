@@ -198,7 +198,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const scrollMiniVolumePercent = computed(() => Math.round(scrollMiniVolume.value * 100))
   const scrollMiniVolumeIcon = computed(() => {
     if (scrollMiniVolume.value === 0) {
-      return ['fas', 'volume-mute']
+      return ['fas', 'volume-xmark']
     }
     if (scrollMiniVolume.value < 0.5) {
       return ['fas', 'volume-low']

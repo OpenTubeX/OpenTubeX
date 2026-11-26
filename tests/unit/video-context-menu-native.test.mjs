@@ -47,11 +47,11 @@ function openMenu ({ electron = false, capacitor = false, media = false, selecte
     suppressMenuHoldClick () {},
     resetMenuHold () {},
     title: { value: 'Test video' },
-    videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'step-forward'] }] },
+    videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'forward-step'] }] },
     mobileThumbnailActions: { value: [] },
     openMobileContextActions: menu => mobileMenus.push(menu),
     lightHaptic: () => { if (capacitor) haptics.push('impact') },
-    videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'step-forward'], quickAction: true }] },
+    videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'forward-step'], quickAction: true }] },
     event
   }
   vm.runInNewContext(handler + '\nopenVideoContextMenu(event)', context)

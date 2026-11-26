@@ -179,10 +179,6 @@
     "ri": "chat-1-line",
     "material": "chat-bubble-outline"
   },
-  "comment-alt": {
-    "ri": "chat-4-line",
-    "material": "chat-outline"
-  },
   "compress": {
     "ri": "fullscreen-exit-line",
     "material": "close-fullscreen-rounded"
@@ -223,25 +219,21 @@
     "ri": "download-line",
     "material": "download-rounded"
   },
-  "edit": {
+  "pen-to-square": {
     "ri": "edit-line",
     "material": "edit-outline"
   },
-  "ellipsis-h": {
+  "ellipsis": {
     "ri": "more-line",
     "material": "more-horiz"
   },
-  "ellipsis-v": {
+  "ellipsis-vertical": {
     "ri": "more-2-line",
     "material": "more-vert"
   },
-  "exchange-alt": {
+  "right-left": {
     "ri": "arrow-left-right-line",
     "material": "swap-horiz-rounded"
-  },
-  "exclamation-circle": {
-    "ri": "error-warning-line",
-    "material": "error-outline"
   },
   "expand": {
     "ri": "fullscreen-line",
@@ -251,7 +243,7 @@
     "ri": "logout-box-r-line",
     "material": "output-rounded"
   },
-  "external-link-alt": {
+  "up-right-from-square": {
     "ri": "arrow-right-up-box-line",
     "material": "open-in-new-down"
   },
@@ -264,10 +256,6 @@
     "material": "visibility-off-outline"
   },
   "file-arrow-down": {
-    "ri": "file-download-line",
-    "material": "download-2-outline"
-  },
-  "file-download": {
     "ri": "file-download-line",
     "material": "download-2-outline"
   },
@@ -395,10 +383,6 @@
     "ri": "heart-fill",
     "material": "favorite"
   },
-  "history": {
-    "ri": "history-line",
-    "material": "history-rounded"
-  },
   "house": {
     "ri": "home-5-line",
     "material": "home-outline"
@@ -414,10 +398,6 @@
   "import": {
     "ri": "login-box-line",
     "material": "input-rounded"
-  },
-  "info-circle": {
-    "ri": "information-line",
-    "material": "info-outline"
   },
   "key": {
     "ri": "key-2-line",
@@ -547,7 +527,7 @@
     "ri": "qr-code-line",
     "material": "qr-code-2-rounded"
   },
-  "question-circle": {
+  "circle-question": {
     "ri": "question-line",
     "material": "help-outline"
   },
@@ -555,7 +535,7 @@
     "ri": "play-list-2-line",
     "material": "playlist-play-rounded"
   },
-  "random": {
+  "shuffle": {
     "ri": "shuffle-line",
     "material": "shuffle-rounded"
   },
@@ -619,15 +599,11 @@
     "ri": "scissors-cut-line",
     "material": "content-cut-rounded"
   },
-  "search": {
-    "ri": "search-line",
-    "material": "search-rounded"
-  },
   "server": {
     "ri": "server-line",
     "material": "dns-outline"
   },
-  "share-alt": {
+  "share-nodes": {
     "ri": "share-line",
     "material": "share-outline"
   },
@@ -643,7 +619,7 @@
     "ri": "subtract-line",
     "material": "block"
   },
-  "sliders-h": {
+  "sliders": {
     "ri": "equalizer-line",
     "material": "tune-rounded"
   },
@@ -651,11 +627,11 @@
     "ri": "smartphone-line",
     "material": "smartphone-outline"
   },
-  "sort-alpha-down": {
+  "arrow-down-a-z": {
     "ri": "sort-alphabet-asc",
     "material": "sort-by-alpha-rounded"
   },
-  "sort-alpha-down-alt": {
+  "arrow-down-z-a": {
     "ri": "sort-alphabet-desc",
     "material": "sort-by-alpha-za-rounded"
   },
@@ -663,11 +639,11 @@
     "ri": "speaker-line",
     "material": "speaker-outline-rounded"
   },
-  "step-backward": {
+  "backward-step": {
     "ri": "skip-back-line",
     "material": "skip-previous-rounded"
   },
-  "step-forward": {
+  "forward-step": {
     "ri": "skip-forward-mini-line",
     "material": "skip-next-rounded"
   },
@@ -679,7 +655,7 @@
     "ri": "sun-line",
     "material": "light-mode-outline"
   },
-  "sync": {
+  "arrows-rotate": {
     "ri": "refresh-line",
     "material": "sync-rounded"
   },
@@ -723,11 +699,7 @@
     "ri": "coupon-line",
     "material": "confirmation-number-outline"
   },
-  "times": {
-    "ri": "close-line",
-    "material": "close-rounded"
-  },
-  "times-circle": {
+  "circle-xmark": {
     "ri": "close-circle-line",
     "material": "cancel-outline"
   },
@@ -755,7 +727,7 @@
     "ri": "underline",
     "material": "format-underlined-rounded"
   },
-  "undo": {
+  "arrow-rotate-left": {
     "ri": "arrow-go-back-line",
     "material": "undo-rounded"
   },
@@ -811,10 +783,6 @@
     "ri": "volume-down-line",
     "material": "volume-down-rounded"
   },
-  "volume-mute": {
-    "ri": "volume-mute-line",
-    "material": "volume-off-rounded"
-  },
   "wallpaper": {
     "ri": "landscape-line",
     "material": "wallpaper-rounded"
@@ -869,41 +837,182 @@
     "ri": "arrow-right-s-line",
     "material": "keyboard-arrow-right-rounded"
   },
-  "twitch": { "ri": "video-line", "material": "movie-outline", "simple": "twitch" },
-  "vimeo": { "ri": "video-line", "material": "movie-outline", "simple": "vimeo" },
-  "dailymotion": { "ri": "video-line", "material": "movie-outline", "simple": "dailymotion" },
-  "soundcloud": { "ri": "video-line", "material": "movie-outline", "simple": "soundcloud" },
-  "bandcamp": { "ri": "video-line", "material": "movie-outline", "simple": "bandcamp" },
-  "bilibili": { "ri": "video-line", "material": "movie-outline", "simple": "bilibili" },
-  "odysee": { "ri": "video-line", "material": "movie-outline", "simple": "odysee" },
-  "peertube": { "ri": "video-line", "material": "movie-outline", "simple": "peertube" },
-  "rumble": { "ri": "video-line", "material": "movie-outline", "simple": "rumble" },
-  "ccc": { "ri": "video-line", "material": "movie-outline", "simple": "ccc" },
-  "internetarchive": { "ri": "video-line", "material": "movie-outline", "simple": "internetarchive" },
-  "mixcloud": { "ri": "video-line", "material": "movie-outline", "simple": "mixcloud" },
-  "kick": { "ri": "video-line", "material": "movie-outline", "simple": "kick" },
-  "niconico": { "ri": "video-line", "material": "movie-outline", "simple": "niconico" },
-  "tiktok": { "ri": "video-line", "material": "movie-outline", "simple": "tiktok" },
-  "instagram": { "ri": "video-line", "material": "movie-outline", "simple": "instagram" },
-  "x": { "ri": "video-line", "material": "movie-outline", "simple": "x" },
-  "twitter": { "ri": "video-line", "material": "movie-outline", "simple": "twitter" },
-  "facebook": { "ri": "video-line", "material": "movie-outline", "simple": "facebook" },
-  "reddit": { "ri": "video-line", "material": "movie-outline", "simple": "reddit" },
-  "crunchyroll": { "ri": "video-line", "material": "movie-outline", "simple": "crunchyroll" },
-  "snapchat": { "ri": "link", "material": "link-rounded", "simple": "snapchat" },
-  "tumblr": { "ri": "link", "material": "link-rounded", "simple": "tumblr" },
-  "patreon": { "ri": "link", "material": "link-rounded", "simple": "patreon" },
-  "goodreads": { "ri": "link", "material": "link-rounded", "simple": "goodreads" },
-  "discord": { "ri": "link", "material": "link-rounded", "simple": "discord" },
-  "linkedin": { "ri": "link", "material": "link-rounded", "simple": "linkedin" },
-  "pinterest": { "ri": "link", "material": "link-rounded", "simple": "pinterest" },
-  "spotify": { "ri": "link", "material": "link-rounded", "simple": "spotify" },
-  "medium": { "ri": "link", "material": "link-rounded", "simple": "medium" },
-  "bell": { "ri": "notification-3-fill", "material": "notifications-active-rounded" },
-  "bell-outline": { "ri": "notification-3-line", "material": "notifications-outline-rounded" },
-  "bell-plain": { "ri": "notification-3-fill", "material": "notifications-rounded" },
-  "bell-slash": { "ri": "notification-off-line", "material": "notifications-off-outline-rounded" },
-  "text-color": { "ri": "font-color", "material": "format-color-text-rounded" },
-  "opacity": { "ri": "contrast-drop-2-line", "material": "opacity-rounded" },
-  "fill-color": { "ri": "paint-line", "material": "format-color-fill-rounded" }
+  "twitch": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "twitch"
+  },
+  "vimeo": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "vimeo"
+  },
+  "dailymotion": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "dailymotion"
+  },
+  "soundcloud": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "soundcloud"
+  },
+  "bandcamp": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "bandcamp"
+  },
+  "bilibili": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "bilibili"
+  },
+  "odysee": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "odysee"
+  },
+  "peertube": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "peertube"
+  },
+  "rumble": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "rumble"
+  },
+  "ccc": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "ccc"
+  },
+  "internetarchive": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "internetarchive"
+  },
+  "mixcloud": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "mixcloud"
+  },
+  "kick": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "kick"
+  },
+  "niconico": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "niconico"
+  },
+  "tiktok": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "tiktok"
+  },
+  "instagram": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "instagram"
+  },
+  "x": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "x"
+  },
+  "twitter": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "twitter"
+  },
+  "facebook": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "facebook"
+  },
+  "reddit": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "reddit"
+  },
+  "crunchyroll": {
+    "ri": "video-line",
+    "material": "movie-outline",
+    "simple": "crunchyroll"
+  },
+  "snapchat": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "snapchat"
+  },
+  "tumblr": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "tumblr"
+  },
+  "patreon": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "patreon"
+  },
+  "goodreads": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "goodreads"
+  },
+  "discord": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "discord"
+  },
+  "linkedin": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "linkedin"
+  },
+  "pinterest": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "pinterest"
+  },
+  "spotify": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "spotify"
+  },
+  "medium": {
+    "ri": "link",
+    "material": "link-rounded",
+    "simple": "medium"
+  },
+  "bell": {
+    "ri": "notification-3-fill",
+    "material": "notifications-active-rounded"
+  },
+  "bell-outline": {
+    "ri": "notification-3-line",
+    "material": "notifications-outline-rounded"
+  },
+  "bell-plain": {
+    "ri": "notification-3-fill",
+    "material": "notifications-rounded"
+  },
+  "bell-slash": {
+    "ri": "notification-off-line",
+    "material": "notifications-off-outline-rounded"
+  },
+  "text-color": {
+    "ri": "font-color",
+    "material": "format-color-text-rounded"
+  },
+  "opacity": {
+    "ri": "contrast-drop-2-line",
+    "material": "opacity-rounded"
+  },
+  "fill-color": {
+    "ri": "paint-line",
+    "material": "format-color-fill-rounded"
+  }
 }

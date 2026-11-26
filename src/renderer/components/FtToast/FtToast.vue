@@ -307,7 +307,7 @@ const progressToasts = computed(() => {
   const toasts = store.getters.getProgressOperations.map(operation => ({
     key: operation.id,
     testId: 'progress-toast',
-    icon: operation.icon ?? ['fas', 'sync'],
+    icon: operation.icon ?? ['fas', 'arrows-rotate'],
     message: operation.message || t('Settings.Theme Settings.Operation in Progress'),
     percentage: operation.percentage ?? 0
   }))
@@ -468,7 +468,7 @@ function open(event) {
   if (buttonAction === 'open-sync-settings') {
     buttons = [{
       label: t('Settings.Sync Settings.Sync Settings'),
-      icon: ['fas', 'sync'],
+      icon: ['fas', 'arrows-rotate'],
       action: () => {
         store.commit('setSettingsWindowSection', 'sync')
         store.dispatch('showSettingsWindow')

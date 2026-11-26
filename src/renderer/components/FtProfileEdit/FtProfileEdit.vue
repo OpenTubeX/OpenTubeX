@@ -186,7 +186,7 @@
                 <FtButton
                   v-if="profileIcon && profileIcon.type !== 'initial'"
                   :label="$t('Profile.Use Initial')"
-                  :icon="['fas', 'undo']"
+                  :icon="['fas', 'arrow-rotate-left']"
                   @click="clearProfileIcon"
                 />
               </FtFlexBox>

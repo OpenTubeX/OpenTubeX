@@ -19,7 +19,7 @@ const ALERT_TOAST_ICONS = new Set(['circle-exclamation', 'triangle-exclamation']
  */
 export function isImportantToast({ icon, buttons, buttonAction, important }) {
   return important === true ||
-    (buttons ?? []).some(button => button.icon?.[1] !== 'undo') ||
+    (buttons ?? []).some(button => button.icon?.[1] !== 'arrow-rotate-left') ||
     buttonAction != null ||
     ALERT_TOAST_ICONS.has(icon?.[1] ?? '')
 }

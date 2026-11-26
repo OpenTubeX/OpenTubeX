@@ -28,12 +28,12 @@ export function getIconForSortPreference(sortPreference) {
     case 'author_descending':
     case 'video_title_descending':
       // text descending
-      return ['fas', 'sort-alpha-down-alt']
+      return ['fas', 'arrow-down-z-a']
     case 'name_ascending':
     case 'author_ascending':
     case 'video_title_ascending':
       // text ascending
-      return ['fas', 'sort-alpha-down']
+      return ['fas', 'arrow-down-a-z']
     case 'latest_updated_first':
     case 'latest_created_first':
     case 'latest_played_first':
@@ -916,7 +916,7 @@ export async function openInExternalPlayer(payload) {
 
   showToast({
     message: i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }),
-    icon: ['fas', 'external-link-alt'],
+    icon: ['fas', 'up-right-from-square'],
   })
   return true
 }
