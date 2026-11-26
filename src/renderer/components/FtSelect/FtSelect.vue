@@ -64,11 +64,17 @@
         aria-hidden="true"
       />
       <span class="selectValueBox">
-        <!-- Sizes a content-sized select by a fixed name, so choosing another option never resizes it. -->
+        <!-- Sizes a content-sized select by fixed names, so choosing another option never resizes it. -->
         <span
           v-if="sizerNames"
           class="selectValueSizer"
           :data-names="sizerNames"
+          aria-hidden="true"
+        />
+        <span
+          v-if="cappedSizerNames"
+          class="selectValueSizer capped"
+          :data-names="cappedSizerNames"
           aria-hidden="true"
         />
         <span
@@ -590,19 +596,23 @@ const selectedName = computed(() => selectedIndices.value.map(index => props.sel
 
 /**
  * Content-sized selects take the width of their default option, so choosing
- * another one never resizes them, and longer values truncate. Multi-selects
- * and selects without a listed default reserve their longest option instead.
+ * another one never resizes them. Their other options get room up to a capped
+ * width, and only longer values truncate. Multi-selects and selects without a
+ * listed default reserve their longest option instead.
  */
+const allSizerNames = computed(() => [...props.selectNames, props.emptyLabel].filter(Boolean).join('\n'))
+const defaultSizerIndex = computed(() => {
+  if (!props.sizeToContent || props.multiple || !props.settingKey || !Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)) {
+    return -1
+  }
+  const defaultValue = String(DEFAULT_SETTINGS[props.settingKey])
+  return props.selectValues.findIndex(value => String(value) === defaultValue)
+})
 const sizerNames = computed(() => {
   if (!props.sizeToContent) return null
-  const defaultValue = !props.multiple && props.settingKey && Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)
-    ? String(DEFAULT_SETTINGS[props.settingKey])
-    : null
-  const index = defaultValue === null ? -1 : props.selectValues.findIndex(value => String(value) === defaultValue)
-  return index === -1
-    ? [...props.selectNames, props.emptyLabel].filter(Boolean).join('\n')
-    : props.selectNames[index]
+  return defaultSizerIndex.value === -1 ? allSizerNames.value : props.selectNames[defaultSizerIndex.value]
 })
+const cappedSizerNames = computed(() => defaultSizerIndex.value === -1 ? null : allSizerNames.value)
 const hasOptionVisuals = computed(() =>
   props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
   props.optionIcons.some(icon => Array.isArray(icon))

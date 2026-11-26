@@ -155,6 +155,11 @@
   white-space: pre;
 }
 
+/* Other options than the default widen the field only up to this width. */
+.selectValueSizer.capped {
+  max-inline-size: 12em;
+}
+
 .selectedValue {
   display: block;
   line-height: 20px;
@@ -164,7 +169,7 @@
 }
 
 /* The value truncates instead of resizing the select. */
-.selectValueSizer + .selectedValue {
+.selectValueSizer ~ .selectedValue {
   contain: inline-size;
 }
 
