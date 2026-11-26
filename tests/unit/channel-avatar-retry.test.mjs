@@ -31,13 +31,23 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   const timers = new Map()
   const observers = []
   const settings = Vue.reactive({ getUseDataSaverThumbnails: false })
+  class IntersectionObserver {
+    constructor(callback) { this.callback = callback; observers.push(this) }
+    observe(image) { this.image = image }
+    disconnect() { this.disconnected = true }
+  }
   const RetryImage = await compileComponent('FtRetryImage.vue', {
     process: { env: { IS_CAPACITOR: isCapacitor } },
     store: { getters: settings },
-    IntersectionObserver: class {
-      constructor(callback) { this.callback = callback; observers.push(this) }
-      observe(image) { this.image = image }
-      disconnect() { this.disconnected = true }
+    // One observer per wait, like the shared helper's first sighting.
+    observeFirstVisible: (element, callback) => {
+      const observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return
+        observer.disconnect()
+        callback()
+      })
+      observer.observe(element)
+      return () => observer.disconnect()
     },
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async (src, instance, authorization) => { requests.push(src); instances.push(instance); authorizations.push(authorization); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     FtIcon: { render: () => Vue.h('fallback') },

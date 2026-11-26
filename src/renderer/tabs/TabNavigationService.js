@@ -4,6 +4,8 @@ import { START_LOCATION } from 'vue-router'
 import { translateWindowTitle } from '../helpers/strings'
 import { isAppHidden } from '../helpers/appVisibility'
 import {
+  cancelPendingViewTransition,
+  getViewTransitionRequestId,
   hasPendingViewTransition,
   runPendingViewTransition,
   takePendingViewTransition
@@ -270,9 +272,12 @@ export class TabNavigationService {
     // mounting and a lifecycle hook both pushing) don't read the same history
     // snapshot and clobber each other's setTabNavigation commit.
     const previous = this.navigationQueuesByTabId.get(tabId) ?? Promise.resolve()
+    // A click requests its thumbnail morph right before navigating the tab it
+    // was in. Navigations of other tabs must not cancel that request.
+    const morphRequestId = tabId === this.getPresentedTabId() ? getViewTransitionRequestId() : null
     const run = previous
       .catch(() => {})
-      .then(() => this._performNavigate(tabId, location, mode, historyState))
+      .then(() => this._performNavigate(tabId, location, mode, historyState, morphRequestId))
     this.navigationQueuesByTabId.set(tabId, run)
 
     try {
@@ -284,7 +289,7 @@ export class TabNavigationService {
     }
   }
 
-  async _performNavigate(tabId, location, mode, historyState = null) {
+  async _performNavigate(tabId, location, mode, historyState = null, morphRequestId = null) {
     const tab = this.store.getters.getTabById(tabId)
     if (!tab) {
       return
@@ -322,6 +327,8 @@ export class TabNavigationService {
     const discardCurrentEntry = !sameRoute && isUnresolvedWatchEntry(tab, from)
 
     if (mode === 'push' && sameRoute) {
+      // The click's thumbnail morph would otherwise attach to a later tab switch.
+      cancelPendingViewTransition(morphRequestId)
       return
     }
 
@@ -348,6 +355,7 @@ export class TabNavigationService {
       for (const hook of this.beforeEachHooksByTabId.get(tabId) ?? []) {
         const result = await hook(to, from)
         if (result === false) {
+          cancelPendingViewTransition(morphRequestId)
           return
         }
       }

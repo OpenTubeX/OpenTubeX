@@ -3,6 +3,7 @@ import i18n from '../../../i18n/index'
 import store from '../../../store/index'
 import { keepControlsShown } from '../../../helpers/player/keepControlsShown'
 import { updateSponsorBlockSeekBarState } from '../../../helpers/player/sponsorBlockSeekBar'
+import { applyAnimationSpeed } from '../../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
 
@@ -181,10 +182,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       const progress = this.pointer ? (strip.bottom - this.pointer.y) / (strip.height / 2) : 0
       hint.style.setProperty('--ft-seek-precise-progress', String(Math.min(1, Math.max(0, progress))))
       if (switched && !isReducedMotionEnabled()) {
-        hint.animate({ scale: [1, 1.08, 1] }, { duration: 240, easing: 'ease-out' })
+        applyAnimationSpeed(hint.animate({ scale: [1, 1.08, 1] }, { duration: 240, easing: 'ease-out' }))
         // The new label follows the pointer: up into precise seeking, down out of it.
         const offset = this.precise ? '100%' : '-100%'
-        hintLabel.animate({ translate: [`0 ${offset}`, '0 0'], opacity: [0, 1] }, { duration: 200, easing: 'ease-out' })
+        applyAnimationSpeed(hintLabel.animate({ translate: [`0 ${offset}`, '0 0'], opacity: [0, 1] }, { duration: 200, easing: 'ease-out' }))
       }
     }
     this.container.classList.toggle('ft-seek-filmstrip-pullable', available)

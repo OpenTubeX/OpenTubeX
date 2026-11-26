@@ -456,6 +456,7 @@ import FtDataScopeNotice from '../../components/FtDataScopeNotice/FtDataScopeNot
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { supportsYouTubeAccount } from '../../helpers/youtube-account-state'
 import { useRootClass } from '../../helpers/rootClasses'
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { registerAndroidBackView } from '../../helpers/androidBackGesture'
 import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
 import { FtIcon } from '@opentubex/icons'
@@ -1842,7 +1843,7 @@ function animateWindowBounds(element, from) {
   if (!element || !from || document.documentElement.dataset.reducedMotion === 'reduce') return
   const to = getWindowAnimationState(element)
   if (to.width === 0 || to.height === 0) return
-  const animation = element.animate([
+  const animation = applyAnimationSpeed(element.animate([
     {
       transformOrigin: '0 0',
       transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})`,
@@ -1856,7 +1857,7 @@ function animateWindowBounds(element, from) {
   ], {
     duration: 240,
     easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-  })
+  }))
   boundsAnimation = animation
   animation.finished.catch(() => {}).finally(() => {
     if (boundsAnimation === animation) boundsAnimation = null

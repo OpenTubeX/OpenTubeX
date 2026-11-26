@@ -832,8 +832,10 @@ test.describe('recommended video morph with default as the default', () => {
     await page.evaluate((activeTabSelector) => {
       const startViewTransition = document.startViewTransition.bind(document)
       document.startViewTransition = (update) => {
+        // An unloaded thumbnail is a hidden image beside its visible placeholder.
         window.__recommendedMorph = {
-          sourceName: document.querySelector('.watchVideoRecommendations .thumbnailImage')
+          sourceName: [...document.querySelectorAll('.watchVideoRecommendations .thumbnailImage')]
+            .find(element => element.checkVisibility({ visibilityProperty: true }))
             ?.style.viewTransitionName
         }
         return startViewTransition(async () => {

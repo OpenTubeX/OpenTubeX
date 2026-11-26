@@ -641,6 +641,12 @@ function cancelLoaderSettle() {
   pointer-events: none;
 }
 
+/* The thumbnail morph names every player (themes.css). A neighbor's player
+   would duplicate the name, which makes Chromium skip the whole transition. */
+.pageSwipePrewarm :deep(.videoPlayer) {
+  view-transition-name: none !important;
+}
+
 /* Android WebView ticks animations under this opacity: 0 layer on the main
    thread. A spinner in a neighbor would otherwise render a frame per refresh.
    Hidden browsing pages behind Watch keep ticking their animations as well. */

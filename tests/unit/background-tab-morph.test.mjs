@@ -15,6 +15,8 @@ test('background tab creation starts before an animation can capture the documen
   }
   const context = vm.createContext({
     HTMLElement: Element,
+    HTMLImageElement: Element,
+    applyAnimationSpeed: animation => animation,
     document: {
       documentElement: { classList: { add() {}, remove() {} } },
       startViewTransition() {
@@ -39,7 +41,7 @@ test('reduced motion opens the tab without measuring or cloning the thumbnail', 
   class Element {
     querySelector() { throw new Error('Reduced motion needs no thumbnail') }
   }
-  const context = vm.createContext({ HTMLElement: Element, isReducedMotionEnabled: () => true })
+  const context = vm.createContext({ HTMLElement: Element, HTMLImageElement: Element, isReducedMotionEnabled: () => true })
   vm.runInContext(source, context)
   let created = 0
   await context.morphThumbnailIntoNewTab(new Element(), async () => { created++; return { id: 'new-tab' } })

@@ -926,7 +926,7 @@ test.describe('history date and channel browsing', () => {
     await expect(page).toHaveURL(/searchQueryText=City\+walk\+219/)
   })
 
-  test('keeps all browse filters cleared while their URL saves are queued', async ({ page }) => {
+  test('clears all browse filters with one URL save', async ({ page }) => {
     await goTo(page, 'history')
     await openHistoryFilters(page)
     await page.getByLabel('From', { exact: true }).fill('2026-10-12')
@@ -935,13 +935,13 @@ test.describe('history date and channel browsing', () => {
     await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('channel')).toBe('id:UC-walking')
     await trackHistoryNavigations(page, true)
     await page.getByRole('button', { name: 'Clear filters' }).click()
-    for (let count = 1; count <= 3; count++) {
-      await releaseHistoryNavigation(page, count)
-      await expect(page.getByLabel('From', { exact: true })).toHaveValue('')
-      await expect(page.getByLabel('To', { exact: true })).toHaveValue('')
-      await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('All channels')
-    }
+    await expect(page.getByLabel('From', { exact: true })).toHaveValue('')
+    await expect(page.getByLabel('To', { exact: true })).toHaveValue('')
+    await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('All channels')
+    await releaseHistoryNavigation(page, 1)
     await expect(page).toHaveURL(/#\/history$/)
+    // Each cleared filter replaced the route on its own before.
+    expect(await page.evaluate(() => window.__historyNavigations.releases.length)).toBe(0)
   })
 
   test('preserves scroll when loading more date-filtered history', async ({ page }) => {

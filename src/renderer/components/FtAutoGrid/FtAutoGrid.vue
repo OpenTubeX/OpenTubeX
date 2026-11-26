@@ -32,6 +32,7 @@ import store from '../../store/index'
 import { getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
 import { getUiDensityScale } from '../../constants/uiDensity'
 import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
+import { tabPresentedKey } from '../../tabs/TabContext'
 import { GRID_COLUMNS_SETTINGS, getGridColumns, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -76,6 +77,7 @@ const MOVE_TRANSITION_MAX_ITEMS = 50
 const gridElement = useTemplateRef('gridElement')
 provide(tileKeyboardShortcutsKey, true)
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+const isTabPresented = inject(tabPresentedKey, null)
 const getCardSizes = styles => getThumbnailGridSizes(Number.parseFloat(styles['--thumbnail-grid-size']))
 // Only the thumbnails read this, so a new card width does not re-render the
 // grid. Until the grid is measured, cards have their default width.
@@ -358,6 +360,14 @@ function updatePageAtBottom() {
   pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
 }
 
+function handleWindowScroll() {
+  // A grid in a hidden tab, a page kept behind Watch or a page swipe neighbor
+  // doesn't own the window's scroll position, and every mounted grid would
+  // otherwise lay out the page on each scroll.
+  if (hidden || isTabPresented?.value === false) return
+  updatePageAtBottom()
+}
+
 /**
  * @param {number} contentWidth
  * @param {boolean} [viewportCrossedPhoneWidth]
@@ -435,7 +445,7 @@ onMounted(() => {
     phoneWidthChangedWhileHidden = false
   })
   resizeObserver.observe(gridElement.value.$el)
-  window.addEventListener('scroll', updatePageAtBottom, { passive: true })
+  window.addEventListener('scroll', handleWindowScroll, { passive: true })
   if (props.appear) enterTogether(gridElement.value.$el)
 })
 
@@ -449,7 +459,7 @@ onBeforeUnmount(() => {
   updateGridSliderLimit()
   resizeObserver?.disconnect()
   phoneWidthQuery?.removeEventListener('change', handlePhoneWidthChange)
-  window.removeEventListener('scroll', updatePageAtBottom)
+  window.removeEventListener('scroll', handleWindowScroll)
   clearTimeout(suppressResetTimeout)
 })
 </script>

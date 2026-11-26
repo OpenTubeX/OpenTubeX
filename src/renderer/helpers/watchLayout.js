@@ -91,18 +91,21 @@ export function createWatchLayoutAnimator() {
    */
   function placeFixedBackgrounds() {
     const { clientWidth: viewportWidth, clientHeight: viewportHeight } = document.documentElement
-    insetElements.forEach(element => {
+    // Read every area before writing, so one area's write doesn't force a
+    // layout for the next area's read.
+    const insets = [...insetElements].map(element => {
       const rect = element.getBoundingClientRect()
       const { m41: translateX, m42: translateY } = new DOMMatrixReadOnly(getComputedStyle(element).transform)
       const left = rect.left - translateX + element.clientLeft
       const top = rect.top - translateY + element.clientTop
-      element.style.setProperty('--fixed-background-inset', [
+      return [element, [
         -top,
         left + element.clientWidth - viewportWidth,
         top + element.clientHeight - viewportHeight,
         -left
-      ].map(value => `${value}px`).join(' '))
+      ].map(value => `${value}px`).join(' ')]
     })
+    insets.forEach(([element, inset]) => element.style.setProperty('--fixed-background-inset', inset))
   }
 
   /**
@@ -174,6 +177,10 @@ export function createWatchLayoutAnimator() {
       pin(layout, sidebar, sidebarRect)
     }
 
+    // Measure every area and card before the first write. Clipping a card or
+    // starting an animation between reads forced a page layout per card.
+    /** @type {(() => void)[]} */
+    const writes = []
     elements.forEach((element, index) => {
       const previousRect = previousRects[index]
       const nextRect = element.getBoundingClientRect()
@@ -181,16 +188,19 @@ export function createWatchLayoutAnimator() {
       if (element.classList.contains('sidebarArea')) {
         // An appearing sidebar has no previous place. It slides in beside the
         // narrowing info area instead.
+        const endOffset = infoEndOffset
         if (!hadSidebar && hasSidebar) {
-          translate(element, infoEndOffset, 0)
+          writes.push(() => translate(element, endOffset, 0))
         }
         // A closing sidebar slides out with the widening info area.
-        if (element === pinnedSidebar && Math.abs(infoEndOffset) >= 0.5) {
-          track(applyAnimationSpeed(element.animate([
-            { transform: 'none' },
-            { transform: `translateX(${-infoEndOffset}px)` }
-          ], ANIMATION_OPTIONS)))
-          keepFixedBackgroundsInPlace(element, 0, 0, -infoEndOffset)
+        if (element === pinnedSidebar && Math.abs(endOffset) >= 0.5) {
+          writes.push(() => {
+            track(applyAnimationSpeed(element.animate([
+              { transform: 'none' },
+              { transform: `translateX(${-endOffset}px)` }
+            ], ANIMATION_OPTIONS)))
+            keepFixedBackgroundsInPlace(element, 0, 0, -endOffset)
+          })
         }
         if (!hadSidebar || !hasSidebar) { return }
       }
@@ -200,33 +210,36 @@ export function createWatchLayoutAnimator() {
       if (element.classList.contains('infoArea')) {
         infoEndOffset = rtl ? offsetX : previousRect.right - nextRect.right
       }
-      // Resized cards move and resize on their own, see morph.
+      // Resized cards move and resize on their own, see planMorph.
       const cards = [...previousCardRects].filter(([card]) => element.contains(card))
-      const cardsResize = cards.some(([card, rect]) => {
-        const nextCardRect = card.getBoundingClientRect()
+      const nextCardRects = cards.map(([card]) => card.getBoundingClientRect())
+      const cardsResize = cards.some(([, rect], cardIndex) => {
+        const nextCardRect = nextCardRects[cardIndex]
         return Math.abs(rect.width - nextCardRect.width) >= 0.5 || Math.abs(rect.height - nextCardRect.height) >= 0.5
       })
       if (cardsResize) {
-        // Measure all cards before the first transform moves the others.
-        cards.map(([card, rect]) => [card, rect, card.getBoundingClientRect()])
-          .forEach(([card, rect, nextCardRect]) => morph(card, rect, nextCardRect, rtl))
+        cards.forEach(([card, rect], cardIndex) => {
+          const write = planMorph(card, rect, nextCardRects[cardIndex], rtl)
+          if (write) writes.push(write)
+        })
         return
       }
       if (isVideoPlayer) {
         const scaleX = previousRect.width / nextRect.width
         const scaleY = previousRect.height / nextRect.height
         if (offsetX === 0 && offsetY === 0 && scaleX === 1 && scaleY === 1) { return }
-        track(applyAnimationSpeed(element.animate([
+        writes.push(() => track(applyAnimationSpeed(element.animate([
           {
             transform: `translate(${offsetX}px, ${offsetY}px) scale(${scaleX}, ${scaleY})`,
             transformOrigin: 'top left'
           },
           { transform: 'none', transformOrigin: 'top left' }
-        ], ANIMATION_OPTIONS)))
+        ], ANIMATION_OPTIONS))))
       } else {
-        translate(element, offsetX, offsetY)
+        writes.push(() => translate(element, offsetX, offsetY))
       }
     })
+    writes.forEach(write => write())
 
     // Nothing moved, so no finished animation would restore the overflow.
     if (animations.length === 0) {
@@ -275,20 +288,23 @@ export function createWatchLayoutAnimator() {
    * children get the inverse scale. The content keeps its size and its final
    * layout, without reflowing on every frame, and the card's moving edges
    * reveal or cover it.
+   *
+   * Measures now and returns the writes that start the animation, so all
+   * cards can be measured before any of them changes.
    * @param {HTMLElement} card
    * @param {DOMRect} from
    * @param {DOMRect} to
    * @param {boolean} rtl
+   * @returns {(() => void) | undefined}
    */
-  function morph(card, from, to, rtl) {
+  function planMorph(card, from, to, rtl) {
     if (!card.isConnected || to.width < 1 || to.height < 1 || from.width < 1 || from.height < 1) { return }
     const scaleX = from.width / to.width
     const scaleY = from.height / to.height
     const offsetX = from.left - to.left
     const offsetY = from.top - to.top
     if (Math.abs(scaleX - 1) < 0.001 && Math.abs(scaleY - 1) < 0.001) {
-      translate(card, offsetX, offsetY)
-      return
+      return () => translate(card, offsetX, offsetY)
     }
 
     // Every transform here applies around its element's top left corner. A
@@ -309,6 +325,14 @@ export function createWatchLayoutAnimator() {
     const layers = [...card.querySelectorAll('.fixedBackgroundLayer')]
       .filter(layer => !children.some(({ child }) => child.contains(layer)))
 
+    return () => startMorph(card, { scaleX, scaleY, offsetX, offsetY, to, children, layers })
+  }
+
+  /**
+   * @param {HTMLElement} card
+   * @param {{ scaleX: number, scaleY: number, offsetX: number, offsetY: number, to: DOMRect, children: { child: HTMLElement, x: number, y: number }[], layers: Element[] }} plan
+   */
+  function startMorph(card, { scaleX, scaleY, offsetX, offsetY, to, children, layers }) {
     clippedCards.set(card, card.style.overflow)
     card.style.overflow = 'clip'
     const transformOrigin = '0 0'

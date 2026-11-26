@@ -1347,10 +1347,10 @@
       >
         <div
           v-if="showCountdownOverlay"
+          ref="countdownOverlay"
           class="countdownOverlay"
           role="status"
           aria-live="polite"
-          :aria-label="countdownAriaLabel"
         >
           <div class="countdownProgress">
             <svg
@@ -1372,11 +1372,14 @@
                 :r="38"
                 fill="none"
                 :stroke-dasharray="countdownRingCircumference"
-                :stroke-dashoffset="countdownRingDashoffset"
               />
             </svg>
-            <span class="countdownTime">
-              {{ countdownTimeLabel }}
+            <!-- The overlay's label announces whole seconds instead. -->
+            <span
+              class="countdownTime"
+              aria-hidden="true"
+            >
+              <LiveText :text="() => countdownTimeLabel" />
             </span>
           </div>
         </div>
@@ -1411,7 +1414,7 @@
             </div>
             <div class="skippedSegmentHeaderActions">
               <span class="skippedSegmentTimer">
-                {{ getSponsorBlockPromptTimeLabel(uuid) }}
+                <LiveText :text="() => getSponsorBlockPromptTimeLabel(uuid)" />
               </span>
               <button
                 class="closeSkippedSegmentButton"
@@ -1468,9 +1471,10 @@
                   v-if="isSponsorBlockToastCountdownPaused(uuid)"
                   :icon="['fas', 'pause']"
                 />
-                <template v-else>
-                  {{ getSponsorBlockToastTimeLabel(uuid) }}
-                </template>
+                <LiveText
+                  v-else
+                  :text="() => getSponsorBlockToastTimeLabel(uuid)"
+                />
               </span>
               <button
                 v-if="sponsorBlockEnableSubmission"
@@ -2236,6 +2240,7 @@ import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions, getRemoved
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
+import LiveText from './opentubex/LiveText'
 import { BooleanSettingButton } from './player-components/BooleanSettingButton'
 import { KeyboardShortcuts, PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
@@ -8573,11 +8578,13 @@ const autoplayLoading = computed(() => autoplayPending.value && !showCountdownOv
 const countdownTimeSeconds = computed(() => +(countdownRemainingMs.value / 1000).toFixed(1))
 const countdownTimeLabel = computed(() => `${countdownTimeSeconds.value}s`)
 const countdownAriaLabel = computed(() => {
+  // Whole seconds, so the live region doesn't change on every 100 ms tick.
+  const remindingTimeSeconds = Math.ceil(countdownRemainingMs.value / 1000)
   if (sabrBackoffRemainingMs.value > 0) {
-    return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: countdownTimeSeconds.value })
+    return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds })
   }
 
-  return t('Video.Watch.Remaining preroll-ad time: {remindingTimeSeconds}s', { remindingTimeSeconds: countdownTimeSeconds.value })
+  return t('Video.Watch.Remaining preroll-ad time: {remindingTimeSeconds}s', { remindingTimeSeconds })
 })
 const COUNTDOWN_RING_RADIUS = 38
 const countdownRingCircumference = 2 * Math.PI * COUNTDOWN_RING_RADIUS
@@ -8590,6 +8597,15 @@ const countdownRingDashoffset = computed(() => {
   const clampedProgress = Math.min(1, Math.max(0, progress))
   return countdownRingCircumference * (1 - clampedProgress)
 })
+// The countdown ticks every 100 ms. Binding these in the template rendered the
+// whole player again on each tick, so they are written to the overlay directly.
+const countdownOverlay = useTemplateRef('countdownOverlay')
+watch([countdownOverlay, countdownAriaLabel], ([overlay, label]) => {
+  overlay?.setAttribute('aria-label', label)
+}, { flush: 'post' })
+watch([countdownOverlay, countdownRingDashoffset], ([overlay, offset]) => {
+  overlay?.querySelector('.countdownRingProgress')?.setAttribute('stroke-dashoffset', String(offset))
+}, { flush: 'post' })
 
 function requestTabPreviewRefresh(delayMs = SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS) {
   if (
