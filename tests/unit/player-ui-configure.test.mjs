@@ -165,15 +165,17 @@ test('an unchanged configuration does not rebuild the controls', async () => {
   const { context, props, configureCalls } = setupPlayer({ theatrePossible: false })
   await load(context)
   props.chapters = chapters
+  // Toggling autoplay changes this, and the skip buttons hide themselves.
+  props.canSkipNext = true
   await nextTick()
   assert.equal(configureCalls.length, 1)
 })
 
 test('a real configuration change after load still rebuilds once', async () => {
-  const { context, props, configureCalls } = setupPlayer()
+  const { context, configureCalls } = setupPlayer()
   await load(context)
-  props.canSkipNext = true
+  context.displayVideoPlayButton.value = false
   await nextTick()
   assert.equal(configureCalls.length, 2)
-  assert.ok(configureCalls[1].controlPanelElements.includes('ft_skip_next'))
+  assert.deepEqual([...configureCalls[1].bigButtons], [])
 })

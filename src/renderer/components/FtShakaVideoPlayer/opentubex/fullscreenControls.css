@@ -79,21 +79,23 @@
 }
 
 /*
-  The control bar ends with the last visible button the user kept. Theatre and
-  full window buttons are hidden in fullscreen, and theatre mode in full window.
+  The control bar starts with its first visible play or skip button and ends
+  with the last visible button the user kept. Skip buttons hide while there is
+  nothing to skip to. Theatre and full window buttons are hidden in fullscreen,
+  and theatre mode in full window.
 */
 /* stylelint-disable selector-max-compound-selectors */
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button)))),
-.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child),
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *)),
 .ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button)))),
-.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *)) {
   position: relative;
   overflow: visible;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *))::before,
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button))))::before,
-.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *))::before,
 .ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button))))::before {
   /*
     Shaka keeps the bottom controls at 98% width, so the outer edges can reach
@@ -103,8 +105,8 @@
   position: absolute;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
-.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before {
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *))::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > :is(.shaka-play-button, .ft-shaka-skip-button):not(.shaka-hidden, :not(.shaka-hidden) ~ *))::before {
   inset: -8px -8px -8px -2vw;
 }
 
