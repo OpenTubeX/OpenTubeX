@@ -1,4 +1,4 @@
-import { test, expect, sel, abortUnmockedRequest } from '../../helpers/app.mjs'
+import { test, expect, sel, abortUnmockedRequest, goTo } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -181,5 +181,16 @@ test.describe('original names for existing subscriptions', () => {
     await expect(page.locator('.ft-list-channel .h3Title')).toHaveText(originalName)
     await expect.poll(async () => (await subscription()).name).toBe(originalName)
     expect(feedRequests).toBe(1)
+  })
+
+  test('replaces saved translated names in the channel list', async ({ page }) => {
+    await mockSearch(page, route => route.fulfill({ contentType: 'application/atom+xml', body: rss }))
+    await goTo(page, 'subscribedchannels')
+    const channel = page.locator('.channel').filter({ has: page.locator('.channelName') })
+    await expect(channel.locator('.channelName')).toHaveText(originalName)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getProfileList[0].subscriptions[0].name
+    })).toBe(originalName)
   })
 })

@@ -1512,22 +1512,33 @@ export function throttle(func, wait) {
 }
 
 // Every list item of every feed can add an entry, so the cache is capped and
-// evicts the oldest titles first rather than growing for the whole session.
-const OEMBED_TITLE_CACHE_LIMIT = 500
-const oembedTitleCache = new Map()
-const oembedTitleRequests = new Map()
+// evicts the oldest entries first rather than growing for the whole session.
+const OEMBED_CACHE_LIMIT = 500
+/** @type {Map<string, { title: string, author: string | null }>} */
+const oembedCache = new Map()
+/** @type {Map<string, Promise<{ title: string, author: string | null } | null>>} */
+const oembedRequests = new Map()
 
 /**
  * @param {string} videoId
- * @param {string} title
+ * @param {{ title: string, author: string | null }} info
  */
-function cacheOembedTitle(videoId, title) {
-  if (oembedTitleCache.size >= OEMBED_TITLE_CACHE_LIMIT) {
+function cacheOembedInfo(videoId, info) {
+  if (oembedCache.size >= OEMBED_CACHE_LIMIT) {
     // Map iterates in insertion order, so the first key is the oldest one.
-    oembedTitleCache.delete(oembedTitleCache.keys().next().value)
+    oembedCache.delete(oembedCache.keys().next().value)
   }
 
-  oembedTitleCache.set(videoId, title)
+  oembedCache.set(videoId, info)
+}
+
+/**
+ * The untranslated title and channel name of a video.
+ * @param {string} videoId
+ * @returns {{ title: string, author: string | null } | null}
+ */
+export function getCachedOembedInfo(videoId) {
+  return oembedCache.get(videoId) ?? null
 }
 
 /**
@@ -1535,7 +1546,46 @@ function cacheOembedTitle(videoId, title) {
  * @returns {string | null}
  */
 export function getCachedOembedTitle(videoId) {
-  return oembedTitleCache.get(videoId) ?? null
+  return getCachedOembedInfo(videoId)?.title ?? null
+}
+
+/**
+ * The untranslated title and channel name of a video, which YouTube's oEmbed endpoint keeps.
+ * @param {string} videoId
+ * @returns {Promise<{ title: string, author: string | null } | null>}
+ */
+export async function getOembedInfo(videoId) {
+  const cachedInfo = getCachedOembedInfo(videoId)
+  if (cachedInfo !== null) {
+    return cachedInfo
+  }
+
+  if (oembedRequests.has(videoId)) {
+    return oembedRequests.get(videoId)
+  }
+
+  const request = (async () => {
+    try {
+      const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
+      if (typeof oembedInfo.title === 'string' && oembedInfo.title.length > 0) {
+        const info = {
+          title: oembedInfo.title,
+          author: typeof oembedInfo.author_name === 'string' && oembedInfo.author_name.length > 0 ? oembedInfo.author_name : null
+        }
+        cacheOembedInfo(videoId, info)
+        return info
+      }
+    } catch (error) {
+      console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
+    } finally {
+      oembedRequests.delete(videoId)
+    }
+
+    return null
+  })()
+
+  oembedRequests.set(videoId, request)
+  return request
 }
 
 /**
@@ -1543,31 +1593,5 @@ export function getCachedOembedTitle(videoId) {
  * @returns {Promise<string | null>}
  */
 export async function getOembedTitle(videoId) {
-  const cachedTitle = getCachedOembedTitle(videoId)
-  if (cachedTitle !== null) {
-    return cachedTitle
-  }
-
-  if (oembedTitleRequests.has(videoId)) {
-    return oembedTitleRequests.get(videoId)
-  }
-
-  const request = (async () => {
-    try {
-      const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
-      if (typeof oembedInfo.title === 'string' && oembedInfo.title.length > 0) {
-        cacheOembedTitle(videoId, oembedInfo.title)
-        return oembedInfo.title
-      }
-    } catch (error) {
-      console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
-    } finally {
-      oembedTitleRequests.delete(videoId)
-    }
-
-    return null
-  })()
-
-  oembedTitleRequests.set(videoId, request)
-  return request
+  return (await getOembedInfo(videoId))?.title ?? null
 }

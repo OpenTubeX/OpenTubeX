@@ -38,6 +38,8 @@ import { getVisionOsStreamsFallbackReason, isVisionOsStreamsEnabled } from './vi
 import { classifyRequestFailure } from './requestDiagnostics.js'
 import { calculatePublishedDate, deepCopy, extractNumberFromString, getChannelPlaylistId, getRelativeTimeFromDate } from '../utils'
 
+const preferOriginalChannelNames = () => store.getters.getAvoidTranslation === 'entire_app'
+
 const {
   normalizeLocalSubscriptionFeed,
   parseLocalPlaylistVideos,
@@ -56,7 +58,10 @@ const {
   parseLocalListPlaylists,
   parseLocalChannelVideos,
   parseLocalChannelCollaborations
-} = createLocalFeedParsers(isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters))
+} = createLocalFeedParsers(
+  isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters),
+  preferOriginalChannelNames
+)
 export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalHashtagHeader, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
 
 /**
@@ -1819,6 +1824,7 @@ async function processForegroundSubscriptionResponse(input) {
       ...input,
       data,
       hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
+      preferOriginalChannelNames: preferOriginalChannelNames(),
     })
   } catch (error) {
     console.warn('Background feed processing failed; parsing in the renderer:', error)

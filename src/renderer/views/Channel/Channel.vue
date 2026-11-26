@@ -2512,7 +2512,7 @@ async function getCommunityPostsLocal() {
       posts = communityTab.posts
     }
 
-    latestCommunityPosts.value = parseLocalCommunityPosts(communityTab)
+    latestCommunityPosts.value = parseLocalCommunityPosts(communityTab, channelInstance)
     communityContinuationData.value = communityTab.has_continuation ? communityTab : null
     tabApiUsed.set('community', 'local')
     setElementListLoading('community', false)
@@ -2558,7 +2558,7 @@ async function getCommunityPostsLocalMore() {
       posts = continuation.posts
     }
 
-    latestCommunityPosts.value = latestCommunityPosts.value.concat(parseLocalCommunityPosts(continuation))
+    latestCommunityPosts.value = latestCommunityPosts.value.concat(parseLocalCommunityPosts(continuation, channelInstance))
     communityContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     if (!isCurrentRequest()) return

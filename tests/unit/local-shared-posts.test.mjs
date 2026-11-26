@@ -121,3 +121,26 @@ test('keeps shared posts whose original post was deleted', () => {
   assert.equal(shared.postText, '')
   assert.deepEqual(shared.postContent, { type: 'sharedPost', content: null })
 })
+
+test('uses the untranslated channel name for the header and own posts when preferred', () => {
+  const data = {
+    ...postsTab([sharedPost('shared-1', 'Check this out', backstagePost('original-1', 'Original post'))]),
+    microformat: {
+      microformatDataRenderer: {
+        title: 'YouTube Viewers',
+        channelProfileMicroformatDetails: { profilePage: { mainEntity: { name: 'Original Viewers ' } } }
+      }
+    }
+  }
+  const translated = createLocalFeedParsers(() => false)
+  const original = createLocalFeedParsers(() => false, () => true)
+
+  assert.equal(translated.parseLocalChannelHeader(new YT.Channel(null, { data }), true).name, 'YouTube Viewers')
+  assert.equal(translated.parseLocalCommunityPosts(new YT.Channel(null, { data }))[0].author, 'YouTube Viewers')
+
+  assert.equal(original.parseLocalChannelHeader(new YT.Channel(null, { data }), true).name, 'Original Viewers')
+  const [shared] = original.parseLocalCommunityPosts(new YT.Channel(null, { data }))
+  assert.equal(shared.author, 'Original Viewers')
+  // Posts shared from other channels keep their own author name.
+  assert.equal(shared.postContent.content.author, 'YouTube TV')
+})

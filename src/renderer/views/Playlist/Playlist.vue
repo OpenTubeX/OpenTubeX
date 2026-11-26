@@ -267,6 +267,7 @@ import {
   getLocalPlaylist,
   getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
+  getOriginalChannelName,
   parseLocalPlaylistVideo,
 } from '../../helpers/api/local'
 import {
@@ -955,11 +956,21 @@ async function getPlaylistLocal() {
     infoSource.value = 'local'
     showUnavailableVideosAlert.value = result.menu?.items?.some((item) => item.text === 'Show unavailable videos')
 
+    // YouTube translates the owner's name; the original one comes from the channel's feed.
+    const preferOriginalChannelName = store.getters.getAvoidTranslation === 'entire_app'
     store.dispatch('updateSubscriptionDetails', {
       channelThumbnailUrl: channelThumbnail.value,
-      channelName: channelName_,
+      channelName: preferOriginalChannelName ? undefined : channelName_,
       channelId: channelId.value
     })
+    if (preferOriginalChannelName && channelId.value) {
+      const ownerId = channelId.value
+      getOriginalChannelName(ownerId).then(originalName => {
+        if (!originalName || !requestIsCurrent()) return
+        channelName.value = originalName
+        store.dispatch('updateSubscriptionDetails', { channelId: ownerId, channelName: originalName })
+      })
+    }
 
     playlistItems.value = playlistItems_
 

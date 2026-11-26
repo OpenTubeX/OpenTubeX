@@ -4,6 +4,7 @@ import { extractNumberFromString, calculatePublishedDate, escapeHTML, CHANNEL_HA
 import { isCollaborativeVideoAuthor, parseLocalCollaboratorItems } from '../video-collaborators.js'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
+import { getOriginalChannelProfile } from './original-channel-name.js'
 
 /**
  * Whether text runs show the original text rather than YouTube's translation of it,
@@ -136,7 +137,11 @@ export function getTextVerification(text, iconName) {
   }
 }
 
-export function createLocalFeedParsers(shouldHideMembersOnly) {
+/**
+ * @param {(isMembersOnly: boolean) => boolean} shouldHideMembersOnly
+ * @param {() => boolean} [preferOriginalChannelNames] use the untranslated name channel pages keep in their microformat
+ */
+export function createLocalFeedParsers(shouldHideMembersOnly, preferOriginalChannelNames = () => false) {
   const TRACKING_PARAM_NAMES = [
     'utm_source',
     'utm_medium',
@@ -297,6 +302,12 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
         break
       }
+    }
+
+    // YouTube translates channel names in the header, but not in the microformat.
+    // Topic channels have no microformat name.
+    if (preferOriginalChannelNames()) {
+      name = getOriginalChannelProfile(channel.page?.microformat).name ?? name
     }
 
     const handle = getChannelHandleFromUrl(channel.metadata?.vanity_channel_url)
@@ -1321,14 +1332,25 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   /**
    * Parse the community posts on a channel posts tab or post page
    * @param {import('youtubei.js').Mixins.Feed} feed
+   * @param {import('youtubei.js').Mixins.Feed} [channelPage] the channel page, when `feed` is a continuation
    */
-  function parseLocalCommunityPosts(feed) {
+  function parseLocalCommunityPosts(feed, channelPage = feed) {
     // `feed.posts` is grouped by post type and also lists the original post inside each SharedPost,
     // so read the post threads to keep the page order and skip the nested original posts.
-    return feed.memo.getType(YTNodes.BackstagePostThread)
+    const posts = feed.memo.getType(YTNodes.BackstagePostThread)
       .map(thread => thread.post)
       .filter(post => post != null)
       .map(parseLocalCommunityPost)
+
+    // Posts carry the channel's translated name, like the header.
+    const channelId = channelPage?.metadata?.external_id
+    const originalName = preferOriginalChannelNames() && channelId ? getOriginalChannelProfile(channelPage.page?.microformat).name : undefined
+    if (originalName) {
+      for (const post of posts) {
+        if (post.authorId === channelId) post.author = originalName
+      }
+    }
+    return posts
   }
 
   /**

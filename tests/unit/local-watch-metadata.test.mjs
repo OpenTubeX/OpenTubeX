@@ -416,7 +416,7 @@ test('retrieves a missing title from oEmbed', async () => {
 for (const state of ['cached', 'in flight']) {
   test(`reuses the ${state} original-language title request`, async () => {
     const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
-    const oembed = utils.slice(utils.indexOf('const OEMBED_TITLE_CACHE_LIMIT')).replace(/^export /gm, '')
+    const oembed = utils.slice(utils.indexOf('const OEMBED_CACHE_LIMIT')).replace(/^export /gm, '')
     let requests = 0
     let respond
     const response = new Promise(resolve => { respond = resolve })

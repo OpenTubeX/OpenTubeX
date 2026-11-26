@@ -609,6 +609,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
+import { isCollaborativeVideoAuthor } from '../../helpers/video-collaborators'
 
 import store from '../../store/index'
 import { usesInvidiousInstance } from '../../../apiBackends'
@@ -617,7 +618,8 @@ import {
   copyToClipboard,
   formatDurationAsTimestamp,
   formatViewCount,
-  getCachedOembedTitle,
+  getCachedOembedInfo,
+  getOembedInfo,
   getOembedTitle,
   getRelativeTimeFromDate,
   getShortThumbnailUrl,
@@ -2629,23 +2631,30 @@ function parseVideoData() {
   id.value = props.data.videoId
   title.value = props.data.title
 
-  if (store.getters.getAvoidTranslation === 'entire_app' && id.value) {
-    const cachedTitle = getCachedOembedTitle(id.value)
-    if (cachedTitle !== null) {
-      title.value = cachedTitle
-    } else {
-      getOembedTitle(id.value).then((oembedTitle) => {
-        if (oembedTitle) {
-          title.value = oembedTitle
-        }
-      })
-    }
-  }
-
   channelName.value = props.data.author ?? null
   // A channel-page refresh can omit collaborators that the byline lookup resolved.
   if (props.data.collaborators?.length > 0) {
     channelCollaborators.value = props.data.collaborators
+  }
+
+  if (store.getters.getAvoidTranslation === 'entire_app' && id.value) {
+    const videoId = id.value
+    const applyOriginalText = (info) => {
+      if (info === null || id.value !== videoId) return
+      title.value = info.title
+      // YouTube translates channel names too. oEmbed only names the uploader,
+      // so collaboration bylines keep every channel.
+      if (info.author && channelName.value !== null && channelCollaborators.value.length === 0 &&
+        !isCollaborativeVideoAuthor(channelName.value)) {
+        channelName.value = info.author
+      }
+    }
+    const cachedInfo = getCachedOembedInfo(videoId)
+    if (cachedInfo !== null) {
+      applyOriginalText(cachedInfo)
+    } else {
+      getOembedInfo(videoId).then(applyOriginalText)
+    }
   }
   // Collaboration videos have no authorId; the first collaborator is the main author
   channelId.value = props.data.authorId ?? channelCollaborators.value[0]?.id ?? null
