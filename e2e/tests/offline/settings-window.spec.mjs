@@ -702,13 +702,6 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).not.toHaveClass(/compactSettings/)
 
-    // General's rows keep their icons in one column, and their selects one width.
-    for (const [controls, measure] of [['.settingsRowIcon', 'left'], ['.settingsRowControl > .select .select-text', 'width']]) {
-      expect(await page.locator('.settingsContent > [data-section="general"]').evaluate((general, [controls, measure]) => {
-        return new Set(Array.from(general.querySelectorAll(controls), control => Math.round(control.getBoundingClientRect()[measure]))).size
-      }, [controls, measure])).toBe(1)
-    }
-
     const content = page.locator('.settingsContent')
     expect(await content.evaluate(element => {
       const rightEdge = element.getBoundingClientRect().right

@@ -398,6 +398,11 @@ export const SETTINGS_SEARCH_SETTING_KEYS = {
   general: {
     'Settings.General Settings.System Tray': 'useTrayIcon'
   },
+  // Chips whose visible text their full label doesn't contain add it to their name.
+  distraction: {
+    'Settings.Distraction Free Settings.Hide Recommended Videos': 'hideRecommendedVideos',
+    'Settings.Distraction Free Settings.Hide Videos on Watch': 'hideWatchedSubs'
+  },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',
     'Settings.Channel Settings.Auto Save Video Quality': 'autoUpdateChannelVideoQualities',

@@ -55,7 +55,12 @@
 }
 
 .settingChip.disabled {
+  border-color: color-mix(in srgb, var(--secondary-text-color) 25%, transparent);
   cursor: default;
+}
+
+/* Only the chip's own content dims, so its buttons stay readable. */
+.settingChip.disabled :is(.settingChipIcon, .settingChipText) {
   opacity: 0.38;
 }
 
@@ -90,9 +95,11 @@
   outline-offset: 2px;
 }
 
-/* The indicators are buttons above the transparent checkbox. */
+/* The indicators and tooltip are buttons above the transparent checkbox,
+   and stay fully visible on a disabled chip. */
 .settingChip :deep(.syncedSettingIndicator),
-.settingChip :deep(.changedSettingIndicator) {
+.settingChip :deep(.changedSettingIndicator),
+.settingChipTooltip {
   margin-inline-start: 0;
   z-index: 1;
 }

@@ -42,7 +42,7 @@ test('the system tray menu keeps hiding windows tied to its icon and background 
     return [getters.getUseTrayIcon, getters.getHideToTrayOnClose, getters.getHideToTrayOnMinimize]
   })
   const trayDestroyed = () => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())
-  const requiredNote = general.getByText('The tray icon is required while background subscription refresh is enabled.', { exact: true })
+  const requiredNote = general.locator('.settingsRow').filter({ has: page.getByRole('combobox', { name: 'System tray' }) }).locator('.settingsRowDescription')
 
   await tray.click()
   await expect(requiredNote).toHaveCount(0)

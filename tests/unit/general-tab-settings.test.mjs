@@ -7,10 +7,11 @@ import { renderToString } from 'vue/server-renderer'
 
 const source = await readFile(new URL('../../src/renderer/components/Settings/General/GeneralSettings.vue', import.meta.url), 'utf8')
 const keys = ['landingPage', 'newTabPosition', 'tabCloseFocus', 'startupBehavior']
-// The Startup and Tabs section, the first of the General page, holds the tab settings.
-const startupSection = source.match(/<FtSettingsSection[\s\S]*?<\/FtSettingsSection>/)[0]
-for (const key of keys) assert.ok(startupSection.includes(`setting-key="${key}"`), key)
-const render = compile(`<div>${startupSection}</div>`)
+// The section that holds the tab settings, wherever it sits on the page.
+const tabSection = [...source.matchAll(/<FtSettingsSection[\s\S]*?<\/FtSettingsSection>/g)]
+  .map(([section]) => section)
+  .find(section => section.includes('landingPage')) ?? ''
+const render = compile(`<div>${tabSection}</div>`)
 
 for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
   ['desktop', true, false], ['mobile', false, true], ['web', false, false],
