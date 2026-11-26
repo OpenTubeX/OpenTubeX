@@ -280,12 +280,14 @@
             </FtButton>
             <FtButton
               v-if="inActionRow('download')"
+              ref="downloadButton"
               class="actionButton"
               data-overflow-key="download"
               :title="t('Downloads.Download Playlist')"
+              aria-haspopup="menu"
               :icon="['fas', 'download']"
               theme="secondary"
-              @click="showDownloadPrompt = true"
+              @click="openDownloadMenu"
             >
               <template #label>
                 <span class="buttonLabel">{{ t('Downloads.Download') }}</span>
@@ -392,7 +394,7 @@
         :is-playlist="true"
         :video-count="videoCount"
         :title="title"
-        :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
+        :thumbnail="downloadThumbnail"
         :videos="videos"
         :more-videos-available="!isUserPlaylist && moreVideoDataAvailable"
         :videos-loading="downloadVideosLoading"
@@ -460,6 +462,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY, normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { downloadMenuItem, downloadTemplateMenuItems } from '../../helpers/templateDownloads'
 import { isRejectedByYouTube, YOUTUBE_REJECTED_PLAYLIST_CHARACTERS } from '../../helpers/youtube-sync'
 import { useFittedButtonLabels } from '../../composables/useFittedButtonLabels'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -582,7 +585,7 @@ const props = defineProps({
 
 const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist', 'download-video-selection'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const query = ref('')
@@ -782,6 +785,24 @@ function togglePinnedToNavigation() {
   store.dispatch('updatePinnedPlaylistIds', ids => [...ids.filter(id => id !== playlistId), ...pin ? [playlistId] : []])
 }
 
+const downloadThumbnail = computed(() => isUserPlaylist.value && thumbnailPreference.value !== 'hidden' ? defaultThumbnail.value : thumbnail.value)
+
+/** The download menus start downloads of the prompt's playlist with a template. */
+const downloadMenu = {
+  target: () => ({
+    playlistId: isUserPlaylist.value ? '' : props.id,
+    playlistKey: props.id,
+    videoIds: isUserPlaylist.value ? props.videos.map(video => video.videoId) : [],
+    isPlaylist: true,
+    videoCount: props.videoCount,
+    title: props.title,
+    thumbnail: downloadThumbnail.value
+  }),
+  customize: () => { showDownloadPrompt.value = true },
+  t,
+  locale
+}
+
 const SEPARATOR = { type: 'separator' }
 
 /**
@@ -811,9 +832,10 @@ const rowActions = computed(() => ({
   },
   download: {
     visible: supportsYtDlp && enableDownloads.value && props.videoCount > 0,
-    label: t('Downloads.Download Playlist'),
-    icon: ['fas', 'download'],
-    run: () => { showDownloadPrompt.value = true },
+    ...downloadMenuItem({
+      label: t('Downloads.Download Playlist'),
+      ...downloadMenu,
+    }),
   },
 }))
 
@@ -925,7 +947,7 @@ const moreMenuItems = computed(() => {
   // Moved actions lead the menu in their order in the row
   const moved = Object.entries(rowActions.value)
     .filter(([key]) => overflowedRowActions.value.includes(key))
-    .map(([, { label, icon, enabled = true, run }]) => ({ label, icon, enabled, run }))
+    .map(([, { label, icon, enabled = true, run, submenu }]) => ({ label, icon, enabled, run, ...(submenu ? { submenu } : {}) }))
   return [...moved, SEPARATOR, ...ownMenuItems.value].map(item => ({ enabled: true, ...item }))
 })
 
@@ -933,8 +955,16 @@ function openMoreOptionsMenu() {
   openButtonMenu(moreOptionsButton.value.$el, moreMenuItems, props.title)
 }
 
+const downloadButton = useTemplateRef('downloadButton')
+const downloadMenuItems = computed(() => downloadTemplateMenuItems(downloadMenu))
+
+function openDownloadMenu() {
+  openButtonMenu(downloadButton.value.$el, downloadMenuItems, t('Downloads.Download Playlist'))
+}
+
 onBeforeUnmount(() => {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreMenuItems }))
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: downloadMenuItems }))
   // Loading another playlist removes the prompt without closing it
   if (showDownloadPrompt.value) emit('download-video-selection', false)
 })

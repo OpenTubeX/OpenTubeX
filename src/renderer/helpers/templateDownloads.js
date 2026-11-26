@@ -143,48 +143,58 @@ function templateIcon(mode) {
 }
 
 /**
- * A menu entry whose submenu starts a download with any template, below an
- * entry that opens the download prompt to customize it first.
- * @param {{
- *   label: string,
- *   target: () => DownloadTarget,
- *   customize: () => void,
- *   t: Function,
- *   locale: import('vue').Ref<string>,
- *   actionId?: string,
- * }} menu Shortcuts such as swipe actions run the entry itself, which opens the prompt.
- *   `actionId` identifies it for them.
+ * @typedef DownloadMenu
+ * @property {() => DownloadTarget} target
+ * @property {() => void} customize opens the download prompt
+ * @property {Function} t
+ * @property {import('vue').Ref<string>} locale
  */
-export function downloadMenuItem({ label, target, customize, t, locale, actionId }) {
+
+/**
+ * Menu entries that start a download with any template, below an entry that
+ * opens the download prompt to customize it first.
+ * @param {DownloadMenu} menu
+ */
+export function downloadTemplateMenuItems({ target, customize, t, locale }) {
   const start = value => startTemplateDownload(value, target(), { t, locale: locale.value })
   const customTemplates = parseCustomDownloadTemplates(store.getters.getYtDlpDownloadTemplates)
+  return [
+    {
+      label: t('Downloads.Customize Download'),
+      icon: ['fas', 'sliders-h'],
+      enabled: true,
+      run: customize
+    },
+    { type: 'separator' },
+    ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => ({
+      label: template.label(t),
+      icon: templateIcon(template.options.mode),
+      enabled: true,
+      run: () => start(template.value)
+    })),
+    ...(customTemplates.length > 0 ? [{ type: 'separator' }] : []),
+    ...customTemplates.map(template => ({
+      label: template.name,
+      icon: templateIcon(template.options?.mode),
+      enabled: true,
+      run: () => start(`template:${template.name}`)
+    }))
+  ]
+}
+
+/**
+ * A menu entry with {@link downloadTemplateMenuItems} as its submenu.
+ * @param {DownloadMenu & { label: string, actionId?: string }} menu Shortcuts
+ *   such as swipe actions run the entry itself, which opens the prompt.
+ *   `actionId` identifies it for them.
+ */
+export function downloadMenuItem({ label, actionId, ...menu }) {
   return {
     label,
     ...(actionId ? { actionId } : {}),
     icon: ['fas', 'download'],
     enabled: true,
-    run: customize,
-    submenu: [
-      {
-        label: t('Downloads.Customize Download'),
-        icon: ['fas', 'sliders-h'],
-        enabled: true,
-        run: customize
-      },
-      { type: 'separator' },
-      ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => ({
-        label: template.label(t),
-        icon: templateIcon(template.options.mode),
-        enabled: true,
-        run: () => start(template.value)
-      })),
-      ...(customTemplates.length > 0 ? [{ type: 'separator' }] : []),
-      ...customTemplates.map(template => ({
-        label: template.name,
-        icon: templateIcon(template.options?.mode),
-        enabled: true,
-        run: () => start(`template:${template.name}`)
-      }))
-    ]
+    run: menu.customize,
+    submenu: downloadTemplateMenuItems(menu)
   }
 }

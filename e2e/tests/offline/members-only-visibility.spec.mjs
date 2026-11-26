@@ -252,6 +252,7 @@ test.describe('YouTube playlists', () => {
     await page.locator(sel.searchInput).press('Enter')
 
     await page.locator('.playlistInfo').getByTitle('Download Playlist').click()
+    await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
     const selection = page.locator('.downloadPromptCard .videoSelection')
     await selection.locator('summary').click()
     await selection.getByText('2. Sample recommendation', { exact: true }).click()

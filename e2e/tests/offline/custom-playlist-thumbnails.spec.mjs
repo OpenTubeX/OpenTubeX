@@ -135,6 +135,7 @@ for (const entry of ['playlist header', 'playlist card']) {
     })
     if (entry === 'playlist header') {
       await page.getByTitle('Download Playlist').click()
+      await page.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
     } else {
       await goTo(page, 'userplaylists')
       await dispatch(page, 'updateShowVideoMenuButton', true)

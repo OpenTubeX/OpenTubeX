@@ -32,6 +32,6 @@ export function openButtonMenu(button, items, title, thumbnailActions) {
   button.focus({ preventScroll: true })
   const bounds = button.getBoundingClientRect()
   window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
-    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items, touchFriendly: true }
+    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, anchorTop: bounds.top, items, touchFriendly: true }
   }))
 }

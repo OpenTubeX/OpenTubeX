@@ -1801,6 +1801,7 @@ function openVideoOptionsMenu() {
     detail: {
       x: document.body.dir === 'rtl' ? bounds.right : bounds.left,
       y: bounds.bottom,
+      anchorTop: bounds.top,
       items: videoContextMenuItems
     }
   }))
