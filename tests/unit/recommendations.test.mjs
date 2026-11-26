@@ -96,6 +96,8 @@ test('description links and markup do not become topics', () => {
   const plain = 'Rust <3 WebAssembly, i<length tutorial'
   assert.deepEqual([...recommendationFeatures({ description: plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
   assert.deepEqual([...recommendationFeatures({ description: ' '.repeat(480) + plain }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
+  // Comparisons are not tags, and escaped query parameters stay part of their URL
+  assert.deepEqual([...recommendationFeatures({ description: 'Rust: when x < 10, compile WebAssembly; when x > 20, stop. https://example.org/?id=1&amp;campaign=sponsor' }).keys()].sort(), ['compile', 'rust', 'stop', 'webassembly'])
 })
 test('ignores malformed subscriptions while retaining channel strings and objects', () => {
   for (const subscriptions of [null, {}, 'channel']) {

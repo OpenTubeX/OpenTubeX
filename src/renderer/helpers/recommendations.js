@@ -59,10 +59,11 @@ function descriptionText(text) {
   if (text.length >= HISTORY_DESCRIPTION_MAX_LENGTH && [...text].length >= HISTORY_DESCRIPTION_MAX_LENGTH) {
     text = text.replace(/<\/?(?:a|b|i|img|s)(?:\s[^>]*)?$/u, ' ')
   }
-  return text.replaceAll(/<[^>]*>/gu, ' ')
+  // URLs go before entities, which can join their query parameters
+  return text.replaceAll(/<\/?[a-z][^>]*>/giu, ' ')
+    .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
     .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
     .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
-    .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
 }
 
 export function recommendationFeatures(video) {
