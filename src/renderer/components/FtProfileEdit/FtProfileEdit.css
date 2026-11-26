@@ -228,7 +228,10 @@ h3 {
 .colorOption {
   inline-size: 40px;
   block-size: 40px;
-  margin: 2px;
+
+  /* Leave room for the selected outline (3px plus a 2px offset) so it doesn't
+     touch the neighboring swatches. */
+  margin: 4px;
   cursor: pointer;
   border-radius: 50%;
   transition: border-radius var(--motion-fast-spatial);
