@@ -1447,6 +1447,10 @@ Settings:
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
     Import subscription groups hint: Para organizar os canais em grupos, adicione uma coluna depois do título do canal em um arquivo .csv com os nomes dos grupos separados por ponto e vírgula, ou importe um arquivo .opml com pastas. Os grupos que não existirem são criados.
+    Takeout description: "Importe inscrições, playlists, histórico de exibição e histórico de pesquisa de um arquivo ZIP do Google Takeout."
+    Individual data: "Dados individuais"
+    Import: "Importar"
+    Export: "Exportar"
   Sync Settings:
     Signed Out After Restore: 'A sincronização foi desconectada porque estes dados do app foram restaurados de um backup ou de outro dispositivo. Entre novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de abas sincronizados deste dispositivo também serão excluídos."

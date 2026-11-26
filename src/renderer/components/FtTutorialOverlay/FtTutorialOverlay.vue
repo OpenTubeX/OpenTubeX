@@ -189,13 +189,13 @@
                 :label="t('Tutorial.Welcome.Import Data')"
                 :text-color="null"
                 :background-color="null"
-                :icon="['fas', 'database']"
+                :icon="['fas', 'import']"
                 @click="showImport = true"
               />
               <FtSettingsSubpage
                 :open="showImport"
                 :title="t('Tutorial.Welcome.Import Data')"
-                :icon="['fas', 'database']"
+                :icon="['fas', 'import']"
                 grow-with-content
                 @close="showImport = false"
               >

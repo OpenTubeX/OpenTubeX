@@ -1507,6 +1507,10 @@ Settings:
     Channels not found: "{count} canal nu a putut fi găsit | {count} canale nu au putut fi găsite | {count} de canale nu au putut fi găsite"
     Playlists have been successfully imported: "1/{total} playlist importat cu succes | {count}/{total} playlisturi importate cu succes | {count}/{total} de playlisturi importate cu succes"
     Import subscription groups hint: Pentru a sorta canalele în grupuri, adaugă o coloană după titlul canalului într-un fișier .csv cu numele grupurilor separate prin punct și virgulă sau importă un fișier .opml cu dosare. Grupurile lipsă sunt create.
+    Takeout description: "Importă abonamente, playlisturi, istoricul vizionărilor și istoricul căutărilor dintr-un fișier ZIP Google Takeout."
+    Individual data: "Date individuale"
+    Import: "Importă"
+    Export: "Exportă"
   Sync Settings:
     Signed Out After Restore: 'Sincronizarea a fost deconectată deoarece aceste date ale aplicației au fost restaurate dintr-o copie de rezervă sau de pe alt dispozitiv. Conectează-te din nou pentru a sincroniza acest dispozitiv.'
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."

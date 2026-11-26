@@ -1748,6 +1748,10 @@ Settings:
     Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
     Playlists have been successfully imported: "Sėkmingai importuotas {count}/{total} grojaraštis | Sėkmingai importuoti {count}/{total} grojaraščiai | Sėkmingai importuota {count}/{total} grojaraščių"
     Import subscription groups hint: Norėdami suskirstyti kanalus į grupes, .csv faile po kanalo pavadinimo pridėkite stulpelį su grupių pavadinimais, atskirtais kabliataškiais, arba importuokite .opml failą su aplankais. Trūkstamos grupės sukuriamos.
+    Takeout description: "Importuoti prenumeratas, grojaraščius, žiūrėjimo istoriją ir paieškos istoriją iš „Google Takeout“ ZIP failo."
+    Individual data: "Atskiri duomenys"
+    Import: "Importuoti"
+    Export: "Eksportuoti"
   Sync Settings:
     Signed Out After Restore: 'Sinchronizavimas atjungtas, nes šios programėlės duomenys buvo atkurti iš atsarginės kopijos arba kito įrenginio. Prisijunkite iš naujo, kad sinchronizuotumėte šį įrenginį.'
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."

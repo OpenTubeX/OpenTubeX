@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "Importovala sa rýchlosť prehrávania {count} kanála | Importovali sa rýchlosti prehrávania {count} kanálov | Importovali sa rýchlosti prehrávania {count} kanálov"
     Channels not found: "{count} kanál sa nepodarilo nájsť | {count} kanály sa nepodarilo nájsť | {count} kanálov sa nepodarilo nájsť"
     Import subscription groups hint: Ak chcete kanály roztriediť do skupín, pridajte v súbore .csv za názov kanála stĺpec s názvami skupín oddelenými bodkočiarkami alebo importujte súbor .opml s priečinkami. Chýbajúce skupiny sa vytvoria.
+    Takeout description: "Importovať odbery, playlisty, históriu pozerania a históriu vyhľadávania zo súboru ZIP z Google Takeout."
+    Individual data: "Jednotlivé údaje"
+    Import: "Importovať"
+    Export: "Exportovať"
   Sync Settings:
     Signed Out After Restore: 'Synchronizácia bola odhlásená, pretože tieto údaje aplikácie boli obnovené zo zálohy alebo z iného zariadenia. Prihláste sa znova, aby ste toto zariadenie synchronizovali.'
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."

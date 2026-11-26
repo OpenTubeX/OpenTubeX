@@ -1522,6 +1522,10 @@ Settings:
     Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
     Playlists have been successfully imported: "1/{total} afspeellijst is geïmporteerd | {count}/{total} afspeellijsten zijn geïmporteerd"
     Import subscription groups hint: Om kanalen in groepen in te delen, voeg je in een .csv-bestand na de kanaaltitel een kolom toe met groepsnamen, gescheiden door puntkomma's, of importeer je een .opml-bestand met mappen. Ontbrekende groepen worden aangemaakt.
+    Takeout description: "Importeer abonnementen, afspeellijsten, kijkgeschiedenis en zoekgeschiedenis uit een ZIP-bestand van Google Takeout."
+    Individual data: "Afzonderlijke gegevens"
+    Import: "Importeren"
+    Export: "Exporteren"
   Sync Settings:
     Signed Out After Restore: 'Synchronisatie is afgemeld omdat deze app-gegevens zijn hersteld vanuit een back-up of vanaf een ander apparaat. Meld je opnieuw aan om dit apparaat te synchroniseren.'
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."

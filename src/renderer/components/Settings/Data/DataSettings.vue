@@ -3,69 +3,108 @@
     :title="$t('Settings.Data Settings.Data Settings')"
     hide-title
   >
-    <h4 class="groupTitle">
-      {{ t('Settings.Data Settings.Complete backup') }}
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="t('Settings.Data Settings.Import backup')"
-        :icon="['fas', 'folder-open']"
-        :disabled="backupBusy"
-        @click="selectUnifiedBackup"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="t('Settings.Data Settings.Export backup')"
-        :icon="['fas', 'file-download']"
-        :disabled="backupBusy"
-        @click="openBackupExport"
-      />
-    </FtFlexBox>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Backup description') }}
-    </p>
     <FtDataScopeNotice />
+    <div class="dataHighlights">
+      <section class="dataHighlight">
+        <span
+          class="dataIcon"
+          aria-hidden="true"
+        >
+          <FtIcon :icon="['fas', 'box-archive']" />
+        </span>
+        <h4>{{ t('Settings.Data Settings.Complete backup') }}</h4>
+        <p class="dataDescription">
+          {{ t('Settings.Data Settings.Backup description') }}
+        </p>
+        <div class="dataActions">
+          <FtButton
+            v-if="!importOnly"
+            variant="filled"
+            :label="t('Settings.Data Settings.Export backup')"
+            :icon="['fas', 'export']"
+            :disabled="backupBusy"
+            @click="openBackupExport"
+          />
+          <FtButton
+            :label="t('Settings.Data Settings.Import backup')"
+            :icon="['fas', 'import']"
+            :disabled="backupBusy"
+            @click="selectUnifiedBackup"
+          />
+        </div>
+      </section>
+      <section class="dataHighlight">
+        <span
+          class="dataIcon"
+          aria-hidden="true"
+        >
+          <FtIcon :icon="['fab', 'youtube']" />
+        </span>
+        <h4>{{ t('Settings.Data Settings.YouTube Google Takeout') }}</h4>
+        <p class="dataDescription">
+          {{ t('Settings.Data Settings.Takeout description') }}
+        </p>
+        <div class="dataActions">
+          <FtButton
+            :label="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+            :icon="['fas', 'import']"
+            :disabled="takeoutBusy"
+            @click="selectTakeoutZip"
+          />
+        </div>
+      </section>
+    </div>
     <h4 class="groupTitle">
-      {{ t('Settings.Data Settings.YouTube Google Takeout') }}
+      {{ t('Settings.Data Settings.Individual data') }}
     </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
-        :icon="['fas', 'folder-open']"
-        :disabled="takeoutBusy"
-        @click="selectTakeoutZip"
-      />
-    </FtFlexBox>
-    <h4 class="groupTitle">
-      {{ $t('Subscriptions.Subscriptions') }}
-      <FtTooltip
-        class="selectTooltip"
-        position="top"
-        :tooltip="t('Settings.Data Settings.Import subscription groups hint')"
-      />
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="$t('Settings.Data Settings.Import Subscriptions')"
-        :icon="['fas', 'folder-open']"
-        @click="importSubscriptions"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="$t('Settings.Data Settings.Manage Subscriptions')"
-        :icon="['fas', 'users']"
-        @click="openProfileSettings"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="$t('Settings.Data Settings.Export Subscriptions')"
-        :icon="['fas', 'file-download']"
-        @click="showExportSubscriptionsPrompt = true"
-      />
-    </FtFlexBox>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Import subscriptions formats') }}
-    </p>
+    <div class="dataItems">
+      <article
+        v-for="item in dataItems"
+        :key="item.id"
+        class="dataItem"
+      >
+        <span
+          class="dataIcon"
+          aria-hidden="true"
+        >
+          <FtIcon :icon="item.icon" />
+        </span>
+        <div class="dataItemTitle">
+          <h4>{{ item.title }}</h4>
+          <FtTooltip
+            v-if="item.tooltip"
+            position="top"
+            :tooltip="item.tooltip"
+          />
+          <FtButton
+            v-if="item.id === 'subscriptions' && !importOnly"
+            variant="outlined"
+            size="extra-small"
+            :label="t('Settings.Data Settings.Manage Subscriptions')"
+            :icon="['fas', 'users']"
+            @click="openProfileSettings"
+          />
+        </div>
+        <p class="dataDescription">
+          {{ item.description }}
+        </p>
+        <div class="dataActions">
+          <FtButton
+            :label="t('Settings.Data Settings.Import')"
+            :aria-label="item.importLabel"
+            :icon="['fas', 'import']"
+            @click="item.import"
+          />
+          <FtButton
+            v-if="!importOnly"
+            :label="t('Settings.Data Settings.Export')"
+            :aria-label="item.exportLabel"
+            :icon="['fas', 'export']"
+            @click="item.export"
+          />
+        </div>
+      </article>
+    </div>
     <p class="center">
       <a
         class="importHelpLink"
@@ -74,88 +113,10 @@
         {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
       </a>
     </p>
-    <h4 class="groupTitle">
-      {{ $t('History.History') }}
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="$t('Settings.Data Settings.Import History')"
-        :icon="['fas', 'folder-open']"
-        @click="importWatchHistory"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="$t('Settings.Data Settings.Export History')"
-        :icon="['fas', 'file-download']"
-        @click="showExportWatchHistoryPrompt = true"
-      />
-    </FtFlexBox>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Import history formats') }}
-    </p>
-    <h4 class="groupTitle">
-      {{ $t('Playlists') }}
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="$t('Settings.Data Settings.Import Playlists')"
-        :icon="['fas', 'folder-open']"
-        @click="importPlaylists"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="$t('Settings.Data Settings.Export Playlists')"
-        :icon="['fas', 'file-download']"
-        @click="exportPlaylists"
-      />
-    </FtFlexBox>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Import playlists formats') }}
-    </p>
-    <h4 class="groupTitle">
-      {{ t('Settings.Data Settings.Search history') }}
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="t('Settings.Data Settings.Import search history')"
-        :icon="['fas', 'folder-open']"
-        @click="importSearchHistory"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="t('Settings.Data Settings.Export search history')"
-        :icon="['fas', 'file-download']"
-        @click="showExportSearchHistoryPrompt = true"
-      />
-    </FtFlexBox>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Import search history formats') }}
-    </p>
-    <h4 class="groupTitle">
-      {{ t('Settings.Settings') }}
-      <FtTooltip
-        class="selectTooltip"
-        position="top"
-        :tooltip="t('Settings.Data Settings.Settings Tooltip')"
-      />
-    </h4>
-    <FtFlexBox class="box">
-      <FtButton
-        :label="t('Settings.Data Settings.Import Settings')"
-        :icon="['fas', 'folder-open']"
-        @click="importSettings"
-      />
-      <FtButton
-        v-if="!importOnly"
-        :label="t('Settings.Data Settings.Export Settings')"
-        :icon="['fas', 'file-download']"
-        @click="exportSettings"
-      />
-    </FtFlexBox>
     <FtSettingsSubpage
       :open="showBackupExport"
       :title="t('Settings.Data Settings.Export backup')"
-      :icon="['fas', 'file-download']"
+      :icon="['fas', 'export']"
       @close="showBackupExport = false"
     >
       <div
@@ -170,7 +131,7 @@
         />
         <FtButton
           :label="t('Settings.Data Settings.Export selected data')"
-          :icon="['fas', 'file-download']"
+          :icon="['fas', 'export']"
           :disabled="backupBusy || selectedExportSections.length === 0"
           @click="exportUnifiedBackup"
         />
@@ -180,7 +141,7 @@
       :open="showBackupImport"
       grow-with-content
       :title="t('Settings.Data Settings.Import backup')"
-      :icon="['fas', 'folder-open']"
+      :icon="['fas', 'import']"
       @close="closeBackupImport"
     >
       <div
@@ -209,7 +170,7 @@
         <FtButton
           v-if="selectedBackupSections.length > 0"
           :label="t('Settings.Data Settings.Import selected data')"
-          :icon="['fas', 'folder-open']"
+          :icon="['fas', 'import']"
           :disabled="backupBusy"
           @click="importUnifiedBackup"
         />
@@ -219,7 +180,7 @@
       :open="showTakeoutImport"
       grow-with-content
       :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
-      :icon="['fas', 'folder-open']"
+      :icon="['fas', 'import']"
       @close="closeTakeoutImport"
     >
       <div
@@ -253,7 +214,7 @@
         <FtButton
           v-if="takeoutPreviewReady"
           :label="t('Settings.Data Settings.Import selected data')"
-          :icon="['fas', 'folder-open']"
+          :icon="['fas', 'import']"
           :disabled="takeoutBusy"
           @click="importSelectedTakeoutData"
         />
@@ -288,7 +249,7 @@
     <FtFlexBox class="box">
       <FtButton
         :label="t('Settings.Data Settings.Import channel playback speeds')"
-        :icon="['fas', 'folder-open']"
+        :icon="['fas', 'import']"
         :disabled="channelPlaybackSpeedsBusy"
         @click="importChannelPlaybackSpeeds"
       />
@@ -311,6 +272,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { Translation, useI18n } from 'vue-i18n'
+import { FtIcon } from '@opentubex/icons'
 
 import FtButton from '../../FtButton/FtButton.vue'
 import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
@@ -381,6 +343,55 @@ const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 const USING_ELECTRON = process.env.IS_ELECTRON
 const { t } = useI18n()
+
+/** The kinds of data that import and export on their own, apart from backups */
+const dataItems = computed(() => [{
+  id: 'subscriptions',
+  icon: ['fas', 'users'],
+  title: t('Subscriptions.Subscriptions'),
+  tooltip: t('Settings.Data Settings.Import subscription groups hint'),
+  description: t('Settings.Data Settings.Import subscriptions formats'),
+  importLabel: t('Settings.Data Settings.Import Subscriptions'),
+  exportLabel: t('Settings.Data Settings.Export Subscriptions'),
+  import: importSubscriptions,
+  export: () => { showExportSubscriptionsPrompt.value = true },
+}, {
+  id: 'history',
+  icon: ['fas', 'history'],
+  title: t('History.History'),
+  description: t('Settings.Data Settings.Import history formats'),
+  importLabel: t('Settings.Data Settings.Import History'),
+  exportLabel: t('Settings.Data Settings.Export History'),
+  import: importWatchHistory,
+  export: () => { showExportWatchHistoryPrompt.value = true },
+}, {
+  id: 'playlists',
+  icon: ['fas', 'list'],
+  title: t('Playlists'),
+  description: t('Settings.Data Settings.Import playlists formats'),
+  importLabel: t('Settings.Data Settings.Import Playlists'),
+  exportLabel: t('Settings.Data Settings.Export Playlists'),
+  import: importPlaylists,
+  export: exportPlaylists,
+}, {
+  id: 'searchHistory',
+  icon: ['fas', 'search'],
+  title: t('Settings.Data Settings.Search history'),
+  description: t('Settings.Data Settings.Import search history formats'),
+  importLabel: t('Settings.Data Settings.Import search history'),
+  exportLabel: t('Settings.Data Settings.Export search history'),
+  import: importSearchHistory,
+  export: () => { showExportSearchHistoryPrompt.value = true },
+}, {
+  id: 'settings',
+  icon: ['fas', 'sliders-h'],
+  title: t('Settings.Settings'),
+  description: t('Settings.Data Settings.Settings Tooltip'),
+  importLabel: t('Settings.Data Settings.Import Settings'),
+  exportLabel: t('Settings.Data Settings.Export Settings'),
+  import: importSettings,
+  export: exportSettings,
+}])
 const backupImportContent = useTemplateRef('backupImportContent')
 const takeoutImportContent = useTemplateRef('takeoutImportContent')
 let importContentObserver

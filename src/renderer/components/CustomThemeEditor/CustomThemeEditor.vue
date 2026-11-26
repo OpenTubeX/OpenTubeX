@@ -21,7 +21,7 @@
         <div class="fileActions">
           <FtIconButton
             :title="t('Settings.Theme Settings.Custom Theme.Import Theme')"
-            :icon="['fas', 'folder-open']"
+            :icon="['fas', 'import']"
             @click="importTheme"
           />
           <FtIconButton
@@ -31,7 +31,7 @@
           />
           <FtIconButton
             :title="t('Settings.Theme Settings.Custom Theme.Export Theme')"
-            :icon="['fas', 'download']"
+            :icon="['fas', 'export']"
             @click="exportTheme"
           />
           <FtIconButton

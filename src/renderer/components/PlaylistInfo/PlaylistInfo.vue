@@ -880,7 +880,7 @@ const ownMenuItems = computed(() => {
     items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !addingMissingVideosPending.value, run: () => addMissingPlaylistVideos(props.id) })
   }
   if (isUserPlaylist.value && hasVideos) {
-    items.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'file-export'], run: () => { showExportPrompt.value = true } })
+    items.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'export'], run: () => { showExportPrompt.value = true } })
   }
   if (props.preloadAvailable && hasVideos) {
     items.push({

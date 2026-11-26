@@ -7,6 +7,135 @@
   padding-block-end: 0;
 }
 
+/* Backups and Takeout imports move whole sets of data, so they lead as tiles
+   beside each other, or stacked on narrow sections. */
+.dataHighlights {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.dataHighlight {
+  background-color: color-mix(in srgb, var(--primary-text-color) 5%, transparent);
+  border-radius: var(--shape-corner-large);
+  column-gap: 16px;
+  display: grid;
+  grid-template:
+    'icon title' auto
+    'icon description' auto
+    '. actions' 1fr
+    / 40px minmax(0, 1fr);
+  padding: 16px;
+}
+
+/* Material 3 list items like the Storage tab's: leading icon, headline with
+   supporting text, and a trailing Import and Export pair. */
+.dataItem {
+  column-gap: 16px;
+  display: grid;
+  grid-template:
+    'icon title actions' auto
+    'icon description actions' auto
+    / 40px minmax(0, 1fr) auto;
+  padding-block: 12px;
+}
+
+.dataItem + .dataItem {
+  border-block-start: 1px solid var(--divider-color);
+}
+
+.dataIcon {
+  align-items: center;
+  align-self: start;
+  background-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 18%, transparent);
+  block-size: 40px;
+  border-radius: var(--shape-corner-medium);
+  color: var(--primary-text-color);
+  display: flex;
+  font-size: 18px;
+  grid-area: icon;
+  inline-size: 40px;
+  justify-content: center;
+}
+
+.dataHighlight h4,
+.dataItemTitle h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  margin: 0;
+}
+
+.dataHighlight h4,
+.dataItemTitle {
+  align-self: center;
+  grid-area: title;
+  min-inline-size: 0;
+}
+
+.dataItemTitle {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.dataDescription {
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  grid-area: description;
+  line-height: 1.25rem;
+  margin-block: 2px 0;
+  min-inline-size: 0;
+}
+
+.dataActions {
+  align-items: center;
+  align-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  grid-area: actions;
+  min-inline-size: 0;
+}
+
+.dataHighlight .dataActions {
+  align-self: end;
+  margin-block-start: 12px;
+}
+
+.dataActions :deep(.btn),
+.dataItemTitle :deep(.btn) {
+  margin: 0;
+  max-inline-size: 100%;
+  white-space: normal;
+}
+
+/* Narrow sections put a row's buttons below its text. */
+@container settings-content (width <= 560px) {
+  .dataItem {
+    grid-template:
+      'icon title' auto
+      'icon description' auto
+      '. actions' auto
+      / 40px minmax(0, 1fr);
+  }
+
+  .dataItem .dataActions {
+    margin-block-start: 8px;
+  }
+}
+
+/* Tiles on phones give their buttons the full width, so a pair fits a row. */
+@container settings-content (width <= 480px) {
+  .dataHighlight {
+    grid-template-areas:
+      'icon title'
+      'icon description'
+      'actions actions';
+  }
+}
+
 .importFormatsHint {
   color: var(--secondary-text-color);
   font-size: 0.9em;

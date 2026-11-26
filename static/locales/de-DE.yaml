@@ -1598,6 +1598,10 @@ Settings:
     Backup imported: Sicherung erfolgreich importiert
     YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: YouTube-Takeout-ZIP importieren
+    Takeout description: Abos, Playlists, Wiedergabeverlauf und Suchverlauf aus einer ZIP-Datei von Google Takeout importieren.
+    Individual data: Einzelne Daten
+    Import: Importieren
+    Export: Exportieren
     Select Takeout data: Zu importierende Daten auswählen
     Import selected data: Ausgewählte Daten importieren
     No supported Takeout data: In diesem ZIP wurden keine unterstützten YouTube-Daten gefunden.

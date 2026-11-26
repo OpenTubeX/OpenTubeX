@@ -1497,6 +1497,10 @@ Settings:
     Channel playback speeds imported: "{count} kanalın oynatma sürəti idxal edildi | {count} kanalın oynatma sürətləri idxal edildi"
     Channels not found: "{count} kanal tapılmadı | {count} kanal tapılmadı"
     Import subscription groups hint: Kanalları qruplara ayırmaq üçün .csv faylında kanal adından sonra nöqtəli vergüllə ayrılmış qrup adları olan bir sütun əlavə edin və ya qovluqları olan .opml faylını idxal edin. Mövcud olmayan qruplar yaradılır.
+    Takeout description: "Abunəlikləri, pleylistləri, baxış tarixçəsini və axtarış tarixçəsini Google Takeout ZIP faylından idxal edin."
+    Individual data: "Ayrı-ayrı məlumatlar"
+    Import: "İdxal et"
+    Export: "İxrac et"
   Sync Settings:
     Signed Out After Restore: 'Sinxronizasiyadan çıxış edildi, çünki bu tətbiq məlumatları ehtiyat nüsxədən və ya başqa cihazdan bərpa olunub. Bu cihazı sinxronlaşdırmaq üçün yenidən daxil olun.'
     Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."

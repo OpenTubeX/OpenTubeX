@@ -1494,6 +1494,10 @@ Settings:
     Channel playback speeds imported: "Importerade uppspelningshastigheten för {count} kanal | Importerade uppspelningshastigheterna för {count} kanaler"
     Channels not found: "{count} kanal kunde inte hittas | {count} kanaler kunde inte hittas"
     Import subscription groups hint: Om du vill sortera kanaler i grupper lägger du till en kolumn efter kanaltiteln i en .csv-fil med gruppnamn avgränsade med semikolon, eller importerar en .opml-fil med mappar. Grupper som saknas skapas.
+    Takeout description: "Importera prenumerationer, spellistor, visningshistorik och sökhistorik från en ZIP-fil från Google Takeout."
+    Individual data: "Enskilda data"
+    Import: "Importera"
+    Export: "Exportera"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen loggades ut eftersom dessa appdata återställdes från en säkerhetskopia eller en annan enhet. Logga in igen för att synkronisera den här enheten.'
     Revoke Session Tabs Warning: "Den här enhetens synkroniserade flikuppsättningar kommer också att raderas."

@@ -1499,6 +1499,10 @@ Settings:
     Channels not found: "Không tìm thấy {count} kênh"
     Playlists have been successfully imported: "Đã nhập thành công {count}/{total} danh sách phát"
     Import subscription groups hint: Để sắp xếp kênh vào các nhóm, hãy thêm một cột sau tiêu đề kênh trong tệp .csv chứa tên nhóm phân tách bằng dấu chấm phẩy, hoặc nhập tệp .opml có thư mục. Các nhóm chưa có sẽ được tạo.
+    Takeout description: "Nhập kênh đăng ký, danh sách phát, lịch sử xem và lịch sử tìm kiếm từ tệp ZIP của Google Takeout."
+    Individual data: "Dữ liệu riêng lẻ"
+    Import: "Nhập"
+    Export: "Xuất"
   Sync Settings:
     Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."
