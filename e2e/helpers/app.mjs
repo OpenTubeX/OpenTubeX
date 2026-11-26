@@ -191,15 +191,34 @@ export async function chooseSelectOption(select, value) {
  * @param {import('@playwright/test').Locator} control
  */
 export async function clickInFullscreen(control) {
-  await expect.poll(() => control.evaluate(async element => {
-    element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
-    const before = element.getBoundingClientRect()
-    await new Promise(resolve => requestAnimationFrame(resolve))
-    const rect = element.getBoundingClientRect()
-    return ['x', 'y', 'width', 'height'].every(key => rect[key] === before[key]) &&
-      !!document.fullscreenElement?.contains(element) &&
-      element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
-  })).toBe(true)
+  let state = null
+  await expect.poll(async () => {
+    state = await control.evaluate(async element => {
+      element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+      const before = element.getBoundingClientRect()
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const rect = element.getBoundingClientRect()
+      const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+      return {
+        stable: ['x', 'y', 'width', 'height'].every(key => rect[key] === before[key]),
+        inFullscreen: !!document.fullscreenElement?.contains(element),
+        receivesPointer: element.contains(hit),
+        before: before.toJSON(),
+        rect: rect.toJSON(),
+        fullscreenElement: document.fullscreenElement?.className ?? null,
+        hit: hit && {
+          element: `${hit.tagName.toLowerCase()}.${[...hit.classList].join('.')}`,
+          within: hit.closest('[class]')?.className ?? null,
+          text: hit.textContent.trim().slice(0, 60),
+        },
+      }
+    }).catch(error => ({ error: String(error?.message ?? error) }))
+    return state.stable && state.inFullscreen && state.receivesPointer
+  }).toBe(true).catch(error => {
+    error.message += `\nLast fullscreen control state: ${JSON.stringify(state)}`
+    if (error.stack) error.stack += `\nLast fullscreen control state: ${JSON.stringify(state)}`
+    throw error
+  })
   await control.click({ force: true })
 }
 

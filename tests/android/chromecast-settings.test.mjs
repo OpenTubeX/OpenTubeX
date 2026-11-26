@@ -5,6 +5,7 @@ import { expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
+import { rethrowWithAndroidState } from '../helpers/android-failure.mjs'
 
 // Run against a current debug APK on a locked emulator, with its WebView forwarded.
 test('Android enables Google Cast from settings and opens the native device menu', {
@@ -70,6 +71,39 @@ test('Android enables Google Cast from settings and opens the native device menu
       try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
+    // Records when the Cast button and the Watch state that shows it change,
+    // for the failure report.
+    await watch.evaluate(component => {
+      const events = window.__castTestEvents = []
+      const record = (type, value) => {
+        events.push({ t: Math.round(performance.now()), type, value })
+        if (events.length > 100) events.shift()
+      }
+      const watch = component.proxy
+      watch.$watch(() => ({
+        errorMessage: watch.errorMessage,
+        isLoading: watch.isLoading,
+        playerReady: watch.playerReady,
+        playerStreamsPending: watch.playerStreamsPending,
+        ytDlpStreamsPending: watch.ytDlpStreamsPending,
+        playbackEngineFallbackTarget: watch.playbackEngineFallbackTarget,
+        activeFormat: watch.activeFormat,
+        localFilePlayback: watch.localFilePlayback,
+        isUpcoming: watch.isUpcoming,
+        videoLoadGeneration: watch.videoLoadGeneration,
+        preparingVideoLoadGeneration: watch.preparingVideoLoadGeneration,
+        legacyFormats: watch.legacyFormats.length,
+        videoId: watch.videoId,
+      }), value => record('watch', value), { immediate: true })
+      let shown = null
+      window.__castTestObserver = new MutationObserver(() => {
+        const button = document.querySelector('.chromecastControl > button')
+        if (shown === button) return
+        shown = button
+        record('castButton', button ? 'attached' : 'missing')
+      })
+      window.__castTestObserver.observe(document.body, { childList: true, subtree: true })
+    })
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
     await watch.evaluate((component, media) => {
       const watch = component.proxy
@@ -116,7 +150,20 @@ test('Android enables Google Cast from settings and opens the native device menu
     await button.press('Escape')
     await watch.evaluate(component => component.proxy.$store.commit('setCastProtocols', []))
     await expect(button).toHaveCount(0)
+  } catch (error) {
+    await rethrowWithAndroidState(error, page, 'chromecast-settings', () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        now: Math.round(performance.now()),
+        hash: location.hash,
+        castProtocols: store.getters.getCastProtocols,
+        castControls: [...document.querySelectorAll('.castControl')].map(element => element.className),
+        player: document.querySelector('.ftVideoPlayer')?.className ?? null,
+        events: window.__castTestEvents ?? null,
+      }
+    })
   } finally {
+    await page.evaluate(() => window.__castTestObserver?.disconnect()).catch(() => {})
     await watch?.evaluate(component => component?.proxy.$refs.player?.pause()).catch(() => {})
     await watch?.dispose()
     await page.evaluate(async ({ settings, originalRoute }) => {

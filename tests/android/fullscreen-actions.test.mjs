@@ -5,6 +5,7 @@ import { expect } from '@playwright/test'
 import { clickInFullscreen, goTo } from '../../e2e/helpers/app.mjs'
 import { blockAppNetwork, connectAndroidApp } from '../helpers/android-webview.mjs'
 import { replaceWatchVideo } from '../helpers/android-watch.mjs'
+import { rethrowWithAndroidState } from '../helpers/android-failure.mjs'
 
 // Use a current debug APK on a locked emulator with its WebView forwarded.
 test('Android customizes fullscreen actions and removes the empty bubble', {
@@ -160,6 +161,25 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await expect(dock).toHaveCount(0)
     await expect(player).toHaveAttribute('data-action-dock-visible', 'false')
     assert.equal(await video.evaluate(element => element.error), null)
+  } catch (error) {
+    await rethrowWithAndroidState(error, page, 'fullscreen-actions', () => {
+      const describe = element => element && {
+        className: element.className,
+        rect: element.getBoundingClientRect().toJSON(),
+        inFullscreen: !!document.fullscreenElement?.contains(element),
+      }
+      const card = document.querySelector('.downloadPromptCard')
+      return {
+        now: Math.round(performance.now()),
+        fullscreenElement: document.fullscreenElement?.className ?? null,
+        prompts: [...document.querySelectorAll('.prompt')].map(describe),
+        downloadPromptCard: describe(card),
+        cardAnimations: card?.getAnimations({ subtree: true }).map(animation => ({ playState: animation.playState, currentTime: animation.currentTime })) ?? null,
+        overlays: [...document.querySelectorAll('.ftVideoPlayer [class*="Overlay"].open, .toast, .ft-toast, [role="dialog"], [role="menu"]')].map(describe),
+        inert: [...document.querySelectorAll('[inert]')].map(element => element.className),
+        focused: document.activeElement && `${document.activeElement.tagName.toLowerCase()}.${[...document.activeElement.classList].join('.')}`,
+      }
+    })
   } finally {
     await page.evaluate(async ({ settings, originalRoute }) => {
       if (document.fullscreenElement) await document.exitFullscreen()
