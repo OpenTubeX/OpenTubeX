@@ -1,4 +1,5 @@
-import { test, expect, sel, abortUnmockedRequest } from '../../helpers/app.mjs'
+import { readFile } from 'node:fs/promises'
+import { test, expect, sel, abortUnmockedRequest, goTo } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -181,5 +182,95 @@ test.describe('original names for existing subscriptions', () => {
     await expect(page.locator('.ft-list-channel .h3Title')).toHaveText(originalName)
     await expect.poll(async () => (await subscription()).name).toBe(originalName)
     expect(feedRequests).toBe(1)
+  })
+
+  test('replaces saved translated names in the channel list', async ({ page }) => {
+    await mockSearch(page, route => route.fulfill({ contentType: 'application/atom+xml', body: rss }))
+    await goTo(page, 'subscribedchannels')
+    const channel = page.locator('.channel').filter({ has: page.locator('.channelName') })
+    await expect(channel.locator('.channelName')).toHaveText(originalName)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getProfileList[0].subscriptions[0].name
+    })).toBe(originalName)
+  })
+})
+
+test.describe('playlist owner names', () => {
+  test.use({
+    seed: {
+      settings: { avoidTranslation: 'entire_app', backendPreference: 'local', backendFallback: false, enableSearchSuggestions: false }
+    }
+  })
+
+  test('updates the tab title and saved playlist when the original owner name arrives', async ({ page }) => {
+    const playlistId = 'PL-translated-owner'
+    const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
+    let releaseFeed
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await page.route('https://www.youtube.com/feeds/videos.xml**', async route => {
+      await new Promise(resolve => { releaseFeed = resolve })
+      await route.fulfill({ contentType: 'application/atom+xml', body: rss })
+    })
+    await page.route('https://www.youtube.com/youtubei/v1/browse**', route => route.fulfill({
+      json: {
+        metadata: { playlistMetadataRenderer: { title: 'Owner playlist', description: '' } },
+        sidebar: {
+          playlistSidebarRenderer: {
+            items: [{
+              playlistSidebarPrimaryInfoRenderer: {
+                title: { simpleText: 'Owner playlist' },
+                stats: [{ simpleText: '1 video' }, { simpleText: 'No views' }],
+                thumbnailRenderer: {
+                  playlistVideoThumbnailRenderer: { thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/sampleVid01/hqdefault.jpg', width: 480, height: 360 }] } }
+                }
+              }
+            }, {
+              playlistSidebarSecondaryInfoRenderer: {
+                videoOwner: {
+                  videoOwnerRenderer: {
+                    title: { runs: [{ text: translatedName, navigationEndpoint: { browseEndpoint: { browseId: channelId } } }] },
+                    thumbnail: { thumbnails: [] }
+                  }
+                }
+              }
+            }]
+          }
+        },
+        contents: {
+          twoColumnBrowseResultsRenderer: {
+            tabs: [{
+              tabRenderer: {
+                selected: true,
+                content: {
+                  sectionListRenderer: {
+                    contents: [{
+                      itemSectionRenderer: {
+                        contents: [{ playlistVideoListRenderer: { playlistId, contents: [{ lockupViewModel: lockup }] } }]
+                      }
+                    }]
+                  }
+                }
+              }
+            }]
+          }
+        }
+      }
+    }))
+
+    await page.locator(sel.searchInput).fill(`https://www.youtube.com/playlist?list=${playlistId}`)
+    await page.locator(sel.searchInput).press('Enter')
+    const info = page.locator('.playlistInfo')
+    await expect(info).toContainText(translatedName)
+    await expect.poll(() => typeof releaseFeed).toBe('function')
+    await info.getByTitle('Save Playlist').click()
+    const savedOwner = () => page.evaluate(id => window.$store.getters.getPlaylistBookmark(id)?.uploader.name, playlistId)
+    await expect.poll(savedOwner).toBe(translatedName)
+
+    releaseFeed()
+    await expect(info).toContainText(originalName)
+    await expect(page.locator('.tab.active .tabTitleText')).toHaveText(`Owner playlist | ${originalName}`)
+    await expect.poll(savedOwner).toBe(originalName)
   })
 })

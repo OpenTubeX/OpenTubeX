@@ -267,6 +267,7 @@ import {
   getLocalPlaylist,
   getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
+  getOriginalChannelName,
   parseLocalPlaylistVideo,
 } from '../../helpers/api/local'
 import {
@@ -556,11 +557,11 @@ function remotePlaylistUpdatedAt() {
   return lastUpdatedDate.value?.getTime() ?? parseLocalPlaylistLastUpdated(lastUpdated.value)
 }
 
-async function refreshPlaylistBookmarkMetadata() {
-  const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
-  if (bookmark == null) return
+let bookmarkMetadataSave = Promise.resolve()
 
-  const updated = updatePlaylistBookmarkMetadata(bookmark, {
+function refreshPlaylistBookmarkMetadata() {
+  const id = playlistId.value
+  const metadata = {
     title: playlistTitle.value,
     description: playlistDescription.value,
     thumbnailUrl: playlistThumbnail.value || (firstVideoId.value
@@ -571,10 +572,19 @@ async function refreshPlaylistBookmarkMetadata() {
     uploaderName: channelName.value || playlistTitle.value,
     uploaderAvatar: channelThumbnail.value,
     updatedAt: remotePlaylistUpdatedAt(),
-  })
-  if (updated === bookmark) return
+  }
 
-  await store.dispatch('savePlaylistBookmark', updated)
+  // The original owner name can arrive while an earlier save is still running.
+  // Saving in order compares each refresh against what the previous one saved.
+  const save = bookmarkMetadataSave.then(async () => {
+    const bookmark = store.getters.getPlaylistBookmark(id)
+    if (bookmark == null) return
+
+    const updated = updatePlaylistBookmarkMetadata(bookmark, metadata)
+    if (updated !== bookmark) await store.dispatch('savePlaylistBookmark', updated)
+  })
+  bookmarkMetadataSave = save.catch(() => {})
+  return save
 }
 
 async function togglePlaylistBookmark() {
@@ -955,11 +965,23 @@ async function getPlaylistLocal() {
     infoSource.value = 'local'
     showUnavailableVideosAlert.value = result.menu?.items?.some((item) => item.text === 'Show unavailable videos')
 
+    // YouTube translates the owner's name; the original one comes from the channel's feed.
+    const preferOriginalChannelName = store.getters.getAvoidTranslation === 'entire_app'
     store.dispatch('updateSubscriptionDetails', {
       channelThumbnailUrl: channelThumbnail.value,
-      channelName: channelName_,
+      channelName: preferOriginalChannelName ? undefined : channelName_,
       channelId: channelId.value
     })
+    if (preferOriginalChannelName && channelId.value) {
+      const ownerId = channelId.value
+      getOriginalChannelName(ownerId).then(originalName => {
+        if (!originalName || !requestIsCurrent()) return
+        channelName.value = originalName
+        store.dispatch('updateSubscriptionDetails', { channelId: ownerId, channelName: originalName })
+        updatePageTitle()
+        refreshPlaylistBookmarkMetadata().catch(error => console.error(error))
+      })
+    }
 
     playlistItems.value = playlistItems_
 

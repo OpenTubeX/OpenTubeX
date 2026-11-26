@@ -236,7 +236,8 @@ import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeBut
 import FtSubscriptionGroupBar from '../../components/FtSubscriptionGroupBar/FtSubscriptionGroupBar.vue'
 import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
-import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
+import { getLocalChannel, getOriginalChannelName, parseLocalChannelHeader } from '../../helpers/api/local'
+import { mapConcurrently } from '../../helpers/concurrent-map'
 import { useListPagination } from '../../composables/useListPagination'
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 import { ctrlFHandler, getIconForSortPreference, showToast, throttle } from '../../helpers/utils'
@@ -758,9 +759,9 @@ function updateThumbnail(channel) {
       }
       // Refreshes are spaced 500 ms apart, so each would otherwise rewrite
       // every profile holding the channel and update all of their getters.
+      // The name is left out, so a stale one cannot replace a newer saved name.
       refreshedChannels.push({
         channelThumbnailUrl,
-        channelName: channel.name,
         channelId: channel.id,
         channelHandle
       })
@@ -787,6 +788,29 @@ function markQueryPasted() {
 }
 
 let isUnmounted = false
+
+// Some pages save the channel names YouTube translated, while channel feeds
+// keep the original ones. The lookups are shared and cached for the session.
+const originalNameLookupIds = new Set()
+watch([
+  displayedChannels,
+  () => process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'local' && store.getters.getAvoidTranslation === 'entire_app'
+], async ([entries, preferOriginalNames]) => {
+  if (!preferOriginalNames) return
+  const channels = entries
+    .filter(entry => entry.platform === 'youtube' && !originalNameLookupIds.has(entry.key))
+    .map(entry => entry.channel)
+  if (channels.length === 0) return
+  for (const channel of channels) originalNameLookupIds.add(channel.id)
+
+  const updates = []
+  await mapConcurrently(channels, 3, async channel => {
+    if (isUnmounted) return
+    const name = await getOriginalChannelName(channel.id)
+    if (name && name !== channel.name) updates.push({ channelId: channel.id, channelName: name })
+  })
+  store.dispatch('batchUpdateSubscriptionDetails', updates)
+}, { immediate: true })
 
 /**
  * @param {string} message

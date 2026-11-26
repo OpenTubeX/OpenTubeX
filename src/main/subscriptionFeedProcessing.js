@@ -4,10 +4,10 @@ import { parseSubscriptionRss } from '../renderer/helpers/api/feed-rss.js'
 import { getEmptyLiveContinuation } from '../subscriptionBackgroundRequests.js'
 
 /** Parse foreground responses in the same process as hidden-window refreshes. */
-export function processSubscriptionFeed({ format, data: serializedData, text, feedType, channelId, channelName, hideMembersOnly = true }) {
+export function processSubscriptionFeed({ format, data: serializedData, text, feedType, channelId, channelName, hideMembersOnly = true, preferOriginalChannelNames = false }) {
   if (format === 'rss') return parseSubscriptionRss(text, channelId)
   const data = JSON.parse(serializedData)
-  const parsers = createLocalFeedParsers(isMembersOnly => isMembersOnly && hideMembersOnly)
+  const parsers = createLocalFeedParsers(isMembersOnly => isMembersOnly && hideMembersOnly, () => preferOriginalChannelNames)
   if (format === 'localContinuation') {
     return {
       videos: parsers.parseLocalChannelVideos(new Mixins.Feed(null, { data }).videos, channelId, channelName),
