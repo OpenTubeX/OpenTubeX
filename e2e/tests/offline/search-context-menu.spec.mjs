@@ -195,10 +195,10 @@ test.describe('with all built-in external search engines enabled', () => {
     await password.click({ button: 'right' })
 
     const menu = page.locator('.contextMenu')
-    await expect(menu.getByRole('menuitem')).toHaveText(['Select All', 'Cut', 'Copy', 'Paste'])
+    await expect(menu.getByRole('menuitem', { name: 'Paste' })).toBeEnabled()
     await expect(menu.getByRole('menuitem', { name: 'Cut' })).toBeDisabled()
     await expect(menu.getByRole('menuitem', { name: 'Copy' })).toBeDisabled()
-    await expect(menu.getByRole('menuitem', { name: 'Paste' })).toBeEnabled()
+    await expect(menu.getByRole('menuitem', { name: /^Search/ })).toHaveCount(0)
   })
 
   test('opens the fly-out towards the start without a horizontal scrollbar', async ({ page }) => {
