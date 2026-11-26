@@ -1372,6 +1372,7 @@ Settings:
     Cleanup Complete: Lageroprydning er færdig
     Cleanup Failed: Lageroprydning mislykkedes
   Subscription Settings:
+    Open Profile Manager: Åbn profilhåndtering
     Refresh These Feeds Together: "Opdater disse feeds samtidig"
     Fetch Feed on Startup: Hent feed ved opstart
     Show New Content Feed: Vis feed med nyt indhold

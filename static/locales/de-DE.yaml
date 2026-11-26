@@ -1399,6 +1399,7 @@ Settings:
     Enable Google Cast: "Google Cast aktivieren"
     Enable FCast: "FCast aktivieren"
   Subscription Settings:
+    Open Profile Manager: Profilverwaltung öffnen
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
     Fetch Feed on Startup: Feed beim Start abrufen

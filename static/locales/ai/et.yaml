@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Salvestusruumi puhastamine on lõpetatud
     Cleanup Failed: Salvestusruumi puhastamine nurjus
   Subscription Settings:
+    Open Profile Manager: Ava profiilihaldur
     Refresh These Feeds Together: "Värskenda neid vooge koos"
     Fetch Feed on Startup: Hangi voog käivitamisel
     Show New Content Feed: Kuva uue sisu voog

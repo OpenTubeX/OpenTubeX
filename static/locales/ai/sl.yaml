@@ -1581,6 +1581,7 @@ Settings:
     Cleanup Complete: Čiščenje shrambe je končano
     Cleanup Failed: Čiščenje shrambe ni uspelo
   Subscription Settings:
+    Open Profile Manager: Odpri upravitelja profilov
     Refresh These Feeds Together: "Osveži te vire skupaj"
     Fetch Feed on Startup: Pridobi vir ob zagonu
     Show New Content Feed: Prikaži vir novih vsebin

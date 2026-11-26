@@ -1359,6 +1359,7 @@ Settings:
     Cleanup Complete: تم الانتهاء من تنظيف وحدة التخزين
     Cleanup Failed: فشل تنظيف التخزين
   Subscription Settings:
+    Open Profile Manager: فتح مدير الملف الشخصي
     Refresh These Feeds Together: "تحديث هذه الخلاصات معًا"
     Fetch Feed on Startup: جلب التغذية عند بدء التشغيل
     Show New Content Feed: إظهار خلاصة المحتوى الجديد

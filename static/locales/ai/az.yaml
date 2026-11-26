@@ -1350,6 +1350,7 @@ Settings:
     Cleanup Complete: Yaddaşın təmizlənməsi tamamlandı
     Cleanup Failed: Yaddaşın təmizlənməsi alınmadı
   Subscription Settings:
+    Open Profile Manager: Profil İdarəedicisini aç
     Refresh These Feeds Together: "Bu axınları birlikdə yenilə"
     Fetch Feed on Startup: Başladıqda lenti al
     Show New Content Feed: Yeni məzmun lentini göstər

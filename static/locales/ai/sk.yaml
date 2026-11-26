@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Čistenie úložiska bolo dokončené
     Cleanup Failed: Čistenie úložiska zlyhalo
   Subscription Settings:
+    Open Profile Manager: Otvoriť správcu profilov
     Refresh These Feeds Together: "Obnovovať tieto kanály spoločne"
     Fetch Feed on Startup: Načítať kanál pri spustení
     Show New Content Feed: Zobraziť kanál nového obsahu

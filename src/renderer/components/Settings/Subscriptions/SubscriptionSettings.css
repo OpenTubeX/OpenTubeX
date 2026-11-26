@@ -27,6 +27,10 @@
 
 .subscriptionChannelSettingsManager {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+
+  /* Leaves room for the sync icon after the Subscription settings button */
+  column-gap: 1.5em;
 }
 

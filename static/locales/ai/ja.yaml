@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: ストレージのクリーンアップが完了しました
     Cleanup Failed: ストレージのクリーンアップに失敗しました
   Subscription Settings:
+    Open Profile Manager: プロファイル管理を開く
     Refresh These Feeds Together: "これらのフィードをまとめて更新"
     Fetch Feed on Startup: 起動時にフィードを取得
     Show New Content Feed: 新着コンテンツのフィードを表示

@@ -104,8 +104,7 @@
   margin-block-start: 12px;
 }
 
-.dataActions :deep(.btn),
-.dataItemTitle :deep(.btn) {
+.dataActions :deep(.btn) {
   margin: 0;
   max-inline-size: 100%;
   white-space: normal;

@@ -1307,6 +1307,7 @@ Settings:
     Cleanup Complete: Очистка хранилища завершена
     Cleanup Failed: Не удалось очистить хранилище
   Subscription Settings:
+    Open Profile Manager: Открыть менеджер профилей
     Refresh These Feeds Together: "Обновлять эти ленты вместе"
     Fetch Feed on Startup: Загружать ленту при запуске
     Show New Content Feed: Показывать ленту нового контента

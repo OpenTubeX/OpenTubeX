@@ -1615,6 +1615,7 @@ Settings:
     Cleanup Complete: Ha acabat la neteja de l'emmagatzematge
     Cleanup Failed: Ha fallat la neteja de l'emmagatzematge
   Subscription Settings:
+    Open Profile Manager: Obre el gestor de perfils
     Refresh These Feeds Together: "Actualitza aquests canals alhora"
     Fetch Feed on Startup: Obtén el canal en iniciar
     Show New Content Feed: Mostra el canal de contingut nou

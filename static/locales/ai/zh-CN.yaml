@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: 存储空间清理完成
     Cleanup Failed: 存储空间清理失败
   Subscription Settings:
+    Open Profile Manager: 打开配置文件管理器
     Refresh These Feeds Together: "同时刷新这些订阅源"
     Fetch Feed on Startup: 启动时获取动态
     Show New Content Feed: 显示新内容动态

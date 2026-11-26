@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Lagringsrensningen är klar
     Cleanup Failed: Lagringsrensningen misslyckades
   Subscription Settings:
+    Open Profile Manager: Öppna profilhanteraren
     Refresh These Feeds Together: "Uppdatera dessa flöden samtidigt"
     Fetch Feed on Startup: Hämta flöde vid start
     Show New Content Feed: Visa flöde med nytt innehåll

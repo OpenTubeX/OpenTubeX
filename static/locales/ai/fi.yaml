@@ -1348,6 +1348,7 @@ Settings:
     Cleanup Complete: Tallennustilan siivous valmistui
     Cleanup Failed: Tallennustilan siivous epäonnistui
   Subscription Settings:
+    Open Profile Manager: Avaa profiilin hallinta
     Refresh These Feeds Together: "Päivitä nämä syötteet yhdessä"
     Fetch Feed on Startup: Hae syöte käynnistettäessä
     Show New Content Feed: Näytä uuden sisällön syöte

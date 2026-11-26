@@ -76,14 +76,6 @@
             position="top"
             :tooltip="item.tooltip"
           />
-          <FtButton
-            v-if="item.id === 'subscriptions' && !importOnly"
-            variant="outlined"
-            size="extra-small"
-            :label="t('Settings.Data Settings.Manage Subscriptions')"
-            :icon="['fas', 'users']"
-            @click="openProfileSettings"
-          />
         </div>
         <p class="dataDescription">
           {{ item.description }}
@@ -726,10 +718,6 @@ async function importSelectedTakeoutData() {
   } finally {
     takeoutBusy.value = false
   }
-}
-
-function openProfileSettings() {
-  store.dispatch('showSettingsWindow', 'profile')
 }
 
 /**

@@ -1363,6 +1363,7 @@ Settings:
     Cleanup Complete: Opslag opgeschoond
     Cleanup Failed: Opschonen van opslag mislukt
   Subscription Settings:
+    Open Profile Manager: Profielbeheer openen
     Refresh These Feeds Together: "Deze feeds samen vernieuwen"
     Fetch Feed on Startup: Feed ophalen bij opstarten
     Show New Content Feed: Feed met nieuwe content tonen

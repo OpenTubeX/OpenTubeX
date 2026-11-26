@@ -94,6 +94,11 @@
     </div>
     <div class="subscriptionChannelSettingsManager">
       <SubscriptionChannelSettings />
+      <FtButton
+        :label="$t('Settings.Subscription Settings.Open Profile Manager')"
+        :icon="['fas', 'users']"
+        @click="openProfileManager"
+      />
     </div>
     <div class="switchColumnGrid">
       <div class="switchColumn">
@@ -203,6 +208,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtButton from '../../FtButton/FtButton.vue'
 import SubscriptionChannelSettings from './SubscriptionChannelSettings.vue'
 
 import store from '../../../store/index'
@@ -395,6 +401,10 @@ const onlyShowLatestFromChannelNumber = computed(() => store.getters.getOnlyShow
  */
 function updateOnlyShowLatestFromChannelNumber(value) {
   store.dispatch('updateOnlyShowLatestFromChannelNumber', value)
+}
+
+function openProfileManager() {
+  store.dispatch('showSettingsWindow', 'profile')
 }
 </script>
 

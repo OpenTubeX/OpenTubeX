@@ -1562,6 +1562,7 @@ Settings:
     Cleanup Complete: Saugyklos valymas baigtas
     Cleanup Failed: Saugyklos išvalyti nepavyko
   Subscription Settings:
+    Open Profile Manager: Atidaryti profilių valdymą
     Refresh These Feeds Together: "Atnaujinti šiuos kanalus kartu"
     Fetch Feed on Startup: Paleidžiant gauti sklaidos kanalo duomenis
     Show New Content Feed: Rodyti naujo turinio sklaidos kanalą

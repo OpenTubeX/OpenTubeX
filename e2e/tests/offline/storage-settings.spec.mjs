@@ -59,7 +59,13 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
   // Returning from the profile manager remounts the section, which must keep
   // its tabs and the selected tab.
   await page.locator('.settingsWindow [data-settings-tab="data"]').click()
-  await dataAndStorage.getByRole('button', { name: 'Manage Subscriptions', exact: true }).click()
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    Menu.getApplicationMenu().items
+      .flatMap(menu => menu.submenu?.items ?? [])
+      .find(item => item.label === 'Profile Manager')
+      .click({}, browserWindow, browserWindow.webContents)
+  })
   await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
   await page.locator('.settingsWindow .settingsBackButton').click()
   await expect(dataAndStorage).toBeVisible()
