@@ -94,7 +94,7 @@ test('without RealtimeKit, audio threads keep their priority', async (t) => {
       connections++
       throw new Error('No system bus')
     },
-    setRealtimeTimeLimit: async () => assert.fail('Set a CPU time limit without RealtimeKit'),
+    limitRealtimeTime: async () => assert.fail('Set a CPU time limit without RealtimeKit'),
     readThreads: async () => new Map([[102, 'AudioOutputDevi']]),
   })
 
