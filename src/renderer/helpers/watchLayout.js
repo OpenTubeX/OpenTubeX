@@ -303,7 +303,11 @@ export function createWatchLayoutAnimator() {
       const atRight = content.left >= middle || (content.right > middle && rtl)
       return { child, x: rect.left - (atRight ? to.right : to.left), y: rect.top - to.top }
     })
-    const layers = card.querySelectorAll(':scope > .fixedBackgroundLayer')
+    // Cards can hold their layer deeper, like the AI summary, whose closed
+    // details render only their summary. A counter-scaled child contains
+    // the fixed layers inside it instead of the card.
+    const layers = [...card.querySelectorAll('.fixedBackgroundLayer')]
+      .filter(layer => !children.some(({ child }) => child.contains(layer)))
 
     clippedCards.set(card, card.style.overflow)
     card.style.overflow = 'clip'
