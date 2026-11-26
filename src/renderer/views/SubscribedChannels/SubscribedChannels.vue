@@ -759,9 +759,9 @@ function updateThumbnail(channel) {
       }
       // Refreshes are spaced 500 ms apart, so each would otherwise rewrite
       // every profile holding the channel and update all of their getters.
+      // The name is left out, so a stale one cannot replace a newer saved name.
       refreshedChannels.push({
         channelThumbnailUrl,
-        channelName: channel.name,
         channelId: channel.id,
         channelHandle
       })

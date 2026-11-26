@@ -969,6 +969,8 @@ async function getPlaylistLocal() {
         if (!originalName || !requestIsCurrent()) return
         channelName.value = originalName
         store.dispatch('updateSubscriptionDetails', { channelId: ownerId, channelName: originalName })
+        updatePageTitle()
+        refreshPlaylistBookmarkMetadata().catch(error => console.error(error))
       })
     }
 
