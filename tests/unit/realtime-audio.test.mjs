@@ -6,7 +6,8 @@ import { createRealtimeAudio } from '../../src/main/realtimeAudio.js'
 const RENDERER = 100
 const AUDIO_SERVICE = 200
 
-function createFakes({ refusals = 0, allowRealtime = true } = {}) {
+function createFakes({ refuseOnce = [], allowRealtime = true } = {}) {
+  const refusals = new Set(refuseOnce)
   const calls = []
   const threads = new Map([
     [RENDERER, new Map([[101, 'electron'], [102, 'AudioOutputDevi'], [103, 'Media'], [104, 'Compositor']])],
@@ -17,11 +18,8 @@ function createFakes({ refusals = 0, allowRealtime = true } = {}) {
     getAudioServicePids: () => [AUDIO_SERVICE],
     connect: () => ({
       call: async (member, signature, body) => {
-        if (refusals > 0) {
-          refusals--
-          throw new Error('Operation not permitted')
-        }
-        calls.push([member, ...body])
+        if (refusals.delete(body[1])) throw new Error('Operation not permitted')
+        calls.push([member, signature, ...body])
       },
       getProperty: async name => properties[name],
       close () {},
@@ -43,16 +41,16 @@ test('audible renderers get realtime audio threads once, after a CPU time limit'
 
   await realtimeAudio.setAudible(RENDERER, true)
   // Renderer and audio service requests can interleave, but each process gets its limit first.
-  const callsFor = pid => calls.filter(call => call[1] === pid)
+  const callsFor = pid => calls.filter(call => call[call[0] === 'prlimit' ? 1 : 2] === pid)
   assert.deepEqual(callsFor(RENDERER), [
     ['prlimit', RENDERER, 200_000],
     // Capped at RealtimeKit's maximum, below Chromium's own priority of 8
-    ['MakeThreadRealtimeWithPID', RENDERER, 102, 5],
-    ['MakeThreadHighPriorityWithPID', RENDERER, 103, -10],
+    ['MakeThreadRealtimeWithPID', 'ttu', RENDERER, 102, 5],
+    ['MakeThreadHighPriorityWithPID', 'tti', RENDERER, 103, -10],
   ])
   assert.deepEqual(callsFor(AUDIO_SERVICE), [
     ['prlimit', AUDIO_SERVICE, 200_000],
-    ['MakeThreadRealtimeWithPID', AUDIO_SERVICE, 202, 5],
+    ['MakeThreadRealtimeWithPID', 'ttu', AUDIO_SERVICE, 202, 5],
   ])
 
   // The next video's output thread is raised, the others aren't raised again.
@@ -60,29 +58,41 @@ test('audible renderers get realtime audio threads once, after a CPU time limit'
   threads.get(RENDERER).delete(102)
   threads.get(RENDERER).set(105, 'AudioOutputDevi')
   await realtimeAudio.setAudible(RENDERER, true)
-  assert.deepEqual(calls, [['MakeThreadRealtimeWithPID', RENDERER, 105, 5]])
+  assert.deepEqual(calls, [['MakeThreadRealtimeWithPID', 'ttu', RENDERER, 105, 5]])
 
-  realtimeAudio.setAudible(RENDERER, false)
-  realtimeAudio.setAudible(RENDERER, false)
+  // Once nothing is audible, nothing is scanned.
+  calls.length = 0
+  await realtimeAudio.setAudible(RENDERER, false)
+  await realtimeAudio.setAudible(RENDERER, false)
+  threads.get(RENDERER).set(106, 'AudioOutputDevi')
+  await realtimeAudio.setAudible(RENDERER, false)
+  assert.deepEqual(calls, [])
 })
 
 test('a refused thread is retried on later scans, a low inherited time limit keeps it normal', async (t) => {
   t.mock.method(console, 'warn', () => {})
+  t.mock.timers.enable({ apis: ['Date'] })
+  const realtimeCalls = calls => calls.filter(call => call[0] !== 'prlimit')
   // RealtimeKit refuses bursts of requests for a while
-  const refused = createFakes({ refusals: 1 })
-  await refused.realtimeAudio.setAudible(AUDIO_SERVICE + 1, true)
-  assert.deepEqual(refused.calls.filter(call => call[0] !== 'prlimit'), [])
-  await refused.realtimeAudio.setAudible(AUDIO_SERVICE + 1, true)
-  assert.deepEqual(refused.calls.filter(call => call[0] !== 'prlimit'), [['MakeThreadRealtimeWithPID', AUDIO_SERVICE, 202, 5]])
-  refused.realtimeAudio.setAudible(AUDIO_SERVICE + 1, false)
-  refused.realtimeAudio.setAudible(AUDIO_SERVICE + 1, false)
+  const refused = createFakes({ refuseOnce: [202] })
+  await refused.realtimeAudio.setAudible(RENDERER, true)
+  // An audio state change right away doesn't retry, so it can't use up the attempts.
+  await refused.realtimeAudio.setAudible(RENDERER + 1, true)
+  assert.deepEqual(realtimeCalls(refused.calls).filter(call => call[3] === 202), [])
+  t.mock.timers.tick(5_000)
+  await refused.realtimeAudio.setAudible(RENDERER + 1, false)
+  await refused.realtimeAudio.setAudible(RENDERER + 2, true)
+  assert.deepEqual(realtimeCalls(refused.calls).filter(call => call[3] === 202), [['MakeThreadRealtimeWithPID', 'ttu', AUDIO_SERVICE, 202, 5]])
 
   const limited = createFakes({ allowRealtime: false })
   await limited.realtimeAudio.setAudible(RENDERER, true)
-  await limited.realtimeAudio.setAudible(RENDERER, true)
-  assert.deepEqual(limited.calls.filter(call => call[0] !== 'prlimit'), [['MakeThreadHighPriorityWithPID', RENDERER, 103, -10]])
-  limited.realtimeAudio.setAudible(RENDERER, false)
-  limited.realtimeAudio.setAudible(RENDERER, false)
+  t.mock.timers.tick(5_000)
+  await limited.realtimeAudio.setAudible(RENDERER + 1, true)
+  assert.deepEqual(realtimeCalls(limited.calls), [['MakeThreadHighPriorityWithPID', 'tti', RENDERER, 103, -10]])
+
+  for (const { realtimeAudio } of [refused, limited]) {
+    for (const pid of [RENDERER, RENDERER + 1, RENDERER + 2]) await realtimeAudio.setAudible(pid, false)
+  }
 })
 
 test('without RealtimeKit, audio threads keep their priority', async (t) => {

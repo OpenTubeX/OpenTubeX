@@ -26,7 +26,7 @@ const REALTIME_PRIORITY = 8
 const NICE_LEVEL = -10
 const RESCAN_INTERVAL = 5_000
 // RealtimeKit refuses temporarily, such as after a burst of requests, so a
-// failed thread is retried on the next scans
+// failed thread is retried a few times, at most once per rescan interval
 const MAX_ATTEMPTS = 3
 // A lower inherited CPU time limit could stop an audio thread right away
 const MIN_REALTIME_TIME_LIMIT = 50_000
@@ -136,7 +136,7 @@ export function createRealtimeAudio({
   const raised = new Map()
   /** @type {Map<number, Promise<boolean>>} whether each process's threads can run in realtime */
   const realtimeAllowed = new Map()
-  /** @type {Map<number, Map<number, number>>} failed attempts by thread ID, by process ID */
+  /** @type {Map<number, Map<number, { attempts: number, retryAt: number }>>} failed attempts by thread ID, by process ID */
   const failures = new Map()
   /** @type {Map<number, number>} audible web contents by renderer process ID */
   const audibleRenderers = new Map()
@@ -199,7 +199,9 @@ export function createRealtimeAudio({
     const failedThreads = new Map([...failures.get(pid) ?? []].filter(([tid]) => threads.has(tid)))
     failures.set(pid, failedThreads)
     for (const [tid, name] of threads) {
-      if (raisedThreads.has(tid) || (failedThreads.get(tid) ?? 0) >= MAX_ATTEMPTS) continue
+      const failure = failedThreads.get(tid)
+      // Audio state changes scan again right away, which must not use up the retries
+      if (raisedThreads.has(tid) || (failure && (failure.attempts >= MAX_ATTEMPTS || Date.now() < failure.retryAt))) continue
       const realtime = realtimeNames.includes(name)
       if (!realtime && !highPriorityNames.includes(name)) continue
       try {
@@ -213,7 +215,7 @@ export function createRealtimeAudio({
             allowed.catch(() => realtimeAllowed.delete(pid))
           }
           if (!await allowed) {
-            failedThreads.set(tid, MAX_ATTEMPTS)
+            failedThreads.set(tid, { attempts: MAX_ATTEMPTS, retryAt: Infinity })
             if (!warned) console.warn(`Audio thread ${name} stays at normal priority, because its process has a low realtime CPU time limit`)
             warned = true
             continue
@@ -224,7 +226,7 @@ export function createRealtimeAudio({
         }
         raisedThreads.add(tid)
       } catch (error) {
-        failedThreads.set(tid, (failedThreads.get(tid) ?? 0) + 1)
+        failedThreads.set(tid, { attempts: (failure?.attempts ?? 0) + 1, retryAt: Date.now() + RESCAN_INTERVAL })
         // RealtimeKit refuses apps outside an active session for every thread
         if (!warned) console.warn(`Unable to raise the priority of audio thread ${name}`, error)
         warned = true
