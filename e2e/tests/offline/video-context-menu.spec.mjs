@@ -461,9 +461,10 @@ for (const listType of ['grid', 'list']) {
         const viewportWidth = await page.evaluate(() => window.innerWidth)
         const expectedX = Math.max(8, Math.min(anchor.x, viewportWidth - bounds.width - 8))
         expect(Math.abs(bounds.x - expectedX)).toBeLessThanOrEqual(1)
-        // The shared menu clamps vertically when there is insufficient space below the button.
+        // The shared menu opens below the button, or ends at its top when there
+        // is insufficient space below, as in the shorter window of a larger UI Scale.
         expect(bounds.y).toBeLessThanOrEqual(anchor.y + anchor.height + 1)
-        expect(bounds.y + bounds.height).toBeGreaterThan(anchor.y)
+        expect(bounds.y + bounds.height).toBeGreaterThanOrEqual(anchor.y - 1)
         if (input === 'mouse') await attachScreenshot('optional video menu button')
         await page.keyboard.press('Escape')
         await expect(menu).toHaveCount(0)
