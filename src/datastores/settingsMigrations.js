@@ -37,7 +37,7 @@ export function listFromSwitches(listKey, switchValue) {
 }
 
 /** Former settings that are no longer configurable */
-export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps'])
+export const REMOVED_SETTINGS = Object.freeze(['updateRelativeTimestamps', 'monoAudio'])
 
 /**
  * The removed per-channel Enable switches, each with the automatic saving

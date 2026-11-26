@@ -291,6 +291,13 @@ const sideEffectHandlers = {
     }
   },
 
+  showMonoAudioToggle: ({ commit }, value) => {
+    // Turning the toggle back on must not resume earlier mono audio
+    if (!value) {
+      commit('clearTabMonoAudio')
+    }
+  },
+
   enableSeekHistory: (_store, value) => {
     // Turning seek history back on must not bring back earlier positions
     if (!value) {

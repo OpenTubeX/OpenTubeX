@@ -17,15 +17,6 @@
           @change="updateEnableSubtitlesByDefault"
         />
         <FtToggleSwitch
-          v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Mono Audio')"
-          :compact="true"
-          :default-value="store.getters.getMonoAudio"
-          setting-key="monoAudio"
-          :tooltip="t('Tooltips.Player Settings.Mono Audio')"
-          @change="store.dispatch('updateMonoAudio', $event)"
-        />
-        <FtToggleSwitch
           v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Automatically Open Chapters')"
           :compact="true"

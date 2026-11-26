@@ -2491,7 +2491,6 @@ Tooltips:
   Player Settings:
     Rewind on Resume: "Hüppab peatatud video jätkamisel nii mitu sekundit tagasi, et saaksid viimaseid hetki uuesti näha. Väljalülitamiseks määra 0."
     Minimum Pause Before Rewinding: "Kerib tagasi ainult siis, kui video oli vähemalt nii kaua peatatud. Iga pausi järel tagasikerimiseks määra 0."
-    Mono Audio: 'Esitab vasakut ja paremat helikanalit mõlemas kõrvas. Kasuta seda, kui video heli kostab ainult kõrvaklappide ühest küljest.'
     Normalize Loudness: 'Vaigistab videoid, mis on valjemad kui enamik, et helitugevus videote vahel ei hüppaks. Vaiksed videod säilitavad oma helitugevuse. Töötab ainult kohaliku API kaudu laaditud videotega.'
     Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'

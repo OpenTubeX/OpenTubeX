@@ -1732,7 +1732,6 @@ Tooltips:
     Hold to Speed Up: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo pomnożyć aktualną prędkość odtwarzania przez wybraną wartość.
     Rewind on Resume: "Cofa o tyle sekund po wznowieniu wstrzymanego filmu, aby można było ponownie zobaczyć ostatnie chwile. Ustaw 0, aby wyłączyć."
     Minimum Pause Before Rewinding: "Przewija wstecz tylko wtedy, gdy film był wstrzymany co najmniej tak długo. Ustaw 0, aby przewijać po każdej pauzie."
-    Mono Audio: 'Odtwarza lewy i prawy kanał dźwięku w obu uszach. Użyj, gdy dźwięk filmu dochodzi tylko z jednej strony słuchawek.'
     Normalize Loudness: 'Ścisza filmy, które są głośniejsze niż większość, aby głośność nie skakała między filmami. Ciche filmy zachowują swoją głośność. Działa tylko w przypadku filmów wczytanych przez lokalne API.'
     Pause on Stream Recovery: "Gdy strumień wideo zawiedzie, a odtwarzacz załaduje go ponownie lub przełączy się na inny format lub silnik, odtwarzanie zostanie wstrzymane, a błąd pozostanie u góry odtwarzacza, dopóki go nie zamkniesz. Po wyłączeniu odtwarzanie jest kontynuowane, a błąd pojawia się na chwilę jako powiadomienie."
     Continue Playback When Screen Is Locked: 'Utrzymuje odtwarzanie dźwięku w tle i udostępnia elementy sterowania multimediami Androida. Wyłącz, aby wstrzymywać odtwarzanie, gdy aplikacja nie jest już widoczna.'

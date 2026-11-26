@@ -2550,7 +2550,6 @@ Tooltips:
   Player Settings:
     Rewind on Resume: "Retrocede este número de segundos ao retomar un vídeo en pausa, para que poidas volver ver os últimos momentos. Establéceo en 0 para desactivalo."
     Minimum Pause Before Rewinding: "Só retrocede cando o vídeo estivo en pausa polo menos este tempo. Establéceo en 0 para retroceder despois de cada pausa."
-    Mono Audio: 'Reproduce as canles de audio esquerda e dereita nos dous oídos. Úsao cando o son dun vídeo só saia por un lado dos teus auriculares.'
     Normalize Loudness: 'Baixa o volume dos vídeos que soan máis forte ca maioría para que o volume non salte entre vídeos. Os vídeos baixos manteñen o seu volume. Só funciona cos vídeos cargados coa API local.'
     Pause on Stream Recovery: "Cando a emisión de vídeo falla e o reprodutor a volve cargar ou cambia a outro formato ou motor, a reprodución ponse en pausa e o erro queda na parte superior do reprodutor ata que o descartes. Se está desactivado, a reprodución continúa e o erro aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantén o audio reproducíndose en segundo plano e fornece controis multimedia de Android. Desactívao para pausar cando a aplicación deixe de estar visible.'

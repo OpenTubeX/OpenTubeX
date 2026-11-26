@@ -28,6 +28,7 @@ const state = {
   currentWatchTimestamps: {},
   videoZoomByTabId: {},
   volumeBoostByTabId: {},
+  monoAudioByTabId: {},
   lightsOffByTabId: {},
   // Kept for the video they were set for, so the next video in the tab starts without them.
   /** @type {Record<string, { videoId: string, value: boolean }>} */
@@ -71,6 +72,7 @@ const getters = {
   getWatchTimestamp: (state) => (tabId) => state.currentWatchTimestamps[tabId] ?? null,
   getTabVideoZoom: (state) => (tabId) => state.videoZoomByTabId[tabId] ?? DEFAULT_VIDEO_ZOOM,
   getTabVolumeBoost: (state) => (tabId) => state.volumeBoostByTabId[tabId] ?? DEFAULT_VOLUME_BOOST,
+  getTabMonoAudio: (state) => (tabId) => state.monoAudioByTabId[tabId] ?? false,
   getTabSkipSilence: (state) => (tabId) => state.skipSilenceByTabId[tabId] ?? false,
   getTabHistoryState: (state) => (tabId) => {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
@@ -165,6 +167,11 @@ const mutations = {
     for (const tabId of Object.keys(state.volumeBoostByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.volumeBoostByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.monoAudioByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.monoAudioByTabId[tabId]
       }
     }
     for (const tabId of Object.keys(state.lightsOffByTabId)) {
@@ -317,6 +324,14 @@ const mutations = {
 
   clearTabVolumeBoosts(state) {
     state.volumeBoostByTabId = {}
+  },
+
+  setTabMonoAudio(state, { tabId, value }) {
+    state.monoAudioByTabId[tabId] = value === true
+  },
+
+  clearTabMonoAudio(state) {
+    state.monoAudioByTabId = {}
   },
 
   setTabLightsOff(state, { tabId, value }) {

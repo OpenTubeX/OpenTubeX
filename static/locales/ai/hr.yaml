@@ -2526,7 +2526,6 @@ Tooltips:
   Player Settings:
     Rewind on Resume: "Vraća se toliko sekundi unatrag kad nastavite pauzirani videozapis, kako biste ponovno vidjeli posljednje trenutke. Postavite na 0 za isključivanje."
     Minimum Pause Before Rewinding: "Premotava unatrag samo ako je videozapis bio pauziran barem toliko dugo. Postavite na 0 za premotavanje nakon svake pauze."
-    Mono Audio: 'Reproducira lijevi i desni audiokanal u oba uha. Koristite kada zvuk videozapisa dolazi samo s jedne strane slušalica.'
     Normalize Loudness: 'Utišava videozapise koji su glasniji od većine, kako glasnoća ne bi skakala između videozapisa. Tihi videozapisi zadržavaju svoju glasnoću. Radi samo za videozapise učitane putem lokalnog sučelja.'
     Pause on Stream Recovery: "Kada video stream ne uspije, a player ga ponovno učita ili prijeđe na drugi format ili pogon, reprodukcija se pauzira i greška ostaje na vrhu playera dok je ne odbaciš. Kada je isključeno, reprodukcija se nastavlja, a greška se kratko prikazuje kao obavijest."
     Continue Playback When Screen Is Locked: 'Nastavlja reprodukciju zvuka u pozadini i pruža Android kontrole medija. Isključite ovo za pauziranje kada aplikacija više nije vidljiva.'

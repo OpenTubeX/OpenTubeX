@@ -4939,7 +4939,7 @@ function updateVolumeBoost(value) {
 watch(volumeBoost, value => playerAudioOutput.setGain('boost', value))
 
 // Downmixing to mono shares volume boost's Web Audio graph, so it is not available on iOS either.
-const monoAudio = computed(() => !process.env.IS_IOS && store.getters.getMonoAudio)
+const monoAudio = computed(() => showMonoAudioToggle.value && store.getters.getTabMonoAudio(mediaTabId))
 watch(monoAudio, value => playerAudioOutput.setMono(value))
 
 /** @type {import('vue').Ref<string | null>} */
@@ -10644,7 +10644,7 @@ function registerMonoAudioButton() {
     create(rootElement, controls) {
       return new BooleanSettingButton({
         value: monoAudio,
-        updateValue: value => store.dispatch('updateMonoAudio', value),
+        updateValue: value => store.commit('setTabMonoAudio', { tabId: mediaTabId, value }),
         events,
         className: 'mono-audio-button',
         mappedIcon: 'speaker',
