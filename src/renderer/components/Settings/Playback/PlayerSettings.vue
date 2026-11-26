@@ -49,7 +49,7 @@
           @change="updateContinuePlaybackWhenScreenIsLocked"
         />
         <FtToggleSwitch
-          v-if="IS_CAPACITOR && !IS_IOS"
+          v-if="IS_CAPACITOR"
           :label="t('Settings.Player Settings.Switch to Audio in Background')"
           :compact="true"
           :default-value="store.getters.getSwitchToAudioInBackground"

@@ -2680,15 +2680,17 @@ export default defineComponent({
     /**
      * Plays audio formats while the app is in the background or the screen
      * is off, where nobody can see the video, if the user enabled it.
-     * Android Picture-in-Picture keeps the app visible, so it keeps the video.
+     * Picture-in-Picture keeps the video: Android keeps the app visible, and
+     * iOS shows it while the app is hidden. iOS switches as soon as the app
+     * resigns active, before WebKit pauses video in the background.
      */
     switchToAudioInBackground() {
-      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !isAppHidden() || this.formatBeforeBackground !== null ||
+      if (!process.env.IS_CAPACITOR || !isAppHidden() || this.formatBeforeBackground !== null ||
         !this.$store.getters.getSwitchToAudioInBackground ||
         // Playback pauses in the background without it.
         !this.$store.getters.getContinuePlaybackWhenScreenIsLocked ||
         this.activeFormat === 'audio' || !this.audioFormatAvailable || this.castingActive ||
-        !this.videoPlaying || !this.isPlaybackPresented()) return
+        !this.videoPlaying || !this.isPlaybackPresented() || this.$refs.player?.isInPictureInPicture()) return
       this.formatBeforeBackground = this.activeFormat
       this.activeFormat = 'audio'
     },
