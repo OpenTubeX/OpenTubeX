@@ -89,10 +89,11 @@ test('handles a diverse thousand-video vocabulary without exceeding argument lim
 test('description links and markup do not become topics', () => {
   const description = 'Rust &amp; WebAssembly tutorial<br><a href="https://www.youtube.com/redirect?q=https%3A%2F%2Fexample.org">https://example.org/guide</a> see www.example.net'
   assert.deepEqual([...recommendationFeatures({ description }).keys()].sort(), ['rust', 'see', 'tutorial', 'webassembly'])
-  // The stored description can end inside a tag
-  assert.deepEqual([...recommendationFeatures({ description: 'Rust tutorial <a dir="auto" href="https://www.you' }).keys()].sort(), ['rust', 'tutorial'])
+  // History keeps 500 characters of a description, which can end inside a tag
+  const cut = 'Rust tutorial ' + ' '.repeat(460) + '<a dir="auto" href="https://www.you'
+  assert.deepEqual([...recommendationFeatures({ description: cut }).keys()].sort(), ['rust', 'tutorial'])
   // Plain-text descriptions can contain a lone angle bracket
-  assert.deepEqual([...recommendationFeatures({ description: 'Rust <3 WebAssembly tutorial' }).keys()].sort(), ['rust', 'tutorial', 'webassembly'])
+  assert.deepEqual([...recommendationFeatures({ description: 'Rust <3 WebAssembly, i<length tutorial' }).keys()].sort(), ['length', 'rust', 'tutorial', 'webassembly'])
 })
 test('ignores malformed subscriptions while retaining channel strings and objects', () => {
   for (const subscriptions of [null, {}, 'channel']) {

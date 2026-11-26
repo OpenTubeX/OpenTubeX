@@ -1,5 +1,6 @@
 import { runCooperatively, runSynchronously } from './cooperativeTask.js'
 import { isExternalMediaHistoryId } from './externalMediaHistory.js'
+import { HISTORY_DESCRIPTION_MAX_LENGTH } from '../../history.js'
 
 const DAY = 24 * 60 * 60 * 1000
 const STOPWORDS = new Set(`
@@ -50,15 +51,15 @@ export function recommendationTokens(text) {
       (word.length >= 3 || /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(word)) && !STOPWORDS.has(word))
 }
 
-// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics.
-// The history keeps 500 characters, which can end inside a tag.
+// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics
 function descriptionText(text) {
-  return typeof text === 'string'
-    ? text.replaceAll(/<(?:[^>]*>|\/?[a-z][^>]*$)/giu, ' ')
-        .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
-        .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
-        .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
-    : text
+  if (typeof text !== 'string') return text
+  // History keeps the start of a description, which can end inside a tag
+  if (text.length >= HISTORY_DESCRIPTION_MAX_LENGTH) text = text.replace(/<\/?[a-z][^>]*$/iu, ' ')
+  return text.replaceAll(/<[^>]*>/gu, ' ')
+    .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
+    .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
+    .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
 }
 
 export function recommendationFeatures(video) {
