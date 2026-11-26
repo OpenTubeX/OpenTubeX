@@ -240,6 +240,22 @@
   justify-content: center;
 }
 
+.previewIconButton:has(> .previewCaptionSlash) {
+  position: relative;
+}
+
+/* The player's caption toggle crosses out its icon while the captions are off. */
+.previewCaptionSlash {
+  background-color: currentcolor;
+  block-size: calc(2.3 * var(--u));
+  border-radius: calc(999px * var(--ui-roundness));
+  inline-size: calc(24 * var(--u));
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
 .previewIconButton.open {
   background-color: rgb(255 255 255 / 14%);
 }
@@ -300,6 +316,8 @@
 }
 
 .previewOverflowItem {
+  --corner-unit: var(--u);
+
   align-items: center;
   background-color: rgb(255 255 255 / 7%);
   border-radius: calc(10 * var(--u) * var(--ui-roundness));
@@ -437,17 +455,6 @@
   justify-content: center;
 }
 
-.list .previewOverflowSwitch.on {
-  background-color: var(--toggle-checked-track-color, var(--accent-color));
-  border-color: var(--toggle-checked-track-color, var(--accent-color));
-  justify-content: flex-end;
-}
-
-.list .previewOverflowSwitch.on .previewOverflowSwitchThumb {
-  background-color: var(--toggle-checked-thumb-color, var(--accent-thumb-color, var(--text-with-accent-color)));
-  color: var(--toggle-checked-track-color, var(--accent-color));
-}
-
 /* The same chevron as the player's submenu entries. */
 .list .previewOverflowItem.submenu::after {
   background-color: currentcolor;
@@ -456,6 +463,27 @@
   flex-shrink: 0;
   inline-size: calc(24 * var(--u));
   mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* Like the player's grid, the entries that open a submenu get a folded corner. */
+.previewOverflowItem.submenu {
+  position: relative;
+}
+
+.previewOverflowMenu:not(.list) .previewOverflowItem.submenu::after {
+  background-color: rgb(255 255 255 / 38%);
+  block-size: calc(6 * var(--corner-unit) + 6 * var(--corner-unit) * var(--ui-roundness));
+  border-end-end-radius: calc(10 * var(--corner-unit) * var(--ui-roundness));
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  content: '';
+  inline-size: calc(6 * var(--corner-unit) + 6 * var(--corner-unit) * var(--ui-roundness));
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  position: absolute;
+}
+
+.previewOverflowMenu:not(.list) .previewOverflowItem.submenu:dir(rtl)::after {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
 
 /* Like the player in the phone layout (PHONE_LAYOUT_QUERY), show the menu over
@@ -525,6 +553,8 @@
   }
 
   .previewOverflowItem {
+    --corner-unit: var(--p);
+
     border-radius: calc(10 * var(--p) * var(--ui-roundness));
     font-size: calc(11 * var(--p));
     gap: calc(1 * var(--p));
@@ -621,9 +651,6 @@
   justify-content: center;
 }
 
-.hideControls .previewControls,
-.hideControls .previewBigPlay,
-.hideTitle .previewTitle,
-.hideActions .previewFullscreenActions {
+.hideTitle .previewTitle {
   visibility: hidden;
 }

@@ -1,13 +1,7 @@
 <template>
   <div
     class="playerPreview"
-    :class="{
-      fullscreen,
-      paused,
-      hideControls: paused && !showPlayerControlsWhenPaused,
-      hideTitle: hideFullscreenVideoTitle || (paused && !showVideoTitleWhenPaused),
-      hideActions: paused && !showFullscreenActionsWhenPaused,
-    }"
+    :class="{ fullscreen, hideTitle: hideFullscreenVideoTitle }"
   >
     <div class="previewPlayer">
       <div
@@ -28,7 +22,7 @@
         v-if="displayVideoPlayButton"
         class="previewBigPlay"
       >
-        <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
+        <PreviewIcon :path="SHAKA_PREVIEW_ICONS.PAUSE" />
       </span>
       <div
         v-if="menuOpen"
@@ -69,11 +63,10 @@
             <span
               v-if="TOGGLE_CONTROLS.has(item.id)"
               class="previewOverflowSwitch"
-              :class="{ on: item.on }"
             >
               <span class="previewOverflowSwitchThumb">
                 <FtIcon
-                  :icon="['fas', item.on ? 'check' : 'minus']"
+                  :icon="['fas', 'minus']"
                   aria-hidden="true"
                 />
               </span>
@@ -106,7 +99,7 @@
         <div class="previewButtonPanel">
           <template v-if="!IS_CAPACITOR">
             <span class="previewPill previewIconPill">
-              <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
+              <PreviewIcon :path="SHAKA_PREVIEW_ICONS.PAUSE" />
             </span>
             <span class="previewPill previewIconPill">
               <PreviewIcon :path="SHAKA_PREVIEW_ICONS.MUTE" />
@@ -150,6 +143,10 @@
                 :data-preview-control="button.id"
               >
                 <PreviewIcon :path="button.path" />
+                <span
+                  v-if="button.id === 'captions'"
+                  class="previewCaptionSlash"
+                />
               </span>
             </template>
           </span>
@@ -172,13 +169,13 @@ import { usePhoneLayout } from '../../../../composables/usePhoneLayout'
 import { FULLSCREEN_ACTION_DEFINITIONS, getDisabledFullscreenActions } from '../../../../helpers/fullscreenActions'
 import { supportsYtDlp } from '../../../../helpers/ytDlpCapabilities'
 import { getQuickPlaybackRateLabel } from '../../../../helpers/player/quickPlaybackRateLabel'
-import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
+import { AB_REPEAT_PREVIEW_ICON, CAPTION_TOGGLE_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
 
 const props = defineProps({
   state: {
     type: String,
     default: 'window',
-    validator: value => ['window', 'menu', 'fullscreen', 'paused'].includes(value)
+    validator: value => ['window', 'menu', 'fullscreen'].includes(value)
   },
   /** Whether the playing preview shows the player menu. */
   menu: {
@@ -196,18 +193,14 @@ function PreviewIcon({ path, viewBox = '0 -960 960 960' }) {
 }
 PreviewIcon.props = ['path', 'viewBox']
 
-const fullscreen = computed(() => props.state === 'fullscreen' || props.state === 'paused')
-const paused = computed(() => props.state === 'paused')
+const fullscreen = computed(() => props.state === 'fullscreen')
 // Like the player, narrow windows and phones use the compact controls, whose
 // menu covers the whole player, so only there it gets a preview state of its own.
 const compact = usePhoneLayout()
 const menuOpen = computed(() => props.state === 'menu' || (props.menu && props.state === 'window' && !compact.value))
 
 const usePlayerMenuGrid = computed(() => store.getters.getUsePlayerMenuGrid)
-const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
-const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
 const hideFullscreenVideoTitle = computed(() => store.getters.getHideFullscreenVideoTitle)
-const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
 // The mobile player always shows its center button.
 const displayVideoPlayButton = computed(() => IS_CAPACITOR || store.getters.getDisplayVideoPlayButton)
 const enableScreenshot = computed(() => store.getters.getEnableScreenshot)
@@ -241,7 +234,8 @@ const CONTROL_BAR_ICONS = {
   screenshot: PlayerIcons.PHOTO_CAMERA_FILLED,
   timestampNote: PlayerIcons.EDIT_NOTE_DEFAULT,
   autoplay: PlayerIcons.PAUSE_CIRCLE_FILLED,
-  captions: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS,
+  // Like the player's caption toggle while the captions are off.
+  captions: CAPTION_TOGGLE_PREVIEW_ICON,
   menu: SHAKA_PREVIEW_ICONS.OPEN_OVERFLOW,
   pictureInPicture: SHAKA_PREVIEW_ICONS.PICTURE_IN_PICTURE,
   theatreMode: PlayerIcons.RECTANGLE_DEFAULT,
@@ -324,10 +318,10 @@ const overflowItems = computed(() => {
   const hidden = new Set(store.getters.getHiddenPlayerMenuControls)
   const items = {
     audioTracks: { path: PlayerIcons.RECORD_VOICE_OVER_FILLED, label: t('Video.Player.Audio Tracks'), value: audioTrackLanguage.value },
-    captions: { path: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS_STYLE, label: t('Settings.Player Settings.Caption Appearance.Captions'), value: off },
+    captions: { path: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS_OFF, label: t('Settings.Player Settings.Caption Appearance.Captions'), value: off },
     chapters: { path: SHAKA_PREVIEW_ICONS.CHAPTER, label: t('Chapters.Chapters'), value: '' },
     voiceOverTranslation: store.getters.getUseVoiceOverTranslation && { path: PlayerIcons.RECORD_VOICE_OVER_FILLED, label: t('Settings.Player Settings.Voice-over Translation.Title'), value: t('Video.Player.Voice-over Translation.Start') },
-    musicVisualizer: { path: PlayerIcons.INSERT_CHART_FILLED, label: t('Settings.Player Settings.Music Visualizer'), value: '', on: store.getters.getMusicVisualizer },
+    musicVisualizer: { path: PlayerIcons.INSERT_CHART_FILLED, label: t('Settings.Player Settings.Music Visualizer'), value: off },
     playbackRate: { path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' },
     quality: { path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
     sleepTimer: { path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },

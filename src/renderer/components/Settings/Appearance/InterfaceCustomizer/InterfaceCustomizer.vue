@@ -134,7 +134,6 @@
                 :disabled-label="t('Settings.Subscription Tabs.Hidden')"
               />
             </template>
-            <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
             <ControlPlacementCustomizer v-else-if="activeTabId === 'controlBar'" />
             <template v-else>
               <p class="customizerHint">
@@ -174,7 +173,6 @@ import NavigationCustomizer from '../../../NavigationCustomizer/NavigationCustom
 import QuickSettingsCustomizer from './QuickSettingsCustomizer.vue'
 import SubscriptionTabsPreview from './SubscriptionTabsPreview.vue'
 import NavigationPreview from './NavigationPreview.vue'
-import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
 import ControlPlacementCustomizer from './ControlPlacementCustomizer.vue'
 import PlayerPreview from './PlayerPreview.vue'
 
@@ -223,7 +221,6 @@ const tabs = computed(() => {
     ...(usesPhoneLayout.value ? [{ id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') }] : []),
   ]
   const fullscreenMode = { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') }
-  const pausedMode = { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') }
   return [
     {
       id: 'navigation',
@@ -251,16 +248,6 @@ const tabs = computed(() => {
       label: t('Subscriptions.Subscriptions'),
       syncKey: 'subscriptionTabs',
       previewModes: [],
-    },
-    {
-      id: 'player',
-      icon: ['fas', 'circle-play'],
-      label: t('Settings.Interface Customizer.Player'),
-      syncKey: null,
-      // The fullscreen player shows every element these settings affect, and the
-      // paused settings only apply while it's paused. The controls tab edits the
-      // player menu, so this tab leaves it closed.
-      previewModes: [{ ...playingMode, id: 'fullscreen' }, pausedMode],
     },
     {
       id: 'controlBar',
