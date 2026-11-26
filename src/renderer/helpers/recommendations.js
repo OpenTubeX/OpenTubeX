@@ -50,6 +50,16 @@ export function recommendationTokens(text) {
       (word.length >= 3 || /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(word)) && !STOPWORDS.has(word))
 }
 
+// Descriptions are HTML with links, whose tags, entities and URLs would otherwise become topics
+function descriptionText(text) {
+  return typeof text === 'string'
+    ? text.replaceAll(/<[^>]*>/gu, ' ')
+        .replaceAll(/&(?:#39|#x27|apos);/giu, "'")
+        .replaceAll(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, ' ')
+        .replaceAll(/(?:\bhttps?:\/\/|\bwww\.)\S*/giu, ' ')
+    : text
+}
+
 export function recommendationFeatures(video) {
   const features = new Map()
   function add(text, weight, phrases = false) {
@@ -63,7 +73,7 @@ export function recommendationFeatures(video) {
     }
   }
   add(video?.title, 1, true)
-  add(video?.description, 0.18)
+  add(descriptionText(video?.description), 0.18)
   if (Array.isArray(video?.keywords)) add(video.keywords.join(' '), 1.4)
   return features
 }

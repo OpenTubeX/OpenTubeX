@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRecommendationProfile, buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
+import { buildRecommendationProfile, buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationFeatures, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
 const DAY = 86400000
 const now = Date.UTC(2026, 8, 6)
 const watched = (videoId, extra = {}) => ({ videoId, title: 'Linux desktop customization', authorId: 'linux', author: 'Linux channel', lengthSeconds: 600, watchProgress: 500, timeWatched: now, type: 'video', ...extra })
@@ -86,6 +86,10 @@ test('handles a diverse thousand-video vocabulary without exceeding argument lim
   assert.ok(profile(history).interests.size > 100000)
 })
 
+test('description links and markup do not become topics', () => {
+  const description = 'Rust &amp; WebAssembly tutorial<br><a href="https://www.youtube.com/redirect?q=https%3A%2F%2Fexample.org">https://example.org/guide</a> see www.example.net'
+  assert.deepEqual([...recommendationFeatures({ description }).keys()].sort(), ['rust', 'see', 'tutorial', 'webassembly'])
+})
 test('ignores malformed subscriptions while retaining channel strings and objects', () => {
   for (const subscriptions of [null, {}, 'channel']) {
     assert.deepEqual([...profile([], { subscriptions }).subscriptions], [])
