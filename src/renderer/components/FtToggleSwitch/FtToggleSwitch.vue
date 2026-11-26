@@ -224,18 +224,20 @@ function measureFittedLabelWidth(text) {
   range.setStartBefore(names[0])
   range.setEndAfter(names[names.length - 1])
   const textRects = [...range.getClientRects()].filter(rect => rect.width > 0)
-  const lineCount = new Set(textRects.map(rect => Math.round(rect.top))).size
+  const box = text.getBoundingClientRect()
+  // Client rects include transforms, such as the settings window's opening
+  // morph from its button, while lines and the maximum width are in layout
+  // pixels. Scaled down that far, two lines are less than a pixel apart.
+  const scale = box.width / text.offsetWidth
+  if (!(scale > 0)) return ''
+  const lineCount = new Set(textRects.map(rect => Math.round((rect.top - box.top) / scale))).size
   if (lineCount < 2) return ''
   const icons = text.querySelector('.switch-label-icons').getBoundingClientRect()
   const rects = icons.width > 0 ? [...textRects, icons] : textRects
-  const box = text.getBoundingClientRect()
   const width = getComputedStyle(text).direction === 'rtl'
     ? box.right - Math.min(...rects.map(rect => rect.left))
     : Math.max(...rects.map(rect => rect.right)) - box.left
-  // Client rects include transforms, such as the settings window's opening
-  // scale, while the maximum width is in layout pixels.
-  const scale = box.width / text.offsetWidth
-  return scale > 0 && width < box.width - scale ? `${Math.ceil(width / scale)}px` : ''
+  return width < box.width - scale ? `${Math.ceil(width / scale)}px` : ''
 }
 
 /** Labels waiting to be fitted together, so they share one layout. */
