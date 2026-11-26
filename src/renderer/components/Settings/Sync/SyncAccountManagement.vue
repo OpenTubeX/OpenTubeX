@@ -21,7 +21,7 @@
       <FtIconButton
         class="managementAction"
         :title="t('Settings.Sync Settings.Refresh Devices')"
-        :icon="['fas', 'sync']"
+        :icon="['fas', 'arrows-rotate']"
         :disabled="loading || actionBusy"
         :padding="11"
         :size="20"
@@ -116,7 +116,7 @@
           <FtIconButton
             class="sessionAction"
             :title="t('Settings.Sync Settings.Rename Device')"
-            :icon="['fas', 'edit']"
+            :icon="['fas', 'pen-to-square']"
             :disabled="actionBusy"
             :padding="11"
             :size="20"
@@ -460,7 +460,7 @@ async function renameDevice() {
     renamedDeviceName.value = ''
     showToast({
       message: t('Settings.Sync Settings.Device Renamed'),
-      icon: ['fas', 'edit'],
+      icon: ['fas', 'pen-to-square'],
     })
     await loadSessions()
   } catch (requestError) {

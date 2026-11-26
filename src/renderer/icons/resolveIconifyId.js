@@ -1,11 +1,10 @@
-import faAliasToCanon from './faAliasToCanon.json'
-import faIconMap from './faIconMap.json'
+import iconMap from './iconMap.json'
 import { currentIconPack } from './iconPackState.js'
-import { normalizeFaIcon, resolveMappedIcon } from './iconMappingResolver.js'
+import { normalizeIcon, resolveMappedIcon } from './iconMappingResolver.js'
 
 /** @typedef {import('./iconPackState').IconPackId} IconPackId */
 
-export { normalizeFaIcon }
+export { normalizeIcon }
 
 /**
  * Resolve an Iconify id for the active (or given) pack.
@@ -14,5 +13,5 @@ export { normalizeFaIcon }
  * @returns {string | null}
  */
 export function resolveIconifyId(icon, pack = currentIconPack.value) {
-  return resolveMappedIcon(icon, pack, faAliasToCanon, faIconMap)
+  return resolveMappedIcon(icon, pack, iconMap)
 }

@@ -2,7 +2,7 @@
   <div class="manageButton">
     <FtButton
       :label="t('Channel.Subscription settings')"
-      :icon="['fas', 'sliders-h']"
+      :icon="['fas', 'sliders']"
       @click="showManager = true"
     />
     <FtSyncedSettingIndicator :setting-keys="[SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY]" />
@@ -10,7 +10,7 @@
   <FtSettingsSubpage
     :open="showManager"
     :title="t('Channel.Subscription settings')"
-    :icon="['fas', 'sliders-h']"
+    :icon="['fas', 'sliders']"
     @close="showManager = false"
   >
     <template #breadcrumb-action>
@@ -20,7 +20,7 @@
       <FtInput
         input-type="search"
         :label="t('Settings.Channel Settings.Search Channels')"
-        :icon="['fas', 'search']"
+        :icon="['fas', 'magnifying-glass']"
         :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"

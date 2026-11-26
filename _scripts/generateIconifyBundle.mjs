@@ -1,5 +1,5 @@
 /**
- * Regenerates the per-pack bundles from `faIconMap.json`
+ * Regenerates the per-pack bundles from `iconMap.json`
  * and the installed `@iconify-json/*` packages.
  *
  * Usage: node _scripts/generateIconifyBundle.mjs
@@ -12,7 +12,7 @@ import { getIconData } from '@iconify/utils'
 
 const require = createRequire(import.meta.url)
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const faIconMap = require(join(root, 'src/renderer/icons/faIconMap.json'))
+const iconMap = require(join(root, 'src/renderer/icons/iconMap.json'))
 const customPackIcons = require(join(root, 'src/renderer/icons/customPackIcons.json'))
 
 const COLLECTIONS = {
@@ -67,7 +67,7 @@ function add(out, prefix, name, collection) {
 
 for (const [pack, prefix] of Object.entries(PACK_PREFIXES)) {
   const out = bundles[pack]
-  for (const mapping of Object.values(faIconMap)) {
+  for (const mapping of Object.values(iconMap)) {
     const name = mapping[PACK_FIELDS[pack]]
     add(out, prefix, name, COLLECTIONS[prefix])
     if (mapping.simple) {

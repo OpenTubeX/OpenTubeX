@@ -233,7 +233,7 @@
     v-if="!importOnly"
     class="advancedDataSettings"
     :title="t('Settings.Categories.Advanced')"
-    :icon="['fas', 'sliders-h']"
+    :icon="['fas', 'sliders']"
   >
     <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Channel playback speeds') }}
@@ -349,7 +349,7 @@ const dataItems = computed(() => [{
   export: () => { showExportSubscriptionsPrompt.value = true },
 }, {
   id: 'history',
-  icon: ['fas', 'history'],
+  icon: ['fas', 'clock-rotate-left'],
   title: t('History.History'),
   description: t('Settings.Data Settings.Import history formats'),
   importLabel: t('Settings.Data Settings.Import History'),
@@ -367,7 +367,7 @@ const dataItems = computed(() => [{
   export: exportPlaylists,
 }, {
   id: 'searchHistory',
-  icon: ['fas', 'search'],
+  icon: ['fas', 'magnifying-glass'],
   title: t('Settings.Data Settings.Search history'),
   description: t('Settings.Data Settings.Import search history formats'),
   importLabel: t('Settings.Data Settings.Import search history'),
@@ -376,7 +376,7 @@ const dataItems = computed(() => [{
   export: () => { showExportSearchHistoryPrompt.value = true },
 }, {
   id: 'settings',
-  icon: ['fas', 'sliders-h'],
+  icon: ['fas', 'sliders'],
   title: t('Settings.Settings'),
   description: t('Settings.Data Settings.Settings Tooltip'),
   importLabel: t('Settings.Data Settings.Import Settings'),
@@ -907,7 +907,7 @@ async function importSubscriptions() {
  */
 function runWithDataImportProgress(importSubscriptions) {
   const progressOperation = startProgressBarOperation(store, {
-    icon: ['fas', 'sync'],
+    icon: ['fas', 'arrows-rotate'],
     message: '',
     percentage: 0,
   })
@@ -1543,7 +1543,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
-    icon: ['fas', 'history'],
+    icon: ['fas', 'clock-rotate-left'],
   })
 }
 
@@ -1580,7 +1580,7 @@ async function importLibreTubeWatchHistory(backupData) {
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
-    icon: ['fas', 'history'],
+    icon: ['fas', 'clock-rotate-left'],
   })
 }
 
@@ -1602,7 +1602,7 @@ async function importYouTubeWatchHistory(historyData) {
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
-    icon: ['fas', 'history'],
+    icon: ['fas', 'clock-rotate-left'],
   })
 }
 
@@ -2129,7 +2129,7 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),
-    icon: ['fas', 'history'],
+    icon: ['fas', 'clock-rotate-left'],
   })
 }
 
@@ -2148,7 +2148,7 @@ async function importYouTubeSearchHistory(historyData) {
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),
-    icon: ['fas', 'history'],
+    icon: ['fas', 'clock-rotate-left'],
   })
 }
 
@@ -2387,7 +2387,7 @@ async function importSettings() {
   const failure = settingsImportFailureMessage(result)
   showToast(failure
     ? { message: failure, icon: ['fas', 'circle-exclamation'] }
-    : { message: t('Settings.Data Settings.All settings have been successfully imported'), icon: ['fas', 'sliders-h'] })
+    : { message: t('Settings.Data Settings.All settings have been successfully imported'), icon: ['fas', 'sliders'] })
 }
 
 /**

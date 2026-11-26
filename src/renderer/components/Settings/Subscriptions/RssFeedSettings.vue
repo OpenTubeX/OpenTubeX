@@ -159,7 +159,7 @@
               <FtIconButton
                 v-if="errorFeedUrls.has(feed.url)"
                 :title="t('Subscriptions.RSS Feeds.Retry Feed', { feed: feed.title || feed.url })"
-                :icon="['fas', 'sync']"
+                :icon="['fas', 'arrows-rotate']"
                 theme="base-no-default"
                 :size="16"
                 :padding="8"

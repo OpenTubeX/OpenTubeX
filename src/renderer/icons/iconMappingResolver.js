@@ -1,25 +1,15 @@
 /**
- * Normalize a legacy semantic icon prop to [prefix, name].
- * @param {string | [string, string] | { prefix?: string, iconName?: string }} icon
+ * Normalize an icon prop to [prefix, name]. A plain name uses the `fas` prefix.
+ *
+ * The prefixes keep the names of the Font Awesome styles the app used before
+ * the icon packs: `fas` for solid icons, `far` for the outlined variant some
+ * icons have, `fab` for brand logos, and `fac` for the app's own glyphs.
+ * @param {string | [string, string] | null | undefined} icon
  * @returns {[string, string] | null}
  */
-export function normalizeFaIcon(icon) {
-  if (!icon) return null
-  if (Array.isArray(icon)) {
-    if (icon.length >= 2) return [icon[0], icon[1]]
-    if (icon.length === 1) return ['fas', icon[0]]
-    return null
-  }
-  if (typeof icon === 'string') {
-    if (icon.includes(' ')) {
-      const [prefix, name] = icon.split(/\s+/)
-      return [prefix, name]
-    }
-    return ['fas', icon]
-  }
-  if (typeof icon === 'object' && icon.iconName) {
-    return [icon.prefix || 'fas', icon.iconName]
-  }
+export function normalizeIcon(icon) {
+  if (typeof icon === 'string' && icon !== '') return ['fas', icon]
+  if (Array.isArray(icon) && icon.length === 2) return [icon[0], icon[1]]
   return null
 }
 
@@ -34,23 +24,21 @@ const PACK_FIELD = {
 }
 
 /**
- * Resolve an Iconify id using the generated alias and mapping data.
+ * Resolve an Iconify id from the icon map.
  * @param {string | [string, string]} icon
  * @param {import('./iconPackState').IconPackId} pack
- * @param {Record<string, string>} aliases
  * @param {Record<string, Record<string, string>>} mappings
  * @returns {string | null}
  */
-export function resolveMappedIcon(icon, pack, aliases, mappings) {
-  const normalized = normalizeFaIcon(icon)
+export function resolveMappedIcon(icon, pack, mappings) {
+  const normalized = normalizeIcon(icon)
   if (!normalized) return null
 
-  const [prefix, rawName] = normalized
-  const name = aliases[rawName] || rawName
-  const mapping = mappings[name] ?? mappings[rawName]
+  const [prefix, name] = normalized
+  const mapping = mappings[name]
   if (!mapping) {
-    if (prefix === 'fac') return `otx:${rawName}`
-    console.warn(`[icon-pack] no mapping for ${prefix}:${rawName}`)
+    if (prefix === 'fac') return `otx:${name}`
+    console.error(`[icon-pack] no mapping for ${prefix}:${name}`)
     return null
   }
 

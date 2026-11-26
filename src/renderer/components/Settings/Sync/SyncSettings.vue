@@ -2,7 +2,7 @@
   <FtSettingsSection
     class="syncSettings"
     :title="t('Settings.Sync Settings.Sync Settings')"
-    :icon="['fas', 'sync']"
+    :icon="['fas', 'arrows-rotate']"
   >
     <p class="description">
       {{ t('Settings.Sync Settings.Description') }}
@@ -170,7 +170,7 @@
           <p>{{ t('Settings.Sync Settings.Automatic Sync Paused') }}</p>
           <FtButton
             :label="t('Settings.Sync Settings.Review Deletions')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :disabled="busy"
             @click="syncNow"
           />
@@ -291,7 +291,7 @@
           />
           <FtButton
             :label="t('Settings.Sync Settings.Sync Now')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             :disabled="busy"
             @click="syncNow"
           />
@@ -560,7 +560,7 @@
           <FtFlexBox class="actions">
             <FtButton
               :label="t('Settings.Sync Settings.Keep Deleted Items')"
-              :icon="['fas', 'undo']"
+              :icon="['fas', 'arrow-rotate-left']"
               @click="resolveDataLoss('keep')"
             />
             <FtButton
@@ -1104,7 +1104,7 @@ function authenticated() {
   username.value = editableUsername()
   password.value = ''
   privacyPassphrase.value = ''
-  showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+  showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'arrows-rotate'] })
 }
 
 /** OIDC accounts keep an internal username that users cannot type. */
@@ -1139,7 +1139,7 @@ async function syncNow() {
   try {
     const result = await store.dispatch('syncWithSyncServer', { notifyDataLoss: false })
     if (result !== null) {
-      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'arrows-rotate'] })
     }
   } catch (error) {
     // The review prompt shows deletions the sync stopped at.
@@ -1168,7 +1168,7 @@ async function resolveDataLoss(choice) {
   try {
     const result = await store.dispatch('resolveSyncServerDeletion', choice)
     if (result !== null) {
-      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'arrows-rotate'] })
     }
   } catch (error) {
     if (!store.getters.getSyncServerPendingDeletion) localError.value = error.message

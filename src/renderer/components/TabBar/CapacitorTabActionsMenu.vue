@@ -164,7 +164,7 @@
                 @click="emit('reload')"
               >
                 <FtIcon
-                  :icon="['fas', 'sync']"
+                  :icon="['fas', 'arrows-rotate']"
                   aria-hidden="true"
                 />
                 {{ t('Context Menu.Reload Tab') }}

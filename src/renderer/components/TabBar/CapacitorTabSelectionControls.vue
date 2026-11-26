@@ -53,7 +53,7 @@
       @click="showActions ? closeActions() : showActions = true"
     >
       <FtIcon
-        :icon="['fas', 'ellipsis-h']"
+        :icon="['fas', 'ellipsis']"
         aria-hidden="true"
       />
       {{ t('More') }}
@@ -129,7 +129,7 @@ const actions = computed(() => [
   { name: 'unpin', label: t('Context Menu.Unpin Tabs'), icon: 'thumbtack-slash', enabled: props.canUnpin },
   { name: 'load', label: t('Context Menu.Load Tabs'), icon: 'download', enabled: props.canLoad },
   { name: 'unload', label: t('Context Menu.Unload Tabs'), icon: 'right-from-bracket', enabled: props.canUnload },
-  { name: 'reload', label: t('Context Menu.Reload Tabs'), icon: 'sync', enabled: props.count > 0 },
+  { name: 'reload', label: t('Context Menu.Reload Tabs'), icon: 'arrows-rotate', enabled: props.count > 0 },
 ].filter(action => action.enabled))
 const toolbar = useTemplateRef('toolbar')
 let refocusToolbar = false

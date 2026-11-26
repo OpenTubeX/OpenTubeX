@@ -69,7 +69,7 @@
             :title="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
             @click="copyTimestamp(index)"
           >
-            <FtIcon :icon="['fas', 'share-alt']" />
+            <FtIcon :icon="['fas', 'share-nodes']" />
           </button>
         </div>
       </div>

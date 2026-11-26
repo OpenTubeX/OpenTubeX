@@ -75,7 +75,7 @@ const options = computed(() => {
   }
   items.push(
     { type: 'divider' },
-    { label: t('Theme Discovery.Refresh'), value: 'refresh', icon: ['fas', 'sync'] }
+    { label: t('Theme Discovery.Refresh'), value: 'refresh', icon: ['fas', 'arrows-rotate'] }
   )
   return items
 })

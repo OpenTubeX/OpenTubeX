@@ -183,7 +183,7 @@
         setting-key="extraThumbnailAction"
         :select-names="extraThumbnailActionNames"
         :select-values="extraThumbnailActionValues"
-        :icon="['fas', 'ellipsis-v']"
+        :icon="['fas', 'ellipsis-vertical']"
         @change="updateExtraThumbnailAction"
       />
       <FtSelect
@@ -662,7 +662,7 @@ function getThumbnailSwipeIcon(action) {
     addToQueue: ['fas', 'add-to-queue'],
     playNext: ['fas', 'play-next'],
     copyYoutube: ['fas', 'link'],
-    share: ['fas', 'share-alt'],
+    share: ['fas', 'share-nodes'],
     download: ['fas', 'download'],
   }[getThumbnailSwipeValue(action)] ?? ['fas', 'xmark']
 }

@@ -28,7 +28,7 @@
           :aria-expanded="String(settingsMenuOpen)"
           @click="settingsMenuOpen = !settingsMenuOpen"
         >
-          <FtIcon :icon="['fas', 'sliders-h']" />
+          <FtIcon :icon="['fas', 'sliders']" />
         </button>
         <a
           v-if="!isReplay"
@@ -108,7 +108,7 @@
             :aria-expanded="String(settingsMenuOpen)"
             @click="settingsMenuOpen = !settingsMenuOpen"
           >
-            <FtIcon :icon="['fas', 'sliders-h']" />
+            <FtIcon :icon="['fas', 'sliders']" />
           </button>
           <a
             v-if="!isReplay"
@@ -184,13 +184,13 @@
         {{ errorMessage }}
       </p>
       <FtIcon
-        :icon="['fas', 'exclamation-circle']"
+        :icon="['fas', 'circle-exclamation']"
         class="errorIcon"
       />
       <FtButton
         v-if="showEnableChat"
         :label="t('Video.Enable Live Chat')"
-        :icon="['fas', 'comment-alt']"
+        :icon="['fas', 'message']"
         class="enableLiveChat"
         @click="enableLiveChat"
       />

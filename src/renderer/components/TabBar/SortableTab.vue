@@ -132,7 +132,7 @@
           @pointerdown.stop
         >
           <FtIcon
-            :icon="['fas', 'times']"
+            :icon="['fas', 'xmark']"
             class="closeIcon"
           />
         </button>

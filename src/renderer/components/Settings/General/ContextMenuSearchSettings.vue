@@ -23,7 +23,7 @@
         <div class="engineToggle">
           <FtRetryImage
             v-if="hasFavicon(engine)"
-            :fallback-icon="['fas', 'search']"
+            :fallback-icon="['fas', 'magnifying-glass']"
             class="engineIcon"
             :src="engine.icon"
             alt=""
@@ -33,7 +33,7 @@
           <FtIcon
             v-else
             class="engineIcon fallbackIcon"
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
           />
           <FtToggleSwitch
             :label="engine.name"
@@ -67,7 +67,7 @@
             >
               <span>{{ engine.name }}</span>
               <FtIcon
-                :icon="['fas', 'edit']"
+                :icon="['fas', 'pen-to-square']"
                 aria-hidden="true"
               />
             </button>
@@ -97,7 +97,7 @@
           >
             <code dir="ltr">{{ engine.url }}</code>
             <FtIcon
-              :icon="['fas', 'edit']"
+              :icon="['fas', 'pen-to-square']"
               aria-hidden="true"
             />
           </button>

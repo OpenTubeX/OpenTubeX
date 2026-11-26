@@ -144,6 +144,11 @@
   color: var(--card-bg-color);
 }
 
+/* The overlay sits small and slightly raised inside the main icon. */
+.overlayIcon :deep(.ft-icon__glyph) {
+  transform: translateY(-0.0625em) scale(0.5625);
+}
+
 .disabled {
   opacity: 0.5;
   pointer-events: auto;

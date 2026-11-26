@@ -1010,6 +1010,7 @@ async function attachStallReport(testInfo, step, elapsed, output) {
 }
 
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
+const UNMAPPED_ICON_ERROR = '[icon-pack] no mapping for'
 // Chromium logs every script and eval() it blocks.
 const CSP_VIOLATION = /Content Security Policy/
 const INLINE_HANDLER_VIOLATION = 'Executing inline event handler'
@@ -1086,6 +1087,8 @@ export const test = base.extend({
       // overlayScrollbars.js reports once, also while mounting, without
       // breaking any assertion.
       const scrollbarErrors = []
+      // An icon missing from the icon map renders as nothing.
+      const unmappedIcons = []
       // The renderer may only run its own scripts. A violation means a script
       // the app needs is blocked, or untrusted markup tried to run one.
       const cspViolations = []
@@ -1101,6 +1104,8 @@ export const test = base.extend({
           if (message.type() !== 'error') return
           if (message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
             scrollbarErrors.push(message.text())
+          } else if (message.text().startsWith(UNMAPPED_ICON_ERROR)) {
+            unmappedIcons.push(message.text())
           } else if (CSP_VIOLATION.test(message.text())) {
             cspViolations.push(message.text())
           }
@@ -1141,6 +1146,7 @@ export const test = base.extend({
       settingUp = false
       await use(appHandle)
       expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
+      expect.soft(unmappedIcons, 'Every icon the app shows must be in the icon map').toEqual([])
       expect.soft(cspViolations, 'The renderer must not violate its Content-Security-Policy').toEqual([])
     } finally {
       // A failed launch has not set the test's status yet.

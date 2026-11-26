@@ -73,7 +73,7 @@
       <div class="captionActions">
         <FtButton
           :label="t('Settings.Player Settings.Caption Appearance.Reset')"
-          :icon="['fas', 'undo']"
+          :icon="['fas', 'arrow-rotate-left']"
           :disabled="areCaptionSettingsDefault(captionSettings)"
           @click="resetCaptionSettings"
         />

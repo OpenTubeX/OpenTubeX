@@ -13,7 +13,7 @@
       </p>
       <FtButton
         :label="$t('User Playlists.SinglePlaylistView.Retry')"
-        :icon="['fas', 'sync']"
+        :icon="['fas', 'arrows-rotate']"
         background-color="var(--primary-color)"
         text-color="var(--text-with-main-color)"
         @click="retrySubscriptionCacheLoad"

@@ -326,7 +326,7 @@ const overflowItems = computed(() => {
     quality: { path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
     sleepTimer: { path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },
     autoplay: controlBarMenuItem('autoplay'),
-    seekHistory: store.getters.getEnableSeekHistory && { icon: ['fas', 'history'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) },
+    seekHistory: store.getters.getEnableSeekHistory && { icon: ['fas', 'clock-rotate-left'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) },
     skipSilence: store.getters.getShowSkipSilenceButton && !process.env.IS_IOS && { path: PlayerIcons.SKIP_NEXT_FILLED, label: t('Settings.Player Settings.Skip Silence'), value: off },
     musicMode: store.getters.getShowMusicModeToggle && { icon: ['fas', 'headphones'], label: t('Video.Player.Music Mode'), value: off },
     ambientMode: { path: PlayerIcons.LIGHT_MODE_FILLED, label: t('Global.Ambient Mode'), value: off },

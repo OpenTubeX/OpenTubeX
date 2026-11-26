@@ -167,7 +167,7 @@
     ]"
     :option-names="[$t('Yes'), $t('No'), $t('Confirmations.Never Ask Again')]"
     :option-values="['refresh', 'cancel', 'neverAskAgain']"
-    :option-icons="[['fas', 'sync'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
+    :option-icons="[['fas', 'arrows-rotate'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
     autosize
     @click="handleRefreshWarning"
   />

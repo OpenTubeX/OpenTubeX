@@ -75,7 +75,7 @@
           @click="focusSearch"
         >
           <FtIcon
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             aria-hidden="true"
           />
           <span class="pinnedSearchLabel">{{ pinnedSearchText || t('Search / Go to URL') }}</span>
@@ -184,7 +184,7 @@
         >
           <FtIcon
             class="navIcon"
-            :icon="['fas', 'search']"
+            :icon="['fas', 'magnifying-glass']"
             aria-hidden="true"
           />
         </button>
@@ -198,7 +198,7 @@
         >
           <FtIcon
             class="navIcon"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             aria-hidden="true"
           />
         </button>
@@ -245,7 +245,7 @@
         >
           <FtIcon
             class="navIcon"
-            :icon="['fas', 'cog']"
+            :icon="['fas', 'gear']"
           />
         </button>
         <CapacitorPhoneTabSwitcher
@@ -267,7 +267,7 @@
               >
                 <FtIcon
                   class="phoneOverflowIcon"
-                  :icon="['fas', 'sync']"
+                  :icon="['fas', 'arrows-rotate']"
                   aria-hidden="true"
                 />
                 <span>{{ syncIndicatorLabel }}</span>
@@ -588,9 +588,9 @@ const minimizedSettingsWindowTitle = computed(() => {
   return t('Settings.Settings')
 })
 const minimizedSettingsWindowIcon = computed(() => {
-  if (settingsWindowView.value === 'about') return ['fas', 'info-circle']
+  if (settingsWindowView.value === 'about') return ['fas', 'circle-info']
   if (settingsWindowView.value === 'downloads') return ['fas', 'download']
-  return ['fas', 'cog']
+  return ['fas', 'gear']
 })
 const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedSettingsWindowTitle.value}`)
 

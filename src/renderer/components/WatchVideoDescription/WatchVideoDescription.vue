@@ -17,7 +17,7 @@
         v-if="translationAvailable"
         class="descriptionTranslationButton"
         :title="translationButtonTitle"
-        :icon="['fas', translationLoading ? 'sync' : 'language']"
+        :icon="['fas', translationLoading ? 'arrows-rotate' : 'language']"
         :spin="translationLoading"
         :disabled="translationLoading"
         :theme="translatedText === null ? 'base' : 'primary'"

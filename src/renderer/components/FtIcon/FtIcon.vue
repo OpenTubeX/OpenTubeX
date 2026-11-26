@@ -53,7 +53,6 @@
     <Icon
       class="ft-icon__glyph"
       :icon="iconifyId"
-      :style="iconifyGlyphStyle"
       width="1em"
       height="1em"
       aria-hidden="true"
@@ -65,9 +64,8 @@
 import { computed, normalizeStyle, ref, useAttrs, watch } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 
-import faAliasToCanon from '../../icons/faAliasToCanon.json'
 import { currentIconPack } from '../../icons/iconPackState'
-import { normalizeFaIcon, resolveIconifyId } from '../../icons/resolveIconifyId'
+import { normalizeIcon, resolveIconifyId } from '../../icons/resolveIconifyId'
 import { getCustomIconImageSource } from '../../helpers/customIcons'
 
 defineOptions({
@@ -87,10 +85,6 @@ const props = defineProps({
     type: [String, Number],
     default: null
   },
-  transform: {
-    type: [String, Object],
-    default: null
-  },
   color: {
     type: String,
     default: null
@@ -105,26 +99,6 @@ const props = defineProps({
     default: null
   }
 })
-
-/** @type {Record<string, string>} */
-const ICON_SIZE_TO_EM = {
-  '2xs': '0.625em',
-  xs: '0.75em',
-  sm: '0.875em',
-  lg: '1.25em',
-  xl: '1.5em',
-  '2xl': '2em',
-  '1x': '1em',
-  '2x': '2em',
-  '3x': '3em',
-  '4x': '4em',
-  '5x': '5em',
-  '6x': '6em',
-  '7x': '7em',
-  '8x': '8em',
-  '9x': '9em',
-  '10x': '10em'
-}
 
 const attrs = useAttrs()
 
@@ -154,13 +128,7 @@ const iconifyId = computed(() => resolveIconifyId(props.icon, props.pack ?? curr
 
 // Preserve the stable semantic metadata used by existing styling and consumers,
 // independently of the active pack's visual name.
-const semanticIcon = computed(() => {
-  const normalized = normalizeFaIcon(props.icon)
-  if (!normalized) {
-    return null
-  }
-  return [normalized[0], faAliasToCanon[normalized[1]] || normalized[1]]
-})
+const semanticIcon = computed(() => normalizeIcon(props.icon))
 
 const iconClass = computed(() => attrs.class)
 
@@ -207,12 +175,8 @@ function cssFontSizeFromIconSize(size) {
   if (typeof size === 'number' || /^\d+(\.\d+)?$/.test(String(size))) {
     return `${size}px`
   }
-  const key = String(size)
-  if (ICON_SIZE_TO_EM[key]) {
-    return ICON_SIZE_TO_EM[key]
-  }
   // Already a CSS length (e.g. 1.2em, 20px)
-  return key
+  return String(size)
 }
 
 const iconifyWrapperStyle = computed(() => {
@@ -230,89 +194,6 @@ const iconifyWrapperStyle = computed(() => {
 
 const customIconStyle = computed(() => iconifyWrapperStyle.value)
 
-/**
- * Interpret the existing transform syntax on a 16-unit grid.
- * @param {string | Record<string, unknown> | null | undefined} transform
- * @returns {{ transform?: string }}
- */
-function cssFromIconTransform(transform) {
-  if (transform == null || transform === '') {
-    return {}
-  }
-
-  if (typeof transform === 'object' && !Array.isArray(transform)) {
-    const size = typeof transform.size === 'number' ? transform.size : 16
-    const x = typeof transform.x === 'number' ? transform.x : 0
-    const y = typeof transform.y === 'number' ? transform.y : 0
-    const rotate = typeof transform.rotate === 'number' ? transform.rotate : 0
-    const flipX = transform.flipX ? -1 : 1
-    const flipY = transform.flipY ? -1 : 1
-    return {
-      transform: `translate(${x / 16}em, ${y / 16}em) scale(${(size / 16) * flipX}, ${(size / 16) * flipY}) rotate(${rotate}deg)`
-    }
-  }
-
-  const tokens = String(transform).trim().split(/\s+/).filter(Boolean)
-  let size = 16
-  let x = 0
-  let y = 0
-  let rotate = 0
-  let flipX = 1
-  let flipY = 1
-
-  for (const token of tokens) {
-    let match = /^shrink-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      size -= Number(match[1])
-      continue
-    }
-    match = /^grow-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      size += Number(match[1])
-      continue
-    }
-    match = /^up-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      y -= Number(match[1])
-      continue
-    }
-    match = /^down-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      y += Number(match[1])
-      continue
-    }
-    match = /^left-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      x -= Number(match[1])
-      continue
-    }
-    match = /^right-(\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      x += Number(match[1])
-      continue
-    }
-    match = /^rotate-(-?\d+(?:\.\d+)?)$/.exec(token)
-    if (match) {
-      rotate += Number(match[1])
-      continue
-    }
-    if (token === 'flip-h') {
-      flipX *= -1
-      continue
-    }
-    if (token === 'flip-v') {
-      flipY *= -1
-    }
-  }
-
-  const scaleX = (size / 16) * flipX
-  const scaleY = (size / 16) * flipY
-  return {
-    transform: `translate(${x / 16}em, ${y / 16}em) scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`
-  }
-}
-
-const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 </script>
 
 <style>

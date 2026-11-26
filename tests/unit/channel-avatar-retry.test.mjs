@@ -70,9 +70,8 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
         Icon: { render: () => Vue.h('fallback') },
         getCustomIconImageSource,
         resolveIconifyId: () => 'test:icon',
-        normalizeFaIcon: () => null,
+        normalizeIcon: () => null,
         currentIconPack: Vue.ref('material'),
-        faAliasToCanon: {},
         getTabAvatarUrl: tab => tab.avatarUrl,
         getTabPreviewFallbackUrl: () => null,
         getTabPageIcon: () => null

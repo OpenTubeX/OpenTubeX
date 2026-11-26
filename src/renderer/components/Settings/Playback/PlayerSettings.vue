@@ -331,7 +331,7 @@
         <FtButton
           data-settings-subpage="quick-playback-speed"
           :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
-          :icon="['fas', 'sliders-h']"
+          :icon="['fas', 'sliders']"
           :disabled="!useQuickPlaybackSpeedBar"
           @click="showQuickPlaybackSpeedBarManager = true"
         />
@@ -379,7 +379,7 @@
           v-if="!IS_IOS"
           :label="t('Settings.Player Settings.Skip Silence')"
           :description="t('Settings.Player Settings.Player Controls.Skip Silence Description')"
-          :icon="['fas', 'step-forward']"
+          :icon="['fas', 'forward-step']"
           :compact="true"
           :default-value="showSkipSilenceButton"
           setting-key="showSkipSilenceButton"
@@ -862,7 +862,7 @@
             />
             <FtButton
               :label="t('Settings.Player Settings.Reset Quick Playback Speed Bar')"
-              :icon="['fas', 'undo']"
+              :icon="['fas', 'arrow-rotate-left']"
               :disabled="!hasModifiedQuickPlaybackSpeedBarOptions"
               @click="resetQuickPlaybackSpeedBarOptions"
             />
@@ -910,7 +910,7 @@
                   <FtIconButton
                     class="quickPlaybackSpeedIconButton"
                     :title="t('Settings.Player Settings.Edit Playback Speed Name')"
-                    :icon="['fas', 'edit']"
+                    :icon="['fas', 'pen-to-square']"
                     theme="base-no-default"
                     @click="editingQuickPlaybackSpeedNameId = option.id"
                   />
@@ -931,7 +931,7 @@
                   <FtIconButton
                     class="quickPlaybackSpeedIconButton"
                     :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
-                    :icon="['fas', 'undo']"
+                    :icon="['fas', 'arrow-rotate-left']"
                     theme="base-no-default"
                     @click="resetQuickPlaybackSpeedName(option.id)"
                   />

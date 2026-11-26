@@ -23,7 +23,7 @@
             @click="$emit('refresh')"
           >
             <ft-icon
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               :spin="loading || (submissionEnabled && contributionStatsLoading)"
             />
           </button>
@@ -65,7 +65,7 @@
           role="status"
         >
           <ft-icon
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             spin
             aria-hidden="true"
           />
@@ -108,7 +108,7 @@
         role="status"
       >
         <ft-icon
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           spin
         />
       </div>

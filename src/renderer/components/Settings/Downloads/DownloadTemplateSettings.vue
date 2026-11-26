@@ -1,13 +1,13 @@
 <template>
   <FtButton
     :label="t('Settings.Download Settings.Manage Download Templates', { templateCount: customTemplates.length })"
-    :icon="['fas', 'save']"
+    :icon="['fas', 'floppy-disk']"
     @click="openManager"
   />
   <FtSettingsSubpage
     :open="showManager"
     :title="t('Settings.Download Settings.Download Templates')"
-    :icon="['fas', 'save']"
+    :icon="['fas', 'floppy-disk']"
     @close="showManager = false"
   >
     <div class="templateManagerHeader">
@@ -226,7 +226,7 @@
         />
         <FtButton
           :label="t('Downloads.Save Template')"
-          :icon="['fas', 'save']"
+          :icon="['fas', 'floppy-disk']"
           :disabled="draftName.trim() === '' || filenameTemplateInvalid"
           @click="saveTemplate"
         />
@@ -435,7 +435,7 @@ function saveTemplate() {
   selectedTemplateName.value = name
   selectedSourceValue.value = `custom:${name}`
   draftName.value = name
-  showToast({ message: t('Downloads.Template Saved', { name }), icon: ['fas', 'save'] })
+  showToast({ message: t('Downloads.Template Saved', { name }), icon: ['fas', 'floppy-disk'] })
 }
 
 function deleteTemplate() {

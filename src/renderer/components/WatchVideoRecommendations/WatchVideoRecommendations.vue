@@ -11,7 +11,7 @@
       <h3>
         <FtIcon
           v-if="fullscreenOverlay"
-          :icon="['fas', 'play-circle']"
+          :icon="['fas', 'circle-play']"
           aria-hidden="true"
         />
         {{ offline ? $t("Downloads.Available Offline") : $t("Up Next") }}

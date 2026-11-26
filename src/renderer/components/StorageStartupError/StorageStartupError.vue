@@ -39,7 +39,7 @@
         @click="retry"
       >
         <FtIcon
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           aria-hidden="true"
         />
         {{ t('Storage Startup Error.Retry') }}

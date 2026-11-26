@@ -209,7 +209,7 @@
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Try Again')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             @click="resetReceiver"
           />
         </FtFlexBox>
@@ -420,19 +420,19 @@
           <FtButton
             v-if="pairingApproval"
             :label="t('Settings.Sync Settings.Try Again')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             @click="approvePairing"
           />
           <FtButton
             v-else-if="approveMode === 'invite'"
             :label="t('Settings.Sync Settings.Try Again')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'arrows-rotate']"
             @click="showInvite"
           />
           <template v-else>
             <FtButton
               :label="t('Settings.Sync Settings.Scan Again')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'arrows-rotate']"
               @click="restartScanner"
             />
             <FtButton

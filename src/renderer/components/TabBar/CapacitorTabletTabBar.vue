@@ -104,7 +104,7 @@
             @click="closeTab(tab.id)"
           >
             <FtIcon
-              :icon="['fas', 'times']"
+              :icon="['fas', 'xmark']"
               aria-hidden="true"
             />
           </button>

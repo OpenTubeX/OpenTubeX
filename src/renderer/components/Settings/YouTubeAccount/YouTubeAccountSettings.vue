@@ -114,13 +114,13 @@
       <FtFlexBox>
         <FtButton
           :label="t('Settings.YouTube Account Settings.Sync Now')"
-          :icon="['fas', 'sync']"
+          :icon="['fas', 'arrows-rotate']"
           :disabled="syncing || (!syncSubscriptions && !syncPlaylists)"
           @click="syncNow"
         />
         <FtButton
           :label="t('Settings.YouTube Account Settings.Import Watch History')"
-          :icon="['fas', 'history']"
+          :icon="['fas', 'clock-rotate-left']"
           :disabled="importingHistory"
           @click="importPromptOpen = true"
         />
@@ -136,7 +136,7 @@
         :extra-labels="[t('Settings.YouTube Account Settings.Import Watch History Confirmation')]"
         :option-names="[t('Settings.YouTube Account Settings.Import Watch History'), t('Cancel')]"
         :option-values="['import', 'cancel']"
-        :option-icons="[['fas', 'history'], ['fas', 'xmark']]"
+        :option-icons="[['fas', 'clock-rotate-left'], ['fas', 'xmark']]"
         autosize
         @click="handleImportPrompt"
       />
@@ -284,7 +284,7 @@ async function handleImportPrompt(choice) {
   importingHistory.value = true
   try {
     const count = await importYouTubeWatchHistory()
-    showToast({ message: t('Settings.YouTube Account Settings.Watch History Imported', { count }, count), icon: ['fas', 'history'] })
+    showToast({ message: t('Settings.YouTube Account Settings.Watch History Imported', { count }, count), icon: ['fas', 'clock-rotate-left'] })
   } catch (error) {
     console.error(error)
     showToast({
@@ -371,7 +371,7 @@ async function syncNow() {
   syncing.value = true
   try {
     if (await syncWithYouTube({ manual: true })) {
-      showToast({ message: t('Settings.YouTube Account Settings.Synced'), icon: ['fas', 'sync'] })
+      showToast({ message: t('Settings.YouTube Account Settings.Synced'), icon: ['fas', 'arrows-rotate'] })
     }
   } finally {
     syncing.value = false

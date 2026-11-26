@@ -1,7 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.External Player Settings.External Player Settings')"
-    :icon="['fas', 'external-link-alt']"
+    :icon="['fas', 'up-right-from-square']"
   >
     <FtFlexBox>
       <FtSelect
@@ -10,7 +10,7 @@
         :select-names="externalPlayerNames"
         :select-values="externalPlayerValues"
         :tooltip="$t('Tooltips.External Player Settings.External Player')"
-        :icon="['fas', 'external-link-alt']"
+        :icon="['fas', 'up-right-from-square']"
         @change="updateExternalPlayer"
       />
     </FtFlexBox>

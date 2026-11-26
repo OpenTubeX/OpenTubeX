@@ -111,7 +111,7 @@
         setting-key="externalLinkHandling"
         :select-names="externalLinkHandlingNames"
         :select-values="EXTERNAL_LINK_HANDLING_VALUES"
-        :icon="['fas', 'external-link-alt']"
+        :icon="['fas', 'up-right-from-square']"
         :tooltip="$t('Tooltips.General Settings.External Link Handling')"
         size-to-content
         @change="updateExternalLinkHandling"
