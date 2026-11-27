@@ -36,11 +36,10 @@ public class MobileAppearanceSettingsTest {
                     })()
                     """);
                 awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
-                evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
-                // A labeled switch with help, and a switch whose label is a settings row's title.
-                String control = "document.querySelector('.settingsContent [data-setting-key=autoLoadComments]')";
+                // A labeled switch with help, which Playback has, and a switch whose
+                // label is a settings row's title, which General has.
+                String control = "document.querySelector('.settingsContent [data-setting-key=ambientMode]')";
                 String rowSwitch = "document.querySelector('.settingsContent .settingsRow [data-setting-key=generalAutoLoadMorePaginatedItemsEnabled]')";
-                awaitCondition(view, "!!" + control + " && !!" + rowSwitch);
                 for (int scale : new int[] {100, 125, 150}) {
                     evaluate(view, String.format("""
                         (() => {
@@ -49,13 +48,13 @@ public class MobileAppearanceSettingsTest {
                             store.commit('setUiScale', %d);
                         })()
                         """, scale));
-                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01 && !" +
-                        control + ".querySelector('.performanceImpact')");
+                    evaluate(view, "document.querySelector('.settingsMenu [data-section=playback]').click()");
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01 && !!" +
+                        control + " && !" + control + ".querySelector('.performanceImpact')");
                     double originalWidth = json(view, "({width: " + control +
                         ".querySelector('.switch-label-text').getBoundingClientRect().width})").getDouble("width");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowPerformanceImpactIndicators', true)");
-                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact') && !!" +
-                        rowSwitch + ".querySelector('.performanceImpact')");
+                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact')");
                     JSONObject layout = json(view, String.format("""
                         (() => {
                             const element = %s;
@@ -83,6 +82,8 @@ public class MobileAppearanceSettingsTest {
                     assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
                         layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
                             layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
+                    evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                    awaitCondition(view, "!!" + rowSwitch + "?.querySelector('.performanceImpact')");
                     assertRowBadgeLayout(view, rowSwitch, scale + "%");
                 }
                 // On a 320dp phone at 150%, the text column is too narrow for the
