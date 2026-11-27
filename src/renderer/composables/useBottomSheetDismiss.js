@@ -175,7 +175,10 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
   function updateScrollAction(event) {
     const viewport = event.target
     if (!viewport.hasAttribute('data-overlayscrollbars-viewport')) return
-    viewport.style.setProperty('--bottom-sheet-scroll-action', viewport.scrollTop > 1 ? 'pan-y' : 'pan-down')
+    const nextAction = viewport.scrollTop > 1 ? 'pan-y' : 'pan-down'
+    if (viewport.style.getPropertyValue('--bottom-sheet-scroll-action') !== nextAction) {
+      viewport.style.setProperty('--bottom-sheet-scroll-action', nextAction)
+    }
   }
   function filterClick(event) {
     if (!suppressClick || event.detail === 0) return

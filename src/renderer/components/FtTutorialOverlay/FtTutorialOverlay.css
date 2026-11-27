@@ -6,7 +6,7 @@
 
 /* Settings pages in the card open prompts, like a theme preview or a delete
    confirmation, which must show above the tutorial. */
-:global(.app:has(> .tutorialOverlay) > .prompt) {
+:global(:root.appTutorialOverlayOpen .app > .prompt) {
   z-index: 1002;
 }
 

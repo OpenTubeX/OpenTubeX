@@ -7,6 +7,7 @@
 */
 :deep(.shaka-spinner-container) {
   animation: ft-buffer-spinner-appear 150ms ease-out 400ms both;
+  content-visibility: auto;
 }
 
 :deep(.shaka-spinner) {

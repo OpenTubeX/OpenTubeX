@@ -179,9 +179,11 @@
 
 :global([data-bottom-sheet]) {
   touch-action: none;
+}
 
-  /* Stays on its own layer so the backdrop's layer does not re-raster when the
-     sheet stops sliding, which flickers on Android. See FtPrompt's card. */
+/* Stays on its own layer on Android so the backdrop's layer does not re-raster
+   when the sheet stops sliding, which flickers on Android. See FtPrompt's card. */
+:global(:root.appCapacitorTabs [data-bottom-sheet]) {
   will-change: transform;
 }
 
