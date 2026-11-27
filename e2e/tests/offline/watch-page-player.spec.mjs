@@ -1242,6 +1242,54 @@ test.describe('with seek history enabled', () => {
     await openOverflowMenu()
     await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('1 position')
   })
+
+  test('hides playing controls after closing a hovered seek history submenu', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const controls = player.locator('.shaka-controls-container')
+    const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
+    const entries = player.locator('.seek-history-menu .seek-history-entry')
+
+    await page.evaluate(() => window.$store.dispatch('updatePlayingInterfaceHideDelay', 1))
+    await video.evaluate((element) => {
+      element.pause()
+      element.currentTime = 1
+    })
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.press('9')
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(27, 1)
+    await page.keyboard.press('1')
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(3, 1)
+    await video.evaluate(element => element.play())
+
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+    await expect(seekHistoryButton).toBeVisible()
+    await seekHistoryButton.click()
+    await expect(entries.first()).toBeVisible()
+
+    // Click the 0:01 entry (which rebuilds the list under the pointer and
+    // leaves plenty of playback remaining) and close the menu without moving
+    // the pointer away from where the submenu was.
+    await entries.last().click()
+    await page.keyboard.press('Escape')
+    await expect(player.locator('.seek-history-menu')).toHaveClass(/shaka-hidden/)
+
+    await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 5000 })
+    await expect(player).toHaveClass(/no-cursor/)
+    expect(await video.evaluate(element => ({ paused: element.paused, ended: element.ended }))).toEqual({
+      paused: false,
+      ended: false,
+    })
+
+    // Resting the pointer on a visible control bar still keeps the controls shown.
+    await player.locator('.shaka-controls-button-panel').hover()
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await page.waitForTimeout(1500)
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(player).not.toHaveClass(/no-cursor/)
+  })
 })
 
 test('mobile skip buttons switch videos when tapped', async ({ app, page }) => {
