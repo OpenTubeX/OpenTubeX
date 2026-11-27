@@ -5,6 +5,7 @@ import {
   decryptSyncServerDeviceInfo,
   encryptSyncServerDeviceInfo,
   loadSyncServerDevices,
+  orderSyncServerAccountSessions,
   randomSyncServerDeviceId,
 } from '../../src/renderer/helpers/sync-server-sessions.js'
 
@@ -67,4 +68,19 @@ test('loads names and platforms from encrypted account-session metadata', async 
     [laptopId]: { name: 'Travel laptop', platform: 'linux' },
     [phoneId]: { name: 'Pixel 8 Pro', platform: 'android' },
   })
+})
+
+test('places the current account session first while preserving the order of other sessions', () => {
+  const input = [
+    { id: 'phone', current: false },
+    { id: 'tablet', current: false },
+    { id: 'desktop', current: true },
+    { id: 'laptop', current: false },
+  ]
+
+  assert.deepEqual(
+    orderSyncServerAccountSessions(input).map(session => session.id),
+    ['desktop', 'phone', 'tablet', 'laptop']
+  )
+  assert.deepEqual(input.map(session => session.id), ['phone', 'tablet', 'desktop', 'laptop'])
 })

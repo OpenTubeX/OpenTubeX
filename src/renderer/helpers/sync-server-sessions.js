@@ -212,3 +212,15 @@ export function getSyncServerDeviceIcon(platform) {
   if (platform === 'web') return ['fas', 'globe']
   return platform === 'android' ? ['fas', 'smartphone'] : ['fas', 'display']
 }
+
+/**
+ * Places the current device's session first while preserving the relative order
+ * of all other sessions returned by the server.
+ *
+ * @template {{ current?: boolean }} T
+ * @param {readonly T[]} sessions
+ * @returns {T[]}
+ */
+export function orderSyncServerAccountSessions(sessions) {
+  return [...sessions].sort((a, b) => Number(Boolean(b?.current)) - Number(Boolean(a?.current)))
+}
