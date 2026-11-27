@@ -8,12 +8,13 @@
       pageSwipeTo: isSwipeTarget,
       pageSwipePresented: isPresented && isCapacitor,
       pageSwipePrewarm: isPrewarmed,
+      pageSwipeWarm: isPrewarmed && !prewarmSettling,
       pageSwipeSettling: pageSwipe?.settling,
       hasWatchPreview: watchPreviewing
     }"
     :style="pageSwipeStyle"
     :data-tab-id="tab.id"
-    :inert="!isPresented && !isBackground"
+    :inert="!HIDES_WITH_CONTENT_VISIBILITY && !isPresented && !isBackground"
     :aria-hidden="String(!isPresented)"
   >
     <div
@@ -44,9 +45,9 @@
           :suspended="isWatchRoute && !watchPreviewing && page.key === currentPageKey"
           class="routerView"
           :class="page.key === currentPageKey
-            ? { browsingBehindWatch: isWatchRoute, backSlidePage: RETAINS_PAGES }
+            ? { browsingBehindWatch: isWatchRoute, browsingSettling: isWatchRoute && behindWatchSettling, backSlidePage: RETAINS_PAGES }
             : { retainedPage: true, retainedPagePreview: backReveal?.key === page.key }"
-          :inert="isWatchRoute || page.key !== currentPageKey"
+          :inert="!HIDES_WITH_CONTENT_VISIBILITY && isWatchRoute"
           :aria-hidden="String(isWatchRoute || page.key !== currentPageKey)"
         />
         <!-- Dims the page Back reveals, between it and the current page. -->
@@ -106,6 +107,14 @@ const TAB_LOADER_SETTLE_DELAY_MS = 100
 // predictive back gesture and return to it without reloading.
 const RETAINS_PAGES = process.env.IS_CAPACITOR && !process.env.IS_IOS
 const RETAINED_PAGE_LIMIT = 1
+// Engines that hide content that isn't shown with content-visibility: hidden,
+// which keeps its style and layout and keeps it from being focused or read by
+// assistive technology. Toggling inert or an inherited property such as
+// pointer-events instead restyles every element of the page. Matches the
+// @supports conditions of the styles below.
+const HIDES_WITH_CONTENT_VISIBILITY = globalThis.CSS?.supports?.(
+  '(content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))'
+) ?? false
 
 const props = defineProps({
   tab: {
@@ -233,13 +242,83 @@ watch([resolvedRoute, () => props.tab.historyIndex], ([route]) => {
   }
 }, { immediate: true })
 
-// Background tabs and retained pages keep their layout, so their rows report
-// no resize when shown.
-watch([isBackground, currentPageKey], ([background]) => {
-  if (!background) resumeWindowedListRemeasures()
+const watchPreviewing = ref(false)
+
+/**
+ * Content hidden with content-visibility keeps its layout, but lists, grids
+ * and other components that measure themselves skip it, and resize observers
+ * don't report in it. While settling, it renders once more, transparent, until
+ * those measurements have run.
+ */
+function createHiddenContentSettle() {
+  const settling = ref(false)
+  let generation = 0
+  let idleId = null
+  function stop() {
+    generation++
+    settling.value = false
+    if (idleId === null) return
+    if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idleId)
+    else window.clearTimeout(idleId)
+    idleId = null
+  }
+  function settle() {
+    stop()
+    if (!HIDES_WITH_CONTENT_VISIBILITY) return
+    settling.value = true
+    const current = generation
+    // Resize observers report in the frame after the content renders, and the
+    // measurements they start run in the frames after that.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (current !== generation) return
+      const done = () => {
+        idleId = null
+        settling.value = false
+      }
+      idleId = typeof window.requestIdleCallback === 'function'
+        ? window.requestIdleCallback(done, { timeout: 1000 })
+        : window.setTimeout(done, 100)
+    }))
+  }
+  return { settling, settle, stop }
+}
+
+// A neighbor kept for page swipes settles before it hides, so a swipe shows
+// it laid out like a background tab.
+const { settling: prewarmSettling, settle: settlePrewarm, stop: stopPrewarmSettle } = createHiddenContentSettle()
+watch(isPrewarmed, prewarmed => {
+  if (prewarmed) settlePrewarm()
+  else stopPrewarmSettle()
+})
+
+// The page behind Watch settles when Watch hides it, and again when it
+// changes or the window resizes, so the dock gesture shows it laid out and
+// can restore its scroll position.
+const isBehindWatch = computed(() => isWatchRoute.value && !watchPreviewing.value)
+const { settling: behindWatchSettling, settle: settleBehindWatch, stop: stopBehindWatchSettle } = createHiddenContentSettle()
+let behindWatchObserver = null
+function stopObservingBehindWatch() {
+  behindWatchObserver?.disconnect()
+  window.removeEventListener('resize', settleBehindWatch)
+}
+watch([isBehindWatch, currentPageKey, browsingInitialized], ([behindWatch]) => {
+  stopObservingBehindWatch()
+  stopBehindWatchSettle()
+  const page = behindWatch && HIDES_WITH_CONTENT_VISIBILITY && tabContentRef.value?.querySelector(':scope > .browsingBehindWatch')
+  if (!page) return
+  behindWatchObserver ??= new MutationObserver(settleBehindWatch)
+  behindWatchObserver.observe(page, { childList: true, characterData: true, subtree: true })
+  window.addEventListener('resize', settleBehindWatch)
+  settleBehindWatch()
 }, { flush: 'post' })
 
-const watchPreviewing = ref(false)
+// Background tabs, settled neighbors, retained pages and the page behind
+// Watch keep their layout, so their rows report no resize when shown.
+const browsingRendered = computed(() => !isBackground.value && !(isPrewarmed.value && !prewarmSettling.value) &&
+  (!isBehindWatch.value || behindWatchSettling.value))
+watch([browsingRendered, currentPageKey], ([rendered]) => {
+  if (rendered) resumeWindowedListRemeasures()
+}, { flush: 'post' })
 // Background Watch tabs only need to preload the video. Mount their browsing
 // page on first presentation, then retain it so a dock gesture can reveal it
 // without mounting a route while the video is moving. Mobile swipe prewarming
@@ -482,6 +561,9 @@ onErrorCaptured((error) => {
 
 onBeforeUnmount(() => {
   lifecycleRevision += 1
+  stopPrewarmSettle()
+  stopBehindWatchSettle()
+  stopObservingBehindWatch()
   disposeMountedContent().catch(error => {
     console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
   })
@@ -595,18 +677,47 @@ function cancelLoaderSettle() {
   }
 }
 
+/* TabBrowsingPage sets the width a page behind Watch keeps on the page itself.
+   Its descendants don't use it, and an inherited custom property would
+   restyle every one of them when it changes. */
+@property --browsing-page-width {
+  syntax: '*';
+  inherits: false;
+}
+
 .browsingBehindWatch {
   position: absolute;
   inset: 0;
   z-index: 0;
   inline-size: var(--browsing-page-width, 100%);
-  pointer-events: none;
-  visibility: hidden;
 }
 
 /* Retained browsing content must not extend the Watch page's scroll range. */
 .tabContent:not(.hasWatchPreview) > .browsingBehindWatch {
   overflow: clip;
+}
+
+/* The page behind Watch keeps its style and layout without rendering them,
+   like a background tab, so returning to it or revealing it for the dock
+   gesture does not restyle every element of a long page. */
+@supports (content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body)) {
+  /* Below Watch and transparent, its own box neither paints nor takes input. */
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch {
+    z-index: -1;
+    opacity: 0;
+    content-visibility: hidden;
+  }
+
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch.browsingSettling {
+    content-visibility: visible;
+  }
+}
+
+@supports not ((content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))) {
+  .browsingBehindWatch {
+    pointer-events: none;
+    visibility: hidden;
+  }
 }
 
 /* Keep positioned items in the browsing page below the returning Watch preview. */
@@ -628,7 +739,6 @@ function cancelLoaderSettle() {
   inset-block-start: 0;
   inset-inline: 0;
   content-visibility: hidden;
-  pointer-events: none;
 
   /* Positioned overlays inside it, such as thumbnail badges, must not paint over the current page. */
   isolation: isolate;
@@ -730,7 +840,14 @@ function cancelLoaderSettle() {
      or allowing their fixed-position children to show over the active tab. */
   opacity: 0;
   overflow: hidden;
-  pointer-events: none;
+}
+
+/* Once its content has settled, a neighbor keeps its style and layout without
+   rendering them. Toggling an inherited property such as pointer-events on
+   each neighbor change, and on the tab a swipe lands on, would restyle every
+   element of those tabs. */
+.pageSwipeWarm {
+  content-visibility: hidden;
 }
 
 /* The thumbnail morph names every player (themes.css). A neighbor's player
@@ -739,18 +856,24 @@ function cancelLoaderSettle() {
   view-transition-name: none !important;
 }
 
-/* Android WebView ticks animations under this opacity: 0 layer on the main
-   thread. A spinner in a neighbor would otherwise render a frame per refresh.
-   Hidden browsing pages behind Watch keep ticking their animations as well. */
-.pageSwipePrewarm,
-.pageSwipePrewarm :deep(*),
-.pageSwipePrewarm :deep(*::before),
-.pageSwipePrewarm :deep(*::after),
-.tabContent:not(.hasWatchPreview) > .browsingBehindWatch,
-.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*),
-.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::before),
-.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::after) {
-  animation-play-state: paused !important;
+/* Engines that keep neighbors rendered, transparent, and pages behind Watch
+   hidden with visibility tick their animations, a spinner a frame per
+   refresh. Content hidden with content-visibility does not. */
+@supports not ((content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))) {
+  .pageSwipePrewarm {
+    pointer-events: none;
+  }
+
+  .pageSwipePrewarm,
+  .pageSwipePrewarm :deep(*),
+  .pageSwipePrewarm :deep(*::before),
+  .pageSwipePrewarm :deep(*::after),
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch,
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*),
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::before),
+  .tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::after) {
+    animation-play-state: paused !important;
+  }
 }
 
 .pageSwipePlaceholder {

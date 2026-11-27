@@ -1,4 +1,5 @@
-import { test, expect, sel, abortUnmockedRequest } from '../../helpers/app.mjs'
+import { test, expect, sel, abortUnmockedRequest, goTo } from '../../helpers/app.mjs'
+import { mockUnplayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 
 test.describe('Ctrl+Tab responsiveness', () => {
   test.use({ seed: { settings: { uiScale: 125, showTabPreviews: true, fetchSubscriptionsAutomatically: false } } })
@@ -216,6 +217,62 @@ test.describe('switching back to a large page', () => {
     console.log('Switch back to a large page:', work)
     // Restyling and laying out the whole page took the most time of a switch
     // to a long list. The rows alone have twice as many elements as allowed.
+    expect(work.restyledElements).toBeLessThan(rowCount)
+    expect(work.laidOutObjects).toBeLessThan(rowCount)
+  })
+})
+
+test.describe('Watch over a large page', () => {
+  test.use({
+    seed: {
+      history: [{ ...watchHistoryEntry, title: 'Behind Watch test video' }],
+      settings: { reducedMotion: 'on', fetchSubscriptionsAutomatically: false }
+    }
+  })
+
+  test('keeps the style and layout of the page behind Watch', async ({ app, page }) => {
+    await mockUnplayableWatchPage(app, page)
+    const rowCount = 3000
+    await goTo(page, 'history')
+    const content = page.locator('.tabContent[aria-hidden="false"] > .routerView')
+    await expect(content.getByText('Behind Watch test video')).toBeVisible()
+    // Stands in for a long list, such as a long history.
+    await content.evaluate((element, rowCount) => {
+      const rows = document.createElement('div')
+      for (let index = 0; index < rowCount; index++) {
+        const row = document.createElement('div')
+        row.className = 'ft-card'
+        row.append(document.createElement('span'), `Row ${index}`)
+        rows.append(row)
+      }
+      element.append(rows)
+    }, rowCount)
+    const openWatch = async () => {
+      await content.getByText('Behind Watch test video').click()
+      await expect(page).toHaveURL(/#\/watch\//)
+      await expect(page.locator('.tabContent[aria-hidden="false"] .browsingBehindWatch')).toHaveCount(1)
+      await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+      await settlePageLayout(page)
+    }
+    const goBack = async () => {
+      await page.locator(sel.backButton).click()
+      await expect(page).toHaveURL(/#\/history$/)
+      await expect(page.locator('.browsingBehindWatch')).toHaveCount(0)
+      await settlePageLayout(page)
+    }
+    // The player's styles, which load with the first Watch page, define
+    // custom properties for the whole document, which restyles it once.
+    await openWatch()
+    await goBack()
+
+    const work = await traceStyleAndLayoutWork(page, async () => {
+      await openWatch()
+      await goBack()
+    })
+    console.log('Watch and back over a large page:', work)
+    // Hiding the page with inherited properties and inert, and pausing the
+    // animations of all its elements, restyled every row on the way to Watch
+    // and again on the way back.
     expect(work.restyledElements).toBeLessThan(rowCount)
     expect(work.laidOutObjects).toBeLessThan(rowCount)
   })
