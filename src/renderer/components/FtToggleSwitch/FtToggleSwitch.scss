@@ -211,21 +211,33 @@
   text-wrap: pretty;
 }
 
-/* One box, so the last word and the icons after it never split across lines. */
+/* One box, so the last word and the icons after it never split across lines.
+   The word breaks only when it is longer than the line by itself. When just
+   the icons don't fit beside it, they hang past the end of the line, into the
+   switch's margin. */
 .switch-label-end {
   display: inline-flex;
   align-items: center;
   max-inline-size: 100%;
 
   > .switch-label-name {
-    min-inline-size: 0;
+    max-inline-size: 100%;
+    hyphens: manual;
+    overflow-wrap: break-word;
   }
+}
+
+/* A trailing switch's track sits at the end of the line, so the icons go
+   below the word instead. */
+.trailing .switch-label-end {
+  flex-wrap: wrap;
 }
 
 /* One line tall, so the icons don't make a label's line taller than the
    lines of labels without them. */
 .switch-label-icons {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   block-size: 1lh;
   vertical-align: top;

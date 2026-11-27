@@ -1,6 +1,6 @@
 // The build's browser targets (see _scripts/minimizers.js) include engines
 // without these: Android WebViews before Chrome 120 that the Play Store does
-// not update, such as Huawei's, Firefox before 124 and Safari before 17.4.
+// not update, such as Huawei's.
 // Import this before any other module.
 
 if (typeof AbortSignal.any !== 'function') {

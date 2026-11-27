@@ -11,7 +11,10 @@ const androidTargets = {
   x86: ['386', 'i686-linux-android']
 }
 
-export async function buildAndroidGo(module, executable, output, ndk, abis = Object.keys(androidTargets).join(',')) {
+/**
+ * @param {{ tags?: string, linkerFlags?: string }} [build] extra Go build tags and linker flags
+ */
+export async function buildAndroidGo(module, executable, output, ndk, abis = Object.keys(androidTargets).join(','), build = {}) {
   const host = { linux: 'linux-x86_64', darwin: 'darwin-x86_64', win32: 'windows-x86_64' }[process.platform]
   await rm(join(output, 'jniLibs'), { recursive: true, force: true })
   await rm(join(output, 'licenses'), { recursive: true, force: true })
@@ -37,7 +40,8 @@ export async function buildAndroidGo(module, executable, output, ndk, abis = Obj
     // Keep the APK reproducible on F-Droid: its scanner deletes files before
     // building, and Go's build ID hashes the NDK compiler path.
     await execFileAsync('go', ['build', '-mod=readonly', '-trimpath', '-buildvcs=false', '-buildmode=pie',
-      '-ldflags=-s -w -buildid=',
+      ...(build.tags ? [`-tags=${build.tags}`] : []),
+      `-ldflags=-s -w -buildid=${build.linkerFlags ? ` ${build.linkerFlags}` : ''}`,
       '-o', join(directory, executable), '.'], options)
   }
   return options

@@ -1,25 +1,43 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chromium, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { execFile, execFileSync } from 'node:child_process'
 import { promisify } from 'node:util'
-import { appPage } from '../helpers/android-app-page.mjs'
+import { androidAppId, connectAndroidApp } from '../helpers/android-webview.mjs'
 
-// Requires an isolated debug sender trusting the emulator's temporary test CA,
-// unmodified openchromecast + mpv, ffmpeg-generated demo MP4/DASH/HLS fixtures,
-// and ChromecastTest#prepareOpenSourceReceiverForUiTest running on a locked AVD.
-// Only discovery and adb loopback topology are substituted; authentication,
-// Cast commands, manifest rewriting and media streaming use the real backend.
+// Run with _scripts/androidCastReceiverTest.mjs, which builds a debug sender
+// that also trusts a temporary test root, gives unmodified openchromecast + mpv
+// a device certificate from it, and generates MP4/DASH/HLS fixtures with
+// ffmpeg. Only discovery and adb loopback topology are substituted;
+// authentication, Cast commands, manifest rewriting and media streaming use
+// the real backend.
 const root = process.env.OPENTUBEX_CAST_RECEIVER_FIXTURES
+const receiverPort = Number(process.env.OPENTUBEX_CAST_RECEIVER_PORT)
 const serial = process.env.ANDROID_SERIAL
 const execFileAsync = promisify(execFile)
 test('Android casts MP4, DASH and HLS to the open source receiver', {
-  skip: !root || !serial || !process.env.ANDROID_CDP_URL, timeout: 240_000
+  skip: !root || !receiverPort || !serial || !process.env.ANDROID_CDP_URL, timeout: 330_000
 }, async () => {
   const adb = (...args) => execFileSync('adb', ['-s', serial, ...args], { encoding: 'utf8' })
+  const appId = androidAppId()
+  // The instrumentation starts the app with the receiver among its devices,
+  // which adb reverse connects to this host, and routes the fixture address
+  // to this host's server, until the test marks itself finished.
+  adb('shell', 'run-as', appId, 'rm', '-f', 'cache/cast-emulator-ready', 'cache/cast-emulator-finished')
+  const instrumentation = execFileAsync('adb', ['-s', serial, 'shell', 'am', 'instrument', '-w',
+    '-e', 'class', 'org.opentubex.app.ChromecastTest#prepareOpenSourceReceiverForUiTest',
+    '-e', 'castEmulatorPort', String(receiverPort),
+    `${appId}.test/androidx.test.runner.AndroidJUnitRunner`], { timeout: 330_000 })
+  instrumentation.catch(() => {})
+  await expect.poll(() => {
+    try {
+      adb('shell', 'run-as', appId, 'test', '-f', 'cache/cast-emulator-ready')
+      return true
+    } catch { return false }
+  }, { timeout: 60_000, intervals: [500], message: 'The instrumentation starts the app with the receiver' }).toBe(true)
   const requests = []
   const server = createServer(async (req, res) => {
     try {
@@ -40,8 +58,8 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
   // after production destination validation; production DNS and trust stay intact.
   const upstream = `http://8.8.8.8:${server.address().port}`
   const forwarded = new Set()
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = appPage(browser)
+  // The instrumentation restarted the app in its own process.
+  const { browser, page } = await connectAndroidApp()
   page.setDefaultTimeout(15000)
 
   let watch, original
@@ -50,15 +68,17 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
       assert.match(castId, /^[a-f0-9-]{36}$/)
       await expect.poll(async () => {
         try {
-          await execFileAsync('adb', ['-s', serial, 'shell', 'run-as', 'org.opentubex.app.dev', 'test', '-f', `cache/cast-relay-${castId}`], { timeout: 1000 })
+          await execFileAsync('adb', ['-s', serial, 'shell', 'run-as', appId, 'test', '-f', `cache/cast-relay-${castId}`], { timeout: 1000 })
           return true
         } catch { return false }
       }, { timeout: 15_000, intervals: [100], message: 'Instrumentation installs the test-only relay socket mapping' }).toBe(true)
-      const forwardedPort = adb('forward', 'tcp:0', `tcp:${port}`).trim()
-      forwarded.add(forwardedPort)
-      return `http://127.0.0.1:${forwardedPort}`
+      // The relay rewrites DASH and HLS manifests with its own origin, so the
+      // receiver on this host reaches it at the same port.
+      adb('forward', `tcp:${port}`, `tcp:${port}`)
+      forwarded.add(port)
+      return `http://127.0.0.1:${port}`
     })
-    original = await page.evaluate(() => {
+    original = await page.evaluate(receiverPort => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = { CurrentLocale: 'en-US', CastProtocols: ['googleCast'], VideoPlaybackEngine: 'built-in', AutoplayVideos: false, UseSponsorBlock: false, UseReturnYouTubeDislikes: false }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
@@ -67,7 +87,7 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
       window.fetch = (url, opts) => String(url).startsWith('https://localhost/') ? window.__testCastFetch(url, opts) : Promise.reject(Error('Offline receiver fixture'))
       window.__testNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = async (plugin, method, options) => {
-        if (plugin === 'Chromecast' && method === 'discover') return { devices: [{ id: 'open-source-emulator', name: 'OpenTubeX Test Receiver', address: '127.0.0.1', port: 18009 }] }
+        if (plugin === 'Chromecast' && method === 'discover') return { devices: [{ id: 'open-source-emulator', name: 'OpenTubeX Test Receiver', address: '127.0.0.1', port: receiverPort }] }
         try {
           const result = await window.__testNativePromise(plugin, method, options)
           if (plugin === 'Chromecast' && method === 'openMedia')result.origin = await window.__forwardCastRelay(new URL(result.origin).port, options.castId)
@@ -78,7 +98,7 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
       const route = location.hash
       location.hash = '#/watch/jNQXAC9IVRw'
       return { saved, route }
-    })
+    }, receiverPort)
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
       await tutorial.locator('.tutorialSkip button').click()
@@ -98,32 +118,35 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
       await watch.evaluate(c => c.proxy.$refs.player.play())
       await expect.poll(() => watch.evaluate(c => c.proxy.$refs.player.isPaused())).toBe(false)
       await button.click()
-      await page.getByRole('option', { name: 'OpenTubeX Test Receiver', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'OpenTubeX Test Receiver', exact: true }).click()
       await expect(button).toHaveAttribute('aria-pressed', 'true', { timeout: 20000 })
       await expect.poll(async () => (await state()).status, { timeout: 20000 }).toMatchObject({ paused: false })
       await expect.poll(async () => (await state()).status.currentTime, { timeout: 20000 }).toBeGreaterThan(2)
-      assert.ok(requests.slice(before).some(request => type === 'video/mp4'
+      // The receiver can report the previous media's position before it loads
+      // the new one, so wait for the segments it fetches.
+      await expect.poll(() => requests.slice(before).some(request => type === 'video/mp4'
         ? request.filename === 'video.mp4'
-        : type === 'application/dash+xml' ? request.filename.startsWith('chunk-') : request.filename.endsWith('.ts')))
+        : type === 'application/dash+xml' ? request.filename.startsWith('chunk-') : request.filename.endsWith('.ts')),
+      { timeout: 20000, message: `The receiver fetches the ${type} media` }).toBe(true)
 
       await button.click()
       if (process.env.ANDROID_CAST_RECEIVER_SCREENSHOT && type === 'video/mp4') {
         await page.screenshot({ path: process.env.ANDROID_CAST_RECEIVER_SCREENSHOT })
       }
-      await page.getByRole('option', { name: 'Pause', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Pause', exact: true }).click()
       await expect.poll(async () => (await state()).status.paused).toBe(true)
       await button.click()
-      await page.getByRole('option', { name: 'Play', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Play', exact: true }).click()
       await expect.poll(async () => (await state()).status.paused).toBe(false)
       await button.click()
-      await page.getByRole('option', { name: 'Forward 10 seconds', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Forward 10 seconds', exact: true }).click()
       await expect.poll(async () => (await state()).status.currentTime).toBeGreaterThan(10)
       const previousVolume = (await state()).status.volume
       await button.click()
-      await page.getByRole('option', { name: 'Decrease volume', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Decrease volume', exact: true }).click()
       await expect.poll(async () => (await state()).status.volume).toBeLessThan(previousVolume - 0.05)
       await button.click()
-      await page.getByRole('option', { name: 'Return to local playback', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Return to local playback', exact: true }).click()
       await expect(button).toHaveAttribute('aria-pressed', 'false')
       console.log(`Verified Android ${type}: fetch, playback, pause/resume, seek, volume, stop`)
     }
@@ -131,10 +154,11 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
     await watch?.evaluate(c => c.proxy.$refs.player?.pause()).catch(() => {})
     await page.evaluate(({ saved, route }) => { const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store; for (const [k, v] of Object.entries(saved ?? {}))store.commit('set' + k, v); window.fetch = window.__testCastFetch ?? window.fetch; window.Capacitor.nativePromise = window.__testNativePromise ?? window.Capacitor.nativePromise; location.hash = route }, { saved: original?.saved, route: original?.route ?? '#/' }).catch(() => {})
     await watch?.dispose()
-    await page.removeExposedFunction('__forwardCastRelay').catch(() => {})
     await browser.close()
     server.closeAllConnections(); server.close()
     for (const port of forwarded) adb('forward', '--remove', `tcp:${port}`)
-    adb('shell', 'run-as', 'org.opentubex.app.dev', 'touch', 'cache/cast-emulator-finished')
+    adb('shell', 'run-as', appId, 'touch', 'cache/cast-emulator-finished')
   }
+  const { stdout } = await instrumentation
+  assert.match(stdout, /OK \(1 test\)/, stdout)
 })

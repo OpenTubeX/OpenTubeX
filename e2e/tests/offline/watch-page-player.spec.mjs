@@ -65,7 +65,9 @@ test('connection loss keeps the previous page covered while Watch is scrolled', 
 
   await expect(page.locator('.connectionStatus')).toBeVisible()
   await expect(page.locator('.watchPreviewHost')).toBeVisible()
-  await expect(previousPage).toBeHidden({ timeout: 2000 })
+  // Its content isn't rendered, and its own box paints nothing.
+  await expect(previousPage.locator(':scope > *').first()).toBeHidden({ timeout: 2000 })
+  expect(await previousPage.evaluate(element => element.checkVisibility({ opacityProperty: true, visibilityProperty: true }))).toBe(false)
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 })
 
