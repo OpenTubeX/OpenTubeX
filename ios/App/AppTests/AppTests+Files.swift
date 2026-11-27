@@ -171,7 +171,14 @@ extension AppTests {
     private func openDataSettings() async throws {
         try await openApplication()
         _ = try await webView.callPageScript("for (const video of document.querySelectorAll('video')) video.pause(); await testRouter.push('/subscriptions'); testStore.commit('setSettingsWindowSection', 'data'); await testStore.dispatch('showSettingsWindow')")
-        try await wait("Array.from(document.querySelectorAll('.settingsWindow button')).some(button => button.textContent.trim() === 'Import Settings')")
+        try await wait("!!\(settingsButton(named: "Import Settings"))")
+    }
+
+    /// A JavaScript expression for the button a user finds by this accessible name.
+    /// Data settings give their tiles' short Import and Export labels a fuller ARIA name.
+    private func settingsButton(named name: String, in container: String = ".settingsWindow") -> String {
+        let literal = String(decoding: try! JSONEncoder().encode(name), as: UTF8.self)
+        return "Array.from(document.querySelectorAll('\(container) button')).find(button => (button.getAttribute('aria-label') ?? button.textContent).trim() === \(literal))"
     }
 
     private func importFixture(_ data: Data, name: String, action: String) async throws {
@@ -189,7 +196,7 @@ extension AppTests {
             window.dispatchEvent(new Event('focus'));
         };
         try {
-            const button = Array.from(document.querySelectorAll('.settingsWindow button')).find(button => button.textContent.trim() === action);
+            const button = Array.from(document.querySelectorAll('.settingsWindow button')).find(button => (button.getAttribute('aria-label') ?? button.textContent).trim() === action);
             if (!button) throw new Error('Import button missing: ' + action);
             button.click();
         } finally {
@@ -247,10 +254,11 @@ extension AppTests {
             await testStore.dispatch('updateHistory', video);
             await testStore.dispatch('updateSearchHistoryEntry', {_id: id, query: 'Backup Grüße 日本語 ' + id, lastUpdatedAt: Date.now()});
             await testStore.dispatch('updateRememberHistory', false);
-            Array.from(document.querySelectorAll('.settingsWindow button')).find(button => button.textContent.trim() === 'Export backup').click();
+            \(settingsButton(named: "Export backup")).click();
             """, arguments: arguments)
-            try await wait("Array.from(document.querySelectorAll('.settingsSubpageContent button')).some(button => button.textContent.trim() === 'Export selected data' && !button.disabled)")
-            _ = try await evaluate("Array.from(document.querySelectorAll('.settingsSubpageContent button')).find(button => button.textContent.trim() === 'Export selected data').click(); true")
+            let exportSelected = settingsButton(named: "Export selected data", in: ".settingsSubpageContent")
+            try await wait("\(exportSelected)?.disabled === false")
+            _ = try await evaluate("\(exportSelected).click(); true")
             let controller = try XCTUnwrap(webView.window?.rootViewController)
             try await waitForNative { controller.presentedViewController != nil }
             let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
@@ -279,8 +287,9 @@ extension AppTests {
             """, arguments: arguments) as? Bool
             XCTAssertEqual(removed, true, "Fixtures must be absent before testing restoration")
             try await importFixture(archive, name: "native-backup.zip", action: "Import backup")
-            try await wait("Array.from(document.querySelectorAll('.settingsSubpageContent button')).some(button => button.textContent.trim() === 'Import selected data')")
-            _ = try await evaluate("Array.from(document.querySelectorAll('.settingsSubpageContent button')).find(button => button.textContent.trim() === 'Import selected data').click(); true")
+            let importSelected = settingsButton(named: "Import selected data", in: ".settingsSubpageContent")
+            try await wait("!!\(importSelected)")
+            _ = try await evaluate("\(importSelected).click(); true")
             try await wait("Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('Backup imported successfully'))")
             let restored = try await webView.callPageScript("""
             const profile = testStore.getters.getProfileList.find(profile => profile._id === id);
