@@ -1703,6 +1703,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "이 백업에는 독립 프로필 {count}개의 데이터도 포함되어 있으며, 해당 프로필로 복원됩니다."
     Subscription cache file: "이 파일에는 구독한 채널의 동영상 캐시만 있고 채널 자체는 없습니다. 대신 profiles.db 또는 구독 내보내기 파일을 선택하세요."
+    Not a NewPipe backup: "이 ZIP 파일은 NewPipe 백업이 아닙니다."
     Settings could not be imported: "설정을 가져올 수 없습니다"
     Some settings could not be imported: "일부 설정을 가져올 수 없습니다({total}개 중 {failed}개 실패)"
     Scheduled backups: "예약 백업"
@@ -1763,10 +1764,10 @@ Settings:
     Setting object has insufficient data, skipping item: 설정 객체에 데이터가 부족하여 항목을 건너뜁니다
     Unknown setting key: '알 수 없는 설정 키: {key}'
     Non-transferable setting key: '전송할 수 없는 설정 키: {key}'
-    Import subscriptions formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube 백업 또는 FreeTube 내보내기 (.json)'
-    Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json), Invidious (.json)'
-    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe 백업 (.zip), LibreTube 백업 또는 FreeTube 내보내기 (.json)'
+    Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json), Invidious (.json), NewPipe 백업 (.zip)'
+    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe 백업 (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe 백업 (.zip), LibreTube 백업 (.json)'
     Channel playback speeds: "채널별 재생 속도"
     Import channel playback speeds: "채널별 재생 속도 가져오기"
     Channel playback speeds file: "채널별 재생 속도 파일"

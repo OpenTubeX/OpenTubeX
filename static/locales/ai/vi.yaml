@@ -1479,6 +1479,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Bản sao lưu này cũng chứa dữ liệu của {count} hồ sơ riêng biệt, sẽ được khôi phục vào các hồ sơ đó."
     Subscription cache file: "Tệp này chỉ lưu bộ nhớ đệm video từ các kênh bạn đăng ký, không phải bản thân các kênh. Hãy chọn profiles.db hoặc tệp xuất danh sách đăng ký."
+    Not a NewPipe backup: "Tệp ZIP này không phải là bản sao lưu NewPipe."
     Settings could not be imported: "Không thể nhập cài đặt"
     Some settings could not be imported: "Không thể nhập tất cả cài đặt ({failed}/{total} không thành công)"
     Scheduled backups: "Sao lưu theo lịch"
@@ -1527,10 +1528,10 @@ Settings:
     Setting object has insufficient data, skipping item: Đối tượng cài đặt thiếu dữ liệu, bỏ qua mục
     Unknown setting key: 'Khóa cài đặt không xác định: {key}'
     Non-transferable setting key: 'Khóa cài đặt không thể chuyển: {key}'
-    Import subscriptions formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), bản sao lưu LibreTube hoặc bản xuất FreeTube (.json)'
-    Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), bản sao lưu NewPipe (.zip), bản sao lưu LibreTube hoặc bản xuất FreeTube (.json)'
+    Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json), Invidious (.json), bản sao lưu NewPipe (.zip)'
+    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), bản sao lưu NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu NewPipe (.zip), bản sao lưu LibreTube (.json)'
     Channel playback speeds: "Tốc độ phát của kênh"
     Import channel playback speeds: "Nhập tốc độ phát của kênh"
     Channel playback speeds file: "Tệp tốc độ phát của kênh"

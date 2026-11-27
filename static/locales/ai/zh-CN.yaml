@@ -1478,6 +1478,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "此备份还包含 {count} 个独立个人资料的数据，这些数据将恢复到对应的个人资料中。"
     Subscription cache file: "此文件只缓存了你订阅中的视频，不包含频道本身。请改为选择 profiles.db 或订阅导出文件。"
+    Not a NewPipe backup: "此 ZIP 文件不是 NewPipe 备份。"
     Settings could not be imported: "无法导入设置"
     Some settings could not be imported: "部分设置无法导入（{total} 项中有 {failed} 项失败）"
     Scheduled backups: "定时备份"
@@ -1523,10 +1524,10 @@ Settings:
     Profile Directory: 配置文件文件夹
     Open Profile Directory: 打开配置文件文件夹
     Invalid JSON row, skipping item: 第 {row} 行的 JSON 无效，已跳过该项目
-    Import subscriptions formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv, .json, .opml)、NewPipe (.json)、LibreTube 备份或 FreeTube 导出文件 (.json)'
-    Import history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 备份 (.json)、Invidious (.json)'
-    Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv)、Invidious (.json)'
-    Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
+    Import subscriptions formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv, .json, .opml)、NewPipe (.json)、NewPipe 备份 (.zip)、LibreTube 备份或 FreeTube 导出文件 (.json)'
+    Import history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 备份 (.json)、Invidious (.json)、NewPipe 备份 (.zip)'
+    Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv)、Invidious (.json)、NewPipe 备份 (.zip)、LibreTube (.json)、Piped (.json)'
+    Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、NewPipe 备份 (.zip)、LibreTube 备份 (.json)'
     Channel playback speeds: "频道播放速度"
     Import channel playback speeds: "导入频道播放速度"
     Channel playback speeds file: "频道播放速度文件"

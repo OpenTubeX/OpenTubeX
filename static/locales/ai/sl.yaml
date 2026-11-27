@@ -1744,6 +1744,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Ta varnostna kopija vsebuje tudi podatke {count} ločenega profila, ki se obnovijo v ta profil. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v ta profila. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile."
     Subscription cache file: "Ta datoteka hrani v predpomnilniku samo videoposnetke iz vaših naročnin, ne kanalov. Namesto nje izberite profiles.db ali izvoz naročnin."
+    Not a NewPipe backup: "Ta datoteka ZIP ni varnostna kopija NewPipe."
     Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
     Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"
     Scheduled backups: "Načrtovane varnostne kopije"
@@ -1811,10 +1812,10 @@ Settings:
     Setting object has insufficient data, skipping item: Predmet nastavitve ne vsebuje dovolj podatkov, zato bo element preskočen
     Unknown setting key: 'Neznan ključ nastavitve: {key}'
     Non-transferable setting key: 'Ključa nastavitve ni mogoče prenesti: {key}'
-    Import subscriptions formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), varnostna kopija LibreTube ali izvoz FreeTube (.json)'
-    Import history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), varnostna kopija LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), varnostna kopija NewPipe (.zip), varnostna kopija LibreTube ali izvoz FreeTube (.json)'
+    Import history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), varnostna kopija LibreTube (.json), Invidious (.json), varnostna kopija NewPipe (.zip)'
+    Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), varnostna kopija NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), varnostna kopija NewPipe (.zip), varnostna kopija LibreTube (.json)'
     Channel playback speeds: "Hitrosti predvajanja kanalov"
     Import channel playback speeds: "Uvozi hitrosti predvajanja kanalov"
     Channel playback speeds file: "Datoteka s hitrostmi predvajanja kanalov"

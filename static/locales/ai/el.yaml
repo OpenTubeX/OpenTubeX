@@ -1479,6 +1479,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Αυτό το αντίγραφο ασφαλείας περιέχει επίσης τα δεδομένα {count} χωριστού προφίλ, τα οποία επαναφέρονται σε αυτό το προφίλ. | Αυτό το αντίγραφο ασφαλείας περιέχει επίσης τα δεδομένα {count} χωριστών προφίλ, τα οποία επαναφέρονται σε αυτά τα προφίλ."
     Subscription cache file: "Αυτό το αρχείο αποθηκεύει προσωρινά μόνο τα βίντεο από τις συνδρομές σας, όχι τα κανάλια. Επιλέξτε profiles.db ή μια εξαγωγή συνδρομών."
+    Not a NewPipe backup: "Αυτό το αρχείο ZIP δεν είναι αντίγραφο ασφαλείας του NewPipe."
     Settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή των ρυθμίσεων"
     Some settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή όλων των ρυθμίσεων (απέτυχαν {failed} από {total})"
     Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"
@@ -1524,10 +1525,10 @@ Settings:
     Profile Directory: Κατάλογος προφίλ
     Open Profile Directory: Άνοιγμα καταλόγου προφίλ
     Invalid JSON row, skipping item: Μη έγκυρο JSON στη γραμμή {row}, το στοιχείο παραλείπεται
-    Import subscriptions formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), αντίγραφο ασφαλείας LibreTube ή εξαγωγή FreeTube (.json)'
-    Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), αντίγραφο ασφαλείας NewPipe (.zip), αντίγραφο ασφαλείας LibreTube ή εξαγωγή FreeTube (.json)'
+    Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json), Invidious (.json), αντίγραφο ασφαλείας NewPipe (.zip)'
+    Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), αντίγραφο ασφαλείας NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας NewPipe (.zip), αντίγραφο ασφαλείας LibreTube (.json)'
     Channel playback speeds: "Ταχύτητες αναπαραγωγής καναλιών"
     Import channel playback speeds: "Εισαγωγή ταχυτήτων αναπαραγωγής καναλιών"
     Channel playback speeds file: "Αρχείο ταχυτήτων αναπαραγωγής καναλιών"

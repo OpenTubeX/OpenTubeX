@@ -1506,6 +1506,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Denne sikkerhedskopi indeholder også data fra {count} adskilt profil, som gendannes i den profil. | Denne sikkerhedskopi indeholder også data fra {count} adskilte profiler, som gendannes i de profiler."
     Subscription cache file: "Denne fil gemmer kun videoerne fra dine abonnementer i cachen, ikke kanalerne. Vælg profiles.db eller en eksport af abonnementer i stedet."
+    Not a NewPipe backup: "Denne ZIP-fil er ikke en NewPipe-sikkerhedskopi."
     Settings could not be imported: "Indstillingerne kunne ikke importeres"
     Some settings could not be imported: "Ikke alle indstillinger kunne importeres ({failed} af {total} mislykkedes)"
     Scheduled backups: "Planlagte sikkerhedskopier"
@@ -1566,10 +1567,10 @@ Settings:
     Setting object has insufficient data, skipping item: Indstillingsobjektet indeholder ikke nok data. Elementet springes over
     Unknown setting key: 'Ukendt indstillingsnøgle: {key}'
     Non-transferable setting key: 'Indstillingsnøglen kan ikke overføres: {key}'
-    Import subscriptions formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-sikkerhedskopi eller FreeTube-eksport (.json)'
-    Import history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhedskopi (.json), Invidious (.json)'
-    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe-sikkerhedskopi (.zip), LibreTube-sikkerhedskopi eller FreeTube-eksport (.json)'
+    Import history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhedskopi (.json), Invidious (.json), NewPipe-sikkerhedskopi (.zip)'
+    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe-sikkerhedskopi (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe-sikkerhedskopi (.zip), LibreTube-sikkerhedskopi (.json)'
     Channel playback speeds: "Afspilningshastigheder for kanaler"
     Import channel playback speeds: "Importér afspilningshastigheder for kanaler"
     Channel playback speeds file: "Fil med afspilningshastigheder for kanaler"

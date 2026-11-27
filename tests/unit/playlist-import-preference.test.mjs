@@ -16,6 +16,8 @@ for (const [preference, existing] of [[undefined, true], [false, true], [true, f
     const toasts = []
     const writes = []
     const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+      isInvidiousPlaylistsExport: () => false,
+      isLibreTubePlaylistsExport: () => false,
       ...playlistPreferences,
       allPlaylists: { value: existing ? [current] : [] },
       pickFilesWithPicker: async () => [{ name: 'playlist.db', text: async () => JSON.stringify(imported) }],
@@ -72,6 +74,8 @@ test('playlist import applies each picked database file to the previous file\'s 
     text: async () => JSON.stringify({ _id: 'custom', playlistName: 'My playlist', videos: [{ videoId, title: videoId, lengthSeconds: 60, timeAdded: 1 }] }),
   })
   const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    isInvidiousPlaylistsExport: () => false,
+    isLibreTubePlaylistsExport: () => false,
     ...playlistPreferences,
     allPlaylists: playlists,
     pickFilesWithPicker: async () => [file('first'), file('second')],
@@ -102,6 +106,8 @@ test('playlist import reports a malformed database file and continues with the n
   const toasts = []
   const writes = []
   const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    isInvidiousPlaylistsExport: () => false,
+    isLibreTubePlaylistsExport: () => false,
     ...playlistPreferences,
     allPlaylists: { value: [] },
     pickFilesWithPicker: async () => [

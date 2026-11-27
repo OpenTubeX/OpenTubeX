@@ -297,11 +297,15 @@ import { isPlaylistSortOrder, processToBeAddedPlaylistVideo } from '../../../hel
 import { normalizeRemoveWatchedVideosThreshold, stampPlaylistPreferenceEdits } from '../../../helpers/playlist-preferences-sync'
 import { normalizePlaylistThumbnail } from '../../../helpers/playlist-thumbnails'
 import {
+  convertLibreTubePlaylists,
+  convertLibreTubeSearchHistory,
   convertLibreTubeSubscriptions,
   convertLibreTubeWatchHistoryToOpenTubeX,
   detectSubscriptionJsonFormat,
   extractChannelIdFromUploaderUrl,
   getLibreTubeSubscriptions,
+  isLibreTubePlaylistsExport,
+  isLibreTubeSearchHistoryBackup,
   isLibreTubeWatchHistoryBackup,
 } from '../../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
@@ -320,6 +324,8 @@ import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileH
 import { createTakeoutPlaylistNamer, forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import { convertInvidiousPlaylists, convertInvidiousWatchHistory, isInvidiousPlaylistsExport, isInvidiousWatchHistoryExport } from '../../../helpers/invidious-import'
 import {
+  getSearchHistoryEntryKeyFromEntry,
+  normalizeSearchHistoryEntry,
   normalizeSearchSettings,
   parseExportedSearchHistoryEntry,
 } from '../../../../search-history'
@@ -813,6 +819,20 @@ function isJsonObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
+/**
+ * Reads one kind of data from a NewPipe backup ZIP, or shows that the file is none.
+ * @param {File} file
+ * @param {'subscriptions' | 'history' | 'playlists' | 'searchHistory'} section
+ * @returns {Promise<object[] | null>}
+ */
+async function readNewPipeBackupSection(file, section) {
+  const data = await runBackgroundJob('readNewPipeBackup', { file, section })
+  if (data === null) {
+    showToast({ message: t('Settings.Data Settings.Not a NewPipe backup'), icon: ['fas', 'circle-exclamation'] })
+  }
+  return data
+}
+
 const subscriptionsExportOptions = computed(() => {
   const exportFreeTube = t('Settings.Data Settings.Export OpenTubeX')
   const exportYouTube = t('Settings.Data Settings.Export YouTube')
@@ -835,15 +855,16 @@ const dataScopeProfiles = computed(() => store.getters.getDataScopeProfiles)
 // #region subscriptions import
 
 async function importSubscriptions() {
-  let response
+  let file
   try {
-    response = await readFileWithPicker(
+    file = await pickFileWithPicker(
       t('Settings.Data Settings.Subscription File'),
       {
         'application/x-freetube-db': '.db',
         'text/csv': '.csv',
         'application/json': '.json',
-        'application/xml': ['.xml', '.opml']
+        'application/xml': ['.xml', '.opml'],
+        'application/zip': '.zip',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -854,13 +875,18 @@ async function importSubscriptions() {
     return
   }
 
-  if (response === null) {
+  if (file === null) {
     return
   }
 
-  const { filename, content } = response
+  const filename = file.name.toLowerCase()
 
   try {
+    if (filename.endsWith('.zip')) {
+      await importNewPipeBackupSubscriptions(file)
+      return
+    }
+    const content = await file.text()
     if (filename.endsWith('.csv')) {
       await importYouTubeSubscriptions(filename, content)
     } else if (filename.endsWith('.db')) {
@@ -1222,6 +1248,19 @@ function importNewPipeSubscriptions(newPipeData) {
   return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
 }
 
+/**
+ * @param {File} file
+ */
+async function importNewPipeBackupSubscriptions(file) {
+  const subscriptions = await readNewPipeBackupSection(file, 'subscriptions')
+  if (subscriptions === null) return
+  if (subscriptions.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  await runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
+}
+
 // #endregion subscriptions import
 
 // #region subscriptions export
@@ -1411,13 +1450,14 @@ const historyCacheSorted = computed(() => {
 })
 
 async function importWatchHistory() {
-  let response
+  let file
   try {
-    response = await readFileWithPicker(
+    file = await pickFileWithPicker(
       t('Settings.Data Settings.History File'),
       {
         'application/x-freetube-db': '.db',
-        'application/json': '.json'
+        'application/json': '.json',
+        'application/zip': '.zip',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -1428,13 +1468,18 @@ async function importWatchHistory() {
     return
   }
 
-  if (response === null) {
+  if (file === null) {
     return
   }
 
-  const { filename, content } = response
+  const filename = file.name.toLowerCase()
 
   try {
+    if (filename.endsWith('.zip')) {
+      await importNewPipeWatchHistory(file)
+      return
+    }
+    const content = await file.text()
     if (filename.endsWith('.db')) {
       const records = parseImportedLineDelimitedJson(content)
       if (records !== null) {
@@ -1578,6 +1623,27 @@ async function importLibreTubeWatchHistory(backupData) {
   }
 
   if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'undated' }) !== true) {
+    throw new Error('Could not import history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'clock-rotate-left'],
+  })
+}
+
+/**
+ * @param {File} file
+ */
+async function importNewPipeWatchHistory(file) {
+  const records = await readNewPipeBackupSection(file, 'history')
+  if (records === null) return
+  if (records.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  // NewPipe saves watch times and resume positions, which merge like Takeout's
+  if (await store.dispatch('importHistory', { records, rule: 'takeout' }) !== true) {
     throw new Error('Could not import history')
   }
 
@@ -1755,6 +1821,7 @@ async function importPlaylists() {
         'application/x-freetube-db': '.db',
         'text/csv': '.csv',
         'application/json': '.json',
+        'application/zip': '.zip',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -1775,12 +1842,19 @@ async function importPlaylists() {
   for (const file of files) {
     if (takeoutFiles.includes(file)) { continue }
     try {
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        const playlists = await readNewPipeBackupSection(file, 'playlists')
+        if (playlists !== null) await importPlaylistsByVideoId(playlists)
+        continue
+      }
       const content = await file.text()
-      const invidiousExport = parseInvidiousPlaylistsExport(content)
-      if (invidiousExport === null) {
-        await importPlaylistDatabase(content)
+      const exportData = parseJsonObject(content)
+      if (isInvidiousPlaylistsExport(exportData)) {
+        await importPlaylistsByVideoId(convertInvidiousPlaylists(exportData))
+      } else if (isLibreTubePlaylistsExport(exportData)) {
+        await importPlaylistsByVideoId(convertLibreTubePlaylists(exportData))
       } else {
-        await importInvidiousPlaylists(invidiousExport)
+        await importPlaylistDatabase(content)
       }
     } catch (err) {
       console.error('Unable to import playlist file', file.name, err)
@@ -1790,27 +1864,25 @@ async function importPlaylists() {
 }
 
 /**
+ * The file's JSON object, or null for anything else, such as a playlist
+ * database, which has one JSON object per line
  * @param {string} content
- * @returns {{ playlists: unknown[] } | null}
  */
-function parseInvidiousPlaylistsExport(content) {
-  // Playlist databases have one JSON object per line, so only a file that is
-  // a single JSON object can be an Invidious export.
+function parseJsonObject(content) {
   if (!content.trimStart().startsWith('{')) return null
   try {
     const data = JSON.parse(content)
-    return isInvidiousPlaylistsExport(data) ? data : null
+    return isJsonObject(data) ? data : null
   } catch {
     return null
   }
 }
 
 /**
- * @param {{ playlists: unknown[] }} exportData
+ * Imports playlists from other apps, which allow several playlists with one name.
+ * @param {object[]} playlists
  */
-async function importInvidiousPlaylists(exportData) {
-  const playlists = convertInvidiousPlaylists(exportData)
-  // Invidious allows several playlists with one name
+async function importPlaylistsByVideoId(playlists) {
   const namePlaylist = createTakeoutPlaylistNamer(new Set(playlists.map(playlist => playlist.playlistName.trim())))
   for (const playlist of playlists) {
     // The add times are made up, so a repeated import must match videos by ID
@@ -2132,13 +2204,14 @@ const searchHistoryEntries = computed(() => {
 })
 
 async function importSearchHistory() {
-  let response
+  let file
   try {
-    response = await readFileWithPicker(
+    file = await pickFileWithPicker(
       t('Settings.Data Settings.Search history file'),
       {
         'application/x-freetube-db': '.db',
-        'application/json': '.json'
+        'application/json': '.json',
+        'application/zip': '.zip',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -2149,20 +2222,34 @@ async function importSearchHistory() {
     return
   }
 
-  if (response === null) {
+  if (file === null) {
     return
   }
 
-  const { filename, content } = response
+  const filename = file.name.toLowerCase()
 
   try {
+    if (filename.endsWith('.zip')) {
+      const entries = await readNewPipeBackupSection(file, 'searchHistory')
+      if (entries !== null) await importExternalSearchHistory(entries)
+      return
+    }
+    const content = await file.text()
     if (filename.endsWith('.db')) {
       const records = parseImportedLineDelimitedJson(content)
       if (records !== null) {
         await importFreeTubeSearchHistory(records)
       }
     } else if (filename.endsWith('.json')) {
-      await importYouTubeSearchHistory(JSON.parse(content))
+      const data = JSON.parse(content)
+      if (isLibreTubeSearchHistoryBackup(data)) {
+        // LibreTube saves no search times, so searches saved already keep theirs
+        const saved = new Set(store.getters.getSearchHistoryEntries.map(entry => getSearchHistoryEntryKeyFromEntry(normalizeSearchHistoryEntry(entry))))
+        await importExternalSearchHistory(convertLibreTubeSearchHistory(data)
+          .filter(entry => !saved.has(getSearchHistoryEntryKeyFromEntry(normalizeSearchHistoryEntry(entry)))))
+      } else {
+        await importYouTubeSearchHistory(data)
+      }
     }
   } catch (error) {
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
@@ -2191,6 +2278,20 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
   }
 
   if (await store.dispatch('importSearchHistory', importedEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All search history has been successfully imported'),
+    icon: ['fas', 'clock-rotate-left'],
+  })
+}
+
+/**
+ * @param {object[]} entries
+ */
+async function importExternalSearchHistory(entries) {
+  if (entries.length > 0 && await store.dispatch('importSearchHistory', entries) !== true) {
     throw new Error('Could not import search history')
   }
 

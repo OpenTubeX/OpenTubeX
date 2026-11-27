@@ -1478,6 +1478,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek abba a profilba állíthatók vissza. | Ez a biztonsági mentés {count} különálló profil adatait is tartalmazza, amelyek azokba a profilokba állíthatók vissza."
     Subscription cache file: "Ez a fájl csak a feliratkozásaid videóit tárolja gyorsítótárban, a csatornákat nem. Válaszd helyette a profiles.db fájlt vagy egy feliratkozás-exportot."
+    Not a NewPipe backup: "Ez a ZIP-fájl nem NewPipe biztonsági másolat."
     Settings could not be imported: "A beállításokat nem sikerült importálni"
     Some settings could not be imported: "Nem minden beállítást sikerült importálni ({total} beállításból {failed} sikertelen)"
     Scheduled backups: "Ütemezett biztonsági mentések"
@@ -1523,10 +1524,10 @@ Settings:
     Profile Directory: Profilmappa
     Open Profile Directory: Profilmappa megnyitása
     Invalid JSON row, skipping item: Érvénytelen JSON a(z) {row}. sorban, az elem kihagyva
-    Import subscriptions formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube biztonsági másolat vagy FreeTube exportálás (.json)'
-    Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json), Invidious (.json)'
-    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe biztonsági másolat (.zip), LibreTube biztonsági másolat vagy FreeTube exportálás (.json)'
+    Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json), Invidious (.json), NewPipe biztonsági másolat (.zip)'
+    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe biztonsági másolat (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe biztonsági másolat (.zip), LibreTube biztonsági másolat (.json)'
     Channel playback speeds: "Csatornák lejátszási sebességei"
     Import channel playback speeds: "Csatornák lejátszási sebességeinek importálása"
     Channel playback speeds file: "Csatornák lejátszási sebességeit tartalmazó fájl"

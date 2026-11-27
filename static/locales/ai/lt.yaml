@@ -1716,6 +1716,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Šioje atsarginėje kopijoje taip pat yra {count} atskiro profilio duomenys, kurie atkuriami į tą profilį. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius. | Šioje atsarginėje kopijoje taip pat yra {count} atskirų profilių duomenys, kurie atkuriami į tuos profilius."
     Subscription cache file: "Šiame faile talpinami tik jūsų prenumeratų vaizdo įrašai, o ne kanalai. Vietoj jo pasirinkite profiles.db arba prenumeratų eksportą."
+    Not a NewPipe backup: "Šis ZIP failas nėra NewPipe atsarginė kopija."
     Settings could not be imported: "Nepavyko importuoti nustatymų"
     Some settings could not be imported: "Nepavyko importuoti visų nustatymų (nepavyko: {failed} iš {total})"
     Scheduled backups: "Suplanuotos atsarginės kopijos"
@@ -1776,10 +1777,10 @@ Settings:
     Setting object has insufficient data, skipping item: Nustatymo objekte nepakanka duomenų, elementas praleidžiamas
     Unknown setting key: 'Nežinomas nustatymo raktas: {key}'
     Non-transferable setting key: 'Neperkeliamas nustatymo raktas: {key}'
-    Import subscriptions formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube atsarginė kopija arba FreeTube eksportas (.json)'
-    Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json), Invidious (.json)'
-    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe atsarginė kopija (.zip), LibreTube atsarginė kopija arba FreeTube eksportas (.json)'
+    Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json), Invidious (.json), NewPipe atsarginė kopija (.zip)'
+    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe atsarginė kopija (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe atsarginė kopija (.zip), LibreTube atsarginė kopija (.json)'
     Channel playback speeds: "Kanalų atkūrimo greičiai"
     Import channel playback speeds: "Importuoti kanalų atkūrimo greičius"
     Channel playback speeds file: "Kanalų atkūrimo greičių failas"

@@ -1438,6 +1438,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Эта резервная копия также содержит данные {count} отдельного профиля, которые будут восстановлены в этот профиль. | Эта резервная копия также содержит данные {count} отдельных профилей, которые будут восстановлены в эти профили. | Эта резервная копия также содержит данные {count} отдельных профилей, которые будут восстановлены в эти профили."
     Subscription cache file: "Этот файл лишь кеширует видео из ваших подписок, а не сами каналы. Выберите вместо него profiles.db или экспорт подписок."
+    Not a NewPipe backup: "Этот ZIP-файл не является резервной копией NewPipe."
     Settings could not be imported: "Не удалось импортировать настройки"
     Some settings could not be imported: "Не все настройки удалось импортировать (не удалось: {failed} из {total})"
     Scheduled backups: "Резервное копирование по расписанию"
@@ -1483,10 +1484,10 @@ Settings:
     Profile Directory: Папка профиля
     Open Profile Directory: Открыть папку профиля
     Invalid JSON row, skipping item: Недопустимый JSON в строке {row}, элемент пропущен
-    Import subscriptions formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервная копия LibreTube или экспорт FreeTube (.json)'
-    Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервная копия NewPipe (.zip), резервная копия LibreTube или экспорт FreeTube (.json)'
+    Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json), Invidious (.json), резервная копия NewPipe (.zip)'
+    Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), резервная копия NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия NewPipe (.zip), резервная копия LibreTube (.json)'
     Channel playback speeds: "Скорости воспроизведения каналов"
     Import channel playback speeds: "Импортировать скорости воспроизведения каналов"
     Channel playback speeds file: "Файл скоростей воспроизведения каналов"

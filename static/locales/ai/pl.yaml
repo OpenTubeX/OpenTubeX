@@ -1003,6 +1003,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Ta kopia zapasowa zawiera też dane {count} oddzielnego profilu, które zostaną przywrócone do tego profilu. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili. | Ta kopia zapasowa zawiera też dane {count} oddzielnych profili, które zostaną przywrócone do tych profili."
     Subscription cache file: "Ten plik przechowuje w pamięci podręcznej tylko filmy z Twoich subskrypcji, a nie kanały. Zamiast niego wybierz profiles.db lub eksport subskrypcji."
+    Not a NewPipe backup: "Ten plik ZIP nie jest kopią zapasową NewPipe."
     Settings could not be imported: "Nie udało się zaimportować ustawień"
     Some settings could not be imported: "Nie udało się zaimportować wszystkich ustawień (niepowodzenia: {failed} z {total})"
     Channel playback speeds: "Prędkości odtwarzania kanałów"

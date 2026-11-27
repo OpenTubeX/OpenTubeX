@@ -1496,6 +1496,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "הגיבוי הזה כולל גם את הנתונים של פרופיל נפרד אחד ({count}), והם ישוחזרו לאותו פרופיל. | הגיבוי הזה כולל גם את הנתונים של שני פרופילים נפרדים ({count}), והם ישוחזרו לאותם פרופילים. | הגיבוי הזה כולל גם את הנתונים של {count} פרופילים נפרדים, והם ישוחזרו לאותם פרופילים."
     Subscription cache file: "קובץ זה שומר במטמון רק את הסרטונים מהמינויים שלך, לא את הערוצים. יש לבחור במקום זאת profiles.db או ייצוא של המינויים."
+    Not a NewPipe backup: "קובץ ה־ZIP הזה אינו גיבוי של NewPipe."
     Settings could not be imported: "לא ניתן היה לייבא את ההגדרות"
     Some settings could not be imported: "לא ניתן היה לייבא את כל ההגדרות ({failed} מתוך {total} נכשלו)"
     Scheduled backups: "גיבויים מתוזמנים"
@@ -1550,10 +1551,10 @@ Settings:
     Setting object has insufficient data, skipping item: אין מספיק נתונים באובייקט ההגדרה, הפריט ידולג
     Unknown setting key: 'מפתח הגדרה לא מוכר: {key}'
     Non-transferable setting key: 'מפתח הגדרה שאינו ניתן להעברה: {key}'
-    Import subscriptions formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), גיבוי LibreTube או ייצוא FreeTube (.json)'
-    Import history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), גיבוי NewPipe (.zip), גיבוי LibreTube או ייצוא FreeTube (.json)'
+    Import history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי LibreTube (.json), Invidious (.json), גיבוי NewPipe (.zip)'
+    Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), גיבוי NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי NewPipe (.zip), גיבוי LibreTube (.json)'
     Channel playback speeds: "מהירויות הפעלה של ערוצים"
     Import channel playback speeds: "ייבוא מהירויות הפעלה של ערוצים"
     Channel playback speeds file: "קובץ מהירויות הפעלה של ערוצים"

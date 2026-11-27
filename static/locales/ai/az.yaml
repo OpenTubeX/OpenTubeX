@@ -1480,6 +1480,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profilə bərpa olunur. | Bu ehtiyat nüsxə həmçinin {count} ayrı profilin məlumatlarını ehtiva edir, bunlar həmin profillərə bərpa olunur."
     Subscription cache file: "Bu fayl yalnız abunəliklərinizin videolarını keşləyir, kanalları yox. Bunun əvəzinə profiles.db və ya abunəlik ixracını seçin."
+    Not a NewPipe backup: "Bu ZIP faylı NewPipe ehtiyat nüsxəsi deyil."
     Settings could not be imported: "Parametrləri idxal etmək mümkün olmadı"
     Some settings could not be imported: "Bütün parametrləri idxal etmək mümkün olmadı ({total} parametrdən {failed} uğursuz oldu)"
     Scheduled backups: "Planlaşdırılmış ehtiyat nüsxələr"
@@ -1526,10 +1527,10 @@ Settings:
     Open Profile Directory: Profil qovluğunu aç
     Export OpenTubeX: OpenTubeX məlumatlarını ixrac et
     Invalid JSON row, skipping item: "{row} sətrində etibarsız JSON var, element ötürülür"
-    Import subscriptions formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube ehtiyat nüsxəsi və ya OpenTubeX ixracı (.json)'
-    Import history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), LibreTube ehtiyat nüsxəsi (.json), Invidious (.json)'
-    Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe ehtiyat nüsxəsi (.zip), LibreTube ehtiyat nüsxəsi və ya OpenTubeX ixracı (.json)'
+    Import history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), LibreTube ehtiyat nüsxəsi (.json), Invidious (.json), NewPipe ehtiyat nüsxəsi (.zip)'
+    Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe ehtiyat nüsxəsi (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), NewPipe ehtiyat nüsxəsi (.zip), LibreTube ehtiyat nüsxəsi (.json)'
     Channel playback speeds: "Kanal oynatma sürətləri"
     Import channel playback speeds: "Kanal oynatma sürətlərini idxal et"
     Channel playback speeds file: "Kanal oynatma sürətləri faylı"

@@ -1784,6 +1784,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Aquesta còpia de seguretat també conté les dades de {count} perfil separat, que es restaura en aquest perfil. | Aquesta còpia de seguretat també conté les dades de {count} de perfils separats, que es restauren en aquests perfils. | Aquesta còpia de seguretat també conté les dades de {count} perfils separats, que es restauren en aquests perfils."
     Subscription cache file: "Aquest fitxer només desa a la memòria cau els vídeos de les teves subscripcions, no els canals. Tria profiles.db o una exportació de subscripcions."
+    Not a NewPipe backup: "Aquest fitxer ZIP no és una còpia de seguretat de NewPipe."
     Settings could not be imported: "No s'ha pogut importar la configuració"
     Some settings could not be imported: "No s'ha pogut importar tota la configuració (han fallat {failed} de {total})"
     Scheduled backups: "Còpies de seguretat programades"
@@ -1847,10 +1848,10 @@ Settings:
     Setting object has insufficient data, skipping item: L'objecte de configuració no té prou dades; s'omet l'element
     Unknown setting key: 'Clau de configuració desconeguda: {key}'
     Non-transferable setting key: 'Clau de configuració no transferible: {key}'
-    Import subscriptions formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), còpia de seguretat de LibreTube o exportació de FreeTube (.json)'
-    Import history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), còpia de seguretat de LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), còpia de seguretat de NewPipe (.zip), còpia de seguretat de LibreTube o exportació de FreeTube (.json)'
+    Import history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), còpia de seguretat de LibreTube (.json), Invidious (.json), còpia de seguretat de NewPipe (.zip)'
+    Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), còpia de seguretat de NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), còpia de seguretat de NewPipe (.zip), còpia de seguretat de LibreTube (.json)'
     Channel playback speeds: "Velocitats de reproducció dels canals"
     Import channel playback speeds: "Importa les velocitats de reproducció dels canals"
     Channel playback speeds file: "Fitxer de velocitats de reproducció dels canals"

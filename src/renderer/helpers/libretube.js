@@ -1,7 +1,8 @@
-import { hasReachedWatchedThreshold } from './history'
+import { hasReachedWatchedThreshold } from '../../history.js'
 
 const YOUTUBE_CHANNEL_ID_LENGTH = 24
 const YOUTUBE_CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
+const YOUTUBE_VIDEO_ID_REGEX = /^[\w-]{11}$/
 
 /**
  * @param {unknown} data
@@ -234,7 +235,9 @@ export function convertLibreTubeWatchHistoryToOpenTubeX(backupData) {
       isWatched = hasReachedWatchedThreshold(watchProgress, duration)
     }
 
-    const timeWatched = baseTimeWatched - index
+    // LibreTube backs up its history oldest first and has no watch times,
+    // so spaced times keep its newest entry on top
+    const timeWatched = baseTimeWatched - (backupData.watchHistory.length - 1 - index)
 
     historyItems.set(item.videoId, {
       videoId: item.videoId,
@@ -255,4 +258,119 @@ export function convertLibreTubeWatchHistoryToOpenTubeX(backupData) {
   })
 
   return { historyItems, importedCount, skippedCount }
+}
+
+/**
+ * The ID of a YouTube video URL, or of a bare video ID, as LibreTube saves them
+ * @param {unknown} url
+ */
+export function getYouTubeVideoId(url) {
+  if (typeof url !== 'string') return null
+  const trimmedUrl = url.trim()
+  if (YOUTUBE_VIDEO_ID_REGEX.test(trimmedUrl)) return trimmedUrl
+  try {
+    const { hostname, pathname, searchParams } = new URL(trimmedUrl)
+    const host = hostname.replace(/^(?:www|m|music)\./, '')
+    const videoId = host === 'youtu.be'
+      ? pathname.slice(1)
+      : host === 'youtube.com'
+        ? searchParams.get('v') ?? pathname.match(/^\/(?:shorts|live|embed)\/([^/]+)/)?.[1]
+        : null
+    return typeof videoId === 'string' && YOUTUBE_VIDEO_ID_REGEX.test(videoId) ? videoId : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * LibreTube backups and Piped's and LibreTube's playlist exports
+ * @param {unknown} data
+ */
+export function isLibreTubePlaylistsExport(data) {
+  return isObject(data) && (Array.isArray(data.localPlaylists) || (data.format === 'Piped' && Array.isArray(data.playlists)))
+}
+
+/**
+ * Spaced add times keep the saved order when sorting by date added. They are
+ * made up, so a repeated import must match videos by ID.
+ * @param {object[]} videos
+ * @param {number} now
+ */
+function withAddTimes(videos, now) {
+  return videos.map((video, index) => ({ ...video, timeAdded: now - (videos.length - 1 - index) }))
+}
+
+/**
+ * LibreTube backups save local playlists twice: with their video details, and
+ * as video URLs in Piped's format, which Piped and LibreTube also export.
+ * Videos whose details are missing use their ID as the title, which the
+ * Playlists page's repair action replaces.
+ * @param {Record<string, any>} data
+ * @param {number} now
+ */
+export function convertLibreTubePlaylists(data, now = Date.now()) {
+  const playlists = []
+  if (Array.isArray(data.localPlaylists) && data.localPlaylists.length > 0) {
+    for (const entry of data.localPlaylists) {
+      const name = entry?.playlist?.name
+      if (typeof name !== 'string' || !name.trim() || !Array.isArray(entry.videos)) {
+        console.warn('Skipping invalid LibreTube playlist', entry)
+        continue
+      }
+      const videos = entry.videos.flatMap((item) => {
+        const videoId = getYouTubeVideoId(item?.videoId)
+        if (videoId === null) return []
+        const duration = toFiniteNumber(item.duration)
+        return [{
+          videoId,
+          title: typeof item.title === 'string' && item.title ? item.title : videoId,
+          author: typeof item.uploader === 'string' ? item.uploader : '',
+          authorId: extractChannelIdFromUploaderUrl(item.uploaderUrl),
+          lengthSeconds: duration != null && duration > 0 ? duration : 0,
+        }]
+      })
+      const description = entry.playlist.description
+      playlists.push({
+        playlistName: name,
+        // An empty description must not replace the one of a saved playlist with this name
+        ...(typeof description === 'string' && description.trim() ? { description } : {}),
+        videos: withAddTimes(videos, now),
+      })
+    }
+  } else if (Array.isArray(data.playlists)) {
+    for (const playlist of data.playlists) {
+      if (!isObject(playlist) || typeof playlist.name !== 'string' || !playlist.name.trim() || !Array.isArray(playlist.videos)) {
+        console.warn('Skipping invalid Piped playlist', playlist)
+        continue
+      }
+      const videos = playlist.videos.map(getYouTubeVideoId)
+        .filter(videoId => videoId !== null)
+        .map(videoId => ({ videoId, title: videoId, lengthSeconds: 0 }))
+      playlists.push({ playlistName: playlist.name, videos: withAddTimes(videos, now) })
+    }
+  }
+  return playlists
+}
+
+/**
+ * @param {unknown} data
+ */
+export function isLibreTubeSearchHistoryBackup(data) {
+  return isLibreTubeBackup(data) && Array.isArray(data.searchHistory)
+}
+
+/**
+ * LibreTube backs up its searches oldest first and without their times.
+ * @param {{ searchHistory: unknown[] }} backupData
+ * @param {number} now
+ */
+export function convertLibreTubeSearchHistory(backupData, now = Date.now()) {
+  const queries = new Map()
+  backupData.searchHistory.forEach((item, index) => {
+    const query = isObject(item) && typeof item.query === 'string' ? item.query.trim() : ''
+    if (!query) return
+    queries.delete(query)
+    queries.set(query, now - (backupData.searchHistory.length - 1 - index))
+  })
+  return Array.from(queries, ([query, lastUpdatedAt]) => ({ _id: query, query, lastUpdatedAt }))
 }
