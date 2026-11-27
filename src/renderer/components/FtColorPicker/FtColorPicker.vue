@@ -342,9 +342,17 @@ watch(showColorSources, async value => {
 
   await nextTick()
   if (!settingsOverlayActive.value || !open.value || !showColorSources.value) return
-  const bounds = copyFromButtonRef.value?.getBoundingClientRect()
-  if (bounds !== undefined) {
-    colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
+  if (constrained.value) {
+    // The scrolling body clips a list above the button, but one below extends its range.
+    colorSourcesAbove.value = false
+    await nextTick()
+    if (!showColorSources.value) return
+    colorSourceListRef.value?.scrollIntoView({ block: 'nearest' })
+  } else {
+    const bounds = copyFromButtonRef.value?.getBoundingClientRect()
+    if (bounds !== undefined) {
+      colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
+    }
   }
   observeColorSources()
 })
@@ -606,7 +614,8 @@ function positionPopover() {
     }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin }),
     maxBlockSize: constrained.value ? `${availableHeight}px` : null
   }
-  if (constrained.value) clampOverlayScrollTop(body, pickerContentRef.value)
+  // An open color-source list extends the range past the content.
+  if (constrained.value) clampOverlayScrollTop(body, showColorSources.value ? null : pickerContentRef.value)
 }
 
 let stopOutsidePress = null
@@ -834,10 +843,11 @@ onBeforeUnmount(() => {
   overscroll-behavior: contain;
 }
 
-/* The Android keyboard can shrink the page until the trigger's scroller clips
-   it, such as the theme editor's color grid. Chromium then hides a popup whose
-   anchor is clipped, along with the hex field being typed in. */
-.colorPickerPopover.softwareKeyboardOpen {
+/* The Android keyboard or a short window can shrink the page until the
+   trigger's scroller clips it, such as the theme editor's color grid. Chromium
+   then hides a popup whose anchor is clipped, along with the hex field being
+   typed in. */
+.colorPickerPopover:is(.constrained, .softwareKeyboardOpen) {
   position-visibility: always;
 }
 

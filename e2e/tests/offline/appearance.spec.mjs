@@ -543,13 +543,14 @@ test.describe('custom theme editor', () => {
     await expect(body).not.toHaveAttribute('data-overlayscrollbars-viewport')
 
     // Like a landscape phone, or the space the Android keyboard leaves.
-    await setWindowSize(app, page, { width: 1001, height: 380 })
+    await setWindowSize(app, page, { width: 1001, height: 330 })
     await expect(body).toHaveAttribute('data-overlayscrollbars-viewport')
     await expect.poll(() => picker.evaluate(element => {
       const rect = element.getBoundingClientRect()
       return rect.top >= 11 && rect.bottom <= innerHeight - 11
     }), 'the picker fits the short window').toBe(true)
-    await expect(picker.getByRole('button', { name: 'Apply', exact: true })).toBeInViewport()
+    // The collapsed color grid clips the trigger, which must not hide the picker.
+    await picker.getByRole('button', { name: 'Apply', exact: true }).click({ trial: true })
 
     // An invalid value shows a status line, which goes away after a moment.
     const hexField = picker.getByRole('textbox', { name: 'Hex color' })
@@ -562,15 +563,25 @@ test.describe('custom theme editor', () => {
     await expect(status).toBeHidden()
     await expectOverlayScrollRange(body)
 
+    // The scrolling body would clip a list that opens above the button.
+    const copyFromButton = picker.getByRole('button', { name: 'Copy from another color' })
     await body.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect(picker.getByRole('button', { name: 'Copy from another color' })).toBeInViewport()
+    await copyFromButton.click()
+    const sources = picker.locator('.colorSourceList')
+    await expect(sources.getByRole('button').first()).toBeInViewport({ ratio: 1 })
+    await copyFromButton.click()
+    await expect(sources).toBeHidden()
+    await expectOverlayScrollRange(body)
+
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(copyFromButton).toBeInViewport()
     await setWindowSize(app, page, { width: 1000, height: 420 })
     await expectOverlayScrollRange(body)
 
     await setWindowSize(app, page, { width: 1001, height: 760 })
     await expect(body).not.toHaveAttribute('data-overlayscrollbars-viewport')
     await expect.poll(() => body.evaluate(element => element.scrollTop)).toBe(0)
-    await expect(picker.getByRole('button', { name: 'Copy from another color' })).toBeInViewport()
+    await expect(copyFromButton).toBeInViewport()
     await expect(picker.locator('.saturationValue')).toBeInViewport()
   })
 
