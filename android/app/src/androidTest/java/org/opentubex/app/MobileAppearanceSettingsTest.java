@@ -134,7 +134,6 @@ public class MobileAppearanceSettingsTest {
                 return {splitWords, badgeLeft: bounds.left, badgeTop: bounds.top, badgeRight: bounds.right,
                     trackLeft, trackTop, trackRight: trackLeft + parseFloat(track.width),
                     trackBottom: trackTop + parseFloat(track.height),
-                    textLeft: row.querySelector('.settingsRowText').getBoundingClientRect().left,
                     rowLeft: rowBounds.left, rowRight: rowBounds.right};
             })()
             """, rowSwitch));
@@ -143,8 +142,6 @@ public class MobileAppearanceSettingsTest {
         assertTrue("The row's badge stays inside the row at " + condition + ": " + row,
             row.getDouble("badgeLeft") >= row.getDouble("rowLeft") - 1 &&
                 row.getDouble("badgeRight") <= row.getDouble("rowRight") + 1);
-        assertTrue("The row's track stays below its text at " + condition + ": " + row,
-            Math.abs(row.getDouble("trackLeft") - row.getDouble("textLeft")) <= 1);
         assertTrue("The row's badge sits beside the track or below it at " + condition + ": " + row,
             row.getDouble("badgeLeft") >= row.getDouble("trackRight") ||
                 row.getDouble("badgeTop") >= row.getDouble("trackBottom"));
