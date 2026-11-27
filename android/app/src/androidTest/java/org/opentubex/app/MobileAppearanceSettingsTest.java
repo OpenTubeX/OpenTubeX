@@ -37,8 +37,10 @@ public class MobileAppearanceSettingsTest {
                     """);
                 awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                // A labeled switch with help, and a switch whose label is a settings row's title.
                 String control = "document.querySelector('.settingsContent [data-setting-key=autoLoadComments]')";
-                awaitCondition(view, "!!" + control);
+                String rowSwitch = "document.querySelector('.settingsContent .settingsRow [data-setting-key=generalAutoLoadMorePaginatedItemsEnabled]')";
+                awaitCondition(view, "!!" + control + " && !!" + rowSwitch);
                 for (int scale : new int[] {100, 125, 150}) {
                     evaluate(view, String.format("""
                         (() => {
@@ -52,7 +54,8 @@ public class MobileAppearanceSettingsTest {
                     double originalWidth = json(view, "({width: " + control +
                         ".querySelector('.switch-label-text').getBoundingClientRect().width})").getDouble("width");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowPerformanceImpactIndicators', true)");
-                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact')");
+                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact') && !!" +
+                        rowSwitch + ".querySelector('.performanceImpact')");
                     JSONObject layout = json(view, String.format("""
                         (() => {
                             const element = %s;
@@ -80,6 +83,29 @@ public class MobileAppearanceSettingsTest {
                     assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
                         layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
                             layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
+                    JSONObject row = json(view, String.format("""
+                        (() => {
+                            const element = %s;
+                            const badge = element.querySelector('.performanceImpact');
+                            const text = badge.querySelector('.performanceImpactLabel').firstChild;
+                            const splitWords = Array.from(text.data.matchAll(/\\S+/g), word => {
+                                const range = document.createRange();
+                                range.setStart(text, word.index);
+                                range.setEnd(text, word.index + word[0].length);
+                                return range.getClientRects().length > 1 ? word[0] : null;
+                            }).filter(Boolean);
+                            const bounds = badge.getBoundingClientRect();
+                            const row = element.closest('.settingsRow');
+                            return {splitWords, badgeLeft: bounds.left, badgeRight: bounds.right,
+                                textLeft: row.querySelector('.settingsRowText').getBoundingClientRect().left,
+                                rowRight: row.getBoundingClientRect().right};
+                        })()
+                        """, rowSwitch));
+                    assertEquals("The row's badge keeps its words whole at " + scale + "%: " + row,
+                        0, row.getJSONArray("splitWords").length());
+                    assertTrue("The row's badge stays inside the row, from its text on, at " + scale + "%: " + row,
+                        row.getDouble("badgeLeft") >= row.getDouble("textLeft") - 1 &&
+                            row.getDouble("badgeRight") <= row.getDouble("rowRight") + 1);
                 }
             } finally {
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSettingsWindowOpen', false)");
