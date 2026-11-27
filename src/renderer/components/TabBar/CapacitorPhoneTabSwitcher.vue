@@ -1171,6 +1171,10 @@ function closeSwitcher() {
 }
 
 function restoreTriggerFocus() {
+  // Focus inside the organizer falls back to the body when it closes. Keep
+  // focus that is elsewhere, such as in a search field while the organizer
+  // only drew once at startup or a pull was cancelled.
+  if (document.activeElement && document.activeElement !== document.body) return
   triggerRef.value?.focus({ preventScroll: true })
 }
 
