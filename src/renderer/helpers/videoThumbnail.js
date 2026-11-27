@@ -10,6 +10,15 @@ export function getVideoThumbnailSource(src, dataSaver = false) {
 }
 
 /**
+ * The video a YouTube thumbnail shows, including Invidious proxies.
+ * @param {string} src
+ * @returns {string | null}
+ */
+export function getThumbnailVideoId(src) {
+  return src.match(/\/vi(?:_webp)?\/([^/?]+)\//)?.[1] ?? null
+}
+
+/**
  * Lists provide their thumbnails' rendered width as an `<img sizes>` value,
  * such as the measured card width of a grid.
  * @type {import('vue').InjectionKey<import('vue').Ref<string | null>>}

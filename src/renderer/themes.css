@@ -216,10 +216,10 @@ body,
 }
 
 /* Downloaded videos keep their colors. Players also show other videos, avatars, and comments, so
-   only the current video's frames, artwork, and chapter thumbnails are spared there. The player
-   container carries its own class because the mini player teleports it out of its host. */
+   only the current video's frames, artwork, chapter thumbnails, and seek previews are spared there.
+   The player container carries its own class because the mini player teleports it out of its host. */
 :where(:root.grayscaleExceptDownloads) :where(.downloadedContent),
-:where(:root.grayscaleExceptDownloads) :where(.downloadedPlayer) :where(video, canvas, .countdownPoster, .musicAudioBackdrop, .musicAudioArtwork, .chapterThumbnail, .ft-seek-filmstrip-frame) {
+:where(:root.grayscaleExceptDownloads) :where(.downloadedPlayer) :where(video, canvas, .countdownPoster, .musicAudioBackdrop, .musicAudioArtwork, .chapterThumbnail, .shaka-player-ui-thumbnail-container, .ft-seek-filmstrip-frame) {
   --content-filter: initial;
 }
 

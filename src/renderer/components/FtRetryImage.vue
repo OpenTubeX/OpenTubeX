@@ -6,6 +6,7 @@
     :srcset="srcset || undefined"
     :src="imageUrl || undefined"
     :alt="$attrs.alt ?? ''"
+    :class="{ downloadedContent: showsDownload }"
     :style="hasLoaded ? null : {
       position: 'absolute', visibility: 'hidden', pointerEvents: 'none', inlineSize: '1px', blockSize: '1px'
     }"
@@ -50,9 +51,10 @@
 import { computed, getCurrentInstance, inject, onBeforeUnmount, ref, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
-import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, rememberMissingThumbnail, skipMissingThumbnails, thumbnailSizesKey } from '../helpers/videoThumbnail.js'
+import { getThumbnailVideoId, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, rememberMissingThumbnail, skipMissingThumbnails, thumbnailSizesKey } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
 import { observeFirstVisible } from '../helpers/firstVisible'
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 defineOptions({ inheritAttrs: false })
 
@@ -91,6 +93,9 @@ const preferredSource = computed(() => {
   return skipMissingThumbnails(getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getUseDataSaverThumbnails))
 })
 const imageUrl = ref(preferredSource.value)
+// Thumbnails of downloaded videos, such as those of playlists, keep their colors when grayscale spares downloads.
+const showsDownload = computed(() => supportsYtDlp && store.getters.getGrayscaleScope === 'notDownloaded' &&
+  store.getters.getEnableDownloads && store.getters.getLocalPlaybackDownloadIds.has(getThumbnailVideoId(preferredSource.value)))
 const providedSizes = inject(thumbnailSizesKey, null)
 const imageSizes = computed(() => props.sizes ?? providedSizes?.value ?? null)
 // Retries keep their query parameter on both candidates.

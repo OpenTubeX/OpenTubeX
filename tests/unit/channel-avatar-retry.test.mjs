@@ -5,6 +5,7 @@ import { runInNewContext } from 'node:vm'
 import * as Vue from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import {
+  getThumbnailVideoId,
   getVideoThumbnailSource,
   getVideoThumbnailFallbackUrl,
   getVideoThumbnailSrcset,
@@ -20,7 +21,7 @@ async function compileComponent(path, bindings = {}) {
     .replace(/^import .* from .*\n/gm, '')
     .replace("import('../helpers/api/capacitor-http')", 'loadNativeHttp()')
     .replace('export default', 'const component =')
-  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, thumbnailSizesKey, rememberMissingThumbnail: () => {}, skipMissingThumbnails: src => src, ...bindings })
+  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, supportsYtDlp: false, getThumbnailVideoId, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, thumbnailSizesKey, rememberMissingThumbnail: () => {}, skipMissingThumbnails: src => src, ...bindings })
 }
 
 async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true, pickCandidate = srcset => srcset.split(', ')[0].split(' ')[0] } = {}) {
