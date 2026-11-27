@@ -9,7 +9,7 @@ const messages = load(await readFile(new URL('../../static/locales/en-US.yaml', 
 const source = (await readFile(new URL('../../src/renderer/helpers/commandPaletteRegistry.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function', 'function')
-const shortcuts = { APP: { GENERAL: {} }, VIDEO_PLAYER: { GENERAL: {}, PLAYBACK: {} } }
+const shortcuts = { APP: { GENERAL: { NEW_TAB: 'Ctrl+T' } }, VIDEO_PLAYER: { GENERAL: {}, PLAYBACK: {} } }
 const loadRegistry = isLiteBuild => new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
   'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
   'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', 'isPlayerRoutePath', 'supportsYouTubeAccount', `${source}\nreturn createCommandPaletteRegistry`)(
@@ -61,7 +61,9 @@ test('download and tab commands respect Android availability', () => {
   assert.deepEqual(commands.filter(command => command.id.startsWith('downloads.cancel.')).map(command => command.id), ['downloads.cancel.running'])
   const tabCommands = commands.filter(command => ['tabs.new', 'tabs.close', 'tabs.reload', 'tabs.restore'].includes(command.id))
   assert.equal(tabCommands.length, 4)
-  assert.ok(tabCommands.every(command => command.disabledReason === '' && command.shortcut === ''))
+  assert.ok(tabCommands.every(command => command.disabledReason === ''))
+  // Hardware keyboards run the same tab shortcuts
+  assert.equal(tabCommands.find(command => command.id === 'tabs.new').shortcut, 'Ctrl+T')
   const downloads = commands.find(command => command.id === 'settings.download')
   assert.equal(downloads.disabledReason, '')
   const results = commands.filter(command => command.id.startsWith('settings.search.download.'))

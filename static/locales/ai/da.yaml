@@ -2509,6 +2509,7 @@ Tab Organizer:
   Close Tab: Luk {title}
   No Open Results: Ingen åbne faner matcher denne søgning.
   Recently Closed: Senest lukkede
+  Recently Closed Hint: "Tryk og hold for at se alle nyligt lukkede faner"
   Clear: Ryd
   No Closed Results: Ingen senest lukkede faner matcher denne søgning.
   Drag Tab: Træk for at flytte til en gruppe

@@ -98,7 +98,8 @@ function isSearchableSettingsMessage(sectionType, path, value, options) {
   const messagePath = path.join('.')
   const messageKey = path.at(-1) ?? ''
   return !SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS[sectionType]?.has(messagePath) &&
-    !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey) &&
+    // Confirmation options name actions, such as Loading Tabs, not statuses
+    (path.at(-2) === 'Confirmation Options' || !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey)) &&
     isSettingsSearchMessageVisible(sectionType, path, options)
 }
 
@@ -200,7 +201,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     // Matches the options that the Confirm before list shows
     if (group === 'Confirmation Options') {
       if (item === 'Refreshing All Feeds') return true
-      if (item === 'Closing App') return usingElectron || isCapacitor
+      if (['Closing App', 'Closing Tabs', 'Loading Tabs', 'Unloading Tabs'].includes(item)) return usingElectron || isCapacitor
       return usingElectron
     }
     if ([

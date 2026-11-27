@@ -937,7 +937,7 @@ function continueWatchingRoute(video) {
 
 function activateExistingContinueWatchingTab(event, video) {
   if (
-    !IS_ELECTRON ||
+    !(IS_ELECTRON || (process.env.IS_CAPACITOR && store.getters.getTabsEnabled)) ||
     event.button !== 0 ||
     event.ctrlKey ||
     event.metaKey ||

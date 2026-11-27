@@ -169,7 +169,11 @@ export class CapacitorTabService {
     return await this.commitAndPresent(previous, session)
   }
 
-  async duplicateTab(tabId) {
+  /**
+   * @param {string} tabId
+   * @param {boolean} [makeActive] background copies load in the background, like links
+   */
+  async duplicateTab(tabId, makeActive = true) {
     if (!this.tabsEnabled) return null
     const source = this.store.getters.getTabById(tabId)
     if (!source) return null
@@ -178,7 +182,11 @@ export class CapacitorTabService {
     tab.title = source.contentTitle || source.title || source.route.fullPath
     tab.isIncognito = source.isIncognito === true
     const previous = this.currentSession()
-    const session = addCapacitorTab(previous, tab, true, this.store.getters.getNewTabPosition ?? 'afterCurrentInOrder')
+    const session = addCapacitorTab(previous, tab, makeActive, this.store.getters.getNewTabPosition ?? 'afterCurrentInOrder')
+    if (!makeActive) {
+      this.commitSession(session)
+      return tab.id
+    }
     return await this.commitAndPresent(previous, session) ? tab.id : null
   }
 
@@ -211,13 +219,24 @@ export class CapacitorTabService {
     return true
   }
 
-  async restoreClosedTab() {
+  /**
+   * @param {string | null} [closedTabId] the most recently closed tab if omitted
+   */
+  async restoreClosedTab(closedTabId = null) {
     if (!this.tabsEnabled) return null
     const previous = this.currentSession()
-    const session = restoreClosedCapacitorTab(previous)
+    const session = restoreClosedCapacitorTab(previous, closedTabId)
     if (session === previous) return null
 
     return await this.commitAndPresent(previous, session) ? session.activeTabId : null
+  }
+
+  clearClosedTabs() {
+    const session = this.currentSession()
+    if (session.closedTabs.length === 0) return false
+
+    this.commitSession({ ...session, closedTabs: [] })
+    return true
   }
 
   getSyncSessions() {
@@ -414,6 +433,7 @@ export class CapacitorTabService {
         refreshKey: tab.refreshKey,
         isLoading: tab.isLoading,
         isPlaying: tab.isPlaying,
+        automaticallyUnloaded: tab.automaticallyUnloaded === true,
         pendingReloadRoute: tab.pendingReloadRoute
       })),
       closedTabs: this.store.getters.getClosedTabs.slice().reverse().map(tab => ({
@@ -530,7 +550,7 @@ export class CapacitorTabService {
     const candidates = this.unloadableTabs(session).filter(tab => !tab.isPinned &&
       /^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|userplaylists|search|channel|hashtag)(?:\/|$)/.test(tab.route.path))
     for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {
-      session = unloadCapacitorTab(session, tab.id)
+      session = unloadCapacitorTab(session, tab.id, true)
     }
     if (candidates.length > 2) this.commitSession(session)
   }
@@ -547,7 +567,7 @@ export class CapacitorTabService {
     let session = this.currentSession()
     const candidates = this.unloadableTabs(session, keptTabIds)
     const tabs = candidates.slice(0, Math.ceil(candidates.length * percentage / 100))
-    for (const tab of tabs) session = unloadCapacitorTab(session, tab.id)
+    for (const tab of tabs) session = unloadCapacitorTab(session, tab.id, true)
     if (tabs.length > 0) this.commitSession(session)
     return tabs.length
   }
@@ -621,7 +641,10 @@ function toPersistedSession(session, rememberHistory) {
     placementOpenerTabId: tab.placementOpenerTabId,
     route: tab.route,
     ...(rememberHistory && { history: tab.history, historyIndex: tab.historyIndex }),
-    ...(includeLoadState && { isUnloaded: tab.loadState === 'unloaded' })
+    ...(includeLoadState && {
+      isUnloaded: tab.loadState === 'unloaded',
+      automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true
+    })
   })
 
   // Incognito tabs are not restored

@@ -261,22 +261,25 @@ const generalAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   ]
 ))
 
+// The mobile apps handle tab shortcuts only with mobile tabs, and have no
+// desktop tab organizer, tab bar orientations, or windows.
 const tabAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   configuredKeyboardShortcuts.value.APP.GENERAL,
   ['APP', 'GENERAL'],
-  [
-    'NEW_TAB',
-    'NEW_INCOGNITO_TAB',
-    'CLOSE_TAB',
-    'RELOAD_TAB',
-    'RELOAD_TAB_ALT',
-    'RESTORE_CLOSED_TAB',
-    'NEXT_TAB',
-    'PREV_TAB',
-    'SWITCH_TO_TAB',
-    'OPEN_TAB_ORGANIZER',
-    'TOGGLE_TAB_ORIENTATION',
-  ]
+  process.env.IS_CAPACITOR && !store.getters.getTabsEnabled
+    ? []
+    : [
+        'NEW_TAB',
+        'NEW_INCOGNITO_TAB',
+        'CLOSE_TAB',
+        'RELOAD_TAB',
+        'RELOAD_TAB_ALT',
+        'RESTORE_CLOSED_TAB',
+        'NEXT_TAB',
+        'PREV_TAB',
+        'SWITCH_TO_TAB',
+        ...process.env.IS_CAPACITOR ? [] : ['OPEN_TAB_ORGANIZER', 'TOGGLE_TAB_ORIENTATION'],
+      ]
 ))
 
 const searchAndPageAppShortcuts = computed(() => [
@@ -307,17 +310,19 @@ const searchAndPageAppShortcuts = computed(() => [
 const windowAndViewAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   configuredKeyboardShortcuts.value.APP.GENERAL,
   ['APP', 'GENERAL'],
-  [
-    'NEW_WINDOW',
-    'RESTORE_CLOSED_WINDOW',
-    'MINIMIZE_WINDOW',
-    'CLOSE_WINDOW',
-    'TOGGLE_DEVTOOLS',
-    'RESET_ZOOM',
-    'ZOOM_IN',
-    'ZOOM_OUT',
-    'FULLSCREEN',
-  ]
+  process.env.IS_CAPACITOR
+    ? []
+    : [
+        'NEW_WINDOW',
+        'RESTORE_CLOSED_WINDOW',
+        'MINIMIZE_WINDOW',
+        'CLOSE_WINDOW',
+        'TOGGLE_DEVTOOLS',
+        'RESET_ZOOM',
+        'ZOOM_IN',
+        'ZOOM_OUT',
+        'FULLSCREEN',
+      ]
 ))
 
 const shortcutColumns = computed(() => [
@@ -364,7 +369,11 @@ const shortcutColumns = computed(() => [
 const filteredShortcutColumns = computed(() => {
   const normalize = text => normalizeSearchText(text, locale.value)
   const query = normalize(searchQuery.value)
-  if (!query) return shortcutColumns.value
+  if (!query) {
+    return shortcutColumns.value
+      .map(column => column.filter(section => section.shortcutDictionary.length > 0))
+      .filter(column => column.length > 0)
+  }
 
   return shortcutColumns.value.map(column => column.map(section => ({
     ...section,

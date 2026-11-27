@@ -3816,6 +3816,7 @@ Tab Organizer:
   Close Tab: '{title} schließen'
   No Open Results: Keine offenen Tabs entsprechen der Suche.
   Recently Closed: Kürzlich geschlossen
+  Recently Closed Hint: "Gedrückt halten, um alle kürzlich geschlossenen Tabs anzuzeigen"
   Clear: Leeren
   No Closed Results: Keine kürzlich geschlossenen Tabs entsprechen der Suche.
   Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben

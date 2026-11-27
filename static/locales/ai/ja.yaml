@@ -2424,6 +2424,7 @@ Tab Organizer:
   Close Tab: '{title}を閉じる'
   No Open Results: 検索に一致する開いているタブはありません。
   Recently Closed: 最近閉じたタブ
+  Recently Closed Hint: "長押しすると最近閉じたタブをすべて表示します"
   Clear: 消去
   No Closed Results: 検索に一致する最近閉じたタブはありません。
   Drag Tab: ドラッグしてグループに移動

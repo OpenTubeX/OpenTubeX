@@ -2433,6 +2433,7 @@ Tab Organizer:
   Close Tab: Sulje {title}
   No Open Results: Yksikään avoin välilehti ei vastaa hakua.
   Recently Closed: Viimeksi suljetut
+  Recently Closed Hint: "Pidä painettuna nähdäksesi kaikki äskettäin suljetut välilehdet"
   Clear: Tyhjennä
   No Closed Results: Yksikään viimeksi suljettu välilehti ei vastaa hakua.
   Drag Tab: Siirrä ryhmään vetämällä

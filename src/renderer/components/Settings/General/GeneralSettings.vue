@@ -444,19 +444,19 @@ const CONFIRMATION_OPTIONS = [
   },
   {
     value: 'closeTabs',
-    visible: USING_ELECTRON,
+    visible: USING_ELECTRON || IS_CAPACITOR,
     label: () => t('Settings.General Settings.Confirmation Options.Closing Tabs'),
     settingKey: 'confirmCloseMultipleTabs'
   },
   {
     value: 'loadTabs',
-    visible: USING_ELECTRON,
+    visible: USING_ELECTRON || IS_CAPACITOR,
     label: () => t('Settings.General Settings.Confirmation Options.Loading Tabs'),
     settingKey: 'confirmLoadMultipleTabs'
   },
   {
     value: 'unloadTabs',
-    visible: USING_ELECTRON,
+    visible: USING_ELECTRON || IS_CAPACITOR,
     label: () => t('Settings.General Settings.Confirmation Options.Unloading Tabs'),
     settingKey: 'confirmUnloadMultipleTabs'
   },

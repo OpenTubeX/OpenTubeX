@@ -11,6 +11,7 @@
       :class="`mode-${mode}`"
       @pointerdown.self.stop
       @click.self.stop="emit('dismiss')"
+      @contextmenu.prevent="keepSheetFocus"
       @keydown.esc.stop.prevent="activeMenu ? setMenu(null) : emit('dismiss')"
     >
       <section
@@ -303,6 +304,13 @@ const deviceMenuTrigger = useTemplateRef('deviceMenuTrigger')
 const submenuBack = useTemplateRef('submenuBack')
 let mainScrollTop = 0
 let previousFocus = null
+
+// Android ends the long press that opened the sheet with a context menu on
+// whatever is now under the finger, after moving focus out of the sheet.
+// Without focus, Escape and Back could no longer reach the sheet.
+function keepSheetFocus() {
+  if (!sheetRef.value?.contains(document.activeElement)) sheetRef.value?.focus({ preventScroll: true })
+}
 
 function finishClose() {
   emit('closed')

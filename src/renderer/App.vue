@@ -203,6 +203,7 @@
     <FtPrompt
       v-if="multipleTabsActionPrompt != null"
       autosize
+      :card-class="isCapacitor ? 'capacitorTabsPrompt' : ''"
       :label="multipleTabsActionPromptTitle"
       :extra-labels="[multipleTabsActionPromptMessage, t('Confirmations.Settings Hint')]"
       :option-names="multipleTabsActionPromptNames"
@@ -678,6 +679,7 @@ import SideNav from './components/SideNav/SideNav.vue'
 import TabBar from './components/TabBar/TabBar.vue'
 import WindowControls from './components/WindowControls/WindowControls.vue'
 import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
+import { multipleTabsActionConfirmationKey } from './tabs/multipleTabsActionConfirmation'
 import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
@@ -3475,8 +3477,9 @@ function handleKeyboardShortcuts(event) {
     store.dispatch('showOutlines')
   }
 
-  // Tab keyboard shortcuts (Electron only)
-  if (process.env.IS_ELECTRON) {
+  // Tab keyboard shortcuts, also for hardware keyboards with mobile tabs.
+  // The mobile tab switcher and sheets are modal, so tabs stay put behind them.
+  if (process.env.IS_ELECTRON || (isCapacitor && store.getters.getTabsEnabled && !isAnyPromptOpen.value)) {
     // Ctrl+1..9: Switch to tab by number
     if (matchesKeyboardShortcut(event, shortcuts.SWITCH_TO_TAB)) {
       if (!isTypingTarget(event.target)) {
@@ -3491,7 +3494,7 @@ function handleKeyboardShortcuts(event) {
     }
 
     // F1: Toggle between horizontal and vertical tabs
-    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
+    if (process.env.IS_ELECTRON && matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
       event.preventDefault()
       cycleTabLayout()
       return
@@ -3510,7 +3513,7 @@ function handleKeyboardShortcuts(event) {
       return
     }
 
-    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
+    if (process.env.IS_ELECTRON && matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
       event.preventDefault()
       window.ftElectron.reopenClosedWindow()
       return
@@ -3527,24 +3530,27 @@ function handleKeyboardShortcuts(event) {
     if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
       event.preventDefault()
       closeShortcutTabs().then((hasRemainingTabs) => {
-        if (!hasRemainingTabs) {
+        if (!hasRemainingTabs && process.env.IS_ELECTRON) {
           window.close()
         }
       })
       return
     }
 
-    // Ctrl+Tab: Next tab
+    // Ctrl+Tab: Next tab. The mobile apps switch directly, without the
+    // desktop switcher and its captured previews.
     if (matchesKeyboardShortcut(event, shortcuts.NEXT_TAB)) {
       event.preventDefault()
-      cycleTabSwitcher(1)
+      if (isCapacitor) store.dispatch('nextTab')
+      else cycleTabSwitcher(1)
       return
     }
 
     // Ctrl+Shift+Tab: Previous tab
     if (matchesKeyboardShortcut(event, shortcuts.PREV_TAB)) {
       event.preventDefault()
-      cycleTabSwitcher(-1)
+      if (isCapacitor) store.dispatch('prevTab')
+      else cycleTabSwitcher(-1)
       return
     }
 
@@ -4169,6 +4175,11 @@ function confirmMultipleTabsAction(count, action) {
   })
   return multipleTabsActionPromptPromise
 }
+
+provide(multipleTabsActionConfirmationKey, {
+  confirm: confirmMultipleTabsAction,
+  open: computed(() => multipleTabsActionPrompt.value != null),
+})
 
 /**
  * @param {'confirm' | 'cancel' | 'neverAskAgain' | null} option

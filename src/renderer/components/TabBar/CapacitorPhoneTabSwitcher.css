@@ -350,10 +350,60 @@
   overflow-wrap: anywhere;
 }
 
-.capacitorPhoneTabIncognitoIcon {
+.capacitorPhoneTabIncognitoIcon,
+.capacitorPhoneTabStateIcon {
   flex-shrink: 0;
   inline-size: 1em;
   block-size: 1em;
+}
+
+.capacitorPhoneTabStateIcon {
+  color: var(--secondary-text-color);
+}
+
+.capacitorPhoneTabSearch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin-block: 8px 0;
+  margin-inline: 12px;
+  padding-inline: 16px;
+  min-block-size: 48px;
+  border-radius: var(--shape-corner-full);
+  color: var(--secondary-text-color);
+  background-color: var(--search-bar-color, var(--card-bg-color));
+}
+
+.capacitorPhoneTabSearch:focus-within {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.capacitorPhoneTabSearch input {
+  flex: 1;
+  min-inline-size: 0;
+  block-size: 48px;
+  padding: 0;
+  color: var(--primary-text-color);
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 16px;
+}
+
+.capacitorPhoneTabEmpty {
+  grid-column: 1 / -1;
+  margin-block: 24px;
+  margin-inline: 0;
+  color: var(--secondary-text-color);
+  text-align: center;
+}
+
+.capacitorPhoneClosedTabsHeader {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .capacitorPhoneTabTitle > span[dir] {
@@ -589,7 +639,7 @@
   -webkit-line-clamp: 2;
 }
 
-:global(.prompt:has(.capacitorPhoneSessionPrompt)) {
+:global(.prompt:has(.capacitorTabsPrompt)) {
   z-index: 1200;
 }
 

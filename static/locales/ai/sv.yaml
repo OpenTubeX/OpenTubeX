@@ -2425,6 +2425,7 @@ Tab Organizer:
   Close Tab: Stäng {title}
   No Open Results: Inga öppna flikar matchar sökningen.
   Recently Closed: Nyligen stängda
+  Recently Closed Hint: "Tryck och håll för att se alla nyligen stängda flikar"
   Clear: Rensa
   No Closed Results: Inga nyligen stängda flikar matchar sökningen.
   Drag Tab: Dra för att flytta till en grupp

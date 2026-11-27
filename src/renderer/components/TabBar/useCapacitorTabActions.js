@@ -1,9 +1,12 @@
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, inject, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { MULTIPLE_TABS_CONFIRM_THRESHOLD } from '../../../constants'
 import { getTabShareLink } from '../../helpers/share'
 import { copyToClipboard, showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
+import { multipleTabsActionConfirmationKey } from '../../tabs/multipleTabsActionConfirmation'
+import tabMediaCoordinator from '../../tabs/TabMediaCoordinator'
 
 const noop = () => {}
 
@@ -37,6 +40,7 @@ export function useCapacitorTabActions({
   stopContextMenuPropagation = false,
 }) {
   const { t } = useI18n()
+  const multipleTabsActionConfirmation = inject(multipleTabsActionConfirmationKey, null)
   const selecting = ref(false)
   const selectedTabIds = ref(new Set())
   const closingTabs = ref(false)
@@ -59,12 +63,30 @@ export function useCapacitorTabActions({
     return tab.contentTitle || tab.title || tab.route.fullPath
   }
 
+  function isTabPlaying(tab) {
+    return tab.isPlaying === true || tabMediaCoordinator.getPlaybackState(tab.id) === 'playing'
+  }
+
   function tabAriaLabel(tab) {
     return [
       tabTitle(tab),
+      ...(tab.isPinned ? [t('Tab Organizer.Pinned')] : []),
       ...(tab.isIncognito ? [t('Incognito Tab')] : []),
-      ...(tab.isUnloaded ? [t('Tab Organizer.Unloaded')] : [])
+      ...(isTabPlaying(tab) ? [t('Tab Organizer.Playing')] : []),
+      ...(tab.isUnloaded
+        ? [tab.automaticallyUnloaded ? t('Automatically unloaded to free memory') : t('Tab Organizer.Unloaded')]
+        : [])
     ].join(', ')
+  }
+
+  /**
+   * Asks before closing, loading, or unloading several tabs, like on desktop.
+   * @param {number} count
+   * @param {'close' | 'load' | 'unload'} action
+   */
+  async function confirmMultipleTabsAction(count, action) {
+    if (count < MULTIPLE_TABS_CONFIRM_THRESHOLD || !multipleTabsActionConfirmation) return true
+    return await multipleTabsActionConfirmation.confirm(count, action)
   }
 
   async function createTab() {
@@ -80,6 +102,13 @@ export function useCapacitorTabActions({
   function clearSelection() {
     selecting.value = false
     selectedTabIds.value = new Set()
+  }
+
+  /**
+   * @param {string[]} tabIds
+   */
+  function selectAllTabs(tabIds) {
+    selectedTabIds.value = new Set(tabIds)
   }
 
   function toggleTabSelection(tabId) {
@@ -116,6 +145,7 @@ export function useCapacitorTabActions({
     closingTabs.value = true
     closeTabActions()
     try {
+      if (!await confirmMultipleTabsAction(ids.length, 'close')) return
       // Keep a landing tab so every selected tab enters the closed-tab history.
       if (tabs.value.every(tab => ids.includes(tab.id))) {
         if (!await getCapacitorTabService().createTab()) return
@@ -148,6 +178,10 @@ export function useCapacitorTabActions({
     !['unloaded', 'unloading', 'mounting'].includes(tab.loadState) &&
     !(presentedTabId?.value === tab.id && !tab.isActive)
   const canUnloadSelectedTabs = computed(() => selectedTabs.value.some(canUnloadTab))
+  const selectedTabLinks = computed(() => selectedTabs.value.map(tab => getTabShareLink(tab.route?.fullPath)))
+  const canCopySelectedTabLinks = computed(() => (
+    selectedTabLinks.value.length > 0 && selectedTabLinks.value.every(Boolean)
+  ))
 
   async function runSelectedTabAction(action) {
     if (runningSelectionAction.value || closingTabs.value) return
@@ -155,6 +189,24 @@ export function useCapacitorTabActions({
     try {
       const service = getCapacitorTabService()
       const ids = selectedTabs.value.map(tab => tab.id)
+      if (action === 'copy-links') {
+        if (!canCopySelectedTabLinks.value) return
+        const links = selectedTabLinks.value
+        await copyToClipboard(links.map(link => link.url).join('\n'), links.every(link => link.isYouTube)
+          ? { messageOnSuccess: t('Share.YouTube URL copied to clipboard') }
+          : undefined)
+        return
+      }
+      if (action === 'duplicate') {
+        // Copies open in the background, so the selection stays in view
+        for (const id of ids) await service.duplicateTab(id, false)
+        clearSelection()
+        return
+      }
+      if (action === 'load' || action === 'unload') {
+        const count = selectedTabs.value.filter(action === 'load' ? tab => tab.loadState === 'unloaded' : canUnloadTab).length
+        if (!await confirmMultipleTabsAction(count, action)) return
+      }
       if (action === 'unload' && selectedTabs.value.some(canUnloadTab)) {
         const unselectedTabs = tabs.value.filter(tab => !ids.includes(tab.id))
         let landingReady = true
@@ -297,7 +349,10 @@ export function useCapacitorTabActions({
     canUnpinSelectedTabs,
     canLoadSelectedTabs,
     canUnloadSelectedTabs,
+    canCopySelectedTabLinks,
+    selectedTabLinks,
     clearSelection,
+    selectAllTabs,
     toggleTabSelection,
     selectActionTab,
     relatedTabIds,
@@ -316,6 +371,7 @@ export function useCapacitorTabActions({
     copyActionTabLink,
     duplicateActionTab,
     handleTabTargetKeydown,
+    isTabPlaying,
     openTabActions,
     reloadActionTab,
     tabAriaLabel,

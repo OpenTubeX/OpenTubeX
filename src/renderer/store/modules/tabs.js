@@ -482,13 +482,14 @@ const actions = {
 
   async restoreClosedTab(_context, closedTabId = null) {
     if (process.env.IS_CAPACITOR) {
-      return await getCapacitorTabService().restoreClosedTab()
+      return await getCapacitorTabService().restoreClosedTab(closedTabId)
     }
     if (!process.env.IS_ELECTRON) return null
     return await window.ftElectron.tabs.restoreClosed(closedTabId)
   },
 
   async clearClosedTabs() {
+    if (process.env.IS_CAPACITOR) return getCapacitorTabService().clearClosedTabs()
     if (!process.env.IS_ELECTRON) return false
     return await window.ftElectron.tabs.clearClosed()
   },

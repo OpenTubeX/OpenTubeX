@@ -2424,6 +2424,7 @@ Tab Organizer:
   Close Tab: '{title} sekmesini kapat'
   No Open Results: Bu aramayla eşleşen açık sekme yok.
   Recently Closed: Son Kapatılanlar
+  Recently Closed Hint: "Yakın zamanda kapatılan tüm sekmeleri görmek için basılı tutun"
   Clear: Temizle
   No Closed Results: Bu aramayla eşleşen son kapatılmış sekme yok.
   Drag Tab: Bir gruba taşımak için sürükleyin

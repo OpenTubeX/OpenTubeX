@@ -29,6 +29,7 @@ for (const state of ['closed', 'dragging', 'settling', 'open', 'closed after com
       unlockBodyScroll: () => { locks-- },
       store: { commit: (action, id) => action === 'addOpenPrompt' ? prompts.add(id) : prompts.delete(id) },
       organizerSwipe: { cancel: () => { if (state === 'settling' || state === 'dragging') open.value = false } },
+      reopenHold: { cancel() {} },
       resetTabSwipe() {},
       resetTabDrag() {},
       stopObservingContent() {},

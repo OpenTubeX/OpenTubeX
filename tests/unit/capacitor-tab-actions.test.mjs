@@ -47,9 +47,13 @@ function setup(t, options = {}) {
   }
   const context = vm.createContext({
     computed,
+    inject: () => options.confirmation ?? null,
     nextTick,
     ref,
     watch,
+    MULTIPLE_TABS_CONFIRM_THRESHOLD: 5,
+    multipleTabsActionConfirmationKey: Symbol('confirmation'),
+    tabMediaCoordinator: { getPlaybackState: () => 'none' },
     useI18n: () => ({ t: key => key }),
     getCapacitorTabService: () => service,
     showToast: toast => calls.push(['toast', toast.message]),
@@ -107,6 +111,26 @@ test('close selection closes exactly the selected tabs and clears selection', as
   assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned', 'middle'])
   assert.deepEqual(calls, [['close', 'first'], ['close', 'last'], ['afterClose']])
   assert.equal(actions.selecting.value, false)
+})
+
+test('closing several tabs asks first and keeps them all when cancelled', async t => {
+  const prompts = []
+  let answer = false
+  const { actions, tabs, calls } = setup(t, {
+    confirmation: { confirm: async (count, action) => { prompts.push([count, action]); return answer } },
+  })
+  tabs.value = [...tabs.value, { id: 'fifth' }, { id: 'sixth' }]
+  actions.openTabActions('pinned')
+  await actions.closeRelatedTabs('other')
+  assert.deepEqual(prompts, [[5, 'close']])
+  assert.equal(tabs.value.length, 6)
+  assert.equal(actions.closingTabs.value, false)
+
+  answer = true
+  actions.openTabActions('pinned')
+  await actions.closeRelatedTabs('other')
+  assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned'])
+  assert.equal(calls.filter(call => call[0] === 'close').length, 5)
 })
 
 test('selection actions change only eligible selected tabs', async t => {
@@ -320,6 +344,8 @@ test('closing the bulk action menu restores focus after Escape and while an acti
     showActions: { value: true },
     moreButton: { value: { get disabled() { return props.busy }, focus() { focused.push('more') } } },
     controlsRoot: { value: { focus() { focused.push('controls') } } },
+    props,
+    watch() {},
     nextTick: async () => {},
     emit(event, action) {
       assert.equal(event, 'action')
@@ -348,4 +374,30 @@ test('closing the bulk action menu restores focus after Escape and while an acti
   await context.run('unload')
   assert.equal(context.showActions.value, false)
   assert.deepEqual(focused, ['more', 'controls'])
+})
+
+test('the reopen button taps from the keyboard after its list was opened, but not after a touch hold', async () => {
+  const holdSource = (await readFile(new URL('../../src/renderer/components/TabBar/useHoldAction.js', import.meta.url), 'utf8'))
+    .replace(/^import .*\n/gm, '')
+    .replace('export function', 'function')
+  const timers = []
+  const context = vm.createContext({
+    lightHaptic() {},
+    window: { setTimeout: callback => timers.push(callback), clearTimeout() {} },
+  })
+  vm.runInContext(holdSource, context)
+  const calls = []
+  const hold = context.useHoldAction(() => calls.push('hold'))
+  const tap = () => calls.push('tap')
+
+  hold.keydown({ key: 'ContextMenu', preventDefault() {} })
+  hold.click({ detail: 0 }, tap)
+  assert.deepEqual(calls, ['hold', 'tap'])
+
+  calls.length = 0
+  hold.start({ button: 0 })
+  timers.pop()()
+  hold.click({ detail: 1 }, tap)
+  hold.click({ detail: 1 }, tap)
+  assert.deepEqual(calls, ['hold', 'tap'], 'only the click ending the hold is skipped')
 })
