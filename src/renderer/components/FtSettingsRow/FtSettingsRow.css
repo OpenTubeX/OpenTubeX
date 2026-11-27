@@ -91,6 +91,11 @@
 
 /* Narrow sections put a row's control below its text, like the Data rows. */
 @container settings-content (width <= 560px) {
+  /* Lets a control below measure the text column it sits in. */
+  .settingsRowControl {
+    container: settings-row-control / inline-size;
+  }
+
   .settingsRow:not(.stacked) {
     grid-template:
       'icon text' auto
@@ -132,5 +137,14 @@
   .settingsRow .settingsRowControl > :deep(.switch-ctn) {
     margin-inline: calc(-6px - var(--settings-marker-gutter, 0px)) 0;
     max-inline-size: calc(100% + 6px + var(--settings-marker-gutter, 0px));
+  }
+}
+
+/* A text column too narrow for a switch's badge on one line would split its
+   words, so the badge may also take the space below the icon, its column and
+   gap, once it wraps below the track. The track stays below the text. */
+@container settings-row-control (width < 9em) {
+  .settingsRowControl > :deep(.switch-ctn) {
+    --switch-label-outdent: 56px;
   }
 }
