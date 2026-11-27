@@ -1,5 +1,5 @@
-import { execFileSync, spawn, spawnSync } from 'node:child_process'
-import { createWriteStream, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { execFileSync, spawn } from 'node:child_process'
+import { closeSync, mkdirSync, openSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { connect } from 'node:net'
 import { join, resolve } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -11,8 +11,8 @@ import { setTimeout as delay } from 'node:timers/promises'
  *
  * Senders accept only receivers whose device certificate chains to a Cast
  * root, so the test needs a debug APK whose sender also trusts a temporary
- * root, which `prepare` generates with a device certificate for the receiver.
- * Release and nightly builds refuse that root.
+ * root, which `prepare` generates with a device certificate for the receiver,
+ * in a new or empty DIR. Release and nightly builds refuse that root.
  *
  *   node _scripts/androidCastReceiverTest.mjs prepare DIR
  *   ./android/gradlew --project-dir android :app:assembleDebug :app:assembleDebugAndroidTest -PcastTestRoot=DIR/root.pem
@@ -33,20 +33,22 @@ if (!['prepare', 'run'].includes(command) || !directory) {
 const dir = resolve(directory)
 const fixtures = join(dir, 'fixtures')
 
+// Output only shows when a command fails, in the error it throws.
 function run(file, args, options = {}) {
-  execFileSync(file, args, { stdio: ['ignore', 'ignore', 'inherit'], ...options })
+  execFileSync(file, args, { stdio: 'pipe', ...options })
 }
 
 function prepare() {
-  rmSync(dir, { recursive: true, force: true })
-  mkdirSync(fixtures, { recursive: true })
+  mkdirSync(dir, { recursive: true })
+  if (readdirSync(dir).length > 0) throw new Error(`${dir} must be empty`)
+  mkdirSync(fixtures)
   // Valid for the run only. The root's key is deleted once it has signed the
   // device certificate, so nothing else can be issued from it.
   const rootKey = join(dir, 'root.key')
-  run('openssl', ['req', '-quiet', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', rootKey, '-out', join(dir, 'root.pem'),
+  run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', rootKey, '-out', join(dir, 'root.pem'),
     '-days', '2', '-subj', '/CN=OpenTubeX Cast receiver test root',
     '-addext', 'basicConstraints=critical,CA:TRUE', '-addext', 'keyUsage=critical,keyCertSign'])
-  run('openssl', ['req', '-quiet', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(dir, 'device.key'), '-out', join(dir, 'device.csr'),
+  run('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(dir, 'device.key'), '-out', join(dir, 'device.csr'),
     '-subj', '/CN=OpenTubeX Cast test receiver'])
   const extensions = join(dir, 'device.ext')
   writeFileSync(extensions, 'basicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\n')
@@ -83,11 +85,10 @@ async function runTest() {
   const headless = !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
   // CI uploads ANDROID_ARTIFACT_DIR with the test reports.
   const logFile = join(process.env.ANDROID_ARTIFACT_DIR || dir, 'openchromecast.log')
-  const log = createWriteStream(logFile)
+  const log = openSync(logFile, 'w')
   const receiver = spawn(headless ? 'xvfb-run' : 'openchromecast', headless ? ['-a', 'openchromecast', ...receiverArgs] : receiverArgs,
-    { stdio: ['ignore', 'pipe', 'pipe'], detached: true })
-  receiver.stdout.pipe(log)
-  receiver.stderr.pipe(log)
+    { stdio: ['ignore', log, log], detached: true })
+  closeSync(log)
   let exited = false
   receiver.once('exit', () => { exited = true })
   const adb = (...args) => execFileSync('adb', ['-s', serial, ...args], { encoding: 'utf8' })
@@ -99,7 +100,7 @@ async function runTest() {
     // The app connects to the receiver at its own loopback address.
     adb('reverse', `tcp:${RECEIVER_PORT}`, `tcp:${RECEIVER_PORT}`)
     try {
-      const result = spawnSync(process.execPath, ['_scripts/androidScriptTests.mjs', 'cast-receiver'], {
+      const tests = spawn(process.execPath, ['_scripts/androidScriptTests.mjs', 'cast-receiver'], {
         stdio: 'inherit',
         env: {
           ...process.env,
@@ -108,9 +109,9 @@ async function runTest() {
           OPENTUBEX_CAST_RECEIVER_PORT: String(RECEIVER_PORT)
         }
       })
-      process.exitCode = result.status ?? 1
+      process.exitCode = await new Promise(resolve => tests.once('exit', code => resolve(code ?? 1)))
     } finally {
-      spawnSync('adb', ['-s', serial, 'reverse', '--remove', `tcp:${RECEIVER_PORT}`])
+      try { adb('reverse', '--remove', `tcp:${RECEIVER_PORT}`) } catch {}
     }
   } finally {
     // xvfb-run starts the receiver in its own process group, with mpv.
