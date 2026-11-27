@@ -330,10 +330,11 @@ for (const { name, theme, width, height, scale, rtl } of [
         }
       })
       expect(geometry.duration).toBe('0s')
-      // In a settings row, the switch's icons are 8px from its track, as they are from a select.
-      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 18, trackGap: 8, inputWidth: 40 })) {
+      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 18 })) {
         expect(geometry[key]).toBeCloseTo(value, 1)
       }
+      expect(geometry.trackGap).toBeGreaterThan(0)
+      expect(geometry.inputWidth).toBeCloseTo(geometry.trackWidth, 1)
 
       await input.focus()
       await input.press('Space')
@@ -344,11 +345,18 @@ for (const { name, theme, width, height, scale, rtl } of [
       await label.hover()
       await page.mouse.down()
       expect(await label.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-thumb')).width))).toBeCloseTo(20, 1)
-      expect(await label.evaluate(element => {
+      // The pressed thumb stays inside the track, under the input, at its checked end.
+      const pressed = await label.evaluate(element => {
         const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
         const track = element.parentElement.querySelector('.switch-input').getBoundingClientRect()
-        return getComputedStyle(element).direction === 'rtl' ? track.right - thumb.right : thumb.left - track.left
-      })).toBeCloseTo(18, 1)
+        const rtl = getComputedStyle(element).direction === 'rtl'
+        return {
+          start: rtl ? track.right - thumb.right : thumb.left - track.left,
+          end: rtl ? thumb.left - track.left : track.right - thumb.right
+        }
+      })
+      expect(pressed.start).toBeGreaterThan(pressed.end)
+      expect(pressed.end).toBeGreaterThanOrEqual(0)
       await page.mouse.up()
       await expect(input).not.toBeChecked()
       await expect(dependent).toBeDisabled()

@@ -129,6 +129,7 @@
 @container settings-content (width > 560px) {
   /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
   .settingsRow {
+    --settings-row-select-tooltip: 0px;
     --settings-row-select-sync: 0px;
     --settings-row-select-profile: 0px;
     --settings-row-select-reset: 0px;
@@ -143,6 +144,10 @@
   }
   /* stylelint-enable length-zero-no-unit */
 
+  .settingsRow:has(.settingsRowControl .selectIndicators .selectTooltip) {
+    --settings-row-select-tooltip: 32px;
+  }
+
   .settingsRow:has(.settingsRowControl .selectIndicators .syncedSettingIndicator) {
     --settings-row-select-sync: 22px;
   }
@@ -156,7 +161,7 @@
   }
 
   .settingsRowText {
-    padding-inline-end: calc(var(--settings-row-select-sync) + var(--settings-row-select-profile) + var(--settings-row-select-reset));
+    padding-inline-end: calc(var(--settings-row-select-tooltip) + var(--settings-row-select-sync) + var(--settings-row-select-profile) + var(--settings-row-select-reset));
   }
 
   .settingsRowControl > :deep(.select .selectIndicators) {
