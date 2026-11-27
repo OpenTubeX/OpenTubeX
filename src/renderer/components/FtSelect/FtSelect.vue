@@ -3,7 +3,7 @@
     ref="selectRoot"
     class="select"
     :data-setting-key="settingKey || undefined"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent, labelHidden: hideLabel }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent || inSettingsRow, labelHidden: hideLabel }"
     @focusout="handleFocusOut"
   >
     <select
@@ -487,6 +487,8 @@ const emit = defineEmits(['change', 'open', 'preview', 'reset'])
 const id = useId()
 // A select in a settings row is also described by the row's description.
 const rowDescriptionId = inject(SETTINGS_ROW_DESCRIPTION_ID, null)
+// The selects of a settings row list share the width of their longest option.
+const inSettingsRow = rowDescriptionId !== null
 const describedBy = computed(() => [props.describeById, rowDescriptionId?.value].filter(Boolean).join(' ') || null)
 const dropdownAnchor = `--select-${id}`
 const selectRoot = useTemplateRef('selectRoot')
@@ -615,19 +617,20 @@ const selectedName = computed(() => selectedIndices.value.map(index => props.sel
 /**
  * Content-sized selects take the width of their default option, so choosing
  * another one never resizes them. Their other options get room up to a capped
- * width, and only longer values truncate. Multi-selects and selects without a
- * listed default reserve their longest option instead.
+ * width, and only longer values truncate. Multi-selects, selects without a
+ * listed default and selects in settings rows reserve their longest option
+ * instead.
  */
 const allSizerNames = computed(() => [...props.selectNames, props.emptyLabel].filter(Boolean).join('\n'))
 const defaultSizerIndex = computed(() => {
-  if (!props.sizeToContent || props.multiple || !props.settingKey || !Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)) {
+  if (!props.sizeToContent || inSettingsRow || props.multiple || !props.settingKey || !Object.hasOwn(DEFAULT_SETTINGS, props.settingKey)) {
     return -1
   }
   const defaultValue = String(DEFAULT_SETTINGS[props.settingKey])
   return props.selectValues.findIndex(value => String(value) === defaultValue)
 })
 const sizerNames = computed(() => {
-  if (!props.sizeToContent) return null
+  if (!props.sizeToContent && !inSettingsRow) return null
   return defaultSizerIndex.value === -1 ? allSizerNames.value : props.selectNames[defaultSizerIndex.value]
 })
 const cappedSizerNames = computed(() => defaultSizerIndex.value === -1 ? null : allSizerNames.value)

@@ -35,7 +35,7 @@
       </FtSettingsRow>
       <FtSettingsRow
         :title="t('Settings.Tab Unloading.Tabs to unload')"
-        :icon="['fas', 'clone']"
+        :icon="['fas', 'horizontal-tabs']"
       >
         <FtSelect
           hide-label

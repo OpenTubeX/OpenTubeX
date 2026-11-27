@@ -87,7 +87,7 @@
       </FtSettingsRow>
       <FtSettingsRow
         :title="$t('Settings.General Settings.Enable Search Suggestions')"
-        :icon="['fas', 'list']"
+        :icon="['fas', 'search-suggestions']"
       >
         <FtToggleSwitch
           :label="$t('Settings.General Settings.Enable Search Suggestions')"
@@ -101,7 +101,7 @@
         v-if="USING_ELECTRON || IS_CAPACITOR"
         :description="$t('Tooltips.General Settings.Remember Tab Navigation History')"
         :title="$t('Settings.General Settings.Remember Tab Navigation History')"
-        :icon="['fas', 'clone']"
+        :icon="['fas', 'tab-history']"
       >
         <FtToggleSwitch
           :label="$t('Settings.General Settings.Remember Tab Navigation History')"

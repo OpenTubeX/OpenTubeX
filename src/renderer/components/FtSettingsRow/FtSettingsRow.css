@@ -1,25 +1,23 @@
 /* A Material 3 list item like the Data and Storage rows: a leading icon, the
-   setting's name with an optional supporting line, and its control at the end. */
+   setting's name with an optional supporting line, and its control at the end.
+   The rows of a list share its columns, so their controls line up and take
+   the width of the widest one, up to a limit. */
+:global(.settingsRows) {
+  column-gap: 16px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) fit-content(min(45%, 420px));
+}
+
 .settingsRow {
   column-gap: 16px;
   display: grid;
-  grid-template:
-    'icon text control' auto
-    '. details details' auto
-    / 40px minmax(0, 1fr) auto;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   padding-block: calc(12px * var(--ui-density, 1));
 }
 
 .settingsRow + .settingsRow {
   border-block-start: 1px solid var(--divider-color);
-}
-
-.settingsRow.stacked {
-  grid-template:
-    'icon text' auto
-    '. control' auto
-    '. details' auto
-    / 40px minmax(0, 1fr);
 }
 
 .settingsRowIcon {
@@ -31,14 +29,16 @@
   color: var(--primary-text-color);
   display: flex;
   font-size: 18px;
-  grid-area: icon;
+  grid-column: 1;
+  grid-row: 1;
   inline-size: 40px;
   justify-content: center;
 }
 
 .settingsRowText {
   align-self: center;
-  grid-area: text;
+  grid-column: 2;
+  grid-row: 1;
   min-inline-size: 0;
 }
 
@@ -75,12 +75,20 @@
   align-items: center;
   align-self: center;
   display: flex;
-  grid-area: control;
+  grid-column: 3;
+  grid-row: 1;
   justify-content: flex-end;
   min-inline-size: 0;
 }
 
+/* Wide controls such as chip groups go below the text. */
+.stacked .settingsRowText {
+  grid-column: 2 / -1;
+}
+
 .stacked .settingsRowControl {
+  grid-column: 2 / -1;
+  grid-row: 2;
   justify-content: flex-start;
   margin-block-start: 10px;
 }
@@ -90,26 +98,88 @@
   margin: 0;
 }
 
-/* Selects share one width, so the controls of a list line up at both edges.
-   Wide rows give them a share of their width, so longer values fit. */
-.settingsRowControl > :deep(.select) {
-  inline-size: 260px;
+/* Selects fill the shared column, so they line up at both edges. */
+.settingsRow .settingsRowControl > :deep(.select) {
+  inline-size: 100%;
   max-inline-size: 100%;
 }
 
+/* A row's controls show only the icons of their setting. The reset
+   placeholder elsewhere keeps a dragged slider's label from reflowing; here
+   no control moves when the icon appears. */
+.settingsRowControl :deep(.changedSettingIndicatorPlaceholder) {
+  display: none;
+}
+
+/* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
+.settingsRowControl > :deep(.select:not(:has(.changedSettingIndicator:not(.profileSettingIndicator)))) {
+  --select-reset-space: 0px;
+}
+
+.settingsRowControl > :deep(.select:not(:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder)))) {
+  --select-indicator-space: 0px;
+}
+/* stylelint-enable length-zero-no-unit */
+
+/* Beside the text, every control ends the row and its icons come before it,
+   with the changed-setting marker before them, as on a switch. The selects of
+   a list keep the same width, so the icons sit outside the box, in room the
+   text leaves them. Icons shown only for some values are furthest out, so no
+   icon moves when they appear. */
 @container settings-content (width > 560px) {
-  .settingsRow:not(.stacked):has(> .settingsRowControl > :deep(.select)) {
-    grid-template-columns: 40px minmax(0, 1fr) clamp(260px, 45%, 420px);
+  /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
+  .settingsRow {
+    --settings-row-select-sync: 0px;
+    --settings-row-select-profile: 0px;
+    --settings-row-select-reset: 0px;
   }
 
-  .settingsRow:not(.stacked) > .settingsRowControl > :deep(.select) {
-    inline-size: 100%;
+  .settingsRow .settingsRowControl > :deep(.select) {
+    --select-indicator-space: 0px;
+    --select-outline-inline-start: 0px;
+
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+  /* stylelint-enable length-zero-no-unit */
+
+  .settingsRow:has(.settingsRowControl .selectIndicators .syncedSettingIndicator) {
+    --settings-row-select-sync: 22px;
+  }
+
+  .settingsRow:has(.settingsRowControl .selectIndicators .profileSettingIndicator) {
+    --settings-row-select-profile: 22px;
+  }
+
+  .settingsRow:has(.settingsRowControl .selectIndicators .changedSettingIndicator:not(.profileSettingIndicator)) {
+    --settings-row-select-reset: 22px;
+  }
+
+  .settingsRowText {
+    padding-inline-end: calc(var(--settings-row-select-sync) + var(--settings-row-select-profile) + var(--settings-row-select-reset));
+  }
+
+  .settingsRowControl > :deep(.select .selectIndicators) {
+    flex-direction: row-reverse;
+    inset-block: 0;
+    inset-inline: auto calc(100% + 8px);
+    transform: none;
+  }
+
+  .settingsRowControl > :deep(.select:has(.changedSettingIndicator) .selectIndicators) {
+    border-inline-start: 3px solid var(--settings-changed-color, var(--primary-color));
+    padding-inline-start: 9px;
   }
 }
 
 .settingsRowDetails {
-  grid-area: details;
+  grid-column: 2 / -1;
+  grid-row: 2;
   min-inline-size: 0;
+}
+
+.stacked .settingsRowDetails {
+  grid-row: 3;
 }
 
 /* A slider's label and track start where the text does. Its padding, or the
@@ -131,41 +201,27 @@
     container: settings-row-control / inline-size;
   }
 
-  .settingsRow:not(.stacked) {
-    grid-template:
-      'icon text' auto
-      '. control' auto
-      '. details' auto
-      / 40px minmax(0, 1fr);
+  :global(.settingsRows) {
+    grid-template-columns: 40px minmax(0, 1fr);
   }
 
   .settingsRow:not(.stacked) .settingsRowControl {
+    grid-column: 2;
+    grid-row: 2;
     justify-content: flex-start;
     margin-block-start: 8px;
   }
 
+  .settingsRowDetails {
+    grid-row: 3;
+  }
+
   /* Stacked fields fill the row and start where its text does; the marker
-     gutter moves into the space below the icon. A select keeps room only for
-     the icons it shows. */
-  .settingsRowControl > :deep(.select) {
+     gutter moves into the space below the icon. */
+  .settingsRow .settingsRowControl > :deep(.select) {
     inline-size: calc(100% + var(--settings-marker-gutter, 0px));
     max-inline-size: none;
     margin-inline-start: calc(-1 * var(--settings-marker-gutter, 0px));
-  }
-
-  /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
-  .settingsRowControl > :deep(.select:not(:has(.changedSettingIndicator))) {
-    --select-reset-space: 0px;
-  }
-
-  .settingsRowControl > :deep(.select:not(:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder)))) {
-    --select-indicator-space: 0px;
-  }
-  /* stylelint-enable length-zero-no-unit */
-
-  /* The placeholder only keeps a dragged slider's label from reflowing. */
-  .settingsRowControl :deep(.changedSettingIndicatorPlaceholder) {
-    display: none;
   }
 
   /* A switch's track starts 6px into its box, after its touch area. The

@@ -548,6 +548,13 @@
   padding-inline-start: 9px;
 }
 
+/* The transparent input over a switch's track is placed from the padding
+   edge, so it moves past the gutter with the track. */
+.settingsContent.highlightChangedSettings :deep(.switch-ctn:not(.trailing) > .switch-input),
+:deep(.switch-ctn:not(.trailing):has(.changedSettingIndicator) > .switch-input) {
+  inset-inline-start: 15px;
+}
+
 /* Keep tag and password fields centered when reserving the marker gutter. */
 .settingsContent.highlightChangedSettings :deep(.ft-input-tags-component .ft-input-component),
 .settingsContent.highlightChangedSettings :deep(.passwordForm .ft-input-component),

@@ -56,7 +56,7 @@ test.describe('select indicators', { tag: '@scale' }, () => {
     }
   })
 
-  test('places sync and reset after selects with and without tooltips', async ({ app, page, uiScale }, testInfo) => {
+  test('places sync and reset beside selects with and without tooltips', async ({ app, page, uiScale }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     for (const width of [1200, 400]) {
       // Keep the CSS viewport width independent of the UI scale.
@@ -78,10 +78,10 @@ test.describe('select indicators', { tag: '@scale' }, () => {
             const field = element.querySelector('.select-text').getBoundingClientRect()
             const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
             const viewport = element.closest('.settingsContent').getBoundingClientRect()
-            const bounds = element.getBoundingClientRect()
-            const rtl = getComputedStyle(element).direction === 'rtl'
+            // Beside a settings row's text, the icons come before the select.
+            const bounds = (element.closest('.settingsRow') ?? element).getBoundingClientRect()
             return {
-              gap: rtl ? field.left - icons.right : icons.left - field.right,
+              gap: Math.max(icons.left - field.right, field.left - icons.right),
               centers: Math.abs(field.top + field.height / 2 - icons.top - icons.height / 2),
               overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right),
               rootOverflow: Math.max(bounds.left - icons.left, icons.right - bounds.right)
@@ -318,19 +318,20 @@ for (const { name, theme, width, height, scale, rtl } of [
         const track = getComputedStyle(element.querySelector('.switch-label-text'), '::before')
         const thumb = getComputedStyle(element.querySelector('.switch-thumb'))
         const text = element.querySelector('.switch-label-text').getBoundingClientRect()
-        const bounds = element.getBoundingClientRect()
+        const input = element.parentElement.querySelector('.switch-input').getBoundingClientRect()
         return {
           trackWidth: parseFloat(track.width),
           trackHeight: parseFloat(track.height),
           thumbWidth: parseFloat(thumb.width),
           duration: thumb.transitionDuration,
-          textClearance: getComputedStyle(element).direction === 'rtl'
-            ? bounds.right - text.right
-            : text.left - bounds.left
+          // The input lies over the track, which may come before or after the text.
+          trackGap: Math.max(text.left - input.right, input.left - text.right),
+          inputWidth: input.width
         }
       })
       expect(geometry.duration).toBe('0s')
-      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 18, textClearance: 58 })) {
+      // In a settings row, the switch's icons are 8px from its track, as they are from a select.
+      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 18, trackGap: 8, inputWidth: 40 })) {
         expect(geometry[key]).toBeCloseTo(value, 1)
       }
 
@@ -343,7 +344,11 @@ for (const { name, theme, width, height, scale, rtl } of [
       await label.hover()
       await page.mouse.down()
       expect(await label.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-thumb')).width))).toBeCloseTo(20, 1)
-      expect(await label.evaluate(element => parseFloat(getComputedStyle(element).paddingInlineStart) + parseFloat(getComputedStyle(element.querySelector('.switch-thumb')).insetInlineStart))).toBeCloseTo(24, 1)
+      expect(await label.evaluate(element => {
+        const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
+        const track = element.parentElement.querySelector('.switch-input').getBoundingClientRect()
+        return getComputedStyle(element).direction === 'rtl' ? track.right - thumb.right : thumb.left - track.left
+      })).toBeCloseTo(18, 1)
       await page.mouse.up()
       await expect(input).not.toBeChecked()
       await expect(dependent).toBeDisabled()

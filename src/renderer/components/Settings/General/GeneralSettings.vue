@@ -8,7 +8,7 @@
         v-if="IS_CAPACITOR"
         :description="t('Tooltips.General Settings.Enable Tabs')"
         :title="t('Settings.General Settings.Enable Tabs')"
-        :icon="['fas', 'clone']"
+        :icon="['fas', 'horizontal-tabs']"
       >
         <FtToggleSwitch
           :label="t('Settings.General Settings.Enable Tabs')"
