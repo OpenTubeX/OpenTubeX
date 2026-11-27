@@ -93,7 +93,7 @@ Search Filters:
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: 'Subscriptions'
-  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Your Subscription list is currently empty. If you want to import your subscriptions you can go to Data Settings and select Import Subscriptions or you can search for a channel and subscribe to them.'
+  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Your Subscription list is currently empty. To import subscriptions, open Settings → Data and select Import next to Subscriptions. You can also search for a channel and subscribe to it.'
   Load More Videos: Load more videos
   This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: This profile has a large number of subscriptions.  Forcing RSS to avoid rate limiting
   Error Channels: Channels with errors
