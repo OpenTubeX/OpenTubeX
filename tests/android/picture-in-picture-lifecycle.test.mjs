@@ -271,13 +271,15 @@ function longestHold(positions) {
   return longest
 }
 
-async function assertRecordedEntry(remote, scale, trigger) {
+async function assertRecordedEntry(remote, scale, trigger, diagnostics = {}) {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-pip-entry-'))
   const path = join(directory, 'entry.mp4')
+  let recordingBytes
   try {
     adb('pull', remote, path)
     if (process.env.ANDROID_ARTIFACT_DIR) {
-      await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${trigger}-entry.mp4`, await readFile(path))
+      recordingBytes = await readFile(path)
+      await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${trigger}-entry.mp4`, recordingBytes)
     }
     // Native recordings expose intermediate surface buffers that DOM geometry
     // and occasional screenshots miss.
@@ -337,8 +339,17 @@ async function assertRecordedEntry(remote, scale, trigger) {
     const inlineHold = longestHold(inline)
     const entryHold = longestHold(entry)
     assert.ok(entryHold.seconds <= Math.max(0.35, inlineHold.seconds + 0.15),
-      `native PiP froze a video frame for ${entryHold.seconds.toFixed(3)}s at ${entryHold.at.toFixed(3)}s, ` +
-      `while inline playback held one for at most ${inlineHold.seconds.toFixed(3)}s`)
+      `native PiP froze a video frame for ${entryHold.seconds.toFixed(3)}s at ${entryHold.at.toFixed(3)}s ` +
+      `(enteredAt=${enteredAt.toFixed(3)}s, offset=${(entryHold.at - enteredAt).toFixed(3)}s), ` +
+      `while inline playback held one for at most ${inlineHold.seconds.toFixed(3)}s at ${inlineHold.at.toFixed(3)}s; ` +
+      `diagnostics=${JSON.stringify({ duration: Number(duration.toFixed(3)), inlineFrames: inline.length, entryFrames: entry.length, ...diagnostics })}`)
+  } catch (error) {
+    // Preserve the failed attempt's recording separately so a passing retry
+    // does not overwrite it.
+    if (recordingBytes && process.env.ANDROID_ARTIFACT_DIR) {
+      await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${trigger}-failure-entry.mp4`, recordingBytes)
+    }
+    throw error
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
@@ -409,6 +420,26 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       let returning = false
       let frame
       let nativeSize
+      let videoCallback
+      let lastVideoNow = null
+      const videoGaps = { inlineMaxMs: 0, enteringMaxMs: 0, pipMaxMs: 0, pipFrames: 0 }
+      const trackVideo = now => {
+        if (lastVideoNow !== null) {
+          const gap = Math.round(now - lastVideoNow)
+          const entering = document.body.classList.contains('androidPictureInPictureEntering')
+          if (active) {
+            videoGaps.pipFrames++
+            if (gap > videoGaps.pipMaxMs) videoGaps.pipMaxMs = gap
+          } else if (entering) {
+            if (gap > videoGaps.enteringMaxMs) videoGaps.enteringMaxMs = gap
+          } else if (gap > videoGaps.inlineMaxMs) {
+            videoGaps.inlineMaxMs = gap
+          }
+        }
+        lastVideoNow = now
+        videoCallback = video.requestVideoFrameCallback(trackVideo)
+      }
+      videoCallback = video.requestVideoFrameCallback(trackVideo)
       const onPip = event => { nativeSize = [event.windowWidth, event.windowHeight]; if (!event.transitioning) { active = event.active; returned ||= !event.active } }
       window.addEventListener('opentubex:android-pip', onPip)
       const track = () => {
@@ -433,11 +464,14 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       }
       track()
       window.__pipLifecycleFrames = frames
+      window.__pipVideoGaps = () => ({ ...videoGaps })
       window.__beginPipReturn = () => { returning = true }
       window.__stopPipLifecycleTrace = () => {
         cancelAnimationFrame(frame)
+        if (videoCallback !== undefined) video.cancelVideoFrameCallback(videoCallback)
         window.removeEventListener('opentubex:android-pip', onPip)
         delete window.__pipLifecycleFrames
+        delete window.__pipVideoGaps
         delete window.__stopPipLifecycleTrace
         return frames
       }
@@ -456,10 +490,12 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       await recording
     }
     let trace
+    let failed = false
     try {
       // screenrecord creates its file once it captures.
       await expect.poll(() => adb('shell', `test -e ${remote} && echo recording || true`).trim(),
         { message: 'screenrecord starts' }).toBe('recording')
+      const recordStartedAt = Date.now()
       // Record inline playback first, which shows how smoothly this device
       // plays the video.
       const inlineFrames = FIXTURE.fps * 1.5 + 1
@@ -474,10 +510,12 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
         window.__stopPipInlineFrames = () => { if (callback !== undefined) video.cancelVideoFrameCallback(callback) }
       }, inlineFrames)
       await page.waitForFunction(required => window.__pipInlineFrames >= required, inlineFrames, { timeout: 30000 })
+      const triggerAtMs = Date.now() - recordStartedAt
       if (trigger === 'home') adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
       else await page.evaluate(() => document.querySelector('.ftVideoPlayer .shaka-pip-button').click())
       await page.waitForFunction(() => document.body.classList.contains('androidPictureInPicture') && !document.body.classList.contains('androidPictureInPictureEntering'),
         null, { polling: 100, timeout: 30000 })
+      const pipReadyAtMs = Date.now() - recordStartedAt
       assert.deepEqual(await page.evaluate(() => [document.documentElement, document.body].map(element => {
         const style = getComputedStyle(element)
         return [style.overflowX, style.overflowY]
@@ -490,6 +528,7 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       }
       let [left, top, right, bottom] = bounds
       const boxes = []
+      const screencapStartedAtMs = Date.now() - recordStartedAt
       // DOM geometry alone misses Chromium's stale video/compositor buffers.
       // Sample native screenshots through the first paints after the mode change.
       for (let sample = 0; sample < 8; sample++) {
@@ -517,7 +556,13 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       // Keep recording until the native samples confirm entry, rather than
       // letting a wall-clock deadline expire while a busy emulator starts up.
       await stopRecording()
-      await assertRecordedEntry(remote, scale, label)
+      const videoGaps = await page.evaluate(() => window.__pipVideoGaps?.() ?? null)
+      await assertRecordedEntry(remote, scale, label, {
+        triggerAtMs,
+        pipReadyAtMs,
+        screencapStartedAtMs,
+        videoGaps,
+      })
       const api = Number(adb('shell', 'getprop', 'ro.build.version.sdk').trim())
       if (api >= 31 && trigger === 'button') {
         // A double tap enlarges the window, which must keep the video's
@@ -558,6 +603,9 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       const returned = frames.filter(frame => frame.returned && !frame.active && frame.outer[0] === start.outerWidth)
       assert.ok(returned.every(frame => Math.abs(frame.rect[1] - start.y) < 1 && Math.abs(frame.rect[2] - start.width) < 1),
         'returning must not animate from the mini-player back to the inline player')
+    } catch (error) {
+      failed = true
+      throw error
     } finally {
       await stopRecording()
       adb('shell', 'rm', '-f', remote)
@@ -567,7 +615,8 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       if (await page.evaluate(() => document.body.classList.contains('androidPictureInPicture'))) await leavePictureInPicture()
       trace ??= await page.evaluate(() => window.__stopPipLifecycleTrace?.())
       if (process.env.ANDROID_ARTIFACT_DIR) {
-        await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}-trace.json`, JSON.stringify(trace))
+        const suffix = failed ? '-failure-trace.json' : '-trace.json'
+        await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}${suffix}`, JSON.stringify(trace))
       }
       await page.evaluate(() => {
         window.__stopPipInlineFrames?.()
