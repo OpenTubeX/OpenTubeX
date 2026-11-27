@@ -183,7 +183,13 @@
                   :icon="getItemIcon(item)"
                   :icon-class="getItemIconClass(item)"
                 />
-                <span>{{ localizedLabel(item) }}</span>
+                <span>
+                  {{ localizedLabel(item) }}
+                  <span
+                    v-if="item.detail"
+                    class="menuItemDetail"
+                  >{{ item.detail }}</span>
+                </span>
               </button>
             </template>
           </div>

@@ -188,6 +188,19 @@
   overflow-wrap: anywhere;
 }
 
+/* A second, muted line, like a channel's handle under its name */
+.menuItemDetail {
+  display: block;
+  color: var(--secondary-text-color);
+  font-size: 0.875em;
+}
+
+/* Menus that list channels fit their names and handles instead of keeping
+   the button menu width. */
+.videoMenu:has(.menuItemDetail) {
+  inline-size: max-content;
+}
+
 .menuItem:is(.disabled, :disabled) {
   color: var(--tertiary-text-color);
   background: transparent;

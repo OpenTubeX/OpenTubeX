@@ -384,7 +384,8 @@
                     type="button"
                     :role="action.checked === undefined ? 'menuitem' : action.type === 'radio' ? 'menuitemradio' : 'menuitemcheckbox'"
                     :aria-checked="action.checked"
-                    :aria-label="action.label"
+                    :aria-label="action.detail ? `${action.label} ${action.detail}` : action.label"
+                    :data-label="action.label"
                     :disabled="action.enabled === false"
                     :aria-haspopup="action.submenu ? 'menu' : undefined"
                     @click="runMobileContextAction(action)"
@@ -407,7 +408,13 @@
                       v-else
                       aria-hidden="true"
                     />
-                    <span>{{ action.label }}</span>
+                    <span>
+                      {{ action.label }}
+                      <span
+                        v-if="action.detail"
+                        class="mobileLinkActionDetail"
+                      >{{ action.detail }}</span>
+                    </span>
                     <span
                       v-if="action.submenu"
                       class="mobileLinkSubmenuArrow"
@@ -4428,7 +4435,7 @@ function handleMobileContextKeydown(event) {
   const row = focused?.closest('.mobileLinkQuickActionRow')
   if ((forward || backward) && !row) {
     if (forward && focused?.getAttribute('aria-haspopup') === 'menu') {
-      const action = mobileContextMenuRows.value.find(item => item.label === focused.getAttribute('aria-label'))
+      const action = mobileContextMenuRows.value.find(item => item.label === focused.dataset.label)
       if (action) runMobileContextAction(action, { focusFirstItem: true })
     } else if (backward && mobileContextMenuStack.value.length > 1) {
       backMobileContextMenu()
@@ -4454,7 +4461,7 @@ async function backMobileContextMenu() {
   const triggerLabel = mobileContextMenuStack.value.at(-1).label
   mobileContextMenuPath.value = mobileContextMenuPath.value.slice(0, mobileContextMenuStack.value.length - 2)
   await nextTick()
-  mobileLinkActionsRef.value?.querySelector(`[role="menuitem"][aria-label="${CSS.escape(triggerLabel)}"]:not(:disabled)`)?.focus({ preventScroll: true })
+  mobileLinkActionsRef.value?.querySelector(`[role="menuitem"][data-label="${CSS.escape(triggerLabel)}"]:not(:disabled)`)?.focus({ preventScroll: true })
 }
 
 async function runMobileContextAction(action, { focusFirstItem = false } = {}) {

@@ -173,7 +173,9 @@ const { switching, switchProfile } = useYouTubeProfileSwitch()
 const profiles = computed(() => store.getters.getYouTubeAccount?.profiles ?? [])
 const canSwitchProfile = computed(() => profiles.value.length > 1)
 const profileMenuItems = computed(() => profiles.value.map(entry => ({
-  label: entry.handle ? `${entry.name} (${entry.handle})` : entry.name,
+  label: entry.name,
+  // A second line, so a long handle doesn't break off its last characters.
+  detail: entry.handle,
   // An image, or the fallback icon without one.
   icon: entry.thumbnail ?? '',
   fallbackIcon: ['fas', 'circle-user'],
