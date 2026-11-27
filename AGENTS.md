@@ -73,7 +73,7 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 
 ### Android
 
-- Debug builds install as `org.opentubex.app.dev` (OpenTubeX Dev). Launch `org.opentubex.app.dev/org.opentubex.app.MainActivity`; instrumentation uses `org.opentubex.app.dev.test`. Use `assembleNightly` only to build the published nightly identity. See `android/SIGNING.md`.
+- Debug builds install as `org.opentubex.app.dev` (OpenTubeX Dev). Launch `org.opentubex.app.dev/org.opentubex.app.MainActivity`; instrumentation uses `org.opentubex.app.dev.test`. Use `assembleNightly` only to build the published nightly identity.
 - Verify Android-targeted work (native code, Capacitor behavior, mobile-only components affecting Android, bugs seen on Android) on an emulator with a current debug APK, and report the API level, WebView version, and result. Electron tests and mobile-sized viewports do not replace this.
 - iOS-only changes do not need an emulator, nor do shared renderer or CSS changes merely because the component also appears on phones; cover responsive effects with Electron tests. Use the emulator if an Android-specific failure emerges.
 

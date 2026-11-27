@@ -115,8 +115,9 @@ public class YtDlpPlaybackCacheTest {
             @Override public File getCacheDir() { return cache; }
             @Override public File getNoBackupFilesDir() { return root; }
         };
-        // The default "both" checks persistence without replacing the APK.
-        // See android/YTDLP.md for the separate seed -> install -r -> verify flow.
+        // The default "both" checks persistence without replacing the APK. To test across an
+        // actual APK replacement, run with -e playbackCachePhase seed, reinstall the APK with
+        // `adb install --user 0 -r`, then run with -e playbackCachePhase verify within 1 hour.
         String phase = InstrumentationRegistry.getArguments().getString("playbackCachePhase", "both");
         try {
             if (!phase.equals("verify")) {

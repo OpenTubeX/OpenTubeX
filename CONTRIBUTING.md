@@ -30,7 +30,7 @@ Ask questions on [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussion
    * `pnpm run dev:web` runs the web build in your browser.
    * `pnpm run dev:worktree` uses a separate profile and a free port, so you can run several checkouts at once.
 
-For Android, run `pnpm run capacitor:sync:android`, then `./gradlew assembleDebug` in `android/`. Debug builds install as OpenTubeX Dev (`org.opentubex.app.dev`) next to the published apps; see [android/SIGNING.md](android/SIGNING.md). For iOS, run `pnpm run capacitor:sync:ios` on macOS and open `ios/App/App.xcodeproj` in Xcode.
+For Android, run `pnpm run capacitor:sync:android`, then `./gradlew assembleDebug` in `android/`. Debug builds install as OpenTubeX Dev (`org.opentubex.app.dev`) next to the published apps. For iOS, run `pnpm run capacitor:sync:ios` on macOS and open `ios/App/App.xcodeproj` in Xcode.
 
 ## Making changes
 

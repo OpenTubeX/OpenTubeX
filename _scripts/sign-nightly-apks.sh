@@ -3,6 +3,8 @@
 # public nightly.keystore that signed earlier nightlies, so existing
 # installations update, and Android 9+ then rejects APKs signed only with the
 # public key. Android 8 keeps verifying the public key's v2 signature.
+# Do not regenerate android/nightly.lineage; to rotate again, extend it with
+# `apksigner rotate --in android/nightly.lineage`.
 set -euo pipefail
 
 : "${ANDROID_NIGHTLY_KEYSTORE:?Set ANDROID_NIGHTLY_KEYSTORE to the private nightly keystore.}"

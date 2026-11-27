@@ -199,7 +199,7 @@ android {
     signingConfigs {
         nightly {
             // This public testing key keeps local builds installable. CI re-signs
-            // published nightlies with the private nightly key (see SIGNING.md).
+            // published nightlies with the private nightly key.
             // Never use it for a distributable release APK.
             storeFile rootProject.file("nightly.keystore")
             storePassword "opentubex-nightly"
