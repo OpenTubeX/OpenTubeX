@@ -467,7 +467,7 @@ export function useFullscreenDocks({
 
   function flushFullscreenDockResize() {
     dockResizeFrame = null
-    if (pendingDockResizeClientY === null || !resizingFullscreenDock || !resizingFullscreenDockBounds) return
+    if (pendingDockResizeClientY === null || !resizingFullscreenDock || !resizingFullscreenDockBounds || !container.value) return
     const clientY = pendingDockResizeClientY
     pendingDockResizeClientY = null
     const pointerWeight = (clientY - resizingFullscreenDockBounds.top) /
@@ -497,7 +497,14 @@ export function useFullscreenDocks({
     window.removeEventListener('pointercancel', stopFullscreenDockResize)
   }
 
-  onUnmounted(stopFullscreenDockResize)
+  onUnmounted(() => {
+    if (dockResizeFrame !== null) {
+      cancelAnimationFrame(dockResizeFrame)
+      dockResizeFrame = null
+    }
+    pendingDockResizeClientY = null
+    stopFullscreenDockResize()
+  })
 
   const fullscreenDockWidthResizing = ref(false)
   let resizingFullscreenDockWidthOffset = 0
