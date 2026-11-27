@@ -29,7 +29,8 @@
     >
       <span class="switch-label-main">
         <!-- The icons flow inline after the text, so they follow the last
-             word when the label wraps, and never move to a line of their own. -->
+             word when the label wraps. Only beside a trailing switch's track
+             can they move to a line of their own. -->
         <span
           ref="labelText"
           class="switch-label-text"
