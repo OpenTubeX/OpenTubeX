@@ -912,7 +912,7 @@ async function startYtDlpDownload(
       status.status = shown.phase
     }
     status.percent = shown.percent
-    status.speed = parts.length === 1 ? shown.speed : combineDownloadSpeeds(active.map(part => part.speed))
+    status.speed = parts.length === 1 ? shown.speed : (combineDownloadSpeeds(active.map(part => part.speed)) ?? shown.speed)
     status.eta = shown.eta
     status.live = shown.live === true
     for (const key of /** @type {const} */ (['recordedSeconds', 'recordedBytes'])) {
@@ -1001,10 +1001,11 @@ async function startYtDlpDownload(
       }
       if (key === 'out_time_us' && /^\d+$/.test(value)) part.ffmpegOutTimeSeconds = Number(value) / 1_000_000
       else if (key === 'speed') {
-        const speedMatch = /^(\d+(?:\.\d+)?)x$/.exec(value)
+        const speedMatch = /^(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)x$/.exec(value)
         const factor = speedMatch ? Number(speedMatch[1]) : 0
-        part.ffmpegSpeedFactor = factor > 0 ? factor : undefined
-        part.ffmpegSpeed = factor > 0 ? value : null
+        const valid = Number.isFinite(factor) && factor > 0
+        part.ffmpegSpeedFactor = valid ? factor : undefined
+        part.ffmpegSpeed = valid ? value : null
       } else if (key === 'progress' && value === 'continue') {
         const previousStatus = status.status
         const duration = expectedDownloadDuration(payload, part.videoDuration)

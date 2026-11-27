@@ -172,15 +172,32 @@ test('FFmpeg progress updates non-live section downloads without marking them li
     '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t\t\t"HLS video"',
     '__OPENTUBEX_LIVE__:False\t200',
     'out_time_us=100000000',
-    'speed=2.0x',
+    'speed=1.0e+01x',
     'progress=continue',
     'progress=end',
   ], 'preparing')
   assert.equal(finished.updates.find(update => update.status === 'downloading').percent, 50)
-  assert.equal(finished.updates.find(update => update.status === 'downloading').eta, '00:50')
+  assert.equal(finished.updates.find(update => update.status === 'downloading').speed, '1.0e+01x')
+  assert.equal(finished.updates.find(update => update.status === 'downloading').eta, '00:10')
   assert.equal(finished.status.status, 'processing')
   assert.equal(finished.status.speed, null)
   assert.equal(finished.status.eta, null)
+
+  // Split playlists keep the shown part's multiplier speed when no byte-rate speed is reported
+  const splitParts = [0, 1].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
+  const split = replay([
+    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t"First"'],
+    [0, '__OPENTUBEX_LIVE__:False\t200'],
+    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t"Second"'],
+    [1, '__OPENTUBEX_LIVE__:False\t200'],
+    [0, 'out_time_us=50000000'],
+    [0, 'speed=0.5x'],
+    [0, 'progress=continue'],
+    [1, 'out_time_us=50000000'],
+    [1, 'speed=2.0x'],
+    [1, 'progress=continue'],
+  ], 'preparing', { parts: splitParts })
+  assert.equal(split.status.speed, '0.5x')
 })
 
 test('parts of a split playlist keep their own live state', () => {

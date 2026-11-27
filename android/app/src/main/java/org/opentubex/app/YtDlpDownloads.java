@@ -35,7 +35,7 @@ final class YtDlpDownloads {
     private static final String LIVE_PREFIX = "__OPENTUBEX_LIVE__:";
     // The keys of FFmpeg's -progress output used for live recordings and FFmpeg-backed downloads
     private static final Pattern FFMPEG_PROGRESS = Pattern.compile("^(out_time_us|total_size|speed|progress)=\\s*(\\S+)$");
-    private static final Pattern FFMPEG_SPEED = Pattern.compile("^(\\d+(?:\\.\\d+)?)x$");
+    private static final Pattern FFMPEG_SPEED = Pattern.compile("^(\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)x$");
     private static final Pattern DOWNLOAD_TIME = Pattern.compile("^(?:\\d+:)?[0-5]?\\d:[0-5]\\d(?:\\.\\d+)?$");
     static final long STOP_UNANSWERED_MS = 10_000;
     private final Context context;
@@ -548,9 +548,11 @@ final class YtDlpDownloads {
                 || liveRank(part) == liveRank(shown) && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
         }
         if (shown == null) shown = parts.get(0);
+        Object combinedSpeed = parts.size() > 1 ? combineSpeeds(speeds) : JSONObject.NULL;
+        Object shownSpeed = shown.isNull("speed") ? JSONObject.NULL : shown.get("speed");
         record.put("status", shown.optString("status", "preparing")).put("percent", shown.optDouble("percent", 0))
             .put("eta", shown.isNull("eta") ? JSONObject.NULL : shown.get("eta"))
-            .put("speed", parts.size() > 1 ? combineSpeeds(speeds) : shown.isNull("speed") ? JSONObject.NULL : shown.get("speed"));
+            .put("speed", !JSONObject.NULL.equals(combinedSpeed) ? combinedSpeed : shownSpeed);
         if (shown.has("currentVideoId")) {
             for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.put(key, shown.opt(key));
         }
@@ -620,7 +622,10 @@ final class YtDlpDownloads {
         Double end = parseDownloadTimestamp(payload.isNull("endTime") ? null : payload.optString("endTime", null));
         if (start == null && end == null) return duration;
         double effectiveStart = start != null ? start : 0;
-        Double effectiveEnd = end == null ? duration : duration == null ? end : Math.min(end, duration);
+        Double effectiveEnd;
+        if (end == null) effectiveEnd = duration;
+        else if (duration == null) effectiveEnd = end;
+        else effectiveEnd = Math.min(end, duration);
         if (effectiveEnd == null || effectiveEnd <= effectiveStart) return null;
         return effectiveEnd - effectiveStart;
     }
@@ -678,7 +683,7 @@ final class YtDlpDownloads {
             } else if (key.equals("speed")) {
                 var speedMatch = FFMPEG_SPEED.matcher(value);
                 double factor = speedMatch.matches() ? Double.parseDouble(speedMatch.group(1)) : 0;
-                if (factor > 0) record.put("ffmpegSpeedFactor", factor).put("ffmpegSpeed", value);
+                if (Double.isFinite(factor) && factor > 0) record.put("ffmpegSpeedFactor", factor).put("ffmpegSpeed", value);
                 else { record.remove("ffmpegSpeedFactor"); record.remove("ffmpegSpeed"); }
             } else if (key.equals("progress") && value.equals("continue")) {
                 Double videoDuration = record.has("videoDuration") ? record.optDouble("videoDuration") : null;
