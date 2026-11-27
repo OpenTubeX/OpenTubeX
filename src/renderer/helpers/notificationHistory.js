@@ -197,6 +197,8 @@ export function showInAppNotification(entry) {
     image: notificationThumbnailsAllowed() ? entry.thumbnail ?? null : null,
     // Notifications the user turned on stay when only important ones are shown.
     important: true,
+    // Longer than ordinary toasts so the title can be read before it goes.
+    time: 10_000,
     action: () => openNotificationEntry(entry)
   })
 }
