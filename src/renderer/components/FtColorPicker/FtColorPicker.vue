@@ -236,7 +236,7 @@ import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch 
 import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { getAnchoredPosition, getAnchoredViewportCorrection, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
@@ -336,7 +336,8 @@ watch(open, async value => {
   positionPopover()
   saturationValueRef.value?.focus()
 })
-watch(showColorSources, async value => {
+// The list's placement depends on whether the body scrolls, so a resize can change it.
+watch([showColorSources, constrained], async ([value]) => {
   stopObservingColorSources()
   if (!value) return
 
@@ -349,13 +350,20 @@ watch(showColorSources, async value => {
     if (!showColorSources.value) return
     colorSourceListRef.value?.scrollIntoView({ block: 'nearest' })
   } else {
-    const bounds = copyFromButtonRef.value?.getBoundingClientRect()
-    if (bounds !== undefined) {
-      colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
-    }
+    placeColorSources()
   }
   observeColorSources()
 })
+function placeColorSources() {
+  const button = copyFromButtonRef.value
+  const popover = popoverRef.value
+  if (!showColorSources.value || constrained.value || button === null || popover === null) return
+  // A viewport correction may still move the picker after the next frames, so place the list where the button ends up.
+  const correction = getAnchoredViewportCorrection(popover)
+  const shift = correction === null ? 0 : correction.y - (Number.parseFloat(popover.style.translate.split(' ')[1]) || 0)
+  const bounds = button.getBoundingClientRect()
+  colorSourcesAbove.value = window.innerHeight - bounds.bottom - shift < 230 && bounds.top + shift > 230
+}
 function syncFromModel(color, force = false) {
   if (!force && color === lastEmittedColor) {
     lastEmittedColor = null
@@ -562,6 +570,7 @@ function clampColorSourcesScroll() {
 }
 
 function observeColorSources() {
+  stopObservingColorSources()
   if (colorSourceListRef.value === null || colorSourceContentRef.value === null) return
 
   colorSourcesResizeObserver = new ResizeObserver(clampColorSourcesScroll)
@@ -615,7 +624,12 @@ function positionPopover() {
     maxBlockSize: constrained.value ? `${availableHeight}px` : null
   }
   // An open color-source list extends the range past the content.
-  if (constrained.value) clampOverlayScrollTop(body, showColorSources.value ? null : pickerContentRef.value)
+  if (constrained.value) {
+    clampOverlayScrollTop(body, showColorSources.value ? null : pickerContentRef.value)
+  } else {
+    // Moving the picker can leave too little room below the button, so measure once the new position applies.
+    nextTick(placeColorSources)
+  }
 }
 
 let stopOutsidePress = null

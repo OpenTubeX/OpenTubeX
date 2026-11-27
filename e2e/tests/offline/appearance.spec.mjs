@@ -578,9 +578,12 @@ test.describe('custom theme editor', () => {
     await setWindowSize(app, page, { width: 1000, height: 420 })
     await expectOverlayScrollRange(body)
 
+    // A list opened while the body scrolls moves above the button once the picker fits.
+    await copyFromButton.click()
     await setWindowSize(app, page, { width: 1001, height: 760 })
     await expect(body).not.toHaveAttribute('data-overlayscrollbars-viewport')
     await expect.poll(() => body.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(sources).toBeInViewport({ ratio: 1 })
     await expect(copyFromButton).toBeInViewport()
     await expect(picker.locator('.saturationValue')).toBeInViewport()
   })
