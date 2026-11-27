@@ -35,6 +35,7 @@
         v-if="open"
         ref="popoverRef"
         class="colorPickerPopover"
+        :class="{ softwareKeyboardOpen }"
         :style="popoverStyle"
         role="dialog"
         :aria-label="label"
@@ -226,6 +227,7 @@ import { useI18n } from 'vue-i18n'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
+import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
@@ -771,6 +773,13 @@ onBeforeUnmount(() => {
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 12px 36px rgb(0 0 0 / 45%);
   font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* The Android keyboard can shrink the page until the trigger's scroller clips
+   it, such as the theme editor's color grid. Chromium then hides a popup whose
+   anchor is clipped, along with the hex field being typed in. */
+.colorPickerPopover.softwareKeyboardOpen {
+  position-visibility: always;
 }
 
 .colorPickerPopover button,
