@@ -440,7 +440,7 @@ const menuItems = computed(() => {
       items.push({ label: t('Downloads.Share'), icon: ['fas', 'share-nodes'], run: () => emit('share') })
       // Android hands the file to another app instead of revealing its folder;
       // iOS can only share files with other apps
-      if (!IS_IOS) items.push({ label: t('Downloads.Open With'), icon: ['fas', 'up-right-from-square'], run: () => emit('open') })
+      if (!IS_IOS) items.push({ label: t('Downloads.Open With'), icon: ['fas', 'arrow-up-right-from-square'], run: () => emit('open') })
       items.push({ label: t('Downloads.Remove File'), icon: ['fas', 'trash'], run: () => emit('remove') })
     }
     items.push({ label: t('Downloads.Clear From List'), icon: ['fas', 'xmark'], run: () => emit('clear') })
