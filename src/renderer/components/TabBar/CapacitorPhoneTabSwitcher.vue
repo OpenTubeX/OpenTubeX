@@ -870,8 +870,13 @@ function openSwitcher() {
 // The header owns pointer capture and direction locking. This component owns
 // the destination geometry and only becomes modal after the gesture commits.
 let organizerTransition = null
+// How far prewarm() opens the organizer: the organizer shows at 1% opacity and
+// the page shrinks by less than a pixel.
+const PREWARM_PROGRESS = 0.0018
 const organizerSwipe = {
   begin() {
+    // A real opening takes over from the prewarm.
+    if (organizerTransition?.prewarm) organizerSwipe.cancel()
     if (!props.enabled || open.value || organizerTransition || disposed) return false
     const page = document.querySelector('.app > .routerView')
     if (!page) return false
@@ -954,6 +959,24 @@ const organizerSwipe = {
     organizerTransition = null
     window.removeEventListener('resize', organizerSwipe.resize)
     if (commit) skipDialogTransition.value = false
+  },
+  /**
+   * Opens the organizer a little for a few frames, then cancels. The first
+   * opening after launch creates the GPU pipelines that draw the organizer and
+   * the page's morph, which held its first frame for 110–180 ms on a Pixel 8
+   * Pro, so the app does that once while idle instead.
+   */
+  async prewarm() {
+    if (!organizerSwipe.begin()) return
+    const state = organizerTransition
+    state.prewarm = true
+    await state.ready
+    if (organizerTransition !== state) return
+    state.animation.update(PREWARM_PROGRESS)
+    // Raster can take longer than a frame; the change after the last frame
+    // only reaches the screen once this one has been drawn.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    if (organizerTransition === state) organizerSwipe.cancel()
   },
   resize() {
     if (!organizerTransition?.committed) {
