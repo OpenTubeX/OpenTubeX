@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import { getUntransformedRect, supportsAnchorPositioning } from '../helpers/anchoredPosition'
+import { getAnchoredViewportCorrection, supportsAnchorPositioning } from '../helpers/anchoredPosition'
 
 /**
  * CSS anchors follow the trigger, but their post-layout scroll shift can move
@@ -39,18 +39,10 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
             invalidated = false
             schedule()
           }
-          const minLeft = Number.parseFloat(menu.style.getPropertyValue('--anchor-min-left'))
-          const maxLeft = Number.parseFloat(menu.style.getPropertyValue('--anchor-max-left'))
-          const minTop = Number.parseFloat(menu.style.getPropertyValue('--anchor-min-top'))
-          const maxTop = Number.parseFloat(menu.style.getPropertyValue('--anchor-max-top'))
-          if (![minLeft, maxLeft, minTop, maxTop].every(Number.isFinite)) return
+          const correction = getAnchoredViewportCorrection(menu)
+          if (correction === null) return
 
-          const [tx = 0, ty = 0] = menu.style.translate.split(' ').map(Number.parseFloat)
-          const rect = getUntransformedRect(menu)
-          const left = rect.left - (tx || 0)
-          const top = rect.top - (ty || 0)
-          const x = Math.max(minLeft, Math.min(left, maxLeft)) - left
-          const y = Math.max(minTop, Math.min(top, maxTop)) - top
+          const { x, y } = correction
           const needsCorrection = x !== 0 || y !== 0
           if (needsCorrection) menu.style.translate = `${x}px ${y}px`
           else menu.style.removeProperty('translate')

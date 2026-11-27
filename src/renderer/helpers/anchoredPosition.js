@@ -101,6 +101,29 @@ export function getAnchoredPosition(anchor, triggerRect, left, top, limits, plac
 }
 
 /**
+ * The translate that moves an anchored popup inside the viewport limits from
+ * getAnchoredPosition, which useAnchoredViewportBounds applies.
+ * @param {HTMLElement} popup
+ * @returns {{x: number, y: number}|null} null without limits
+ */
+export function getAnchoredViewportCorrection(popup) {
+  const minLeft = Number.parseFloat(popup.style.getPropertyValue('--anchor-min-left'))
+  const maxLeft = Number.parseFloat(popup.style.getPropertyValue('--anchor-max-left'))
+  const minTop = Number.parseFloat(popup.style.getPropertyValue('--anchor-min-top'))
+  const maxTop = Number.parseFloat(popup.style.getPropertyValue('--anchor-max-top'))
+  if (![minLeft, maxLeft, minTop, maxTop].every(Number.isFinite)) return null
+
+  const [tx = 0, ty = 0] = popup.style.translate.split(' ').map(Number.parseFloat)
+  const rect = getUntransformedRect(popup)
+  const left = rect.left - (tx || 0)
+  const top = rect.top - (ty || 0)
+  return {
+    x: Math.max(minLeft, Math.min(left, maxLeft)) - left,
+    y: Math.max(minTop, Math.min(top, maxTop)) - top
+  }
+}
+
+/**
  * Measures a popup's box without its own transform, such as the scale of an
  * open animation, so it is placed where it ends up once the animation ends.
  * Handles the translate and scale such animations use.

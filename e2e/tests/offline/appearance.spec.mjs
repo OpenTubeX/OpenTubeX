@@ -532,6 +532,64 @@ test.describe('custom theme editor', () => {
     })).toBe(true)
   })
 
+  test('scrolls the color picker below its header when the window is shorter than the picker', { tag: ['@scale'] }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1000, height: 760 })
+    await goToSettingsSection(page, 'theme')
+    await openCustomThemeEditor(page)
+    await page.getByRole('button', { name: 'Page background', exact: true }).click()
+    const picker = page.getByRole('dialog', { name: 'Page background' })
+    const body = picker.locator('.pickerBody')
+    await expect(picker).toBeVisible()
+    await expect(body).not.toHaveAttribute('data-overlayscrollbars-viewport')
+
+    // Like a landscape phone, or the space the Android keyboard leaves.
+    await setWindowSize(app, page, { width: 1001, height: 330 })
+    await expect(body).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect.poll(() => picker.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      return rect.top >= 11 && rect.bottom <= innerHeight - 11
+    }), 'the picker fits the short window').toBe(true)
+    // The collapsed color grid clips the trigger, which must not hide the picker.
+    await picker.getByRole('button', { name: 'Apply', exact: true }).click({ trial: true })
+
+    // An invalid value shows a status line, which goes away after a moment.
+    const hexField = picker.getByRole('textbox', { name: 'Hex color' })
+    await hexField.fill('not a color')
+    await hexField.press('Enter')
+    const status = picker.getByRole('status')
+    await expect(status).toBeVisible()
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(status).toBeInViewport()
+    await expect(status).toBeHidden()
+    await expectOverlayScrollRange(body)
+
+    // The scrolling body would clip a list that opens above the button.
+    const copyFromButton = picker.getByRole('button', { name: 'Copy from another color' })
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await copyFromButton.click()
+    const sources = picker.locator('.colorSourceList')
+    await expect(sources.getByRole('button').first()).toBeInViewport({ ratio: 1 })
+    // Choosing a color from the end of the extended range closes the list.
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await sources.getByRole('button').last().click()
+    await expect(sources).toBeHidden()
+    await expectOverlayScrollRange(body)
+
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(copyFromButton).toBeInViewport()
+    await setWindowSize(app, page, { width: 1000, height: 420 })
+    await expectOverlayScrollRange(body)
+
+    // A list opened while the body scrolls moves above the button once the picker fits.
+    await copyFromButton.click()
+    await setWindowSize(app, page, { width: 1001, height: 760 })
+    await expect(body).not.toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect.poll(() => body.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(sources).toBeInViewport({ ratio: 1 })
+    await expect(copyFromButton).toBeInViewport()
+    await expect(picker.locator('.saturationValue')).toBeInViewport()
+  })
+
   test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
     // Edits dozens of colors across several editor sessions, which takes longer than the default on slower machines.
     test.slow()
