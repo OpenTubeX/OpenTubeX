@@ -69,6 +69,22 @@ export async function openVideoOrSkip(test, page, video) {
 }
 
 /**
+ * Moves the pointer over a scroll mini player until its controls show, since
+ * one that docks during playback keeps them hidden until the viewer interacts.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} player
+ */
+export async function revealScrollMiniControls(page, player) {
+  await expect(async () => {
+    const { x, y, width, height } = await player.boundingBox()
+    await page.mouse.move(x + width / 2 - 10, y + height / 2)
+    await page.mouse.move(x + width / 2, y + height / 2)
+    await expect(player.locator('.scrollMiniDragHandle')).not.toHaveClass(/isHidden/, { timeout: 500 })
+  }).toPass()
+}
+
+/**
  * Asserts that the scroll mini player sits in the bottom right corner.
  *
  * @param {import('@playwright/test').Locator} player

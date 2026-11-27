@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { test, expect, abortUnmockedRequest, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { activeTab, openMockedVideo, openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions, revealScrollMiniControls, seekAsViewer } from '../../helpers/player.mjs'
 
 const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
@@ -358,6 +358,7 @@ test.describe('playlist in the mini player', () => {
         // Return once through the mini player, so History sits between two
         // entries of this video. Back must keep updating the one it left.
         await page.getByRole('link', { name: 'Go to History', exact: true }).click()
+        await revealScrollMiniControls(page, player)
         await player.locator('.scrollMiniScrollTop').click()
         await expect(page).toHaveURL(/#\/watch\/offline0001\?/)
         await page.locator('.navBackButton button').click()
@@ -379,6 +380,7 @@ test.describe('playlist in the mini player', () => {
         // Forward returns to the video the mini player plays now.
         await page.getByRole('button', { name: /^Forward/ }).click()
       } else {
+        await revealScrollMiniControls(page, player)
         await player.locator('.scrollMiniScrollTop').click()
       }
       await expect(page).toHaveURL(/#\/watch\/offline0002\?/)

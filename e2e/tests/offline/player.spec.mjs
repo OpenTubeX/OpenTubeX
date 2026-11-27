@@ -1,5 +1,5 @@
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, revealScrollMiniControls, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 import { decodeCommentTranslationAction } from '../../helpers/innertube.mjs'
@@ -2036,10 +2036,10 @@ test.describe('scroll mini player', () => {
         .toBeGreaterThan(playbackTimeBeforeSwitch)
 
       const playPauseButton = player.locator('.scrollMiniPlayPause')
-      // The button hides after three seconds of playback, which the steps above
-      // can outlast on a busy machine, and click() does not move the pointer far
-      // enough to reveal it. Move over it and click right away, as a user would;
-      // click()'s actionability checks can outlast the next three seconds too.
+      // A mini player that docks during playback keeps the button hidden, and
+      // click() does not move the pointer far enough to reveal it. Move over it
+      // and click right away, as a user would; click()'s actionability checks
+      // can outlast the three seconds before it hides again.
       const { x, y, width, height } = await playPauseButton.boundingBox()
       await page.mouse.move(x + width / 2 - 10, y + height / 2)
       await page.mouse.move(x + width / 2, y + height / 2)
@@ -2068,6 +2068,7 @@ test.describe('scroll mini player', () => {
 
       await page.locator('.tabBar .newTabButton').click()
       await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await revealScrollMiniControls(page, player)
       await player.getByRole('button', { name: 'Hide mini player' }).click()
 
       await expect(player).toHaveCSS('opacity', '0')
@@ -2105,6 +2106,7 @@ test.describe('scroll mini player', () => {
       await expect(page.locator('.ftVideoPlayer.scrollMiniPlayer')).toHaveCount(1)
 
       // A hidden mini player keeps playing, but no longer stops this tab from docking.
+      await revealScrollMiniControls(page, firstPlayer)
       await firstPlayer.getByRole('button', { name: 'Hide mini player' }).click()
       await expect(firstPlayer).toHaveClass(/scrollMiniPlayerDismissed/)
       await expect(activePlayer).toHaveClass(/scrollMiniPlayer/)

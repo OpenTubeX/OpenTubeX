@@ -152,7 +152,6 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     handleScrollMiniPlayPauseMouseEnter,
     handleScrollMiniControlsPointerMove,
     restoreScrollMiniPlayPause,
-    resetScrollMiniPlayPause,
   } = useScrollMiniPlayerControls({
     scrollMiniPlayerActive,
     video,
@@ -1156,7 +1155,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!previousRect || !usesMobileMiniBar()) scrollMiniPlaceholderHeight.value = 0
     scrollMiniDragHandleOnLightBg.value = false
     scrollMiniResizeHandleOnLightBg.value = false
-    resetScrollMiniPlayPause()
+    clearScrollMiniPlayPauseHideTimeout()
 
     cancelScrollMiniPlayerBounce()
     endScrollMiniPointerSession()
