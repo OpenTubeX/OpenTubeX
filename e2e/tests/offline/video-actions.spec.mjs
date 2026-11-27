@@ -8,6 +8,7 @@ import {
   goTo,
   goToSettingsSection,
   openNewWindowFromTabBar,
+  setWindowSize,
   waitForAppReady,
   readDatastore,
 } from '../../helpers/app.mjs'
@@ -361,11 +362,31 @@ test.describe('video downloads', () => {
     await expect.poll(() => page.evaluate(() => Object.values(window.$store.getters.getYtDlpDownloads)
       .map(download => [download.status, download.template]))).toEqual([['completed', 'audio:mp3']])
 
-    // The download button under a video lists the same templates
+    // The download button under a video lists the same templates, with Customize…
+    // closest to the button whether the menu opens below or above it.
     await writeFile(capturedArgs, '')
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page, 'jNQXAC9IVRw', { waitForPlayback: false })
-    await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+    const downloadButton = page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true })
+    const menu = page.locator('.contextMenu')
+
+    // At the default window height, the menu fits below the button.
+    await downloadButton.click()
+    await expect(menu).toBeVisible()
+    const [belowMenuBox, topButtonBox] = await Promise.all([menu.boundingBox(), downloadButton.boundingBox()])
+    expect(belowMenuBox.y).toBeGreaterThanOrEqual(topButtonBox.y + topButtonBox.height - 2)
+    await expect(menu.getByRole('menuitem').first()).toHaveText('Customize…')
+    await expect(menu.getByRole('menuitem', { name: 'Customize…', exact: true })).toBeFocused()
+    await page.keyboard.press('Escape')
+
+    // In a shorter window, the menu opens above the button so Customize… moves to the bottom.
+    await setWindowSize(app, page, { width: 1200, height: 720 })
+    await downloadButton.click()
+    await expect(menu).toBeVisible()
+    const [aboveMenuBox, bottomButtonBox] = await Promise.all([menu.boundingBox(), downloadButton.boundingBox()])
+    expect(aboveMenuBox.y + aboveMenuBox.height).toBeLessThanOrEqual(bottomButtonBox.y + 2)
+    await expect(menu.getByRole('menuitem').last()).toHaveText('Customize…')
+    await expect(menu.getByRole('menuitem', { name: 'Customize…', exact: true })).toBeFocused()
     await page.getByRole('menuitem', { name: 'Video - 720p', exact: true }).click()
 
     await expect.poll(() => readFile(capturedArgs, 'utf8')).toContain('jNQXAC9IVRw')

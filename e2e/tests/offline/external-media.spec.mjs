@@ -1143,6 +1143,66 @@ test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page
   await expect(page.getByRole('dialog', { name: 'Add download' }).getByRole('textbox', { name: 'URL' })).toBeEmpty()
 })
 
+test('opens the template menu from the Download button on external media pages', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://vimeo.com/123456789'
+  const executable = path.join(app.userDataDir, 'external-watch-download-yt-dlp.sh')
+  const argsFile = path.join(app.userDataDir, 'external-watch-download-args.txt')
+  const response = JSON.stringify({
+    title: 'External download video',
+    webpage_url: mediaUrl,
+    duration: 30,
+    formats: [{
+      format_id: 'webm-360',
+      url: DEMO_MEDIA_URL,
+      protocol: 'https',
+      ext: 'webm',
+      vcodec: 'vp9',
+      acodec: 'opus',
+      width: 640,
+      height: 360,
+      tbr: 200
+    }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'for arg in "$@"; do',
+    `  if [ "$arg" = "--ignore-no-formats-error" ]; then printf '%s\\n' '${response}'; exit; fi`,
+    'done',
+    `printf '%s\\n' "$@" > '${argsFile}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpFfmpegSource', 'system')
+  })
+
+  await openLiveStream(page, mediaUrl)
+  const downloadButton = page.locator(`${activeTab} .videoOptions`).getByRole('button', { name: 'Download Video', exact: true })
+  await expect(downloadButton).toBeVisible()
+
+  await downloadButton.click()
+  const menu = page.locator('.contextMenu')
+  await expect(menu).toBeVisible()
+  await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
+
+  await menu.getByRole('menuitem', { name: 'Customize…', exact: true }).click()
+  const prompt = page.locator('.downloadPromptCard')
+  await expect(prompt).toBeVisible()
+  await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(prompt).toHaveCount(0)
+
+  await downloadButton.click()
+  await expect(menu).toBeVisible()
+  await menu.getByRole('menuitem', { name: 'Video - 720p', exact: true }).click()
+  await expect(prompt).toHaveCount(0)
+  await expect.poll(() => readFile(argsFile, 'utf8').catch(() => '')).toContain(mediaUrl)
+})
+
 test('offers in-app playback for YouTube URL downloads only', async ({ page }) => {
   await page.evaluate(() => {
     const store = window.$store
