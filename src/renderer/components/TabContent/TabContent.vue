@@ -585,8 +585,9 @@ function cancelLoaderSettle() {
 }
 
 /* WebKit builds from before 2025 could keep showing a tab after hiding it
-   this way, and VoiceOver missed a tab shown again. Only WebKit supports this
-   system font. Chromium 85 to 104 lacks checkVisibility(), which isRendered()
+   this way, and VoiceOver missed a tab shown again. CSS can't tell those
+   builds apart, so every WebKit build, the only engine that supports this
+   system font, hides background tabs with display: none. Chromium 85 to 104 lacks checkVisibility(), which isRendered()
    needs to tell a background tab apart; :has() arrived with it in 105. */
 @supports not ((content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))) {
   .backgroundTab {
