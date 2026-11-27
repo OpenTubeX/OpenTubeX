@@ -309,7 +309,7 @@ button {
 
 button:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 button:not(:disabled):is(:hover, :active, :focus-visible) {

@@ -22,9 +22,11 @@
   }
 }
 
+/* The transparent input lies over the track, so it shows the label's cursor. */
 .switch-input {
   appearance: none;
   block-size: var(--switch-touch-height);
+  cursor: pointer;
   inset-inline-start: 6px;
   margin: 0;
   opacity: 0;
@@ -244,6 +246,7 @@
 }
 
 .disabled {
+  .switch-input,
   .switch-label {
     cursor: not-allowed;
   }

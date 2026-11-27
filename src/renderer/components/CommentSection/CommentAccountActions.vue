@@ -237,7 +237,7 @@ async function handleDeletePrompt(value) {
 }
 
 .commentAccountAction:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 

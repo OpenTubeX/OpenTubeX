@@ -814,7 +814,7 @@ onBeforeUnmount(() => {
 
 .pickerHeaderAction:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .pickerHeaderAction:not(:disabled):hover,
@@ -868,7 +868,7 @@ onBeforeUnmount(() => {
 }
 
 .sliderField input[type='range']:disabled {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .hueSlider {

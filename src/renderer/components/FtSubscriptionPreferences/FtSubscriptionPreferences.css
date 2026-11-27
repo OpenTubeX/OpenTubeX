@@ -46,7 +46,7 @@
 
 /* Unlike disabled buttons, these keep focus at the limit, which keeps the popover open. */
 .dailyVideoLimitStepper button[aria-disabled='true'] {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.4;
 }
 

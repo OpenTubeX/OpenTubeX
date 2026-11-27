@@ -218,7 +218,7 @@
 
 .sponsorBlockSubmissionButton:disabled,
 .sponsorBlockDraftActionButton:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.45;
   text-decoration: none;
 }
@@ -332,7 +332,7 @@
 
 .editSkippedSegmentButton:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .unskipButton {

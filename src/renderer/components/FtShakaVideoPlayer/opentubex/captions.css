@@ -258,7 +258,7 @@
 
 :deep(.ft-caption-timing-controls button:disabled) {
   background: rgb(255 255 255 / 7%);
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.38;
 }
 

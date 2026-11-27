@@ -478,7 +478,7 @@ async function syncNow() {
 }
 
 .profileOption:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 
