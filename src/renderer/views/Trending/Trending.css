@@ -106,14 +106,13 @@
     --material-tab-padding-inline: 4px;
 
     flex: 1 1 auto;
-    flex-wrap: nowrap;
     gap: 0;
   }
 
-  /* Sized by their labels, like the Subscriptions tabs */
+  /* Share the row by their label widths, like the Subscriptions tabs, and
+     wrap instead of overflowing when large text or narrow screens leave no room */
   .tab {
-    flex: 1 1 auto;
-    min-inline-size: 24px;
+    flex: 1 0 auto;
   }
 
   .headerRefreshWidget {
