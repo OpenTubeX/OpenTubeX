@@ -127,6 +127,7 @@ const capacitor = {
   },
   ytDlpClearDownloads: ids => native.clear({ ids }).then(result => result.ok),
   ytDlpOpenDownload: id => native.open({ id }).then(result => result.ok),
+  ytDlpShareDownload: id => native.share({ id }).then(result => result.ok),
   // iOS plays downloads in its own player instead of the watch page.
   ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => {
     if (result.ok) removeDownloadNotifications([id])

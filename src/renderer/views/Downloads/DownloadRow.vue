@@ -415,7 +415,7 @@ const props = defineProps({
   canMoveEarlier: { type: Boolean, default: false },
   canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry', 'stop'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry', 'share', 'stop'])
 const IS_IOS = !!process.env.IS_IOS
 // desktop keeps the full rows; phones get compact rows with an actions menu
 const COMPACT = !!process.env.IS_CAPACITOR
@@ -437,10 +437,11 @@ const menuItems = computed(() => {
     if (canRetry.value && canPlay.value) items.push({ label: t('Downloads.Retry Download'), icon: ['fas', 'arrows-rotate'], enabled: !props.retrying, run: () => emit('retry') })
     if (canPlay.value && !IS_IOS) items.push({ label: t('Video.Add to Queue'), icon: ['fas', 'add-to-queue'], run: () => emit('queue') })
     if (canAccessFiles.value) {
-      items.push(
-        { label: t('Downloads.Show in Folder'), icon: ['fas', 'folder-open'], run: () => emit('open') },
-        { label: t('Downloads.Remove File'), icon: ['fas', 'trash'], run: () => emit('remove') }
-      )
+      items.push({ label: t('Downloads.Share'), icon: ['fas', 'share-nodes'], run: () => emit('share') })
+      // Android hands the file to another app instead of revealing its folder;
+      // iOS can only share files with other apps
+      if (!IS_IOS) items.push({ label: t('Downloads.Open With'), icon: ['fas', 'arrow-up-right-from-square'], run: () => emit('open') })
+      items.push({ label: t('Downloads.Remove File'), icon: ['fas', 'trash'], run: () => emit('remove') })
     }
     items.push({ label: t('Downloads.Clear From List'), icon: ['fas', 'xmark'], run: () => emit('clear') })
   }

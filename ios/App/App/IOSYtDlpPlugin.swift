@@ -232,7 +232,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "IOSYtDlpPlugin"
     public let jsName = "YtDlp"
     public let pluginMethods: [CAPPluginMethod] = [
-        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update", "fetchRumblePage", "passRumbleChallenge"
+        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "share", "play", "cache", "checkUpdate", "update", "fetchRumblePage", "passRumbleChallenge"
     ].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
 
     private let exports = DispatchQueue(label: "org.opentubex.ytdlp.export", qos: .userInitiated)
@@ -730,11 +730,10 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         } catch { call.resolve(["ok": false]) }
     }
 
-    @objc func open(_ call: CAPPluginCall) {
-        if onMain({ self.open(call) }) { return }
+    @objc func share(_ call: CAPPluginCall) {
+        if onMain({ self.share(call) }) { return }
         let id = call.getInt("id") ?? -1
-        guard let record = records[id], let path = record["destination"] as? String,
-              let controller = bridge?.viewController else {
+        guard let record = records[id], let controller = bridge?.viewController else {
             call.resolve(["ok": false]); return
         }
         guard let target = try? directory(record["folder"] as? String ?? "") else {
@@ -744,11 +743,17 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         guard accessed || FileManager.default.isReadableFile(atPath: target.path) else {
             call.resolve(["ok": false]); return
         }
-        guard FileManager.default.fileExists(atPath: path) else {
+        let media = (record["files"] as? [[String: Any]] ?? []).compactMap { $0["path"] as? String }
+        let destinations = record["destinations"] as? [String] ?? [record["destination"] as? String].compactMap { $0 }
+        var paths: [String] = []
+        for path in media + destinations where !paths.contains(path) && FileManager.default.fileExists(atPath: path) {
+            paths.append(path)
+        }
+        guard !paths.isEmpty else {
             if accessed { target.stopAccessingSecurityScopedResource() }
             call.resolve(["ok": false]); return
         }
-        let activity = UIActivityViewController(activityItems: [URL(fileURLWithPath: path)], applicationActivities: nil)
+        let activity = UIActivityViewController(activityItems: paths.map { URL(fileURLWithPath: $0) }, applicationActivities: nil)
         activity.completionWithItemsHandler = { _, _, _, _ in if accessed { target.stopAccessingSecurityScopedResource() } }
         // Without a source rectangle, iPad pins the popover to the view's top-left corner.
         if let popover = activity.popoverPresentationController {

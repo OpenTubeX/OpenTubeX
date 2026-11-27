@@ -813,10 +813,21 @@ final class YtDlpDownloads {
     }
 
     Uri firstFile(long id) {
+        for (String path : paths(id)) if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
+        return null;
+    }
+
+    List<Uri> existingFiles(long id) {
+        List<Uri> files = new ArrayList<>();
+        for (String path : paths(id)) if (YtDlpFiles.exists(context, path)) files.add(Uri.parse(path));
+        return files;
+    }
+
+    private Set<String> paths(long id) {
         Set<String> paths = new LinkedHashSet<>();
         synchronized (this) {
             JSONObject record = records.get(id);
-            if (record == null) return null;
+            if (record == null) return paths;
             JSONArray media = record.optJSONArray("files");
             for (int i = 0; media != null && i < media.length(); i++) {
                 paths.add(media.optJSONObject(i).optString("path"));
@@ -824,8 +835,7 @@ final class YtDlpDownloads {
             JSONArray destinations = record.optJSONArray("destinations");
             for (int i = 0; destinations != null && i < destinations.length(); i++) paths.add(destinations.optString(i));
         }
-        for (String path : paths) if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
-        return null;
+        return paths;
     }
 
     synchronized boolean remove(long id) throws Exception {
