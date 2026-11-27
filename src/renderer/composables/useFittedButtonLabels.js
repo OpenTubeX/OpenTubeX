@@ -1,4 +1,7 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, toValue } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toValue, watch } from 'vue'
+
+import { useTabContext } from '../tabs/TabContext'
+import { isRendered } from '../helpers/rendered'
 
 // Fallback width of an icon-only button, used for actions in the More menu
 const ICON_BUTTON_SIZE = 48
@@ -30,13 +33,22 @@ function getOuterWidth(element) {
  */
 export function useFittedButtonLabels(group, row, overflowOrder = []) {
   let frame
+  // A background tab keeps its layout without rendering it, and reports no
+  // resize once it shows again, so it fits the buttons then.
+  let fitWhenShown = false
   const overflowCount = ref(0)
   const overflowed = computed(() => toValue(overflowOrder).slice(0, overflowCount.value))
+  const { isTabPresented } = useTabContext()
+  watch(() => isTabPresented?.value, presented => {
+    if (presented && fitWhenShown) schedule()
+  })
 
   function update() {
     const groupElement = group.value?.$el
     const rowElement = row.value
-    if (!groupElement || !rowElement || rowElement.clientWidth === 0) { return }
+    if (!groupElement || !rowElement) { return }
+    fitWhenShown = !isRendered(rowElement)
+    if (fitWhenShown || rowElement.clientWidth === 0) { return }
 
     const items = [...groupElement.children].filter(item => item.getClientRects().length > 0)
     const collapsible = items.map(item => item.querySelector(':scope > .buttonLabel') !== null)

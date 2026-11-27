@@ -479,6 +479,7 @@ import {
   shouldPrefetchReplay,
   takeDueReplayComments
 } from './liveChatReplay.js'
+import { isRendered } from '../../helpers/rendered'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
@@ -1469,7 +1470,10 @@ function scheduleLiveEdgeScroll() {
   liveEdgeScrollFrame = requestAnimationFrame(() => {
     liveEdgeScrollFrame = null
     // Wheel/keyboard input or unmounting may have happened since scheduling.
-    if (stayAtBottom && !isUnmounted) {
+    // A background tab keeps its layout without rendering it, and measuring
+    // it would lay out the hidden tab. The comments report their new size
+    // once it shows again, which scrolls them to the live edge.
+    if (stayAtBottom && !isUnmounted && (commentsRef.value == null || isRendered(commentsRef.value))) {
       scrollToBottom('instant')
     }
   })

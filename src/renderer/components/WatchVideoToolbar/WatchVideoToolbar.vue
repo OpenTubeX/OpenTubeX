@@ -42,6 +42,8 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { useI18n } from 'vue-i18n'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import WatchVideoMoreActions from '../WatchVideoMoreActions/WatchVideoMoreActions.vue'
+import { useTabContext } from '../../tabs/TabContext'
+import { isRendered } from '../../helpers/rendered'
 
 /**
  * @typedef ToolbarAction
@@ -76,6 +78,13 @@ const overflowCount = ref(0)
 let layoutFrame = null
 // Whether a layout was skipped while Android's picture-in-picture hid the page
 let layoutPending = false
+// A background tab keeps its layout without rendering it, and a change that
+// leaves the rows at their size reports no resize once it shows again.
+let layoutWhenShown = false
+const { isTabPresented } = useTabContext()
+watch(() => isTabPresented?.value, presented => {
+  if (presented && layoutWhenShown) scheduleLayout()
+})
 // Moving the actions of a group to the More menu can remove the divider, so
 // the overflow keeps budgeting for it. Otherwise the freed space would bring
 // an action back, which brings the divider back too.
@@ -142,7 +151,9 @@ function updateLayout() {
   }
   const element = toolbar.value
   const row = element?.parentElement
-  if (!element || !row || row.clientWidth === 0) { return }
+  if (!element || !row) { return }
+  layoutWhenShown = !isRendered(row)
+  if (layoutWhenShown || row.clientWidth === 0) { return }
 
   element.classList.add('measuring')
   const style = getComputedStyle(element)

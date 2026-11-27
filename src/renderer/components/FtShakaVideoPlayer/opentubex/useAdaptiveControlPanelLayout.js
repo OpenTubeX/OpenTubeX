@@ -191,8 +191,8 @@ export function useAdaptiveControlPanelLayout({
    * @param {boolean} [panelResized] whether only the panel's own size changed
    */
   function scheduleControlPanelLayout(controlPanel, panelResized = false) {
-    // Background tabs remain mounted but are hidden with display:none. Do not
-    // let their zero-size control bars enter a resize/mutation feedback loop.
+    // Background tabs remain mounted but hidden. Do not let their control bars
+    // enter a resize/mutation feedback loop or lay out the hidden tab.
     // The active-tab watcher schedules a fresh measurement when presented.
     if (!isActiveTab.value || scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) {
       return

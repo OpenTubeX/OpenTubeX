@@ -184,6 +184,70 @@ test.describe('desktop tab switching at 125%', () => {
   })
 })
 
+test.describe('switching back to a large page', () => {
+  test.use({ seed: { settings: { reducedMotion: 'on', showTabPreviews: false, fetchSubscriptionsAutomatically: false } } })
+
+  test('keeps the style and layout of background tabs', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    const rowCount = 3000
+    const large = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
+    const content = page.locator(`.tabContent[data-tab-id="${large.id}"] > .routerView`)
+    await expect(content).toBeVisible()
+    // Stands in for a long list, such as several thousand subscribed channels.
+    await content.evaluate((element, rowCount) => {
+      const rows = document.createElement('div')
+      for (let index = 0; index < rowCount; index++) {
+        const row = document.createElement('div')
+        row.className = 'ft-card'
+        row.append(document.createElement('span'), `Row ${index}`)
+        rows.append(row)
+      }
+      element.append(rows)
+    }, rowCount)
+    const other = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/stats', makeActive: true }))
+    await expect(page.locator(`.tabContent[data-tab-id="${other.id}"]`)).toHaveAttribute('aria-hidden', 'false')
+    await settlePageLayout(page)
+
+    const work = await traceStyleAndLayoutWork(page, async () => {
+      await page.locator(`.tab[data-tab-id="${large.id}"]`).click()
+      await expect(page.locator(`.tabContent[data-tab-id="${large.id}"]`)).toHaveAttribute('aria-hidden', 'false')
+      await settlePageLayout(page)
+    })
+    console.log('Switch back to a large page:', work)
+    // Restyling and laying out the whole page took the most time of a switch
+    // to a long list. The rows alone have twice as many elements as allowed.
+    expect(work.restyledElements).toBeLessThan(rowCount)
+    expect(work.laidOutObjects).toBeLessThan(rowCount)
+  })
+})
+
+/**
+ * Counts the elements the page restyles and the objects it lays out.
+ * @param {import('@playwright/test').Page} page
+ * @param {() => Promise<void>} action
+ */
+async function traceStyleAndLayoutWork(page, action) {
+  const session = await page.context().newCDPSession(page)
+  const events = []
+  session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
+  await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
+  try {
+    await action()
+  } finally {
+    const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
+    await session.send('Tracing.end')
+    await complete
+    await session.detach()
+  }
+  let restyledElements = 0
+  let laidOutObjects = 0
+  for (const event of events) {
+    if (event.name === 'UpdateLayoutTree') restyledElements += event.args?.elementCount ?? 0
+    if (event.name === 'Layout') laidOutObjects += event.args?.beginData?.dirtyObjects ?? 0
+  }
+  return { restyledElements, laidOutObjects }
+}
+
 /** Wait for pending resize and mutation observer deliveries before sampling. */
 async function settlePageLayout(page) {
   await page.evaluate(() => new Promise(resolve => {

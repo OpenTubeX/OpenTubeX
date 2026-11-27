@@ -39,6 +39,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { getLastScrollY, getViewportWidth } from '../../helpers/viewport'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
 import { findAdjacentTileIndex, focusTile, getPageTiles, getTileDirection, isTileFocusable, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { isRendered } from '../../helpers/rendered'
 
 const props = defineProps({
   appear: {
@@ -98,12 +99,25 @@ let hidden = false
 // A hidden grid has nothing to measure, so it applies the change once shown.
 let phoneWidthChangedWhileHidden = false
 
+/**
+ * A grid in a background tab keeps its layout without rendering it, and
+ * reports no resize while its tab hides or shows.
+ * @param {Element} element
+ */
+function isGridRendered(element) {
+  return !hidden && isRendered(element)
+}
+
 function updateGridSliderLimit() {
   const element = gridElement.value?.$el
-  if (element) setThumbnailGridVisible(element, active && !hidden && props.grid && gridWidth > 0, thumbnailSizeSetting)
+  if (element) setThumbnailGridVisible(element, active && isGridRendered(element) && props.grid && gridWidth > 0, thumbnailSizeSetting)
 }
 
 watch(() => props.grid, updateGridSliderLimit)
+watch(() => isTabPresented?.value, () => {
+  updateGridSliderLimit()
+  if (phoneWidthChangedWhileHidden) handlePhoneWidthChange()
+}, { flush: 'post' })
 onActivated(() => {
   active = true
   updateGridSliderLimit()
@@ -150,10 +164,12 @@ function getTransitionDurations() {
 // 'feed-move-suppressed' has no transition, and data-skip-move tells the
 // patched TransitionGroup not to measure every child before each update.
 function getMoveClass() {
+  // Measuring the cards of a background tab would lay out the hidden tab.
   const suppressed = suppressMoveTransition ||
     props.disableMoveTransition ||
     reducedMotion.value ||
-    props.itemCount > MOVE_TRANSITION_MAX_ITEMS
+    props.itemCount > MOVE_TRANSITION_MAX_ITEMS ||
+    (gridElement.value?.$el != null && !isRendered(gridElement.value.$el))
 
   return suppressed ? 'feed-move-suppressed' : undefined
 }
@@ -231,7 +247,8 @@ onBeforeUpdate(() => {
   const grid = gridElement.value?.$el
   fillingEmptyGrid = grid instanceof Element && grid.childElementCount === 0 && !reducedMotion.value
   if (fillingEmptyGrid) grid.setAttribute(ENTER_TOGETHER_ATTRIBUTE, '')
-  if (!props.itemKeys || !(grid instanceof Element) || grid.closest('.newFeed') === null) return
+  // Measuring a background tab's cards would lay out the hidden tab.
+  if (!props.itemKeys || !(grid instanceof Element) || grid.closest('.newFeed') === null || !isRendered(grid)) return
   const retainedKeys = new Set(props.itemKeys)
   const leaving = Array.from(grid.children).filter(element => (
     !retainedKeys.has(element.getAttribute('data-feed-item-key')) &&
@@ -255,7 +272,7 @@ function captureLeavingItemLayout(element) {
   // Only the New feed takes leaving items out of flow and consumes these
   // geometry variables. Measuring every removed card in other feeds forces
   // repeated layouts during a large subscription refresh.
-  if (!(element instanceof Element) || element.closest('.newFeed') === null) {
+  if (!(element instanceof Element) || element.closest('.newFeed') === null || !isRendered(element)) {
     return
   }
 
@@ -382,7 +399,7 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     // first measurement, when a grid replaces a list at the end of the page.
     // Resize observations run after layout and any restored scroll position.
     if (gridWidth === 0) updatePageAtBottom()
-    const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert]')
+    const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert], [aria-hidden="true"]')
     suppressMoveTransition = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
@@ -415,10 +432,11 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
 function handlePhoneWidthChange() {
   const element = gridElement.value?.$el
   if (!element || gridWidth === 0) return
-  if (hidden) {
+  if (!isGridRendered(element)) {
     phoneWidthChangedWhileHidden = true
     return
   }
+  phoneWidthChangedWhileHidden = false
   const style = getComputedStyle(element)
   const horizontalInsets = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
     .reduce((total, property) => total + (Number.parseFloat(style[property]) || 0), 0)

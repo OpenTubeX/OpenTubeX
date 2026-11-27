@@ -1,9 +1,9 @@
 <template>
   <div
-    v-show="isPresented || isSwipeFrom || isSwipeTarget || isPrewarmed"
     ref="tabContentRef"
     class="tabContent"
     :class="{
+      backgroundTab: isBackground,
       pageSwipeFrom: isSwipeFrom,
       pageSwipeTo: isSwipeTarget,
       pageSwipePresented: isPresented && isCapacitor,
@@ -13,7 +13,7 @@
     }"
     :style="pageSwipeStyle"
     :data-tab-id="tab.id"
-    :inert="!isPresented"
+    :inert="!isPresented && !isBackground"
     :aria-hidden="String(!isPresented)"
   >
     <div
@@ -97,6 +97,7 @@ import { showTabPage } from '../../tabs/tabPages'
 import { registerAndroidBackPage } from '../../helpers/androidBackGesture'
 import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
 import { getFixedBackgroundContainment } from '../../helpers/fixedBackground'
+import { resumeWindowedListRemeasures } from '../../helpers/windowedList'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -129,6 +130,7 @@ const isPresented = computed(() => store.getters.getPresentedTabId === props.tab
 const isSwipeFrom = computed(() => props.pageSwipe?.fromId === props.tab.id)
 const isSwipeTarget = computed(() => props.pageSwipe?.toId === props.tab.id)
 const isPrewarmed = computed(() => props.prewarm && !isPresented.value && !isSwipeFrom.value && !isSwipeTarget.value)
+const isBackground = computed(() => !isPresented.value && !isSwipeFrom.value && !isSwipeTarget.value && !isPrewarmed.value)
 const pageSwipeStyle = computed(() => {
   if (isSwipeFrom.value) return { left: `${props.pageSwipe.offset}px` }
   if (isSwipeTarget.value) {
@@ -230,6 +232,12 @@ watch([resolvedRoute, () => props.tab.historyIndex], ([route]) => {
     pages.value = [{ key: 0, index: target.index, route: target.route }]
   }
 }, { immediate: true })
+
+// Background tabs and retained pages keep their layout, so their rows report
+// no resize when shown.
+watch([isBackground, currentPageKey], ([background]) => {
+  if (!background) resumeWindowedListRemeasures()
+}, { flush: 'post' })
 
 const watchPreviewing = ref(false)
 // Background Watch tabs only need to preload the video. Mount their browsing
@@ -561,6 +569,30 @@ function cancelLoaderSettle() {
   position: relative;
   min-inline-size: 0;
   inline-size: 100%;
+}
+
+/* A background tab keeps its style and layout without rendering them, so
+   showing it again does not restyle and lay out the whole page, which takes
+   long for large pages such as a long channel list. Like display: none, this
+   keeps its content from being focused or read by assistive technology.
+   Inherited properties set here, such as pointer-events, or an inert
+   attribute would restyle every element of the tab on each switch. */
+.backgroundTab {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  content-visibility: hidden;
+}
+
+/* WebKit builds from before 2025 could keep showing a tab after hiding it
+   this way, and VoiceOver missed a tab shown again. CSS can't tell those
+   builds apart, so every WebKit build, the only engine that supports this
+   system font, hides background tabs with display: none. Chromium 85 to 104 lacks checkVisibility(), which isRendered()
+   needs to tell a background tab apart; :has() arrived with it in 105. */
+@supports not ((content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))) {
+  .backgroundTab {
+    display: none;
+  }
 }
 
 .browsingBehindWatch {

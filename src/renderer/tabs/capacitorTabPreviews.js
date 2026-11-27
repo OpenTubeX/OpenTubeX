@@ -1,6 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { shallowReactive, watch } from 'vue'
 import { getCapacitorTabPreviewRegion } from '../helpers/capacitorTabPreviewRegion.js'
+import { isRendered } from '../helpers/rendered.js'
 import { canCaptureCapacitorTab, createCapacitorPreviewCache } from './capacitorPreviewCache.js'
 import { clearCapacitorTabAvatars } from './capacitorTabAvatars.js'
 import {
@@ -109,7 +110,8 @@ export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Pro
 
 function hasVisibleOverlay() {
   return [...document.querySelectorAll('[role="dialog"], [role="menu"], .settingsWindow')]
-    .some(element => element.getBoundingClientRect().width > 0 && getComputedStyle(element).visibility !== 'hidden')
+    // Overlays left open in a background tab keep their layout, so their size alone doesn't tell.
+    .some(element => isRendered(element) && element.getBoundingClientRect().width > 0 && getComputedStyle(element).visibility !== 'hidden')
 }
 
 async function capturePage() {

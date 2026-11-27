@@ -198,6 +198,7 @@ import { formatDurationAsTimestamp } from '../../helpers/utils'
 import store from '../../store/index'
 import { parseTwitchIrcMessage, parseTwitchReplayPage } from './twitchChat'
 import { getTwitchReplayPage } from './twitchChatReplay'
+import { isRendered } from '../../helpers/rendered'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
@@ -339,7 +340,10 @@ function scrollToBottom() {
 
 function syncScrollPosition() {
   const viewport = scrollport.value
-  if (!viewport) return
+  // A background tab keeps its layout without rendering it, and measuring it
+  // would lay out the hidden tab. The messages report their new size once it
+  // shows again.
+  if (!viewport || !isRendered(viewport)) return
   clampOverlayScrollTop(viewport, viewport.querySelector('.liveChatCommentList'))
   if (stayAtEnd) scrollToBottom()
 }

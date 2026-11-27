@@ -242,6 +242,7 @@ import store from '../../store/index'
 import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { showToast } from '../../helpers/utils'
+import { useTabContext } from '../../tabs/TabContext'
 import {
   isProfileSubscribed as isProfileSubscribedToChannel,
   subscribeToChannel,
@@ -260,6 +261,7 @@ import {
   normalizeSubscriptionChannelSettings,
   parseSubscriptionDailyVideoLimit
 } from '../../helpers/subscription-channels'
+import { isRendered } from '../../helpers/rendered'
 
 const { locale, t } = useI18n()
 
@@ -578,6 +580,14 @@ watch(isSubscribed, (subscribed) => {
   }
 })
 
+// The dropdown renders outside the page, so it would stay open over the tab
+// switched to, whose page keeps the trigger without showing it. Closed
+// dropdowns don't follow the tab, as long lists have a button per row.
+const { isTabPresented } = useTabContext()
+watch(() => isProfileDropdownOpen.value && isTabPresented?.value === false, (hidden) => {
+  if (hidden) isProfileDropdownOpen.value = false
+})
+
 // Pending saves keep the profile they were made in, while this one shows its own settings.
 watch(rootProfileId, () => {
   optimisticChannelSettings.value = null
@@ -602,7 +612,7 @@ function positionProfileDropdown() {
 
   // A hidden trigger, such as the Shorts overlay after leaving full window,
   // leaves nothing to anchor to.
-  if (trigger.getClientRects().length === 0) {
+  if (!isRendered(trigger)) {
     isProfileDropdownOpen.value = false
     return
   }

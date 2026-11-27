@@ -2,6 +2,13 @@
 // overscan region; measured fractional heights keep the scroll range stable.
 export const WINDOWED_LIST_OVERSCAN_PX = 800
 
+// Rows of a background tab keep their layout without rendering it. Measuring
+// them would lay out the hidden tab, and against the presented tab's scroll
+// position, so they keep their state until the tab shows again.
+function isRendered(element) {
+  return element.checkVisibility?.() ?? true
+}
+
 export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis, { nested = false, viewport = globalThis } = {}) {
   const items = new Map()
   const releases = new Set()
@@ -20,9 +27,9 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     let rowTop
     for (const item of widthRemeasures) {
       // A hidden row measures nothing and would keep its stale height, so it
-      // waits until the resize observer reports its box again. A suspended
-      // row waits until its list resumes.
-      if (item.hidden || item.suspended) continue
+      // waits until the resize observer reports its box again, or until its
+      // tab shows again. A suspended row waits until its list resumes.
+      if (item.hidden || item.suspended || !isRendered(item.element)) continue
       // A grid cell stretches to the stale shells beside it, so every cell of
       // a grid row is remounted in the same frame.
       const top = item.element.offsetTop
@@ -70,7 +77,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     viewportCheck = frame(() => {
       viewportCheck = null
       const restyled = [...items.values()].some(item => item.isMounted() && item.height > 0 &&
-        Math.abs(item.element.getBoundingClientRect().height - item.height) > 0.5)
+        isRendered(item.element) && Math.abs(item.element.getBoundingClientRect().height - item.height) > 0.5)
       if (!restyled) return
       for (const item of items.values()) {
         if (!item.near && !item.isMounted() && item.height > 0) scheduleRemeasure(item)
@@ -85,6 +92,9 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     for (const entry of entries) {
       const item = items.get(entry.target)
       if (!item) continue
+      // Hiding its tab leaves a row where it was. Showing the tab again
+      // restores the scroll position that brings the same rows near.
+      if (!entry.isIntersecting && !isRendered(entry.target)) continue
       item.near = entry.isIntersecting
       if (item.suspended) continue
       if (item.near) {
@@ -145,7 +155,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
         },
         canEvict() {
           if (item.suspended || item.near || !items.has(element)) return false
-          if (!isProtected()) return true
+          if (isRendered(element) && !isProtected()) return true
           clearTimeout(retry)
           retry = setTimeout(() => item.release(), retryDelay)
           retryDelay = Math.min(retryDelay * 2, 30_000)
@@ -211,6 +221,10 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
         measuredHeight: () => item.height,
       }
     },
+    // A tab shown again reports no resize for rows that kept their size.
+    resumeRemeasures() {
+      if (widthRemeasures.size > 0 && remeasureFrame === null) remeasureFrame = frame(remeasureWidths)
+    },
     disconnect() {
       cancel(releaseFrame)
       cancel(remeasureFrame)
@@ -232,6 +246,12 @@ let sharedWindow
 export function observeWindowedListItem(element, options) {
   sharedWindow ??= createListWindow()
   return sharedWindow.observe(element, options)
+}
+
+/** Remeasures the rows that waited while their tab was in the background. */
+export function resumeWindowedListRemeasures() {
+  sharedWindow?.resumeRemeasures()
+  nestedWindow?.resumeRemeasures()
 }
 
 // Rows inside their own scroller, such as the watch-page playlist, need the

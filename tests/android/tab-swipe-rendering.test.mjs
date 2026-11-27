@@ -39,6 +39,7 @@ for (const scale of [1, 1.25]) {
         .fixed { position:fixed; bottom:0; height:40px; width:100%; background:cyan; }
       </style><main>
         <div class="tabContent pageSwipePrewarm" inert aria-hidden="true"><div class="neighbor">Background page<div class="fixed">Player controls</div></div></div>
+        <div class="tabContent backgroundTab" aria-hidden="true"><div class="neighbor">Other tab<div class="fixed">Player controls</div></div></div>
         <div class="tabContent pageSwipePresented"><article>Subscriptions</article></div>
       </main>`
       document.body.append(frame)
@@ -52,10 +53,13 @@ for (const scale of [1, 1.25]) {
       const neighbor = frame.locator('.pageSwipePrewarm')
       const bounds = await neighbor.boundingBox()
       assert.ok(bounds.height > 0, 'Prewarming retains layout for the swipe')
+      const background = frame.locator('.backgroundTab')
       const actual = await element.screenshot()
       await neighbor.evaluate(node => { node.style.display = 'none' })
+      await background.evaluate(node => { node.style.display = 'none' })
       const expected = await element.screenshot()
-      assert.ok(actual.equals(expected), 'Inactive neighboring page must contribute no visible pixels')
+      assert.ok(actual.equals(expected), 'Inactive neighboring page and background tabs must contribute no visible pixels')
+      await background.evaluate(node => { node.style.display = '' })
 
       await neighbor.evaluate(node => {
         node.style.display = ''

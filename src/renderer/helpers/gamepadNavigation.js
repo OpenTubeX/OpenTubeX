@@ -1,3 +1,5 @@
+import { isRendered } from './rendered'
+
 const GAMEPAD_AXIS_THRESHOLD = 0.55
 const GAMEPAD_REPEAT_DELAY = 350
 const GAMEPAD_REPEAT_INTERVAL = 110
@@ -429,11 +431,13 @@ function adjustRangeInput(input, direction) {
 
 /** @param {HTMLElement} element */
 function isVisible(element) {
+  // Content of a background tab keeps its layout without rendering it, so
+  // checking that first also keeps from laying out the hidden tab.
+  if (!isRendered(element)) return false
   const rect = element.getBoundingClientRect()
   const style = getComputedStyle(element)
   return rect.width > 0 &&
     rect.height > 0 &&
-    style.display !== 'none' &&
     style.visibility !== 'hidden' &&
     style.visibility !== 'collapse'
 }
