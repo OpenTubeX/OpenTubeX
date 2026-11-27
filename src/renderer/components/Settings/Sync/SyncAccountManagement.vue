@@ -248,6 +248,7 @@ import {
   getCurrentSyncServerSystemInfo,
   isValidSyncServerDeviceId,
   isValidSyncServerDeviceName,
+  orderSyncServerAccountSessions,
 } from '../../../helpers/sync-server-sessions'
 import { getRelativeTimeFromDate, showToast } from '../../../helpers/utils'
 import store from '../../../store/index'
@@ -354,7 +355,7 @@ async function loadSessions(token = props.token) {
     emit('password-login-changed', response.password_login === true)
     const currentSystemInfo = await getCurrentSyncServerSystemInfo()
     const devices = {}
-    sessions.value = await Promise.all(response.sessions.map(async session => {
+    sessions.value = orderSyncServerAccountSessions(await Promise.all(response.sessions.map(async session => {
       if (!session || typeof session.id !== 'string' ||
           !isValidSyncServerDeviceId(session.device_id) ||
           typeof session.current !== 'boolean' ||
@@ -407,7 +408,7 @@ async function loadSessions(token = props.token) {
         devices[session.device_id] = { name: deviceInfo.name, platform: deviceInfo.platform }
       }
       return { ...session, deviceInfo }
-    }))
+    })))
     if (requestClient.token === store.getters.getSyncServerToken) {
       store.commit('setSyncServerDevices', devices)
     }
