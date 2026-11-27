@@ -365,7 +365,8 @@
     gap: 6px;
   }
 
-  .switch-label-icons > :deep(*) {
+  .switch-label-icons > .selectTooltip,
+  .switch-label-icons > :deep(:is(.syncedSettingIndicator, .changedSettingIndicator, .changedSettingIndicatorPlaceholder)) {
     margin-inline-start: 0;
   }
 

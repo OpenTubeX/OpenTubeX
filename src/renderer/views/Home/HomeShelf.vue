@@ -58,6 +58,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { isRendered } from '../../helpers/rendered'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -138,7 +139,9 @@ function showPage(element) {
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => {
-    shelfWidth.value = entry.contentRect.width
+    const width = entry.contentRect.width
+    if (width <= 0 || !isRendered(shelfElement.value)) return
+    shelfWidth.value = width
   })
   resizeObserver.observe(shelfElement.value)
 })

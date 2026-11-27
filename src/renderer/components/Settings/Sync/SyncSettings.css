@@ -62,8 +62,20 @@
 }
 
 .syncProgressFill {
-  animation: sync-progress-stripes 700ms linear infinite;
+  position: relative;
+  overflow: hidden;
+  content-visibility: auto;
   background-color: var(--primary-color);
+  block-size: 100%;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the fill grows with each sync step */
+  transition: inline-size var(--motion-default-effects);
+}
+
+.syncProgressFill::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: -1rem 0;
   background-image: linear-gradient(
     -45deg,
     rgb(255 255 255 / 18%) 25%,
@@ -74,14 +86,12 @@
     transparent 75%
   );
   background-size: 1rem 1rem;
-  block-size: 100%;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the fill grows with each sync step */
-  transition: inline-size var(--motion-default-effects);
+  animation: sync-progress-stripes 700ms linear infinite;
 }
 
 @keyframes sync-progress-stripes {
   to {
-    background-position: 1rem 0;
+    transform: translateX(1rem);
   }
 }
 

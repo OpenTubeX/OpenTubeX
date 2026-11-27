@@ -42,6 +42,49 @@
   initial-value: 0;
 }
 
+/* Gesture and layout properties written on page, sheet, or player roots and
+   read only by the element itself (or its ::before). Keeping them non-inherited
+   prevents Chromium from restyling every descendant when a gesture runs. */
+@property --retained-page-top {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --organizer-swipe-field-size {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --organizer-swipe-field-position {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --settings-back-reveal-top {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --settings-back-reveal-inline {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --bottom-sheet-scroll-action {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --mobile-mini-dismiss-offset {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --mobile-mini-dismiss-duration {
+  syntax: '*';
+  inherits: false;
+}
+
 body {
   margin: 0;
   min-block-size: 100vh;

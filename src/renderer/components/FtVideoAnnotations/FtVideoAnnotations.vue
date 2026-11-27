@@ -152,6 +152,7 @@ function measureAnnotationRoot() {
 
 const resizeObserver = new ResizeObserver((entries) => {
   const { width, height } = entries[0].contentRect
+  if (width <= 0 || height <= 0) return
   containerWidth.value = width
   containerHeight.value = height
 })

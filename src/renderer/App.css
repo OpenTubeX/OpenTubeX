@@ -179,9 +179,11 @@
 
 :global([data-bottom-sheet]) {
   touch-action: none;
+}
 
-  /* Stays on its own layer so the backdrop's layer does not re-raster when the
-     sheet stops sliding, which flickers on Android. See FtPrompt's card. */
+/* Stays on its own layer on Android so the backdrop's layer does not re-raster
+   when the sheet stops sliding, which flickers on Android. See FtPrompt's card. */
+:global(:root.appCapacitorTabs [data-bottom-sheet]) {
   will-change: transform;
 }
 
@@ -1400,6 +1402,9 @@
    the page covers it (createOrganizerSwipeAnimation), so the page keeps the
    look it has before the morph. */
 .app.capacitorPhoneLayout > .routerView.organizerSwipePage::before {
+  --organizer-swipe-field-size: inherit;
+  --organizer-swipe-field-position: inherit;
+
   content: '';
   position: absolute;
   inset: 0;

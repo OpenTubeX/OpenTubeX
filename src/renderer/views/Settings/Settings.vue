@@ -508,6 +508,7 @@ import {
   updateOverlayScrollbars
 } from '../../helpers/overlayScrollbars'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
+import { getWindowFieldPlacement } from '../../helpers/fixedBackground'
 import {
   createSettingsSearchIndex,
   findSettingsSearchTab,
@@ -1672,14 +1673,20 @@ function getAndroidBackTarget() {
       position = { top: padding + view.scrollTop - parent.scrollTop, inline: padding }
     }
   }
+  const elementRect = element.getBoundingClientRect()
+  const field = getWindowFieldPlacement(elementRect.left, elementRect.top)
   return {
     element,
     area: page,
-    // The window's own background, which the page area shows through.
+    // The window's own background, which the page area shows through. Sized to
+    // the viewport instead of background-attachment: fixed so the transformed
+    // back-slide does not repaint every frame.
     styles: {
       'background-color': 'var(--card-bg-color)',
       'background-image': 'var(--card-bg-image)',
-      'background-attachment': 'fixed',
+      'background-size': field.size,
+      'background-position': field.position,
+      'background-repeat': 'no-repeat',
       position: 'relative',
       'z-index': '2'
     },
@@ -1967,17 +1974,32 @@ function dragWindow(event) {
   })
   // Updating reactive bounds here also rerenders the settings controls and their
   // scrollbar directives. Only commit the final bounds when the drag stops.
-  applyLiveBounds()
+  applyLiveBounds(false)
 }
 
-function applyLiveBounds() {
+/** @type {number | null} */
+let resizeLiveBoundsFrame = null
+
+function applyLiveBounds(includeSize = true) {
+  if (!liveBounds || !settingsWindowRef.value) return
   const { style } = settingsWindowRef.value
   style.translate = getWindowTranslate(liveBounds)
-  style.inlineSize = `${liveBounds.width}px`
-  style.blockSize = `${liveBounds.height}px`
+  if (includeSize) {
+    style.inlineSize = `${liveBounds.width}px`
+    style.blockSize = `${liveBounds.height}px`
+  }
+}
+
+function flushResizeLiveBounds() {
+  resizeLiveBoundsFrame = null
+  applyLiveBounds(true)
 }
 
 function commitLiveBounds() {
+  if (resizeLiveBoundsFrame !== null) {
+    cancelAnimationFrame(resizeLiveBoundsFrame)
+    resizeLiveBoundsFrame = null
+  }
   if (liveBounds === null) return
   windowBounds.value = liveBounds
   liveBounds = null
@@ -2056,7 +2078,7 @@ function resizeWindow(event) {
     height: bottom - top
   }
   // As with dragging, commit the reactive bounds only when the resize stops.
-  applyLiveBounds()
+  resizeLiveBoundsFrame ??= requestAnimationFrame(flushResizeLiveBounds)
 }
 
 function stopResizing(event) {

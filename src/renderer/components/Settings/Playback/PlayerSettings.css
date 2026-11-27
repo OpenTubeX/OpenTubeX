@@ -166,13 +166,13 @@
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   transition: transform 0.18s ease, opacity 0.18s ease;
-  will-change: transform;
 }
 
 .quickPlaybackSpeedEntry.dragging {
   opacity: 0.65;
   z-index: 1;
   transition: opacity 0.18s ease;
+  will-change: transform;
 }
 
 .quickPlaybackSpeedEntry.suppressTransition {

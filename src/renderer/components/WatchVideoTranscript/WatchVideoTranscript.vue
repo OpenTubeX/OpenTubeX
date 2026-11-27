@@ -205,7 +205,7 @@ const props = defineProps({
     default: () => []
   },
   currentTime: {
-    type: Number,
+    type: [Number, Function],
     default: 0
   },
   preferredCaptionIndex: {
@@ -276,7 +276,8 @@ const segmentChunks = computed(() => {
   return { generation: ++segmentChunksGeneration, chunks }
 })
 const activeSegmentIndex = computed(() => {
-  return findActiveTranscriptSegmentIndex(segments.value, props.currentTime)
+  const time = typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+  return findActiveTranscriptSegmentIndex(segments.value, time)
 })
 // Rows read the active index of their chunk instead of the shared one, so a
 // new active segment only rerenders the chunks it leaves and enters. The
@@ -458,6 +459,7 @@ function updateTranscriptFadeState() {
     transcriptFadeBottom.value = false
     return
   }
+  if (!isRendered(list)) return
 
   transcriptFadeTop.value = list.scrollTop > 1
   transcriptFadeBottom.value = list.scrollTop + list.clientHeight < list.scrollHeight - 1

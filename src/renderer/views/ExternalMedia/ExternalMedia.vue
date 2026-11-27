@@ -462,7 +462,7 @@
             <WatchVideoTranscript
               v-if="transcriptPanelOpen"
               :captions="transcriptCaptions"
-              :current-time="currentTime"
+              :current-time="getCurrentTime"
               :preferred-caption-index="preferredTranscriptCaptionIndex"
               :video-title="info.title ?? ''"
               :fullscreen-overlay="fullscreenTranscriptOpen"
@@ -484,7 +484,7 @@
               :key="`${twitchChatTarget.type}:${twitchChatTarget.id}`"
               class="watchVideoSideBar phoneLiveChat"
               :target="twitchChatTarget"
-              :current-time="currentTime"
+              :current-time="getCurrentTime"
               :seek-count="seekCount"
               :seeking="seeking"
               :fullscreen-overlay="fullscreenLiveChatOpen"
@@ -1403,6 +1403,9 @@ function updatePlaybackRate(rate) {
   // Retrying remounts the player, which must keep the chosen speed.
   currentPlaybackRate.value = rate
   if (companionAudio.value) companionAudio.value.playbackRate = rate
+}
+function getCurrentTime() {
+  return currentTime.value
 }
 function updateCurrentTime(seconds) {
   currentTime.value = seconds

@@ -56,7 +56,7 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
 
   function resizeCanvas() {
     const canvas = musicVisualizerCanvas.value
-    if (!canvas) {
+    if (!canvas || canvas.clientWidth === 0 || canvas.clientHeight === 0) {
       return
     }
 

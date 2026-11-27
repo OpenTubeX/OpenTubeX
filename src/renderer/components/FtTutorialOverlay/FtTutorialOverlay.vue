@@ -260,6 +260,9 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import ThemeGallery from '../Settings/Appearance/ThemeGallery.vue'
 import ThemeModePicker from '../Settings/Appearance/ThemeModePicker.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
+import { useRootClass } from '../../helpers/rootClasses'
+
+useRootClass('appTutorialOverlayOpen', ref(true))
 
 const props = defineProps({
   initialStep: { type: Number, default: 0 }

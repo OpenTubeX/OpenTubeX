@@ -509,7 +509,7 @@ const props = defineProps({
     default: null
   },
   currentTime: {
-    type: Number,
+    type: [Number, Function],
     default: 0
   }
 })
@@ -577,7 +577,8 @@ let replayFetchedUntilMs = 0
  * Tops the replay buffer back up once it no longer reaches far enough ahead of the player.
  */
 const requestMoreReplayComments = createCoalescingPoller(async () => {
-  if (liveChatInstance === null || !shouldPrefetchReplay(replayFetchedUntilMs, props.currentTime)) {
+  const currentTime = typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+  if (liveChatInstance === null || !shouldPrefetchReplay(replayFetchedUntilMs, currentTime)) {
     return
   }
 
@@ -789,7 +790,7 @@ function startLiveChatLocal() {
   liveChatInstance.once('end', handleEnd)
 
   // Videos opened at a saved watch progress start midway through the replay.
-  const startSeconds = pendingReplaySeekSeconds ?? props.currentTime
+  const startSeconds = pendingReplaySeekSeconds ?? (typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime)
   pendingReplaySeekSeconds = null
   if (isReplay.value && startSeconds > 0) {
     liveChatInstance.seekTo(startSeconds * 1000)
@@ -1008,7 +1009,8 @@ function applyChatFilter() {
   liveChatInstance.setFilter(liveChatFilter.value)
 
   if (isReplay.value) {
-    liveChatInstance.seekTo(props.currentTime * 1000)
+    const currentTime = typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+    liveChatInstance.seekTo(currentTime * 1000)
     requestMoreReplayComments()
   }
 }
@@ -1019,12 +1021,13 @@ watch([liveChatFilter, () => props.offline], applyChatFilter)
  * Shows every buffered replay message that the player has reached by now.
  */
 function releaseReplayComments() {
-  for (const { comment } of takeDueReplayComments(pendingReplayComments, props.currentTime)) {
+  const currentTime = typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+  for (const { comment } of takeDueReplayComments(pendingReplayComments, currentTime)) {
     deliverComment(comment)
   }
 }
 
-watch([() => props.currentTime, () => props.seekRequest, () => props.offline], ([currentTime, seekRequest], [, previousSeekRequest]) => {
+watch([() => typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime, () => props.seekRequest, () => props.offline], ([currentTime, seekRequest], [, previousSeekRequest]) => {
   const seeked = seekRequest !== null && seekRequest !== previousSeekRequest
   if (liveChatInstance === null) {
     // Metadata loading can finish after a paused seek. Keep its precision, but

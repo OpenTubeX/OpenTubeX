@@ -17,7 +17,6 @@ const props = defineProps({
   isActive: { type: Boolean, default: false },
   tabBarPosition: { type: String, default: 'top' },
   disableTooltips: { type: Boolean, default: false },
-  closeTooltipsSignal: { type: Number, default: 0 },
   showPreview: { type: Boolean, default: true },
   showIcon: { type: Boolean, default: true }
 })
@@ -70,7 +69,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', handleWindowBlur)
   hideTooltip()
 })
-watch(() => props.closeTooltipsSignal, hideTooltip)
 watch(() => props.isActive, active => { if (active) hideTooltip() })
 watch(() => props.disableTooltips, disabled => { if (disabled) hideTooltip() })
 watch(() => props.tabBarPosition, hideTooltip)

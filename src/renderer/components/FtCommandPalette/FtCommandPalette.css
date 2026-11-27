@@ -28,7 +28,6 @@
   background-color: var(--command-palette-backdrop-color);
   animation: command-palette-dim-enter var(--motion-fast-effects);
   pointer-events: none;
-  will-change: opacity;
 }
 
 .playerFullWindow .commandPaletteBackdrop {
@@ -49,10 +48,6 @@
   max-block-size: min(680px, calc(100vh - min(14vh, 120px) - 48px));
   min-block-size: 260px;
   overflow: hidden;
-
-  /* Stays on its own layer so the backdrop's layer does not re-raster when the
-     animation ends, which flickers on Android. See FtPrompt's card. */
-  will-change: transform;
 }
 
 .commandPaletteHeader {
@@ -354,6 +349,16 @@ kbd {
 :root[data-reduced-motion='reduce'] .commandPaletteBackdrop,
 :root[data-reduced-motion='reduce'] .commandPalette {
   animation: none;
+}
+
+/* Stays on its own layer on Android so the backdrop's layer does not re-raster
+   when the animation ends, which flickers on Android. See FtPrompt's card. */
+:root.appCapacitorTabs .commandPaletteBackdrop::before {
+  will-change: opacity;
+}
+
+:root.appCapacitorTabs .commandPalette {
+  will-change: transform;
 }
 
 @media only screen and (width <= 520px) {

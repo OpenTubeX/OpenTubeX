@@ -55,7 +55,7 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
     tabs,
     stripItems: tabs,
     selectedTabIds: ref(new Set()),
-    closeTooltipsSignal: ref(0),
+    dismissTabTooltips() {},
     dropZoneRef: { value: container },
     inlineNewTabButtonRef: { value: null },
     buildStripItems: items => items,

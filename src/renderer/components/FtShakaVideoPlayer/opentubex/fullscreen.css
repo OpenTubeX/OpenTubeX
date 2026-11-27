@@ -267,6 +267,12 @@
   /* Isolate dock content from the player and neighbouring panels. */
   contain: layout paint;
 
+  /* Fullscreen docks are transformed and contained glass overlays, so nested
+     FtCards must not paint fixed viewport field layers inside them. */
+  --fixed-background-display: none;
+  --fixed-background-host-clip: border-box;
+  --fixed-background-host-attachment: scroll;
+
   /*
     Slide only, like the chapters dock. Fading the panel would make it the
     backdrop root of its glass layer below while the opacity transition runs,

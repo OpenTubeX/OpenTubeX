@@ -734,9 +734,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    * @param {import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect} rect
    * @param {boolean} [persist]
    * @param {boolean} [keepAnchor] trust the rect's own anchor over its geometry
+   * @param {ReturnType<typeof getViewportInsets>} [insets]
    */
-  function applyScrollMiniPlayerRect(rect, persist = false, keepAnchor = false) {
-    const insets = getViewportInsets()
+  function applyScrollMiniPlayerRect(rect, persist = false, keepAnchor = false, insets = getViewportInsets()) {
     const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value, insets)
     // Remember the edge the player is parked at, so a later resize can put it
     // back against that edge instead of leaving it where the old viewport was.
@@ -1546,6 +1546,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function endScrollMiniPointerSession() {
     if (scrollMiniPointerSession?.type === 'volume') scheduleScrollMiniVolumeHide()
     if (scrollMiniPointerSession?.type === 'drag') clearScrollMiniPlayerDragOffset()
+    if (scrollMiniResizeFrame !== null) {
+      cancelAnimationFrame(scrollMiniResizeFrame)
+      scrollMiniResizeFrame = null
+    }
     scrollMiniPointerSession = null
     if (scrollMiniDragAspectRatioChanged) {
       scrollMiniDragAspectRatioChanged = false
@@ -1620,6 +1624,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  /** @type {number | null} */
+  let scrollMiniResizeFrame = null
+
+  function renderScrollMiniPlayerResize() {
+    scrollMiniResizeFrame = null
+    const session = scrollMiniPointerSession
+    if (session?.type !== 'resize' || !session.rect) return
+    applyScrollMiniPlayerRect(session.rect, false, false, session.insets)
+  }
+
   /** @param {PointerEvent} event */
   function handleScrollMiniPointerMoveWindow(event) {
     if (!scrollMiniPointerSession || !scrollMiniPlayerActive.value) return
@@ -1643,23 +1657,20 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       return
     }
 
-    const insets = getViewportInsets()
-
     if (scrollMiniPointerSession.type === 'resize' && scrollMiniPointerSession.corner) {
-      const { startRect, startX, corner } = scrollMiniPointerSession
+      const { startRect, startX, corner, insets } = scrollMiniPointerSession
       const edgeX = startRect.left + (corner.endsWith('right') ? startRect.width : 0)
       // Preserve the grab offset, including presses inside the larger touch target.
-      applyScrollMiniPlayerRect(resizeScrollMiniPlayerFromCorner(
+      scrollMiniPointerSession.rect = resizeScrollMiniPlayerFromCorner(
         startRect,
         /** @type {'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} */ (corner),
         edgeX + event.clientX - startX,
         event.clientY,
         insets,
         scrollMiniVideoAspectRatio.value
-      ))
+      )
+      scrollMiniResizeFrame ??= requestAnimationFrame(renderScrollMiniPlayerResize)
     }
-
-    updateScrollMiniDragHandleContrast()
   }
 
   /** @param {PointerEvent} event */
@@ -1735,7 +1746,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(currentRect, insets), true)
       }
     } else {
-      applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value), true)
+      if (scrollMiniResizeFrame !== null) {
+        cancelAnimationFrame(scrollMiniResizeFrame)
+        scrollMiniResizeFrame = null
+      }
+      const resizedRect = scrollMiniPointerSession.rect ?? scrollMiniPlayerRect.value
+      applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(resizedRect, scrollMiniVideoAspectRatio.value), true)
+      updateScrollMiniDragHandleContrast()
     }
 
     endScrollMiniPointerSession()
@@ -1809,9 +1826,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     event.stopPropagation()
     stopScrollMiniPlayerBounceInPlace()
 
+    const insets = getViewportInsets()
     scrollMiniPointerSession = {
       type: 'resize',
-      corner: getResizeHandleCorner(scrollMiniPlayerRect.value, getViewportInsets()),
+      corner: getResizeHandleCorner(scrollMiniPlayerRect.value, insets),
+      insets,
       startX: event.clientX,
       startY: event.clientY,
       startRect: { ...scrollMiniPlayerRect.value },

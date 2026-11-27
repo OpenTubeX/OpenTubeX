@@ -204,10 +204,14 @@ const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
   target: { type: Object, required: true },
   fullscreenOverlay: { type: Boolean, default: false },
-  currentTime: { type: Number, default: 0 },
+  currentTime: { type: [Number, Function], default: 0 },
   seekCount: { type: Number, default: 0 },
   seeking: { type: Boolean, default: false }
 })
+
+const replaySecond = computed(() => Math.floor(
+  typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+))
 
 const { t, locale } = useI18n()
 const title = computed(() => props.target.type === 'replay' ? t('Video.Live Chat Replay') : t('Video.Live Chat'))
@@ -236,7 +240,7 @@ const scrollport = useTemplateRef('scrollport')
 const visibleMessages = computed(() => {
   if (props.target.type === 'live') return messages.value
   if (props.seeking) return []
-  return messages.value.filter(message => message.offset <= props.currentTime).slice(-500)
+  return messages.value.filter(message => message.offset <= replaySecond.value).slice(-500)
 })
 
 let socket = null
@@ -378,17 +382,18 @@ function connect() {
 }
 
 async function fetchReplay() {
-  if (props.seeking || fetching || retryTimer || exhausted || stopped || fetchedUntil >= props.currentTime + 20) return
+  const currentTime = replaySecond.value
+  if (props.seeking || fetching || retryTimer || exhausted || stopped || fetchedUntil >= currentTime + 20) return
   fetching = true
   const generation = replayGeneration
   let failed = false
   try {
-    const position = nextOffset ?? Math.floor(props.currentTime)
+    const position = nextOffset ?? currentTime
     const payload = await getTwitchReplayPage(props.target.id, position)
     if (generation !== replayGeneration || stopped || props.seeking) return
     const page = parseTwitchReplayPage(payload)
     addMessages(page.messages)
-    fetchedUntil = page.messages.at(-1)?.offset ?? props.currentTime
+    fetchedUntil = page.messages.at(-1)?.offset ?? currentTime
     nextOffset = page.cursor ? Math.max(position + 1, Math.floor(fetchedUntil)) : null
     exhausted = !page.cursor
     errorMessage.value = ''
@@ -406,7 +411,7 @@ async function fetchReplay() {
         retryTimer = null
         fetchReplay()
       }, 5000)
-    } else if (nextOffset !== null && !stopped && fetchedUntil < props.currentTime + 20) fetchReplay()
+    } else if (nextOffset !== null && !stopped && fetchedUntil < replaySecond.value + 20) fetchReplay()
   }
 }
 
@@ -428,7 +433,7 @@ function resetReplay() {
   fetchReplay()
 }
 
-watch(() => props.currentTime, () => { if (props.target.type === 'replay') fetchReplay() })
+watch(replaySecond, () => { if (props.target.type === 'replay') fetchReplay() })
 watch(() => [visibleMessages.value[0]?.id, visibleMessages.value.at(-1)?.id, visibleMessages.value.length], syncScrollPosition, { flush: 'post' })
 watch([showLiveChatTimestamps, () => props.fullscreenOverlay], syncScrollPosition, { flush: 'post' })
 watch(scrollport, (viewport, _previous, onCleanup) => {

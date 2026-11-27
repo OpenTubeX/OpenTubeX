@@ -1,6 +1,7 @@
 <template>
   <FtCard
     class="card"
+    :fixed-background="false"
   >
     <h3>{{ $t("Settings.Password Dialog.Enter Password To Unlock") }}</h3>
 

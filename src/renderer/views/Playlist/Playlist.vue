@@ -1171,9 +1171,10 @@ watch(selectedUserPlaylistVideoCount, async () => {
 const historyCacheById = computed(() => store.getters.getHistoryCacheById)
 
 function getPlaylistItemsWithDuration() {
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
   const { items, anyVideoMissingDuration } = fillMissingPlaylistVideoDurations(
     shownPlaylistItems.value,
-    historyCacheById.value
+    toRaw(historyCacheById.value)
   )
 
   // Show notice if not already shown before returning playlist items

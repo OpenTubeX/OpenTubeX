@@ -224,7 +224,10 @@ function restorePlayback() {
   resumePlayback = null
 }
 
-function measurePlayer() {
+function measurePlayer(event) {
+  if (event?.type === 'scroll' && event.target && dialog.value?.contains?.(event.target)) {
+    return
+  }
   if (!docked.value || !props.open || suspended.value) return
   if (props.fullscreen) {
     sheetTop.value = window.innerHeight * 0.3

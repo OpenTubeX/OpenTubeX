@@ -1,3 +1,4 @@
+import { toRaw } from 'vue'
 import { isHistoryEntryWatched } from '../../history'
 
 export {
@@ -22,6 +23,7 @@ export {
  */
 export function withoutWatchedDiscoveryVideos(items, getters) {
   if (!getters.getHideWatchedInSearchAndRecommendations) return items
-  const historyById = getters.getHistoryCacheById
+  getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyById = toRaw(getters.getHistoryCacheById)
   return items.filter(item => item.videoId == null || !isHistoryEntryWatched(historyById[item.videoId]))
 }

@@ -31,7 +31,6 @@
   background-color: var(--tab-organizer-backdrop-color);
   animation: tab-organizer-dim-enter var(--motion-default-effects);
   pointer-events: none;
-  will-change: opacity;
 }
 
 /* Rows and fields sit on a container one step above the dialog surface;
@@ -52,10 +51,6 @@
   max-block-size: calc(100vh - clamp(24px, 10vh, 96px));
   overflow: hidden;
   animation: tab-organizer-enter var(--motion-default-spatial);
-
-  /* Stays on its own layer so the backdrop's layer does not re-raster when the
-     animation ends, which flickers on Android. See FtPrompt's card. */
-  will-change: transform;
 }
 
 .tabOrganizerHeader {
@@ -1038,4 +1033,14 @@
 :root[data-reduced-motion='reduce'] .tabOrganizerBackdrop,
 :root[data-reduced-motion='reduce'] .tabOrganizer {
   animation: none;
+}
+
+/* Stays on its own layer on Android so the backdrop's layer does not re-raster
+   when the animation ends, which flickers on Android. See FtPrompt's card. */
+:root.appCapacitorTabs .tabOrganizerBackdrop::before {
+  will-change: opacity;
+}
+
+:root.appCapacitorTabs .tabOrganizer {
+  will-change: transform;
 }

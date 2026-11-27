@@ -181,10 +181,23 @@ function spinHourglassOnce() {
   spinHourglass.value = true
 }
 
+const { isTabPresented } = useTabContext()
+const documentVisible = ref(typeof document === 'undefined' || !document.hidden)
+
+function handleVisibilityChange() {
+  documentVisible.value = !document.hidden
+  if (documentVisible.value) updateCountdown()
+}
+
 // Only the countdown ring needs a per-second tick. Tabs stay mounted while not
 // presented, so leaving the timer running would churn reactivity once a second
 // per open feed tab even when no countdown is on screen.
-const countdownVisible = computed(() => props.nextAutoRefreshAt > 0 && props.autoRefreshInterval > 0)
+const countdownVisible = computed(() => (
+  props.nextAutoRefreshAt > 0 &&
+  props.autoRefreshInterval > 0 &&
+  documentVisible.value &&
+  (isTabPresented?.value ?? true)
+))
 
 function startCountdownTicker() {
   if (countdownTicker !== null) {
@@ -214,12 +227,12 @@ onMounted(() => {
   if (countdownVisible.value) {
     startCountdownTicker()
   }
-  document.addEventListener('visibilitychange', updateCountdown)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onBeforeUnmount(() => {
   stopCountdownTicker()
-  document.removeEventListener('visibilitychange', updateCountdown)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 const refreshFeedButtonTitle = computed(() => {
@@ -230,7 +243,6 @@ const refreshFeedButtonTitle = computed(() => {
 })
 
 const emit = defineEmits(['cancel', 'click'])
-const { isTabPresented } = useTabContext()
 
 useTabLifecycle({
   pullToRefresh(request) {

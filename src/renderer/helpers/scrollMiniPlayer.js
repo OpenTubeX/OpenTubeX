@@ -578,7 +578,7 @@ export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointer
     top = rect.top
   }
 
-  const clamped = clampScrollMiniPlayerRect({ left, top, width, height, dock }, normalizedAspectRatio)
+  const clamped = clampScrollMiniPlayerRect({ left, top, width, height, dock }, normalizedAspectRatio, insets)
   return { ...clamped, dock }
 }
 

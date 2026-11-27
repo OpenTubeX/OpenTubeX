@@ -255,20 +255,20 @@ export function useFullscreenDocks({
   }
 
   /**
-   * Moves and resizes a dock from where it was drawn to its new slot with a
-   * vertical `scale` and `translate`, which the compositor animates without
-   * laying out the dock's content again. Its children get the inverse scale,
-   * so the content keeps its size, stays at the dock's top edge and is
-   * revealed or covered by the moving bottom edge.
+   * Measures a dock and its children before any animation starts, so batching
+   * multiple docks never interleaves style/animation writes with layout reads.
    * @param {HTMLElement} element
    * @param {{ top: number, height: number }} from
-   * @param {DOMRect} to
    */
-  function animateFullscreenDockSlot(element, from, to) {
+  function measureFullscreenDockSlotAnimation(element, from) {
+    const to = element.getBoundingClientRect()
+    if (!(to.height > 0 && (Math.abs(from.top - to.top) >= 0.5 || Math.abs(from.height - to.height) >= 0.5))) {
+      return null
+    }
     const startScale = from.height / to.height
     const resized = Math.abs(startScale - 1) >= 0.001
     // Measure the children's centers, which their scale applies around, before
-    // the dock's own transform moves them.
+    // any dock's transform moves them.
     const children = resized
       ? [...element.children].flatMap(child => {
           if (!(child instanceof HTMLElement) || child.classList.contains('fullscreenDockResizeHandle')) return []
@@ -276,7 +276,18 @@ export function useFullscreenDocks({
           return bounds.height > 0 ? [{ child, center: bounds.top + bounds.height / 2 - to.top }] : []
         })
       : []
+    return { element, from, to, startScale, resized, children }
+  }
 
+  /**
+   * Moves and resizes a dock from where it was drawn to its new slot with a
+   * vertical `scale` and `translate`, which the compositor animates without
+   * laying out the dock's content again. Its children get the inverse scale,
+   * so the content keeps its size, stays at the dock's top edge and is
+   * revealed or covered by the moving bottom edge.
+   * @param {{ element: HTMLElement, from: { top: number, height: number }, to: DOMRect, startScale: number, resized: boolean, children: { child: HTMLElement, center: number }[] }} measured
+   */
+  function animateFullscreenDockSlot({ element, from, to, startScale, resized, children }) {
     // Both transforms apply around the dock's center, which scaling moves.
     const startTranslate = from.top - to.top - to.height * (1 - startScale) / 2
     animateFullscreenDockArrangement(element, [
@@ -328,13 +339,15 @@ export function useFullscreenDocks({
     if (generation !== fullscreenDockArrangementGeneration) return
     cancelFullscreenDockArrangementAnimations()
 
+    const measured = []
     for (const [dock, from] of before) {
       const element = getFullscreenDockElement(dock)
       if (!element) continue
-      const to = element.getBoundingClientRect()
-      if (to.height > 0 && (Math.abs(from.top - to.top) >= 0.5 || Math.abs(from.height - to.height) >= 0.5)) {
-        animateFullscreenDockSlot(element, from, to)
-      }
+      const slot = measureFullscreenDockSlotAnimation(element, from)
+      if (slot) measured.push(slot)
+    }
+    for (const slot of measured) {
+      animateFullscreenDockSlot(slot)
     }
   })
 
@@ -447,25 +460,51 @@ export function useFullscreenDocks({
     event.preventDefault()
   }
 
-  function handleFullscreenDockResizePointerMove(event) {
-    if (isOtherFullscreenDockPointer(event)) return
-    const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
+  /** @type {number | null} */
+  let dockResizeFrame = null
+  /** @type {number | null} */
+  let pendingDockResizeClientY = null
+
+  function flushFullscreenDockResize() {
+    dockResizeFrame = null
+    if (pendingDockResizeClientY === null || !resizingFullscreenDock || !resizingFullscreenDockBounds || !container.value) return
+    const clientY = pendingDockResizeClientY
+    pendingDockResizeClientY = null
+    const pointerWeight = (clientY - resizingFullscreenDockBounds.top) /
       resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
     setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
   }
 
+  function handleFullscreenDockResizePointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    pendingDockResizeClientY = event.clientY
+    dockResizeFrame ??= requestAnimationFrame(flushFullscreenDockResize)
+  }
+
   function stopFullscreenDockResize(event) {
     if (isOtherFullscreenDockPointer(event)) return
+    if (dockResizeFrame !== null) {
+      cancelAnimationFrame(dockResizeFrame)
+      flushFullscreenDockResize()
+    }
     fullscreenDockGesturePointerId = null
     fullscreenDockResizing.value = false
     resizingFullscreenDock = null
     resizingFullscreenDockBounds = null
+    pendingDockResizeClientY = null
     window.removeEventListener('pointermove', handleFullscreenDockResizePointerMove)
     window.removeEventListener('pointerup', stopFullscreenDockResize)
     window.removeEventListener('pointercancel', stopFullscreenDockResize)
   }
 
-  onUnmounted(stopFullscreenDockResize)
+  onUnmounted(() => {
+    if (dockResizeFrame !== null) {
+      cancelAnimationFrame(dockResizeFrame)
+      dockResizeFrame = null
+    }
+    pendingDockResizeClientY = null
+    stopFullscreenDockResize()
+  })
 
   const fullscreenDockWidthResizing = ref(false)
   let resizingFullscreenDockWidthOffset = 0
@@ -561,6 +600,16 @@ export function useFullscreenDocks({
     event.preventDefault()
   }
 
+  /** @type {number | null} */
+  let dockWidthResizeFrame = null
+
+  function flushFullscreenDockWidthResize() {
+    dockWidthResizeFrame = null
+    if (draggedFullscreenDockWidth !== null && fullscreenDockWidthResizing.value) {
+      applyDraggedFullscreenDockWidth(draggedFullscreenDockWidth)
+    }
+  }
+
   function handleFullscreenDockWidthPointerMove(event) {
     if (isOtherFullscreenDockPointer(event)) return
     const bounds = resizingFullscreenDockWidthBounds
@@ -568,11 +617,15 @@ export function useFullscreenDocks({
       getFullscreenDockWidthAt(event.clientX, bounds) + resizingFullscreenDockWidthOffset,
       bounds.maximumWidth
     )
-    applyDraggedFullscreenDockWidth(draggedFullscreenDockWidth)
+    dockWidthResizeFrame ??= requestAnimationFrame(flushFullscreenDockWidthResize)
   }
 
   function stopFullscreenDockWidthResize(event) {
     if (!fullscreenDockWidthResizing.value || isOtherFullscreenDockPointer(event)) return
+    if (dockWidthResizeFrame !== null) {
+      cancelAnimationFrame(dockWidthResizeFrame)
+      dockWidthResizeFrame = null
+    }
     fullscreenDockGesturePointerId = null
     window.removeEventListener('pointermove', handleFullscreenDockWidthPointerMove)
     window.removeEventListener('pointerup', stopFullscreenDockWidthResize)
