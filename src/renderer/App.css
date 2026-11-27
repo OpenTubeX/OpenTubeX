@@ -1386,8 +1386,22 @@
   z-index: 1101;
   transform-origin: top left;
   pointer-events: none;
-  background: var(--bg-color);
   will-change: transform, clip-path;
+}
+
+/* Covers the organizer behind the page with the window's field, placed where
+   the page covers it (createOrganizerSwipeAnimation), so the page keeps the
+   look it has before the morph. */
+.app.capacitorPhoneLayout > .routerView.organizerSwipePage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg-color);
+  background-image: var(--bg-image);
+  background-repeat: no-repeat;
+  background-size: var(--organizer-swipe-field-size);
+  background-position: var(--organizer-swipe-field-position);
 }
 
 .libraryNoticeText {

@@ -96,7 +96,7 @@ import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDo
 import { showTabPage } from '../../tabs/tabPages'
 import { registerAndroidBackPage } from '../../helpers/androidBackGesture'
 import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
-import { getFixedBackgroundContainment } from '../../helpers/fixedBackground'
+import { getFixedBackgroundContainment, getWindowFieldPlacement } from '../../helpers/fixedBackground'
 import { resumeWindowedListRemeasures } from '../../helpers/windowedList'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
@@ -407,17 +407,6 @@ function getAndroidBackCoverArea(element) {
     '--window-field-size': size,
     '--window-field-position': position
   }
-}
-
-/**
- * Places the window's field (body::before), which pages let show through, on
- * a box at this viewport position, so the box matches what it covers.
- * @param {number} left
- * @param {number} top
- */
-function getWindowFieldPlacement(left, top) {
-  const { clientWidth, clientHeight } = document.documentElement
-  return { size: `${clientWidth}px ${clientHeight}px`, position: `${-left}px ${-top}px` }
 }
 
 /**

@@ -1,5 +1,6 @@
 import { applyAnimationSpeed } from './animationSpeed'
 import { getCapacitorTabPreviewRegion } from './capacitorTabPreviewRegion'
+import { getFixedBackgroundContainment, getWindowFieldPlacement } from './fixedBackground'
 
 export function organizerSwipeProgress(distance, height) {
   return Math.max(0, Math.min(1, distance / Math.min(320, height * 0.45)))
@@ -25,8 +26,23 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const radius = Number.parseFloat(getComputedStyle(preview).borderTopLeftRadius) || 0
   const reduced = document.documentElement.dataset.reducedMotion === 'reduce'
   const animations = []
+  /** @type {{ element: HTMLElement, name: string }[]} */
+  let pageStyles = []
   if (!reduced) {
+    // The page lets the window's field show through, so its backdrop paints
+    // the field where the page covers it. The class's transform hint also
+    // makes the page contain the fixed field layers of its cards, which
+    // would jump to other parts of their fields and span the whole page,
+    // where repainting them for every step of the crop drops frames. Measure
+    // them before the hint applies, see getFixedBackgroundContainment.
+    const { size, position } = getWindowFieldPlacement(from.left, from.top)
+    pageStyles = [
+      { element: page, name: '--organizer-swipe-field-size', value: size },
+      { element: page, name: '--organizer-swipe-field-position', value: position },
+      ...getFixedBackgroundContainment(page)
+    ]
     page.classList.add('organizerSwipePage')
+    for (const { element, name, value } of pageStyles) element.style.setProperty(name, value)
     // Short landscape pages cannot fill a compact card at this width scale.
     // Crossfade to the cached image, which covers the whole card.
     if (fillsPreview) {
@@ -78,6 +94,7 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
       settlement?.cancel()
       for (const animation of animations) animation.cancel()
       page.classList.remove('organizerSwipePage')
+      for (const { element, name } of pageStyles) element.style.removeProperty(name)
       preview.classList.remove('organizerSwipePreview')
     }
   }

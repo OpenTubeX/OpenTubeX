@@ -49,3 +49,14 @@ export function getFixedBackgroundContainment(element) {
         ]
   ])
 }
+
+/**
+ * Places the window's field (body::before), which pages let show through, on
+ * a box at this viewport position, so the box matches what it covers.
+ * @param {number} left
+ * @param {number} top
+ */
+export function getWindowFieldPlacement(left, top) {
+  const { clientWidth, clientHeight } = document.documentElement
+  return { size: `${clientWidth}px ${clientHeight}px`, position: `${-left}px ${-top}px` }
+}

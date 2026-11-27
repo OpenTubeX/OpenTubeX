@@ -22,6 +22,11 @@ for (const reduced of [false, true]) {
   test(`page animation reaches the exact card bounds and cleans up (reduced motion: ${reduced})`, async () => {
     const animations = []
     const classes = new Set()
+    const styleOf = () => {
+      const properties = new Map()
+      return { properties, setProperty: (name, value) => properties.set(name, value), removeProperty: name => properties.delete(name) }
+    }
+    const field = { style: styleOf() }
     const animate = (frames, options) => {
       const animation = { frames, options, pause() {}, cancel() { this.cancelled = true }, finished: Promise.resolve() }
       animations.push(animation)
@@ -33,6 +38,8 @@ for (const reduced of [false, true]) {
       matchMedia: () => ({ matches: false }),
       getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
       applyAnimationSpeed: animation => animation,
+      getWindowFieldPlacement: () => ({ size: '375.5px 800px', position: '0px -80.5px' }),
+      getFixedBackgroundContainment: () => [{ element: field, name: '--fixed-background-inset', value: '-80.5px 0px 0px 0px' }],
       requestAnimationFrame: () => 1,
       cancelAnimationFrame() {},
     })
@@ -40,6 +47,7 @@ for (const reduced of [false, true]) {
     const page = {
       animate,
       classList: { add: name => classes.add(name), remove: name => classes.delete(name) },
+      style: styleOf(),
       getBoundingClientRect: () => ({ left: 0, top: 80.5, width: 375.5, height: 700.25 })
     }
     const previewClasses = new Set()
@@ -61,6 +69,7 @@ for (const reduced of [false, true]) {
     assert.ok(animations.slice(0, reduced ? 1 : 2).every(animation => animation.currentTime === 1000))
     transition.dispose()
     assert.equal(classes.size, 0)
+    assert.equal(field.style.properties.size + page.style.properties.size, 0, 'the page and its card fields lose the morph styles')
     assert.equal(previewClasses.size, 0, 'the cached image returns after settling or cancellation')
     assert.ok(animations.every(animation => animation.cancelled))
     transition.update(0.1)
