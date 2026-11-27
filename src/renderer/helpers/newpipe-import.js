@@ -168,19 +168,26 @@ export function convertNewPipeSearchHistory(database) {
   return Array.from(searches, ([query, lastUpdatedAt]) => ({ _id: query, query, lastUpdatedAt }))
 }
 
-const CONVERTERS = {
-  subscriptions: convertNewPipeSubscriptions,
-  history: convertNewPipeWatchHistory,
-  playlists: convertNewPipePlaylists,
-  searchHistory: convertNewPipeSearchHistory,
+/**
+ * @param {'subscriptions' | 'history' | 'playlists' | 'searchHistory'} section
+ */
+function getConverter(section) {
+  switch (section) {
+    case 'subscriptions': return convertNewPipeSubscriptions
+    case 'history': return convertNewPipeWatchHistory
+    case 'playlists': return convertNewPipePlaylists
+    case 'searchHistory': return convertNewPipeSearchHistory
+    default: throw new Error(`Unknown NewPipe backup section: ${section}`)
+  }
 }
 
 /**
  * Reads one kind of data from a NewPipe backup ZIP.
- * @param {{ file: Blob, section: keyof typeof CONVERTERS }} input
+ * @param {{ file: Blob, section: 'subscriptions' | 'history' | 'playlists' | 'searchHistory' }} input
  * @returns {Promise<object[] | null>} null when the file is no NewPipe backup
  */
 export async function readNewPipeBackup({ file, section }) {
+  const convert = getConverter(section)
   const archive = new Uint8Array(await file.arrayBuffer())
   let entries
   try {
@@ -190,5 +197,5 @@ export async function readNewPipeBackup({ file, section }) {
   }
   const database = entries[DATABASE_ENTRY]
   if (database === undefined) return null
-  return CONVERTERS[section](openSqliteDatabase(database))
+  return convert(openSqliteDatabase(database))
 }
