@@ -5,6 +5,43 @@
   initial-value: 45px;
 }
 
+/* Properties of lazily loaded components register here, at startup: CSS that
+   registers a property restyles every element of the document when it loads,
+   even when the property is already registered. */
+
+/* FtAutoGrid writes these to the grid whenever its width changes, such as on
+   every frame of the side navigation animation. Only the grid reads them;
+   inherited, each write would restyle every card. */
+@property --thumbnail-grid-size {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --thumbnail-grid-stretch {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --shorts-thumbnail-grid-min-size {
+  syntax: '*';
+  inherits: false;
+}
+
+/* The player controls' fade, shared with glass and icons. */
+@property --ft-controls-fade {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+/* How far the pointer is between the seek filmstrip's bottom (0) and the
+   middle where precise seeking starts (1). */
+@property --ft-seek-precise-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 body {
   margin: 0;
   min-block-size: 100vh;

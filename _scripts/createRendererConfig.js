@@ -137,7 +137,20 @@ module.exports = function createRendererConfig({
           rules: [
             {
               resource: require.resolve('shaka-player/dist/controls.css'),
-              use: path.join(__dirname, 'patch-shaka-player-loader.js')
+              use: [
+                {
+                  loader: path.join(__dirname, 'scope-root-variables-loader.js'),
+                  options: { selector: '.shaka-video-container' }
+                },
+                path.join(__dirname, 'patch-shaka-player-loader.js')
+              ]
+            },
+            {
+              resource: require.resolve('swiper/css'),
+              use: {
+                loader: path.join(__dirname, 'scope-root-variables-loader.js'),
+                options: { selector: '.swiper' }
+              }
             }
           ],
         },
