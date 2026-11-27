@@ -17,18 +17,33 @@ export function findSponsorBlockSeekBarSegment(segments, hoverTime, secondsPerPi
   }) ?? null
 }
 
+/** @type {WeakMap<object, [string, string, string]>} */
+const lastSeekBarState = new WeakMap()
+
 /**
  * Reuse Shaka's painted positions so markers follow buffering, pending seeks
  * and gesture previews without duplicating its seekbar state.
  * @param {HTMLElement} container
  */
 export function updateSponsorBlockSeekBarState(container) {
+  const candidate = container.querySelector?.('.markerContainer') ?? null
+  const markerContainer = candidate?.classList?.contains?.('markerContainer') ? candidate : null
+  if (markerContainer && !markerContainer.querySelector?.('.sponsorBlockMarker')) return
+
   // Shaka paints six stops: buffer start twice, playhead twice, buffer end twice.
   // The hidden Shorts bar uses the same boundaries with a leading 0% stop.
   const stops = [...container.style.background.matchAll(/(-?\d+(?:\.\d+)?)%/g)]
   if (stops.length !== 6) return
 
-  container.style.setProperty('--sponsorblock-played', stops[2][1])
-  container.style.setProperty('--sponsorblock-buffered-start', stops[0][1])
-  container.style.setProperty('--sponsorblock-buffered-end', stops[4][1])
+  const played = stops[2][1]
+  const bufferedStart = stops[0][1]
+  const bufferedEnd = stops[4][1]
+  const target = markerContainer ?? container
+  const previous = lastSeekBarState.get(target)
+  if (previous && previous[0] === played && previous[1] === bufferedStart && previous[2] === bufferedEnd) return
+
+  lastSeekBarState.set(target, [played, bufferedStart, bufferedEnd])
+  target.style.setProperty('--sponsorblock-played', played)
+  target.style.setProperty('--sponsorblock-buffered-start', bufferedStart)
+  target.style.setProperty('--sponsorblock-buffered-end', bufferedEnd)
 }

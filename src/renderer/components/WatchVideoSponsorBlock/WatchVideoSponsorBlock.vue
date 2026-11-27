@@ -318,7 +318,7 @@ const props = defineProps({
   contributionStatsLoaded: Boolean,
   contributionStatsLoading: Boolean,
   currentTime: {
-    type: Number,
+    type: [Number, Function],
     default: 0
   },
   loading: Boolean,
@@ -421,7 +421,8 @@ function isSegmentPassed(segment) {
   }
 
   const endTime = segment.actionType === 'poi' ? segment.startTime : segment.endTime
-  return Number.isFinite(endTime) && props.currentTime >= endTime
+  const currentTime = typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime
+  return Number.isFinite(endTime) && currentTime >= endTime
 }
 </script>
 

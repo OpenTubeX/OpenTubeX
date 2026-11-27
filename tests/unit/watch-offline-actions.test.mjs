@@ -48,7 +48,7 @@ test('changing videos clears the previous video SponsorBlock segments', async ()
 
 test('offline replay seeks preserve messages and resume at the latest position on reconnect', async () => {
   const source = await readFile(new URL('../../src/renderer/components/WatchVideoLiveChat/WatchVideoLiveChat.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('watch([() => props.currentTime, () => props.seekRequest')
+  const start = source.indexOf('watch([() => typeof props.currentTime')
   const end = source.indexOf('\n})', start) + 3
   let callback
   let clears = 0

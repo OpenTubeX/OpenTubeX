@@ -181,7 +181,10 @@ async function handleChoice(choice) {
 }
 
 // Relay failures happen when the TV fetches media, after Play has returned.
-const failureCheck = setInterval(async () => {
+/** @type {ReturnType<typeof setInterval> | null} */
+let failureCheck = null
+
+async function checkCastFailure() {
   if (disposed || busy.value || !castId.value) return
   const id = castId.value
   let stopped
@@ -221,13 +224,25 @@ const failureCheck = setInterval(async () => {
       }
     }
   } finally { busy.value = false }
-}, 1000)
+}
+
+watch(castId, (activeCastId) => {
+  if (activeCastId && failureCheck === null) {
+    failureCheck = setInterval(checkCastFailure, 1000)
+  } else if (!activeCastId && failureCheck !== null) {
+    clearInterval(failureCheck)
+    failureCheck = null
+  }
+})
 
 defineExpose({ options, castId, deviceName, loading, busy, menuTitle, refreshDevices, handleChoice })
 
 onBeforeUnmount(() => {
   disposed = true
-  clearInterval(failureCheck)
+  if (failureCheck !== null) {
+    clearInterval(failureCheck)
+    failureCheck = null
+  }
   stopCasting(false).catch(console.error)
   emit('casting-change', false)
 })

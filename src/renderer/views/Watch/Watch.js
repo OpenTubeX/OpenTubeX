@@ -5157,6 +5157,14 @@ export default defineComponent({
       this.currentTime = currentSeconds
     },
 
+    getCurrentTime: function () {
+      return this.currentTime
+    },
+
+    getLiveChatCurrentTime: function () {
+      return this.liveChatCurrentTime
+    },
+
     handleTimeUpdate: function (currentSeconds, fromChromecast = false) {
       if (this.videoId !== this.tabRoute.params.id) return
       if (this.chromecastActive && !fromChromecast) return
@@ -6291,6 +6299,7 @@ export default defineComponent({
         }
         this.playNextCountDownIntervalId = setInterval(() => {
           const remainingSeconds = Math.max(1, Math.ceil((countdownEndsAt - Date.now()) / 1000))
+          if (this.autoplayCountdown?.remainingSeconds === remainingSeconds) return
           this.autoplayCountdown = {
             ...this.autoplayCountdown,
             remainingSeconds

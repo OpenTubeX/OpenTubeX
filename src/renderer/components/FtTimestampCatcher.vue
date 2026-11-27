@@ -39,6 +39,9 @@ function highlightHtmlText(inputHtml, query) {
   if (normalizedQuery === '') {
     return inputHtml
   }
+  if (!inputHtml.includes('&') && !inputHtml.toLocaleLowerCase().includes(normalizedQuery)) {
+    return inputHtml
+  }
 
   const document = new DOMParser().parseFromString(inputHtml, 'text/html')
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)

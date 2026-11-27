@@ -1,4 +1,5 @@
 import { clampOverlayScrollLeft } from '../../../helpers/overlayScrollbars'
+import { isRendered } from '../../../helpers/rendered'
 
 /**
  * OpenTubeX's control bar decoration and adaptive layout: groups the volume and time controls,
@@ -123,8 +124,11 @@ export function useAdaptiveControlPanelLayout({
 
     // Pill ends must follow the visible controls, including buttons hidden
     // by the adaptive layout rather than by Shaka's own visibility class.
-    for (const button of controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')) {
-      button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
+    // Batch style reads before attribute writes to avoid forced recalcs per button.
+    const hiddenButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')]
+      .map(button => [button, window.getComputedStyle(button).display === 'none'])
+    for (const [button, hidden] of hiddenButtons) {
+      button.toggleAttribute('data-ft-control-hidden', hidden)
     }
 
     updateRightControlGlass(controlPanel)
@@ -173,15 +177,17 @@ export function useAdaptiveControlPanelLayout({
     if (rightGlass instanceof HTMLElement) {
       const rightButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')]
         .filter(button => button.getClientRects().length > 0)
-      rightGlass.hidden = rightButtons.length === 0
 
       if (rightButtons.length > 0) {
         const panelBounds = controlPanel.getBoundingClientRect()
         const firstBounds = rightButtons[0].getBoundingClientRect()
         const lastBounds = rightButtons[rightButtons.length - 1].getBoundingClientRect()
         const scale = controlPanel.clientWidth > 0 ? panelBounds.width / controlPanel.clientWidth : 1
+        rightGlass.hidden = false
         rightGlass.style.left = `${(firstBounds.left - panelBounds.left) / scale}px`
         rightGlass.style.width = `${(lastBounds.right - firstBounds.left) / scale}px`
+      } else {
+        rightGlass.hidden = true
       }
     }
   }
@@ -331,7 +337,9 @@ export function useAdaptiveControlPanelLayout({
       }
       // Button visibility and volume/preset sizes can move the right controls
       // without resizing the panel. Keep their glass aligned with the buttons.
-      updateRightControlGlass(controlPanel)
+      if (isActiveTab.value && isRendered(controlPanel)) {
+        updateRightControlGlass(controlPanel)
+      }
     })
     controlPanelResizeObserver.observe(controlPanel)
     for (const control of controlPanel.querySelectorAll(':scope > button, :scope > .ft-volume-control-group, :scope > .ft-quick-playback-rate-bar')) {

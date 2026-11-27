@@ -717,6 +717,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { inject, computed, nextTick, onBeforeUnmount, provide, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { isRendered } from '../../helpers/rendered'
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
@@ -853,9 +854,9 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  // Playback position in seconds, which the Timed sort follows.
+  // Playback position in seconds (or a reactive getter), which the Timed sort follows.
   currentTime: {
-    type: Number,
+    type: [Number, Function],
     default: null,
   }
 })
@@ -1291,6 +1292,9 @@ const commentPlainTextCache = new WeakMap()
 
 function getCommentPlainText(comment) {
   const text = comment.text ?? ''
+  if (!/[<&\r]/.test(text)) {
+    return text
+  }
   const cacheKey = toRaw(comment)
   const cached = commentPlainTextCache.get(cacheKey)
   if (cached !== undefined && cached.text === text) {
@@ -1470,7 +1474,7 @@ const commentEntries = computed(() => {
 // changes when a comment appears or disappears, not on every time update.
 const timedCommentCutoff = computed(() => {
   if (!isTimedSort.value) return Infinity
-  const time = props.currentTime ?? 0
+  const time = (typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime) ?? 0
   return commentData.value.reduce((cutoff, comment) => {
     return comment.timedSeconds <= time ? Math.max(cutoff, comment.timedSeconds) : cutoff
   }, -1)
@@ -1478,7 +1482,7 @@ const timedCommentCutoff = computed(() => {
 
 const nextTimedCommentSeconds = computed(() => {
   if (!isTimedSort.value) return null
-  const time = props.currentTime ?? 0
+  const time = (typeof props.currentTime === 'function' ? props.currentTime() : props.currentTime) ?? 0
   return commentData.value.reduce((next, comment) => {
     return comment.timedSeconds > time && (next === null || comment.timedSeconds < next) ? comment.timedSeconds : next
   }, null)
@@ -1749,6 +1753,9 @@ function normalizeCommentAuthor(author) {
  * @returns {{ channelId: string, handle: string, author: string } | null}
  */
 function getLeadingMention(html) {
+  if (!/<a[\s>]/i.test(html)) {
+    return null
+  }
   const document = new DOMParser().parseFromString(html, 'text/html')
   const firstAnchor = document.body.querySelector('a')
 
@@ -2268,7 +2275,7 @@ const phoneHeaderActionCount = computed(() => {
 
 function updatePhoneHeaderOverflow() {
   const header = commentHeader.value
-  if (!header || !phonePanelHeader?.value) return
+  if (!header || !phonePanelHeader?.value || !isRendered(header)) return
   const heading = header.querySelector('h3')
   const titleWidth = heading.firstElementChild.getBoundingClientRect().width +
     parseFloat(getComputedStyle(heading).columnGap) + heading.querySelector('.commentHeaderTitle').scrollWidth

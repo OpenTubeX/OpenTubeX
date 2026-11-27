@@ -102,6 +102,7 @@ import { getCenteredChapterScrollTop } from './chapterScroll'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useTabContext } from '../../tabs/TabContext'
 import { isRendered } from '../../helpers/rendered'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 
 const props = defineProps({
   chapters: {
@@ -135,6 +136,7 @@ defineExpose({ chaptersWrapper })
 
 const chaptersContent = useTemplateRef('chaptersContent')
 let scrollFrame = null
+let hasAlignedCurrentChapter = false
 // Scrolling the list by hand stops it from following playback until the
 // sync button, a chapter click, or reopening the list brings it back.
 const followCurrentChapter = ref(true)
@@ -362,9 +364,16 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
   // Stopping short of it lets the next touch swipe latch onto the list
   // instead of chaining to the page, so let the browser clamp to its end.
   if (top >= maxScrollTop) top = container.scrollHeight
-  // Writing scrollTop here would stop a composited smooth scroll that's still
-  // running, and with it the new one.
-  container.scrollTo({ top, behavior: 'smooth' })
+  // Opening mid-video jumps straight to the active chapter so rows do not
+  // animate while the panel itself enters; later chapter changes scroll smoothly.
+  if (!hasAlignedCurrentChapter || isReducedMotionEnabled()) {
+    hasAlignedCurrentChapter = true
+    container.scrollTop = top
+  } else {
+    // Writing scrollTop here would stop a composited smooth scroll that's still
+    // running, and with it the new one.
+    container.scrollTo({ top, behavior: 'smooth' })
+  }
 }
 
 </script>

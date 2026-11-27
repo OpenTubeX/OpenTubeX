@@ -284,7 +284,7 @@
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, triggerRef, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, toRaw, TransitionGroup, triggerRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -462,7 +462,8 @@ const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.va
 const userPlaylistWatchedVideoCount = computed(() => {
   if (!isUserPlaylist.value) { return 0 }
 
-  const historyCacheById = store.getters.getHistoryCacheById
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCacheById = toRaw(store.getters.getHistoryCacheById)
   return selectedUserPlaylist.value?.videos.reduce((count, video) => {
     return isHistoryEntryWatched(historyCacheById[video.videoId]) ? count + 1 : count
   }, 0) ?? 0
@@ -1694,10 +1695,10 @@ async function renderProgressBarPreview() {
     const boundaryRect = boundary.getBoundingClientRect()
     const margin = 8
     const availableWidth = Math.max(0, boundaryRect.width - (margin * 2))
-    progressBarPreview.value.style.setProperty(
-      '--playlist-preview-max-inline-size',
-      `${availableWidth}px`
-    )
+    const maxInlineSize = `${availableWidth}px`
+    if (progressBarPreview.value.style.getPropertyValue?.('--playlist-preview-max-inline-size') !== maxInlineSize) {
+      progressBarPreview.value.style.setProperty('--playlist-preview-max-inline-size', maxInlineSize)
+    }
     const previewWidth = Math.min(progressBarPreview.value.offsetWidth, availableWidth)
     const minimumViewportLeft = boundaryRect.left + margin
     const maximumViewportLeft = boundaryRect.right - margin - previewWidth

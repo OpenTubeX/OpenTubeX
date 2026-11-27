@@ -579,7 +579,7 @@
               class="autoplayCountdownHeading"
               aria-live="polite"
             >
-              {{ $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds }) }}
+              <LiveText :text="() => $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds })" />
             </p>
             <div class="autoplayThumbnailWrapper">
               <FtRetryImage
@@ -2329,6 +2329,7 @@ import {
 } from '../../helpers/overlayScrollbars'
 import { getFullscreenAspectRatio, isLandscapeLocked, lockCurrentOrientation, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { isRendered as isElementRendered } from '../../helpers/rendered'
 import {
   enterAndroidPictureInPicture,
   observeAndroidDisplayRotation,
@@ -6253,15 +6254,16 @@ function handleSeekBarMouseMove(event) {
   const rect = seekBarContainer.getBoundingClientRect()
   const { start, end } = player.seekRange()
   const offsetX = event.clientX - rect.left
-  showChapterPreview(seekBarContainer, start + (end - start) * Math.max(0, Math.min(1, offsetX / rect.width)), offsetX)
+  showChapterPreview(seekBarContainer, start + (end - start) * Math.max(0, Math.min(1, offsetX / rect.width)), offsetX, rect)
 }
 
 /**
  * @param {HTMLElement} seekBarContainer
  * @param {number} hoverTime
  * @param {number} offsetX the preview's center within the seek bar container
+ * @param {DOMRect} [seekBarRect]
  */
-function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
+function showChapterPreview(seekBarContainer, hoverTime, offsetX, seekBarRect = null) {
   if (!container.value || !player) return
 
   if (props.chapters.length === 0) {
@@ -6276,7 +6278,7 @@ function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
   const chapterPreview = getChapterPreview(seekBarContainer)
   if (!chapterPreview) return
 
-  const rect = seekBarContainer.getBoundingClientRect()
+  const rect = seekBarRect ?? seekBarContainer.getBoundingClientRect()
   if (rect.width === 0) {
     chapterPreview.style.display = 'none'
     return
@@ -6295,25 +6297,9 @@ function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
     return
   }
 
-  if (chapterPreview.textContent !== chapter.title) {
-    chapterPreview.textContent = chapter.title
-  }
-
-  chapterPreview.style.display = ''
-
+  // Batch geometry reads before mutating chapterPreview styles to avoid
+  // repeated forced synchronous layouts on every mousemove.
   const playerRect = container.value.getBoundingClientRect()
-  const maxFromSeekBar = rect.width - 8
-  const maxFromPlayer = playerRect.width - 16
-  const maxW = Math.max(
-    Math.min(
-      maxFromSeekBar,
-      maxFromPlayer,
-      window.innerWidth - 24
-    ),
-    0
-  )
-  chapterPreview.style.setProperty('--ft-chapter-preview-max-width', `${maxW}px`)
-
   const thumbContainer = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-container')
   let bottomPx
   if (thumbContainer && window.getComputedStyle(thumbContainer).visibility === 'visible') {
@@ -6325,17 +6311,48 @@ function showChapterPreview(seekBarContainer, hoverTime, offsetX) {
   if (bottomPx == null || !Number.isFinite(bottomPx)) {
     bottomPx = seekBarContainer.offsetHeight + 8
   }
-  chapterPreview.style.bottom = `${bottomPx}px`
+
+  const maxFromSeekBar = rect.width - 8
+  const maxFromPlayer = playerRect.width - 16
+  const maxW = Math.max(
+    Math.min(
+      maxFromSeekBar,
+      maxFromPlayer,
+      window.innerWidth - 24
+    ),
+    0
+  )
 
   // The player clips its overflow, so short players get fewer than three lines,
   // and the title overlaps the thumbnail when not even one line fits above it.
-  const spaceAbove = chapterPreview.getBoundingClientRect().bottom - playerRect.top - 4
+  // Compute space above the preview's bottom edge directly from the geometry
+  // already read instead of writing bottom and reading back getBoundingClientRect().
+  const spaceAbove = rect.bottom - bottomPx - playerRect.top - 4
   const oneLineHeight = CHAPTER_PREVIEW_PADDING_BLOCK + CHAPTER_PREVIEW_LINE_HEIGHT
-  if (spaceAbove < oneLineHeight) {
-    chapterPreview.style.bottom = `${bottomPx - (oneLineHeight - spaceAbove)}px`
+  const finalBottomPx = spaceAbove < oneLineHeight
+    ? bottomPx - (oneLineHeight - spaceAbove)
+    : bottomPx
+  const lines = Math.max(1, Math.min(3, Math.floor((spaceAbove - CHAPTER_PREVIEW_PADDING_BLOCK) / CHAPTER_PREVIEW_LINE_HEIGHT)))
+
+  const maxWValue = `${maxW}px`
+  const bottomValue = `${finalBottomPx}px`
+  const linesValue = `${lines}`
+
+  if (chapterPreview.textContent !== chapter.title) {
+    chapterPreview.textContent = chapter.title
   }
-  const lines = Math.floor((spaceAbove - CHAPTER_PREVIEW_PADDING_BLOCK) / CHAPTER_PREVIEW_LINE_HEIGHT)
-  chapterPreview.style.setProperty('--ft-chapter-preview-lines', `${Math.max(1, Math.min(3, lines))}`)
+  if (chapterPreview.style.display !== '') {
+    chapterPreview.style.display = ''
+  }
+  if (chapterPreview.style.getPropertyValue('--ft-chapter-preview-max-width') !== maxWValue) {
+    chapterPreview.style.setProperty('--ft-chapter-preview-max-width', maxWValue)
+  }
+  if (chapterPreview.style.bottom !== bottomValue) {
+    chapterPreview.style.bottom = bottomValue
+  }
+  if (chapterPreview.style.getPropertyValue('--ft-chapter-preview-lines') !== linesValue) {
+    chapterPreview.style.setProperty('--ft-chapter-preview-lines', linesValue)
+  }
 
   const previewWidth = chapterPreview.offsetWidth
   const minX = previewWidth / 2
@@ -7836,9 +7853,11 @@ function handleTimeupdate() {
     if (sleepTimer.checkChapterBoundary()) return
     checkAbRepeatBoundary()
     const currentTime = video.value.currentTime
-    updateMobileMiniBarProgress()
-    // A live seek range moves on without changing the progress, so refresh its time text.
-    renderMiniPlayerProgress()
+    if (scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) {
+      updateMobileMiniBarProgress()
+      // A live seek range moves on without changing the progress, so refresh its time text.
+      renderMiniPlayerProgress()
+    }
     sponsorBlockCurrentTime.value = currentTime
     annotationCurrentTime = currentTime
     updateActiveAnnotations()
@@ -8420,8 +8439,9 @@ const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbie
 
 function updateVideoElementGeometry() {
   if (video.value) {
-    const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
     const video_ = video.value
+    if (!isElementRendered(video_) || video_.clientWidth === 0 || video_.clientHeight === 0) return
+    const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
 
     videoElementWidth.value = video_.clientWidth * devicePixelRatio
     videoElementHeight.value = video_.clientHeight * devicePixelRatio
@@ -9618,9 +9638,32 @@ function positionShortsContextMenu() {
   })
 }
 
+/** @type {HTMLElement | null} */
+let shortsQuickPlaybackRatePanel = null
+let lastShortsQuickPlaybackRateOpacity = ''
+
+function setShortsQuickPlaybackRateOpacity(panel, value) {
+  if (shortsQuickPlaybackRatePanel && shortsQuickPlaybackRatePanel !== panel) {
+    shortsQuickPlaybackRatePanel.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
+    lastShortsQuickPlaybackRateOpacity = ''
+  }
+  shortsQuickPlaybackRatePanel = panel
+  if (!panel) {
+    lastShortsQuickPlaybackRateOpacity = ''
+    return
+  }
+  if (lastShortsQuickPlaybackRateOpacity === value) return
+  lastShortsQuickPlaybackRateOpacity = value
+  if (value === '') {
+    panel.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
+  } else {
+    panel.style.setProperty('--shorts-quick-playback-rate-bar-opacity', value)
+  }
+}
+
 function handlePlayerMouseLeave(event) {
   handleScrollMiniPlayerLeave(event)
-  container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
+  setShortsQuickPlaybackRateOpacity(shortsQuickPlaybackRatePanel, '')
 
   // Dragging the seek bar keeps the controls up until the drag ends.
   if (props.shortsPlayer && !video.value.paused && !pictureInPictureActive.value && !ui?.getControls().isSeeking()) {
@@ -9640,12 +9683,15 @@ function updateShortsQuickPlaybackRateBarProximity(event) {
   }
 
   if (!props.shortsPlayer) {
-    playerContainer.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
+    if (lastShortsQuickPlaybackRateOpacity !== '') {
+      setShortsQuickPlaybackRateOpacity(shortsQuickPlaybackRatePanel, '')
+    }
     return
   }
 
   const target = event.target instanceof Element ? event.target : null
   const playbackRateBar = playerContainer.querySelector('.ft-quick-playback-rate-bar')
+  const panel = playbackRateBar?.parentElement instanceof HTMLElement ? playbackRateBar.parentElement : null
   const seekBarTarget = target?.closest('.shaka-seek-bar-container')
   const focusedElement = document.activeElement
   if (
@@ -9656,8 +9702,8 @@ function updateShortsQuickPlaybackRateBarProximity(event) {
     focusedElement.blur()
   }
 
-  if (!playbackRateBar || seekBarTarget) {
-    playerContainer.style.setProperty('--shorts-quick-playback-rate-bar-opacity', '0')
+  if (!playbackRateBar || !panel || seekBarTarget) {
+    setShortsQuickPlaybackRateOpacity(panel, '0')
     return
   }
 
@@ -9668,10 +9714,7 @@ function updateShortsQuickPlaybackRateBarProximity(event) {
   const distance = Math.hypot(distanceX, distanceY)
   const opacity = Math.max(0, 1 - (distance / proximity))
 
-  playerContainer.style.setProperty(
-    '--shorts-quick-playback-rate-bar-opacity',
-    opacity.toFixed(3)
-  )
+  setShortsQuickPlaybackRateOpacity(panel, opacity.toFixed(3))
 }
 
 /**
@@ -12176,7 +12219,12 @@ function refreshSponsorBlockMarkers() {
       )
     })
 
-  addMarkers(markers.concat(draftMarkers))
+  const allMarkers = markers.concat(draftMarkers)
+  addMarkers(allMarkers)
+  if (allMarkers.length > 0) {
+    const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+    if (seekBarContainer instanceof HTMLElement) updateSponsorBlockSeekBarState(seekBarContainer)
+  }
 }
 
 function createChapterMarkers() {
@@ -12851,7 +12899,11 @@ onMounted(async () => {
   containerResizeObserver.observe(container.value)
 
   controls.addEventListener('uiupdated', addUICustomizations)
-  controls.addEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
+  controls.addEventListener('timeandseekrangeupdated', () => {
+    if (scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) {
+      updateMobileMiniBarProgress()
+    }
+  })
   configureUI(true)
 
   applyInitialVolume(videoElement)
