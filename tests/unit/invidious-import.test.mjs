@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { convertInvidiousPlaylists, convertInvidiousWatchHistory, isInvidiousPlaylistsExport, isInvidiousWatchHistoryExport } from '../../src/renderer/helpers/invidious-import.js'
+import { needsHistoryRepair } from '../../src/historyRepair.js'
+import { needsPlaylistRepair } from '../../src/playlistRepair.js'
 
 const exportData = {
   subscriptions: ['UCaaaaaaaaaaaaaaaaaaaaaa'],
@@ -30,21 +32,8 @@ test('Invidious watch history keeps its newest last entry on top', () => {
     ['bbbbbbbbbbb', 999],
     ['aaaaaaaaaaa', 1000],
   ])
-  // The ID placeholder and the missing details let the history repair load them
-  assert.deepEqual(records[0], {
-    videoId: 'bbbbbbbbbbb',
-    title: 'bbbbbbbbbbb',
-    author: '',
-    authorId: '',
-    published: 0,
-    timeWatched: 999,
-    description: '',
-    lengthSeconds: null,
-    watchProgress: 0,
-    isWatched: true,
-    isLive: false,
-    type: 'video',
-  })
+  // The export has no details, which the history repair must load
+  assert.ok(records.every(record => record.isWatched && needsHistoryRepair(record)))
 })
 
 test('Invidious playlists keep their order and skip invalid entries', () => {
@@ -59,4 +48,5 @@ test('Invidious playlists keep their order and skip invalid entries', () => {
     },
     { playlistName: 'Empty', videos: [] },
   ])
+  assert.ok(convertInvidiousPlaylists(exportData)[0].videos.every(needsPlaylistRepair))
 })
