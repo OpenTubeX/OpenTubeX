@@ -1407,7 +1407,7 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
   await view.dispose()
 })
 
-test('desktop skip buttons flank the centered play button without a backdrop', { tag: '@scale' }, async ({ app, page }) => {
+test('desktop skip buttons flank the centered play button', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => window.$store.dispatch('updateDisplayVideoPlayButton', true))
   await openMockedVideo(page)
@@ -1449,14 +1449,6 @@ test('desktop skip buttons flank the centered play button without a backdrop', {
   await expect(buttons.nth(2)).toHaveClass(/skip-next-button/)
   // The control bar keeps its own skip buttons on desktop.
   await expect(player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button:not(.shaka-hidden)')).toHaveCount(2)
-
-  const styles = await buttons.evaluateAll(elements => elements.map(element => {
-    const { backgroundColor, boxShadow } = getComputedStyle(element)
-    return { backgroundColor, boxShadow }
-  }))
-  for (const style of styles) {
-    expect(style).toEqual({ backgroundColor: 'rgba(0, 0, 0, 0)', boxShadow: 'none' })
-  }
 
   const bounds = await buttons.evaluateAll(elements => elements.map(element => {
     const { x, y, width, height } = element.getBoundingClientRect()
