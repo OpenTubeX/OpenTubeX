@@ -40,7 +40,7 @@
         ref="textRef"
         class="text"
         :class="{
-          [position]: true,
+          [placement]: true,
           allowNewlines,
           open: visible && settingsOverlayActive,
         }"
@@ -66,10 +66,27 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 const { t } = useI18n()
 
+const props = defineProps({
+  position: {
+    type: String,
+    default: 'bottom',
+    validator: (value) => value === 'bottom' || value === 'left' || value === 'right' || value === 'top' || value === 'bottom-left'
+  },
+  tooltip: {
+    type: String,
+    required: true
+  },
+  allowNewlines: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
 const tooltipTarget = shallowRef(getFullscreenLayer() ?? document.body)
 const tooltipStyle = ref({})
+const placement = ref(props.position)
 const visible = ref(false)
 const settingsOverlayActive = useSettingsOverlay(() => {
   setHovered(false)
@@ -80,6 +97,13 @@ const noHover = usePhoneLayout('(hover: none)')
 const dialogOpen = ref(false)
 const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
+const FALLBACK_PLACEMENTS = {
+  bottom: ['bottom', 'top', 'right', 'left'],
+  'bottom-left': ['bottom-left', 'top-left', 'left', 'right'],
+  top: ['top', 'bottom', 'right', 'left'],
+  left: ['left', 'right', 'bottom', 'top'],
+  right: ['right', 'left', 'bottom', 'top'],
+}
 let hovered = false
 let focused = false
 let positionAnimationFrame = null
@@ -196,37 +220,60 @@ function positionTooltip() {
   const width = text.offsetWidth
   const height = text.offsetHeight
   const isRtl = getComputedStyle(button).direction === 'rtl'
-  let left
-  let top
-
-  switch (props.position) {
-    case 'left':
-      left = isRtl ? buttonRect.right + TOOLTIP_GAP : buttonRect.left - width - TOOLTIP_GAP
-      top = buttonRect.top + (buttonRect.height - height) / 2
-      break
-    case 'right':
-      left = isRtl ? buttonRect.left - width - TOOLTIP_GAP : buttonRect.right + TOOLTIP_GAP
-      top = buttonRect.top + (buttonRect.height - height) / 2
-      break
-    case 'top':
-      left = buttonRect.left + (buttonRect.width - width) / 2
-      top = buttonRect.top - height - TOOLTIP_GAP
-      break
-    case 'bottom-left':
-      left = isRtl ? buttonRect.left : buttonRect.right - width
-      top = buttonRect.bottom + TOOLTIP_GAP
-      break
-    default:
-      left = buttonRect.left + (buttonRect.width - width) / 2
-      top = buttonRect.bottom + TOOLTIP_GAP
-  }
-
-  tooltipStyle.value = getAnchoredPosition(tooltipAnchor, buttonRect, Math.round(left), Math.round(top), {
+  const limits = {
     minLeft: EDGE_MARGIN,
     maxLeft: window.innerWidth - width - EDGE_MARGIN,
     minTop: EDGE_MARGIN,
     maxTop: window.innerHeight - height - EDGE_MARGIN
-  })
+  }
+
+  // Clamping a tooltip into the viewport on its preferred side would slide it
+  // over its trigger and the pointer, so use the first side where it fits,
+  // or the side it overflows least.
+  let best
+  for (const side of FALLBACK_PLACEMENTS[props.position] ?? FALLBACK_PLACEMENTS.bottom) {
+    const { left, top } = getPlacementPosition(side, buttonRect, width, height, isRtl)
+    const vertical = side !== 'left' && side !== 'right'
+    const overflow = vertical
+      ? Math.max(limits.minTop - top, top - limits.maxTop, 0)
+      : Math.max(limits.minLeft - left, left - limits.maxLeft, 0)
+    if (!best || overflow < best.overflow) best = { side, left, top, overflow }
+    if (overflow === 0) break
+  }
+
+  placement.value = best.side
+  tooltipStyle.value = getAnchoredPosition(tooltipAnchor, buttonRect, Math.round(best.left), Math.round(best.top), limits)
+}
+
+/**
+ * @param {string} side
+ * @param {DOMRect} buttonRect
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} isRtl
+ * @returns {{left: number, top: number}}
+ */
+function getPlacementPosition(side, buttonRect, width, height, isRtl) {
+  const centerLeft = buttonRect.left + (buttonRect.width - width) / 2
+  const centerTop = buttonRect.top + (buttonRect.height - height) / 2
+  const endLeft = isRtl ? buttonRect.left : buttonRect.right - width
+  const above = buttonRect.top - height - TOOLTIP_GAP
+  const below = buttonRect.bottom + TOOLTIP_GAP
+
+  switch (side) {
+    case 'left':
+      return { left: isRtl ? buttonRect.right + TOOLTIP_GAP : buttonRect.left - width - TOOLTIP_GAP, top: centerTop }
+    case 'right':
+      return { left: isRtl ? buttonRect.left - width - TOOLTIP_GAP : buttonRect.right + TOOLTIP_GAP, top: centerTop }
+    case 'top':
+      return { left: centerLeft, top: above }
+    case 'top-left':
+      return { left: endLeft, top: above }
+    case 'bottom-left':
+      return { left: endLeft, top: below }
+    default:
+      return { left: centerLeft, top: below }
+  }
 }
 
 async function handleFullscreenChange() {
@@ -242,22 +289,6 @@ async function handleFullscreenChange() {
 
 onBeforeUnmount(() => {
   stopTrackingPosition()
-})
-
-const props = defineProps({
-  position: {
-    type: String,
-    default: 'bottom',
-    validator: (value) => value === 'bottom' || value === 'left' || value === 'right' || value === 'top' || value === 'bottom-left'
-  },
-  tooltip: {
-    type: String,
-    required: true
-  },
-  allowNewlines: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 const id = useId()

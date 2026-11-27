@@ -94,6 +94,14 @@
   transform-origin: top left;
 }
 
+.text.top-left {
+  transform-origin: bottom right;
+}
+
+.text.top-left:dir(rtl) {
+  transform-origin: bottom left;
+}
+
 .text.allowNewlines {
   white-space: pre-wrap;
   inline-size: 55vw;
