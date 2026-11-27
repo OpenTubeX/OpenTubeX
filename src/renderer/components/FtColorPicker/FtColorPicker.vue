@@ -35,7 +35,7 @@
         v-if="open"
         ref="popoverRef"
         class="colorPickerPopover"
-        :class="{ softwareKeyboardOpen }"
+        :class="{ constrained, softwareKeyboardOpen }"
         :style="popoverStyle"
         role="dialog"
         :aria-label="label"
@@ -66,158 +66,164 @@
           </div>
         </div>
         <div
-          v-overlay-scrollbars="softwareKeyboardOpen"
+          ref="pickerBodyRef"
+          v-overlay-scrollbars="constrained"
           class="pickerBody"
         >
           <div
-            ref="saturationValueRef"
-            class="saturationValue"
-            role="slider"
-            tabindex="0"
-            :aria-label="t('Color Picker.Saturation and Brightness')"
-            :aria-valuemin="0"
-            :aria-valuemax="100"
-            :aria-valuenow="Math.round(value)"
-            :aria-valuetext="`${Math.round(saturation)}%, ${Math.round(value)}%`"
-            :style="{ backgroundColor: `hsl(${hue} 100% 50%)` }"
-            @pointerdown="startSaturationValue"
-            @keydown="adjustSaturationValue"
+            ref="pickerContentRef"
+            class="pickerContent"
           >
-            <span
-              class="saturationValueThumb"
-              :style="{ insetInlineStart: `${saturation}%`, insetBlockStart: `${100 - value}%` }"
-            />
-          </div>
+            <div
+              ref="saturationValueRef"
+              class="saturationValue"
+              role="slider"
+              tabindex="0"
+              :aria-label="t('Color Picker.Saturation and Brightness')"
+              :aria-valuemin="0"
+              :aria-valuemax="100"
+              :aria-valuenow="Math.round(value)"
+              :aria-valuetext="`${Math.round(saturation)}%, ${Math.round(value)}%`"
+              :style="{ backgroundColor: `hsl(${hue} 100% 50%)` }"
+              @pointerdown="startSaturationValue"
+              @keydown="adjustSaturationValue"
+            >
+              <span
+                class="saturationValueThumb"
+                :style="{ insetInlineStart: `${saturation}%`, insetBlockStart: `${100 - value}%` }"
+              />
+            </div>
 
-          <label class="sliderField">
-            <span>{{ t('Color Picker.Hue') }}</span>
-            <input
-              v-model.number="hue"
-              v-touch-range
-              class="hueSlider"
-              type="range"
-              min="0"
-              max="359"
-              @input="emitCurrentColor"
-              @change="emit('change')"
-            >
-          </label>
-          <label
-            v-if="allowAlpha"
-            class="sliderField"
-          >
-            <span>{{ t('Color Picker.Opacity') }}</span>
-            <span>{{ opacityLabel }}</span>
-            <span
-              class="alphaSliderBackground checkerboard"
-              :style="{ '--opaque-color': opaqueHex }"
-            >
+            <label class="sliderField">
+              <span>{{ t('Color Picker.Hue') }}</span>
               <input
-                v-model.number="alpha"
+                v-model.number="hue"
                 v-touch-range
-                class="alphaSlider"
+                class="hueSlider"
                 type="range"
                 min="0"
-                max="255"
+                max="359"
                 @input="emitCurrentColor"
                 @change="emit('change')"
               >
-            </span>
-          </label>
-          <label
-            v-if="supportsBlur"
-            class="sliderField"
-            :class="{ disabled: !isTransparent }"
-          >
-            <span>{{ t('Color Picker.Backdrop Blur') }}</span>
-            <span>{{ blurLabel }}</span>
-            <input
-              v-model.number="blurStrength"
-              v-touch-range
-              class="blurSlider"
-              type="range"
-              min="0"
-              max="40"
-              :disabled="!isTransparent"
-              @input="emitCurrentBlur"
-              @change="emit('change')"
+            </label>
+            <label
+              v-if="allowAlpha"
+              class="sliderField"
             >
-          </label>
-
-          <div class="valueRow">
-            <label class="hexField">
-              <span>{{ t('Color Picker.Hex Color') }}</span>
-              <span class="hexInputControl">
+              <span>{{ t('Color Picker.Opacity') }}</span>
+              <span>{{ opacityLabel }}</span>
+              <span
+                class="alphaSliderBackground checkerboard"
+                :style="{ '--opaque-color': opaqueHex }"
+              >
                 <input
-                  v-model="hexInput"
-                  dir="ltr"
-                  :placeholder="allowAlpha ? '#336699ff' : '#336699'"
-                  type="text"
-                  :maxlength="allowAlpha ? 9 : 7"
-                  spellcheck="false"
-                  @focus="$event.target.select()"
-                  @blur="commitHexInput"
-                  @keydown.enter.prevent="commitHexInput"
+                  v-model.number="alpha"
+                  v-touch-range
+                  class="alphaSlider"
+                  type="range"
+                  min="0"
+                  max="255"
+                  @input="emitCurrentColor"
+                  @change="emit('change')"
                 >
-                <button
-                  type="button"
-                  class="copyColorButton"
-                  :title="copyButtonLabel"
-                  :aria-label="copyButtonLabel"
-                  @click="copyColor"
-                >
-                  <FtIcon :icon="['fas', copied ? 'check' : 'copy']" />
-                </button>
               </span>
             </label>
-          </div>
-          <div
-            v-if="otherColors.length > 0"
-            class="copyFromControl"
-          >
-            <button
-              ref="copyFromButtonRef"
-              type="button"
-              class="copyFromButton"
-              :aria-expanded="showColorSources"
-              @click="toggleColorSources"
+            <label
+              v-if="supportsBlur"
+              class="sliderField"
+              :class="{ disabled: !isTransparent }"
             >
-              <FtIcon :icon="['fas', 'copy']" />
-              {{ t('Color Picker.Copy From Another Color') }}
-            </button>
-            <div
-              v-if="showColorSources"
-              ref="colorSourceListRef"
-              v-overlay-scrollbars
-              data-scrollbar-always-visible
-              class="colorSourceList"
-              :class="{ above: colorSourcesAbove }"
-              :aria-label="t('Color Picker.Copy From Another Color')"
-            >
-              <div
-                ref="colorSourceContentRef"
-                class="colorSourceContent"
+              <span>{{ t('Color Picker.Backdrop Blur') }}</span>
+              <span>{{ blurLabel }}</span>
+              <input
+                v-model.number="blurStrength"
+                v-touch-range
+                class="blurSlider"
+                type="range"
+                min="0"
+                max="40"
+                :disabled="!isTransparent"
+                @input="emitCurrentBlur"
+                @change="emit('change')"
               >
-                <button
-                  v-for="color in otherColors"
-                  :key="color.key"
-                  type="button"
-                  @click="copyFromColor(color.value)"
+            </label>
+
+            <div class="valueRow">
+              <label class="hexField">
+                <span>{{ t('Color Picker.Hex Color') }}</span>
+                <span class="hexInputControl">
+                  <input
+                    v-model="hexInput"
+                    dir="ltr"
+                    :placeholder="allowAlpha ? '#336699ff' : '#336699'"
+                    type="text"
+                    :maxlength="allowAlpha ? 9 : 7"
+                    spellcheck="false"
+                    @focus="$event.target.select()"
+                    @blur="commitHexInput"
+                    @keydown.enter.prevent="commitHexInput"
+                  >
+                  <button
+                    type="button"
+                    class="copyColorButton"
+                    :title="copyButtonLabel"
+                    :aria-label="copyButtonLabel"
+                    @click="copyColor"
+                  >
+                    <FtIcon :icon="['fas', copied ? 'check' : 'copy']" />
+                  </button>
+                </span>
+              </label>
+            </div>
+            <div
+              v-if="otherColors.length > 0"
+              class="copyFromControl"
+            >
+              <button
+                ref="copyFromButtonRef"
+                type="button"
+                class="copyFromButton"
+                :aria-expanded="showColorSources"
+                @click="toggleColorSources"
+              >
+                <FtIcon :icon="['fas', 'copy']" />
+                {{ t('Color Picker.Copy From Another Color') }}
+              </button>
+              <div
+                v-if="showColorSources"
+                ref="colorSourceListRef"
+                v-overlay-scrollbars
+                data-scrollbar-always-visible
+                class="colorSourceList"
+                :class="{ above: colorSourcesAbove }"
+                :aria-label="t('Color Picker.Copy From Another Color')"
+              >
+                <div
+                  ref="colorSourceContentRef"
+                  class="colorSourceContent"
                 >
-                  <span class="sourceSwatch checkerboard">
-                    <span :style="{ backgroundColor: color.value }" />
-                  </span>
-                  <span>{{ color.label }}</span>
-                  <code dir="ltr">{{ color.value }}</code>
-                </button>
+                  <button
+                    v-for="color in otherColors"
+                    :key="color.key"
+                    type="button"
+                    @click="copyFromColor(color.value)"
+                  >
+                    <span class="sourceSwatch checkerboard">
+                      <span :style="{ backgroundColor: color.value }" />
+                    </span>
+                    <span>{{ color.label }}</span>
+                    <code dir="ltr">{{ color.value }}</code>
+                  </button>
+                </div>
               </div>
             </div>
+            <small
+              v-if="status"
+              class="pickerStatus"
+              role="status"
+            >{{ status }}</small>
           </div>
-          <small
-            v-if="status"
-            class="pickerStatus"
-            role="status"
-          >{{ status }}</small>
         </div>
       </div>
     </Teleport>
@@ -263,6 +269,8 @@ const { t } = useI18n()
 const triggerRef = useTemplateRef('triggerRef')
 const popoverAnchor = `--color-picker-${useId()}`
 const popoverRef = useTemplateRef('popoverRef')
+const pickerBodyRef = useTemplateRef('pickerBodyRef')
+const pickerContentRef = useTemplateRef('pickerContentRef')
 const saturationValueRef = useTemplateRef('saturationValueRef')
 const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
@@ -281,6 +289,8 @@ const status = ref('')
 const showColorSources = ref(false)
 const colorSourcesAbove = ref(false)
 const popoverStyle = ref({})
+// Whether the picker is taller than the viewport, which then scrolls its body.
+const constrained = ref(false)
 const colorWhenOpened = ref(props.modelValue)
 const blurWhenOpened = ref(props.blurValue ?? 0)
 let saturationValuePointerId = null
@@ -322,6 +332,7 @@ watch(open, async value => {
   if (!settingsOverlayActive.value || !open.value || popoverRef.value === null) return
   popoverResizeObserver = new ResizeObserver(positionPopover)
   popoverResizeObserver.observe(popoverRef.value)
+  popoverResizeObserver.observe(pickerContentRef.value)
   positionPopover()
   saturationValueRef.value?.focus()
 })
@@ -573,17 +584,29 @@ function positionPopover() {
   const margin = 12
   // Android draws the status bar over the page.
   const minTop = margin + (Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0)
+  // Measure the content instead of the body, which is shorter while it scrolls.
+  const body = pickerBodyRef.value
+  const bodyStyle = getComputedStyle(body)
+  const naturalHeight = popover.offsetHeight - body.clientHeight + pickerContentRef.value.offsetHeight +
+    Number.parseFloat(bodyStyle.paddingBlockStart) + Number.parseFloat(bodyStyle.paddingBlockEnd)
+  const availableHeight = window.innerHeight - minTop - margin
+  constrained.value = naturalHeight > availableHeight + 0.5
+  const height = constrained.value ? availableHeight : naturalHeight
   const left = triggerBounds.left
   const below = triggerBounds.bottom + 8
-  const top = below + popover.offsetHeight <= window.innerHeight - margin
+  const top = below + height <= window.innerHeight - margin
     ? below
-    : triggerBounds.top - popover.offsetHeight - 8
-  popoverStyle.value = getAnchoredPosition(popoverAnchor, triggerBounds, left, top, {
-    minLeft: margin,
-    maxLeft: window.innerWidth - popover.offsetWidth - margin,
-    minTop,
-    maxTop: window.innerHeight - popover.offsetHeight - margin
-  }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin })
+    : triggerBounds.top - height - 8
+  popoverStyle.value = {
+    ...getAnchoredPosition(popoverAnchor, triggerBounds, left, top, {
+      minLeft: margin,
+      maxLeft: window.innerWidth - popover.offsetWidth - margin,
+      minTop,
+      maxTop: window.innerHeight - height - margin
+    }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin }),
+    maxBlockSize: constrained.value ? `${availableHeight}px` : null
+  }
+  if (constrained.value) clampOverlayScrollTop(body, pickerContentRef.value)
 }
 
 let stopOutsidePress = null
@@ -785,9 +808,6 @@ onBeforeUnmount(() => {
 .pickerBody {
   position: relative;
   min-block-size: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
 
   /* Reach into the popover's padding so a scrolling body neither clips the
      saturation thumb and focus outlines nor puts its scrollbar over them. */
@@ -797,20 +817,28 @@ onBeforeUnmount(() => {
   padding-inline: 14px;
 }
 
-/* The Android keyboard can shrink the page until the trigger's scroller clips
-   it, such as the theme editor's color grid. Chromium then hides a popup whose
-   anchor is clipped, along with the hex field being typed in. What remains
-   above the keyboard can also be shorter than the picker, so its body scrolls
-   below the header. */
-.colorPickerPopover.softwareKeyboardOpen {
-  position-visibility: always;
-  max-block-size: calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - 24px);
+.pickerContent {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+/* Short windows, landscape phones, and the Android keyboard can leave less
+   room than the picker needs, so its body scrolls below the header. */
+.colorPickerPopover.constrained {
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-.softwareKeyboardOpen .pickerBody {
+.constrained .pickerBody {
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* The Android keyboard can shrink the page until the trigger's scroller clips
+   it, such as the theme editor's color grid. Chromium then hides a popup whose
+   anchor is clipped, along with the hex field being typed in. */
+.colorPickerPopover.softwareKeyboardOpen {
+  position-visibility: always;
 }
 
 .colorPickerPopover button,
