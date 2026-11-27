@@ -64,8 +64,9 @@ export const CUSTOM_THEME_COLORS = Object.freeze([
   ['destructiveText', '--destructive-text-color', 'Text and icons on destructive actions'],
 ])
 
+// Saved and shared themes keep these keys so older versions can still import them.
 const LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS = new Set([
-  'instanceMenu', 'accentVisited', 'scrollbarTextHover', 'primaryInput',
+  'instanceMenu', 'accentVisited', 'linkVisited', 'scrollbarTextHover', 'primaryInput',
   'coloredHeaderHover', 'coloredHeaderHoverText', 'coloredHeaderPressed', 'coloredHeaderPressedText'
 ])
 export const CUSTOM_THEME_EDITABLE_COLORS = Object.freeze(

@@ -214,8 +214,7 @@ const MAIN_COLOR_KEYS = [
   'selectionBackground', 'selectionText'
 ]
 const SECONDARY_COLOR_KEYS = [
-  'accent', 'accentHover', 'accentActive', 'accentLight', 'accentVisited',
-  'textWithAccent', 'link', 'linkVisited'
+  'accent', 'accentHover', 'accentActive', 'accentLight', 'textWithAccent', 'link'
 ]
 const blurProperties = new Map(CUSTOM_THEME_BLURS.map(([key, property]) => [key, property]))
 const baseThemeNames = useBaseThemeNames(false)

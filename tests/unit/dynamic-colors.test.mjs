@@ -150,7 +150,7 @@ for (const dark of [false, true]) {
     assert.notEqual(colors.searchBar, colors.cardBackground, 'Fields must have a distinct fill')
     const surfaces = ['background', 'cardBackground', 'secondaryCardBackground', 'searchBar', 'settingsSearchBar', 'subtleSurface']
     for (const background of surfaces) {
-      for (const foreground of ['primaryText', 'secondaryText', 'tertiaryText', 'link', 'linkVisited', 'error']) {
+      for (const foreground of ['primaryText', 'secondaryText', 'tertiaryText', 'link', 'error']) {
         assert.ok(contrast(colors[foreground], colors[background]) >= 4.5, `${foreground} on ${background}`)
       }
       for (const foreground of ['border', 'scrollbar', 'scrollbarHover', 'scrollbarActive', 'accent']) {
@@ -215,7 +215,7 @@ for (const mode of ['light', 'dark', 'black']) {
       const colors = dynamicThemeColors(materialSeedPalette(seed), mode !== 'light', mode === 'black')
       if (mode === 'black') assert.equal(colors.background, '#000000')
       for (const bg of ['background', 'cardBackground', 'searchBar', 'settingsSearchBar', 'subtleSurface', 'instanceMenu', 'sideNav', 'dropdownHover']) {
-        for (const fg of ['primaryText', 'secondaryText', 'tertiaryText', 'link', 'linkVisited', 'error']) {
+        for (const fg of ['primaryText', 'secondaryText', 'tertiaryText', 'link', 'error']) {
           assert.ok(contrast(colors[fg], colors[bg]) >= 4.5, `${seed}: ${fg} on ${bg}: ${contrast(colors[fg], colors[bg])}`)
         }
         if (bg !== 'dropdownHover') {
