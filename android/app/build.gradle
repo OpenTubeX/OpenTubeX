@@ -63,15 +63,26 @@ def generateAppIconPresets = tasks.register('generateAppIconPresets', Exec) {
 tasks.named('preBuild').configure { dependsOn(generateAppIconPresets) }
 
 def castSenderOutput = layout.buildDirectory.dir('generated/cast-sender')
+// The Chromecast receiver integration test (_scripts/androidCastReceiverTest.mjs)
+// builds a debug APK whose sender also trusts the test's temporary root.
+def castTestRoot = project.findProperty('castTestRoot')?.with { rootProject.file(it).absolutePath }
+if (castTestRoot) {
+    gradle.taskGraph.whenReady { graph ->
+        def shipped = graph.allTasks.find { it.project == project && it.name =~ /(?i)release|nightly/ }
+        if (shipped) throw new GradleException("castTestRoot is only for debug builds of the receiver test, not for ${shipped.path}")
+    }
+}
 def generateCastSender = tasks.register('generateCastSender', Exec) {
     workingDir rootProject.file('..')
     inputs.dir(rootProject.file('../_scripts/cast-sender'))
     inputs.files(rootProject.file('../_scripts/androidCastSender.mjs'), rootProject.file('../_scripts/castSender.mjs'), rootProject.file('../_scripts/goBuild.mjs'))
     inputs.property('abis', project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86')
+    // Changing the root, or building without it again, builds the sender again.
+    inputs.property('castTestRoot', castTestRoot ? file(castTestRoot).text : '')
     outputs.dir(castSenderOutput)
     doFirst {
-        commandLine 'node', '_scripts/androidCastSender.mjs', castSenderOutput.get().asFile.absolutePath,
-            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis
+        commandLine(['node', '_scripts/androidCastSender.mjs', castSenderOutput.get().asFile.absolutePath,
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis] + (castTestRoot ? [castTestRoot] : []))
     }
 }
 tasks.named('preBuild').configure { dependsOn(generateCastSender) }

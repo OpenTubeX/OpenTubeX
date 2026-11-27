@@ -20,7 +20,7 @@ import { forwardAndroidWebView } from '../tests/helpers/android-webview.mjs'
  * file starts with a restarted app, so that no page, stub or session state
  * of an earlier file leaks into it. Needs ffmpeg for the media fixtures.
  *
- * Usage: node _scripts/androidScriptTests.mjs [<test file>... | <shard> <shards> | api37]
+ * Usage: node _scripts/androidScriptTests.mjs [<test file>... | <shard> <shards> | api37 | cast-receiver]
  */
 
 const METADATA = 'android/app/build/outputs/apk/debug/output-metadata.json'
@@ -30,7 +30,9 @@ const PERMISSIONS = ['android.permission.POST_NOTIFICATIONS']
 
 // The scripts to run, with their seconds on a local emulator, which balance
 // the shards. These scripts in tests/android stay out:
-// - chromecast-receiver needs a sender trusting a test CA, openchromecast and mpv.
+// - chromecast-receiver needs a debug APK whose sender trusts a test root, and
+//   openchromecast and mpv. _scripts/androidCastReceiverTest.mjs prepares them
+//   and runs it with `cast-receiver`.
 // - large-screen-fullscreen and local-network-permission need Android 17, so
 //   they run in their own list on an API 37 emulator.
 // - mobile-performance runs in a desktop Chromium, not on the device, and the
@@ -85,6 +87,8 @@ const API_37_SCRIPTS = [
   ['local-network-permission', 15],
 ]
 
+const CAST_RECEIVER_SCRIPTS = [['chromecast-receiver', 115]]
+
 /** @param {[string, number]} script */
 const scriptFile = ([name]) => `tests/android/${name}.test.mjs`
 
@@ -110,7 +114,9 @@ const files = (shardArgs
   ? shardScripts(...shardArgs)
   : args.length === 1 && args[0] === 'api37'
     ? API_37_SCRIPTS.map(scriptFile)
-    : args.length > 0 ? args : SCRIPTS.map(scriptFile))
+    : args.length === 1 && args[0] === 'cast-receiver'
+      ? CAST_RECEIVER_SCRIPTS.map(scriptFile)
+      : args.length > 0 ? args : SCRIPTS.map(scriptFile))
   .map(file => resolve(file))
 if (shardArgs && files.length === 0) throw new Error(`Shard ${shardArgs[0]} of ${shardArgs[1]} has no scripts`)
 
@@ -219,7 +225,7 @@ function prepareMedia() {
  * @param {string} file
  */
 function fileTimeout(file) {
-  const seconds = [...SCRIPTS, ...API_37_SCRIPTS].find(script => file === resolve(scriptFile(script)))?.[1] ?? 60
+  const seconds = [...SCRIPTS, ...API_37_SCRIPTS, ...CAST_RECEIVER_SCRIPTS].find(script => file === resolve(scriptFile(script)))?.[1] ?? 60
   return (120 + seconds * 6) * 1000
 }
 

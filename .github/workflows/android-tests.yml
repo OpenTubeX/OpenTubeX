@@ -35,9 +35,9 @@ jobs:
     name: Instrumentation tests (API 35, shard ${{ matrix.shard }})
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # At night, each shard also runs a third of the WebView script tests, and
-    # the first shard the Android 17 ones.
-    timeout-minutes: ${{ github.event_name != 'push' && 185 || 80 }}
+    # At night, each shard also runs a third of the WebView script tests, the
+    # first shard the Android 17 ones, and the second the Chromecast receiver test.
+    timeout-minutes: ${{ github.event_name != 'push' && 230 || 80 }}
 
     # Software rendering makes long emulator sessions crash, so each shard
     # runs part of the suite on its own emulator.
@@ -252,6 +252,59 @@ jobs:
           timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           mkdir -p "$ANDROID_ARTIFACT_DIR"
           node _scripts/androidScriptTests.mjs api37
+
+    # The Chromecast receiver test casts to openchromecast, an open source
+    # receiver, on the runner. Senders accept only receivers whose certificate
+    # chains to a Cast root, so the test builds a debug APK whose sender also
+    # trusts a temporary root. It runs last, since the other tests need the
+    # regular sender.
+    - name: Build the Chromecast receiver test
+      id: cast-receiver-build
+      if: ${{ !cancelled() && github.event_name != 'push' && matrix.shard == 1 && steps.instrumentation.outcome == 'success' }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+        OPENCHROMECAST_VERSION: 1.0.5
+        OPENCHROMECAST_SHA256: c1902841da0a89ac2b32ea8f60af6d4c9c3cfc551b429b648110909c9dd4d55f
+      run: |
+        package="$RUNNER_TEMP/openchromecast_${OPENCHROMECAST_VERSION}_amd64.deb"
+        gh release download "v$OPENCHROMECAST_VERSION" --repo yukarikaname/openchromecast \
+          --pattern "openchromecast_${OPENCHROMECAST_VERSION}_amd64.deb" --dir "$RUNNER_TEMP"
+        echo "$OPENCHROMECAST_SHA256  $package" | sha256sum --check
+        # The package declares only mpv, but the receiver also links libxdo.
+        # Xvfb gives mpv a display for its video window.
+        sudo apt-get install -y --no-install-recommends "$package" mpv libxdo3 xvfb
+        node _scripts/androidCastReceiverTest.mjs prepare "$RUNNER_TEMP/cast-receiver"
+        ./android/gradlew --project-dir android :app:assembleDebug -PtestAbi=x86_64 -PcastTestRoot="$RUNNER_TEMP/cast-receiver/root.pem"
+
+    - name: Run the Chromecast receiver test
+      if: ${{ !cancelled() && steps.cast-receiver-build.outcome == 'success' }}
+      # Booting takes up to ten minutes with software rendering, and the test
+      # takes about two minutes on a local emulator, plus a retry.
+      timeout-minutes: 45
+      env:
+        ANDROID_FLAKY_REPORT: ${{ runner.temp }}/android-flaky.json
+        ANDROID_ARTIFACT_DIR: android/app/build/outputs/androidTest-results/connected/webview-scripts-cast-receiver
+      uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+      with:
+        api-level: 35
+        target: google_apis
+        arch: x86_64
+        emulator-build: 15917651
+        profile: pixel_6
+        cores: 4
+        ram-size: 4096M
+        disk-size: 6G
+        disable-animations: false
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle -skin 720x1600
+        script: |
+          adb shell settings put global hide_error_dialogs 1
+          adb shell settings put secure anr_show_background 0
+          adb shell settings put global heads_up_notifications_enabled 0
+          adb shell wm density 280
+          adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
+          timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
+          mkdir -p "$ANDROID_ARTIFACT_DIR"
+          node _scripts/androidCastReceiverTest.mjs run "$RUNNER_TEMP/cast-receiver"
 
     - name: Show why the emulator stopped
       if: failure()
