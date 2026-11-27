@@ -50,3 +50,19 @@ export function combineDownloadSpeeds(speeds) {
   const exponent = Math.min(Math.max(Math.floor(Math.log(total) / Math.log(1024)), 0), SPEED_UNITS.length - 1)
   return `${(total / 1024 ** exponent).toFixed(2)}${SPEED_UNITS[exponent]}/s`
 }
+
+/**
+ * Formats an estimated remaining duration in seconds as `MM:SS` or `HH:MM:SS`,
+ * matching yt-dlp's `_eta_str`.
+ * @param {number} seconds
+ * @returns {string | null}
+ */
+export function formatDownloadEta(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return null
+  const total = Math.round(seconds)
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const secs = total % 60
+  const pad = value => String(value).padStart(2, '0')
+  return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(secs)}` : `${pad(minutes)}:${pad(secs)}`
+}

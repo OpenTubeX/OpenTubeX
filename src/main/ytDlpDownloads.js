@@ -2,6 +2,7 @@ import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, splitArguments, isYtDlpMediaUrl,
   isSafeDownloadFilenameTemplate, DOT_FIELD_PATTERN, playlistDownloadPartLimit, splitDownloadArguments,
+  expectedDownloadDuration,
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -20,6 +21,7 @@ import { interruptProcess, killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, sign
 import {
   combineDownloadSpeeds,
   compareQueuedDownloads,
+  formatDownloadEta,
   normalizeDownloadBandwidth,
   normalizeDownloadConcurrency,
   resumePendingDownload,
@@ -137,8 +139,8 @@ const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
 const LIVE_PREFIX = '__OPENTUBEX_LIVE__:'
-// The keys of FFmpeg's `-progress` output that a live recording shows
-const FFMPEG_PROGRESS_REGEX = /^(out_time_us|total_size|progress)=(\S+)$/
+// The keys of FFmpeg's `-progress` output used for live recordings and FFmpeg-backed downloads
+const FFMPEG_PROGRESS_REGEX = /^(out_time_us|total_size|speed|progress)=\s*(\S+)$/
 const STOP_UNANSWERED_MS = 10_000
 const DOWNLOAD_STOPPED_ERROR = 'DOWNLOAD_STOPPED_UNEXPECTEDLY'
 const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
@@ -872,6 +874,10 @@ async function startYtDlpDownload(
    * @property {number | null} [playlistIndex]
    * @property {number | null} [playlistCount]
    * @property {boolean} [live] whether the current video is a live stream
+   * @property {number | null} [videoDuration] duration of the current video in seconds, when reported by yt-dlp
+   * @property {number} [ffmpegOutTimeSeconds] latest media timestamp emitted by FFmpeg for a non-live download
+   * @property {number} [ffmpegSpeedFactor] latest realtime speed multiplier emitted by FFmpeg (e.g. 0.72 for `0.72x`)
+   * @property {string | null} [ffmpegSpeed] formatted speed string emitted by FFmpeg (e.g. `0.72x`)
    * @property {number} [recordedSeconds]
    * @property {number} [recordedBytes]
    * @property {number} [stopRequestedAt] when the live recording was asked to stop
@@ -950,14 +956,21 @@ async function startYtDlpDownload(
       part.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
       part.playlistIndex = index > 0 ? index : null
       part.playlistCount = count > 0 ? count : null
-      // The next line reports whether this video is live
+      // The next line reports whether this video is live and its duration
       part.live = false
+      delete part.videoDuration
+      delete part.ffmpegOutTimeSeconds
+      delete part.ffmpegSpeedFactor
+      delete part.ffmpegSpeed
       delete part.recordedSeconds
       delete part.recordedBytes
       delete part.stopRequestedAt
     }
     if (line.startsWith(LIVE_PREFIX)) {
-      part.live = line.slice(LIVE_PREFIX.length) === 'True'
+      const [rawLive, rawDuration] = line.slice(LIVE_PREFIX.length).split('\t')
+      part.live = rawLive === 'True'
+      const duration = Number(rawDuration)
+      part.videoDuration = Number.isFinite(duration) && duration > 0 ? duration : null
       // Pausing checks the row, which has to show a live video before it reports progress
       showProgress()
       sendStatus(true)
@@ -965,24 +978,53 @@ async function startYtDlpDownload(
     }
     const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
     if (ffmpegProgress) {
-      if (part.live !== true) return
-      if (part.stopRequestedAt !== undefined) {
-        // FFmpeg ends its report within moments of a stop request. A process that
-        // started with interrupts ignored keeps recording, so show that again.
-        if (Date.now() - part.stopRequestedAt < STOP_UNANSWERED_MS) return
-        delete part.stopRequestedAt
-      }
       const [, key, value] = ffmpegProgress
-      if (key === 'out_time_us' && /^\d+$/.test(value)) part.recordedSeconds = Number(value) / 1_000_000
-      else if (key === 'total_size' && /^\d+$/.test(value)) part.recordedBytes = Number(value)
-      else if (key === 'progress' && value === 'continue') {
+      if (part.live === true) {
+        if (part.stopRequestedAt !== undefined) {
+          // FFmpeg ends its report within moments of a stop request. A process that
+          // started with interrupts ignored keeps recording, so show that again.
+          if (Date.now() - part.stopRequestedAt < STOP_UNANSWERED_MS) return
+          delete part.stopRequestedAt
+        }
+        if (key === 'out_time_us' && /^\d+$/.test(value)) part.recordedSeconds = Number(value) / 1_000_000
+        else if (key === 'total_size' && /^\d+$/.test(value)) part.recordedBytes = Number(value)
+        else if (key === 'progress' && value === 'continue') {
+          const previousStatus = status.status
+          part.phase = 'downloading'
+          part.percent = 0
+          part.speed = null
+          part.eta = null
+          showProgress()
+          sendStatus(previousStatus !== status.status)
+        }
+        return
+      }
+      if (key === 'out_time_us' && /^\d+$/.test(value)) part.ffmpegOutTimeSeconds = Number(value) / 1_000_000
+      else if (key === 'speed') {
+        const speedMatch = /^(\d+(?:\.\d+)?)x$/.exec(value)
+        const factor = speedMatch ? Number(speedMatch[1]) : 0
+        part.ffmpegSpeedFactor = factor > 0 ? factor : undefined
+        part.ffmpegSpeed = factor > 0 ? value : null
+      } else if (key === 'progress' && value === 'continue') {
         const previousStatus = status.status
+        const duration = expectedDownloadDuration(payload, part.videoDuration)
         part.phase = 'downloading'
+        part.percent = duration !== null && part.ffmpegOutTimeSeconds !== undefined
+          ? Math.min(100, Math.max(0, (part.ffmpegOutTimeSeconds / duration) * 100))
+          : 0
+        part.speed = part.ffmpegSpeed ?? null
+        part.eta = duration !== null && part.ffmpegOutTimeSeconds !== undefined && part.ffmpegSpeedFactor !== undefined
+          ? formatDownloadEta(Math.max(0, duration - part.ffmpegOutTimeSeconds) / part.ffmpegSpeedFactor)
+          : null
+        showProgress()
+        sendStatus(previousStatus !== status.status)
+      } else if (key === 'progress' && value === 'end') {
+        part.phase = 'processing'
         part.percent = 0
         part.speed = null
         part.eta = null
         showProgress()
-        sendStatus(previousStatus !== status.status)
+        sendStatus(true)
       }
       return
     }

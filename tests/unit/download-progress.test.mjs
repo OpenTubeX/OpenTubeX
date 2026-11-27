@@ -4,6 +4,8 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { downloadErrorMessage } from '../../src/renderer/helpers/downloadErrors.js'
+import { expectedDownloadDuration } from '../../src/ytDlpArguments.js'
+import { formatDownloadEta } from '../../src/main/downloadQueue.js'
 
 const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const DOWNLOAD_STOPPED_ERROR = /^const DOWNLOAD_STOPPED_ERROR = '([^']+)'$/m.exec(source)[1]
@@ -22,8 +24,11 @@ function replay(lines, initialStatus = 'downloading', overrides = {}) {
     status,
     entry,
     parts: [part],
+    payload: {},
     videoIds: [],
     combineDownloadSpeeds: () => null,
+    expectedDownloadDuration,
+    formatDownloadEta,
     sendStatus: force => updates.push({ ...status, force }),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
@@ -142,18 +147,40 @@ test('live recordings show the recorded length and size that FFmpeg reports', ()
   assert.equal(part.stopRequestedAt, undefined)
 })
 
-test('FFmpeg progress of a video that is not live leaves its status alone', () => {
+test('FFmpeg progress updates non-live section downloads without marking them live', () => {
   // A live video earlier in a playlist must not mark the next one as live
-  const { status } = replay([
+  const { status, updates } = replay([
     '__OPENTUBEX_LIVE__:True',
-    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t2\t2\t"Video"',
-    '__OPENTUBEX_LIVE__:False',
-    'out_time_us=1000000',
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t2\t2\t"Clipped video"',
+    '__OPENTUBEX_LIVE__:False\t600',
+    'out_time_us=N/A',
+    'speed=N/A',
     'progress=continue',
-  ], 'preparing')
-  assert.equal(status.status, 'preparing')
+    'out_time_us=30000000',
+    'speed= 0.5x',
+    'progress=continue',
+  ], 'preparing', { payload: { mode: 'video', startTime: '00:01:00', endTime: '00:03:00' } })
+  assert.equal(status.status, 'downloading')
   assert.notEqual(status.live, true)
   assert.equal(status.recordedSeconds, undefined)
+  assert.equal(status.percent, 25)
+  assert.equal(status.speed, '0.5x')
+  assert.equal(status.eta, '03:00')
+  assert.equal(updates.find(update => update.status === 'downloading').force, true)
+
+  const finished = replay([
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t\t\t"HLS video"',
+    '__OPENTUBEX_LIVE__:False\t200',
+    'out_time_us=100000000',
+    'speed=2.0x',
+    'progress=continue',
+    'progress=end',
+  ], 'preparing')
+  assert.equal(finished.updates.find(update => update.status === 'downloading').percent, 50)
+  assert.equal(finished.updates.find(update => update.status === 'downloading').eta, '00:50')
+  assert.equal(finished.status.status, 'processing')
+  assert.equal(finished.status.speed, null)
+  assert.equal(finished.status.eta, null)
 })
 
 test('parts of a split playlist keep their own live state', () => {
