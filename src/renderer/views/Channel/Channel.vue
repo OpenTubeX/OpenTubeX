@@ -340,7 +340,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 import { YTNodes } from 'youtubei.js'
@@ -3193,7 +3193,8 @@ function handleSubscription() {
 }
 
 function filterWatchedArray(videos) {
-  const historyCache = store.getters.getHistoryCacheById
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCache = toRaw(store.getters.getHistoryCacheById)
   return videos.filter(video => !isHistoryEntryWatched(historyCache[video.videoId]))
 }
 </script>

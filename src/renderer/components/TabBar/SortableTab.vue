@@ -6,7 +6,6 @@
     :is-active="tab.isActive"
     :tab-bar-position="tabBarPosition"
     :disable-tooltips="disableTooltips || isDragging"
-    :close-tooltips-signal="closeTooltipsSignal"
     :show-preview="showPreview"
   >
     <template #anchor="{ bindings }">
@@ -199,10 +198,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  closeTooltipsSignal: {
-    type: Number,
-    default: 0
-  },
   showIcon: {
     type: Boolean,
     default: true
@@ -375,7 +370,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   transition: transform 0.2s ease;
   position: relative;
   touch-action: none;
-  will-change: transform;
 }
 
 .tab.noTransition {
@@ -447,10 +441,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   cursor: grabbing;
   transition: none;
   box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
+  will-change: transform;
 }
 
 .tab.settling {
   z-index: 10;
+  will-change: transform;
 }
 
 .tabTitle {

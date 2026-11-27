@@ -5,11 +5,14 @@
     :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive, watchMinimizePreview: previewActive && !previewRestoring }"
   >
     <div
-      v-show="isWatchRoute || previewStyle"
       ref="watchRoot"
-      :class="{ watchDragPreview: previewStyle, watchRestorePreview: restorePreviewShown }"
+      :class="{
+        watchHidden: !isWatchRoute && !previewStyle,
+        watchDragPreview: previewStyle,
+        watchRestorePreview: restorePreviewShown
+      }"
       :style="previewStyle"
-      :inert="!isWatchRoute"
+      :inert="!HIDES_WITH_CONTENT_VISIBILITY && !isWatchRoute"
       :aria-hidden="String(!isWatchRoute)"
     >
       <component
@@ -33,6 +36,13 @@ import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs
 import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { useRootClass } from '../../helpers/rootClasses'
+import { getWindowFieldPlacement } from '../../helpers/fixedBackground'
+
+// Keep Watch's style and layout when minimized behind browsing content, matching
+// TabContent.vue's @supports guard so WebKit and older Chromium keep display: none.
+const HIDES_WITH_CONTENT_VISIBILITY = globalThis.CSS?.supports?.(
+  '(content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))'
+) ?? false
 
 const props = defineProps({
   tabId: { type: String, required: true },
@@ -264,13 +274,16 @@ function beginRestorePreview() {
     left: window.scrollX + targetLeft - cover.left,
     top: window.scrollY + targetBounds.top - cover.top
   }
+  const field = getWindowFieldPlacement(targetLeft - cover.left, targetBounds.top - cover.top)
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
     width: `${targetWidth + cover.left + cover.right}px`,
     height: `${window.innerHeight - targetBounds.top - window.scrollY + cover.top}px`,
     boxSizing: 'border-box',
-    padding: `${cover.top}px ${cover.right}px 0 ${cover.left}px`
+    padding: `${cover.top}px ${cover.right}px 0 ${cover.left}px`,
+    backgroundSize: field.size,
+    backgroundPosition: field.position
   }
   watchRoot.value.style.opacity = '0'
   watchRoot.value.firstElementChild.style.opacity = '0'
@@ -535,6 +548,19 @@ onBeforeUnmount(() => {
   inset: 0;
 }
 
+.watchHidden {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  content-visibility: hidden;
+}
+
+@supports not ((content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body))) {
+  .watchHidden {
+    display: none;
+  }
+}
+
 .watchDragPreview {
   position: absolute;
   z-index: 100;
@@ -544,11 +570,12 @@ onBeforeUnmount(() => {
 }
 
 /* Paint the window's field like body::before, so the returning page does not
-   flash a flat color until the Watch route takes over. A fixed attachment keeps
-   the field aligned with the viewport while the preview covers it. */
+   flash a flat color until the Watch route takes over. Sized and positioned to
+   the viewport in JS instead of background-attachment: fixed, which forces a
+   full repaint on every scroll/frame. */
 .watchRestorePreview {
   background-color: var(--bg-color);
   background-image: var(--bg-image);
-  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 </style>

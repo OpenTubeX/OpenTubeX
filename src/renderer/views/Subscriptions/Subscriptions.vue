@@ -1678,12 +1678,12 @@ function updateGroupsBesideNewFeedTabs() {
   if (
     !(header instanceof HTMLElement) ||
     !(tabs instanceof HTMLElement) ||
-    !(bar instanceof HTMLElement) ||
-    header.getClientRects().length === 0
+    !(bar instanceof HTMLElement)
   ) {
     groupsBesideNewFeedTabs.value = false
     return
   }
+  if (header.getClientRects().length === 0) return
 
   const items = groupBarItems(bar)
   const itemGap = Number.parseFloat(getComputedStyle(bar).columnGap) || 0

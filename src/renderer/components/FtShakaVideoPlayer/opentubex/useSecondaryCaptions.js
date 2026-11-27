@@ -59,6 +59,7 @@ export function useSecondaryCaptions({
     secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
       if (!observedTextContainer) return
       const { offsetTop, offsetLeft, offsetWidth, offsetHeight } = observedTextContainer
+      if (offsetWidth === 0 || offsetHeight === 0) return
       secondaryCaptionsBox.value = {
         inset: `${offsetTop}px auto auto ${offsetLeft}px`,
         inlineSize: `${offsetWidth}px`,

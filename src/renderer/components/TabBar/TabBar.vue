@@ -61,7 +61,6 @@
                 :is-settling="isSettling && settlingTabIds.has(item.id)"
                 :suppress-transition="suppressTransitions"
                 :disable-tooltips="draggingTabIds.size > 0"
-                :close-tooltips-signal="closeTooltipsSignal"
                 :show-icon="showTabIcons"
                 :show-preview="showTabPreviews"
                 :is-selected="selectedTabIds.has(item.id)"
@@ -78,7 +77,6 @@
                 is-group
                 :tab-bar-position="tabBarPosition"
                 :disable-tooltips="draggingTabIds.size > 0"
-                :close-tooltips-signal="closeTooltipsSignal"
                 :show-preview="showTabPreviews"
               >
                 <template #anchor="{ bindings }">
@@ -202,7 +200,10 @@ import {
 
 defineOptions({ inheritAttrs: false })
 
-provideTabTooltip()
+const tabTooltip = provideTabTooltip()
+function dismissTabTooltips() {
+  tabTooltip.dismiss()
+}
 
 const { t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -304,10 +305,15 @@ watch(showTabPreviews, enabled => {
   }
 }, { immediate: true })
 
+watch(showTabIcons, enabled => {
+  if (isElectron) {
+    window.ftElectron.tabs.setAvatarsEnabled(enabled)
+  }
+}, { immediate: true })
+
 watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
   if (!isElectron) return
 
-  window.ftElectron.tabs.setAvatarsEnabled(enabled)
   if (!enabled) {
     attemptedAutomaticAvatarRoutes.clear()
     return
@@ -395,7 +401,6 @@ const dropZoneRef = useTemplateRef('dropZoneRef')
 /** Holds the tabs and the inline new tab button, and spans the scroll range. */
 const tabsRowRef = useTemplateRef('tabsRow')
 const inlineNewTabButtonRef = useTemplateRef('inlineNewTabButton')
-const closeTooltipsSignal = ref(0)
 
 // Tabs that arrive with the first state update, such as a restored session,
 // appear without animating.
@@ -682,7 +687,7 @@ function handleDragPointerMove(event) {
       selectionAnchorId = dragSession.tabId
     }
     draggingTabIds.value = new Set(dragSession.tabIds)
-    closeTooltipsSignal.value++
+    dismissTabTooltips()
     document.body.classList.add('tab-bar-grabbing')
   }
 
@@ -1101,6 +1106,23 @@ const MAX_VERTICAL_TAB_BAR_WIDTH = 400
 const DEFAULT_VERTICAL_TAB_BAR_WIDTH = 220
 
 let isResizingTabBar = false
+/** @type {DOMRect | null} */
+let resizeBarRect = null
+/** @type {number | null} */
+let resizeFrameId = null
+/** @type {number | null} */
+let pendingResizeWidth = null
+
+function flushTabBarResize() {
+  resizeFrameId = null
+  if (pendingResizeWidth === null) return
+  const width = pendingResizeWidth
+  pendingResizeWidth = null
+  if (width !== store.getters.getVerticalTabBarWidth) {
+    // Apply live via the mutation; the pointerup handler persists the result.
+    store.commit('setVerticalTabBarWidth', width)
+  }
+}
 
 /**
  * @param {PointerEvent} event
@@ -1109,7 +1131,12 @@ function handleResizePointerDown(event) {
   if (event.button !== 0) return
 
   event.preventDefault()
+  if (event.currentTarget instanceof Element && event.pointerId != null) {
+    try { event.currentTarget.setPointerCapture(event.pointerId) } catch {}
+  }
   isResizingTabBar = true
+  resizeBarRect = tabBarRef.value?.getBoundingClientRect() ?? null
+  pendingResizeWidth = null
   document.body.classList.add('tab-bar-resizing')
   window.addEventListener('pointermove', handleResizePointerMove)
   window.addEventListener('pointerup', handleResizePointerUp)
@@ -1120,22 +1147,23 @@ function handleResizePointerDown(event) {
  * @param {PointerEvent} event
  */
 function handleResizePointerMove(event) {
-  const bar = tabBarRef.value
-  if (!bar) return
+  const rect = resizeBarRect ?? tabBarRef.value?.getBoundingClientRect()
+  if (!rect) return
 
-  const rect = bar.getBoundingClientRect()
   const width = tabBarPosition.value === 'right'
     ? rect.right - event.clientX
     : event.clientX - rect.left
-  const clampedWidth = Math.round(
+  pendingResizeWidth = Math.round(
     Math.max(MIN_VERTICAL_TAB_BAR_WIDTH, Math.min(MAX_VERTICAL_TAB_BAR_WIDTH, width))
   )
-
-  // Apply live via the mutation; the pointerup handler persists the result.
-  store.commit('setVerticalTabBarWidth', clampedWidth)
+  resizeFrameId ??= requestAnimationFrame(flushTabBarResize)
 }
 
 function handleResizePointerUp() {
+  if (resizeFrameId !== null) {
+    cancelAnimationFrame(resizeFrameId)
+    flushTabBarResize()
+  }
   stopTabBarResize()
   store.dispatch('updateVerticalTabBarWidth', store.getters.getVerticalTabBarWidth)
 }
@@ -1144,6 +1172,12 @@ function stopTabBarResize() {
   if (!isResizingTabBar) return
 
   isResizingTabBar = false
+  resizeBarRect = null
+  pendingResizeWidth = null
+  if (resizeFrameId !== null) {
+    cancelAnimationFrame(resizeFrameId)
+    resizeFrameId = null
+  }
   document.body.classList.remove('tab-bar-resizing')
   window.removeEventListener('pointermove', handleResizePointerMove)
   window.removeEventListener('pointerup', handleResizePointerUp)
@@ -1348,7 +1382,7 @@ onMounted(() => {
     document.addEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.addEventListener('contextmenu', handleContextMenuEvent, true)
     removeActiveChangedListener = window.ftElectron.tabs.onActiveChanged(() => {
-      closeTooltipsSignal.value++
+      dismissTabTooltips()
       clearTabSelection()
     })
     removeTitleBarMiddleClickListener = window.ftElectron.onTitleBarMiddleClick(handleTitleBarMiddleClick)
@@ -1621,17 +1655,3 @@ watch(tabs, (nextTabs) => {
 </script>
 
 <style scoped src="./TabBar.css" />
-
-<style>
-.tab-bar-grabbing,
-.tab-bar-grabbing * {
-  cursor: grabbing !important;
-  user-select: none !important;
-}
-
-.tab-bar-resizing,
-.tab-bar-resizing * {
-  cursor: col-resize !important;
-  user-select: none !important;
-}
-</style>

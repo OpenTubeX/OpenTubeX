@@ -112,6 +112,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { isRendered } from '../../helpers/rendered'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
@@ -161,21 +162,25 @@ const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
 const metadataLine = useTemplateRef('metadataLine')
 const metadataWrapped = ref(false)
-let metadataResizeObserver = null
+/** @type {Element[]} */
+let observedMetadataElements = []
 
 function updateMetadataWrapping() {
-  const [firstItem, secondItem] = metadataLine.value?.children ?? []
+  if (!metadataLine.value || !isRendered(metadataLine.value)) return
+  const [firstItem, secondItem] = metadataLine.value.children
   metadataWrapped.value = firstItem != null && secondItem != null &&
     Math.abs(firstItem.getBoundingClientRect().top - secondItem.getBoundingClientRect().top) > 1
 }
 
 const infoAndSubscribe = useTemplateRef('infoAndSubscribe')
 const compactSubscribe = ref(false)
-let subscribeResizeObserver = null
+/** @type {Element[]} */
+let observedSubscribeElements = []
 
 /** Drops the subscribe label when the button group would overflow the card, like in narrow grid columns. */
 function updateSubscribeLayout() {
-  const buttonList = infoAndSubscribe.value?.querySelector('.buttonList')
+  if (!infoAndSubscribe.value || !isRendered(infoAndSubscribe.value)) return
+  const buttonList = infoAndSubscribe.value.querySelector('.buttonList')
   const button = buttonList?.querySelector('.subscribeButton')
   if (!button) return
   const available = infoAndSubscribe.value.getBoundingClientRect().width
@@ -187,15 +192,25 @@ function updateSubscribeLayout() {
   if (compact !== compactSubscribe.value) compactSubscribe.value = compact
 }
 
+function unobserveSubscribeElements() {
+  for (const element of observedSubscribeElements) {
+    unobserveChannelResize(element, updateSubscribeLayout)
+  }
+  observedSubscribeElements = []
+}
+
 function observeSubscribeButton() {
-  subscribeResizeObserver?.disconnect()
+  unobserveSubscribeElements()
   const buttonList = infoAndSubscribe.value?.querySelector('.buttonList')
-  if (subscribeResizeObserver && buttonList) {
-    subscribeResizeObserver.observe(infoAndSubscribe.value)
-    subscribeResizeObserver.observe(buttonList)
+  if (typeof ResizeObserver === 'function' && buttonList) {
+    const targets = [infoAndSubscribe.value, buttonList]
     // The hidden label of the compact button changes width without resizing the group.
     const label = buttonList.querySelector('.subscribeLabel')
-    if (label) subscribeResizeObserver.observe(label)
+    if (label) targets.push(label)
+    for (const target of targets) {
+      observeChannelResize(target, updateSubscribeLayout)
+    }
+    observedSubscribeElements = targets
   }
   updateSubscribeLayout()
 }
@@ -210,19 +225,20 @@ onMounted(() => {
     return
   }
 
-  metadataResizeObserver = new ResizeObserver(updateMetadataWrapping)
-  metadataResizeObserver.observe(metadataLine.value)
-  for (const item of metadataLine.value.children) {
-    metadataResizeObserver.observe(item)
+  observedMetadataElements = [metadataLine.value, ...metadataLine.value.children]
+  for (const item of observedMetadataElements) {
+    observeChannelResize(item, updateMetadataWrapping)
   }
 
-  subscribeResizeObserver = new ResizeObserver(updateSubscribeLayout)
   observeSubscribeButton()
 })
 
 onBeforeUnmount(() => {
-  metadataResizeObserver?.disconnect()
-  subscribeResizeObserver?.disconnect()
+  for (const item of observedMetadataElements) {
+    unobserveChannelResize(item, updateMetadataWrapping)
+  }
+  observedMetadataElements = []
+  unobserveSubscribeElements()
 })
 
 let id = ''
@@ -314,6 +330,43 @@ function parseInvidiousData() {
   }
 
   description = props.data.description
+}
+</script>
+
+<script>
+/** @type {ResizeObserver | null} */
+let sharedChannelResizeObserver = null
+/** @type {WeakMap<Element, Set<() => void>>} */
+const channelResizeHandlers = new WeakMap()
+
+function observeChannelResize(element, handler) {
+  sharedChannelResizeObserver ??= new ResizeObserver((entries) => {
+    const pending = new Set()
+    for (const entry of entries) {
+      const handlers = channelResizeHandlers.get(entry.target)
+      if (handlers) {
+        for (const callback of handlers) pending.add(callback)
+      }
+    }
+    for (const callback of pending) callback()
+  })
+  let handlers = channelResizeHandlers.get(element)
+  if (!handlers) {
+    handlers = new Set()
+    channelResizeHandlers.set(element, handlers)
+    sharedChannelResizeObserver.observe(element)
+  }
+  handlers.add(handler)
+}
+
+function unobserveChannelResize(element, handler) {
+  const handlers = channelResizeHandlers.get(element)
+  if (!handlers) return
+  handlers.delete(handler)
+  if (handlers.size === 0) {
+    channelResizeHandlers.delete(element)
+    sharedChannelResizeObserver?.unobserve(element)
+  }
 }
 </script>
 

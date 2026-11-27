@@ -174,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from './FtAutoGrid/FtAutoGrid.vue'
@@ -371,7 +371,9 @@ const displayedEntries = computed(() => {
 const enableRssFeeds = computed(() => supportsYtDlp && store.getters.getEnableRssFeeds)
 const { feeds: rssFeeds, feedAvatars: rssFeedAvatars, items: rssItems } = useFollowedRssFeedItems(() => enableRssFeeds.value)
 const newRssItems = computed(() => {
-  const items = rssItems.value.filter(item => item.isNew === true && !isExternalMediaWatched(item.url, store.getters.getHistoryCacheById))
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCache = toRaw(store.getters.getHistoryCacheById)
+  const items = rssItems.value.filter(item => item.isNew === true && !isExternalMediaWatched(item.url, historyCache))
   return sortBy.value === 'oldest' ? items.toReversed() : items
 })
 const newRssItemKeys = computed(() => newRssItems.value.map(getRssFeedItemKey))
@@ -380,12 +382,14 @@ const platformChannels = computed(() => getFollowedChannels())
 const platformAvatars = computed(() => new Map(platformChannels.value.map(channel => [getPlatformChannelKey(channel), channel.avatar ?? null])))
 // Clips come from viewers, so only live streams and uploads are new content
 const newPlatformItems = computed(() => {
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCache = toRaw(store.getters.getHistoryCacheById)
   const keys = new Set(platformChannels.value.map(getPlatformChannelKey))
   const { live, videos } = platformFeed.value
   const items = sortNewestFirst([...live, ...videos].filter(item => (
     item.isNew === true && keys.has(getPlatformChannelKey({ platform: item.platform, id: item.channelId })) &&
     // Every broadcast of a channel shares its address, so live streams are never watched
-    (item.isLive === true || !isExternalMediaWatched(item.url, store.getters.getHistoryCacheById))
+    (item.isLive === true || !isExternalMediaWatched(item.url, historyCache))
   )))
   return sortBy.value === 'oldest' ? items.toReversed() : items
 })

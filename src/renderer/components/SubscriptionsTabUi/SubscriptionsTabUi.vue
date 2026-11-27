@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRaw } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -322,8 +322,10 @@ const filteredVideoList = computed(() => {
   if (props.onlyShowNew) {
     videoList = videoList.filter(entry => entry.isNewInSubscriptionFeed === true)
   } else if (!props.isCommunity && hideWatchedSubs.value) {
+    store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+    const historyCache = toRaw(historyCacheById.value)
     videoList = videoList.filter((video) => {
-      return video.videoId == null || !isHistoryEntryWatched(historyCacheById.value[video.videoId])
+      return video.videoId == null || !isHistoryEntryWatched(historyCache[video.videoId])
     })
   }
 
@@ -341,9 +343,11 @@ const filteredVideoList = computed(() => {
 const hasNewContent = computed(() => {
   // The entries' seen state changes in place, outside this computed's tracking.
   subscriptionEntryVersion.value // eslint-disable-line no-unused-expressions
+  store.getters.getHistoryEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCache = toRaw(historyCacheById.value)
   return filteredVideoList.value.some(entry => {
     return entry.isNewInSubscriptionFeed === true &&
-      (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
+      (entry.videoId == null || !isHistoryEntryWatched(historyCache[entry.videoId]))
   })
 })
 

@@ -16,6 +16,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { isRendered } from '../../helpers/rendered'
 
 const props = defineProps({
   progress: {
@@ -43,7 +44,6 @@ const props = defineProps({
 const svg = useTemplateRef('svg')
 const width = ref(1)
 const height = ref(1)
-let resizeObserver = null
 
 const clampedProgress = computed(() => Math.min(100, Math.max(0, props.progress)))
 
@@ -122,21 +122,46 @@ const path = computed(() => {
  * @param {ResizeObserverEntry} entry
  */
 function updateGeometry(entry) {
+  if (!svg.value || !isRendered(svg.value)) return
   const box = entry.borderBoxSize?.[0]
-  width.value = Math.max(1, box ? box.inlineSize : entry.contentRect.width)
-  height.value = Math.max(1, box ? box.blockSize : entry.contentRect.height)
+  const nextWidth = box ? box.inlineSize : entry.contentRect.width
+  const nextHeight = box ? box.blockSize : entry.contentRect.height
+  if (nextWidth <= 0 || nextHeight <= 0) return
+  width.value = Math.max(1, nextWidth)
+  height.value = Math.max(1, nextHeight)
 }
 
 defineExpose({ lineInsets })
 
 onMounted(() => {
-  resizeObserver = new ResizeObserver(entries => updateGeometry(entries[0]))
-  resizeObserver.observe(svg.value)
+  if (svg.value) observeProgressResize(svg.value, updateGeometry)
 })
 
 onBeforeUnmount(() => {
-  resizeObserver?.disconnect()
+  if (svg.value) unobserveProgressResize(svg.value)
 })
+</script>
+
+<script>
+/** @type {ResizeObserver | null} */
+let sharedProgressResizeObserver = null
+/** @type {WeakMap<Element, (entry: ResizeObserverEntry) => void>} */
+const progressResizeHandlers = new WeakMap()
+
+function observeProgressResize(element, handler) {
+  sharedProgressResizeObserver ??= new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      progressResizeHandlers.get(entry.target)?.(entry)
+    }
+  })
+  progressResizeHandlers.set(element, handler)
+  sharedProgressResizeObserver.observe(element)
+}
+
+function unobserveProgressResize(element) {
+  progressResizeHandlers.delete(element)
+  sharedProgressResizeObserver?.unobserve(element)
+}
 </script>
 
 <style scoped>

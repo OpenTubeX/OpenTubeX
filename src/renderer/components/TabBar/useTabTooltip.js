@@ -60,6 +60,8 @@ export function provideTabTooltip() {
     hideTimer = setTimeout(() => hide(id), 120)
   }
 
-  provide(tabTooltipKey, { active, show, hide, leave, dismiss })
+  const api = { active, show, hide, leave, dismiss }
+  provide(tabTooltipKey, api)
   onBeforeUnmount(dismiss)
+  return api
 }

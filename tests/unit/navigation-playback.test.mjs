@@ -92,6 +92,7 @@ function mountWatch(t, { tab = null, path = '/watch/video', paused = false, hasL
     document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     useRootClass: (name, active) => rootClasses.set(name, active),
+    getWindowFieldPlacement: (left, top) => ({ size: '412px 800px', position: `${-left}px ${-top}px` }),
     defineProps: () => props,
     defineEmits: () => () => {},
     defineExpose: value => { exposed = value },
