@@ -187,6 +187,38 @@ export function splitDownloadArguments(payload, args, count) {
  */
 export const LOCAL_PLAYLIST_INDEX_METADATA = 'original_url:[?&]index=(?P<opentubex_playlist_index>[0-9]+)(?:&|$)'
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
+/**
+ * Parses a download section timestamp (`MM:SS` or `HH:MM:SS`, with optional
+ * fractional seconds) into seconds, or returns null when invalid.
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+export function parseDownloadTimestamp(value) {
+  if (typeof value !== 'string' || !TIME_REGEX.test(value)) return null
+  return value.split(':').reduce((total, segment) => total * 60 + Number(segment), 0)
+}
+/**
+ * Expected duration in seconds of the downloaded media for FFmpeg progress
+ * reporting, accounting for any `--download-sections` time range.
+ * @param {{ mode?: string, startTime?: string, endTime?: string } | null | undefined} payload
+ * @param {number | null | undefined} videoDuration
+ * @returns {number | null}
+ */
+export function expectedDownloadDuration(payload, videoDuration) {
+  const duration = typeof videoDuration === 'number' && Number.isFinite(videoDuration) && videoDuration > 0
+    ? videoDuration
+    : null
+  if (!payload || payload.mode === 'subtitles') return duration
+  const start = parseDownloadTimestamp(payload.startTime)
+  const end = parseDownloadTimestamp(payload.endTime)
+  if (start === null && end === null) return duration
+  const effectiveStart = start ?? 0
+  const effectiveEnd = end === null
+    ? duration
+    : duration === null ? end : Math.min(end, duration)
+  if (effectiveEnd === null || effectiveEnd <= effectiveStart) return null
+  return effectiveEnd - effectiveStart
+}
 export const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   minDurationSeconds: 31_536_000,
   maxDurationSeconds: 31_536_000,
@@ -444,7 +476,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   args.push(
     '--no-simulate',
     '--print', `video:__OPENTUBEX_PREPARING__:%(id)s\t${position}\t%(title)j`,
-    '--print', 'video:__OPENTUBEX_LIVE__:%(is_live)s',
+    '--print', 'video:__OPENTUBEX_LIVE__:%(is_live)s\t%(duration|)s',
     '--progress-template', 'download:__OPENTUBEX_DOWNLOAD__:%(progress.status)s\t%(progress._percent_str)s\t%(progress._speed_str)s\t%(progress._eta_str)s',
     '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
   )

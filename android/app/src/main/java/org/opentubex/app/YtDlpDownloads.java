@@ -33,8 +33,10 @@ final class YtDlpDownloads {
     private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
     private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
     private static final String LIVE_PREFIX = "__OPENTUBEX_LIVE__:";
-    // The keys of FFmpeg's -progress output that a live recording shows
-    private static final Pattern FFMPEG_PROGRESS = Pattern.compile("^(out_time_us|total_size|progress)=(\\S+)$");
+    // The keys of FFmpeg's -progress output used for live recordings and FFmpeg-backed downloads
+    private static final Pattern FFMPEG_PROGRESS = Pattern.compile("^(out_time_us|total_size|speed|progress)=\\s*(\\S+)$");
+    private static final Pattern FFMPEG_SPEED = Pattern.compile("^(\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)x$");
+    private static final Pattern DOWNLOAD_TIME = Pattern.compile("^(?:\\d+:)?[0-5]?\\d:[0-5]\\d(?:\\.\\d+)?$");
     static final long STOP_UNANSWERED_MS = 10_000;
     private final Context context;
     private final AtomicFile file;
@@ -546,9 +548,11 @@ final class YtDlpDownloads {
                 || liveRank(part) == liveRank(shown) && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
         }
         if (shown == null) shown = parts.get(0);
+        Object combinedSpeed = parts.size() > 1 ? combineSpeeds(speeds) : JSONObject.NULL;
+        Object shownSpeed = shown.isNull("speed") ? JSONObject.NULL : shown.get("speed");
         record.put("status", shown.optString("status", "preparing")).put("percent", shown.optDouble("percent", 0))
             .put("eta", shown.isNull("eta") ? JSONObject.NULL : shown.get("eta"))
-            .put("speed", parts.size() > 1 ? combineSpeeds(speeds) : shown.isNull("speed") ? JSONObject.NULL : shown.get("speed"));
+            .put("speed", !JSONObject.NULL.equals(combinedSpeed) ? combinedSpeed : shownSpeed);
         if (shown.has("currentVideoId")) {
             for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.put(key, shown.opt(key));
         }
@@ -593,8 +597,9 @@ final class YtDlpDownloads {
         if (!isExecuting(id) || parts == null) return;
         try {
             String previousStatus = record.optString("status");
-            for (String line : lines.split("\n")) updateProgress(parts.get(part), line);
-            showProgress(record, parts, record.getJSONObject("retryPayload").optJSONArray("videoIds"));
+            JSONObject payload = record.optJSONObject("retryPayload");
+            for (String line : lines.split("\n")) updateProgress(parts.get(part), line, payload);
+            showProgress(record, parts, payload != null ? payload.optJSONArray("videoIds") : null);
             long now = System.currentTimeMillis();
             if (!previousStatus.equals(record.optString("status")) || now - record.optLong("lastProgress") >= 500) {
                 record.put("lastProgress", now);
@@ -603,26 +608,100 @@ final class YtDlpDownloads {
         } catch (Exception error) { Log.w("OpenTubeXYtDlp", "Invalid download progress", error); }
     }
 
+    private static Double parseDownloadTimestamp(String value) {
+        if (value == null || !DOWNLOAD_TIME.matcher(value).matches()) return null;
+        double total = 0;
+        for (String segment : value.split(":")) total = total * 60 + Double.parseDouble(segment);
+        return total;
+    }
+
+    private static Double expectedDownloadDuration(JSONObject payload, Double videoDuration) {
+        Double duration = videoDuration != null && Double.isFinite(videoDuration) && videoDuration > 0 ? videoDuration : null;
+        if (payload == null || "subtitles".equals(payload.optString("mode"))) return duration;
+        Double start = parseDownloadTimestamp(payload.isNull("startTime") ? null : payload.optString("startTime", null));
+        Double end = parseDownloadTimestamp(payload.isNull("endTime") ? null : payload.optString("endTime", null));
+        if (start == null && end == null) return duration;
+        double effectiveStart = start != null ? start : 0;
+        Double effectiveEnd;
+        if (end == null) effectiveEnd = duration;
+        else if (duration == null) effectiveEnd = end;
+        else effectiveEnd = Math.min(end, duration);
+        if (effectiveEnd == null || effectiveEnd <= effectiveStart) return null;
+        return effectiveEnd - effectiveStart;
+    }
+
+    private static Object formatDownloadEta(double seconds) {
+        if (!Double.isFinite(seconds) || seconds < 0) return JSONObject.NULL;
+        long total = Math.round(seconds);
+        long hours = total / 3600;
+        long minutes = (total % 3600) / 60;
+        long secs = total % 60;
+        return hours > 0
+            ? String.format(Locale.ROOT, "%02d:%02d:%02d", hours, minutes, secs)
+            : String.format(Locale.ROOT, "%02d:%02d", minutes, secs);
+    }
+
     static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        updateProgress(record, line, null);
+    }
+
+    static void updateProgress(JSONObject record, String line, JSONObject payload) throws org.json.JSONException {
         if (line.startsWith(LIVE_PREFIX)) {
-            record.put("live", line.substring(LIVE_PREFIX.length()).equals("True"));
+            String[] fields = line.substring(LIVE_PREFIX.length()).split("\t", 2);
+            record.put("live", fields[0].equals("True"));
+            if (fields.length > 1 && !fields[1].isEmpty()) {
+                try {
+                    double duration = Double.parseDouble(fields[1]);
+                    if (Double.isFinite(duration) && duration > 0) record.put("videoDuration", duration);
+                    else record.remove("videoDuration");
+                } catch (NumberFormatException ignored) { record.remove("videoDuration"); }
+            } else {
+                record.remove("videoDuration");
+            }
             return;
         }
         var ffmpegProgress = FFMPEG_PROGRESS.matcher(line);
         if (ffmpegProgress.matches()) {
-            if (!record.optBoolean("live")) return;
-            if (record.has("stopping")) {
-                // FFmpeg reports progress once more after a stop request, which already shows processing.
-                // One that still reports after that kept recording, so show that again.
-                if (System.currentTimeMillis() - record.optLong("stopping") < STOP_UNANSWERED_MS) return;
-                record.remove("stopping");
-            }
             String key = ffmpegProgress.group(1);
             String value = ffmpegProgress.group(2);
-            if (key.equals("out_time_us") && value.matches("\\d{1,15}")) record.put("recordedSeconds", Long.parseLong(value) / 1_000_000.0);
-            else if (key.equals("total_size") && value.matches("\\d{1,18}")) record.put("recordedBytes", Long.parseLong(value));
-            else if (key.equals("progress") && value.equals("continue")) {
-                record.put("status", "downloading").put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+            if (record.optBoolean("live")) {
+                if (record.has("stopping")) {
+                    // FFmpeg reports progress once more after a stop request, which already shows processing.
+                    // One that still reports after that kept recording, so show that again.
+                    if (System.currentTimeMillis() - record.optLong("stopping") < STOP_UNANSWERED_MS) return;
+                    record.remove("stopping");
+                }
+                if (key.equals("out_time_us") && value.matches("\\d{1,15}")) record.put("recordedSeconds", Long.parseLong(value) / 1_000_000.0);
+                else if (key.equals("total_size") && value.matches("\\d{1,18}")) record.put("recordedBytes", Long.parseLong(value));
+                else if (key.equals("progress") && value.equals("continue")) {
+                    record.put("status", "downloading").put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+                }
+                return;
+            }
+            if (key.equals("out_time_us") && value.matches("\\d{1,15}")) {
+                record.put("ffmpegOutTimeSeconds", Long.parseLong(value) / 1_000_000.0);
+            } else if (key.equals("speed")) {
+                var speedMatch = FFMPEG_SPEED.matcher(value);
+                double factor = speedMatch.matches() ? Double.parseDouble(speedMatch.group(1)) : 0;
+                if (Double.isFinite(factor) && factor > 0) record.put("ffmpegSpeedFactor", factor).put("ffmpegSpeed", value);
+                else { record.remove("ffmpegSpeedFactor"); record.remove("ffmpegSpeed"); }
+            } else if (key.equals("progress") && value.equals("continue")) {
+                Double videoDuration = record.has("videoDuration") ? record.optDouble("videoDuration") : null;
+                Double duration = expectedDownloadDuration(payload, videoDuration);
+                double percent = 0;
+                Object eta = JSONObject.NULL;
+                if (duration != null && record.has("ffmpegOutTimeSeconds")) {
+                    double outTime = record.optDouble("ffmpegOutTimeSeconds");
+                    percent = Math.min(100, Math.max(0, (outTime / duration) * 100));
+                    if (record.has("ffmpegSpeedFactor")) {
+                        eta = formatDownloadEta(Math.max(0, duration - outTime) / record.optDouble("ffmpegSpeedFactor"));
+                    }
+                }
+                record.put("status", "downloading").put("percent", percent)
+                    .put("speed", record.has("ffmpegSpeed") ? record.optString("ffmpegSpeed") : JSONObject.NULL)
+                    .put("eta", eta);
+            } else if (key.equals("progress") && value.equals("end")) {
+                record.put("status", "processing").put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
             }
             return;
         }
@@ -633,9 +712,9 @@ final class YtDlpDownloads {
             record.put("currentVideoId", fields[0].matches("[\\w-]{11}") ? fields[0] : "")
                 .put("currentTitle", title instanceof String ? ((String) title).substring(0, Math.min(255, ((String) title).length())) : "")
                 .put("playlistIndex", positiveInteger(fields, 1)).put("playlistCount", positiveInteger(fields, 2));
-            // The next line reports whether this video is live
+            // The next line reports whether this video is live and its duration
             record.put("live", false);
-            for (String key : asList("recordedSeconds", "recordedBytes", "stopping")) record.remove(key);
+            for (String key : asList("videoDuration", "ffmpegOutTimeSeconds", "ffmpegSpeedFactor", "ffmpegSpeed", "recordedSeconds", "recordedBytes", "stopping")) record.remove(key);
         }
         if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
             record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")

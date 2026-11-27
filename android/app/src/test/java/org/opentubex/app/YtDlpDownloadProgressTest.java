@@ -61,14 +61,45 @@ public class YtDlpDownloadProgressTest {
         assertFalse(part.has("stopping"));
         part.put("stopping", System.currentTimeMillis()).put("status", "processing");
 
-        // A live video earlier in a playlist must not mark the next one as live
+        // A live video earlier in a playlist must not mark the next one as live,
+        // and non-live FFmpeg downloads (such as clipped sections) report percentage and ETA
         YtDlpDownloads.updateProgress(part, "__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t\"Video\"");
         assertFalse(part.getBoolean("live"));
         assertFalse(part.has("recordedSeconds"));
         assertFalse(part.has("stopping"));
-        YtDlpDownloads.updateProgress(part, "__OPENTUBEX_LIVE__:False");
-        YtDlpDownloads.updateProgress(part, "progress=continue");
-        assertEquals("preparing", part.getString("status"));
+        JSONObject clipPayload = new JSONObject().put("mode", "video").put("startTime", "00:01:00").put("endTime", "00:03:00");
+        YtDlpDownloads.updateProgress(part, "__OPENTUBEX_LIVE__:False\t600", clipPayload);
+        YtDlpDownloads.updateProgress(part, "out_time_us=30000000", clipPayload);
+        YtDlpDownloads.updateProgress(part, "speed= 0.5x", clipPayload);
+        YtDlpDownloads.updateProgress(part, "progress=continue", clipPayload);
+        assertEquals("downloading", part.getString("status"));
+        assertFalse(part.getBoolean("live"));
+        assertFalse(part.has("recordedSeconds"));
+        assertEquals(25.0, part.getDouble("percent"), 0.001);
+        assertEquals("0.5x", part.getString("speed"));
+        assertEquals("03:00", part.getString("eta"));
+        YtDlpDownloads.updateProgress(part, "progress=end", clipPayload);
+        assertEquals("processing", part.getString("status"));
+        assertTrue(part.isNull("speed"));
+        assertTrue(part.isNull("eta"));
+
+        // Open-ended clip with unknown duration and scientific-notation speed must not throw or stay preparing
+        JSONObject openEnded = new JSONObject().put("status", "preparing").put("percent", 0);
+        JSONObject openEndedPayload = new JSONObject().put("mode", "video").put("startTime", "00:01:00");
+        YtDlpDownloads.updateProgress(openEnded, "__OPENTUBEX_LIVE__:False", openEndedPayload);
+        YtDlpDownloads.updateProgress(openEnded, "out_time_us=30000000", openEndedPayload);
+        YtDlpDownloads.updateProgress(openEnded, "speed=1.2e+01x", openEndedPayload);
+        YtDlpDownloads.updateProgress(openEnded, "progress=continue", openEndedPayload);
+        assertEquals("downloading", openEnded.getString("status"));
+        assertEquals("1.2e+01x", openEnded.getString("speed"));
+        assertTrue(openEnded.isNull("eta"));
+
+        // Split playlists preserve the shown part's multiplier speed when no byte-rate speed is present
+        JSONObject otherFfmpeg = new JSONObject().put("status", "downloading").put("speed", "2.0x").put("playlistIndex", 2);
+        openEnded.put("playlistIndex", 1);
+        JSONObject splitRecord = new JSONObject();
+        YtDlpDownloads.showProgress(splitRecord, Arrays.asList(otherFfmpeg, openEnded), null);
+        assertEquals("1.2e+01x", splitRecord.getString("speed"));
 
         // Parts of a split playlist keep their own live state, and the row shows the recording
         // even after an earlier video, so it cannot be paused
