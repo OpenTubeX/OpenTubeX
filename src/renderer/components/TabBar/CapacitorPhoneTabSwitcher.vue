@@ -1170,10 +1170,14 @@ function closeSwitcher() {
   open.value = false
 }
 
+// Set once the organizer becomes modal, until it has closed. Prewarming it at
+// startup or cancelling a pull never makes it modal or gives it focus.
+let organizerWasModal = false
 function restoreTriggerFocus() {
+  if (!organizerWasModal) return
+  organizerWasModal = false
   // Focus inside the organizer falls back to the body when it closes. Keep
-  // focus that is elsewhere, such as in a search field while the organizer
-  // only drew once at startup or a pull was cancelled.
+  // focus that something else has taken since.
   if (document.activeElement && document.activeElement !== document.body) return
   triggerRef.value?.focus({ preventScroll: true })
 }
@@ -1692,6 +1696,7 @@ watch(() => open.value && !organizerGesture.value, modal => {
   if (modal) {
     lockBodyScroll()
     modalLocked = true
+    organizerWasModal = true
     store.commit('addOpenPrompt', promptId)
     if (showSyncedTabsView.value) {
       store.dispatch('refreshSyncServerDevices').catch(error => {
