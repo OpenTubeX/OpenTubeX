@@ -290,6 +290,13 @@
   object-fit: cover;
 }
 
+.mobileLinkActionDetail {
+  display: block;
+  color: var(--secondary-text-color);
+  font-size: 0.875em;
+  overflow-wrap: anywhere;
+}
+
 .mobileLinkActionCheck {
   color: var(--primary-color);
 }

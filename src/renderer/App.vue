@@ -384,7 +384,7 @@
                     type="button"
                     :role="action.checked === undefined ? 'menuitem' : action.type === 'radio' ? 'menuitemradio' : 'menuitemcheckbox'"
                     :aria-checked="action.checked"
-                    :aria-label="action.label"
+                    :aria-label="action.detail ? `${action.label} ${action.detail}` : action.label"
                     :disabled="action.enabled === false"
                     :aria-haspopup="action.submenu ? 'menu' : undefined"
                     @click="runMobileContextAction(action)"
@@ -407,7 +407,13 @@
                       v-else
                       aria-hidden="true"
                     />
-                    <span>{{ action.label }}</span>
+                    <span>
+                      {{ action.label }}
+                      <span
+                        v-if="action.detail"
+                        class="mobileLinkActionDetail"
+                      >{{ action.detail }}</span>
+                    </span>
                     <span
                       v-if="action.submenu"
                       class="mobileLinkSubmenuArrow"
