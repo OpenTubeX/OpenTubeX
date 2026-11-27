@@ -1,4 +1,4 @@
-import { base64EncodeUtf8, createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
+import { base64EncodeUtf8, createStaticDataURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
 import { createYatteeAuthorization } from '../../helpers/api/yattee'
 import { getInvidiousInstanceCredentials, normalizeInvidiousInstanceUrl, normalizeYatteeServerUrl, splitInvidiousInstanceCredentials } from '../../../apiBackends'
 
@@ -50,7 +50,7 @@ const actions = {
       return
     }
 
-    const url = createWebURL('/static/invidious-instances.json')
+    const url = createStaticDataURL('/static/invidious-instances.json')
 
     const fileData = await (await fetch(url)).json()
     const instances = fileData.filter(e => {

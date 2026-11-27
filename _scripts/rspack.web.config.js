@@ -5,6 +5,7 @@ const getStartupSplash = require('./startupSplash')
 const RelativeImportMetaUrlPlugin = require('./RelativeImportMetaUrlPlugin')
 const getMinimizers = require('./minimizers')
 const { SHAKA_LOCALES_TO_BE_BUNDLED } = require('./getShakaLocales')
+const getStaticDataVersion = require('./staticDataVersion')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 const isCapacitor = process.env.IS_CAPACITOR === 'true'
@@ -42,7 +43,9 @@ const config = createRendererConfig({
     // Invidious server. Its Caddyfile serves self-hosted.js, which says whether
     // the server runs one.
     'process.env.IS_SELF_HOSTED': isSelfHosted,
-    'process.env.SELF_HOSTED_INVIDIOUS': isSelfHosted && '(globalThis.opentubexSelfHosted?.invidious !== false)'
+    'process.env.SELF_HOSTED_INVIDIOUS': isSelfHosted && '(globalThis.opentubexSelfHosted?.invidious !== false)',
+    // The Capacitor apps bundle their files, so only browsers keep older copies
+    'process.env.STATIC_DATA_VERSION': isCapacitor ? false : JSON.stringify(getStaticDataVersion())
   },
   html: {
     excludeChunks: ['processTaskWorker']

@@ -7,7 +7,7 @@ import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { trackSettingWrite } from './settings'
 import {
   CHANNEL_HANDLE_REGEX,
-  createWebURL,
+  createStaticDataURL,
   getVideoParamsFromUrl,
   replaceFilenameForbiddenChars,
   searchFiltersMatch,
@@ -571,7 +571,7 @@ const actions = {
   async getRegionData ({ commit }, locale) {
     const localePathExists = process.env.GEOLOCATION_NAMES.includes(locale)
 
-    const url = createWebURL(`/static/geolocations/${localePathExists ? locale : 'en-US'}.json`)
+    const url = createStaticDataURL(`/static/geolocations/${localePathExists ? locale : 'en-US'}.json`)
 
     const countries = await (await fetch(url)).json()
 
@@ -882,7 +882,7 @@ const actions = {
   },
 
   async getExternalPlayerCmdArgumentsData ({ commit }) {
-    const url = createWebURL('/static/external-player-map.json')
+    const url = createStaticDataURL('/static/external-player-map.json')
     const externalPlayerMap = await (await fetch(url)).json()
     // Sort external players alphabetically & case-insensitive, keep default entry at the top
     const playerNone = externalPlayerMap.shift()
