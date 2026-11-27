@@ -175,7 +175,7 @@
             @click="syncNow"
           />
         </div>
-        <FtFlexBox class="toggles syncOptions">
+        <FtFlexBox class="toggles syncOptions settingsRowsWidth">
           <FtToggleSwitch
             class="autoSync"
             :label="t('Settings.Sync Settings.Sync Automatically')"
