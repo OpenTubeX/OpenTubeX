@@ -342,7 +342,7 @@ Subscriptions:
     # On Subscriptions Page
   Subscriptions: Subscriptions
   'This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting': This profile has a large number of subscriptions.  Forcing RSS to avoid rate limiting
-  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Your Subscription list is currently empty. To import subscriptions, open Settings → Data and select Import Subscriptions. You can also search for a channel and subscribe to it.
+  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Your Subscription list is currently empty. To import subscriptions, open Settings → Data and select Import next to Subscriptions. You can also search for a channel and subscribe to it.
   Disabled Automatic Fetching: You have disabled automatic subscription fetching. Refresh subscriptions to see them here.
   Empty Channels: Your subscribed channels currently do not have any videos.
   Empty Posts: Your subscribed channels currently do not have any posts.

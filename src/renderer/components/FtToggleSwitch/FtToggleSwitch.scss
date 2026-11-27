@@ -310,3 +310,27 @@
   padding-inline: 6px;
   text-transform: uppercase;
 }
+
+/* Without a visible label, only badges follow the track. The text, not the
+   label, makes room for the track, so badges that wrap start below it instead
+   of keeping its indent and squeezing into the space beside it. The first line
+   is as tall as the track, so a wrapped badge clears it. A parent may set
+   --switch-label-outdent to let wrapped badges start further out than the
+   track. Switches without badges keep the label around the track, as their
+   focus ring follows the label. */
+.labelHidden:not(.trailing):has(> .switch-label > :is(.performanceImpact, .experimentalBadge)) {
+  .switch-label {
+    margin-inline-start: calc(-1 * var(--switch-label-outdent, 0px));
+    padding-inline-start: 6px;
+
+    @media (width <= 680px) {
+      inline-size: calc(100% + var(--switch-label-outdent, 0px));
+      max-inline-size: calc(100% + var(--switch-label-outdent, 0px));
+    }
+  }
+
+  .switch-label-main {
+    margin-inline-start: calc(var(--switch-track-width) + 12px + var(--switch-label-outdent, 0px));
+    min-block-size: var(--switch-track-height);
+  }
+}
