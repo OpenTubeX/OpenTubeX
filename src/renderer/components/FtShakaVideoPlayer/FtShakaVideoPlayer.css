@@ -100,8 +100,14 @@
   grid-column: 2;
 }
 
+/* A faint circle marks play/pause as the main control without hiding the video. */
 .ftVideoPlayer :deep(.shaka-big-buttons-container > .shaka-play-button) {
   grid-column: 3;
+  background-color: rgb(0 0 0 / 20%);
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .shaka-play-button:not([disabled]):hover) {
+  background-color: rgb(0 0 0 / 30%);
 }
 
 .ftVideoPlayer :deep(.shaka-big-buttons-container > .skip-next-button) {
