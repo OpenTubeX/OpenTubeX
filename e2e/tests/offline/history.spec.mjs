@@ -250,32 +250,43 @@ test.describe('returning to scrolled history', () => {
     }
   })
 
-  test('shows the same videos after going back from a channel', async ({ page }) => {
-    await goTo(page, 'history')
-    const rows = page.locator('.tabContent[aria-hidden="false"] [data-feed-item-key]')
-    await expect(rows).toHaveCount(100)
-    // Scroll like a reader so the rows above the viewport render at their real
-    // height. The History page that Back mounts starts them as placeholders.
-    await page.evaluate(async () => {
-      for (let top = 0; top <= 6000; top += 400) {
-        window.scrollTo(0, top)
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  test.describe('in a grid of large thumbnails', () => {
+    // The grid has its default columns until it is measured, after Back has
+    // restored the scroll offset. Large thumbnails fit fewer cards per row.
+    test.use({
+      seed: {
+        settings: { listType: 'grid', thumbnailSize: 200 },
+        history: matchingHistoryEntries('Return', 100)
       }
     })
-    const firstRowBelowHeader = () => rows.evaluateAll(elements => {
-      const element = elements.find(candidate => candidate.getBoundingClientRect().top >= 150)
-      return { key: element.getAttribute('data-feed-item-key'), top: element.getBoundingClientRect().top }
-    })
-    const before = await firstRowBelowHeader()
 
-    await page.locator(`[data-feed-item-key="${before.key}"] a.channelName`).click()
-    await expect(page.locator('.channelDetails:visible')).toBeVisible()
-    await page.locator(sel.backButton).click()
-    await expect(rows).toHaveCount(100)
-    await expect.poll(async () => {
-      const after = await firstRowBelowHeader()
-      return after.key === before.key && Math.abs(after.top - before.top) <= 1
-    }).toBe(true)
+    test('shows the same videos after going back from a channel', async ({ page }) => {
+      await goTo(page, 'history')
+      const rows = page.locator('.tabContent[aria-hidden="false"] [data-feed-item-key]')
+      await expect(rows).toHaveCount(100)
+      // Scroll like a reader so the rows above the viewport render at their real
+      // height. The History page that Back mounts starts them as placeholders.
+      await page.evaluate(async () => {
+        for (let top = 0; top <= 12000; top += 400) {
+          window.scrollTo(0, top)
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        }
+      })
+      const firstRowBelowHeader = () => rows.evaluateAll(elements => {
+        const element = elements.find(candidate => candidate.getBoundingClientRect().top >= 150)
+        return { key: element.getAttribute('data-feed-item-key'), top: element.getBoundingClientRect().top }
+      })
+      const before = await firstRowBelowHeader()
+
+      await page.locator(`[data-feed-item-key="${before.key}"] a.channelName`).click()
+      await expect(page.locator('.channelDetails:visible')).toBeVisible()
+      await page.locator(sel.backButton).click()
+      await expect(rows).toHaveCount(100)
+      await expect.poll(async () => {
+        const after = await firstRowBelowHeader()
+        return after.key === before.key && Math.abs(after.top - before.top) <= 1
+      }).toBe(true)
+    })
   })
 
   test('tabs into rows that have not mounted yet', async ({ page }) => {

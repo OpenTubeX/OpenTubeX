@@ -262,14 +262,30 @@ export function observeNestedWindowedListItem(element, options) {
   return nestedWindow.observe(element, options)
 }
 
-// A page that mounts again, such as on Back, would start rows it has not
-// rendered yet at their minimum height and restore its scroll offset into a
-// shorter list. Rows keep the height they last had so the offset lands on the
-// same content. Least recently measured heights go first.
+// A page that mounts again, such as on Back, restores its scroll offset in its
+// first frame. Its rows and grids keep the height and width they last had, so
+// the offset lands on the same content. Least recently measured values go first.
 const MAX_REMEMBERED_HEIGHTS = 5000
+const MAX_REMEMBERED_GRID_WIDTHS = 200
 const rememberedHeights = new Map()
+const rememberedGridWidths = new Map()
 
 /**
+ * @param {Map<string, number>} values
+ * @param {number} max
+ * @param {string} key
+ * @param {number} value
+ */
+function remember(values, max, key, value) {
+  values.delete(key)
+  values.set(key, value)
+  if (values.size > max) {
+    values.delete(values.keys().next().value)
+  }
+}
+
+/**
+ * Rows that a page has not rendered yet would start at their minimum height.
  * @param {string} key
  * @returns {number}
  */
@@ -282,9 +298,23 @@ export function getRememberedListItemHeight(key) {
  * @param {number} height
  */
 export function rememberListItemHeight(key, height) {
-  rememberedHeights.delete(key)
-  rememberedHeights.set(key, height)
-  if (rememberedHeights.size > MAX_REMEMBERED_HEIGHTS) {
-    rememberedHeights.delete(rememberedHeights.keys().next().value)
-  }
+  remember(rememberedHeights, MAX_REMEMBERED_HEIGHTS, key, height)
+}
+
+/**
+ * A grid that has not been measured yet would lay out its cards in the default
+ * columns, which fit a different number of cards per row.
+ * @param {string} key
+ * @returns {number}
+ */
+export function getRememberedGridWidth(key) {
+  return rememberedGridWidths.get(key) ?? 0
+}
+
+/**
+ * @param {string} key
+ * @param {number} width
+ */
+export function rememberGridWidth(key, width) {
+  remember(rememberedGridWidths, MAX_REMEMBERED_GRID_WIDTHS, key, width)
 }
