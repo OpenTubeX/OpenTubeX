@@ -1286,7 +1286,7 @@ test.describe('with seek history enabled', () => {
     // Resting the pointer on a visible control bar still keeps the controls shown.
     await player.locator('.shaka-controls-button-panel').hover()
     await expect(controls).toHaveAttribute('shown', 'true')
-    await page.waitForTimeout(1500)
+    await video.evaluate(element => element.ui.getControls().hideUI())
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(player).not.toHaveClass(/no-cursor/)
   })
