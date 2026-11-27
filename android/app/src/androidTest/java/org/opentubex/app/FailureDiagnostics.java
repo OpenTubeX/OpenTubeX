@@ -1,5 +1,7 @@
 package org.opentubex.app;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
@@ -14,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
@@ -23,28 +26,56 @@ import org.junit.runner.notification.RunListener;
  * that outlives the runner's per-test timeout, for example in teardown, logs
  * every thread's stack and ends its process so the shard can continue. Before
  * each test, it closes another app's "isn't responding" dialog, which would
- * otherwise keep focus for every later test.
+ * otherwise keep focus for every later test. It also logs the main and test
+ * thread stacks if the main looper stalls for more than 2.5 seconds, before
+ * Android's 5-second ANR timeout kills the instrumented process.
  */
 public final class FailureDiagnostics extends RunListener {
     private static final String TAG = "FailureDiagnostics";
     private static final long STALL_MINUTES = 12;
+    private static final long MAIN_THREAD_STALL_MILLIS = 2000;
 
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ScheduledExecutorService watchdog = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "TestWatchdog");
         thread.setDaemon(true);
         return thread;
     });
     private ScheduledFuture<?> stall;
+    private ScheduledFuture<?> mainWatch;
 
     @Override
     public void testStarted(Description description) {
         closeOtherAppsNotRespondingDialog(description);
         stall = watchdog.schedule(() -> reportStall(description), STALL_MINUTES, TimeUnit.MINUTES);
+        Thread testThread = Thread.currentThread();
+        AtomicLong pendingSince = new AtomicLong();
+        AtomicLong lastReportedAt = new AtomicLong();
+        Runnable heartbeat = () -> {
+            pendingSince.set(0);
+            lastReportedAt.set(0);
+        };
+        mainWatch = watchdog.scheduleWithFixedDelay(() -> {
+            long now = SystemClock.uptimeMillis();
+            long since = pendingSince.get();
+            if (since == 0) {
+                pendingSince.set(now);
+                mainHandler.post(heartbeat);
+                return;
+            }
+            long blockedMillis = now - since;
+            if (blockedMillis >= MAIN_THREAD_STALL_MILLIS &&
+                now - lastReportedAt.get() >= MAIN_THREAD_STALL_MILLIS) {
+                lastReportedAt.set(now);
+                logMainThreadStall(description, blockedMillis, testThread);
+            }
+        }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void testFinished(Description description) {
         if (stall != null) stall.cancel(false);
+        if (mainWatch != null) mainWatch.cancel(false);
     }
 
     @Override
@@ -80,6 +111,21 @@ public final class FailureDiagnostics extends RunListener {
         } catch (RuntimeException error) {
             Log.w(TAG, "Unable to check for another app's dialog", error);
         }
+    }
+
+    private static void logMainThreadStall(Description description, long blockedMillis, Thread testThread) {
+        Log.w(TAG, description + " main thread unresponsive for " + blockedMillis + "ms");
+        logThreadStack(Looper.getMainLooper().getThread());
+        if (testThread != null && testThread != Looper.getMainLooper().getThread()) {
+            logThreadStack(testThread);
+        }
+    }
+
+    private static void logThreadStack(Thread thread) {
+        StringBuilder stack = new StringBuilder("Thread ").append(thread.getName())
+            .append(" (").append(thread.getState()).append(')');
+        for (StackTraceElement frame : thread.getStackTrace()) stack.append("\n    at ").append(frame);
+        Log.w(TAG, stack.toString());
     }
 
     private static void reportStall(Description description) {
