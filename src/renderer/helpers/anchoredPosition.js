@@ -1,3 +1,5 @@
+import { getFullscreenLayer } from './fullscreenLayer'
+
 export const supportsAnchorPositioning = CSS.supports('position-anchor', '--popup')
 
 /**
@@ -34,7 +36,7 @@ function measureAnchorBox(anchor) {
   const probe = document.createElement('div')
   probe.style.cssText = 'position: fixed; left: anchor(left); top: anchor(top); visibility: hidden'
   probe.style.positionAnchor = anchor
-  ;(document.fullscreenElement ?? document.body).append(probe)
+  ;(getFullscreenLayer() ?? document.body).append(probe)
   const rect = probe.getBoundingClientRect()
   probe.remove()
   return rect

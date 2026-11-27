@@ -1,7 +1,9 @@
 import { nextTick, onBeforeUnmount, shallowRef } from 'vue'
 
+import { getFullscreenLayer, onFullscreenLayerChange } from '../helpers/fullscreenLayer'
+
 /**
- * Teleport target for a modal overlay: the fullscreen element while one is
+ * Teleport target for a modal overlay: the fullscreen layer while one is
  * open, so the overlay shows above it, otherwise `.app`. Chromium exits
  * fullscreen on Escape before the page sees the key, which would leave the
  * overlay stranded inside the windowed element, so dismiss it then. Overlays
@@ -12,7 +14,7 @@ import { nextTick, onBeforeUnmount, shallowRef } from 'vue'
  */
 export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
   /** @type {import('vue').ShallowRef<Element | string>} */
-  const target = shallowRef(document.fullscreenElement ?? '.app')
+  const target = shallowRef(getFullscreenLayer() ?? '.app')
 
   // Entering fullscreen can blur the focused element before fullscreenchange.
   let blurred = null
@@ -35,12 +37,19 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
   }
 
   let timeout
-  const handleFullscreenChange = () => {
-    if (document.fullscreenElement) {
-      moveTo(document.fullscreenElement)
+  /** @param {Event} event */
+  const handleFullscreenChange = (event) => {
+    const layer = getFullscreenLayer()
+    if (layer) {
+      moveTo(layer)
       return
     }
     if (target.value === '.app') return
+    // Rotation fullscreen ends without Escape, so the overlay can stay open.
+    if (event.type === 'toggle') {
+      moveTo('.app')
+      return
+    }
     // Vue re-renders between listeners, so decide before any overlay moves or
     // closes, as either changes which overlay is topmost for the others.
     const keep = keepOpen()
@@ -49,11 +58,11 @@ export function useFullscreenTeleportTarget(dismiss, keepOpen = () => false) {
       else dismiss()
     })
   }
-  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  const removeFullscreenListener = onFullscreenLayerChange(handleFullscreenChange)
   document.addEventListener('focusin', handleFocusChange)
   document.addEventListener('focusout', handleFocusChange)
   onBeforeUnmount(() => {
-    document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    removeFullscreenListener()
     document.removeEventListener('focusin', handleFocusChange)
     document.removeEventListener('focusout', handleFocusChange)
     clearTimeout(timeout)

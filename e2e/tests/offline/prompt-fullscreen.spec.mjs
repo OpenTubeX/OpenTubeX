@@ -124,3 +124,39 @@ test('keeps a prompt open behind a modal sheet when Escape exits player fullscre
   await expect(page.locator('.app > .prompt')).toHaveCount(1)
   await expect(addPrompt).toBeVisible()
 })
+
+test('shows prompts and action sheets above Android rotation fullscreen and keeps them usable', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  // Android's rotation fullscreen shows the watch layout as a popover instead
+  // of making it the fullscreen element.
+  const layout = page.locator('.tabContent[aria-hidden="false"] .videoLayout')
+  await layout.evaluate(element => {
+    element.setAttribute('popover', 'manual')
+    element.showPopover()
+  })
+
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('opentubex:mobile-context-menu', {
+    detail: { title: 'Held video', actions: [{ label: 'Held action', run: () => { window.heldActionRan = true } }] }
+  })))
+  await layout.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Held action', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => window.heldActionRan)).toBe(true)
+  await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
+
+  await showAddToPlaylistPrompt(page)
+  const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  const search = addPrompt.getByRole('searchbox', { name: 'Search in playlists', exact: true })
+  await expect(layout.locator('.prompt')).toHaveCount(1)
+  await search.click()
+  await page.keyboard.type('Music')
+  await expect(search).toHaveValue('Music')
+
+  // Turning the phone back to portrait ends it without Escape.
+  await layout.evaluate(element => {
+    element.hidePopover()
+    element.removeAttribute('popover')
+  })
+  await expect(page.locator('.app > .prompt')).toHaveCount(1)
+  await addPrompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(page.locator('.prompt')).toHaveCount(0)
+})

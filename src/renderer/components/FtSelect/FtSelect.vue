@@ -347,6 +347,7 @@ import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { getAnchoredPosition } from '../../helpers/anchoredPosition'
+import { getFullscreenLayer } from '../../helpers/fullscreenLayer'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
@@ -597,7 +598,7 @@ const settingsOverlayActive = useSettingsOverlay(() => {
 })
 const activeIndex = ref(0)
 const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
-const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
+const dropdownTarget = shallowRef(getFullscreenLayer() ?? document.body)
 const dropdownPlacement = ref('below')
 let typeahead = ''
 let typeaheadTimer = null
@@ -734,7 +735,7 @@ function openDropdown() {
   // Mobile sheets must keep focus inside their subscription popup. Desktop lists
   // stay outside it so blurred card backgrounds cannot offset or clip them.
   const popupTarget = phoneLayout.value ? selectRoot.value?.closest('.profileDropdown') : null
-  dropdownTarget.value = popupTarget ?? selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? document.fullscreenElement ?? document.body
+  dropdownTarget.value = popupTarget ?? selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? getFullscreenLayer() ?? document.body
   dropdownShown.value = true
 
   nextTick(async () => {
@@ -829,7 +830,7 @@ function snapToDevicePixels(value) {
 }
 
 function getTopChromeBottom() {
-  if (document.fullscreenElement !== null) {
+  if (getFullscreenLayer() !== null) {
     return 0
   }
 

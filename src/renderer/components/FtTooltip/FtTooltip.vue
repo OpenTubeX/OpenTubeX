@@ -58,6 +58,7 @@ import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getAnchoredPosition, getUntransformedRect, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { getFullscreenLayer, onFullscreenLayerChange } from '../../helpers/fullscreenLayer'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -67,7 +68,7 @@ const { t } = useI18n()
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
-const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
+const tooltipTarget = shallowRef(getFullscreenLayer() ?? document.body)
 const tooltipStyle = ref({})
 const visible = ref(false)
 const settingsOverlayActive = useSettingsOverlay(() => {
@@ -85,6 +86,7 @@ let positionAnimationFrame = null
 let positionMutationObserver = null
 let positionResizeObserver = null
 let trackingPosition = false
+let removeFullscreenListener = null
 
 /**
  * @param {boolean} value
@@ -107,7 +109,7 @@ function setFocused(value) {
 function updateVisibility() {
   visible.value = hovered || focused
   if (visible.value) {
-    tooltipTarget.value = document.fullscreenElement ?? document.body
+    tooltipTarget.value = getFullscreenLayer() ?? document.body
     nextTick(() => {
       if (!settingsOverlayActive.value || !visible.value) return
       positionTooltip()
@@ -134,7 +136,7 @@ function startTrackingPosition() {
   if (!visible.value || trackingPosition) return
   trackingPosition = true
   window.addEventListener('resize', schedulePositionUpdate)
-  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  removeFullscreenListener = onFullscreenLayerChange(handleFullscreenChange)
 
   if (!supportsAnchorPositioning) {
     window.addEventListener('scroll', schedulePositionUpdate, true)
@@ -167,7 +169,8 @@ function stopTrackingPosition() {
   trackingPosition = false
   window.removeEventListener('resize', schedulePositionUpdate)
   window.removeEventListener('scroll', schedulePositionUpdate, true)
-  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  removeFullscreenListener?.()
+  removeFullscreenListener = null
   positionMutationObserver?.disconnect()
   positionResizeObserver?.disconnect()
   if (positionAnimationFrame !== null) {
@@ -227,7 +230,7 @@ function positionTooltip() {
 }
 
 async function handleFullscreenChange() {
-  tooltipTarget.value = document.fullscreenElement ?? document.body
+  tooltipTarget.value = getFullscreenLayer() ?? document.body
   if (visible.value) {
     await nextTick()
     positionResizeObserver?.disconnect()

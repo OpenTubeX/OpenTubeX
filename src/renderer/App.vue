@@ -69,7 +69,7 @@
     <FtFlexBox
       class="flexBox routerView"
       role="main"
-      :inert="isAnyPromptOpen"
+      :inert="isAnyPromptOpen && !rotationFullscreen"
     >
       <template v-if="usesLogicalTabs">
         <TabContent
@@ -640,6 +640,7 @@
 import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
 import { OPEN_MOBILE_CONTEXT_MENU_EVENT } from './helpers/buttonMenu'
 import { installIosContextMenu } from './helpers/iosContextMenu'
+import { getFullscreenLayer, onFullscreenLayerChange } from './helpers/fullscreenLayer'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/google-sans'
 import '@fontsource-variable/figtree'
@@ -1238,12 +1239,17 @@ const hardwareKeyboardAttached = ref(!isCapacitor)
 provide('hardwareKeyboardAttached', hardwareKeyboardAttached)
 const mobileContextLink = ref(null)
 const mobileContextActions = shallowRef(null)
-const mobileContextMenuTarget = shallowRef(document.fullscreenElement ?? document.body)
-function updateMobileContextMenuTarget() {
-  mobileContextMenuTarget.value = document.fullscreenElement ?? document.body
+const mobileContextMenuTarget = shallowRef(getFullscreenLayer() ?? document.body)
+// Android's rotation fullscreen is a popover in the watch layout, which, unlike
+// a fullscreen element, stays inert with the route. It covers the route anyway.
+const rotationFullscreen = ref(false)
+function updateFullscreenLayer() {
+  const layer = getFullscreenLayer()
+  mobileContextMenuTarget.value = layer ?? document.body
+  rotationFullscreen.value = layer !== null && layer !== document.fullscreenElement
 }
-document.addEventListener('fullscreenchange', updateMobileContextMenuTarget)
-onBeforeUnmount(() => document.removeEventListener('fullscreenchange', updateMobileContextMenuTarget))
+updateFullscreenLayer()
+onBeforeUnmount(onFullscreenLayerChange(updateFullscreenLayer))
 const mobileContextMenuPath = ref([])
 const mobileContextMenuStack = computed(() => {
   const stack = [{ label: mobileContextLinkLabel.value, items: unref(mobileContextActions.value?.actions) ?? [] }]
@@ -1362,10 +1368,19 @@ const mobileContextLinkCopyUrl = computed(() => {
     ? resolveMobileContextLinkCopyUrl(href, window.location.href.split('#')[0])
     : null
 })
+/**
+ * A hold opens the sheet under the finger, and the platform's own hold then
+ * selects text there: an action label, or text of the inert page behind it.
+ * @param {Event} event
+ */
+function preventMobileContextSelection(event) {
+  event.preventDefault()
+}
 watch(() => mobileContextLink.value !== null || mobileContextActions.value !== null, (isOpen) => {
   if (isOpen && !mobileLinkActionsLocked) {
     lockBodyScroll()
     store.commit('addOpenPrompt', mobileLinkActionsPromptId)
+    document.addEventListener('selectstart', preventMobileContextSelection, true)
     mobileLinkActionsLocked = true
   }
 })
@@ -1373,6 +1388,7 @@ function releaseMobileContextSheet() {
   if (mobileContextLink.value || mobileContextActions.value || !mobileLinkActionsLocked) return
   store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
   unlockBodyScroll()
+  document.removeEventListener('selectstart', preventMobileContextSelection, true)
   mobileLinkActionsLocked = false
   const trigger = mobileContextReturnFocus
   mobileContextReturnFocus = null
@@ -2197,6 +2213,7 @@ onBeforeUnmount(() => {
   if (mobileLinkActionsLocked) {
     store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
     unlockBodyScroll()
+    document.removeEventListener('selectstart', preventMobileContextSelection, true)
     mobileLinkActionsLocked = false
   }
   tabletTabStripQuery.removeEventListener('change', handleTabletTabStripChange)
