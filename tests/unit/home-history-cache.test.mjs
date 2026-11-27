@@ -48,8 +48,9 @@ test('playback saves leave the history entries revision unchanged', () => {
   const entries = [video('first'), video('second')]
   store.commit('setHistoryCacheSorted', entries)
   store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
-  const revision = () => store.state.history.historyEntriesRevision
+  const revision = () => store.getters.getHistoryEntriesRevision
   const entriesRevision = revision()
+  assert.equal(entriesRevision, store.state.history.historyEntriesRevision)
   store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'first', watchProgress: 50 })
   store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'first', lastViewedPlaylistId: 'playlist' })
   assert.equal(revision(), entriesRevision)

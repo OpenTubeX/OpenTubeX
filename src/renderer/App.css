@@ -1402,6 +1402,9 @@
    the page covers it (createOrganizerSwipeAnimation), so the page keeps the
    look it has before the morph. */
 .app.capacitorPhoneLayout > .routerView.organizerSwipePage::before {
+  --organizer-swipe-field-size: inherit;
+  --organizer-swipe-field-position: inherit;
+
   content: '';
   position: absolute;
   inset: 0;

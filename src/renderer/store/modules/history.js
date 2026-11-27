@@ -62,6 +62,10 @@ const getters = {
     return cached.entries
   },
 
+  getHistoryEntriesRevision(state) {
+    return state.historyEntriesRevision
+  },
+
   getHistoryCacheSorted(state) {
     return state.historyCacheSorted
   },
