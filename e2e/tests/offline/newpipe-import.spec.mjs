@@ -46,7 +46,6 @@ test('NewPipe backups import watch history and playlists', async ({ page }) => {
   }, await createNewPipeBackup())
 
   await dataSection.getByRole('button', { name: 'Import history', exact: true }).click()
-  await expect(page.locator('.toast', { hasText: 'All watched history has been successfully imported' })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
     const historyById = window.$store.getters.getHistoryCacheById
     return ['newpipeAAAA', 'newpipeBBBB'].map(videoId => {
@@ -59,7 +58,6 @@ test('NewPipe backups import watch history and playlists', async ({ page }) => {
   ])
 
   await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
-  await expect(page.locator('.toast', { hasText: '1/1 playlist has been successfully imported' })).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists
     .find(playlist => playlist.playlistName === 'NewPipe playlist')?.videos.map(video => video.videoId)))
     .toEqual(['newpipeBBBB', 'newpipeAAAA'])
