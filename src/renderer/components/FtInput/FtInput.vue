@@ -588,6 +588,8 @@ function updateInputSelection() {
     inputSelection.value = { start, end }
   }
 }
+// Selection changes are skipped without highlights, so the selection may be stale when they appear.
+watch(() => props.highlights.length > 0, (active) => { if (active) updateInputSelection() })
 // Text controls fire selectionchange at themselves in Chromium, and at the document in older engines.
 onMounted(() => document.addEventListener('selectionchange', updateInputSelection, true))
 onBeforeUnmount(() => document.removeEventListener('selectionchange', updateInputSelection, true))
