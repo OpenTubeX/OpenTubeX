@@ -339,7 +339,12 @@ watch(open, async value => {
 // The list's placement depends on whether the body scrolls, so a resize can change it.
 watch([showColorSources, constrained], async ([value]) => {
   stopObservingColorSources()
-  if (!value) return
+  if (!value) {
+    // Closing the list ends the range it extended without resizing the observed content.
+    await nextTick()
+    if (!showColorSources.value && constrained.value && pickerBodyRef.value !== null) clampOverlayScrollTop(pickerBodyRef.value, pickerContentRef.value)
+    return
+  }
 
   await nextTick()
   if (!settingsOverlayActive.value || !open.value || !showColorSources.value) return

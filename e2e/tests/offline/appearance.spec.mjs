@@ -569,7 +569,9 @@ test.describe('custom theme editor', () => {
     await copyFromButton.click()
     const sources = picker.locator('.colorSourceList')
     await expect(sources.getByRole('button').first()).toBeInViewport({ ratio: 1 })
-    await copyFromButton.click()
+    // Choosing a color from the end of the extended range closes the list.
+    await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await sources.getByRole('button').last().click()
     await expect(sources).toBeHidden()
     await expectOverlayScrollRange(body)
 
