@@ -26,6 +26,7 @@
   /* stylelint-disable length-zero-no-unit */
   --select-tooltip-space: 0px;
   --select-sync-space: 0px;
+  --select-profile-space: 0px;
   --select-reset-space: 0px;
   --select-indicator-space: 0px;
   /* stylelint-enable length-zero-no-unit */
@@ -46,7 +47,7 @@
 }
 
 .select:has(.selectIndicators > *) {
-  --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+  --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-profile-space) + var(--select-reset-space));
 }
 
 .select.containsTooltip {
@@ -57,7 +58,11 @@
   --select-sync-space: 22px;
 }
 
-.select:has(.changedSettingIndicator, .changedSettingIndicatorPlaceholder) {
+.select:has(.profileSettingIndicator) {
+  --select-profile-space: 22px;
+}
+
+.select:has(.changedSettingIndicator:not(.profileSettingIndicator), .changedSettingIndicatorPlaceholder) {
   --select-reset-space: 22px;
 }
 

@@ -1014,5 +1014,21 @@
   "fill-color": {
     "ri": "paint-line",
     "material": "format-color-fill-rounded"
+  },
+  "circle-half-stroke": {
+    "ri": "contrast-line",
+    "material": "contrast-rounded"
+  },
+  "tab-history": {
+    "ri": "arrow-go-back-line",
+    "material": "tab-recent-rounded"
+  },
+  "search-suggestions": {
+    "ri": "menu-search-line",
+    "material": "manage-search-rounded"
+  },
+  "comment-unread": {
+    "ri": "chat-unread-line",
+    "material": "mark-chat-unread-outline-rounded"
   }
 }

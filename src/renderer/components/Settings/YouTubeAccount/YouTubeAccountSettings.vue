@@ -60,7 +60,7 @@
         <FtSettingsRow
           :description="t('Tooltips.YouTube Account Settings.Sync Subscriptions')"
           :title="t('Settings.YouTube Account Settings.Sync Subscriptions')"
-          :icon="['fas', 'users']"
+          :icon="['fas', 'subscriptions']"
         >
           <FtToggleSwitch
             :label="t('Settings.YouTube Account Settings.Sync Subscriptions')"
@@ -129,7 +129,7 @@
           v-if="supportsNotificationHistory"
           :description="t('Tooltips.YouTube Account Settings.Watch Posted Comments')"
           :title="t('Settings.YouTube Account Settings.Watch Posted Comments')"
-          :icon="['fas', 'comment']"
+          :icon="['fas', 'comment-unread']"
         >
           <FtToggleSwitch
             :label="t('Settings.YouTube Account Settings.Watch Posted Comments')"

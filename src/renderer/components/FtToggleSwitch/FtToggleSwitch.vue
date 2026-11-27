@@ -6,6 +6,7 @@
       compact,
       trailing,
       labelHidden: hideLabel,
+      inSettingsRow,
       disabled: disabled,
       containsTooltip: tooltip.length > 0
     }"
@@ -187,6 +188,7 @@ const { t } = useI18n()
 const id = useId()
 const descriptionId = `${id}-description`
 const rowDescriptionId = inject(SETTINGS_ROW_DESCRIPTION_ID, null)
+const inSettingsRow = rowDescriptionId !== null
 const describedBy = computed(() => [props.description ? descriptionId : null, rowDescriptionId?.value].filter(Boolean).join(' ') || undefined)
 
 const currentValue = ref(props.defaultValue)

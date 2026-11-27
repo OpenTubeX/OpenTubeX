@@ -9,7 +9,7 @@
         v-if="supportsYtDlp"
         :description="t('Tooltips.Subscription Settings.Enable Twitch Page')"
         :title="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"
-        :icon="['fas', 'twitch']"
+        :icon="['fab', 'twitch']"
       >
         <FtToggleSwitch
           :label="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"

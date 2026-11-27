@@ -349,3 +349,45 @@
     min-block-size: var(--switch-track-height);
   }
 }
+
+/* In a settings row, a switch's icons sit 8px from its track and 6px apart,
+   as a select's do. Switches with badges keep their own layout. */
+.switch-ctn.inSettingsRow.labelHidden:not(:has(> .switch-label > :is(.performanceImpact, .experimentalBadge))) {
+  .switch-label {
+    padding-inline: calc(var(--switch-track-width) + 14px) 0;
+  }
+
+  .switch-label-text {
+    --switch-track-start: calc(-1 * var(--switch-track-width) - 8px);
+  }
+
+  .switch-label-icons {
+    gap: 6px;
+  }
+
+  .switch-label-icons > :deep(*) {
+    margin-inline-start: 0;
+  }
+
+  /* Beside the row's text, the track ends the row and the icons come before
+     it. Those shown only for some values are furthest out, so no icon moves
+     when they appear. The input outranks the one Settings moves past the
+     marker gutter, which now comes before the icons. */
+  @container settings-content (width > 560px) {
+    .switch-input {
+      inset-inline: auto 0;
+    }
+
+    .switch-label {
+      padding-inline: 0 calc(var(--switch-track-width) + 8px);
+    }
+
+    .switch-label-text {
+      --switch-track-start: calc(100% + 8px);
+    }
+
+    .switch-label-icons {
+      flex-direction: row-reverse;
+    }
+  }
+}

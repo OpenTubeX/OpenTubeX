@@ -7,7 +7,7 @@
       <FtSettingsRow
         :description="t('Tooltips.Distraction Free Settings.Grayscale')"
         :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
-        :icon="['fas', 'eye']"
+        :icon="['fas', 'circle-half-stroke']"
       >
         <FtSelect
           hide-label

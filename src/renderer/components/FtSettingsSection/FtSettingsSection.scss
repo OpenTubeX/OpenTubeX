@@ -636,7 +636,7 @@
    its field as the marker gutter takes before it. The theme selects keep
    lining up with the theme picker instead. */
 @container settings-content (width <= 460px) {
-  .sectionBody :deep(.select.contentSized:not(.generalSelectGrid > *)) {
+  .sectionBody :deep(.select.contentSized:not(.generalSelectGrid > *, .settingsRowControl > *)) {
     box-sizing: border-box;
     inline-size: 100%;
     max-inline-size: 100%;
@@ -644,22 +644,22 @@
   }
 
   /* stylelint-disable length-zero-no-unit -- the values are added inside calc() */
-  .sectionBody :deep(.select.contentSized:not(.themeControls *)) {
+  .sectionBody :deep(.select.contentSized:not(.themeControls *, .settingsRowControl > *)) {
     --select-reset-space: 0px;
     --select-indicator-space: var(--settings-marker-gutter, 0px);
   }
   /* stylelint-enable length-zero-no-unit */
 
-  .sectionBody :deep(.select.contentSized:not(.themeControls *):has(.changedSettingIndicator)) {
+  .sectionBody :deep(.select.contentSized:not(.themeControls *, .settingsRowControl > *):has(.changedSettingIndicator:not(.profileSettingIndicator))) {
     --select-reset-space: 22px;
   }
 
-  .sectionBody :deep(.select.contentSized:not(.themeControls *):has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
-    --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+  .sectionBody :deep(.select.contentSized:not(.themeControls *, .settingsRowControl > *):has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
+    --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-profile-space) + var(--select-reset-space));
   }
 
   /* The placeholder only keeps a dragged slider's label from reflowing. */
-  .sectionBody :deep(.select.contentSized:not(.themeControls *) .changedSettingIndicatorPlaceholder) {
+  .sectionBody :deep(.select.contentSized:not(.themeControls *, .settingsRowControl > *) .changedSettingIndicatorPlaceholder) {
     display: none;
   }
 
