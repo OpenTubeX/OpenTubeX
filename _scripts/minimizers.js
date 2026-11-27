@@ -41,9 +41,11 @@ function getMinimizers({ cssTargets, json = false } = {}) {
 }
 
 getMinimizers.ELECTRON_TARGETS = `electron >= ${electronVersion.split('.')[0]}`
-// The oldest engines with :has(), container queries and color-mix(), which the styles need.
-// Android uses these too, as its WebView is Chrome.
-getMinimizers.WEB_TARGETS = ['chrome >= 111', 'firefox >= 121', 'safari >= 16.2', 'ios_saf >= 16.2']
+// Chrome 111 is the oldest with :has(), container queries and color-mix(),
+// which the styles need. Android uses it too, as its WebView is Chrome; the
+// polyfills in src/renderer/helpers cover what it lacks. The renderer also
+// calls Intl.Segmenter (Firefox 125) and Element.checkVisibility() (Safari 17.4).
+getMinimizers.WEB_TARGETS = ['chrome >= 111', 'firefox >= 125', 'safari >= 17.4', 'ios_saf >= 17.4']
 // Keep in sync with IPHONEOS_DEPLOYMENT_TARGET in ios/App/App.xcodeproj.
 getMinimizers.IOS_TARGETS = 'ios_saf >= 17.4'
 

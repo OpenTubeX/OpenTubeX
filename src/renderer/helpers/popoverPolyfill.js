@@ -1,6 +1,7 @@
 import { apply, isSupported } from '@oddbird/popover-polyfill/fn'
 
-// Popover needs Chrome 114, as in Huawei's WebView, Firefox 125 or Safari 17.
+// Popover needs Chrome 114, which Huawei's WebView and other ones the Play Store
+// does not update can lack.
 // The polyfill marks open popovers with a class, which styles must match too,
 // as CSS cannot be polyfilled.
 const OPEN_CLASS = ':popover-open'
