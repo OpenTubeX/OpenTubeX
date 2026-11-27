@@ -308,14 +308,23 @@ function create(element) {
    */
   function prepareUpdate(force) {
     if (!element.isConnected) return null
-    // A hidden container has nothing to scroll, and measuring one in a
-    // background tab would lay out the hidden tab. Its bars hide with it and
-    // keep their state: a background tab keeps its layout, and reports the
-    // sizes that changed meanwhile once shown, like a container that was
-    // display: none reports its size again.
+    // A hidden container has nothing to scroll. It reports its size again
+    // once shown, so skip measuring it until then.
     if (!isPage && !element.checkVisibility()) {
       instance.measurement = ''
-      return null
+      // A background tab keeps its layout, so its bars keep their state and
+      // hide with it. It reports the sizes that changed meanwhile once shown,
+      // but unchanged ones don't report again to show the bars.
+      if (element.closest('.backgroundTab')) return null
+      return {
+        write() {
+          for (const bar of scrollbars) {
+            bar.usable = false
+            setClass(bar.scrollbar, 'os-scrollbar-visible', false)
+            setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
+          }
+        }
+      }
     }
 
     const style = getComputedStyle(scrollElement)
