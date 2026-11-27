@@ -228,7 +228,7 @@ function positionTooltip() {
   // over its trigger and the pointer, so use the first side where it fits,
   // or the side it overflows least.
   let best
-  for (const side of FALLBACK_PLACEMENTS[props.position]) {
+  for (const side of FALLBACK_PLACEMENTS[props.position] ?? FALLBACK_PLACEMENTS.bottom) {
     const { left, top } = getPlacementPosition(side, buttonRect, width, height, isRtl)
     const vertical = side !== 'left' && side !== 'right'
     const overflow = vertical
