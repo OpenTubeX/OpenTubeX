@@ -129,13 +129,12 @@
   --ended-band-padding: 10px;
   --ended-gap: 12px;
   --ended-replay-size: 32px;
-  --ended-available-block-size: calc(
-    100cqh - var(--ended-screen-top, 0px) - var(--ended-screen-bottom, 76px) - 2 * var(--ended-band-padding)
-  );
+  --ended-band-start: calc(var(--ended-screen-top, 0px) + var(--ended-band-padding));
+  --ended-band-end: calc(100cqh - var(--ended-screen-bottom, 76px) - var(--ended-band-padding));
+  --ended-available-block-size: calc(var(--ended-band-end) - var(--ended-band-start));
 
   position: absolute;
-  inset-block: calc(var(--ended-screen-top, 0px) + var(--ended-band-padding))
-    calc(var(--ended-screen-bottom, 76px) + var(--ended-band-padding));
+  inset-block: var(--ended-band-start) calc(100cqh - var(--ended-band-end));
   color: #fff;
 }
 
@@ -226,13 +225,20 @@
     --ended-heading-size: 18px;
     --ended-thumbnail-size: min(45cqw, var(--ended-available-block-size) * 16 / 9);
     --ended-text-start: calc(var(--ended-thumbnail-size) + var(--ended-gap));
-
-    inset-inline: 14px;
-    block-size: min(
+    --ended-layout-size: min(
       var(--ended-available-block-size),
       max(var(--ended-thumbnail-size) * 9 / 16, var(--ended-heading-size) + var(--ended-replay-size) + 64px)
     );
-    margin-block: auto;
+
+    inset-inline: 14px;
+
+    /* Centered in the player, unless that would put it under the controls */
+    inset-block: clamp(
+      var(--ended-band-start),
+      (100cqh - var(--ended-layout-size)) / 2,
+      var(--ended-band-end) - var(--ended-layout-size)
+    ) auto;
+    block-size: var(--ended-layout-size);
   }
 
   :global(.capacitorTabs .ftVideoPlayer .endedScreenHeader) {
@@ -341,8 +347,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: var(--ended-gap);
+  }
+
+  /* Center the content in the player, unless that would put it under the controls:
+     the spacer on the side of the larger inset starts larger by the difference
+     between the insets, and gives up that difference first when space runs out. */
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout::before),
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout::after) {
+    content: '';
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout::before) {
+    flex: 1 1 max(0px, var(--ended-screen-bottom, 76px) - var(--ended-screen-top, 0px));
+    margin-block-end: calc(-1 * var(--ended-gap));
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout::after) {
+    flex: 1 1 max(0px, var(--ended-screen-top, 0px) - var(--ended-screen-bottom, 76px));
+    margin-block-start: calc(-1 * var(--ended-gap));
   }
 
   :global(.capacitorTabs .ftVideoPlayer :is(.endedScreenHeader, .endedRecommendations)) {
