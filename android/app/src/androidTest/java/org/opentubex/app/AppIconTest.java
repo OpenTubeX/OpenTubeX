@@ -148,6 +148,11 @@ public class AppIconTest {
             assertEquals(chosen, AppIconPlugin.current(context));
             evaluate(scenario, "window.iconTestStillRunning = true");
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_HOME);
+            long stopDeadline = SystemClock.uptimeMillis() + 5000;
+            while (scenario.getState().isAtLeast(Lifecycle.State.STARTED) && SystemClock.uptimeMillis() < stopDeadline) {
+                Thread.sleep(100);
+            }
+            assertEquals("Home stops the app before relaunching it", Lifecycle.State.CREATED, scenario.getState());
             context.startActivity(context.getPackageManager().getLaunchIntentForPackage(context.getPackageName()));
             long resumeDeadline = SystemClock.uptimeMillis() + 5000;
             while (scenario.getState() != Lifecycle.State.RESUMED && SystemClock.uptimeMillis() < resumeDeadline) {
