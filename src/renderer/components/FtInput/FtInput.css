@@ -820,3 +820,12 @@
   background: none;
   color: var(--link-color);
 }
+
+/* The textarea draws the selection background, and the highlights its text. */
+.hasHighlights .ft-input:not(.inputHighlights)::selection {
+  color: transparent;
+}
+
+.inputHighlights .inputSelected {
+  color: var(--selection-text-color);
+}

@@ -71,7 +71,11 @@
       ><mark
         v-if="segment.highlighted"
         class="inputHighlight"
-      >{{ segment.text }}</mark><template v-else>{{ segment.text }}</template></template></span>
+        :class="{ inputSelected: segment.selected }"
+      >{{ segment.text }}</mark><span
+        v-else-if="segment.selected"
+        class="inputSelected"
+      >{{ segment.text }}</span><template v-else>{{ segment.text }}</template></template></span>
       <fieldset
         v-if="labelVisible"
         class="inputOutline"
@@ -572,18 +576,39 @@ const inputDataDisplayed = computed(() => {
 const inputDataPresent = computed(() => inputDataDisplayed.value.length > 0)
 
 const highlightsRef = useTemplateRef('highlightsRef')
+// The highlights draw over the textarea, so they draw its selected text too.
+const inputSelection = ref({ start: 0, end: 0 })
+function updateInputSelection() {
+  const input = inputRef.value
+  const focused = input != null && input === document.activeElement
+  inputSelection.value = focused ? { start: input.selectionStart, end: input.selectionEnd } : { start: 0, end: 0 }
+}
+// Text controls fire selectionchange at themselves in Chromium, and at the document in older engines.
+onMounted(() => document.addEventListener('selectionchange', updateInputSelection, true))
+onBeforeUnmount(() => document.removeEventListener('selectionchange', updateInputSelection, true))
+
 // A line break at the end needs a character after it to take up its line.
 const highlightSegments = computed(() => {
   if (props.highlights.length === 0) return null
   const text = inputDataDisplayed.value
+  const { start: selectionStart, end: selectionEnd } = inputSelection.value
+  const boundaries = [...new Set([
+    0,
+    text.length,
+    selectionStart,
+    selectionEnd,
+    ...props.highlights.flatMap(({ start, end }) => [start, end])
+  ])].filter(index => index <= text.length).sort((a, b) => a - b)
   const segments = []
-  let index = 0
-  for (const { start, end } of props.highlights) {
-    if (start > index) segments.push({ text: text.slice(index, start), highlighted: false })
-    segments.push({ text: text.slice(start, end), highlighted: true })
-    index = end
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    const start = boundaries[i]
+    segments.push({
+      text: text.slice(start, boundaries[i + 1]),
+      highlighted: props.highlights.some(range => start >= range.start && start < range.end),
+      selected: start >= selectionStart && start < selectionEnd
+    })
   }
-  segments.push({ text: `${text.slice(index)} `, highlighted: false })
+  segments.push({ text: ' ', highlighted: false, selected: false })
   return segments
 })
 const inputTextStyle = computed(() => {
@@ -998,10 +1023,12 @@ function handleFocusOut(event) {
 }
 
 function handleInputBlur() {
+  updateInputSelection()
   emit('blur', inputData.value)
 }
 
 function handleFocus() {
+  updateInputSelection()
   emit('focus')
   searchState.showOptions = true
 }
