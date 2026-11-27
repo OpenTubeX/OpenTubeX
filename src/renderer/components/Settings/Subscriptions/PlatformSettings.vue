@@ -36,6 +36,7 @@
         :description="t('Tooltips.Subscription Settings.Platforms Auto Refresh Interval')"
         :title="t('Settings.Subscription Settings.Auto Refresh Interval')"
         :icon="['fas', 'clock']"
+        performance-impact-key="platformFeedAutoRefreshInterval"
       >
         <FtSelect
           hide-label

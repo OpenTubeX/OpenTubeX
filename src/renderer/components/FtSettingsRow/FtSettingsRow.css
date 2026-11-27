@@ -50,6 +50,11 @@
   text-wrap: pretty;
 }
 
+.settingsRowPerformanceImpact {
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
+
 .settingsRowTooltip {
   display: inline-flex;
   font-size: 0.875rem;

@@ -16,6 +16,12 @@
         class="settingsRowTitle"
       >
         {{ title }}
+        <FtPerformanceImpact
+          v-if="performanceImpactKey"
+          class="settingsRowPerformanceImpact"
+          compact
+          :setting-key="performanceImpactKey"
+        />
         <FtTooltip
           v-if="tooltip"
           class="settingsRowTooltip"
@@ -33,10 +39,7 @@
       </p>
     </div>
     <div class="settingsRowControl">
-      <slot
-        :title-id="titleId"
-        :description-id="description ? descriptionId : undefined"
-      />
+      <slot :title-id="titleId" />
     </div>
     <!-- Controls that refine the row's setting, such as a slider for its
          amount, below the text and control. -->
@@ -50,12 +53,14 @@
 </template>
 
 <script setup>
-import { useId } from 'vue'
+import { computed, provide, useId } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import { SETTINGS_ROW_DESCRIPTION_ID } from './settingsRowContext'
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true
@@ -73,6 +78,11 @@ defineProps({
     type: Array,
     default: null
   },
+  // Shows the badge for controls that hide the label it normally sits in, such as selects
+  performanceImpactKey: {
+    type: String,
+    default: ''
+  },
   // Puts the control below the text, for wide controls such as chip groups
   stacked: {
     type: Boolean,
@@ -83,6 +93,9 @@ defineProps({
 const id = useId()
 const titleId = `${id}-title`
 const descriptionId = `${id}-description`
+
+// The row's control is described by the description beside its title.
+provide(SETTINGS_ROW_DESCRIPTION_ID, computed(() => props.description ? descriptionId : null))
 </script>
 
 <style scoped src="./FtSettingsRow.css" />

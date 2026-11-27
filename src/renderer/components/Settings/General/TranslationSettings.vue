@@ -24,7 +24,6 @@
         />
       </FtSettingsRow>
       <FtSettingsRow
-        v-slot="{ descriptionId }"
         :description="t('Settings.General Settings.Comment Translation.Description')"
         :title="t('Settings.General Settings.Comment Translation.Never Translate')"
         :icon="['fas', 'ban']"
@@ -36,7 +35,6 @@
           setting-key="commentTranslationIgnoredLanguages"
           :select-names="languageNames"
           :select-values="languageValues"
-          :describe-by-id="descriptionId"
           :disabled="!anyTranslationEnabled"
           :is-locale-selector="true"
           @change="addLanguage"

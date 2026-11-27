@@ -16,7 +16,7 @@
           @change="handleUpdateSponsorBlock"
         />
       </FtSettingsRow>
-      <template v-if="showSponsorBlockUrl && useSponsorBlock">
+      <template v-if="useSponsorBlock">
         <FtSettingsRow
           :title="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
           :icon="['fas', 'bell']"
