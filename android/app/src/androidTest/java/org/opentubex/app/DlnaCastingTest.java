@@ -535,7 +535,8 @@ public class DlnaCastingTest {
         } finally { clients.shutdownNow(); }
     }
 
-    private static InetAddress wifiAddress(Context context) {
+    private static InetAddress wifiAddress(Context context) throws Exception {
+        ensureEmulatorWifiRoute();
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         for (Network network : manager.getAllNetworks()) {
             NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
@@ -546,6 +547,33 @@ public class DlnaCastingTest {
         }
         fail("Wi-Fi IPv4 address");
         return null;
+    }
+
+    /**
+     * A busy emulator can drop virtual Wi-Fi beacons mid-shard and rejoin
+     * without wlan0's routing table, which causes bound multicast sends to fail
+     * with ENETUNREACH. Reconnect AndroidWifi before starting a DLNA test when
+     * wlan0's default route is missing.
+     */
+    private static void ensureEmulatorWifiRoute() throws Exception {
+        java.util.regex.Pattern route = java.util.regex.Pattern.compile("default via .* dev wlan0 table");
+        if (route.matcher(FailureDiagnostics.shell("ip -4 route show table all")).find()) return;
+        if (!FailureDiagnostics.shell("cmd wifi list-networks").contains("AndroidWifi")) return;
+        FailureDiagnostics.shell("cmd wifi set-wifi-enabled disabled");
+        long disableDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+        while (!FailureDiagnostics.shell("cmd wifi status").contains("Wifi is disabled") && System.nanoTime() < disableDeadline) {
+            Thread.sleep(500);
+        }
+        FailureDiagnostics.shell("cmd wifi set-wifi-enabled enabled");
+        long enableDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+        while (!FailureDiagnostics.shell("cmd wifi status").contains("Wifi is enabled") && System.nanoTime() < enableDeadline) {
+            Thread.sleep(500);
+        }
+        FailureDiagnostics.shell("cmd wifi connect-network AndroidWifi open");
+        long routeDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(60);
+        while (!route.matcher(FailureDiagnostics.shell("ip -4 route show table all")).find() && System.nanoTime() < routeDeadline) {
+            Thread.sleep(500);
+        }
     }
 
     private static byte[] readBody(InputStream input) throws IOException {
