@@ -104,8 +104,9 @@ const getInlinePlayer = inject('phonePanelInlinePlayer', null)
 const expandPanel = inject('expandPhonePanel', null)
 const landscape = usePhoneLayout('(orientation: landscape)')
 const expanded = ref(false)
-const dragOffset = ref(0)
-const visibleTop = computed(() => Math.max(0, (expanded.value ? 0 : sheetTop.value) + Math.min(0, dragOffset.value)))
+// A moving sheet holds its layout at this top edge and follows the gesture
+// with transforms alone, so it does not lay out its content on every frame.
+const motionTop = ref(null)
 const fullscreenElement = shallowRef(document.fullscreenElement)
 const playerCoversWindow = ref(false)
 const playerDragging = ref(false)
@@ -146,12 +147,16 @@ watch([dialog, () => props.open], updatePresentation, { flush: 'post' })
 onUpdated(updatePresentation)
 document.addEventListener('fullscreenchange', updatePresentation)
 const sheetTop = ref(0)
+// The resting top edge, below the status bar
+const restingTop = computed(() => {
+  const top = !expanded.value
+    ? `${sheetTop.value}px`
+    : shortsPlayer.value && !landscape.value ? 'calc(var(--phone-viewport-height, 100dvh) * 0.3)' : '0px'
+  return `max(var(--app-safe-area-inset-top, 0px), ${top})`
+})
 const sheetStyle = computed(() => {
   if (!docked.value) return null
-  const top = shortsPlayer.value && !landscape.value && expanded.value
-    ? `calc(var(--phone-viewport-height, 100dvh) * 0.3 + ${Math.min(0, dragOffset.value)}px)`
-    : `${visibleTop.value}px`
-  const inset = `max(var(--app-safe-area-inset-top, 0px), ${top})`
+  const inset = motionTop.value ?? restingTop.value
   return {
     insetBlockStart: inset,
     blockSize: `calc(var(--phone-viewport-height, 100dvh) - ${inset})`
@@ -181,6 +186,7 @@ watch(dialog, (element, _previous, onCleanup) => {
       if (!props.enabled || !props.open || !element.open || props.back || props.compact ||
         suspended.value || closing || drag || isReducedMotionEnabled()) return false
       animation?.cancel()
+      resetMotion()
       backAnimation = applyAnimationSpeed(element.animate([
         { transform: 'translateY(0)' },
         { transform: 'translateY(100%)' }
@@ -269,6 +275,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
   if (enabled && open && closing) {
     closing = false
     animation?.cancel()
+    resetMotion()
   }
   if (enabled && open && !element.open) {
     previousFocus = document.activeElement
@@ -350,29 +357,52 @@ function startDrag(event, header = event.currentTarget) {
   window.addEventListener('pointerup', endDrag, true)
   window.addEventListener('pointercancel', cancelDrag, true)
 }
+// Resolves a top edge in CSS to pixels through the transform, which needs no layout.
+function resolveTop(element, top) {
+  element.style.transform = `translateY(${top})`
+  const transform = getComputedStyle(element).transform
+  return transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42
+}
+let motionLayoutTop = 0
+function holdLayout(top, pixels) {
+  motionTop.value = top
+  motionLayoutTop = pixels
+}
 function moveDrag(event) {
   if (drag?.id !== event.pointerId) return
   drag.distance = event.clientY - drag.y
+  const element = dialog.value
   if (!drag.active) {
     const horizontalDistance = Math.abs(event.clientX - drag.x)
     if (Math.max(Math.abs(drag.distance), horizontalDistance) < 8) return
     if (horizontalDistance > Math.abs(drag.distance)) {
-      cancelDrag()
+      clearDrag()
       return
     }
+    // A sheet that is still settling continues from where it is on screen.
+    const transform = getComputedStyle(element).transform
+    const offset = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42
+    const held = motionTop.value !== null
     cancelBackGesture()
     animation?.cancel()
+    element.style.willChange = 'transform'
+    drag.restingTop = resolveTop(element, restingTop.value)
+    drag.startTop = (held ? motionLayoutTop : drag.restingTop) + offset
+    drag.minTop = resolveTop(element, 'max(var(--app-safe-area-inset-top, 0px), 0px)')
+    if (motionTop.value === null) holdLayout(restingTop.value, drag.restingTop)
     drag.active = true
     suppressDragClick = true
     // Keep taps targeted at the control; capture only after a vertical drag.
     drag.header.setPointerCapture(event.pointerId)
   }
-  dragOffset.value = drag.distance
-  dialog.value.style.transform = `translateY(${Math.max(0, drag.distance)}px)`
+  drag.top = Math.max(drag.minTop, drag.startTop + drag.distance)
+  // Pulled above its layout, the sheet fills the window, which lays it out once.
+  if (drag.top < motionLayoutTop) holdLayout('0px', 0)
+  element.style.transform = `translateY(${drag.top - motionLayoutTop}px)`
 }
 function endDrag(event) {
   if (drag?.id !== event.pointerId) return
-  const { distance, start, active } = drag
+  const { distance, start, active, top: from } = drag
   clearDrag()
   if (!active) return
   const expand = !expanded.value && distance < -60
@@ -383,7 +413,6 @@ function endDrag(event) {
     return
   }
   const element = dialog.value
-  const before = element.getBoundingClientRect()
   if (expand) {
     expanded.value = true
     if (!landscape.value) resumePlayback = expandPanel?.()
@@ -391,15 +420,17 @@ function endDrag(event) {
     expanded.value = false
     restorePlayback()
   }
-  dragOffset.value = 0
-  element.style.transform = ''
-  nextTick(() => {
-    const after = element.getBoundingClientRect()
-    animation = applyAnimationSpeed(element.animate([
-      { top: `${before.top}px`, height: `${before.height}px`, transform: 'translateY(0)' },
-      { top: `${after.top}px`, height: `${after.height}px`, transform: 'translateY(0)' }
-    ], motionTiming('--motion-default-effects', 180, 'ease-out')))
-  })
+  // Settle in the held layout, and lay out at the resting size afterward.
+  const to = resolveTop(element, restingTop.value)
+  if (to < motionLayoutTop) holdLayout('0px', 0)
+  element.style.transform = `translateY(${to - motionLayoutTop}px)`
+  const settling = animation = applyAnimationSpeed(element.animate([
+    { transform: `translateY(${from - motionLayoutTop}px)` },
+    { transform: `translateY(${to - motionLayoutTop}px)` }
+  ], motionTiming('--motion-default-effects', 180, 'ease-out')))
+  settling.finished.then(() => {
+    if (animation === settling) resetMotion()
+  }, () => {})
 }
 function clearDrag() {
   drag = null
@@ -409,9 +440,17 @@ function clearDrag() {
 }
 function cancelDrag(event) {
   if (event && drag?.id !== event.pointerId) return
-  dragOffset.value = 0
+  const moved = drag?.active
   clearDrag()
-  if (dialog.value) dialog.value.style.transform = ''
+  if (moved) resetMotion()
+}
+// Returns a moved sheet to its resting layout without a transform.
+function resetMotion() {
+  motionTop.value = null
+  const element = dialog.value
+  if (!element) return
+  element.style.transform = ''
+  element.style.willChange = ''
 }
 
 function handleHeaderClick(event) {
@@ -448,6 +487,7 @@ function release(preservePresentation = false) {
   window.visualViewport?.removeEventListener('resize', measurePlayer)
   animation?.cancel()
   cancelDrag()
+  resetMotion()
   unlockBodyScroll()
   locked = false
   if (!preservePresentation && !anotherPanelOpen && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
