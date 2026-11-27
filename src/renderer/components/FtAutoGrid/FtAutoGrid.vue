@@ -405,9 +405,12 @@ function handleWindowScroll() {
 function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
   const element = gridElement.value?.$el
   if (!element) return
+  // A grid without a width, such as in a hidden page, has not been measured.
   const firstMeasurement = !measured
-  measured = true
-  if (contentWidth > 0) rememberGridWidth(gridWidthKey, contentWidth)
+  if (contentWidth > 0) {
+    measured = true
+    rememberGridWidth(gridWidthKey, contentWidth)
+  }
 
   if (contentWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
