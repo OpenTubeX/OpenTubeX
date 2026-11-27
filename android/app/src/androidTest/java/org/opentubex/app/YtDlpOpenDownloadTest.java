@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,20 +54,31 @@ public class YtDlpOpenDownloadTest {
             var field = YtDlpPlugin.class.getDeclaredField("downloads");
             field.setAccessible(true);
             field.set(plugin, downloads);
-            CompletableFuture<Intent> launched = new CompletableFuture<>();
+            var launched = new LinkedBlockingQueue<Intent>();
             Context context = new ContextWrapper(app) {
-                @Override public void startActivity(Intent intent) { launched.complete(intent); }
+                @Override public void startActivity(Intent intent) { launched.add(intent); }
             };
 
             assertTrue("Existing download was reported as missing", open(plugin, context, id).getBoolean("ok"));
-            Intent intent = launched.get(5, TimeUnit.SECONDS);
+            Intent intent = launched.poll(5, TimeUnit.SECONDS);
             assertEquals(Intent.ACTION_VIEW, intent.getAction());
             assertEquals(document.getUri(), intent.getData());
             assertEquals("video/webm", intent.getType());
             assertTrue((intent.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
 
+            assertTrue("Existing download could not be shared", share(plugin, context, id).getBoolean("ok"));
+            Intent chooser = launched.poll(5, TimeUnit.SECONDS);
+            assertEquals(Intent.ACTION_CHOOSER, chooser.getAction());
+            Intent send = chooser.getParcelableExtra(Intent.EXTRA_INTENT);
+            assertEquals(Intent.ACTION_SEND, send.getAction());
+            assertEquals(document.getUri(), (Uri) send.getParcelableExtra(Intent.EXTRA_STREAM));
+            assertEquals("video/webm", send.getType());
+            assertEquals(document.getUri(), send.getClipData().getItemAt(0).getUri());
+            assertTrue((send.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0);
+
             assertTrue(document.delete());
             assertFalse("Deleted files must still be reported as missing", open(plugin, context, id).getBoolean("ok"));
+            assertFalse("Deleted files must not be shared", share(plugin, context, id).getBoolean("ok"));
             assertFalse(open(plugin, context, id + 1).getBoolean("ok"));
 
             JSObject retry = new JSObject().put("retryDownloadId", id)
@@ -90,6 +102,10 @@ public class YtDlpOpenDownloadTest {
 
     private JSObject open(YtDlpPlugin plugin, Context context, long id) throws Exception {
         return call(call -> plugin.open(context, call), new JSObject().put("id", id));
+    }
+
+    private JSObject share(YtDlpPlugin plugin, Context context, long id) throws Exception {
+        return call(call -> plugin.share(context, call), new JSObject().put("id", id));
     }
 
     private JSObject call(Consumer<PluginCall> invoke, JSObject data) throws Exception {

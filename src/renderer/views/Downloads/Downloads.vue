@@ -167,6 +167,7 @@
         @queue-next="queueDownload(download, true)"
         @remove="pendingRemoval = download"
         @retry="retryDownload(download)"
+        @share="shareDownload(download.id)"
       />
     </section>
 
@@ -415,6 +416,12 @@ async function queueAction(action) {
 }
 async function openDownload(id) {
   if (!await ytDlp.ytDlpOpenDownload(id)) {
+    await refreshDownloads()
+    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+async function shareDownload(id) {
+  if (!await ytDlp.ytDlpShareDownload(id)) {
     await refreshDownloads()
     showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }

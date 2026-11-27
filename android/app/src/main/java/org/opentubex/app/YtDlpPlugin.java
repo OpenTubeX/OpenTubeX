@@ -3,6 +3,7 @@ package org.opentubex.app;
 import static java.util.Arrays.asList;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.Context;
 import android.net.Uri;
@@ -118,6 +119,40 @@ public final class YtDlpPlugin extends Plugin {
             context.startActivity(intent);
             return new JSONObject().put("ok", true);
         });
+    }
+    @PluginMethod public void share(PluginCall call) {
+        share(getContext(), call);
+    }
+
+    void share(Context context, PluginCall call) {
+        run(call, () -> {
+            List<Uri> files = downloads.existingFiles(call.getData().optLong("id", -1L));
+            if (files.isEmpty()) return new JSONObject().put("ok", false);
+            Intent intent = new Intent(files.size() == 1 ? Intent.ACTION_SEND : Intent.ACTION_SEND_MULTIPLE)
+                .setType(shareType(context, files))
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (files.size() == 1) intent.putExtra(Intent.EXTRA_STREAM, files.get(0));
+            else intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, new ArrayList<>(files));
+            // The chooser only passes the read grant on for URIs in the clip data.
+            ClipData clip = ClipData.newRawUri("", files.get(0));
+            for (Uri file : files.subList(1, files.size())) clip.addItem(new ClipData.Item(file));
+            intent.setClipData(clip);
+            context.startActivity(Intent.createChooser(intent, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return new JSONObject().put("ok", true);
+        });
+    }
+
+    // Receivers filter by MIME type, so mixed files share the widest type they have in common.
+    private static String shareType(Context context, List<Uri> files) {
+        String shared = null;
+        for (Uri file : files) {
+            String type = context.getContentResolver().getType(file);
+            if (type == null) return "*/*";
+            if (shared == null || shared.equals(type)) shared = type;
+            else if (shared.split("/")[0].equals(type.split("/")[0])) shared = type.split("/")[0] + "/*";
+            else return "*/*";
+        }
+        return shared;
     }
     @PluginMethod public void createSession(PluginCall call) {
         Intent intent = new Intent(getContext(), YouTubeSessionActivity.class);

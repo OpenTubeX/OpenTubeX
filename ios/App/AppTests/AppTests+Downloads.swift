@@ -779,10 +779,10 @@ extension AppTests {
         }
         XCTAssertGreaterThan(offlinePlayer.currentTime().seconds, 0.1)
         offlinePlayer.pause()
-        let opened = try await webView.callPageScript(
-            "return (await Capacitor.Plugins.YtDlp.open({id})).ok",
+        let shared = try await webView.callPageScript(
+            "return (await Capacitor.Plugins.YtDlp.share({id})).ok",
             arguments: ["id": id]) as? Bool
-        XCTAssertEqual(opened, true)
+        XCTAssertEqual(shared, true)
         let controller = try XCTUnwrap(webView.window?.rootViewController)
         try await waitForNative { controller.presentedViewController is UIActivityViewController }
         if let activity = controller.presentedViewController { try await dismiss(activity) }
