@@ -38,6 +38,14 @@
         :description-id="description ? descriptionId : undefined"
       />
     </div>
+    <!-- Controls that refine the row's setting, such as a slider for its
+         amount, below the text and control. -->
+    <div
+      v-if="$slots.details"
+      class="settingsRowDetails"
+    >
+      <slot name="details" />
+    </div>
   </div>
 </template>
 

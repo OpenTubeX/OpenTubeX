@@ -5,6 +5,7 @@
   display: grid;
   grid-template:
     'icon text control' auto
+    '. details details' auto
     / 40px minmax(0, 1fr) auto;
   padding-block: calc(12px * var(--ui-density, 1));
 }
@@ -17,6 +18,7 @@
   grid-template:
     'icon text' auto
     '. control' auto
+    '. details' auto
     / 40px minmax(0, 1fr);
 }
 
@@ -100,6 +102,23 @@
   }
 }
 
+.settingsRowDetails {
+  grid-area: details;
+  min-inline-size: 0;
+}
+
+/* A slider's label and track start where the text does. Its padding, or the
+   changed-setting marker gutter while highlighting is on, moves into the
+   space below the icon. */
+.settingsRowDetails > :deep(.pure-material-slider) {
+  --settings-row-slider-offset: max(5px, var(--settings-marker-gutter, 0px));
+
+  box-sizing: border-box;
+  inline-size: min(100% + var(--settings-row-slider-offset), 380px);
+  margin-block: 4px 0;
+  margin-inline: calc(-1 * var(--settings-row-slider-offset)) 0;
+}
+
 /* Narrow sections put a row's control below its text, like the Data rows. */
 @container settings-content (width <= 560px) {
   /* Lets a control below measure the text column it sits in. */
@@ -111,6 +130,7 @@
     grid-template:
       'icon text' auto
       '. control' auto
+      '. details' auto
       / 40px minmax(0, 1fr);
   }
 

@@ -148,19 +148,19 @@
           setting-key="onlyShowLatestFromChannel"
           @change="updateOnlyShowLatestFromChannel"
         />
+        <template #details>
+          <FtSlider
+            :label="$t('Settings.Subscription Settings.To')"
+            :default-value="onlyShowLatestFromChannelNumber"
+            setting-key="onlyShowLatestFromChannelNumber"
+            :disabled="!onlyShowLatestFromChannel"
+            :min-value="1"
+            :max-value="useRssFeeds ? 15 : 30"
+            :step="1"
+            @change="updateOnlyShowLatestFromChannelNumber"
+          />
+        </template>
       </FtSettingsRow>
-    </div>
-    <div class="onlyShowLatestFromChannelNumber">
-      <FtSlider
-        :label="$t('Settings.Subscription Settings.To')"
-        :default-value="onlyShowLatestFromChannelNumber"
-        setting-key="onlyShowLatestFromChannelNumber"
-        :disabled="!onlyShowLatestFromChannel"
-        :min-value="1"
-        :max-value="useRssFeeds ? 15 : 30"
-        :step="1"
-        @change="updateOnlyShowLatestFromChannelNumber"
-      />
     </div>
     <div class="subscriptionChannelSettingsManager">
       <SubscriptionChannelSettings />
