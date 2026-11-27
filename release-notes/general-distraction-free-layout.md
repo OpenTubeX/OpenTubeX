@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-General and Distraction Free settings are easier to scan. General groups its settings into sections with short descriptions, and Distraction Free shows what you hide as chips grouped by page. Player interface delays, watch statistics, and Reduced Motion moved to Playback, Privacy, and Appearance.
+Settings are easier to scan. General, Focus, Privacy, Subscriptions, and more list each setting in a row with its description, and Distraction Free shows hidden items as chips grouped by page. Player interface delays, watch statistics, and Reduced Motion moved to Playback, Privacy, and Appearance.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/5ce92361-db12-4eca-9949-d83af3bf9d84">

@@ -3,35 +3,46 @@
     :title="$t('Settings.SponsorBlock Settings.DeArrow Settings')"
     :icon="['fac', 'dearrow']"
   >
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
+        :title="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
+        :icon="['fas', 'font']"
+      >
         <FtToggleSwitch
-          compact
           :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
+          hide-label
           :default-value="useDeArrowTitles"
           setting-key="useDeArrowTitles"
-          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
           @change="handleUpdateUseDeArrowTitles"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
+        :title="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
+        :icon="['fas', 'images']"
+      >
         <FtToggleSwitch
-          compact
           :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
+          hide-label
           :default-value="useDeArrowThumbnails"
           setting-key="useDeArrowThumbnails"
-          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
           @change="handleUpdateUseDeArrowThumbnails"
         />
-      </div>
-      <div class="switchColumn">
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.SponsorBlock Settings.Always Show DeArrow Badge')"
+        :title="$t('Settings.SponsorBlock Settings.Always Show DeArrow Badge')"
+        :icon="['fac', 'dearrow']"
+      >
         <FtToggleSwitch
-          compact
           :label="$t('Settings.SponsorBlock Settings.Always Show DeArrow Badge')"
+          hide-label
           :default-value="showDeArrowBadge"
           setting-key="showDeArrowBadge"
-          :tooltip="$t('Tooltips.SponsorBlock Settings.Always Show DeArrow Badge')"
           @change="handleUpdateShowDeArrowBadge"
         />
-      </div>
+      </FtSettingsRow>
     </div>
     <FtFlexBox>
       <FtInput
@@ -53,6 +64,7 @@
 <script setup>
 import { computed, useTemplateRef } from 'vue'
 
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtInput from '../../FtInput/FtInput.vue'

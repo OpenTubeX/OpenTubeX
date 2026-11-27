@@ -3,46 +3,67 @@
     :title="$t('Settings.Parental Control Settings.Parental Control Settings')"
     hide-title
   >
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
+    <div class="settingsRows">
+      <FtSettingsRow
+        :title="$t('Settings.Parental Control Settings.Hide Unsubscribe Button')"
+        :icon="['fas', 'user-minus']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Hide Unsubscribe Button')"
-          compact
+          hide-label
           :default-value="hideUnsubscribeButton"
           setting-key="hideUnsubscribeButton"
           @change="updateHideUnsubscribeButton"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Parental Control Settings.Show Family Friendly Only')"
+        :icon="['fas', 'shield-halved']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Show Family Friendly Only')"
-          compact
+          hide-label
           :default-value="showFamilyFriendlyOnly"
           setting-key="showFamilyFriendlyOnly"
           @change="updateShowFamilyFriendlyOnly"
         />
-        <FtToggleSwitch
-          :label="$t('Settings.Parental Control Settings.Disable Channel Links')"
-          compact
-          :default-value="disableChannelLinks"
-          setting-key="disableChannelLinks"
-          @change="updateDisableChannelLinks"
-        />
-      </div>
-      <div class="switchColumn">
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Parental Control Settings.Hide Search Bar')"
+        :icon="['fas', 'magnifying-glass']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Hide Search Bar')"
-          compact
+          hide-label
           :default-value="hideSearchBar"
           setting-key="hideSearchBar"
           @change="updateHideSearchBar"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Parental Control Settings.Disable Channel Links')"
+        :icon="['fas', 'link-slash']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Parental Control Settings.Disable Channel Links')"
+          hide-label
+          :default-value="disableChannelLinks"
+          setting-key="disableChannelLinks"
+          @change="updateDisableChannelLinks"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Parental Control Settings.Hide Uploader on Watch page')"
+        :icon="['fas', 'circle-user']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Hide Uploader on Watch page')"
-          compact
+          hide-label
           :default-value="hideUploader"
           setting-key="hideUploader"
           @change="updateHideUploader"
         />
-      </div>
+      </FtSettingsRow>
     </div>
   </FtSettingsSection>
 </template>
@@ -50,6 +71,7 @@
 <script setup>
 import { computed } from 'vue'
 
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 

@@ -56,61 +56,91 @@
           />
         </component>
       </div>
-      <FtFlexBox>
-        <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.Sync Subscriptions')"
-          :default-value="syncSubscriptions"
-          setting-key="youTubeAccountSyncSubscriptions"
-          :tooltip="t('Tooltips.YouTube Account Settings.Sync Subscriptions')"
-          compact
-          @change="store.dispatch('updateYouTubeAccountSyncSubscriptions', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.Sync Playlists')"
-          :default-value="syncPlaylists"
-          setting-key="youTubeAccountSyncPlaylists"
+      <div class="settingsRows">
+        <FtSettingsRow
+          :description="t('Tooltips.YouTube Account Settings.Sync Subscriptions')"
+          :title="t('Settings.YouTube Account Settings.Sync Subscriptions')"
+          :icon="['fas', 'users']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.Sync Subscriptions')"
+            hide-label
+            :default-value="syncSubscriptions"
+            setting-key="youTubeAccountSyncSubscriptions"
+            @change="store.dispatch('updateYouTubeAccountSyncSubscriptions', $event)"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
           :tooltip="t('Tooltips.YouTube Account Settings.Sync Playlists')"
-          controlled
-          compact
-          @change="changeSyncPlaylists"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.YouTube Watch History')"
-          :default-value="historyPaused === false"
-          :disabled="historyPaused === null || pausingHistory"
-          :tooltip="t('Tooltips.YouTube Account Settings.YouTube Watch History')"
-          controlled
-          compact
-          @change="setHistoryPaused(!$event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.Add to YouTube Watch History')"
-          :default-value="watchHistory"
-          setting-key="youTubeAccountWatchHistory"
-          :disabled="historyPaused === true"
-          :tooltip="t('Tooltips.YouTube Account Settings.Add to YouTube Watch History')"
-          compact
-          @change="store.dispatch('updateYouTubeAccountWatchHistory', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.Rate Videos')"
-          :default-value="videoRatings"
-          setting-key="youTubeAccountVideoRatings"
+          :title="t('Settings.YouTube Account Settings.Sync Playlists')"
+          :icon="['fas', 'playlist-merge']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.Sync Playlists')"
+            hide-label
+            :default-value="syncPlaylists"
+            setting-key="youTubeAccountSyncPlaylists"
+            controlled
+            @change="changeSyncPlaylists"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
+          :description="t('Tooltips.YouTube Account Settings.YouTube Watch History')"
+          :title="t('Settings.YouTube Account Settings.YouTube Watch History')"
+          :icon="['fas', 'clock-rotate-left']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.YouTube Watch History')"
+            hide-label
+            :default-value="historyPaused === false"
+            :disabled="historyPaused === null || pausingHistory"
+            controlled
+            @change="setHistoryPaused(!$event)"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
+          :description="t('Tooltips.YouTube Account Settings.Add to YouTube Watch History')"
+          :title="t('Settings.YouTube Account Settings.Add to YouTube Watch History')"
+          :icon="['fas', 'circle-play']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.Add to YouTube Watch History')"
+            hide-label
+            :default-value="watchHistory"
+            setting-key="youTubeAccountWatchHistory"
+            :disabled="historyPaused === true"
+            @change="store.dispatch('updateYouTubeAccountWatchHistory', $event)"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
           :tooltip="t('Tooltips.YouTube Account Settings.Rate Videos')"
-          compact
-          @change="store.dispatch('updateYouTubeAccountVideoRatings', $event)"
-        />
-        <FtToggleSwitch
+          :title="t('Settings.YouTube Account Settings.Rate Videos')"
+          :icon="['fas', 'thumbs-up']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.Rate Videos')"
+            hide-label
+            :default-value="videoRatings"
+            setting-key="youTubeAccountVideoRatings"
+            @change="store.dispatch('updateYouTubeAccountVideoRatings', $event)"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
           v-if="supportsNotificationHistory"
-          :label="t('Settings.YouTube Account Settings.Watch Posted Comments')"
-          :default-value="store.getters.getYouTubeAccountReplyNotifications"
-          setting-key="youTubeAccountReplyNotifications"
-          :disabled="!isCommentWatchingEnabled()"
-          :tooltip="t('Tooltips.YouTube Account Settings.Watch Posted Comments')"
-          compact
-          @change="store.dispatch('updateYouTubeAccountReplyNotifications', $event)"
-        />
-      </FtFlexBox>
+          :description="t('Tooltips.YouTube Account Settings.Watch Posted Comments')"
+          :title="t('Settings.YouTube Account Settings.Watch Posted Comments')"
+          :icon="['fas', 'comment']"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.YouTube Account Settings.Watch Posted Comments')"
+            hide-label
+            :default-value="store.getters.getYouTubeAccountReplyNotifications"
+            setting-key="youTubeAccountReplyNotifications"
+            :disabled="!isCommentWatchingEnabled()"
+            @change="store.dispatch('updateYouTubeAccountReplyNotifications', $event)"
+          />
+        </FtSettingsRow>
+      </div>
       <FtFlexBox>
         <FtButton
           :label="t('Settings.YouTube Account Settings.Sync Now')"
@@ -174,6 +204,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import YouTubeSignInPrompt from './YouTubeSignInPrompt.vue'

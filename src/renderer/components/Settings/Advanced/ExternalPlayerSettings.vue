@@ -3,35 +3,48 @@
     :title="$t('Settings.External Player Settings.External Player Settings')"
     :icon="['fas', 'up-right-from-square']"
   >
-    <FtFlexBox>
-      <FtSelect
-        :placeholder="$t('Settings.External Player Settings.External Player')"
-        :value="externalPlayer"
-        :select-names="externalPlayerNames"
-        :select-values="externalPlayerValues"
+    <div class="settingsRows">
+      <FtSettingsRow
         :tooltip="$t('Tooltips.External Player Settings.External Player')"
+        :title="$t('Settings.External Player Settings.External Player')"
         :icon="['fas', 'up-right-from-square']"
-        @change="updateExternalPlayer"
-      />
-    </FtFlexBox>
-    <FtFlexBox>
-      <FtToggleSwitch
-        :label="$t('Settings.External Player Settings.Ignore Unsupported Action Warnings')"
-        :default-value="externalPlayerIgnoreWarnings"
-        :disabled="externalPlayer === ''"
-        :compact="true"
-        :tooltip="$t('Tooltips.External Player Settings.Ignore Warnings')"
-        @change="updateExternalPlayerIgnoreWarnings"
-      />
-      <FtToggleSwitch
-        :label="$t('Settings.External Player Settings.Ignore Default Arguments')"
-        :default-value="externalPlayerIgnoreDefaultArgs"
-        :disabled="externalPlayer === ''"
-        :compact="true"
-        :tooltip="$t('Tooltips.External Player Settings.Ignore Default Arguments')"
-        @change="updateExternalPlayerIgnoreDefaultArgs"
-      />
-    </FtFlexBox>
+      >
+        <FtSelect
+          hide-label
+          :placeholder="$t('Settings.External Player Settings.External Player')"
+          :value="externalPlayer"
+          :select-names="externalPlayerNames"
+          :select-values="externalPlayerValues"
+          @change="updateExternalPlayer"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.External Player Settings.Ignore Warnings')"
+        :title="$t('Settings.External Player Settings.Ignore Unsupported Action Warnings')"
+        :icon="['fas', 'triangle-exclamation']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.External Player Settings.Ignore Unsupported Action Warnings')"
+          hide-label
+          :default-value="externalPlayerIgnoreWarnings"
+          :disabled="externalPlayer === ''"
+          @change="updateExternalPlayerIgnoreWarnings"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.External Player Settings.Ignore Default Arguments')"
+        :title="$t('Settings.External Player Settings.Ignore Default Arguments')"
+        :icon="['fas', 'terminal']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.External Player Settings.Ignore Default Arguments')"
+          hide-label
+          :default-value="externalPlayerIgnoreDefaultArgs"
+          :disabled="externalPlayer === ''"
+          @change="updateExternalPlayerIgnoreDefaultArgs"
+        />
+      </FtSettingsRow>
+    </div>
     <template
       v-if="externalPlayer !== ''"
     >
@@ -69,6 +82,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'

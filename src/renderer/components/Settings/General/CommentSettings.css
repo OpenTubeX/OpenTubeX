@@ -1,9 +1,0 @@
-.commentSettings {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.commentSwitches.switchColumnGrid {
-  align-self: stretch;
-}

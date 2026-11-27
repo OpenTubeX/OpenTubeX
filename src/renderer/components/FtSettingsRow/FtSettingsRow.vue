@@ -26,13 +26,17 @@
       </span>
       <p
         v-if="description"
+        :id="descriptionId"
         class="settingsRowDescription"
       >
         {{ description }}
       </p>
     </div>
     <div class="settingsRowControl">
-      <slot :title-id="titleId" />
+      <slot
+        :title-id="titleId"
+        :description-id="description ? descriptionId : undefined"
+      />
     </div>
   </div>
 </template>
@@ -68,7 +72,9 @@ defineProps({
   }
 })
 
-const titleId = `${useId()}-title`
+const id = useId()
+const titleId = `${id}-title`
+const descriptionId = `${id}-description`
 </script>
 
 <style scoped src="./FtSettingsRow.css" />

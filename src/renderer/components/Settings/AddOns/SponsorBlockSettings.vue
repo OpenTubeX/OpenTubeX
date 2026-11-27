@@ -3,33 +3,50 @@
     :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
     :icon="['fac', 'sponsorblock']"
   >
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
-        :default-value="useSponsorBlock"
-        setting-key="useSponsorBlock"
-        @change="handleUpdateSponsorBlock"
-      />
-    </FtFlexBox>
+    <div class="settingsRows">
+      <FtSettingsRow
+        :title="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
+        :icon="['fac', 'sponsorblock']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
+          hide-label
+          :default-value="useSponsorBlock"
+          setting-key="useSponsorBlock"
+          @change="handleUpdateSponsorBlock"
+        />
+      </FtSettingsRow>
+      <template v-if="showSponsorBlockUrl && useSponsorBlock">
+        <FtSettingsRow
+          :title="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
+          :icon="['fas', 'bell']"
+        >
+          <FtToggleSwitch
+            :label="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
+            hide-label
+            :default-value="sponsorBlockShowSkippedToast"
+            setting-key="sponsorBlockShowSkippedToast"
+            @change="handleUpdateSponsorBlockShowSkippedToast"
+          />
+        </FtSettingsRow>
+        <FtSettingsRow
+          :title="$t('Settings.SponsorBlock Settings.Enable SponsorBlock Submission')"
+          :icon="['fas', 'pen-to-square']"
+        >
+          <FtToggleSwitch
+            :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock Submission')"
+            hide-label
+            :default-value="sponsorBlockEnableSubmission"
+            setting-key="sponsorBlockEnableSubmission"
+            @change="handleUpdateSponsorBlockEnableSubmission"
+          />
+        </FtSettingsRow>
+      </template>
+    </div>
     <template
       v-if="showSponsorBlockUrl"
     >
-      <FtFlexBox
-        v-if="useSponsorBlock"
-        class="settingsFlexStart500px"
-      >
-        <FtToggleSwitch
-          :label="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
-          :default-value="sponsorBlockShowSkippedToast"
-          setting-key="sponsorBlockShowSkippedToast"
-          @change="handleUpdateSponsorBlockShowSkippedToast"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock Submission')"
-          :default-value="sponsorBlockEnableSubmission"
-          setting-key="sponsorBlockEnableSubmission"
-          @change="handleUpdateSponsorBlockEnableSubmission"
-        />
+      <FtFlexBox v-if="useSponsorBlock">
         <FtSlider
           :label="$t('Settings.SponsorBlock Settings.Skip notification timeout')"
           :default-value="sponsorBlockSkippedToastDuration"
@@ -156,6 +173,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtInput from '../../FtInput/FtInput.vue'

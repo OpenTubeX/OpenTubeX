@@ -3,65 +3,142 @@
     :title="$t('Settings.Privacy Settings.Privacy Settings')"
     :icon="['fas', 'user-lock']"
   >
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="$t('Settings.Privacy Settings.Internet Connectivity Checks')"
-          :tooltip="$t('Settings.Privacy Settings.Internet Connectivity Checks Tooltip')"
-          compact
-          :default-value="internetConnectivityChecks"
-          setting-key="internetConnectivityChecks"
-          @change="updateInternetConnectivityChecks"
-        />
+    <div class="settingsRows">
+      <FtSettingsRow
+        :title="$t('Settings.Privacy Settings.Remember History')"
+        :icon="['fas', 'clock-rotate-left']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Remember History')"
-          compact
+          hide-label
           :default-value="rememberHistory"
           setting-key="rememberHistory"
           @change="handleRememberHistory"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :tooltip="$t('Settings.Privacy Settings.Watched Progress Saving Mode.Tooltip')"
+        :title="$t('Settings.Privacy Settings.Save Watched Progress')"
+        :icon="['fas', 'bars-progress']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
+          :value="watchedProgressSavingMode"
+          setting-key="watchedProgressSavingMode"
+          :select-names="watchedProgressSavingModeNames"
+          :select-values="WATCHED_PROGRESS_SAVING_MODE_VALUES"
+          :disabled="!rememberHistory"
+          @change="updateWatchedProgressSavingMode"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
+        :icon="['fas', 'playlist-check']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
-          compact
+          hide-label
           :disabled="!rememberHistory"
           :default-value="saveVideoHistoryWithLastViewedPlaylist"
           setting-key="saveVideoHistoryWithLastViewedPlaylist"
           @change="updateSaveVideoHistoryWithLastViewedPlaylist"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Privacy Settings.Enable Watch Statistics')"
+        :icon="['fas', 'chart-line']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Enable Watch Statistics')"
-          compact
+          hide-label
           :disabled="!rememberHistory"
           :default-value="enableWatchStats"
           setting-key="enableWatchStats"
           @change="store.dispatch('updateEnableWatchStats', $event)"
         />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="$t('Settings.General Settings.Enable Search Suggestions')"
-          :default-value="enableSearchSuggestions"
-          setting-key="enableSearchSuggestions"
-          compact
-          @change="updateEnableSearchSuggestions"
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Privacy Settings.Week Starts On')"
+        :icon="['fas', 'calendar-days']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
+          :value="store.getters.getStatsWeekStartsOn"
+          setting-key="statsWeekStartsOn"
+          :select-names="weekStartNames"
+          :select-values="WEEK_START_VALUES"
+          :disabled="!rememberHistory || !enableWatchStats"
+          @change="store.dispatch('updateStatsWeekStartsOn', $event)"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Privacy Settings.Remember Search History')"
+        :icon="['fas', 'magnifying-glass']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Remember Search History')"
-          compact
+          hide-label
           :default-value="rememberSearchHistory"
           setting-key="rememberSearchHistory"
           @change="updateRememberSearchHistory"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.General Settings.Enable Search Suggestions')"
+        :icon="['fas', 'list']"
+      >
         <FtToggleSwitch
-          v-if="USING_ELECTRON || IS_CAPACITOR"
+          :label="$t('Settings.General Settings.Enable Search Suggestions')"
+          hide-label
+          :default-value="enableSearchSuggestions"
+          setting-key="enableSearchSuggestions"
+          @change="updateEnableSearchSuggestions"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="USING_ELECTRON || IS_CAPACITOR"
+        :description="$t('Tooltips.General Settings.Remember Tab Navigation History')"
+        :title="$t('Settings.General Settings.Remember Tab Navigation History')"
+        :icon="['fas', 'clone']"
+      >
+        <FtToggleSwitch
           :label="$t('Settings.General Settings.Remember Tab Navigation History')"
+          hide-label
           :default-value="rememberTabNavigationHistory"
           setting-key="rememberTabNavigationHistory"
-          :tooltip="$t('Tooltips.General Settings.Remember Tab Navigation History')"
-          compact
           @change="updateRememberTabNavigationHistory"
         />
-      </div>
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.General Settings.External Link Handling')"
+        :title="$t('Settings.General Settings.External Link Handling.External Link Handling')"
+        :icon="['fas', 'up-right-from-square']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
+          :value="externalLinkHandling"
+          setting-key="externalLinkHandling"
+          :select-names="externalLinkHandlingNames"
+          :select-values="EXTERNAL_LINK_HANDLING_VALUES"
+          @change="updateExternalLinkHandling"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Settings.Privacy Settings.Internet Connectivity Checks Tooltip')"
+        :title="$t('Settings.Privacy Settings.Internet Connectivity Checks')"
+        :icon="['fas', 'wifi']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Internet Connectivity Checks')"
+          hide-label
+          :default-value="internetConnectivityChecks"
+          setting-key="internetConnectivityChecks"
+          @change="updateInternetConnectivityChecks"
+        />
+      </FtSettingsRow>
     </div>
     <div
       class="privacyRetention"
@@ -112,43 +189,6 @@
         />
       </FtFlexBox>
     </div>
-    <div class="settingsSelectGrid singleColumn">
-      <FtSelect
-        :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
-        :value="externalLinkHandling"
-        setting-key="externalLinkHandling"
-        :select-names="externalLinkHandlingNames"
-        :select-values="EXTERNAL_LINK_HANDLING_VALUES"
-        :icon="['fas', 'up-right-from-square']"
-        :tooltip="$t('Tooltips.General Settings.External Link Handling')"
-        size-to-content
-        @change="updateExternalLinkHandling"
-      />
-      <FtSelect
-        class="privacyWatchedProgressSelect"
-        :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
-        :value="watchedProgressSavingMode"
-        setting-key="watchedProgressSavingMode"
-        :select-names="watchedProgressSavingModeNames"
-        :select-values="WATCHED_PROGRESS_SAVING_MODE_VALUES"
-        :icon="['fas', 'bars-progress']"
-        :tooltip="$t('Settings.Privacy Settings.Watched Progress Saving Mode.Tooltip')"
-        :disabled="!rememberHistory"
-        size-to-content
-        @change="updateWatchedProgressSavingMode"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
-        :value="store.getters.getStatsWeekStartsOn"
-        setting-key="statsWeekStartsOn"
-        :select-names="weekStartNames"
-        :select-values="WEEK_START_VALUES"
-        :icon="['fas', 'chart-line']"
-        :disabled="!rememberHistory || !enableWatchStats"
-        @change="store.dispatch('updateStatsWeekStartsOn', $event)"
-      />
-    </div>
     <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
@@ -173,6 +213,7 @@ import { useI18n } from 'vue-i18n'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -373,23 +414,6 @@ function updateWatchedPercentageThreshold(value) {
 <style scoped>
 .privacyRetention {
   margin-block-start: 1.5em;
-}
-
-.privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {
-  position: relative;
-  inset-block: auto;
-  margin-block-start: -7px;
-}
-
-.privacyWatchedProgressSelect.select.outlined :deep(.selectLegend) {
-  max-inline-size: none;
-  margin-inline-end: 40px;
-}
-
-@media (any-pointer: coarse), (width <= 680px) {
-  .privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {
-    margin-block-start: -9px;
-  }
 }
 
 /* Day counts need little room. The gap leaves room for each field's icons. */

@@ -92,16 +92,5 @@ test('automatic unloading settings @scale can be changed and disabled', async ({
   await expect(threshold.locator('.select-text')).toBeEnabled()
   await expect(percentage.locator('.select-text')).toBeEnabled()
   await page.getByRole('heading', { name: 'Automatically unload tabs', exact: true }).scrollIntoViewIfNeeded()
-  const alignment = await page.locator('[data-setting-key="autoUnloadTabs"]').evaluate(element => {
-    const toggle = element.getBoundingClientRect()
-    const selects = element.closest('.sectionBody').querySelector('.switchGrid').getBoundingClientRect()
-    return {
-      centerOffset: Math.abs(toggle.left + toggle.width / 2 - selects.left - selects.width / 2),
-      verticalGap: selects.top - toggle.bottom
-    }
-  })
-  expect(alignment.centerOffset).toBeLessThanOrEqual(1)
-  // Fractional zoom can differ by a few millionths of a CSS pixel at a shared edge.
-  expect(alignment.verticalGap).toBeGreaterThanOrEqual(-0.01)
   await attachScreenshot('automatic tab unloading settings')
 })

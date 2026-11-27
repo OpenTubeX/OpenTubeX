@@ -6,28 +6,36 @@
     <p class="experimental-warning">
       {{ $t('Settings.Experimental Settings.Warning') }}
     </p>
-    <FtFlexBox>
-      <FtToggleSwitch
-        tooltip-position="top"
-        :label="$t('Settings.Experimental Settings.Replace HTTP Cache')"
-        compact
-        :default-value="replaceHttpCache"
-        :disabled="replaceHttpCacheLoading"
-        performance-impact-key="replaceHttpCache"
-        :tooltip="$t('Tooltips.Experimental Settings.Replace HTTP Cache')"
-        @change="handleToggleReplaceHttpCache"
-      />
-      <FtToggleSwitch
-        tooltip-position="top"
-        :label="$t('Settings.Experimental Settings.Disable Hardware Acceleration')"
-        compact
-        :default-value="disableHardwareAcceleration"
-        :disabled="disableHardwareAccelerationLoading"
-        performance-impact-key="disableHardwareAcceleration"
-        :tooltip="$t('Tooltips.Experimental Settings.Disable Hardware Acceleration')"
-        @change="handleToggleDisableHardwareAcceleration"
-      />
-    </FtFlexBox>
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="$t('Tooltips.Experimental Settings.Replace HTTP Cache')"
+        :title="$t('Settings.Experimental Settings.Replace HTTP Cache')"
+        :icon="['fas', 'database']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Experimental Settings.Replace HTTP Cache')"
+          hide-label
+          :default-value="replaceHttpCache"
+          :disabled="replaceHttpCacheLoading"
+          performance-impact-key="replaceHttpCache"
+          @change="handleToggleReplaceHttpCache"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.Experimental Settings.Disable Hardware Acceleration')"
+        :title="$t('Settings.Experimental Settings.Disable Hardware Acceleration')"
+        :icon="['fas', 'gauge-high']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Experimental Settings.Disable Hardware Acceleration')"
+          hide-label
+          :default-value="disableHardwareAcceleration"
+          :disabled="disableHardwareAccelerationLoading"
+          performance-impact-key="disableHardwareAcceleration"
+          @change="handleToggleDisableHardwareAcceleration"
+        />
+      </FtSettingsRow>
+    </div>
     <FtPrompt
       v-if="showRestartPrompt"
       autosize
@@ -45,7 +53,7 @@
 import { onMounted, ref } from 'vue'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 

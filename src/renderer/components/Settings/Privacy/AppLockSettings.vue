@@ -1,26 +1,35 @@
 <template>
   <FtSettingsSection :title="t('App Lock.Title')">
-    <FtFlexBox>
-      <FtToggleSwitch
-        :label="t('App Lock.Enable')"
-        :tooltip="t('App Lock.Enable Tooltip')"
-        :default-value="enabled"
-        :disabled="!loaded || busy"
-        controlled
-        @change="updateEnabled"
-      />
-    </FtFlexBox>
-    <FtFlexBox>
-      <FtSelect
-        :placeholder="t('App Lock.Lock After')"
-        :value="timeoutSeconds"
-        :select-names="timeoutNames"
-        :select-values="TIMEOUT_VALUES"
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="t('App Lock.Enable Tooltip')"
+        :title="t('App Lock.Enable')"
+        :icon="['fas', 'lock']"
+      >
+        <FtToggleSwitch
+          :label="t('App Lock.Enable')"
+          hide-label
+          :default-value="enabled"
+          :disabled="!loaded || busy"
+          controlled
+          @change="updateEnabled"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('App Lock.Lock After')"
         :icon="['fas', 'clock']"
-        :disabled="!enabled || busy"
-        @change="updateTimeout"
-      />
-    </FtFlexBox>
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('App Lock.Lock After')"
+          :value="timeoutSeconds"
+          :select-names="timeoutNames"
+          :select-values="TIMEOUT_VALUES"
+          :disabled="!enabled || busy"
+          @change="updateTimeout"
+        />
+      </FtSettingsRow>
+    </div>
   </FtSettingsSection>
 </template>
 
@@ -29,8 +38,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { registerPlugin } from '@capacitor/core'
 
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 

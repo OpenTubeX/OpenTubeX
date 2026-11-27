@@ -463,7 +463,7 @@
 }
 
 /* Layouts that line their selects up with other fields place them themselves. */
-.sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
+.sectionBody :deep(.select:only-child:not(
   .settingsSelectGrid > *,
   .generalSelectGrid > *,
   .settingsRowControl > *,

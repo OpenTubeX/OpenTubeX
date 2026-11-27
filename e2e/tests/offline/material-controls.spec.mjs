@@ -355,7 +355,7 @@ for (const { name, theme, width, height, scale, rtl } of [
       if (scale !== 100) await page.evaluate(() => window.ftElectron.setZoomFactor(1))
       await label.scrollIntoViewIfNeeded()
       const screenshot = testInfo.outputPath('material-switches.png')
-      await section.locator('.switchColumnGrid').first().screenshot({ path: screenshot })
+      await section.locator('.settingsRows').first().screenshot({ path: screenshot })
       await testInfo.attach('material-switches', { path: screenshot, contentType: 'image/png' })
     })
   })

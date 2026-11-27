@@ -3,94 +3,164 @@
     :title="$t('Settings.Subscription Settings.Subscription Settings')"
     :icon="['fas', 'subscriptions']"
   >
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="$t('Tooltips.Subscription Settings.Fetch Feed on Startup')"
+        :title="$t('Settings.Subscription Settings.Fetch Feed on Startup')"
+        :icon="['fas', 'power-off']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feed on Startup')"
+          hide-label
           :default-value="fetchSubscriptionsAutomatically"
           setting-key="fetchSubscriptionsAutomatically"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feed on Startup')"
-          compact
           @change="updateFetchSubscriptionsAutomatically"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="SUPPORTS_LOCAL_API"
+        :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
+        :title="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
+        :icon="['fas', 'gauge-high']"
+      >
         <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
           :label="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
+          hide-label
           :default-value="fastSubscriptionRefresh"
           setting-key="fastSubscriptionRefresh"
-          :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
-          compact
           @change="updateFastSubscriptionRefresh"
         />
-        <FtToggleSwitch
-          v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
-          :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
-          :default-value="enableClosedAppSubscriptionRefresh"
-          setting-key="enableClosedAppSubscriptionRefresh"
-          :tooltip="$t('Tooltips.Subscription Settings.Refresh Subscriptions While App Is Closed')"
-          compact
-          @change="updateEnableClosedAppSubscriptionRefresh"
-        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
+        :title="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
+        :icon="['fas', 'rss']"
+      >
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
+          hide-label
           :default-value="useRssFeeds"
           setting-key="useRssFeeds"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
-          compact
           @change="updateUseRssFeeds"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
+        :description="$t('Tooltips.Subscription Settings.Refresh Subscriptions While App Is Closed')"
+        :title="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
+        :icon="['fas', 'clock-rotate-left']"
+      >
         <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
-          :default-value="unsubscriptionPopupStatus"
-          setting-key="unsubscriptionPopupStatus"
-          compact
-          @change="updateUnsubscriptionPopupStatus"
+          :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
+          hide-label
+          :default-value="enableClosedAppSubscriptionRefresh"
+          setting-key="enableClosedAppSubscriptionRefresh"
+          @change="updateEnableClosedAppSubscriptionRefresh"
         />
-      </div>
-      <div class="switchColumn">
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="((IS_CAPACITOR && !IS_IOS) || IS_ELECTRON) && store.getters.getNotificationMode !== 'off'"
+        :tooltip="$t('Tooltips.Subscription Settings.Notify About New Uploads')"
+        :title="$t('Settings.Subscription Settings.Notify About New Uploads')"
+        :icon="['fas', 'bell']"
+      >
         <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show New Content Feed')"
-          :default-value="showNewSubscriptionFeed"
-          setting-key="showNewSubscriptionFeed"
-          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Feed')"
-          compact
-          @change="updateShowNewSubscriptionFeed"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
-          :default-value="showNewSubscriptionFeedIndicators"
-          setting-key="showNewSubscriptionFeedIndicators"
-          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
-          compact
-          @change="updateShowNewSubscriptionFeedIndicators"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
-          :default-value="showScheduledLiveStreamsFirst"
-          setting-key="showScheduledLiveStreamsFirst"
-          :tooltip="$t('Tooltips.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
-          compact
-          @change="updateShowScheduledLiveStreamsFirst"
-        />
-        <FtToggleSwitch
-          v-if="((IS_CAPACITOR && !IS_IOS) || IS_ELECTRON) && store.getters.getNotificationMode !== 'off'"
           :label="$t('Settings.Subscription Settings.Notify About New Uploads')"
+          hide-label
           :default-value="enableUploadNotifications"
           setting-key="enableUploadNotifications"
-          :tooltip="$t('Tooltips.Subscription Settings.Notify About New Uploads')"
-          compact
           @change="updateEnableUploadNotifications"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.Subscription Settings.Show New Content Feed')"
+        :title="$t('Settings.Subscription Settings.Show New Content Feed')"
+        :icon="['fas', 'list']"
+      >
         <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
+          :label="$t('Settings.Subscription Settings.Show New Content Feed')"
+          hide-label
+          :default-value="showNewSubscriptionFeed"
+          setting-key="showNewSubscriptionFeed"
+          @change="updateShowNewSubscriptionFeed"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
+        :title="$t('Settings.Subscription Settings.Show New Content Indicators')"
+        :icon="['fas', 'circle']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
+          hide-label
+          :default-value="showNewSubscriptionFeedIndicators"
+          setting-key="showNewSubscriptionFeedIndicators"
+          @change="updateShowNewSubscriptionFeedIndicators"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :tooltip="$t('Tooltips.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+        :title="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+        :icon="['fas', 'calendar-day']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+          hide-label
+          :default-value="showScheduledLiveStreamsFirst"
+          setting-key="showScheduledLiveStreamsFirst"
+          @change="updateShowScheduledLiveStreamsFirst"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="SUPPORTS_LOCAL_API"
+        :tooltip="$t('Tooltips.Subscription Settings.Show Collaborations From Other Channels')"
+        :title="$t('Settings.Subscription Settings.Show Collaborations From Other Channels')"
+        :icon="['fas', 'users']"
+      >
+        <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show Collaborations From Other Channels')"
+          hide-label
           :default-value="includeSubscriptionCollaborations"
           setting-key="includeSubscriptionCollaborations"
-          :tooltip="$t('Tooltips.Subscription Settings.Show Collaborations From Other Channels')"
-          compact
           @change="updateIncludeSubscriptionCollaborations"
         />
-      </div>
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
+        :icon="['fas', 'user-minus']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
+          hide-label
+          :default-value="unsubscriptionPopupStatus"
+          setting-key="unsubscriptionPopupStatus"
+          @change="updateUnsubscriptionPopupStatus"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="$t('Settings.Subscription Settings.Limit the number of videos displayed for each channel')"
+        :icon="['fas', 'list-ol']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Limit the number of videos displayed for each channel')"
+          hide-label
+          :default-value="onlyShowLatestFromChannel"
+          setting-key="onlyShowLatestFromChannel"
+          @change="updateOnlyShowLatestFromChannel"
+        />
+      </FtSettingsRow>
+    </div>
+    <div class="onlyShowLatestFromChannelNumber">
+      <FtSlider
+        :label="$t('Settings.Subscription Settings.To')"
+        :default-value="onlyShowLatestFromChannelNumber"
+        setting-key="onlyShowLatestFromChannelNumber"
+        :disabled="!onlyShowLatestFromChannel"
+        :min-value="1"
+        :max-value="useRssFeeds ? 15 : 30"
+        :step="1"
+        @change="updateOnlyShowLatestFromChannelNumber"
+      />
     </div>
     <div class="subscriptionChannelSettingsManager">
       <SubscriptionChannelSettings />
@@ -99,29 +169,6 @@
         :icon="['fas', 'users']"
         @click="openProfileManager"
       />
-    </div>
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Limit the number of videos displayed for each channel')"
-          :default-value="onlyShowLatestFromChannel"
-          setting-key="onlyShowLatestFromChannel"
-          compact
-          @change="updateOnlyShowLatestFromChannel"
-        />
-        <div class="onlyShowLatestFromChannelNumber">
-          <FtSlider
-            :label="$t('Settings.Subscription Settings.To')"
-            :default-value="onlyShowLatestFromChannelNumber"
-            setting-key="onlyShowLatestFromChannelNumber"
-            :disabled="!onlyShowLatestFromChannel"
-            :min-value="1"
-            :max-value="useRssFeeds ? 15 : 30"
-            :step="1"
-            @change="updateOnlyShowLatestFromChannelNumber"
-          />
-        </div>
-      </div>
     </div>
     <div
       class="autoRefreshIntervals"
@@ -201,6 +248,7 @@
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'

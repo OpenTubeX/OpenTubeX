@@ -3,40 +3,42 @@
     :title="t('Comments.Comments')"
     :icon="['fas', 'comment']"
   >
-    <div class="commentSettings">
-      <!-- Side by side when there is room, like the general switches. -->
-      <div class="commentSwitches switchColumnGrid">
-        <div class="switchColumn">
-          <FtToggleSwitch
-            :label="t('Settings.General Settings.Auto Load Comments.Label')"
-            :default-value="store.getters.getAutoLoadComments"
-            setting-key="autoLoadComments"
-            :compact="true"
-            :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
-            @change="store.dispatch('updateAutoLoadComments', $event)"
-          />
-        </div>
-        <div
-          v-if="canNotifyReplies"
-          class="switchColumn"
-        >
-          <FtToggleSwitch
-            :label="t('Settings.General Settings.Reply Notifications')"
-            :default-value="store.getters.getCommentReplyNotifications"
-            setting-key="commentReplyNotifications"
-            :compact="true"
-            :tooltip="t('Tooltips.General Settings.Reply Notifications')"
-            @change="updateReplyNotifications"
-          />
-        </div>
-      </div>
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="t('Settings.General Settings.Auto Load Comments.Tooltip')"
+        :title="t('Settings.General Settings.Auto Load Comments.Label')"
+        :icon="['fas', 'comment']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Auto Load Comments.Label')"
+          hide-label
+          :default-value="store.getters.getAutoLoadComments"
+          setting-key="autoLoadComments"
+          @change="store.dispatch('updateAutoLoadComments', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="canNotifyReplies"
+        :tooltip="t('Tooltips.General Settings.Reply Notifications')"
+        :title="t('Settings.General Settings.Reply Notifications')"
+        :icon="['fas', 'bell']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Reply Notifications')"
+          hide-label
+          :default-value="store.getters.getCommentReplyNotifications"
+          setting-key="commentReplyNotifications"
+          @change="updateReplyNotifications"
+        />
+      </FtSettingsRow>
+    </div>
+    <FtFlexBox v-if="canNotifyReplies && store.getters.getCommentReplyNotifications">
       <FtButton
-        v-if="canNotifyReplies && store.getters.getCommentReplyNotifications"
         :label="t('Settings.General Settings.Watched Comments')"
         :icon="['fas', 'bell']"
         @click="watchedCommentsOpen = true"
       />
-    </div>
+    </FtFlexBox>
     <WatchedCommentsPrompt
       v-if="watchedCommentsOpen"
       @close="watchedCommentsOpen = false"
@@ -49,6 +51,8 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import WatchedCommentsPrompt from './WatchedCommentsPrompt.vue'
@@ -67,5 +71,3 @@ function updateReplyNotifications(value) {
   if (process.env.IS_CAPACITOR && value) requestCapacitorNotificationPermission()
 }
 </script>
-
-<style scoped src="./CommentSettings.css" />

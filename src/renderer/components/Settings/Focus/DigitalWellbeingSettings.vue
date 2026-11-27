@@ -3,157 +3,209 @@
     :title="t('Settings.Distraction Free Settings.Sections.Digital Wellbeing')"
     hide-title
   >
-    <div class="wellbeingColumns">
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
-        :value="store.getters.getGrayscaleMode"
-        setting-key="grayscaleMode"
-        :select-names="grayscaleModeNames"
-        :select-values="GRAYSCALE_MODES"
-        :tooltip="t('Tooltips.Distraction Free Settings.Grayscale')"
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Grayscale')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
         :icon="['fas', 'eye']"
-        @change="store.dispatch('updateGrayscaleMode', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Apply Grayscale To')"
-        :value="store.getters.getGrayscaleScope"
-        setting-key="grayscaleScope"
-        :select-names="grayscaleScopeNames"
-        :select-values="GRAYSCALE_SCOPES"
-        :disabled="store.getters.getGrayscaleMode === 'off'"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
+          :value="store.getters.getGrayscaleMode"
+          setting-key="grayscaleMode"
+          :select-names="grayscaleModeNames"
+          :select-values="GRAYSCALE_MODES"
+          @change="store.dispatch('updateGrayscaleMode', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
         :tooltip="t('Tooltips.Distraction Free Settings.Apply Grayscale To')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Apply Grayscale To')"
         :icon="['fas', 'images']"
-        @change="store.dispatch('updateGrayscaleScope', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Watch Time Limit')"
-        :value="String(store.getters.getDailyWatchTimeLimit)"
-        setting-key="dailyWatchTimeLimit"
-        :select-names="DAILY_LIMIT_MINUTES.map(formatMinutesOption)"
-        :select-values="DAILY_LIMIT_MINUTES.map(String)"
-        :tooltip="t('Tooltips.Distraction Free Settings.Daily Watch Time Limit')"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Apply Grayscale To')"
+          :value="store.getters.getGrayscaleScope"
+          setting-key="grayscaleScope"
+          :select-names="grayscaleScopeNames"
+          :select-values="GRAYSCALE_SCOPES"
+          :disabled="store.getters.getGrayscaleMode === 'off'"
+          @change="store.dispatch('updateGrayscaleScope', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Daily Watch Time Limit')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Watch Time Limit')"
         :icon="['fas', 'clock']"
-        @change="store.dispatch('updateDailyWatchTimeLimit', Number($event))"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Count Watch Time From')"
-        :value="store.getters.getDailyWatchTimeLimitDevices"
-        setting-key="dailyWatchTimeLimitDevices"
-        :select-names="[t('Stats.All devices'), t('Settings.Sync Settings.This Device')]"
-        :select-values="LIMIT_DEVICES"
-        :disabled="store.getters.getDailyWatchTimeLimit === 0"
-        :tooltip="t('Tooltips.Distraction Free Settings.Count Watch Time From')"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Watch Time Limit')"
+          :value="String(store.getters.getDailyWatchTimeLimit)"
+          setting-key="dailyWatchTimeLimit"
+          :select-names="DAILY_LIMIT_MINUTES.map(formatMinutesOption)"
+          :select-values="DAILY_LIMIT_MINUTES.map(String)"
+          @change="store.dispatch('updateDailyWatchTimeLimit', Number($event))"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Count Watch Time From')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Count Watch Time From')"
         :icon="['fas', 'devices']"
-        @change="store.dispatch('updateDailyWatchTimeLimitDevices', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Shorts Limit')"
-        :value="String(store.getters.getDailyShortsLimit)"
-        setting-key="dailyShortsLimit"
-        :select-names="SHORTS_LIMIT_MINUTES.map(formatMinutesOption)"
-        :select-values="SHORTS_LIMIT_MINUTES.map(String)"
-        :tooltip="t('Tooltips.Distraction Free Settings.Daily Shorts Limit')"
-        :icon="['fas', 'clock']"
-        @change="store.dispatch('updateDailyShortsLimit', Number($event))"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.When a Limit Is Reached')"
-        :value="store.getters.getDailyLimitAction"
-        setting-key="dailyLimitAction"
-        :select-names="dailyLimitActionNames"
-        :select-values="DAILY_LIMIT_ACTIONS"
-        :disabled="store.getters.getDailyWatchTimeLimit === 0 && store.getters.getDailyShortsLimit === 0"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Count Watch Time From')"
+          :value="store.getters.getDailyWatchTimeLimitDevices"
+          setting-key="dailyWatchTimeLimitDevices"
+          :select-names="[t('Stats.All devices'), t('Settings.Sync Settings.This Device')]"
+          :select-values="LIMIT_DEVICES"
+          :disabled="store.getters.getDailyWatchTimeLimit === 0"
+          @change="store.dispatch('updateDailyWatchTimeLimitDevices', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Daily Shorts Limit')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Shorts Limit')"
+        :icon="['fas', 'clapperboard']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Shorts Limit')"
+          :value="String(store.getters.getDailyShortsLimit)"
+          setting-key="dailyShortsLimit"
+          :select-names="SHORTS_LIMIT_MINUTES.map(formatMinutesOption)"
+          :select-values="SHORTS_LIMIT_MINUTES.map(String)"
+          @change="store.dispatch('updateDailyShortsLimit', Number($event))"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
         :tooltip="t('Tooltips.Distraction Free Settings.When a Limit Is Reached')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.When a Limit Is Reached')"
         :icon="['fas', 'pause']"
-        @change="store.dispatch('updateDailyLimitAction', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Take a Break Reminder')"
-        :value="String(store.getters.getBreakReminderInterval)"
-        setting-key="breakReminderInterval"
-        :select-names="BREAK_INTERVAL_MINUTES.map(formatIntervalOption)"
-        :select-values="BREAK_INTERVAL_MINUTES.map(String)"
-        :tooltip="t('Tooltips.Distraction Free Settings.Take a Break Reminder')"
-        :icon="['fas', 'clock']"
-        @change="store.dispatch('updateBreakReminderInterval', Number($event))"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Break Reminder Action')"
-        :value="store.getters.getBreakReminderAction"
-        setting-key="breakReminderAction"
-        :select-names="dailyLimitActionNames"
-        :select-values="DAILY_LIMIT_ACTIONS"
-        :disabled="store.getters.getBreakReminderInterval === 0"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.When a Limit Is Reached')"
+          :value="store.getters.getDailyLimitAction"
+          setting-key="dailyLimitAction"
+          :select-names="dailyLimitActionNames"
+          :select-values="DAILY_LIMIT_ACTIONS"
+          :disabled="store.getters.getDailyWatchTimeLimit === 0 && store.getters.getDailyShortsLimit === 0"
+          @change="store.dispatch('updateDailyLimitAction', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Take a Break Reminder')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Take a Break Reminder')"
+        :icon="['fas', 'bell']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Take a Break Reminder')"
+          :value="String(store.getters.getBreakReminderInterval)"
+          setting-key="breakReminderInterval"
+          :select-names="BREAK_INTERVAL_MINUTES.map(formatIntervalOption)"
+          :select-values="BREAK_INTERVAL_MINUTES.map(String)"
+          @change="store.dispatch('updateBreakReminderInterval', Number($event))"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Break Reminder Action')"
         :icon="['fas', 'pause']"
-        @change="store.dispatch('updateBreakReminderAction', $event)"
-      />
-    </div>
-    <div class="wellbeingColumns">
-      <div class="switchColumn">
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Break Reminder Action')"
+          :value="store.getters.getBreakReminderAction"
+          setting-key="breakReminderAction"
+          :select-names="dailyLimitActionNames"
+          :select-values="DAILY_LIMIT_ACTIONS"
+          :disabled="store.getters.getBreakReminderInterval === 0"
+          @change="store.dispatch('updateBreakReminderAction', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Distraction Free Settings.Bedtime Reminder')"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Reminder')"
+        :icon="['fas', 'moon']"
+      >
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Reminder')"
-          :compact="true"
+          hide-label
           :default-value="bedtimeReminder"
           setting-key="bedtimeReminder"
-          :tooltip="t('Tooltips.Distraction Free Settings.Bedtime Reminder')"
           @change="store.dispatch('updateBedtimeReminder', $event)"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Start')"
+        :icon="['fas', 'clock']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Start')"
+          :value="store.getters.getBedtimeStart"
+          setting-key="bedtimeStart"
+          :select-names="bedtimeTimeNames"
+          :select-values="BEDTIME_TIMES"
+          @change="store.dispatch('updateBedtimeStart', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime End')"
+        :icon="['fas', 'sun']"
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime End')"
+          :value="store.getters.getBedtimeEnd"
+          setting-key="bedtimeEnd"
+          :select-names="bedtimeTimeNames"
+          :select-values="BEDTIME_TIMES"
+          @change="store.dispatch('updateBedtimeEnd', $event)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Wait Until the Video Ends')"
+        :icon="['fas', 'circle-play']"
+      >
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Wait Until the Video Ends')"
-          :compact="true"
+          hide-label
           :disabled="!bedtimeReminder"
           :default-value="store.getters.getBedtimeWaitForVideoEnd"
           setting-key="bedtimeWaitForVideoEnd"
           @change="store.dispatch('updateBedtimeWaitForVideoEnd', $event)"
         />
-      </div>
-      <div class="switchColumn">
+      </FtSettingsRow>
+      <FtSettingsRow
+        v-if="uploadNotificationsAvailable"
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Silence Upload Notifications at Bedtime')"
+        :icon="['fas', 'bell-slash']"
+      >
         <FtToggleSwitch
-          v-if="uploadNotificationsAvailable"
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Silence Upload Notifications at Bedtime')"
-          :compact="true"
+          hide-label
           :default-value="store.getters.getBedtimeSilenceNotifications"
           setting-key="bedtimeSilenceNotifications"
           @change="store.dispatch('updateBedtimeSilenceNotifications', $event)"
         />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Distraction Free Settings.Digital Wellbeing.Stop Autoplay at Bedtime and After the Daily Limit')"
+        :icon="['fas', 'autoplay']"
+      >
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Stop Autoplay at Bedtime and After the Daily Limit')"
-          :compact="true"
+          hide-label
           :default-value="store.getters.getStopAutoplayAtBedtimeAndLimit"
           setting-key="stopAutoplayAtBedtimeAndLimit"
           @change="store.dispatch('updateStopAutoplayAtBedtimeAndLimit', $event)"
         />
-      </div>
-    </div>
-    <div class="wellbeingColumns">
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Start')"
-        :value="store.getters.getBedtimeStart"
-        setting-key="bedtimeStart"
-        :select-names="bedtimeTimeNames"
-        :select-values="BEDTIME_TIMES"
-        :icon="['fas', 'moon']"
-        @change="store.dispatch('updateBedtimeStart', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime End')"
-        :value="store.getters.getBedtimeEnd"
-        setting-key="bedtimeEnd"
-        :select-names="bedtimeTimeNames"
-        :select-values="BEDTIME_TIMES"
-        :icon="['fas', 'moon']"
-        @change="store.dispatch('updateBedtimeEnd', $event)"
-      />
+      </FtSettingsRow>
     </div>
   </FtSettingsSection>
 </template>
@@ -162,6 +214,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
@@ -224,55 +277,3 @@ function formatIntervalOption(minutes) {
     : t('Settings.Distraction Free Settings.Digital Wellbeing.Every', { duration: formatWholeMinutes(t, minutes) })
 }
 </script>
-
-<style scoped>
-/* Every block shares two equal columns, so the selects, switches, and
-   bedtime selects below them start at the same edges. The selects fill
-   their column and keep room for all of their icons, so their fields end
-   at the same edge too. */
-.wellbeingColumns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 32px;
-  max-inline-size: calc(52rem + 40px);
-}
-
-.wellbeingColumns > .select.contentSized {
-  --select-indicator-space: calc(8px + 32px + 22px + 22px);
-
-  box-sizing: border-box;
-  inline-size: auto;
-  margin-inline: 0;
-
-  /* The column sets the width, so a narrow one shrinks the field instead
-     of pushing it under its icons. */
-  grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
-}
-
-.wellbeingColumns > .switchColumn {
-  align-items: start;
-}
-
-/* A label that wraps splits into even lines. */
-.wellbeingColumns :deep(.switch-label-text) {
-  text-wrap: balance;
-}
-
-/* Stacked, the fields keep as much room before them as their icons take
-   after them, so they are centered. */
-@container settings-content (width <= 680px) {
-  .wellbeingColumns {
-    grid-template-columns: minmax(0, 1fr);
-    max-inline-size: calc(26rem + 40px + 2 * 84px);
-  }
-
-  /* The room before gives way first when the column runs out of space. */
-  .wellbeingColumns > .select.contentSized {
-    margin-inline-start: clamp(
-      0px,
-      100% - 200px - var(--select-indicator-space) - var(--settings-marker-gutter, 0px),
-      var(--select-indicator-space) - var(--settings-marker-gutter, 0px)
-    );
-  }
-}
-</style>

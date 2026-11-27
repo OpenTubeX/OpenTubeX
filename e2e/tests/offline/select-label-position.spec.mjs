@@ -39,14 +39,14 @@ async function expectStableLabel(select) {
 }
 
 for (const [locale, label] of [
-  ['de-DE', 'Videofortschritt merken'],
+  ['de-DE', 'Standard-Medienformat'],
 ]) {
-  test.describe(`watched progress label in ${locale}`, () => {
+  test.describe(`media format label in ${locale}`, () => {
     test.use({ seed: { settings: { currentLocale: locale, baseTheme: 'dark' } } })
 
-    test('widens the watched progress select without clipping its label', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-      const privacy = await goToSettingsSection(page, 'privacy')
-      const select = privacy.getByRole('combobox', { name: label })
+    test('widens the media format select without clipping its label', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+      const playback = await goToSettingsSection(page, 'playback')
+      const select = playback.getByRole('combobox', { name: label })
       for (const width of [1600, 375]) {
         await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
           BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
@@ -66,7 +66,7 @@ for (const [locale, label] of [
         expect(bounds.right).toBeLessThanOrEqual(bounds.viewport)
         await expectStableLabel(select)
         if (uiScale === 100 && width === 1600) {
-          await page.screenshot({ path: testInfo.outputPath('watched-progress-label.png') })
+          await page.screenshot({ path: testInfo.outputPath('media-format-label.png') })
         }
       }
     })
