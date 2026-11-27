@@ -127,7 +127,7 @@ index a3596c9aa5af1236ec90588617fcf18685064397..260799ecd57290bed487401a8ee89c0e
  function BQ(a){if(a.h.addSeekBar)a.A=CQ.create(a.U,a),a.L.push(a.A);else{for(let b of a.M)b.classList.add("shaka-low-position");a=a.J;a.classList.contains("shaka-tooltips-on")&&a.classList.add("shaka-tooltips-low-position")}}function $P(a){var b=a.j.ownerDocument.activeElement,c=b&&a.M.some(d=>!d.classList.contains("shaka-hidden")&&d.contains(b));a.V.Ja();c&&a.ea&&MP(a.ea)&&(a.ea.setAttribute("aria-expanded","false"),a.ea.focus())}
  function aQ(a){var b=a.o?a.o.isPaused():!1,c=a.C.paused&&!a.O&&a.h.showUIOnPaused,d=a.i.classList.contains("shaka-keyboard-navigation");b||(!a.o||!a.o.isLinear())&&c||a.wc||d||DQ(a)?(a.i.getAttribute("shown")==null&&(TP(a),a.i.setAttribute("shown","true"),UP(a),VP(a)),a.jb.stop()):a.jb.aa(a.h.fadeDelay);a.wb()&&(a.P.classList.remove("shaka-tooltips-on"),a.J.classList.remove("shaka-tooltips-on"),a.Ua?.classList.remove("shaka-tooltips-on"))}
 -function cQ(a,b,c){a.l.B(b,"keydown",d=>{c()&&qQ(a,d)});a.l.B(b,"keyup",d=>{c()&&a.ba.delete(d.key)})}async function dQ(a){a.C&&a.C.readyState!=0&&!a.F.Wa()&&a.h.enableFullscreenOnRotation&&a.Od()&&(screen.orientation.type.includes("landscape")&&!a.ib()?await nQ(a):screen.orientation.type.includes("portrait")&&a.ib()&&await fQ(a))}function DQ(a){return window.matchMedia("hover: hover").matches?a.Pc.some(b=>b.matches(":hover")):!1}
-+function cQ(a,b,c){a.l.B(b,"keydown",d=>{c()&&qQ(a,d)});a.l.B(b,"keyup",d=>{c()&&a.ba.delete(d.key)})}async function dQ(a){a.C&&a.C.readyState!=0&&!a.F.Wa()&&a.h.enableFullscreenOnRotation&&a.Od()&&(screen.orientation.type.includes("landscape")&&!a.ib()?await nQ(a):screen.orientation.type.includes("portrait")&&a.ib()&&await fQ(a))}function DQ(a){return window.matchMedia("(hover: hover)").matches?a.j.querySelector(".shaka-show-controls-on-mouse-over:hover")!=null:!1}
++function cQ(a,b,c){a.l.B(b,"keydown",d=>{c()&&qQ(a,d)});a.l.B(b,"keyup",d=>{c()&&a.ba.delete(d.key)})}async function dQ(a){a.C&&a.C.readyState!=0&&!a.F.Wa()&&a.h.enableFullscreenOnRotation&&a.Od()&&(screen.orientation.type.includes("landscape")&&!a.ib()?await nQ(a):screen.orientation.type.includes("portrait")&&a.ib()&&await fQ(a))}function DQ(a){return window.matchMedia("(hover: hover)").matches?Array.from(a.j.querySelectorAll(".shaka-show-controls-on-mouse-over:hover")).some(b=>!b.closest(".shaka-hidden")&&b.getClientRects().length>0&&getComputedStyle(b).visibility!=="hidden"):!1}
  function HO(a,b,c=!1){a.A?.endMouseInteraction();c&&"fastSeek"in a.C?a.C.fastSeek(b):a.C.currentTime=b;TP(a)}function tQ(a,b){if(!(a.o&&a.o.isLinear()||a.m.nc())){var c=a.m.getVideoTracks().find(d=>d.active);c&&c.frameRate&&(a.A&&a.A.endMouseInteraction(),a.C.paused||a.C.pause(),TP(a),c=1/c.frameRate,b=a.Ec()+c*b,b>=0&&b<=a.m.ya().end&&a.C.currentTime!==b&&HO(a,b))}}
  function rQ(a,b){for(var c=a.j.ownerDocument.activeElement;c&&!a.M.some(d=>d==c);)c=c.parentElement;if(!c||c.classList.contains("shaka-hidden"))return!1;sQ(a,b,c);return!0}
  function sQ(a,b,c,d=!1){var e=a.j.ownerDocument.activeElement;c=Array.from(c.querySelectorAll("button, input, select, textarea, a[href], [tabindex]")).filter(h=>h.tabIndex>=0&&MP(h));if(c.length){var f=c[0],g=c[c.length-1];d&&!c.some(h=>h==e)?(b.preventDefault(),a.ba.has("Shift")?g.focus():f.focus()):a.ba.has("Shift")?e==f&&(b.preventDefault(),g.focus()):e==g&&(b.preventDefault(),f.focus())}}
@@ -457,7 +457,7 @@ index 8c8241b87db20ecd644649e3522f475533390db0..25f5ff2a9859ff5da0a0683d021447b2
        // This is primarily a touch-screen device, so the :hover query below
        // doesn't make sense.  In spite of this, the :hover query on an element
        // can still return true on such a device after a touch ends.
-@@ -2208,9 +2242,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2208,9 +2242,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        return false;
      }
  
@@ -466,12 +466,21 @@ index 8c8241b87db20ecd644649e3522f475533390db0..25f5ff2a9859ff5da0a0683d021447b2
 -    });
 +    // Query on each call, so that elements the app adds to the container
 +    // later (e.g. fullscreen overlays) count too.
-+    return this.videoContainer_.querySelector(
-+        '.shaka-show-controls-on-mouse-over:hover') != null;
++    // Skip hidden elements: Chromium can keep a stale :hover match on a menu
++    // after it becomes display:none under a stationary pointer.
++    for (const element of this.videoContainer_.querySelectorAll(
++        '.shaka-show-controls-on-mouse-over:hover')) {
++      if (!element.closest('.shaka-hidden') &&
++          element.getClientRects().length > 0 &&
++          getComputedStyle(element).visibility !== 'hidden') {
++        return true;
++      }
++    }
++    return false;
    }
  
    /**
-@@ -2869,22 +2904,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+@@ -2869,22 +2913,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
        this.seekBar_.setValue(this.video_.currentTime);
        this.seekBar_.update();
  
