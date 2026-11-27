@@ -7533,7 +7533,8 @@ function handlePause() {
   updateAutoPip()
   scheduleScrollMiniPlayerUpdate()
 
-  if (scrollMiniPlayerActive.value) {
+  // A pause event that arrives after playback resumed must not pin the controls.
+  if (scrollMiniPlayerActive.value && video_?.paused) {
     showScrollMiniPlayPause(false)
   }
 
