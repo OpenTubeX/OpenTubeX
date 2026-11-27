@@ -347,8 +347,7 @@
 }
 
 .settingsContent .section,
-.settingsContent :deep(.settingsSection),
-.settingsContent :deep(.sectionBody) {
+.settingsContent :deep(.settingsSection) {
   min-inline-size: 0;
   max-inline-size: 100%;
   inline-size: 100%;
