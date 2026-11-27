@@ -7457,7 +7457,9 @@ function handlePlay() {
   updateAutoPip()
   scheduleScrollMiniPlayerUpdate()
 
-  if (scrollMiniPlayerActive.value) {
+  // Paused mini players show their controls, so only restart their hide timer.
+  // Hidden ones docked after playback started, before this event arrived.
+  if (scrollMiniPlayerActive.value && scrollMiniPlayPauseVisible.value) {
     showScrollMiniPlayPause(true)
   }
 
