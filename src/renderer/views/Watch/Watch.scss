@@ -1302,11 +1302,15 @@
 
 /* Without native popover, the polyfill cannot use the top layer: the route's
    container would contain the fixed layout, and the route would stay below the
-   navigation bars, like it does in full window mode. */
-:global(.app.capacitorTabs > .routerView:has(.videoLayout.\:popover-open)) {
-  position: relative;
-  z-index: 1000;
-  container-type: normal;
+   navigation bars, like it does in full window mode. Only those WebViews get
+   the rule: with it, a class change anywhere in the page, such as Shaka
+   switching its options menu's views, restyles the route's descendants. */
+@supports not selector(:popover-open) {
+  :global(.app.capacitorTabs > .routerView:has(.videoLayout.\:popover-open)) {
+    position: relative;
+    z-index: 1000;
+    container-type: normal;
+  }
 }
 
 :global(.capacitorTabs .videoLayout:is(:popover-open, .\:popover-open)) {
