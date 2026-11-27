@@ -484,7 +484,7 @@ public class MobileTabSelectionTest {
                         "const viewport = document.querySelector('.app > .routerView').getBoundingClientRect();" +
                         "const rect = neighbor.getBoundingClientRect();" +
                         "return getComputedStyle(neighbor).display !== 'none' && rect.width === viewport.width &&" +
-                        "rect.left === viewport.left && neighbor.inert && neighbor.getAttribute('aria-hidden') === 'true'; })()"));
+                        "rect.left === viewport.left && neighbor.classList.contains('pageSwipePrewarm') && neighbor.getAttribute('aria-hidden') === 'true'; })()"));
                 evaluate(view, "window.pageSwipeOriginalAnimationSpeed = " + STORE + ".getters.getAnimationSpeed;" +
                     STORE + ".commit('setAnimationSpeed', 25)");
                 try {
@@ -601,6 +601,7 @@ public class MobileTabSelectionTest {
                             const other = [...document.querySelectorAll('.pageSwipePrewarm')]
                                 .find(page => page !== target);
                             const rect = target.getBoundingClientRect();
+                            const inert = [target.inert, other.inert];
                             target.inert = false;
                             other.inert = false;
                             other.style.pointerEvents = 'auto';
@@ -608,8 +609,7 @@ public class MobileTabSelectionTest {
                                 return document.elementFromPoint(rect.right - 30, rect.top + 30)
                                     ?.closest('.tabContent') === target;
                             } finally {
-                                target.inert = true;
-                                other.inert = true;
+                                [target.inert, other.inert] = inert;
                                 other.style.pointerEvents = '';
                             }
                         })()
