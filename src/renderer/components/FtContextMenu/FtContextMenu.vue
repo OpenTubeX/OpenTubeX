@@ -679,6 +679,12 @@ function positionSubmenu(eventOrContainer) {
         if (nearBottom) next.add(rowIndex)
         else next.delete(rowIndex)
         submenuAnchorBottom.value = next
+        const request = openRequest
+        nextTick().then(() => {
+          if (request !== openRequest || !submenu.isConnected) return
+          const scroller = submenu.querySelector('.submenuScroll')
+          if (scroller) restoreOverlayScrollTop(scroller, nearBottom ? scroller.scrollHeight : 0)
+        })
       }
     }
   }
