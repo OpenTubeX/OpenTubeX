@@ -100,8 +100,9 @@
   gap: 4px;
 }
 
-.channelErrorsRetryAll {
-  /* Sized like the icon buttons beside it, with the same 6px around its content, so the actions are evenly spaced */
+/* Sized like the icon buttons beside it, with the same 6px around its content, so the actions are evenly spaced.
+   Doubled to outrank FtButton's own margin and minimum sizes, including its larger ones on phones. */
+.channelErrorsRetryAll.channelErrorsRetryAll {
   --icon-width: 1em;
 
   min-inline-size: 0;
@@ -136,7 +137,7 @@
   }
 
   /* Leaves the room to the summary, the label stays the button's accessible name */
-  .channelErrorsRetryAll {
+  .channelErrorsRetryAll.channelErrorsRetryAll {
     position: relative;
     padding: 5px;
   }
