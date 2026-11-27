@@ -95,9 +95,15 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // default columns, a page that fits more or fewer cards per row would place it
 // on other cards, or past the end of a page that was shorter, so the grid
 // starts at the width it last had on the same page.
-const gridWidthKey = `${thumbnailSizeSetting}:${useRoute().path}`
-let gridWidth = getRememberedGridWidth(gridWidthKey)
+const route = useRoute()
+const getGridWidthKey = () => `${thumbnailSizeSetting}:${route.path}`
+let gridWidth = getRememberedGridWidth(getGridWidthKey())
 let measured = false
+// A page that stays mounted for another path, such as another channel, keeps
+// its grid and the width it has.
+watch(() => route.path, () => {
+  if (measured) rememberGridWidth(getGridWidthKey(), gridWidth)
+})
 let active = true
 let hidden = false
 // A hidden grid has nothing to measure, so it applies the change once shown.
@@ -409,7 +415,7 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
   const firstMeasurement = !measured
   if (contentWidth > 0) {
     measured = true
-    rememberGridWidth(gridWidthKey, contentWidth)
+    rememberGridWidth(getGridWidthKey(), contentWidth)
   }
 
   if (contentWidth !== gridWidth) {
