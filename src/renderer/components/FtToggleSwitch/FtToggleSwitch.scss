@@ -310,3 +310,16 @@
   padding-inline: 6px;
   text-transform: uppercase;
 }
+
+/* Without a visible label, only badges follow the track. The text, not the
+   label, makes room for the track, so badges that wrap start below it instead
+   of keeping its indent and squeezing into the space beside it. */
+.labelHidden:not(.trailing) {
+  .switch-label {
+    padding-inline-start: 6px;
+  }
+
+  .switch-label-main {
+    margin-inline-start: calc(var(--switch-track-width) + 12px);
+  }
+}
