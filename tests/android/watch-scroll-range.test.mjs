@@ -42,7 +42,8 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       const content = document.createElement('div')
       content.id = 'watch-scroll-history-fixture'
       content.style.height = '4000px'
-      document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(content)
+      // The page that Back returns to stays mounted before the current one.
+      document.querySelector('.tabContent[aria-hidden="false"] > .routerView:not(.retainedPage)').append(content)
       scrollTo(0, document.scrollingElement.scrollHeight)
       location.hash = '#/watch/jNQXAC9IVRw'
     })
