@@ -204,6 +204,7 @@ import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/ov
 import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 import { collapseSeparators } from '../../helpers/menuSeparators'
+import { getFullscreenLayer, onFullscreenLayerChange } from '../../helpers/fullscreenLayer'
 import { getWebContextMenuItems } from '../../helpers/webContextMenu'
 import { resolveSearchEngineFavicon } from '../../helpers/searchEngineFavicon'
 
@@ -211,6 +212,7 @@ const { t } = useI18n()
 const route = useRoute()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)
+let removeFullscreenListener = null
 const isOpen = ref(false)
 const items = ref([])
 const localItems = shallowRef(null)
@@ -278,7 +280,7 @@ const menuRows = computed(() => {
 })
 
 function updateFullscreenTarget() {
-  fullscreenTarget.value = document.fullscreenElement
+  fullscreenTarget.value = getFullscreenLayer()
 }
 
 const itemIcons = {
@@ -722,7 +724,7 @@ onMounted(() => {
   window.addEventListener('opentubex:context-menu', openLocalMenu)
   window.addEventListener('opentubex:close-context-menu', closeLocalMenu)
   document.addEventListener('pointerdown', close, true)
-  document.addEventListener('fullscreenchange', updateFullscreenTarget)
+  removeFullscreenListener = onFullscreenLayerChange(updateFullscreenTarget)
   window.addEventListener('blur', close)
   window.addEventListener('resize', close)
   window.addEventListener('keydown', handleKeydown, true)
@@ -735,7 +737,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('opentubex:context-menu', openLocalMenu)
   window.removeEventListener('opentubex:close-context-menu', closeLocalMenu)
   document.removeEventListener('pointerdown', close, true)
-  document.removeEventListener('fullscreenchange', updateFullscreenTarget)
+  removeFullscreenListener?.()
   window.removeEventListener('blur', close)
   window.removeEventListener('resize', close)
   window.removeEventListener('keydown', handleKeydown, true)

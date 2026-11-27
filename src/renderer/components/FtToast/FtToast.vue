@@ -84,6 +84,7 @@ import { Toaster, toast as sonner } from 'vue-sonner'
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { shouldUseProgressToast } from '../../helpers/progressPresentation'
 import { isImportantToast } from '../../helpers/toastImportance'
+import { getFullscreenLayer, onFullscreenLayerChange } from '../../helpers/fullscreenLayer'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
@@ -172,6 +173,7 @@ const indefiniteToastIds = new Set()
 const abortListeners = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
+let removeFullscreenListener = null
 const showConnectionStatus = computed(() => connectionState.value !== 'online' &&
   !(fullscreenTarget.value && connectionState.value === 'offline'))
 // Pages reserve room for the status bar.
@@ -337,7 +339,7 @@ const toastProgressRadius = computed(() => 16 * store.getters.getUiRoundness / 1
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
 function updateFullscreenTarget() {
-  fullscreenTarget.value = document.fullscreenElement
+  fullscreenTarget.value = getFullscreenLayer()
 }
 
 /**
@@ -639,7 +641,7 @@ onMounted(() => {
   trackFrontToast()
 
   ToastEventBus.addEventListener('toast-open', open)
-  document.addEventListener('fullscreenchange', updateFullscreenTarget)
+  removeFullscreenListener = onFullscreenLayerChange(updateFullscreenTarget)
   updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
@@ -651,7 +653,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
-  document.removeEventListener('fullscreenchange', updateFullscreenTarget)
+  removeFullscreenListener?.()
   stopProgressToastPointerTracking()
   persistentHolderResizeObserver?.disconnect()
   connectionResizeObserver?.disconnect()
