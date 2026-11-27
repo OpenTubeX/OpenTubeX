@@ -26,6 +26,7 @@
 
 <script setup>
 import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import store from '../../store/index'
 
@@ -40,6 +41,7 @@ import { getLastScrollY, getViewportWidth } from '../../helpers/viewport'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
 import { findAdjacentTileIndex, focusTile, getPageTiles, getTileDirection, isTileFocusable, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 import { isRendered } from '../../helpers/rendered'
+import { getRememberedGridWidth, rememberGridWidth } from '../../helpers/windowedList.js'
 
 const props = defineProps({
   appear: {
@@ -80,10 +82,6 @@ provide(tileKeyboardShortcutsKey, true)
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 const isTabPresented = inject(tabPresentedKey, null)
 const getCardSizes = styles => getThumbnailGridSizes(Number.parseFloat(styles['--thumbnail-grid-size']))
-// Only the thumbnails read this, so a new card width does not re-render the
-// grid. Until the grid is measured, cards have their default width.
-const gridThumbnailSizes = shallowRef(getCardSizes(getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting])))
-provide(thumbnailSizesKey, computed(() => props.grid ? gridThumbnailSizes.value : getThumbnailListSizes(store.state.settings[thumbnailSizeSetting])))
 const animationSpeedMultiplier = computed(() => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed))
 const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.value}ms`)
 
@@ -93,7 +91,19 @@ const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.
 // getBoundingClientRect() on every child, so any re-render of this component
 // costs a layout pass over the whole feed. Dragging the thumbnail size slider
 // emits an event per step, which turned that into hundreds of forced layouts.
-let gridWidth = 0
+// Back restores the page's scroll offset before the grid is measured. In the
+// default columns, a page that fits more or fewer cards per row would place it
+// on other cards, or past the end of a page that was shorter, so the grid
+// starts at the width it last had on the same page.
+const route = useRoute()
+const getGridWidthKey = () => `${thumbnailSizeSetting}:${route.path}`
+let gridWidth = getRememberedGridWidth(getGridWidthKey())
+let measured = false
+// A page that stays mounted for another path, such as another channel, keeps
+// its grid and the width it has.
+watch(() => route.path, () => {
+  if (measured) rememberGridWidth(getGridWidthKey(), gridWidth)
+})
 let active = true
 let hidden = false
 // A hidden grid has nothing to measure, so it applies the change once shown.
@@ -129,8 +139,8 @@ onDeactivated(() => {
 })
 
 // Only whether the width is known needs to reach the template, and that flips
-// just once, right after mount.
-const thumbnailSizeReady = ref(false)
+// at most once, right after mount.
+const thumbnailSizeReady = ref(gridWidth > 0)
 
 // While the container itself is being sized or resized (initial layout or
 // window resize), the FLIP move transition must not run — it should only
@@ -176,14 +186,8 @@ function getMoveClass() {
 
 const fullWidth = computed(() => store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth')
 
-function applyThumbnailSizeStyles() {
-  const element = gridElement.value?.$el
-
-  if (!element) {
-    return
-  }
-
-  const styles = getThumbnailGridStyles(
+function getGridStyles() {
+  return getThumbnailGridStyles(
     store.state.settings[thumbnailSizeSetting],
     gridWidth,
     getViewportWidth(),
@@ -191,7 +195,22 @@ function applyThumbnailSizeStyles() {
     getGridColumns(thumbnailSizeSetting),
     getUiDensityScale(store.state.settings.uiDensity)
   )
+}
 
+// Only the thumbnails read this, so a new card width does not re-render the
+// grid. Until the grid is measured, cards have the width the grid last had on
+// the page, or else their default width.
+const gridThumbnailSizes = shallowRef(getCardSizes(getGridStyles()))
+provide(thumbnailSizesKey, computed(() => props.grid ? gridThumbnailSizes.value : getThumbnailListSizes(store.state.settings[thumbnailSizeSetting])))
+
+function applyThumbnailSizeStyles() {
+  const element = gridElement.value?.$el
+
+  if (!element) {
+    return
+  }
+
+  const styles = getGridStyles()
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
   }
@@ -392,13 +411,19 @@ function handleWindowScroll() {
 function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
   const element = gridElement.value?.$el
   if (!element) return
+  // A grid without a width, such as in a hidden page, has not been measured.
+  const firstMeasurement = !measured
+  if (contentWidth > 0) {
+    measured = true
+    rememberGridWidth(getGridWidthKey(), contentWidth)
+  }
 
   if (contentWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
     // page that was scrolled to its end above the new end. This includes the
     // first measurement, when a grid replaces a list at the end of the page.
     // Resize observations run after layout and any restored scroll position.
-    if (gridWidth === 0) updatePageAtBottom()
+    if (firstMeasurement) updatePageAtBottom()
     const keepBottom = pageAtBottom && contentWidth > 0 && !element.closest('[inert], [aria-hidden="true"]')
     suppressMoveTransition = true
     clearTimeout(suppressResetTimeout)
@@ -420,6 +445,8 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     // updates whether the page is at its end.
     return
   }
+  // A grid that started at its remembered width shows the slider limit now.
+  if (firstMeasurement) updateGridSliderLimit()
   if (viewportCrossedPhoneWidth) {
     // Applies the phone column minimum to a constrained grid.
     applyThumbnailSizeStyles()
@@ -447,6 +474,7 @@ onMounted(() => {
   inNewFeed = gridElement.value.$el.closest('.newFeed') !== null
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
   phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
+  if (gridWidth > 0) applyThumbnailSizeStyles()
 
   resizeObserver = new ResizeObserver(([entry]) => {
     const width = entry.contentRect.width
