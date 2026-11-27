@@ -283,34 +283,63 @@ function createHiddenContentSettle() {
   return { settling, settle, stop }
 }
 
-// A neighbor kept for page swipes settles before it hides, so a swipe shows
-// it laid out like a background tab.
+// A neighbor kept for page swipes and the page behind Watch settle when they
+// hide, and again when their content changes or the window resizes, so a
+// swipe or the dock gesture shows them laid out.
 const { settling: prewarmSettling, settle: settlePrewarm, stop: stopPrewarmSettle } = createHiddenContentSettle()
 watch(isPrewarmed, prewarmed => {
   if (prewarmed) settlePrewarm()
   else stopPrewarmSettle()
-})
+}, { immediate: true })
 
-// The page behind Watch settles when Watch hides it, and again when it
-// changes or the window resizes, so the dock gesture shows it laid out and
-// can restore its scroll position.
 const isBehindWatch = computed(() => isWatchRoute.value && !watchPreviewing.value)
 const { settling: behindWatchSettling, settle: settleBehindWatch, stop: stopBehindWatchSettle } = createHiddenContentSettle()
-let behindWatchObserver = null
-function stopObservingBehindWatch() {
-  behindWatchObserver?.disconnect()
-  window.removeEventListener('resize', settleBehindWatch)
-}
 watch([isBehindWatch, currentPageKey, browsingInitialized], ([behindWatch]) => {
-  stopObservingBehindWatch()
-  stopBehindWatchSettle()
-  const page = behindWatch && HIDES_WITH_CONTENT_VISIBILITY && tabContentRef.value?.querySelector(':scope > .browsingBehindWatch')
-  if (!page) return
-  behindWatchObserver ??= new MutationObserver(settleBehindWatch)
-  behindWatchObserver.observe(page, { childList: true, characterData: true, subtree: true })
-  window.addEventListener('resize', settleBehindWatch)
+  if (!behindWatch) {
+    stopBehindWatchSettle()
+    return
+  }
+  // Like inert did, Watch takes focus from the page it hides, such as from
+  // the video link that opened it, which stays rendered while it settles.
+  const focused = document.activeElement
+  if (HIDES_WITH_CONTENT_VISIBILITY && focused instanceof HTMLElement && tabContentRef.value?.contains(focused) &&
+    !focused.closest('.watchPreviewHost')) {
+    focused.blur()
+  }
   settleBehindWatch()
-}, { flush: 'post' })
+}, { immediate: true })
+
+/** @param {MutationRecord} record */
+function changesPageBehindWatch(record) {
+  // Watch changes as it plays. Only the page behind it, which an async route
+  // component can also replace, counts.
+  if (record.target === tabContentRef.value) {
+    return [...record.addedNodes].some(node => node instanceof Element && node.classList.contains('browsingBehindWatch'))
+  }
+  const element = record.target instanceof Element ? record.target : record.target.parentElement
+  return element?.closest('.browsingBehindWatch') != null
+}
+/** @param {MutationRecord[]} [records] none for a resize */
+function settleChangedHiddenContent(records) {
+  if (isPrewarmed.value) settlePrewarm()
+  if (isBehindWatch.value && (!records || records.some(changesPageBehindWatch))) settleBehindWatch()
+}
+function settleResizedHiddenContent() {
+  settleChangedHiddenContent()
+}
+let hiddenContentObserver = null
+function stopObservingHiddenContent() {
+  hiddenContentObserver?.disconnect()
+  window.removeEventListener('resize', settleResizedHiddenContent)
+}
+const observesHiddenContent = computed(() => HIDES_WITH_CONTENT_VISIBILITY && (isPrewarmed.value || isBehindWatch.value))
+watch([observesHiddenContent, tabContentRef], ([observes, root]) => {
+  stopObservingHiddenContent()
+  if (!observes || !root) return
+  hiddenContentObserver ??= new MutationObserver(settleChangedHiddenContent)
+  hiddenContentObserver.observe(root, { childList: true, characterData: true, subtree: true })
+  window.addEventListener('resize', settleResizedHiddenContent)
+}, { flush: 'post', immediate: true })
 
 // Background tabs, settled neighbors, retained pages and the page behind
 // Watch keep their layout, so their rows report no resize when shown.
@@ -563,7 +592,7 @@ onBeforeUnmount(() => {
   lifecycleRevision += 1
   stopPrewarmSettle()
   stopBehindWatchSettle()
-  stopObservingBehindWatch()
+  stopObservingHiddenContent()
   disposeMountedContent().catch(error => {
     console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
   })
@@ -846,8 +875,10 @@ function cancelLoaderSettle() {
    rendering them. Toggling an inherited property such as pointer-events on
    each neighbor change, and on the tab a swipe lands on, would restyle every
    element of those tabs. */
-.pageSwipeWarm {
-  content-visibility: hidden;
+@supports (content-visibility: hidden) and selector(:has(*)) and (not (font: -apple-system-body)) {
+  .pageSwipeWarm {
+    content-visibility: hidden;
+  }
 }
 
 /* The thumbnail morph names every player (themes.css). A neighbor's player
