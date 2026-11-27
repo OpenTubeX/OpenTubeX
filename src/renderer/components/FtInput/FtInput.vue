@@ -44,8 +44,8 @@
         @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
         @click="handleNativeClick"
         @input="handleInput"
-        @focus="handleFocus"
-        @blur="handleInputBlur"
+        @focus="handleFocus(); updateInputSelection()"
+        @blur="handleInputBlur(); updateInputSelection()"
         @keydown="handleKeyDown"
         @scroll="highlightsRef && (highlightsRef.scrollTop = $event.target.scrollTop)"
       />
@@ -579,9 +579,14 @@ const highlightsRef = useTemplateRef('highlightsRef')
 // The highlights draw over the textarea, so they draw its selected text too.
 const inputSelection = ref({ start: 0, end: 0 })
 function updateInputSelection() {
+  if (props.highlights.length === 0) return
   const input = inputRef.value
   const focused = input != null && input === document.activeElement
-  inputSelection.value = focused ? { start: input.selectionStart, end: input.selectionEnd } : { start: 0, end: 0 }
+  const start = focused ? input.selectionStart : 0
+  const end = focused ? input.selectionEnd : 0
+  if (start !== inputSelection.value.start || end !== inputSelection.value.end) {
+    inputSelection.value = { start, end }
+  }
 }
 // Text controls fire selectionchange at themselves in Chromium, and at the document in older engines.
 onMounted(() => document.addEventListener('selectionchange', updateInputSelection, true))
@@ -600,11 +605,13 @@ const highlightSegments = computed(() => {
     ...props.highlights.flatMap(({ start, end }) => [start, end])
   ])].filter(index => index <= text.length).sort((a, b) => a - b)
   const segments = []
+  let rangeIndex = 0
   for (let i = 0; i < boundaries.length - 1; i++) {
     const start = boundaries[i]
+    while (rangeIndex < props.highlights.length && props.highlights[rangeIndex].end <= start) rangeIndex++
     segments.push({
       text: text.slice(start, boundaries[i + 1]),
-      highlighted: props.highlights.some(range => start >= range.start && start < range.end),
+      highlighted: rangeIndex < props.highlights.length && start >= props.highlights[rangeIndex].start,
       selected: start >= selectionStart && start < selectionEnd
     })
   }
@@ -1023,12 +1030,10 @@ function handleFocusOut(event) {
 }
 
 function handleInputBlur() {
-  updateInputSelection()
   emit('blur', inputData.value)
 }
 
 function handleFocus() {
-  updateInputSelection()
   emit('focus')
   searchState.showOptions = true
 }
