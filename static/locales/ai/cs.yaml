@@ -1478,6 +1478,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Tato záloha obsahuje také data {count} samostatného profilu, která se obnoví do tohoto profilu. | Tato záloha obsahuje také data {count} samostatných profilů, která se obnoví do těchto profilů. | Tato záloha obsahuje také data {count} samostatných profilů, která se obnoví do těchto profilů."
     Subscription cache file: "Tento soubor obsahuje jen mezipaměť videí z vašich odběrů, ne samotné kanály. Vyberte místo něj profiles.db nebo export odběrů."
+    Not a NewPipe backup: "Tento soubor ZIP není záloha NewPipe."
     Settings could not be imported: "Nastavení se nepodařilo importovat"
     Some settings could not be imported: "Některá nastavení se nepodařilo importovat (selhalo {failed} z {total})"
     Scheduled backups: "Plánované zálohy"
@@ -1523,10 +1524,10 @@ Settings:
     Profile Directory: Složka profilu
     Open Profile Directory: Otevřít složku profilu
     Invalid JSON row, skipping item: Neplatný JSON na řádku {row}, položka se přeskočí
-    Import subscriptions formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), záloha LibreTube nebo export FreeTube (.json)'
-    Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), záloha NewPipe (.zip), záloha LibreTube nebo export FreeTube (.json)'
+    Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json), Invidious (.json), záloha NewPipe (.zip)'
+    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), záloha NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha NewPipe (.zip), záloha LibreTube (.json)'
     Channel playback speeds: "Rychlosti přehrávání kanálů"
     Import channel playback speeds: "Importovat rychlosti přehrávání kanálů"
     Channel playback speeds file: "Soubor s rychlostmi přehrávání kanálů"

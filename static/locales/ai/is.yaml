@@ -1480,6 +1480,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Þetta afrit inniheldur einnig gögn {count} aðskilins notandasniðs, sem eru endurheimt í það notandasnið. | Þetta afrit inniheldur einnig gögn {count} aðskilinna notandasniða, sem eru endurheimt í þau notandasnið."
     Subscription cache file: "Þessi skrá geymir aðeins myndskeið úr áskriftunum þínum í skyndiminni, ekki rásirnar. Veldu frekar profiles.db eða útflutning áskrifta."
+    Not a NewPipe backup: "Þessi ZIP-skrá er ekki öryggisafrit NewPipe."
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
     Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"
     Scheduled backups: "Áætluð öryggisafrit"
@@ -1526,10 +1527,10 @@ Settings:
     Open Profile Directory: Opna möppu notandasniðs
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
-    Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
-    Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit NewPipe (.zip), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
+    Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json), Invidious (.json), öryggisafrit NewPipe (.zip)'
+    Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), öryggisafrit NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit NewPipe (.zip), öryggisafrit LibreTube (.json)'
     Channel playback speeds: "Spilunarhraði rása"
     Import channel playback speeds: "Flytja inn spilunarhraða rása"
     Channel playback speeds file: "Skrá með spilunarhraða rása"

@@ -1478,6 +1478,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horretan leheneratzen dira. | Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horietan leheneratzen dira."
     Subscription cache file: "Fitxategi honek zure harpidetzetako bideoak soilik gordetzen ditu cachean, ez kanalak. Aukeratu profiles.db edo harpidetzen esportazio bat."
+    Not a NewPipe backup: "ZIP fitxategi hau ez da NewPipe babeskopia bat."
     Settings could not be imported: "Ezin izan dira ezarpenak inportatu"
     Some settings could not be imported: "Ezin izan dira ezarpen guztiak inportatu ({total}etik {failed} huts egin dute)"
     Scheduled backups: "Programatutako babeskopiak"
@@ -1523,10 +1524,10 @@ Settings:
     Profile Directory: Profilaren direktorioa
     Open Profile Directory: Ireki profilaren direktorioa
     Invalid JSON row, skipping item: '{row}. errenkadako JSONa ez da baliozkoa; elementua saltatzen'
-    Import subscriptions formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube babeskopia edo FreeTube esportazioa (.json)'
-    Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json), Invidious (.json)'
-    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe babeskopia (.zip), LibreTube babeskopia edo FreeTube esportazioa (.json)'
+    Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json), Invidious (.json), NewPipe babeskopia (.zip)'
+    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe babeskopia (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe babeskopia (.zip), LibreTube babeskopia (.json)'
     Channel playback speeds: "Kanalen erreprodukzio-abiadurak"
     Import channel playback speeds: "Inportatu kanalen erreprodukzio-abiadurak"
     Channel playback speeds file: "Kanalen erreprodukzio-abiaduren fitxategia"

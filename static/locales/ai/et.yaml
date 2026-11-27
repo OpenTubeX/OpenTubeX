@@ -1478,6 +1478,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse sellesse profiili. | See varukoopia sisaldab ka {count} eraldi profiili andmeid, mis taastatakse neisse profiilidesse."
     Subscription cache file: "See fail puhverdab ainult sinu tellimuste videoid, mitte kanaleid. Vali selle asemel profiles.db või tellimuste eksport."
+    Not a NewPipe backup: "See ZIP-fail ei ole NewPipe’i varukoopia."
     Settings could not be imported: "Seadeid ei õnnestunud importida"
     Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"
     Scheduled backups: "Ajastatud varukoopiad"
@@ -1523,10 +1524,10 @@ Settings:
     Profile Directory: Profiilikaust
     Open Profile Directory: Ava profiilikaust
     Invalid JSON row, skipping item: Rea {row} JSON on vigane, üksus jäetakse vahele
-    Import subscriptions formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube’i varukoopia või FreeTube’i eksport (.json)'
-    Import history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube’i varukoopia (.json), Invidious (.json)'
-    Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), NewPipe’i varukoopia (.zip), LibreTube’i varukoopia või FreeTube’i eksport (.json)'
+    Import history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube’i varukoopia (.json), Invidious (.json), NewPipe’i varukoopia (.zip)'
+    Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), NewPipe’i varukoopia (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), NewPipe’i varukoopia (.zip), LibreTube’i varukoopia (.json)'
     Channel playback speeds: "Kanalite esituskiirused"
     Import channel playback speeds: "Impordi kanalite esituskiirused"
     Channel playback speeds file: "Kanalite esituskiiruste fail"

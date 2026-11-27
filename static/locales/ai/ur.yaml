@@ -1544,6 +1544,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "اس بیک اپ میں {count} الگ پروفائل کا ڈیٹا بھی شامل ہے، جو اسی پروفائل میں بحال کیا جائے گا۔ | اس بیک اپ میں {count} الگ پروفائلز کا ڈیٹا بھی شامل ہے، جو انہی پروفائلز میں بحال کیا جائے گا۔"
     Subscription cache file: "یہ فائل صرف آپ کی سبسکرپشنز کی ویڈیوز کو کیش کرتی ہے، چینلز کو نہیں۔ اس کے بجائے profiles.db یا سبسکرپشنز کی ایکسپورٹ منتخب کریں۔"
+    Not a NewPipe backup: "یہ ZIP فائل NewPipe بیک اپ نہیں ہے۔"
     Settings could not be imported: "ترتیبات درآمد نہیں کی جا سکیں"
     Some settings could not be imported: "تمام ترتیبات درآمد نہیں کی جا سکیں ({total} میں سے {failed} ناکام)"
     Scheduled backups: شیڈول شدہ بیک اپس
@@ -1598,10 +1599,10 @@ Settings:
     Setting object has insufficient data, skipping item: سیٹنگ آبجیکٹ میں ناکافی ڈیٹا ہے، آئٹم چھوڑا جا رہا ہے
     Unknown setting key: 'نامعلوم سیٹنگ کلید: {key}'
     Non-transferable setting key: 'ناقابل منتقلی سیٹنگ کلید: {key}'
-    Import subscriptions formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، LibreTube بیک اپ یا FreeTube ایکسپورٹ (.json)'
-    Import history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، LibreTube بیک اپ (.json)، Invidious (.json)'
-    Import playlists formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)'
-    Import search history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Import subscriptions formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، NewPipe بیک اپ (.zip)، LibreTube بیک اپ یا FreeTube ایکسپورٹ (.json)'
+    Import history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، LibreTube بیک اپ (.json)، Invidious (.json)، NewPipe بیک اپ (.zip)'
+    Import playlists formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)، NewPipe بیک اپ (.zip)، LibreTube (.json)، Piped (.json)'
+    Import search history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، NewPipe بیک اپ (.zip)، LibreTube بیک اپ (.json)'
     Channel playback speeds: چینل پلے بیک اسپیڈز
     Import channel playback speeds: چینل پلے بیک اسپیڈز امپورٹ کریں
     Channel playback speeds file: چینل پلے بیک اسپیڈز فائل

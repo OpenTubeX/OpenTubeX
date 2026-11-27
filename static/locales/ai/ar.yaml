@@ -1492,6 +1492,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملف شخصي منفصل، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات ملف شخصي منفصل واحد ({count})، وستُستعاد إلى ذلك الملف الشخصي. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات ملفين شخصيين منفصلين ({count})، وستُستعاد إلى هذين الملفين الشخصيين. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملفات شخصية منفصلة، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملفًا شخصيًا منفصلًا، وستُستعاد إلى تلك الملفات الشخصية. | تحتوي هذه النسخة الاحتياطية أيضًا على بيانات {count} ملف شخصي منفصل، وستُستعاد إلى تلك الملفات الشخصية."
     Subscription cache file: "يخزّن هذا الملف مقاطع الفيديو من اشتراكاتك مؤقتًا فقط، وليس القنوات. اختر profiles.db أو ملف تصدير للاشتراكات بدلًا منه."
+    Not a NewPipe backup: "ملف ZIP هذا ليس نسخة احتياطية من NewPipe."
     Settings could not be imported: "تعذّر استيراد الإعدادات"
     Some settings could not be imported: "تعذّر استيراد بعض الإعدادات (فشل {failed} من {total})"
     Scheduled backups: "النسخ الاحتياطية المجدولة"
@@ -1546,10 +1547,10 @@ Settings:
     Setting object has insufficient data, skipping item: لا يحتوي كائن الإعداد على بيانات كافية، مما يؤدي إلى تخطي العنصر
     Unknown setting key: 'مفتاح الإعداد غير معروف: {key}'
     Non-transferable setting key: 'مفتاح الإعداد غير القابل للتحويل: {key}'
-    Import subscriptions formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، أو YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، النسخ الاحتياطي LibreTube أو تصدير FreeTube (.json)'
-    Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)، وInvidious (.json)'
-    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.csv)، وInvidious (.json)'
-    Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Import subscriptions formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، أو YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، النسخ الاحتياطي NewPipe (.zip)، النسخ الاحتياطي LibreTube أو تصدير FreeTube (.json)'
+    Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)، وInvidious (.json)، والنسخ الاحتياطي NewPipe (.zip)'
+    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.csv)، وInvidious (.json)، والنسخ الاحتياطي NewPipe (.zip)، وLibreTube (.json)، وPiped (.json)'
+    Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، النسخ الاحتياطي NewPipe (.zip)، النسخ الاحتياطي LibreTube (.json)'
     Channel playback speeds: "سرعات تشغيل القنوات"
     Import channel playback speeds: "استيراد سرعات تشغيل القنوات"
     Channel playback speeds file: "ملف سرعات تشغيل القنوات"

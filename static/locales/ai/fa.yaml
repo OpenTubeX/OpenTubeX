@@ -1518,6 +1518,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "این پشتیبان شامل داده‌های {count} نمایهٔ جدا نیز هست که در همان نمایه بازیابی می‌شود. | این پشتیبان شامل داده‌های {count} نمایهٔ جدا نیز هست که در همان نمایه‌ها بازیابی می‌شوند."
     Subscription cache file: "این فایل فقط ویدیوهای اشتراک‌های شما را در حافظهٔ پنهان نگه می‌دارد، نه خود کانال‌ها را. به‌جای آن profiles.db یا یک خروجی اشتراک‌ها را انتخاب کنید."
+    Not a NewPipe backup: "این فایل ZIP پشتیبان NewPipe نیست."
     Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
     Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"
     Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"
@@ -1578,10 +1579,10 @@ Settings:
     Setting object has insufficient data, skipping item: داده‌های شیء تنظیمات کافی نیست؛ مورد نادیده گرفته شد
     Unknown setting key: 'کلید تنظیمات ناشناخته: {key}'
     Non-transferable setting key: 'کلید تنظیمات انتقال‌ناپذیر: {key}'
-    Import subscriptions formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، پشتیبان LibreTube یا خروجی FreeTube (.json)'
-    Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)، Invidious (.json)'
-    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)'
-    Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Import subscriptions formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، پشتیبان NewPipe (.zip)، پشتیبان LibreTube یا خروجی FreeTube (.json)'
+    Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)، Invidious (.json)، پشتیبان NewPipe (.zip)'
+    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)، پشتیبان NewPipe (.zip)، LibreTube (.json)، Piped (.json)'
+    Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان NewPipe (.zip)، پشتیبان LibreTube (.json)'
     Channel playback speeds: "سرعت‌های پخش کانال‌ها"
     Import channel playback speeds: "وارد کردن سرعت‌های پخش کانال‌ها"
     Channel playback speeds file: "فایل سرعت‌های پخش کانال‌ها"

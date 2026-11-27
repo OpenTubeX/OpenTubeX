@@ -1482,6 +1482,7 @@ Settings:
   Data Settings:
     Backup separate profile data: "Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffil hwnnw. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} broffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} phroffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny. | Mae'r copi wrth gefn hwn hefyd yn cynnwys data {count} proffil ar wahân, sy'n cael ei adfer i'r proffiliau hynny."
     Subscription cache file: "Mae'r ffeil hon ond yn storio fideos o'ch tanysgrifiadau, nid y sianeli. Dewiswch profiles.db neu allforiad tanysgrifiadau yn lle."
+    Not a NewPipe backup: "Nid copi wrth gefn NewPipe yw’r ffeil ZIP hon."
     Settings could not be imported: "Methu mewnforio'r gosodiadau"
     Some settings could not be imported: "Methu mewnforio pob gosodiad ({failed} o {total} wedi methu)"
     Scheduled backups: "Copïau wrth gefn wedi’u hamserlennu"
@@ -1527,10 +1528,10 @@ Settings:
     Profile Directory: Cyfeiriadur y proffil
     Open Profile Directory: Agor cyfeiriadur y proffil
     Invalid JSON row, skipping item: JSON annilys yn rhes {row}; yn hepgor yr eitem
-    Import subscriptions formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copi wrth gefn LibreTube neu allforyn FreeTube (.json)'
-    Import history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn LibreTube (.json), Invidious (.json)'
-    Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
-    Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Import subscriptions formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copi wrth gefn NewPipe (.zip), copi wrth gefn LibreTube neu allforyn FreeTube (.json)'
+    Import history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn LibreTube (.json), Invidious (.json), copi wrth gefn NewPipe (.zip)'
+    Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json), copi wrth gefn NewPipe (.zip), LibreTube (.json), Piped (.json)'
+    Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn NewPipe (.zip), copi wrth gefn LibreTube (.json)'
     Channel playback speeds: "Cyflymderau chwarae sianeli"
     Import channel playback speeds: "Mewnforio cyflymderau chwarae sianeli"
     Channel playback speeds file: "Ffeil cyflymderau chwarae sianeli"
