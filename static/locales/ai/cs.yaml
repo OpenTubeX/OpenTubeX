@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Práh pro odebrání"
   Removal threshold Tooltip: "Videa se odeberou po dosažení vybraného procenta, pokud do konce nezbývají více než 2 minuty. Při 0 % se odeberou na začátku přehrávání. Při 100 % se odeberou po skončení přehrávání."
   Repair Playlists: Opravit playlisty
-  Repair Description: Obnovte chybějící údaje o videích po importu ZIP archivu YouTube Takeout. Pořadí v playlistech se nezmění.
+  Repair Description: Obnovte chybějící údaje o videích po importu playlistů. Pořadí v playlistech se nezmění.
   Remove Unavailable Videos: "Odstraňte nedostupná videa"
   Remove Unavailable Videos Confirmation: "Odstranit nedostupná videa? Nalezeno: {count}. Nelze zkontrolovat: {uncertain}. Nezkontrolovaná videa budou zachována."
   Add Missing Videos: "Přidat chybějící videa ze zdrojového playlistu"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Otevřít složku profilu
     Invalid JSON row, skipping item: Neplatný JSON na řádku {row}, položka se přeskočí
     Import subscriptions formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), záloha LibreTube nebo export FreeTube (.json)'
-    Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json)'
-    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Rychlosti přehrávání kanálů"
     Import channel playback speeds: "Importovat rychlosti přehrávání kanálů"

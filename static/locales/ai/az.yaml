@@ -317,7 +317,7 @@ User Playlists:
   Removal threshold: "Silinmə həddi"
   Removal threshold Tooltip: "Seçilmiş faizə çatdıqda və sonuna ən çox 2 dəqiqə qaldıqda videolar silinir. 0% seçildikdə oxutma başlayanda, 100% seçildikdə isə oxutma bitəndə silinir."
   Repair Playlists: Pleylistləri düzəlt
-  Repair Description: YouTube Takeout ZIP faylını idxal etdikdən sonra çatışmayan video məlumatlarını bərpa edin. Pleylist sırası dəyişmir.
+  Repair Description: Pleylistləri idxal etdikdən sonra çatışmayan video məlumatlarını bərpa edin. Pleylist sırası dəyişmir.
   Remove Unavailable Videos: "Əlçatan olmayan videoları silin"
   Remove Unavailable Videos Confirmation: "Əlçatan olmayan videoları silmək istəyirsiniz? Tapıldı: {count}. Yoxlamaq mümkün olmadı: {uncertain}. Yoxlanılmayan videolar saxlanılacaq."
   Add Missing Videos: Çatışmayan videoları mənbə pleylistdən əlavə et
@@ -1527,8 +1527,8 @@ Settings:
     Export OpenTubeX: OpenTubeX məlumatlarını ixrac et
     Invalid JSON row, skipping item: "{row} sətrində etibarsız JSON var, element ötürülür"
     Import subscriptions formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube ehtiyat nüsxəsi və ya OpenTubeX ixracı (.json)'
-    Import history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), LibreTube ehtiyat nüsxəsi (.json)'
-    Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), LibreTube ehtiyat nüsxəsi (.json), Invidious (.json)'
+    Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanal oynatma sürətləri"
     Import channel playback speeds: "Kanal oynatma sürətlərini idxal et"

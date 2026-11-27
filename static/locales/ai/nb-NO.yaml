@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Terskel for fjerning"
   Removal threshold Tooltip: "Videoer fjernes når valgt prosentandel er nådd og det gjenstår maksimalt 2 minutter. Ved 0 % fjernes de når avspillingen starter. Ved 100 % fjernes de når avspillingen avsluttes."
   Repair Playlists: Reparer spillelister
-  Repair Description: Gjenopprett manglende videodetaljer etter import av en YouTube Takeout-ZIP. Rekkefølgen i spillelistene forblir uendret.
+  Repair Description: Gjenopprett manglende videodetaljer etter import av spillelister. Rekkefølgen i spillelistene forblir uendret.
   Remove Unavailable Videos: "Fjern utilgjengelige videoer"
   Remove Unavailable Videos Confirmation: "Vil du fjerne utilgjengelige videoer? Funnet: {count}. Kunne ikke sjekke: {uncertain}. Ukontrollerte videoer blir beholdt."
   Add Missing Videos: "Legg til manglende videoer fra den opprinnelige spillelisten"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Åpne profilmappen
     Invalid JSON row, skipping item: Ugyldig JSON på rad {row}. Hopper over elementet
     Import subscriptions formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-sikkerhetskopi eller FreeTube-eksport (.json)'
-    Import history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhetskopi (.json)'
-    Import playlists formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhetskopi (.json), Invidious (.json)'
+    Import playlists formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Avspillingshastigheter for kanaler"
     Import channel playback speeds: "Importer avspillingshastigheter for kanaler"

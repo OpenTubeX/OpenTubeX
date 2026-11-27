@@ -319,7 +319,7 @@ User Playlists:
   Removal threshold: "Ngưỡng xóa"
   Removal threshold Tooltip: "Video bị xóa sau khi đạt tỷ lệ đã chọn và còn không quá 2 phút. Ở mức 0%, video bị xóa khi bắt đầu phát. Ở mức 100%, video bị xóa khi phát xong."
   Repair Playlists: Sửa danh sách phát
-  Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
+  Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập danh sách phát. Thứ tự danh sách phát không thay đổi.
   Remove Unavailable Videos: "Xóa video không có sẵn"
   Remove Unavailable Videos Confirmation: "Xóa video không có sẵn? Đã tìm thấy: {count}. Không thể kiểm tra: {uncertain}. Các video không được kiểm tra sẽ được giữ lại."
   Add Missing Videos: "Thêm video còn thiếu từ danh sách phát nguồn"
@@ -1528,8 +1528,8 @@ Settings:
     Unknown setting key: 'Khóa cài đặt không xác định: {key}'
     Non-transferable setting key: 'Khóa cài đặt không thể chuyển: {key}'
     Import subscriptions formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), bản sao lưu LibreTube hoặc bản xuất FreeTube (.json)'
-    Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json)'
-    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Tốc độ phát của kênh"
     Import channel playback speeds: "Nhập tốc độ phát của kênh"

@@ -272,7 +272,7 @@ User Playlists:
   Removal threshold: "Limite de remoção"
   Removal threshold Tooltip: "Os vídeos são removidos depois de atingirem a porcentagem selecionada e quando faltarem, no máximo, 2 minutos. Com 0%, são removidos quando a reprodução começa. Com 100%, são removidos quando a reprodução termina."
   Repair Playlists: Reparar playlists
-  Repair Description: Restaure os detalhes ausentes dos vídeos após importar um ZIP do YouTube Takeout. A ordem das playlists permanece igual.
+  Repair Description: Restaure os detalhes ausentes dos vídeos após importar playlists. A ordem das playlists permanece igual.
   Remove Unavailable Videos: "Remover vídeos indisponíveis"
   Remove Unavailable Videos Confirmation: "Remover vídeos indisponíveis? Encontrados: {count}. Não foi possível verificar: {uncertain}. Os vídeos não verificados serão mantidos."
   Add Missing Videos: "Adicionar vídeos ausentes da playlist original"
@@ -1477,8 +1477,8 @@ Settings:
     Open Profile Directory: Abrir pasta do perfil
     Invalid JSON row, skipping item: JSON inválido na linha {row}; o item será ignorado
     Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), backup do LibreTube ou exportação do FreeTube (.json)'
-    Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup do LibreTube (.json)'
-    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup do LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reprodução dos canais"
     Import channel playback speeds: "Importar velocidades de reprodução dos canais"

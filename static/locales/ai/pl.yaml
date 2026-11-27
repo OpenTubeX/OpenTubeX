@@ -185,7 +185,7 @@ User Playlists:
   Removal threshold: "Próg usunięcia"
   Removal threshold Tooltip: "Filmy są usuwane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one usuwane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one usuwane po zakończeniu odtwarzania."
   Repair Playlists: Napraw playlisty
-  Repair Description: Przywróć brakujące dane filmów po zaimportowaniu archiwum ZIP z YouTube Takeout. Kolejność na playlistach pozostaje bez zmian.
+  Repair Description: Przywróć brakujące dane filmów po zaimportowaniu playlist. Kolejność na playlistach pozostaje bez zmian.
   Remove Unavailable Videos: "Usuń niedostępne filmy"
   Remove Unavailable Videos Confirmation: "Usunąć niedostępne filmy? Znaleziono: {count}. Nie można sprawdzić: {uncertain}. Niesprawdzone filmy zostaną zachowane."
   Add Missing Videos: "Dodaj brakujące filmy ze źródłowej playlisty"

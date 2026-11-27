@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Soglia di rimozione"
   Removal threshold Tooltip: "I video vengono rimossi dopo aver raggiunto la percentuale selezionata e quando non mancano più di 2 minuti. Con 0%, vengono rimossi all'inizio della riproduzione. Con 100%, vengono rimossi al termine."
   Repair Playlists: Ripara le playlist
-  Repair Description: Ripristina i dettagli mancanti dei video dopo l’importazione di un ZIP di YouTube Takeout. L’ordine delle playlist resta invariato.
+  Repair Description: Ripristina i dettagli mancanti dei video dopo l’importazione di playlist. L’ordine delle playlist resta invariato.
   Remove Unavailable Videos: "Rimuovi i video non disponibili"
   Remove Unavailable Videos Confirmation: "Rimuovere i video non disponibili? Trovati: {count}. Impossibile controllare: {uncertain}. I video non verificati verranno conservati."
   Add Missing Videos: "Aggiungi i video mancanti dalla playlist originale"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Apri cartella del profilo
     Invalid JSON row, skipping item: JSON non valido alla riga {row}, elemento ignorato
     Import subscriptions formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), backup di LibreTube o esportazione di FreeTube (.json)'
-    Import history formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup di LibreTube (.json)'
-    Import playlists formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup di LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocità di riproduzione dei canali"
     Import channel playback speeds: "Importa velocità di riproduzione dei canali"

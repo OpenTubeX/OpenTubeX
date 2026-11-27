@@ -319,7 +319,7 @@ User Playlists:
   Removal threshold: "Gräns för borttagning"
   Removal threshold Tooltip: "Videor tas bort när den valda procentandelen har nåtts och högst 2 minuter återstår. Vid 0 % tas de bort när uppspelningen börjar. Vid 100 % tas de bort när uppspelningen slutar."
   Repair Playlists: Reparera spellistor
-  Repair Description: Återställ saknade videouppgifter efter import av en YouTube Takeout-ZIP. Spellistornas ordning ändras inte.
+  Repair Description: Återställ saknade videouppgifter efter import av spellistor. Spellistornas ordning ändras inte.
   Remove Unavailable Videos: "Ta bort otillgängliga videor"
   Remove Unavailable Videos Confirmation: "Ta bort otillgängliga videor? Hittade: {count}. Kunde inte kontrollera: {uncertain}. Okontrollerade videor kommer att behållas."
   Add Missing Videos: "Lägg till saknade videor från den ursprungliga spellistan"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Öppna profilmappen
     Invalid JSON row, skipping item: Ogiltig JSON på rad {row}. Objektet hoppas över
     Import subscriptions formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-säkerhetskopia eller FreeTube-export (.json)'
-    Import history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-säkerhetskopia (.json)'
-    Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-säkerhetskopia (.json), Invidious (.json)'
+    Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Uppspelningshastigheter för kanaler"
     Import channel playback speeds: "Importera uppspelningshastigheter för kanaler"

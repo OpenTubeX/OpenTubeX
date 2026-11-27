@@ -316,7 +316,7 @@ User Playlists:
   Removal threshold: "Trothwy tynnu"
   Removal threshold Tooltip: "Caiff fideos eu tynnu ar ôl cyrraedd y ganran a ddewiswyd a phan nad oes mwy na 2 funud ar ôl. Ar 0%, cânt eu tynnu pan fydd chwarae'n dechrau. Ar 100%, cânt eu tynnu pan fydd chwarae'n gorffen."
   Repair Playlists: Atgyweirio rhestrau chwarae
-  Repair Description: Adfer manylion fideo coll ar ôl mewnforio ZIP YouTube Takeout. Mae trefn y rhestrau chwarae yn aros yr un fath.
+  Repair Description: Adfer manylion fideo coll ar ôl mewnforio rhestrau chwarae. Mae trefn y rhestrau chwarae yn aros yr un fath.
   Remove Unavailable Videos: "Dileu fideos nad ydynt ar gael"
   Remove Unavailable Videos Confirmation: "Dileu fideos nad ydynt ar gael? Wedi dod o hyd: {count}. Methu gwirio: {uncertain}. Bydd fideos heb eu gwirio yn cael eu cadw."
   Add Missing Videos: "Ychwanegu fideos coll o’r rhestr chwarae wreiddiol"
@@ -1528,8 +1528,8 @@ Settings:
     Open Profile Directory: Agor cyfeiriadur y proffil
     Invalid JSON row, skipping item: JSON annilys yn rhes {row}; yn hepgor yr eitem
     Import subscriptions formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copi wrth gefn LibreTube neu allforyn FreeTube (.json)'
-    Import history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn LibreTube (.json)'
-    Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Cyflymderau chwarae sianeli"
     Import channel playback speeds: "Mewnforio cyflymderau chwarae sianeli"

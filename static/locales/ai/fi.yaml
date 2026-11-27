@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Poistoraja"
   Removal threshold Tooltip: "Video poistetaan, kun valittu prosenttiosuus on saavutettu ja videota on jäljellä enintään 2 minuuttia. Jos rajaksi valitaan 0 %, video poistetaan toiston alkaessa. Jos rajaksi valitaan 100 %, video poistetaan toiston päättyessä."
   Repair Playlists: Korjaa soittolistat
-  Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
+  Repair Description: Palauta puuttuvat videotiedot soittolistojen tuonnin jälkeen. Soittolistojen järjestys ei muutu.
   Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"
   Remove Unavailable Videos Confirmation: "Poistetaanko videot, jotka eivät ole käytettävissä? Löytyi: {count}. Ei voitu tarkistaa: {uncertain}. Tarkistamattomat videot säilytetään."
   Add Missing Videos: "Lisää puuttuvat videot alkuperäisestä soittolistasta"
@@ -1525,8 +1525,8 @@ Settings:
     Open Profile Directory: Avaa profiilikansio
     Invalid JSON row, skipping item: Virheellinen JSON rivillä {row}, ohitetaan kohde
     Import subscriptions formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-varmuuskopio tai FreeTube-vienti (.json)'
-    Import history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-varmuuskopio (.json)'
-    Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-varmuuskopio (.json), Invidious (.json)'
+    Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanavien toistonopeudet"
     Import channel playback speeds: "Tuo kanavien toistonopeudet"

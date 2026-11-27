@@ -274,7 +274,7 @@ User Playlists:
   Removal threshold: "Limiar de remoção"
   Removal threshold Tooltip: "Os vídeos são removidos depois de atingirem a percentagem selecionada e quando faltarem, no máximo, 2 minutos. Com 0%, são removidos quando a reprodução começa. Com 100%, são removidos quando a reprodução termina."
   Repair Playlists: Reparar listas de reprodução
-  Repair Description: Restaure os detalhes dos vídeos em falta após importar um ZIP do YouTube Takeout. A ordem dos vídeos nas listas mantém-se.
+  Repair Description: Restaure os detalhes dos vídeos em falta após importar listas de reprodução. A ordem dos vídeos nas listas mantém-se.
   Remove Unavailable Videos: "Remover vídeos indisponíveis"
   Remove Unavailable Videos Confirmation: "Remover vídeos indisponíveis? Encontrados: {count}. Não foi possível verificar: {uncertain}. Os vídeos não verificados serão mantidos."
   Add Missing Videos: "Adicionar vídeos em falta a partir da lista de reprodução original"
@@ -1499,8 +1499,8 @@ Settings:
     Unknown setting key: 'Chave de definição desconhecida: {key}'
     Non-transferable setting key: 'Chave de definição não transferível: {key}'
     Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cópia de segurança do LibreTube ou exportação do FreeTube (.json)'
-    Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cópia de segurança do LibreTube (.json)'
-    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cópia de segurança do LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reprodução dos canais"
     Import channel playback speeds: "Importar velocidades de reprodução dos canais"

@@ -319,7 +319,7 @@ User Playlists:
   Removal threshold: "Prag de eliminare"
   Removal threshold Tooltip: "Videoclipurile sunt eliminate după atingerea procentului selectat și când au rămas cel mult 2 minute. La 0%, sunt eliminate când începe redarea. La 100%, sunt eliminate la încheierea redării."
   Repair Playlists: Repară listele de redare
-  Repair Description: Restabilește detaliile video lipsă după importarea unui ZIP YouTube Takeout. Ordinea listelor de redare rămâne neschimbată.
+  Repair Description: Restabilește detaliile video lipsă după importarea listelor de redare. Ordinea listelor de redare rămâne neschimbată.
   Remove Unavailable Videos: "Eliminați videoclipurile indisponibile"
   Remove Unavailable Videos Confirmation: "Eliminați videoclipurile indisponibile? Găsite: {count}. Nu s-a putut verifica: {uncertain}. Videoclipurile neverificate vor fi păstrate."
   Add Missing Videos: "Adaugă videoclipurile lipsă din lista de redare sursă"
@@ -1536,8 +1536,8 @@ Settings:
     Unknown setting key: 'Cheie de setare necunoscută: {key}'
     Non-transferable setting key: 'Cheie de setare netransferabilă: {key}'
     Import subscriptions formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copie de rezervă LibreTube sau export FreeTube (.json)'
-    Import history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copie de rezervă LibreTube (.json)'
-    Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copie de rezervă LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Viteze de redare ale canalelor"
     Import channel playback speeds: "Importă vitezele de redare ale canalelor"

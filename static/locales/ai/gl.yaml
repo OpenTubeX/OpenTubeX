@@ -318,7 +318,7 @@ User Playlists:
   Removal threshold: "Limiar de retirada"
   Removal threshold Tooltip: "Os vídeos retíranse ao chegar á porcentaxe seleccionada e quedar como máximo 2 minutos. Co 0 %, retíranse ao comezar a reprodución. Co 100 %, retíranse ao rematar."
   Repair Playlists: Reparar listas de reprodución
-  Repair Description: Restaura os datos dos vídeos que faltan tras importar un ZIP de YouTube Takeout. A orde dos vídeos nas listas de reprodución mantense.
+  Repair Description: Restaura os datos dos vídeos que faltan tras importar listas de reprodución. A orde dos vídeos nas listas de reprodución mantense.
   Remove Unavailable Videos: "Eliminar vídeos non dispoñibles"
   Remove Unavailable Videos Confirmation: "Queres eliminar os vídeos non dispoñibles? Atopados: {count}. Non se puido comprobar: {uncertain}. Os vídeos sen comprobar manteranse."
   Add Missing Videos: "Engadir os vídeos que faltan desde a lista de reprodución orixinal"
@@ -1547,8 +1547,8 @@ Settings:
     Unknown setting key: 'Chave de configuración descoñecida: {key}'
     Non-transferable setting key: 'Chave de configuración non transferible: {key}'
     Import subscriptions formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copia de seguranza de LibreTube ou exportación de FreeTube (.json)'
-    Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguranza de LibreTube (.json)'
-    Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguranza de LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reprodución das canles"
     Import channel playback speeds: "Importar velocidades de reprodución das canles"

@@ -259,7 +259,7 @@ User Playlists:
   Removal threshold: "Umbral de eliminación"
   Removal threshold Tooltip: "Los vídeos se quitan después de alcanzar el porcentaje seleccionado y cuando quedan como máximo 2 minutos. Al 0 %, se quitan al iniciar la reproducción. Al 100 %, se quitan cuando termina."
   Repair Playlists: Reparar listas de reproducción
-  Repair Description: Restaura los datos de vídeo que faltan tras importar un ZIP de YouTube Takeout. El orden de las listas se mantiene.
+  Repair Description: Restaura los datos de vídeo que faltan tras importar listas de reproducción. El orden de las listas se mantiene.
   Remove Unavailable Videos: "Eliminar vídeos no disponibles"
   Remove Unavailable Videos Confirmation: "¿Eliminar vídeos no disponibles? Encontrados: {count}. No se pudo verificar: {uncertain}. Los vídeos no verificados se conservarán."
   Add Missing Videos: "Añadir vídeos que faltan desde la lista de reproducción original"
@@ -1473,8 +1473,8 @@ Settings:
     Setting object has insufficient data, skipping item: El objeto de ajuste no tiene datos suficientes; se omitirá el elemento
     Non-transferable setting key: 'Clave de ajuste no transferible: {key}'
     Import subscriptions formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copia de seguridad de LibreTube o exportación de FreeTube (.json)'
-    Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguridad de LibreTube (.json)'
-    Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguridad de LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Velocidades de reproducción de canales"
     Import channel playback speeds: "Importar velocidades de reproducción de canales"

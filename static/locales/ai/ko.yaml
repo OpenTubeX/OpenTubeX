@@ -332,7 +332,7 @@ User Playlists:
   Removal threshold: "삭제 기준"
   Removal threshold Tooltip: "선택한 비율에 도달하고 남은 시간이 2분 이하이면 동영상을 삭제합니다. 0%에서는 재생을 시작할 때, 100%에서는 재생이 끝날 때 삭제합니다."
   Repair Playlists: 재생목록 복구
-  Repair Description: YouTube Takeout ZIP을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.
+  Repair Description: 재생목록을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.
   Remove Unavailable Videos: "사용할 수 없는 동영상 삭제"
   Remove Unavailable Videos Confirmation: "사용할 수 없는 동영상을 삭제하시겠습니까? 발견: {count}. 확인할 수 없음: {uncertain}. 확인하지 않은 동영상은 보관됩니다."
   Add Missing Videos: "원본 재생목록에서 누락된 동영상 추가"
@@ -1764,8 +1764,8 @@ Settings:
     Unknown setting key: '알 수 없는 설정 키: {key}'
     Non-transferable setting key: '전송할 수 없는 설정 키: {key}'
     Import subscriptions formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube 백업 또는 FreeTube 내보내기 (.json)'
-    Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json)'
-    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json), Invidious (.json)'
+    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "채널별 재생 속도"
     Import channel playback speeds: "채널별 재생 속도 가져오기"

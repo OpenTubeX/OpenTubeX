@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Gwehin dilemel"
   Removal threshold Tooltip: "Dilamet e vez ar videoioù goude tizhout an dregantad diuzet pa chom 2 vunutenn d'ar muiañ. Gant 0% e vezont dilamet pa grog al lenn. Gant 100% e vezont dilamet pa echu al lenn."
   Repair Playlists: Ratreañ ar rolloù lenn
-  Repair Description: Adkavit titouroù ar videoioù a vank goude enporzhiañ ur ZIP YouTube Takeout. Urzh ar rolloù lenn a chom digemm.
+  Repair Description: Adkavit titouroù ar videoioù a vank goude enporzhiañ rolloù lenn. Urzh ar rolloù lenn a chom digemm.
   Remove Unavailable Videos: "Dilemel ar videoioù n'int ket hegerz"
   Remove Unavailable Videos Confirmation: "Dilemel ar videoioù n'int ket hegerz ? Kavet : {count}. N'haller ket gwiriañ : {uncertain}. Miret e vo ar videoioù na oant ket gwiriet."
   Add Missing Videos: "Ouzhpennañ ar videoioù a vank eus ar roll-lenn orin"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: "Digeriñ teuliad ar profil"
     Invalid JSON row, skipping item: "JSON didalvoudek war al linenn {row}; lezet eo an elfenn a-gostez"
     Import subscriptions formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), gwaredadenn LibreTube pe ezporzhadenn FreeTube (.json)"
-    Import history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), gwaredadenn LibreTube (.json)"
-    Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)"
+    Import history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), gwaredadenn LibreTube (.json), Invidious (.json)"
+    Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)"
     Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
     Channel playback speeds: "Tizhoù lenn ar chadennoù"
     Import channel playback speeds: "Enporzhiañ tizhoù lenn ar chadennoù"

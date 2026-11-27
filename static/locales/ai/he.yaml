@@ -318,7 +318,7 @@ User Playlists:
   Removal threshold: "סף הסרה"
   Removal threshold Tooltip: "סרטונים יוסרו לאחר הגעה לאחוז שנבחר וכשלא נותרו יותר מ-2 דקות. ב-0% הם יוסרו בתחילת ההפעלה. ב-100% הם יוסרו בסופה."
   Repair Playlists: תיקון רשימות השמעה
-  Repair Description: שחזור פרטי סרטונים חסרים לאחר ייבוא ZIP של YouTube Takeout. סדר רשימות ההשמעה נשאר ללא שינוי.
+  Repair Description: שחזור פרטי סרטונים חסרים לאחר ייבוא רשימות השמעה. סדר רשימות ההשמעה נשאר ללא שינוי.
   Remove Unavailable Videos: "הסר סרטונים לא זמינים"
   Remove Unavailable Videos Confirmation: "להסיר סרטונים לא זמינים? נמצאו: {count}. לא ניתן לבדוק: {uncertain}. סרטונים שלא נבדקו יישמרו."
   Add Missing Videos: "הוספת סרטונים חסרים מרשימת ההשמעה המקורית"
@@ -1551,8 +1551,8 @@ Settings:
     Unknown setting key: 'מפתח הגדרה לא מוכר: {key}'
     Non-transferable setting key: 'מפתח הגדרה שאינו ניתן להעברה: {key}'
     Import subscriptions formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), גיבוי LibreTube או ייצוא FreeTube (.json)'
-    Import history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי LibreTube (.json)'
-    Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "מהירויות הפעלה של ערוצים"
     Import channel playback speeds: "ייבוא מהירויות הפעלה של ערוצים"

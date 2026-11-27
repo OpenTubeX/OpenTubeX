@@ -324,7 +324,7 @@ User Playlists:
   Removal threshold: "Праг за уклањање"
   Removal threshold Tooltip: "Видео снимци се уклањају када достигну изабрани проценат и преостане највише 2 минута. На 0% уклањају се при почетку репродукције. На 100% уклањају се по завршетку репродукције."
   Repair Playlists: Поправи листе за репродукцију
-  Repair Description: Вратите недостајуће податке о видео-снимцима након увоза ZIP архиве YouTube Takeout. Редослед у листама остаје исти.
+  Repair Description: Вратите недостајуће податке о видео-снимцима након увоза листа за репродукцију. Редослед у листама остаје исти.
   Remove Unavailable Videos: "Уклоните недоступне видео снимке"
   Remove Unavailable Videos Confirmation: "Уклоните недоступне видео снимке? Пронађено: {count}. Није могуће проверити: {uncertain}. Непроверени видео снимци ће бити сачувани."
   Add Missing Videos: "Додај видео-снимке који недостају из изворне плејлисте"
@@ -1565,8 +1565,8 @@ Settings:
     Unknown setting key: 'Непознат кључ подешавања: {key}'
     Non-transferable setting key: 'Кључ подешавања који се не може пренети: {key}'
     Import subscriptions formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube резервна копија или FreeTube извоз (.json)'
-    Import history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube резервна копија (.json)'
-    Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube резервна копија (.json), Invidious (.json)'
+    Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Брзине репродукције канала"
     Import channel playback speeds: "Увези брзине репродукције канала"

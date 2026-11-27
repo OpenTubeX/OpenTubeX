@@ -278,7 +278,7 @@ User Playlists:
   Removal threshold: "Порог удаления"
   Removal threshold Tooltip: "Видео удаляется, когда достигнут выбранный процент и до конца остаётся не более 2 минут. При 0 % удаление происходит в начале воспроизведения, а при 100 % — в конце."
   Repair Playlists: Восстановить плейлисты
-  Repair Description: Восстановите недостающие сведения о видео после импорта ZIP-архива YouTube Takeout. Порядок в плейлистах не изменится.
+  Repair Description: Восстановите недостающие сведения о видео после импорта плейлистов. Порядок в плейлистах не изменится.
   Remove Unavailable Videos: "Удалить недоступные видео"
   Remove Unavailable Videos Confirmation: "Удалить недоступные видео? Найдено: {count}. Не удалось проверить: {uncertain}. Непроверенные видео будут сохранены."
   Add Missing Videos: "Добавить недостающие видео из исходного плейлиста"
@@ -1484,8 +1484,8 @@ Settings:
     Open Profile Directory: Открыть папку профиля
     Invalid JSON row, skipping item: Недопустимый JSON в строке {row}, элемент пропущен
     Import subscriptions formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервная копия LibreTube или экспорт FreeTube (.json)'
-    Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json)'
-    Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Скорости воспроизведения каналов"
     Import channel playback speeds: "Импортировать скорости воспроизведения каналов"

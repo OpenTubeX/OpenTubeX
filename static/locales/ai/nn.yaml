@@ -316,7 +316,7 @@ User Playlists:
   Removal threshold: "Terskel for fjerning"
   Removal threshold Tooltip: "Videoar blir fjerna når dei har nådd den valde prosentdelen og det står att høgst 2 minutt. Ved 0 % blir dei fjerna når avspelinga tek til. Ved 100 % blir dei fjerna når avspelinga er ferdig."
   Repair Playlists: Reparer spelelister
-  Repair Description: Gjenopprett manglande videodetaljar etter import av ein YouTube Takeout-ZIP. Rekkjefølgja i spelelistene vert ikkje endra.
+  Repair Description: Gjenopprett manglande videodetaljar etter import av spelelister. Rekkjefølgja i spelelistene vert ikkje endra.
   Remove Unavailable Videos: "Fjern utilgjengelege videoar"
   Remove Unavailable Videos Confirmation: "Fjern utilgjengelege videoar? Funne: {count}. Kunne ikkje kontrollere: {uncertain}. Videoar som ikkje vart kontrollerte, vert behaldne."
   Add Missing Videos: "Legg til manglande videoar frå den opphavlege spelelista"
@@ -1683,8 +1683,8 @@ Settings:
     Unknown setting key: 'Ukjend innstillingsnøkkel: {key}'
     Non-transferable setting key: 'Innstillingsnøkkelen kan ikkje overførast: {key}'
     Import subscriptions formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-tryggleikskopi eller FreeTube-eksport (.json)'
-    Import history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-tryggleikskopi (.json)'
-    Import playlists formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-tryggleikskopi (.json), Invidious (.json)'
+    Import playlists formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Avspelingsfart for kanalar"
     Import channel playback speeds: "Importer avspelingsfart for kanalar"
