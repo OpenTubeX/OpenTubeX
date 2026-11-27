@@ -460,18 +460,40 @@ test('Android organizer unmount releases its modal lock during committed settlem
       await touch('touchMove', { ...point, y: point.y + step * 20 })
       await page.waitForTimeout(40)
     }
+    await expect(page.locator('.organizerGesture')).toHaveCount(1)
+    await expect(page.locator('.organizerSwipePage')).toHaveCount(1)
+    // Observe the commit inside the page and unmount synchronously on that
+    // frame, before CDP round trips on a slow emulator can outlast the
+    // settlement animation.
+    const teardownPromise = page.evaluate(() => new Promise((resolve, reject) => {
+      const cleanup = () => {
+        observer.disconnect()
+        clearTimeout(timer)
+      }
+      const check = () => {
+        if (document.querySelector('.organizerGesture')) return
+        if (getComputedStyle(document.documentElement).overflow !== 'hidden') return
+        cleanup()
+        if (!document.querySelector('.organizerSwipePage')) {
+          reject(new Error('the committed gesture must still be settling'))
+          return
+        }
+        const app = document.querySelector('#app').__vue_app__
+        const store = app.config.globalProperties.$store
+        app.unmount()
+        resolve({ overflow: document.documentElement.style.overflow, promptOpen: store.getters.isAnyPromptOpen })
+      }
+      const observer = new MutationObserver(check)
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] })
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
+      const timer = setTimeout(() => {
+        cleanup()
+        reject(new Error(`timed out waiting for committed settlement: gesture=${Boolean(document.querySelector('.organizerGesture'))}, swipePage=${Boolean(document.querySelector('.organizerSwipePage'))}, overflow=${getComputedStyle(document.documentElement).overflow}`))
+      }, 15_000)
+      check()
+    }))
     await touch('touchEnd')
-    await expect(page.locator('.organizerGesture')).toHaveCount(0)
-    await expect(page.locator('html')).toHaveCSS('overflow', 'hidden')
-    // Unmount synchronously while settlement is active, without first changing
-    // props and giving the modal watcher a chance to release the lock.
-    const teardown = await page.evaluate(() => {
-      if (!document.querySelector('.organizerSwipePage')) throw new Error('the committed gesture must still be settling')
-      const app = document.querySelector('#app').__vue_app__
-      const store = app.config.globalProperties.$store
-      app.unmount()
-      return { overflow: document.documentElement.style.overflow, promptOpen: store.getters.isAnyPromptOpen }
-    })
+    const teardown = await teardownPromise
     assert.equal(teardown.overflow, saved.overflow, 'unmount must release the root scroll lock')
     assert.equal(teardown.promptOpen, false, 'unmount must remove the organizer prompt')
   } finally {
