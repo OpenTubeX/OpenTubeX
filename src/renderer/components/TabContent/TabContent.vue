@@ -33,7 +33,9 @@
           v-if="page.key === currentPageKey && backReveal"
           class="backSlideCover"
           :style="backReveal.cover"
-        />
+        >
+          <div class="backSlideCoverField" />
+        </div>
         <TabBrowsingPage
           :tab-id="tab.id"
           :route="page.route"
@@ -94,6 +96,7 @@ import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDo
 import { showTabPage } from '../../tabs/tabPages'
 import { registerAndroidBackPage } from '../../helpers/androidBackGesture'
 import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
+import { getFixedBackgroundContainment } from '../../helpers/fixedBackground'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -175,6 +178,18 @@ const currentPageKey = computed(() => pages.value.at(-1)?.key)
 const backReveal = shallowRef(null)
 /** @type {HTMLElement | null} */
 let backRevealPage = null
+/** @type {{ element: HTMLElement, name: string }[]} */
+let backRevealFields = []
+
+function clearBackRevealFields() {
+  backRevealFields.forEach(({ element, name }) => element.style.removeProperty(name))
+  backRevealFields = []
+}
+
+// The page Back reveals loses its layer hint in the render that makes it the
+// current page, which Back can reach frames before the gesture ends. Its card
+// fields must return to the viewport in the same render.
+watch(currentPageKey, clearBackRevealFields, { flush: 'sync' })
 
 /** @param {{ key: number | null, top: number, cover: Record<string, string> } | null} reveal */
 async function setBackReveal(reveal) {
@@ -184,6 +199,7 @@ async function setBackReveal(reveal) {
   // tab would restyle the current page as well.
   backRevealPage?.style.removeProperty('--retained-page-top')
   backRevealPage = null
+  clearBackRevealFields()
   if (!reveal) return null
   await nextTick()
   const root = tabContentRef.value
@@ -191,6 +207,9 @@ async function setBackReveal(reveal) {
   const page = root.querySelector(':scope > .retainedPagePreview')
   if (page instanceof HTMLElement) {
     page.style.setProperty('--retained-page-top', `${reveal.top}px`)
+    // Its layer hint would move its card fields, see getFixedBackgroundContainment.
+    backRevealFields = getFixedBackgroundContainment(page)
+    backRevealFields.forEach(({ element, name, value }) => element.style.setProperty(name, value))
     backRevealPage = page
   }
   return {
@@ -371,7 +390,26 @@ function getAndroidBackTarget() {
  */
 function getAndroidBackCoverArea(element) {
   const { top, left, width } = element.getBoundingClientRect()
-  return { top: `${Math.max(0, top)}px`, left: `${left}px`, width: `${width}px` }
+  const coverTop = Math.max(0, top)
+  const { size, position } = getWindowFieldPlacement(left, coverTop)
+  return {
+    top: `${coverTop}px`,
+    left: `${left}px`,
+    width: `${width}px`,
+    '--window-field-size': size,
+    '--window-field-position': position
+  }
+}
+
+/**
+ * Places the window's field (body::before), which pages let show through, on
+ * a box at this viewport position, so the box matches what it covers.
+ * @param {number} left
+ * @param {number} top
+ */
+function getWindowFieldPlacement(left, top) {
+  const { clientWidth, clientHeight } = document.documentElement
+  return { size: `${clientWidth}px ${clientHeight}px`, position: `${-left}px ${-top}px` }
 }
 
 /**
@@ -379,9 +417,15 @@ function getAndroidBackCoverArea(element) {
  * @param {HTMLElement} element
  */
 function getAndroidBackCover(element) {
+  const { top, left } = element.getBoundingClientRect()
+  const { size, position } = getWindowFieldPlacement(left, top)
   return {
     'background-color': 'var(--bg-color)',
-    'min-block-size': `${Math.max(0, window.innerHeight - element.getBoundingClientRect().top)}px`
+    'background-image': 'var(--bg-image)',
+    'background-repeat': 'no-repeat',
+    'background-size': size,
+    'background-position': position,
+    'min-block-size': `${Math.max(0, window.innerHeight - top)}px`
   }
 }
 
@@ -600,6 +644,21 @@ function cancelLoaderSettle() {
   inset-block-end: 0;
   background-color: var(--bg-color);
   pointer-events: none;
+  will-change: transform;
+}
+
+/* Pages let the window's field show through in themes that paint one, so the
+   cover paints it too, where it covers it (getWindowFieldPlacement). Its own
+   layer keeps the cover a solid color, which shows if the field is not
+   rastered yet as the gesture starts. */
+.backSlideCoverField {
+  display: var(--fixed-background-display, none);
+  position: absolute;
+  inset: 0;
+  background-image: var(--bg-image);
+  background-repeat: no-repeat;
+  background-size: var(--window-field-size);
+  background-position: var(--window-field-position);
   will-change: transform;
 }
 
