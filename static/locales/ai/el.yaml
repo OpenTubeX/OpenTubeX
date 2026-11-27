@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Όριο αφαίρεσης"
   Removal threshold Tooltip: "Τα βίντεο αφαιρούνται όταν φτάσουν στο επιλεγμένο ποσοστό και απομένουν έως 2 λεπτά. Στο 0%, αφαιρούνται όταν αρχίζει η αναπαραγωγή. Στο 100%, αφαιρούνται όταν τελειώνει."
   Repair Playlists: Επιδιόρθωση λιστών αναπαραγωγής
-  Repair Description: Επαναφέρετε τα στοιχεία βίντεο που λείπουν μετά την εισαγωγή ZIP από το YouTube Takeout. Η σειρά στις λίστες παραμένει ίδια.
+  Repair Description: Επαναφέρετε τα στοιχεία βίντεο που λείπουν μετά την εισαγωγή λιστών αναπαραγωγής. Η σειρά στις λίστες παραμένει ίδια.
   Remove Unavailable Videos: "Αφαίρεση μη διαθέσιμων βίντεο"
   Remove Unavailable Videos Confirmation: "Να αφαιρεθούν τα μη διαθέσιμα βίντεο; Βρέθηκαν: {count}. Δεν ήταν δυνατός ο έλεγχος: {uncertain}. Τα βίντεο που δεν ελέγχθηκαν θα διατηρηθούν."
   Add Missing Videos: "Προσθήκη βίντεο που λείπουν από την αρχική λίστα αναπαραγωγής"
@@ -1525,8 +1525,8 @@ Settings:
     Open Profile Directory: Άνοιγμα καταλόγου προφίλ
     Invalid JSON row, skipping item: Μη έγκυρο JSON στη γραμμή {row}, το στοιχείο παραλείπεται
     Import subscriptions formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), αντίγραφο ασφαλείας LibreTube ή εξαγωγή FreeTube (.json)'
-    Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json)'
-    Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Ταχύτητες αναπαραγωγής καναλιών"
     Import channel playback speeds: "Εισαγωγή ταχυτήτων αναπαραγωγής καναλιών"

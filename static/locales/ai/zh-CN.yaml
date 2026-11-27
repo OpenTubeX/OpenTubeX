@@ -319,7 +319,7 @@ User Playlists:
   Removal threshold: "移除阈值"
   Removal threshold Tooltip: "播放进度达到所选百分比且剩余时长不超过 2 分钟后，视频会被移除。设为 0% 时，开始播放即会移除；设为 100% 时，播放结束才会移除。"
   Repair Playlists: 修复播放列表
-  Repair Description: 导入 YouTube Takeout ZIP 后恢复缺失的视频信息。播放列表顺序保持不变。
+  Repair Description: 导入播放列表后恢复缺失的视频信息。播放列表顺序保持不变。
   Remove Unavailable Videos: "删除不可用的视频"
   Remove Unavailable Videos Confirmation: "删除不可用的视频？找到：{count}。无法检查：{uncertain}。未检查的视频将被保留。"
   Add Missing Videos: "从来源播放列表添加缺少的视频"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: 打开配置文件文件夹
     Invalid JSON row, skipping item: 第 {row} 行的 JSON 无效，已跳过该项目
     Import subscriptions formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv, .json, .opml)、NewPipe (.json)、LibreTube 备份或 FreeTube 导出文件 (.json)'
-    Import history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 备份 (.json)'
-    Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv)'
+    Import history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 备份 (.json)、Invidious (.json)'
+    Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv)、Invidious (.json)'
     Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
     Channel playback speeds: "频道播放速度"
     Import channel playback speeds: "导入频道播放速度"

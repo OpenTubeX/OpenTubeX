@@ -7,7 +7,7 @@ import * as playlistPreferences from '../../src/renderer/helpers/playlist-prefer
 
 const source = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const importSource = source.slice(source.indexOf('async function importPlaylists()'), source.indexOf('async function exportPlaylists()'))
-const takeoutSource = source.slice(source.indexOf('async function importTakeoutPlaylist('), source.indexOf('async function normalizeImportedPlaylistThumbnail('))
+const takeoutSource = source.slice(source.indexOf('async function importExternalPlaylist('), source.indexOf('async function normalizeImportedPlaylistThumbnail('))
 
 for (const [preference, existing] of [[undefined, true], [false, true], [true, false]]) {
   test(`playlist import retains preference ${preference} with an existing playlist ${existing}`, async () => {
@@ -51,7 +51,7 @@ for (const addVideosToTop of [false, true]) {
       videos: [{ videoId: 'existing', timeAdded: 1, playlistItemId: 'first' }, { videoId: 'existing', timeAdded: 1, playlistItemId: 'duplicate' }],
     }
     let saved
-    const run = vm.runInNewContext(takeoutSource + '\nimportTakeoutPlaylist', {
+    const run = vm.runInNewContext(takeoutSource + '\nimportExternalPlaylist', {
       allPlaylists: { value: [current] },
       deepCopy: structuredClone,
       processToBeAddedPlaylistVideo: () => {},

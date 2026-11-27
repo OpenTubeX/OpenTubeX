@@ -352,7 +352,7 @@ User Playlists:
   Removal threshold: "Šalinimo slenkstis"
   Removal threshold Tooltip: "Vaizdo įrašai pašalinami pasiekus pasirinktą procentą ir likus ne daugiau kaip 2 minutėms. Pasirinkus 0 %, jie pašalinami pradėjus atkūrimą. Pasirinkus 100 %, jie pašalinami atkūrimui pasibaigus."
   Repair Playlists: Taisyti grojaraščius
-  Repair Description: Atkurkite trūkstamus vaizdo įrašų duomenis importavę YouTube Takeout ZIP. Grojaraščių tvarka nesikeičia.
+  Repair Description: Atkurkite trūkstamus vaizdo įrašų duomenis importavę grojaraščius. Grojaraščių tvarka nesikeičia.
   Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"
   Remove Unavailable Videos Confirmation: "Pašalinti nepasiekiamus vaizdo įrašus? Rasta: {count}. Nepavyko patikrinti: {uncertain}. Nepatikrinti vaizdo įrašai bus išsaugoti."
   Add Missing Videos: "Pridėti trūkstamus vaizdo įrašus iš šaltinio grojaraščio"
@@ -1777,8 +1777,8 @@ Settings:
     Unknown setting key: 'Nežinomas nustatymo raktas: {key}'
     Non-transferable setting key: 'Neperkeliamas nustatymo raktas: {key}'
     Import subscriptions formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube atsarginė kopija arba FreeTube eksportas (.json)'
-    Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json)'
-    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json), Invidious (.json)'
+    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanalų atkūrimo greičiai"
     Import channel playback speeds: "Importuoti kanalų atkūrimo greičius"

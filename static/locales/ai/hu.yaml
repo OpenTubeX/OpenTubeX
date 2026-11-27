@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Eltávolítási küszöb"
   Removal threshold Tooltip: "A videók eltávolításra kerülnek, ha elérik a kiválasztott százalékot, és legfeljebb 2 perc van hátra belőlük. 0%-nál a lejátszás kezdetekor, 100%-nál a lejátszás végén kerülnek eltávolításra."
   Repair Playlists: Lejátszási listák javítása
-  Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.
+  Repair Description: Állítsa vissza a hiányzó videóadatokat lejátszási listák importálása után. A listák sorrendje nem változik.
   Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"
   Remove Unavailable Videos Confirmation: "Eltávolítja a nem elérhető videókat? Talált: {count}. Nem sikerült ellenőrizni: {uncertain}. A nem ellenőrzött videók megmaradnak."
   Add Missing Videos: "Hiányzó videók hozzáadása a forráslejátszási listából"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Profilmappa megnyitása
     Invalid JSON row, skipping item: Érvénytelen JSON a(z) {row}. sorban, az elem kihagyva
     Import subscriptions formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube biztonsági másolat vagy FreeTube exportálás (.json)'
-    Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json)'
-    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json), Invidious (.json)'
+    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Csatornák lejátszási sebességei"
     Import channel playback speeds: "Csatornák lejátszási sebességeinek importálása"

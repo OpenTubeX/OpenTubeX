@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Kentzeko atalasea"
   Removal threshold Tooltip: "Bideoak kendu egingo dira hautatutako ehunekora iritsi eta gehienez 2 minutu geratzen direnean. % 0 hautatuz gero, erreprodukzioa hastean kenduko dira; % 100 hautatuz gero, amaitzean."
   Repair Playlists: Konpondu erreprodukzio-zerrendak
-  Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.
+  Repair Description: Berreskuratu falta diren bideo-datuak erreprodukzio-zerrendak inportatu ondoren. Zerrenden ordena ez da aldatzen.
   Remove Unavailable Videos: "Kendu erabilgarri ez dauden bideoak"
   Remove Unavailable Videos Confirmation: "Eskuragarri ez dauden bideoak kendu? Aurkitu: {count}. Ezin izan da egiaztatu: {uncertain}. Egiaztatu gabeko bideoak gordeko dira."
   Add Missing Videos: "Gehitu falta diren bideoak jatorrizko erreprodukzio-zerrendatik"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Ireki profilaren direktorioa
     Invalid JSON row, skipping item: '{row}. errenkadako JSONa ez da baliozkoa; elementua saltatzen'
     Import subscriptions formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube babeskopia edo FreeTube esportazioa (.json)'
-    Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json)'
-    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json), Invidious (.json)'
+    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanalen erreprodukzio-abiadurak"
     Import channel playback speeds: "Inportatu kanalen erreprodukzio-abiadurak"

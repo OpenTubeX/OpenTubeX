@@ -319,7 +319,7 @@ User Playlists:
   Removal threshold: "Kaldırma eşiği"
   Removal threshold Tooltip: "Videolar seçilen yüzdeye ulaştığında ve en fazla 2 dakika kaldığında kaldırılır. %0'da oynatma başladığında, %100'de ise oynatma bittiğinde kaldırılır."
   Repair Playlists: Oynatma listelerini onar
-  Repair Description: YouTube Takeout ZIP dosyasını içe aktardıktan sonra eksik video bilgilerini geri yükleyin. Oynatma listesi sırası değişmez.
+  Repair Description: Oynatma listelerini içe aktardıktan sonra eksik video bilgilerini geri yükleyin. Oynatma listesi sırası değişmez.
   Remove Unavailable Videos: "Kullanılamayan videoları kaldır"
   Remove Unavailable Videos Confirmation: "Kullanılamayan videolar kaldırılsın mı? Bulundu: {count}. Kontrol edilemedi: {uncertain}. Kontrol edilemeyen videolar saklanacak."
   Add Missing Videos: "Kaynak oynatma listesinden eksik videoları ekle"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Profil dizinini aç
     Invalid JSON row, skipping item: '{row}. satırdaki JSON geçersiz, öğe atlanıyor'
     Import subscriptions formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube yedeği veya FreeTube dışa aktarımı (.json)'
-    Import history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube yedeği (.json)'
-    Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube yedeği (.json), Invidious (.json)'
+    Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanal oynatma hızları"
     Import channel playback speeds: "Kanal oynatma hızlarını içe aktar"

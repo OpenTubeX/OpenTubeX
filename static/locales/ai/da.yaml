@@ -320,7 +320,7 @@ User Playlists:
   Removal threshold: "Grænse for fjernelse"
   Removal threshold Tooltip: "Videoer fjernes, når den valgte procentdel er nået, og der højst er 2 minutter tilbage. Ved 0 % fjernes de, når afspilningen begynder. Ved 100 % fjernes de, når afspilningen slutter."
   Repair Playlists: Reparer afspilningslister
-  Repair Description: Gendan manglende videooplysninger efter import af en YouTube Takeout-ZIP. Rækkefølgen i afspilningslisterne ændres ikke.
+  Repair Description: Gendan manglende videooplysninger efter import af afspilningslister. Rækkefølgen i afspilningslisterne ændres ikke.
   Remove Unavailable Videos: "Fjern utilgængelige videoer"
   Remove Unavailable Videos Confirmation: "Vil du fjerne utilgængelige videoer? Fundet: {count}. Kunne ikke kontrollere: {uncertain}. Videoer, der ikke blev kontrolleret, vil blive bevaret."
   Add Missing Videos: "Tilføj manglende videoer fra den oprindelige afspilningsliste"
@@ -1567,8 +1567,8 @@ Settings:
     Unknown setting key: 'Ukendt indstillingsnøgle: {key}'
     Non-transferable setting key: 'Indstillingsnøglen kan ikke overføres: {key}'
     Import subscriptions formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-sikkerhedskopi eller FreeTube-eksport (.json)'
-    Import history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhedskopi (.json)'
-    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhedskopi (.json), Invidious (.json)'
+    Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Afspilningshastigheder for kanaler"
     Import channel playback speeds: "Importér afspilningshastigheder for kanaler"

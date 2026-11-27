@@ -318,7 +318,7 @@ User Playlists:
   Removal threshold: "Verwijderdrempel"
   Removal threshold Tooltip: "Video's worden verwijderd zodra het geselecteerde percentage is bereikt en er niet meer dan 2 minuten over zijn. Bij 0% gebeurt dit wanneer het afspelen begint. Bij 100% wanneer het afspelen eindigt."
   Repair Playlists: Afspeellijsten herstellen
-  Repair Description: Herstel ontbrekende videogegevens na het importeren van een YouTube Takeout-ZIP. De volgorde van video's in afspeellijsten blijft gelijk.
+  Repair Description: Herstel ontbrekende videogegevens na het importeren van afspeellijsten. De volgorde van video's in afspeellijsten blijft gelijk.
   Remove Unavailable Videos: "Verwijder niet-beschikbare video's"
   Remove Unavailable Videos Confirmation: "Niet-beschikbare video's verwijderen? Gevonden: {count}. Kon niet controleren: {uncertain}. Niet-gecontroleerde video's worden bewaard."
   Add Missing Videos: "Ontbrekende video’s uit de bronafspeellijst toevoegen"
@@ -1551,8 +1551,8 @@ Settings:
     Unknown setting key: 'Onbekende instellingssleutel: {key}'
     Non-transferable setting key: 'Niet-overdraagbare instellingssleutel: {key}'
     Import subscriptions formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-back-up of FreeTube-export (.json)'
-    Import history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-back-up (.json)'
-    Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-back-up (.json), Invidious (.json)'
+    Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Afspeelsnelheden per kanaal"
     Import channel playback speeds: "Afspeelsnelheden per kanaal importeren"

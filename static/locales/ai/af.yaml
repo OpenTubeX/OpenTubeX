@@ -383,7 +383,7 @@ User Playlists:
   Removal threshold: "Verwyderingsdrempel"
   Removal threshold Tooltip: "Video's word verwyder nadat die gekose persentasie bereik is en daar nie meer as 2 minute oor is nie. By 0% word hulle verwyder wanneer afspeel begin. By 100% word hulle verwyder wanneer afspeel eindig."
   Repair Playlists: Herstel afspeellyste
-  Repair Description: Herstel ontbrekende videobesonderhede nadat ’n YouTube Takeout-ZIP ingevoer is. Die volgorde van die afspeellys bly onveranderd.
+  Repair Description: Herstel ontbrekende videobesonderhede nadat afspeellyste ingevoer is. Die volgorde van die afspeellys bly onveranderd.
   Add Missing Videos: Voeg ontbrekende video’s van die bronafspeellys by
   Source Playlist: Bronafspeellys
   Your Playlists: U afspeellyste
@@ -1730,8 +1730,8 @@ Settings:
     Unknown setting key: 'Onbekende instellingsleutel: {key}'
     Non-transferable setting key: 'Nie-oordraagbare instellingsleutel: {key}'
     Import subscriptions formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-rugsteun of FreeTube-uitvoer (.json)'
-    Import history formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-rugsteun (.json)'
-    Import playlists formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-rugsteun (.json), Invidious (.json)'
+    Import playlists formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Ondersteunde formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: Afspeelspoed per kanaal
     Import channel playback speeds: Voer afspeelspoed per kanaal in

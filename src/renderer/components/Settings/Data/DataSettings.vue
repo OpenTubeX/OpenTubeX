@@ -317,7 +317,8 @@ import { BACKUP_SECTIONS, PROFILE_DATA_SECTIONS } from '../../../helpers/unified
 import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers, getDataScope, withDataScope } from '../../../../datastores/handlers/index'
-import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
+import { createTakeoutPlaylistNamer, forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
+import { convertInvidiousPlaylists, convertInvidiousWatchHistory, isInvidiousPlaylistsExport, isInvidiousWatchHistoryExport } from '../../../helpers/invidious-import'
 import {
   normalizeSearchSettings,
   parseExportedSearchHistoryEntry,
@@ -701,7 +702,7 @@ async function importSelectedTakeoutData() {
       } else if (entry.type === 'searchHistory') {
         await importYouTubeSearchHistory(JSON.parse(entry.content))
       } else if (entry.type === 'playlists') {
-        await importTakeoutPlaylist(entry.playlist)
+        await importExternalPlaylist(entry.playlist)
         importedPlaylistCount++
       }
     }, (error, type, path) => {
@@ -1447,6 +1448,8 @@ async function importWatchHistory() {
 
       if (isLibreTubeWatchHistoryBackup(jsonContent)) {
         await importLibreTubeWatchHistory(jsonContent)
+      } else if (isInvidiousWatchHistoryExport(jsonContent)) {
+        await importInvidiousWatchHistory(jsonContent)
       } else if (Array.isArray(jsonContent)) {
         await importYouTubeWatchHistory(jsonContent)
       } else {
@@ -1585,6 +1588,28 @@ async function importLibreTubeWatchHistory(backupData) {
 }
 
 /**
+ * @param {{ watch_history: unknown[] }} exportData
+ */
+async function importInvidiousWatchHistory(exportData) {
+  const { records, skipped } = convertInvidiousWatchHistory(exportData)
+  if (records.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  if (skipped > 0) {
+    showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
+  }
+  if (await store.dispatch('importHistory', { records, rule: 'undated' }) !== true) {
+    throw new Error('Could not import history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'clock-rotate-left'],
+  })
+}
+
+/**
  * @param {any[]} historyData
  */
 async function importYouTubeWatchHistory(historyData) {
@@ -1681,7 +1706,12 @@ async function exportYouTubeWatchHistory() {
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
-async function importTakeoutPlaylist(playlist) {
+/**
+ * Creates the playlist, or adds its missing videos to the saved one with its name.
+ * @param {object} playlist
+ * @param {(video: object) => string} videoKey identifies videos that the saved playlist has already
+ */
+async function importExternalPlaylist(playlist, videoKey = video => `${video.videoId}:${video.timeAdded}`) {
   const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
   if (existing === undefined) {
     if (await store.dispatch('addPlaylist', playlist) !== true) {
@@ -1689,9 +1719,9 @@ async function importTakeoutPlaylist(playlist) {
     }
   } else {
     const videos = deepCopy(existing.videos)
-    const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))
+    const known = new Set(videos.map(videoKey))
     for (const video of playlist.videos) {
-      const key = `${video.videoId}:${video.timeAdded}`
+      const key = videoKey(video)
       if (!known.has(key)) {
         processToBeAddedPlaylistVideo(video)
         videos.push(video)
@@ -1724,6 +1754,7 @@ async function importPlaylists() {
       {
         'application/x-freetube-db': '.db',
         'text/csv': '.csv',
+        'application/json': '.json',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -1744,12 +1775,48 @@ async function importPlaylists() {
   for (const file of files) {
     if (takeoutFiles.includes(file)) { continue }
     try {
-      await importPlaylistDatabase(await file.text())
+      const content = await file.text()
+      const invidiousExport = parseInvidiousPlaylistsExport(content)
+      if (invidiousExport === null) {
+        await importPlaylistDatabase(content)
+      } else {
+        await importInvidiousPlaylists(invidiousExport)
+      }
     } catch (err) {
       console.error('Unable to import playlist file', file.name, err)
       showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${file.name}`, icon: ['fas', 'circle-exclamation'] })
     }
   }
+}
+
+/**
+ * @param {string} content
+ * @returns {{ playlists: unknown[] } | null}
+ */
+function parseInvidiousPlaylistsExport(content) {
+  // Playlist databases have one JSON object per line, so only a file that is
+  // a single JSON object can be an Invidious export.
+  if (!content.trimStart().startsWith('{')) return null
+  try {
+    const data = JSON.parse(content)
+    return isInvidiousPlaylistsExport(data) ? data : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {{ playlists: unknown[] }} exportData
+ */
+async function importInvidiousPlaylists(exportData) {
+  const playlists = convertInvidiousPlaylists(exportData)
+  // Invidious allows several playlists with one name
+  const namePlaylist = createTakeoutPlaylistNamer(new Set(playlists.map(playlist => playlist.playlistName.trim())))
+  for (const playlist of playlists) {
+    // The add times are made up, so a repeated import must match videos by ID
+    await importExternalPlaylist(namePlaylist(playlist), video => video.videoId)
+  }
+  showPlaylistsImportedToast(playlists.length, playlists.length)
 }
 
 async function importTakeoutPlaylistFiles(files) {
@@ -1762,7 +1829,7 @@ async function importTakeoutPlaylistFiles(files) {
   }
   try {
     await forEachTakeoutPlaylistFile(files, async playlist => {
-      await importTakeoutPlaylist(playlist)
+      await importExternalPlaylist(playlist)
       importedCount++
     }, reportError)
   } catch (error) {

@@ -335,7 +335,7 @@ User Playlists:
   Removal threshold: "آستانهٔ حذف"
   Removal threshold Tooltip: "ویدیو پس از رسیدن به درصد انتخابی و باقی‌ماندن حداکثر 2 دقیقه حذف می‌شود. در 0% با آغاز پخش و در 100% با پایان پخش حذف می‌شود."
   Repair Playlists: ترمیم فهرست‌های پخش
-  Repair Description: جزئیات گم‌شدهٔ ویدیوها را پس از وارد کردن فایل ZIP از YouTube Takeout بازیابی کنید. ترتیب ویدیوها در فهرست‌های پخش تغییر نمی‌کند.
+  Repair Description: جزئیات گم‌شدهٔ ویدیوها را پس از وارد کردن فهرست‌های پخش بازیابی کنید. ترتیب ویدیوها در فهرست‌های پخش تغییر نمی‌کند.
   Remove Unavailable Videos: "ویدیوهای غیرقابل دسترس را حذف کنید"
   Remove Unavailable Videos Confirmation: "ویدیوهای غیرقابل دسترس حذف شوند؟ یافت شد: {count}. بررسی ممکن نبود: {uncertain}. ویدیوهای بررسی‌نشده نگه داشته می‌شوند."
   Add Missing Videos: "افزودن ویدیوهای موجود در فهرست پخش منبع که در این فهرست نیستند"
@@ -1579,8 +1579,8 @@ Settings:
     Unknown setting key: 'کلید تنظیمات ناشناخته: {key}'
     Non-transferable setting key: 'کلید تنظیمات انتقال‌ناپذیر: {key}'
     Import subscriptions formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، پشتیبان LibreTube یا خروجی FreeTube (.json)'
-    Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)'
-    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)'
+    Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)، Invidious (.json)'
+    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
     Channel playback speeds: "سرعت‌های پخش کانال‌ها"
     Import channel playback speeds: "وارد کردن سرعت‌های پخش کانال‌ها"

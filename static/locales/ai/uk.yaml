@@ -322,7 +322,7 @@ User Playlists:
   Removal threshold: "Поріг видалення"
   Removal threshold Tooltip: "Відео видаляється після досягнення вибраного відсотка, якщо до кінця лишається не більше 2 хвилин. За значення 0% видалення відбувається на початку відтворення, а за 100% — після його завершення."
   Repair Playlists: Відновити списки відтворення
-  Repair Description: Відновіть відсутні відомості про відео після імпорту ZIP-архіву YouTube Takeout. Порядок у списках не зміниться.
+  Repair Description: Відновіть відсутні відомості про відео після імпорту списків відтворення. Порядок у списках не зміниться.
   Remove Unavailable Videos: "Видалити недоступні відео"
   Remove Unavailable Videos Confirmation: "Видалити недоступні відео? Знайдено: {count}. Не вдалося перевірити: {uncertain}. Неперевірені відео будуть збережені."
   Add Missing Videos: "Додати відсутні відео з початкового списку відтворення"
@@ -1547,8 +1547,8 @@ Settings:
     Unknown setting key: 'Невідомий ключ налаштування: {key}'
     Non-transferable setting key: 'Ключ налаштування, який не можна перенести: {key}'
     Import subscriptions formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервна копія LibreTube або експорт FreeTube (.json)'
-    Import history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервна копія LibreTube (.json)'
-    Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервна копія LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Швидкості відтворення каналів"
     Import channel playback speeds: "Імпортувати швидкості відтворення каналів"

@@ -532,7 +532,7 @@ export function isSupportedTakeoutEntry(entry) {
  * names that other playlists in it already use.
  * @param {Set<string>} reservedNames The trimmed names of every playlist in the import.
  */
-function createTakeoutPlaylistNamer(reservedNames) {
+export function createTakeoutPlaylistNamer(reservedNames) {
   // The next suffix to try for each name. Lower suffixes are taken already.
   const nextSuffixes = new Map()
   const allocatedNames = new Set()

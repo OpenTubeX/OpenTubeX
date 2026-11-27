@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Eemaldamise lävend"
   Removal threshold Tooltip: "Video eemaldatakse, kui valitud protsent videost on vaadatud ja lõpuni on jäänud kuni 2 minutit. Väärtuse 0% korral eemaldatakse video esitamise alguses. Väärtuse 100% korral eemaldatakse see esitamise lõpus."
   Repair Playlists: Paranda esitusloendeid
-  Repair Description: Taasta puuduvad videoandmed pärast YouTube Takeouti ZIP-faili importimist. Esitusloendite järjekord ei muutu.
+  Repair Description: Taasta puuduvad videoandmed pärast esitusloendite importimist. Esitusloendite järjekord ei muutu.
   Remove Unavailable Videos: "Eemalda kättesaamatud videod"
   Remove Unavailable Videos Confirmation: "Kas eemaldada kättesaamatud videod? Leitud: {count}. Ei saanud kontrollida: {uncertain}. Kontrollimata videod jäävad alles."
   Add Missing Videos: "Lisa algsest esitusloendist puuduvad videod"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: Ava profiilikaust
     Invalid JSON row, skipping item: Rea {row} JSON on vigane, üksus jäetakse vahele
     Import subscriptions formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube’i varukoopia või FreeTube’i eksport (.json)'
-    Import history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube’i varukoopia (.json)'
-    Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube’i varukoopia (.json), Invidious (.json)'
+    Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Kanalite esituskiirused"
     Import channel playback speeds: "Impordi kanalite esituskiirused"

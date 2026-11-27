@@ -361,7 +361,7 @@ User Playlists:
   Removal threshold: "ہٹانے کی حد"
   Removal threshold Tooltip: "ویڈیوز منتخب فیصد تک پہنچنے اور 2 منٹ سے زیادہ باقی نہ رہنے کے بعد ہٹا دی جاتی ہیں۔ 0% پر وہ پلے بیک شروع ہوتے ہی ہٹا دی جاتی ہیں۔ 100% پر وہ پلے بیک ختم ہونے پر ہٹا دی جاتی ہیں۔"
   Repair Playlists: پلے لسٹس کی مرمت کریں
-  Repair Description: YouTube Takeout ZIP امپورٹ کرنے کے بعد ویڈیوز کی گمشدہ تفصیلات بحال کریں۔ پلے لسٹ کی ترتیب تبدیل نہیں ہوتی۔
+  Repair Description: پلے لسٹس امپورٹ کرنے کے بعد ویڈیوز کی گمشدہ تفصیلات بحال کریں۔ پلے لسٹ کی ترتیب تبدیل نہیں ہوتی۔
   Add Missing Videos: سورس پلے لسٹ سے گمشدہ ویڈیوز شامل کریں
   Source Playlist: سورس پلے لسٹ
   Load More Playlists: مزید پلے لسٹس لوڈ کریں
@@ -1599,8 +1599,8 @@ Settings:
     Unknown setting key: 'نامعلوم سیٹنگ کلید: {key}'
     Non-transferable setting key: 'ناقابل منتقلی سیٹنگ کلید: {key}'
     Import subscriptions formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، LibreTube بیک اپ یا FreeTube ایکسپورٹ (.json)'
-    Import history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، LibreTube بیک اپ (.json)'
-    Import playlists formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)'
+    Import history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، LibreTube بیک اپ (.json)، Invidious (.json)'
+    Import playlists formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)، Invidious (.json)'
     Import search history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
     Channel playback speeds: چینل پلے بیک اسپیڈز
     Import channel playback speeds: چینل پلے بیک اسپیڈز امپورٹ کریں

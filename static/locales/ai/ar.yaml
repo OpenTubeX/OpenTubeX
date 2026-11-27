@@ -318,7 +318,7 @@ User Playlists:
   Removal threshold: "عتبة الإزالة"
   Removal threshold Tooltip: "تتم إزالة مقاطع الفيديو بعد الوصول إلى النسبة المئوية المحددة وعدم تبقّي أكثر من 2 دقيقة. عند 0%، تتم إزالتها عند بدء التشغيل. عند 100%، تتم إزالتها عند انتهاء التشغيل."
   Repair Playlists: إصلاح قوائم التشغيل
-  Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد ملف ZIP من YouTube Takeout. يبقى ترتيب قوائم التشغيل دون تغيير.
+  Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد قوائم التشغيل. يبقى ترتيب قوائم التشغيل دون تغيير.
   Remove Unavailable Videos: "إزالة مقاطع الفيديو غير المتاحة"
   Remove Unavailable Videos Confirmation: "هل تريد إزالة مقاطع الفيديو غير المتوفرة؟ تم العثور على: {count}. تعذر التحقق من: {uncertain}. سيتم الاحتفاظ بمقاطع الفيديو التي لم يتم التحقق منها."
   Add Missing Videos: "إضافة الفيديوهات المفقودة من قائمة التشغيل المصدر"
@@ -1547,8 +1547,8 @@ Settings:
     Unknown setting key: 'مفتاح الإعداد غير معروف: {key}'
     Non-transferable setting key: 'مفتاح الإعداد غير القابل للتحويل: {key}'
     Import subscriptions formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، أو YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، النسخ الاحتياطي LibreTube أو تصدير FreeTube (.json)'
-    Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)'
-    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.csv)'
+    Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)، وInvidious (.json)'
+    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.csv)، وInvidious (.json)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
     Channel playback speeds: "سرعات تشغيل القنوات"
     Import channel playback speeds: "استيراد سرعات تشغيل القنوات"

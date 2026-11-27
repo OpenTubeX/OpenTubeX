@@ -23,7 +23,7 @@ test('does not announce complete success after an empty playlist fails and a lat
         try { await onEntry({ type: 'playlists', playlist: { playlistName: name } }) } catch (error) { onError(error, 'playlists', `playlists/${name}-videos.csv`) }
       }
     },
-    importTakeoutPlaylist: async playlist => {
+    importExternalPlaylist: async playlist => {
       imported.push(playlist.playlistName)
       if (playlist.playlistName === 'Failed') { throw new Error('Database write failed') }
     },

@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "Mörk fyrir fjarlægingu"
   Removal threshold Tooltip: "Myndskeið eru fjarlægð þegar valinni prósentu er náð og ekki meira en 2 mínútur eru eftir. Við 0% eru þau fjarlægð þegar spilun hefst. Við 100% eru þau fjarlægð þegar spilun lýkur."
   Repair Playlists: Lagfæra spilunarlista
-  Repair Description: Endurheimtu upplýsingar sem vantar um myndskeið eftir innflutning á YouTube Takeout ZIP-skrá. Röð spilunarlista helst óbreytt.
+  Repair Description: Endurheimtu upplýsingar sem vantar um myndskeið eftir innflutning spilunarlista. Röð spilunarlista helst óbreytt.
   Remove Unavailable Videos: "Fjarlægðu ótiltæk myndbönd"
   Remove Unavailable Videos Confirmation: "Fjarlægja ótiltæk myndbönd? Fundin: {count}. Ekki tókst að athuga: {uncertain}. Myndbönd sem ekki voru athuguð verða varðveitt."
   Add Missing Videos: "Bæta við myndböndum sem vantar úr upprunalega spilunarlistanum"
@@ -1527,8 +1527,8 @@ Settings:
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
     Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
-    Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
-    Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json), Invidious (.json)'
+    Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Spilunarhraði rása"
     Import channel playback speeds: "Flytja inn spilunarhraða rása"

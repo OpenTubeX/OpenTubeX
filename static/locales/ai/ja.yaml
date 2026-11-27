@@ -315,7 +315,7 @@ User Playlists:
   Removal threshold: "削除のしきい値"
   Removal threshold Tooltip: "選択した割合に達し、残り時間が2分以下になると削除されます。0%では再生開始時、100%では再生終了時に削除されます。"
   Repair Playlists: プレイリストを修復
-  Repair Description: YouTube TakeoutのZIPをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
+  Repair Description: プレイリストをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
   Remove Unavailable Videos: "利用できない動画を削除する"
   Remove Unavailable Videos Confirmation: "利用できない動画を削除しますか？ 見つかった数: {count}。確認できなかった数: {uncertain}。確認できなかった動画は保持されます。"
   Add Missing Videos: "コピー元の再生リストから不足している動画を追加"
@@ -1524,8 +1524,8 @@ Settings:
     Open Profile Directory: プロフィールディレクトリを開く
     Invalid JSON row, skipping item: '{row}行目のJSONが無効なため、この項目をスキップします'
     Import subscriptions formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv、.json、.opml）、NewPipe（.json）、LibreTubeバックアップまたはFreeTubeエクスポート（.json）'
-    Import history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）、LibreTubeバックアップ（.json）'
-    Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv）'
+    Import history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）、LibreTubeバックアップ（.json）、Invidious（.json）'
+    Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv）、Invidious（.json）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
     Channel playback speeds: "チャンネル別の再生速度"
     Import channel playback speeds: "チャンネル別再生速度のインポート"

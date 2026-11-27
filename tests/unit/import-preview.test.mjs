@@ -364,11 +364,11 @@ test('preview reports existing generated playlist names as merge targets on repe
       }
     },
   })
-  vm.runInContext(componentSection('async function importTakeoutPlaylist(', 'async function importPlaylists()'), context)
+  vm.runInContext(componentSection('async function importExternalPlaylist(', 'async function importPlaylists()'), context)
   for (let attempt = 0; attempt < 2; attempt++) {
     const preview = await previewTakeoutImport(file, paths, { playlists: playlists.value })
     assert.deepEqual(counts(preview[0]), [0, 2, 0])
-    await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => context.importTakeoutPlaylist(entry.playlist), error => { throw error })
+    await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => context.importExternalPlaylist(entry.playlist), error => { throw error })
     assert.equal(playlists.value.length, 2)
     assert.deepEqual(Array.from(playlists.value[1].videos, video => video.videoId), ['zzzzzzzzzzz', 'lmnopqrstuv'])
   }

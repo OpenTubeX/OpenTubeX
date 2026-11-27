@@ -318,7 +318,7 @@ User Playlists:
   Removal threshold: "Prag za uklanjanje"
   Removal threshold Tooltip: "Videozapisi se uklanjaju nakon što dosegnu odabrani postotak i preostanu im najviše 2 minute. Pri 0 % uklanjaju se na početku reprodukcije. Pri 100 % uklanjaju se na završetku reprodukcije."
   Repair Playlists: Popravi popise za reprodukciju
-  Repair Description: Vrati nedostajuće podatke o videozapisima nakon uvoza ZIP datoteke iz usluge YouTube Takeout. Redoslijed u popisima ostaje isti.
+  Repair Description: Vrati nedostajuće podatke o videozapisima nakon uvoza popisa za reprodukciju. Redoslijed u popisima ostaje isti.
   Remove Unavailable Videos: "Uklonite nedostupne videozapise"
   Remove Unavailable Videos Confirmation: "Ukloniti nedostupne videozapise? Pronađeno: {count}. Nije moguće provjeriti: {uncertain}. Neprovjereni videozapisi će se zadržati."
   Add Missing Videos: "Dodaj videozapise koji nedostaju iz izvornog popisa za reprodukciju"
@@ -1532,8 +1532,8 @@ Settings:
     Open Profile Directory: Otvori mapu profila
     Invalid JSON row, skipping item: Neispravan JSON u retku {row}, stavka se preskače
     Import subscriptions formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), sigurnosna kopija LibreTubea ili izvoz iz FreeTubea (.json)'
-    Import history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), sigurnosna kopija LibreTubea (.json)'
-    Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), sigurnosna kopija LibreTubea (.json), Invidious (.json)'
+    Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv), Invidious (.json)'
     Import search history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Channel playback speeds: "Brzine reprodukcije kanala"
     Import channel playback speeds: "Uvezi brzine reprodukcije kanala"
