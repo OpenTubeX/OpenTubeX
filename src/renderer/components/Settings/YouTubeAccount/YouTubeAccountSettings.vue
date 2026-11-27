@@ -438,18 +438,20 @@ async function syncNow() {
   color: oklch(from var(--primary-text-color) clamp(0.5, l, 0.82) 0.15 75deg);
 }
 
-/* Lines up with the section's controls, which are padded divs. */
 .profileLabel {
   font-weight: 600;
   margin-block: 1rem 0.5rem;
-  padding-inline: 20px;
+  text-align: center;
 }
 
+/* Centered below its heading, and narrow enough that a selected channel's
+   check stays close to its name. The section pads it by 20px on each side. */
 .profileList {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-block: 1rem;
+  max-inline-size: calc(480px + 40px);
 }
 
 .profileLabel + .profileList {

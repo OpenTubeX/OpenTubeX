@@ -75,12 +75,6 @@
     padding-block-end: 0;
   }
 
-  /* In wide windows, a list of rows narrows with the window and stays
-     centered, so a setting's name stays close to its control. */
-  > :deep(.settingsRows) {
-    max-inline-size: clamp(720px, 80%, 900px);
-  }
-
   /* A switch's label padding already adds space below it. Compact switches
      have no margin, so their row makes up the rest. */
   > :deep(:last-child > .switch-ctn:not(.compact):last-child) {
@@ -126,6 +120,16 @@
 .settingsSection > .sectionBody > :deep(*) {
   margin-block: 0;
   margin-inline: auto;
+}
+
+/* In wide windows, a card with a list of rows narrows with the window and
+   stays centered, so a setting's name stays close to its control and the card
+   doesn't frame empty space beside the rows. Blocks marked settingsRowsWidth
+   narrow their card the same way. The card otherwise spans the settings
+   content, so 80cqi is 80% of its full width. */
+.settingsSection > .sectionBody:has(> :deep(:is(.settingsRows, .settingsRowsWidth))) {
+  margin-inline: auto;
+  max-inline-size: clamp(720px, 80cqi, 900px);
 }
 
 /* Cards nested in a section set themselves apart from the blocks around them. */
