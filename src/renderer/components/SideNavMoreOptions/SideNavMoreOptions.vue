@@ -16,10 +16,8 @@
       <FtIcon
         :icon="['fas', 'ellipsis']"
         class="navIcon"
-        :class="applyNavIconExpand"
       />
       <NavLabel
-        v-if="!hideLabelsSideBar"
         id="moreNavLabel"
         :label="$t('More')"
         :short-label="$t('Mobile Navigation.more')"
@@ -250,17 +248,6 @@ function releaseMenu() {
 }
 const overflowRouteActive = computed(() => props.items.some(item => route.path === `/${item.id}`) ||
   props.pinnedItems.some(({ path }) => path != null && (route.path === path || route.path.startsWith(`${path}/`))))
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideLabelsSideBar = computed(() => {
-  return store.getters.getHideLabelsSideBar
-})
-
-const applyNavIconExpand = computed(() => {
-  return {
-    navIconExpand: hideLabelsSideBar.value
-  }
-})
 
 // Pinned playlists and channels reorder separately, like in the side navigation.
 const pinnedGroups = computed(() => ['playlist', 'channel']
