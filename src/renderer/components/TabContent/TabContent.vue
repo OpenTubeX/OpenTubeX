@@ -327,10 +327,24 @@ function settleChangedHiddenContent(records) {
 function settleResizedHiddenContent() {
   settleChangedHiddenContent()
 }
+/**
+ * Settling content renders transparently, so keyboard focus could reach it.
+ * Inert would restyle every element on each settle instead.
+ * @param {FocusEvent} event
+ */
+function keepFocusOutOfHiddenContent(event) {
+  const target = event.target
+  if (target instanceof HTMLElement && (isPrewarmed.value || (isBehindWatch.value && target.closest('.browsingBehindWatch')))) {
+    target.blur()
+  }
+}
 let hiddenContentObserver = null
+let observedHiddenContentRoot = null
 function stopObservingHiddenContent() {
   hiddenContentObserver?.disconnect()
   window.removeEventListener('resize', settleResizedHiddenContent)
+  observedHiddenContentRoot?.removeEventListener('focusin', keepFocusOutOfHiddenContent)
+  observedHiddenContentRoot = null
 }
 const observesHiddenContent = computed(() => HIDES_WITH_CONTENT_VISIBILITY && (isPrewarmed.value || isBehindWatch.value))
 watch([observesHiddenContent, tabContentRef], ([observes, root]) => {
@@ -339,6 +353,8 @@ watch([observesHiddenContent, tabContentRef], ([observes, root]) => {
   hiddenContentObserver ??= new MutationObserver(settleChangedHiddenContent)
   hiddenContentObserver.observe(root, { childList: true, characterData: true, subtree: true })
   window.addEventListener('resize', settleResizedHiddenContent)
+  root.addEventListener('focusin', keepFocusOutOfHiddenContent)
+  observedHiddenContentRoot = root
 }, { flush: 'post', immediate: true })
 
 // Background tabs, settled neighbors, retained pages and the page behind
