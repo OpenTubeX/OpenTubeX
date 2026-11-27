@@ -4,40 +4,52 @@
     :title-id="titleId"
     :icon="['fas', 'globe']"
   >
-    <FtFlexBox>
-      <FtToggleSwitch
+    <div class="settingsRows">
+      <FtSettingsRow
         v-if="supportsYtDlp"
-        :label="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"
-        :default-value="enableTwitchPage"
-        setting-key="enableTwitchPage"
-        :tooltip="t('Tooltips.Subscription Settings.Enable Twitch Page')"
-        :compact="true"
-        @change="value => store.dispatch('updateEnableTwitchPage', value)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Subscription Settings.Platforms.Notify When Live')"
-        :default-value="liveNotifications"
-        setting-key="twitchLiveNotifications"
-        :tooltip="t('Tooltips.Subscription Settings.Twitch Notify When Live')"
-        :compact="true"
-        @change="updateLiveNotifications"
-      />
-    </FtFlexBox>
-    <FtFlexBox>
-      <div class="autoRefreshInterval">
+        :description="t('Tooltips.Subscription Settings.Enable Twitch Page')"
+        :title="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"
+        :icon="['fas', 'twitch']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.Subscription Settings.Platforms.Enable Twitch Page')"
+          hide-label
+          :default-value="enableTwitchPage"
+          setting-key="enableTwitchPage"
+          @change="value => store.dispatch('updateEnableTwitchPage', value)"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Subscription Settings.Twitch Notify When Live')"
+        :title="t('Settings.Subscription Settings.Platforms.Notify When Live')"
+        :icon="['fas', 'bell']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.Subscription Settings.Platforms.Notify When Live')"
+          hide-label
+          :default-value="liveNotifications"
+          setting-key="twitchLiveNotifications"
+          @change="updateLiveNotifications"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Tooltips.Subscription Settings.Platforms Auto Refresh Interval')"
+        :title="t('Settings.Subscription Settings.Auto Refresh Interval')"
+        :icon="['fas', 'clock']"
+        performance-impact-key="platformFeedAutoRefreshInterval"
+      >
         <FtSelect
+          hide-label
           :placeholder="t('Settings.Subscription Settings.Auto Refresh Interval')"
           :describe-by-id="titleId"
           :value="autoRefreshInterval"
           setting-key="platformFeedAutoRefreshInterval"
           :select-names="autoRefreshIntervalNames"
           :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-          :tooltip="t('Tooltips.Subscription Settings.Platforms Auto Refresh Interval')"
-          :icon="['fas', 'clock']"
           @change="value => store.dispatch('updatePlatformFeedAutoRefreshInterval', value)"
         />
-      </div>
-    </FtFlexBox>
+      </FtSettingsRow>
+    </div>
   </FtSettingsSection>
 </template>
 
@@ -45,8 +57,8 @@
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
@@ -77,5 +89,3 @@ function updateLiveNotifications(value) {
 const autoRefreshInterval = computed(() => store.getters.getPlatformFeedAutoRefreshInterval)
 const autoRefreshIntervalNames = computed(() => getAutoRefreshIntervalNames(t))
 </script>
-
-<style scoped src="./PlatformSettings.css" />

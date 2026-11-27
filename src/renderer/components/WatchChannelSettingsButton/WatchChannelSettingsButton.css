@@ -41,7 +41,7 @@
 
 .channelSettingSave:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .channelSettingSave:not(:disabled):is(:hover, :focus-visible) {

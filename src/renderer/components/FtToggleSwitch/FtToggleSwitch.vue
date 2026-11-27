@@ -19,7 +19,7 @@
       :checked="currentValue"
       :indeterminate="indeterminate"
       :aria-checked="indeterminate ? 'mixed' : undefined"
-      :aria-describedby="description ? descriptionId : undefined"
+      :aria-describedby="describedBy"
       :disabled="disabled"
       @change="change"
     >
@@ -92,13 +92,14 @@
 </template>
 
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, inject, onActivated, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import { SETTINGS_ROW_DESCRIPTION_ID } from '../FtSettingsRow/settingsRowContext'
 
 const props = defineProps({
   label: {
@@ -184,6 +185,8 @@ const { t } = useI18n()
 
 const id = useId()
 const descriptionId = `${id}-description`
+const rowDescriptionId = inject(SETTINGS_ROW_DESCRIPTION_ID, null)
+const describedBy = computed(() => [props.description ? descriptionId : null, rowDescriptionId?.value].filter(Boolean).join(' ') || undefined)
 
 const currentValue = ref(props.defaultValue)
 

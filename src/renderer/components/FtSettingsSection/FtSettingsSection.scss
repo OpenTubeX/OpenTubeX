@@ -75,6 +75,12 @@
     padding-block-end: 0;
   }
 
+  /* In wide windows, a list of rows narrows with the window and stays
+     centered, so a setting's name stays close to its control. */
+  > :deep(.settingsRows) {
+    max-inline-size: clamp(720px, 80%, 900px);
+  }
+
   /* A switch's label padding already adds space below it. Compact switches
      have no margin, so their row makes up the rest. */
   > :deep(:last-child > .switch-ctn:not(.compact):last-child) {
@@ -457,7 +463,7 @@
 }
 
 /* Layouts that line their selects up with other fields place them themselves. */
-.sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
+.sectionBody :deep(.select:only-child:not(
   .settingsSelectGrid > *,
   .generalSelectGrid > *,
   .settingsRowControl > *,

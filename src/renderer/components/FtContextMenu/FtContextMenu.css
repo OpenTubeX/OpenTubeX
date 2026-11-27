@@ -188,9 +188,10 @@
   overflow-wrap: anywhere;
 }
 
-.menuItem.disabled {
+.menuItem:is(.disabled, :disabled) {
   color: var(--tertiary-text-color);
   background: transparent;
+  cursor: not-allowed;
   opacity: 0.7;
 }
 

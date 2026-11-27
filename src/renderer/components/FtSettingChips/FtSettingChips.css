@@ -56,7 +56,7 @@
 
 .settingChip.disabled {
   border-color: color-mix(in srgb, var(--secondary-text-color) 25%, transparent);
-  cursor: default;
+  cursor: not-allowed;
 }
 
 /* Only the chip's own content dims, so its buttons stay readable. */

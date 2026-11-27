@@ -1,20 +1,3 @@
-.translationSettings {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.translationDescription {
-  color: var(--tertiary-text-color);
-  margin-block: 12px 4px;
-  max-inline-size: 700px;
-  text-align: center;
-}
-
-.translationLanguageSelect {
-  inline-size: min(100%, 330px);
-}
-
 .translationLanguages {
   display: flex;
   flex-wrap: wrap;

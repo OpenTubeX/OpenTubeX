@@ -3,74 +3,77 @@
     :title="t('Settings.General Settings.Comment Translation.Translation')"
     :icon="['fas', 'language']"
   >
-    <div class="translationSettings">
-      <FtSelect
-        multiple
-        class="translationLanguageSelect"
-        :placeholder="t('Settings.General Settings.Comment Translation.Offer Translations For')"
-        :empty-label="t('Global.Off')"
-        :value="enabledTranslations"
-        setting-key="enableCommentTranslations"
-        :sync-setting-keys="TRANSLATION_SETTING_KEYS"
-        :is-changed="translationsChanged"
-        :select-names="translationLabels"
-        :select-values="TRANSLATION_SETTING_KEYS"
+    <div class="settingsRows">
+      <FtSettingsRow
+        :title="t('Settings.General Settings.Comment Translation.Offer Translations For')"
         :icon="['fas', 'language']"
-        @change="updateTranslations"
-        @reset="resetTranslations"
-      />
-      <p
-        :id="descriptionId"
-        class="translationDescription"
       >
-        {{ t('Settings.General Settings.Comment Translation.Description') }}
-      </p>
-      <FtSelect
-        class="translationLanguageSelect"
-        :placeholder="t('Settings.General Settings.Comment Translation.Never Translate')"
-        value=""
-        setting-key="commentTranslationIgnoredLanguages"
-        :select-names="languageNames"
-        :select-values="languageValues"
-        :describe-by-id="descriptionId"
-        :disabled="!anyTranslationEnabled"
-        :icon="['fas', 'language']"
-        :is-locale-selector="true"
-        @change="addLanguage"
-      />
-      <ul
-        v-if="selectedLanguages.length > 0"
-        class="translationLanguages"
-        :aria-label="t('Settings.General Settings.Comment Translation.Never Translate')"
+        <FtSelect
+          multiple
+          hide-label
+          :placeholder="t('Settings.General Settings.Comment Translation.Offer Translations For')"
+          :empty-label="t('Global.Off')"
+          :value="enabledTranslations"
+          setting-key="enableCommentTranslations"
+          :sync-setting-keys="TRANSLATION_SETTING_KEYS"
+          :is-changed="translationsChanged"
+          :select-names="translationLabels"
+          :select-values="TRANSLATION_SETTING_KEYS"
+          @change="updateTranslations"
+          @reset="resetTranslations"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Settings.General Settings.Comment Translation.Description')"
+        :title="t('Settings.General Settings.Comment Translation.Never Translate')"
+        :icon="['fas', 'ban']"
       >
-        <li
-          v-for="language in selectedLanguages"
-          :key="language.code"
-          class="translationLanguage"
-        >
-          <bdi :lang="language.code">{{ language.name }}</bdi>
-          <button
-            type="button"
-            class="translationLanguageRemove"
-            :disabled="!anyTranslationEnabled"
-            :aria-label="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
-            :title="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
-            @click="removeLanguage(language.code)"
-          >
-            <FtIcon :icon="['fas', 'xmark']" />
-          </button>
-        </li>
-      </ul>
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.General Settings.Comment Translation.Never Translate')"
+          value=""
+          setting-key="commentTranslationIgnoredLanguages"
+          :select-names="languageNames"
+          :select-values="languageValues"
+          :disabled="!anyTranslationEnabled"
+          :is-locale-selector="true"
+          @change="addLanguage"
+        />
+      </FtSettingsRow>
     </div>
+    <ul
+      v-if="selectedLanguages.length > 0"
+      class="translationLanguages"
+      :aria-label="t('Settings.General Settings.Comment Translation.Never Translate')"
+    >
+      <li
+        v-for="language in selectedLanguages"
+        :key="language.code"
+        class="translationLanguage"
+      >
+        <bdi :lang="language.code">{{ language.name }}</bdi>
+        <button
+          type="button"
+          class="translationLanguageRemove"
+          :disabled="!anyTranslationEnabled"
+          :aria-label="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
+          :title="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
+          @click="removeLanguage(language.code)"
+        >
+          <FtIcon :icon="['fas', 'xmark']" />
+        </button>
+      </li>
+    </ul>
   </FtSettingsSection>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, useId } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 
 import {
@@ -81,7 +84,6 @@ import store from '../../../store/index'
 import { DEFAULT_SETTINGS, defaultUpdaterId } from '../../../store/modules/settings'
 
 const { locale, t } = useI18n()
-const descriptionId = useId()
 const TRANSLATION_SETTING_KEYS = ['enableCommentTranslations', 'enableDescriptionTranslations', 'enablePostTranslations']
 
 const translationLabels = computed(() => [

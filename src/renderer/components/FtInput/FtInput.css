@@ -481,6 +481,10 @@
   cursor: pointer;
 }
 
+.inputAction:disabled {
+  cursor: not-allowed;
+}
+
 .search ::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -549,7 +553,7 @@
 
 .numberStep:disabled {
   opacity: 0.38;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .numberStep:not(:disabled):hover {

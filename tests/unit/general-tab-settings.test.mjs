@@ -91,7 +91,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
 })
 
 const privacySource = await readFile(new URL('../../src/renderer/components/Settings/Privacy/PrivacySettings.vue', import.meta.url), 'utf8')
-const historyToggle = [...privacySource.matchAll(/<FtToggleSwitch\s[\s\S]*?\/>/g)]
+const historyToggle = [...privacySource.matchAll(/<FtSettingsRow\s[\s\S]*?<\/FtSettingsRow>/g)]
   .map(([template]) => template)
   .find(template => template.includes('setting-key="rememberTabNavigationHistory"'))
 assert.ok(historyToggle)
@@ -104,6 +104,10 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
       setup: () => ({ USING_ELECTRON, IS_CAPACITOR, rememberTabNavigationHistory: false, updateRememberTabNavigationHistory: () => {} }),
     })
     app.config.globalProperties.$t = key => key
+    app.component('FtSettingsRow', {
+      inheritAttrs: false,
+      setup: (_props, { slots }) => () => h('div', slots.default?.({})),
+    })
     app.component('FtToggleSwitch', {
       inheritAttrs: false,
       setup: (_props, { attrs }) => () => h('button', { 'data-setting': attrs['setting-key'] }),

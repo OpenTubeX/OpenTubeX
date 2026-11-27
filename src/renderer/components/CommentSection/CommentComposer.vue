@@ -502,7 +502,7 @@ onBeforeUnmount(() => resizeObserver.disconnect())
 }
 
 .commentComposerAvatar:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 

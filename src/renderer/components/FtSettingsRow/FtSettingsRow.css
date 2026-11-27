@@ -5,6 +5,7 @@
   display: grid;
   grid-template:
     'icon text control' auto
+    '. details details' auto
     / 40px minmax(0, 1fr) auto;
   padding-block: calc(12px * var(--ui-density, 1));
 }
@@ -17,6 +18,7 @@
   grid-template:
     'icon text' auto
     '. control' auto
+    '. details' auto
     / 40px minmax(0, 1fr);
 }
 
@@ -46,6 +48,11 @@
   font-weight: 600;
   line-height: 1.5rem;
   text-wrap: pretty;
+}
+
+.settingsRowPerformanceImpact {
+  margin-inline-start: 6px;
+  vertical-align: middle;
 }
 
 .settingsRowTooltip {
@@ -83,10 +90,38 @@
   margin: 0;
 }
 
-/* Selects share one width, so the controls of a list line up at both edges. */
+/* Selects share one width, so the controls of a list line up at both edges.
+   Wide rows give them a share of their width, so longer values fit. */
 .settingsRowControl > :deep(.select) {
   inline-size: 260px;
   max-inline-size: 100%;
+}
+
+@container settings-content (width > 560px) {
+  .settingsRow:not(.stacked):has(> .settingsRowControl > :deep(.select)) {
+    grid-template-columns: 40px minmax(0, 1fr) clamp(260px, 45%, 420px);
+  }
+
+  .settingsRow:not(.stacked) > .settingsRowControl > :deep(.select) {
+    inline-size: 100%;
+  }
+}
+
+.settingsRowDetails {
+  grid-area: details;
+  min-inline-size: 0;
+}
+
+/* A slider's label and track start where the text does. Its padding, or the
+   changed-setting marker gutter while highlighting is on, moves into the
+   space below the icon. */
+.settingsRowDetails > :deep(.pure-material-slider) {
+  --settings-row-slider-offset: max(5px, var(--settings-marker-gutter, 0px));
+
+  box-sizing: border-box;
+  inline-size: min(100% + var(--settings-row-slider-offset), 380px);
+  margin-block: 4px 0;
+  margin-inline: calc(-1 * var(--settings-row-slider-offset)) 0;
 }
 
 /* Narrow sections put a row's control below its text, like the Data rows. */
@@ -100,6 +135,7 @@
     grid-template:
       'icon text' auto
       '. control' auto
+      '. details' auto
       / 40px minmax(0, 1fr);
   }
 

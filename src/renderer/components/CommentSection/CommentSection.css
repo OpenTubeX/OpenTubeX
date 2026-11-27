@@ -111,7 +111,7 @@
 
 .fullscreenCommentAction:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .fullscreenCommentAction:where(:enabled):hover,
@@ -566,7 +566,7 @@
 }
 
 .commentThreadLineToggle:disabled {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .commentThreadLineToggle:focus-visible {
@@ -848,7 +848,7 @@
 }
 
 .commentReplyContinuationButton:disabled {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .commentReplyContinuationButton:disabled:hover {

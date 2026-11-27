@@ -3,14 +3,20 @@
     :title="$t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Settings')"
     :icon="['fas', 'thumbs-down']"
   >
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtToggleSwitch
-        :label="$t('Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike')"
-        :default-value="useReturnYoutubeDislikes"
-        setting-key="useReturnYouTubeDislikes"
-        @change="handleUpdateUseReturnYoutubeDislike"
-      />
-    </FtFlexBox>
+    <div class="settingsRows">
+      <FtSettingsRow
+        :title="$t('Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike')"
+        :icon="['fas', 'thumbs-down']"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike')"
+          hide-label
+          :default-value="useReturnYoutubeDislikes"
+          setting-key="useReturnYouTubeDislikes"
+          @change="handleUpdateUseReturnYoutubeDislike"
+        />
+      </FtSettingsRow>
+    </div>
     <FtFlexBox
       v-if="useReturnYoutubeDislikes"
     >
@@ -33,6 +39,7 @@
 <script setup>
 import { computed } from 'vue'
 
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtInput from '../../FtInput/FtInput.vue'

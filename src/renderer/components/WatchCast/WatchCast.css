@@ -99,6 +99,11 @@
 }
 
 .castDevice:disabled {
+  cursor: not-allowed;
+}
+
+/* A status row such as "Searching…" is a disabled button only to stay in the list. */
+.castDevice.castStatus {
   cursor: default;
 }
 
@@ -218,7 +223,7 @@
 
 /* Busy controls stay focusable so that the menu, which closes when focus leaves it, stays open. */
 :is(.castHeaderButton, .castTransportButton, .castVolumeButton, .castCaption, .castStop, .castSlider):is(:disabled, [aria-disabled='true']) {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.5;
 }
 

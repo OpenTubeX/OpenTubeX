@@ -11,20 +11,6 @@
   }
 }
 
-/* The slider is centered under its switch. Its end keeps as much room as the changed-setting
-   marker gutter takes at its start, so the track is centered too. */
-.onlyShowLatestFromChannelNumber {
-  inline-size: 100%;
-}
-
-.onlyShowLatestFromChannelNumber :deep(.pure-material-slider) {
-  box-sizing: border-box;
-  inline-size: 100%;
-  max-inline-size: 380px;
-  margin-inline: auto;
-  padding-inline-end: max(5px, var(--settings-marker-gutter, 0px));
-}
-
 .subscriptionChannelSettingsManager {
   display: flex;
   flex-wrap: wrap;

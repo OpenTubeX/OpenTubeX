@@ -72,7 +72,7 @@
 }
 
 .materialTabs[role='tablist'] :deep([role='tab']:disabled) {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .materialTabs[role='tablist'] :deep([role='tab']:hover:not(:disabled)) {

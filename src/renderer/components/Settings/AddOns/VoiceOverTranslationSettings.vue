@@ -3,38 +3,50 @@
     :title="`${t('Settings.Player Settings.Voice-over Translation.Title')} ${t('Settings.Player Settings.Voice-over Translation.Attribution')}`"
     :icon="['fas', 'headphones']"
   >
-    <div class="switchGrid">
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
-        compact
-        :default-value="useVoiceOverTranslation"
-        setting-key="useVoiceOverTranslation"
-        :tooltip="t('Tooltips.Player Settings.Voice-over Translation')"
-        @change="updateUseVoiceOverTranslation"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
-        compact
-        :disabled="!useVoiceOverTranslation"
-        :default-value="voiceOverTranslationPrepareInBackground"
-        setting-key="voiceOverTranslationPrepareInBackground"
-        :tooltip="t('Settings.Player Settings.Voice-over Translation.Background Preparation Tooltip')"
-        @change="updateVoiceOverTranslationPrepareInBackground"
-      />
-    </div>
-    <FtFlexBox>
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
-        :value="voiceOverTranslationLanguage"
-        setting-key="voiceOverTranslationLanguage"
-        :select-names="voiceOverTranslationLanguageNames"
-        :select-values="VOICE_OVER_TRANSLATION_LANGUAGE_VALUES"
+    <div class="settingsRows">
+      <FtSettingsRow
+        :description="t('Tooltips.Player Settings.Voice-over Translation')"
+        :title="t('Settings.Player Settings.Voice-over Translation.Enable')"
+        :icon="['fas', 'headphones']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
+          hide-label
+          :default-value="useVoiceOverTranslation"
+          setting-key="useVoiceOverTranslation"
+          @change="updateUseVoiceOverTranslation"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :description="t('Settings.Player Settings.Voice-over Translation.Background Preparation Tooltip')"
+        :title="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
+        :icon="['fas', 'downloading']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
+          hide-label
+          :disabled="!useVoiceOverTranslation"
+          :default-value="voiceOverTranslationPrepareInBackground"
+          setting-key="voiceOverTranslationPrepareInBackground"
+          @change="updateVoiceOverTranslationPrepareInBackground"
+        />
+      </FtSettingsRow>
+      <FtSettingsRow
+        :title="t('Settings.Player Settings.Voice-over Translation.Language')"
         :icon="['fas', 'language']"
-        :disabled="!useVoiceOverTranslation"
-        @change="updateVoiceOverTranslationLanguage"
-      />
-    </FtFlexBox>
+      >
+        <FtSelect
+          hide-label
+          :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
+          :value="voiceOverTranslationLanguage"
+          setting-key="voiceOverTranslationLanguage"
+          :select-names="voiceOverTranslationLanguageNames"
+          :select-values="VOICE_OVER_TRANSLATION_LANGUAGE_VALUES"
+          :disabled="!useVoiceOverTranslation"
+          @change="updateVoiceOverTranslationLanguage"
+        />
+      </FtSettingsRow>
+    </div>
     <FtSliderGrid>
       <FtSlider
         :label="t('Settings.Player Settings.Voice-over Translation.Voice Volume')"
@@ -72,8 +84,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtSliderGrid from '../../FtSliderGrid/FtSliderGrid.vue'

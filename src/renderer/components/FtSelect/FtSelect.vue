@@ -8,7 +8,7 @@
   >
     <select
       :id="`${id}-native`"
-      :aria-describedby="describeById"
+      :aria-describedby="describedBy"
       aria-hidden="true"
       class="nativeSelect"
       v-bind="multiple ? null : { value }"
@@ -40,7 +40,7 @@
       :class="{ disabled, withOptionVisuals: hasOptionVisuals }"
       :aria-labelledby="`${id}-label`"
       :aria-controls="`${id}-listbox`"
-      :aria-describedby="[`${id}-value`, describeById].filter(Boolean).join(' ')"
+      :aria-describedby="[`${id}-value`, describedBy].filter(Boolean).join(' ')"
       :aria-expanded="dropdownShown"
       :aria-activedescendant="dropdownShown && !searchPanel ? `${id}-option-${activeIndex}` : null"
       :disabled="disabled"
@@ -331,7 +331,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
@@ -342,6 +342,7 @@ import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLa
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import { SETTINGS_ROW_DESCRIPTION_ID } from '../FtSettingsRow/settingsRowContext'
 import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
@@ -484,6 +485,9 @@ const props = defineProps({
 const emit = defineEmits(['change', 'open', 'preview', 'reset'])
 
 const id = useId()
+// A select in a settings row is also described by the row's description.
+const rowDescriptionId = inject(SETTINGS_ROW_DESCRIPTION_ID, null)
+const describedBy = computed(() => [props.describeById, rowDescriptionId?.value].filter(Boolean).join(' ') || null)
 const dropdownAnchor = `--select-${id}`
 const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')

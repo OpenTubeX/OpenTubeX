@@ -185,7 +185,7 @@
 
 .commandPaletteOption.disabled {
   color: var(--secondary-text-color);
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .commandPaletteOptionIcon {

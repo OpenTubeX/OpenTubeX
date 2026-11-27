@@ -412,11 +412,11 @@ test('the notification setting turns the bell and the notification options off a
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).notificationMode).toBe('off')
   await expect(page.locator('.notificationCenter')).toHaveCount(0)
   const subscriptions = await goToSettingsSection(page, 'subscription')
-  await expect(subscriptions.getByText('Notify About New Uploads', { exact: true })).toHaveCount(0)
+  await expect(subscriptions.getByRole('checkbox', { name: 'Notify About New Uploads', exact: true })).toHaveCount(0)
 
   await chooseSelectOption((await goToSettingsSection(page, 'general')).locator('.select').filter({ hasText: 'Notifications' }).locator('select'), 'system')
   await expect(page.locator('.notificationCenter')).toHaveCount(0)
-  await expect((await goToSettingsSection(page, 'subscription')).getByText('Notify About New Uploads', { exact: true })).toBeVisible()
+  await expect((await goToSettingsSection(page, 'subscription')).getByRole('checkbox', { name: 'Notify About New Uploads', exact: true })).toHaveCount(1)
 })
 
 test('system notifications and the bell stay in step', async ({ app, page }) => {

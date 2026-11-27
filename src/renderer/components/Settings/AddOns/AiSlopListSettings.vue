@@ -3,15 +3,21 @@
     :title="t('Settings.AiSList Settings.AiSList Settings')"
     :icon="['fac', 'robot-slash']"
   >
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtToggleSwitch
-        :label="t('Settings.AiSList Settings.Hide AI Slop Channels')"
-        :default-value="useAiSlopList"
-        setting-key="useAiSlopList"
+    <div class="settingsRows">
+      <FtSettingsRow
         :tooltip="t('Settings.AiSList Settings.Hide AI Slop Channels Tooltip')"
-        @change="updateUseAiSlopList"
-      />
-    </FtFlexBox>
+        :title="t('Settings.AiSList Settings.Hide AI Slop Channels')"
+        :icon="['fac', 'robot-slash']"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.AiSList Settings.Hide AI Slop Channels')"
+          hide-label
+          :default-value="useAiSlopList"
+          setting-key="useAiSlopList"
+          @change="updateUseAiSlopList"
+        />
+      </FtSettingsRow>
+    </div>
     <p
       v-if="useAiSlopList && status"
       class="aiSlopListStatus"
@@ -28,7 +34,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtSettingsRow from '../../FtSettingsRow/FtSettingsRow.vue'
 
 import store from '../../../store/index'
 import { formatShortDateTime } from '../../../helpers/dateFormat'
