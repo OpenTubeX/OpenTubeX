@@ -30,6 +30,34 @@ test('browser dialogs follow the visual viewport including panning', () => {
   dispose()
 })
 
+test('skips unchanged root writes and restores externally overridden viewport properties on resize', () => {
+  const visualViewport = Object.assign(new EventTarget(), { height: 781, offsetTop: 0 })
+  const window = Object.assign(new EventTarget(), { innerHeight: 781, visualViewport })
+  const values = new Map()
+  let writes = 0
+  const style = {
+    getPropertyValue: key => values.get(key) ?? '',
+    setProperty: (key, value) => {
+      writes++
+      values.set(key, value)
+    },
+  }
+  const dispose = setupPhoneViewport(window, { documentElement: { style } })
+  assert.equal(writes, 2)
+
+  // Unchanged scroll/resize events do not touch the root style again.
+  visualViewport.dispatchEvent(new Event('scroll'))
+  window.dispatchEvent(new Event('resize'))
+  assert.equal(writes, 2)
+
+  // External changes to the property are restored on the next resize.
+  values.set('--phone-viewport-height', '240px')
+  window.dispatchEvent(new Event('resize'))
+  assert.equal(values.get('--phone-viewport-height'), '781px')
+  assert.equal(writes, 3)
+  dispose()
+})
+
 test('Android bottom bars stay hidden until the page grows back after its keyboard closes', (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const window = Object.assign(new EventTarget(), { innerWidth: 400, innerHeight: 800 })

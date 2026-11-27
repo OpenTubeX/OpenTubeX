@@ -40,23 +40,19 @@ export function setupPhoneViewport(window, document, nativeResize = false) {
     }, KEYBOARD_CLOSE_TIMEOUT)
   }
 
-  let lastViewportHeight = ''
-  let lastViewportTop = ''
-
   function update() {
     // Android resizes the WebView itself. Its visual viewport can briefly
     // subtract the IME again while those two resize events catch up.
     const viewport = nativeResize ? null : window.visualViewport
     if (nativeResize) updateSoftwareKeyboard()
+    const { style } = document.documentElement
     const nextHeight = `${viewport?.height ?? window.innerHeight}px`
     const nextTop = `${viewport?.offsetTop ?? 0}px`
-    if (nextHeight !== lastViewportHeight) {
-      lastViewportHeight = nextHeight
-      document.documentElement.style.setProperty('--phone-viewport-height', nextHeight)
+    if (style.getPropertyValue?.('--phone-viewport-height') !== nextHeight) {
+      style.setProperty('--phone-viewport-height', nextHeight)
     }
-    if (nextTop !== lastViewportTop) {
-      lastViewportTop = nextTop
-      document.documentElement.style.setProperty('--phone-viewport-top', nextTop)
+    if (style.getPropertyValue?.('--phone-viewport-top') !== nextTop) {
+      style.setProperty('--phone-viewport-top', nextTop)
     }
   }
   update()
