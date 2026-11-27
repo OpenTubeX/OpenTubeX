@@ -24,6 +24,15 @@
   /* The gap already spaces them out, and their own margin would count towards
      how many fit in a row. */
   margin-inline: 0;
+
+  /* When a label wraps, the tracks in its row still line up. */
+  justify-content: flex-end;
+}
+
+/* A wrapped label splits into even lines instead of leaving its value alone
+   on the last one. */
+.sliderGrid :deep(.pure-material-slider .labelContent) {
+  text-wrap: balance;
 }
 
 /* Up to four sliders fill a row evenly, but a fifth would sit alone on the next

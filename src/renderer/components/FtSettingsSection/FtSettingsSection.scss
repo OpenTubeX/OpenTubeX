@@ -122,12 +122,10 @@
   margin-inline: auto;
 }
 
-/* In wide windows, a card with a list of rows narrows with the window and
-   stays centered, so a setting's name stays close to its control and the card
-   doesn't frame empty space beside the rows. Blocks marked settingsRowsWidth
-   narrow their card the same way. The card otherwise spans the settings
-   content, so 80cqi is 80% of its full width. */
-.settingsSection > .sectionBody:has(> :deep(:is(.settingsRows, .settingsRowsWidth))) {
+/* In wide windows, every card narrows with the window and stays centered, so
+   a setting's name stays close to its control and the card doesn't frame
+   empty space beside its content. 80cqi is 80% of the settings content. */
+.settingsSection > .sectionBody {
   margin-inline: auto;
   max-inline-size: clamp(720px, 80cqi, 900px);
 }
