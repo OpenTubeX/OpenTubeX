@@ -154,6 +154,12 @@ public class PlaylistAutoplayTest {
                     "window.__playlistWatch().phonePanelsEnabled && window.__playlistWatch().mobilePanel === null"));
                 evaluate(view, "window.__playlistVideo = document.querySelector('.ftVideoPlayer video');" +
                     "window.__playlistEnded = false; window.__playlistVideo.addEventListener('ended', () => window.__playlistEnded = true);" +
+                    "window.__playlistCountdownSeen = !!document.querySelector('.autoplayCountdownOverlay');" +
+                    "window.__playlistCountdownObserver?.disconnect();" +
+                    "window.__playlistCountdownObserver = new MutationObserver(() => {" +
+                    "  if (document.querySelector('.autoplayCountdownOverlay')) window.__playlistCountdownSeen = true;" +
+                    "});" +
+                    "window.__playlistCountdownObserver.observe(document.body, { childList: true, subtree: true });" +
                     "window.__playlistVideo.currentTime = window.__playlistVideo.duration - 0.3; window.__playlistVideo.play()");
                 await(view, "window.__playlistEnded");
                 if (atBoundary) {
@@ -196,7 +202,7 @@ public class PlaylistAutoplayTest {
                         return;
                     }
                 }
-                await(view, "!!document.querySelector('.autoplayCountdownOverlay')");
+                await(view, "!!document.querySelector('.autoplayCountdownOverlay') || window.__playlistCountdownSeen === true");
                 await(view, "window.__playlistRouter.currentRoute.value.params.id === 'abcdefghijk'");
                 assertEquals("Advance preserves playlist identity", "true", evaluate(view,
                     youtube ? "window.__playlistRouter.currentRoute.value.query.playlistId === 'youtube-autoplay'"
@@ -207,6 +213,7 @@ public class PlaylistAutoplayTest {
             } finally {
                 String cleanup = """
                     (async () => {
+                        window.__playlistCountdownObserver?.disconnect();
                         window.fetch = window.__playlistFetch;
                         if (window.__playlistNativePromise) window.Capacitor.nativePromise = window.__playlistNativePromise;
                         window.__playlistFinishContinuation?.({ status: 500, headers: {}, data: 'Continuation failed', url: 'https://www.youtube.com/youtubei/v1/browse' });
@@ -254,6 +261,29 @@ public class PlaylistAutoplayTest {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);
         } while (SystemClock.uptimeMillis() < deadline);
-        assertEquals(script, "true", evaluate(view, script));
+        String state = evaluate(view, """
+            JSON.stringify({
+                route: window.__playlistRouter?.currentRoute?.value?.fullPath ?? null,
+                ended: window.__playlistEnded ?? null,
+                countdownSeen: window.__playlistCountdownSeen ?? null,
+                countdownOverlay: !!document.querySelector('.autoplayCountdownOverlay'),
+                watch: window.__playlistWatch?.() ? {
+                    videoId: window.__playlistWatch().videoId,
+                    autoplayEnabled: window.__playlistWatch().autoplayEnabled,
+                    autoplayCountdown: window.__playlistWatch().autoplayCountdown,
+                    waitingForPlaylistContinuation: window.__playlistWatch().waitingForPlaylistContinuation,
+                    nextVideo: window.__playlistWatch().$refs?.watchVideoPlaylist?.nextVideo?.videoId ?? null,
+                    preparingVideoLoadGeneration: window.__playlistWatch().preparingVideoLoadGeneration
+                } : null,
+                video: document.querySelector('.ftVideoPlayer video') ? {
+                    readyState: document.querySelector('.ftVideoPlayer video').readyState,
+                    paused: document.querySelector('.ftVideoPlayer video').paused,
+                    ended: document.querySelector('.ftVideoPlayer video').ended,
+                    currentTime: document.querySelector('.ftVideoPlayer video').currentTime,
+                    duration: document.querySelector('.ftVideoPlayer video').duration
+                } : null
+            })
+            """);
+        assertEquals(script + "\nstate=" + state, "true", evaluate(view, script));
     }
 }
