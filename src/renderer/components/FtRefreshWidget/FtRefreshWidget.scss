@@ -124,9 +124,10 @@
     font-size: 14px;
   }
 
+  // Keeps the button at the end while the last update is still unknown
   .refreshActions {
     gap: 8px;
-    margin-inline-start: 0;
+    margin-inline-start: auto;
   }
 }
 
@@ -184,6 +185,11 @@
   .floatingRefreshSection.embedded.hideLabelsSideBar {
     inline-size: 100%;
     justify-content: space-between;
+  }
+
+  // A wrapped last update lines up with the content above it
+  .floatingRefreshSection.embedded .lastRefreshTimestamp {
+    text-align: start;
   }
 
   .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions {

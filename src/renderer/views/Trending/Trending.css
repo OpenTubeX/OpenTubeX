@@ -10,7 +10,6 @@
 }
 
 .pageHeader {
-  container: trending-header / inline-size;
   position: sticky;
   inset-block-start: var(--trending-top-bar-block-size);
   z-index: 3;
@@ -44,30 +43,39 @@
   color: var(--primary-color);
 }
 
-.headerRefreshWidget {
-  min-inline-size: min(100%, 360px);
+.tabsControlsRow {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  min-inline-size: 0;
 }
 
 .trendingInfoTabs {
   --material-tab-font-size: 1.1em;
+  --material-tab-padding-inline: 15px;
 
-  inline-size: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  flex-wrap: wrap;
   gap: 4px 10px;
-  margin-block: 10px 0;
   color: var(--tertiary-text-color);
 }
 
-@container trending-header (width < 640px) {
-  .trendingInfoTabs {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.headerRefreshWidget {
+  margin-inline-start: auto;
 }
 
 .statusMessage {
   margin-block: 48px;
   text-align: center;
+}
+
+@media only screen and (680px < width <= 1280px) {
+  .trendingInfoTabs {
+    --material-tab-padding-inline: 12px;
+
+    column-gap: 8px;
+  }
 }
 
 @media only screen and (width <= 680px) {
@@ -81,17 +89,40 @@
 
   .titleRow {
     align-items: flex-start;
+    row-gap: 8px;
   }
 
   .pageTitle {
     inline-size: 100%;
   }
 
-  .headerRefreshWidget {
-    min-inline-size: 100%;
+  .tabsControlsRow {
+    gap: 12px 8px;
   }
 
   .trendingInfoTabs {
-    gap: 4px;
+    --material-tab-min-height: 48px;
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+
+  /* Sized by their labels, like the Subscriptions tabs */
+  .tab {
+    flex: 1 1 auto;
+    min-inline-size: 24px;
+  }
+
+  .headerRefreshWidget {
+    inline-size: 100%;
+  }
+}
+
+@media only screen and (width <= 480px) {
+  .tab .trendingIcon {
+    display: none;
   }
 }

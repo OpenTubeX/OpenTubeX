@@ -14,101 +14,104 @@
             />
             {{ $t("Trending.Trending") }}
           </h2>
-          <FtRefreshWidget
-            embedded
-            class="headerRefreshWidget"
-            :disable-refresh="isLoading[currentTab]"
-            :last-refresh-timestamp="lastTrendingRefreshTimestamp"
-            :title="$t('Trending.Trending')"
-            @click="getTrendingInfo(true)"
-          />
+          <!-- Like the Subscriptions header, the tabs and the refresh widget move below the title together -->
+          <div class="tabsControlsRow">
+            <FtTabs
+              class="trendingInfoTabs"
+              role="tablist"
+              :aria-label="$t('Trending.Trending Tabs')"
+            >
+              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+              <div
+                ref="gamingTab"
+                class="tab"
+                role="tab"
+                :aria-selected="currentTab === 'gaming'"
+                aria-controls="trendingPanel"
+                :tabindex="currentTab === 'gaming' ? 0 : -1"
+                :class="{ selectedTab: currentTab === 'gaming' }"
+                @click="changeTab('gaming')"
+                @keydown.space.enter.prevent="changeTab('gaming')"
+                @keydown.left="focusTab('podcasts', $event)"
+                @keydown.right="focusTab('music', $event)"
+              >
+                <FtIcon
+                  :icon="['fas', 'gamepad']"
+                  class="trendingIcon"
+                />
+                {{ $t("Trending.Gaming") }}
+              </div>
+              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+              <div
+                ref="musicTab"
+                class="tab"
+                role="tab"
+                :aria-selected="currentTab === 'music'"
+                aria-controls="trendingPanel"
+                :tabindex="currentTab === 'music' ? 0 : -1"
+                :class="{ selectedTab: currentTab === 'music' }"
+                @click="changeTab('music')"
+                @keydown.space.enter.prevent="changeTab('music')"
+                @keydown.left="focusTab('gaming', $event)"
+                @keydown.right="focusTab('sports', $event)"
+              >
+                <FtIcon
+                  :icon="['fas', 'music']"
+                  class="trendingIcon"
+                />
+                {{ t("Trending.Music") }}
+              </div>
+              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+              <div
+                ref="sportsTab"
+                class="tab"
+                role="tab"
+                :aria-selected="currentTab === 'sports'"
+                aria-controls="trendingPanel"
+                :tabindex="currentTab === 'sports' ? 0 : -1"
+                :class="{ selectedTab: currentTab === 'sports' }"
+                @click="changeTab('sports')"
+                @keydown.space.enter.prevent="changeTab('sports')"
+                @keydown.left="focusTab('music', $event)"
+                @keydown.right="focusTab('podcasts', $event)"
+              >
+                <FtIcon
+                  :icon="['fas', 'trophy']"
+                  class="trendingIcon"
+                />
+                {{ t("Trending.Sports") }}
+              </div>
+              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+              <div
+                ref="podcastsTab"
+                class="tab"
+                role="tab"
+                :aria-selected="currentTab === 'podcasts'"
+                aria-controls="trendingPanel"
+                :tabindex="currentTab === 'podcasts' ? 0 : -1"
+                :class="{ selectedTab: currentTab === 'podcasts' }"
+                @click="changeTab('podcasts')"
+                @keydown.space.enter.prevent="changeTab('podcasts')"
+                @keydown.left="focusTab('sports', $event)"
+                @keydown.right="focusTab('gaming', $event)"
+              >
+                <FtIcon
+                  :icon="['fas', 'podcast']"
+                  class="trendingIcon"
+                />
+                {{ t("Channel.Podcasts.Podcasts") }}
+              </div>
+            </FtTabs>
+            <FtRefreshWidget
+              embedded
+              class="headerRefreshWidget"
+              :disable-refresh="isLoading[currentTab]"
+              :last-refresh-timestamp="lastTrendingRefreshTimestamp"
+              :title="$t('Trending.Trending')"
+              @click="getTrendingInfo(true)"
+            />
+          </div>
         </div>
-        <FtTabs
-          class="trendingInfoTabs"
-          role="tablist"
-          :aria-label="$t('Trending.Trending Tabs')"
-        >
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            ref="gamingTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'gaming'"
-            aria-controls="trendingPanel"
-            :tabindex="currentTab === 'gaming' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'gaming' }"
-            @click="changeTab('gaming')"
-            @keydown.space.enter.prevent="changeTab('gaming')"
-            @keydown.left="focusTab('podcasts', $event)"
-            @keydown.right="focusTab('music', $event)"
-          >
-            <FtIcon
-              :icon="['fas', 'gamepad']"
-              class="trendingIcon"
-            />
-            {{ $t("Trending.Gaming") }}
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            ref="musicTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'music'"
-            aria-controls="trendingPanel"
-            :tabindex="currentTab === 'music' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'music' }"
-            @click="changeTab('music')"
-            @keydown.space.enter.prevent="changeTab('music')"
-            @keydown.left="focusTab('gaming', $event)"
-            @keydown.right="focusTab('sports', $event)"
-          >
-            <FtIcon
-              :icon="['fas', 'music']"
-              class="trendingIcon"
-            />
-            {{ t("Trending.Music") }}
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            ref="sportsTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'sports'"
-            aria-controls="trendingPanel"
-            :tabindex="currentTab === 'sports' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'sports' }"
-            @click="changeTab('sports')"
-            @keydown.space.enter.prevent="changeTab('sports')"
-            @keydown.left="focusTab('music', $event)"
-            @keydown.right="focusTab('podcasts', $event)"
-          >
-            <FtIcon
-              :icon="['fas', 'trophy']"
-              class="trendingIcon"
-            />
-            {{ t("Trending.Sports") }}
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            ref="podcastsTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'podcasts'"
-            aria-controls="trendingPanel"
-            :tabindex="currentTab === 'podcasts' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'podcasts' }"
-            @click="changeTab('podcasts')"
-            @keydown.space.enter.prevent="changeTab('podcasts')"
-            @keydown.left="focusTab('sports', $event)"
-            @keydown.right="focusTab('gaming', $event)"
-          >
-            <FtIcon
-              :icon="['fas', 'podcast']"
-              class="trendingIcon"
-            />
-            {{ t("Channel.Podcasts.Podcasts") }}
-          </div>
-        </FtTabs>
         <FtFixedBackground />
       </div>
       <div
