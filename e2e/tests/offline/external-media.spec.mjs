@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { defaultThemeClass, choosePickerPaths, dropInlineHandlerViolations, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions, revealScrollMiniControls, seekAsViewer } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -668,6 +668,7 @@ test('external media keeps playing in the mini player while browsing and returni
   await expect(player).toHaveClass(/scrollMiniPlayer/)
   const time = await video.evaluate(element => element.currentTime)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
+  await revealScrollMiniControls(page, player)
   await player.locator('.scrollMiniScrollTop').click()
   await expect(page).toHaveURL(/#\/external-media\?/)
   await expect(player).not.toHaveClass(/scrollMiniPlayer/)

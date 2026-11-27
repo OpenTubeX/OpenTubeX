@@ -6,9 +6,10 @@ const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
 
 /**
  * Shows and hides the scroll mini-player's controls and volume popup.
- * During playback the controls hide after the regular player's playing
- * interface hide delay, but not while the volume slider is open, and come back
- * on hover or when the pointer moves over the player.
+ * A mini player that appears during playback keeps its controls hidden. They
+ * come back on hover or when the pointer moves over the player, and hide again
+ * after the regular player's playing interface hide delay, but not while the
+ * volume slider is open.
  *
  * @param {{
  *   scrollMiniPlayerActive: import('vue').Ref<boolean>,
@@ -24,7 +25,6 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, get
   let scrollMiniPlayPauseHideTimeout = null
   /** @type {number | null} */
   let scrollMiniVolumeHideTimeout = null
-  let scrollMiniPlayPauseHiddenByTimer = false
   let scrollMiniPointerRevealSuppressedUntil = 0
   /** @type {number | null} */
   let scrollMiniPointerRevealSampleX = null
@@ -62,7 +62,6 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, get
   function hideScrollMiniPlayPause() {
     clearScrollMiniPlayPauseHideTimeout()
     scrollMiniPlayPauseVisible.value = false
-    scrollMiniPlayPauseHiddenByTimer = true
   }
 
   function scheduleScrollMiniPlayPauseHide() {
@@ -87,7 +86,6 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, get
   /** @param {boolean} [autoHide] */
   function showScrollMiniPlayPause(autoHide = false) {
     scrollMiniPlayPauseVisible.value = true
-    scrollMiniPlayPauseHiddenByTimer = false
     clearScrollMiniPlayPauseHideTimeout()
 
     if (autoHide) {
@@ -174,18 +172,13 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, get
     showScrollMiniPlayPause(true)
   }
 
-  // Activation keeps the button hidden when playback had already hidden it.
+  // Appearing is not an interaction, so it reveals the controls only when paused.
   function restoreScrollMiniPlayPause() {
-    if (scrollMiniPlayPauseHiddenByTimer) {
-      scrollMiniPlayPauseVisible.value = false
+    if (video.value && !video.value.paused) {
+      hideScrollMiniPlayPause()
     } else {
-      showScrollMiniPlayPause(true)
+      showScrollMiniPlayPause()
     }
-  }
-
-  function resetScrollMiniPlayPause() {
-    scrollMiniPlayPauseHiddenByTimer = false
-    clearScrollMiniPlayPauseHideTimeout()
   }
 
   return {
@@ -202,6 +195,5 @@ export function useScrollMiniPlayerControls({ scrollMiniPlayerActive, video, get
     handleScrollMiniPlayPauseMouseEnter,
     handleScrollMiniControlsPointerMove,
     restoreScrollMiniPlayPause,
-    resetScrollMiniPlayPause,
   }
 }
