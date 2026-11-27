@@ -7,6 +7,40 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
 /**
+ * Records Chromium's timeline while `run` runs, and returns the main thread's
+ * events between the `${name} start` and `${name} end` time stamps.
+ *
+ * @template T
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name
+ * @param {() => Promise<T>} run
+ * @returns {Promise<{ result: T, events: any[] }>}
+ */
+async function traceBetweenStamps(page, name, run) {
+  const session = await page.context().newCDPSession(page)
+  const events = []
+  session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
+  await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
+  const result = await run()
+  const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
+  await session.send('Tracing.end')
+  await complete
+  await session.detach()
+
+  const stamp = message => events.find(event => event.name === 'TimeStamp' && event.args?.data?.message === message)
+  const start = stamp(`${name} start`)
+  const end = stamp(`${name} end`)
+  return { result, events: events.filter(event => event.tid === start.tid && event.ts >= start.ts && event.ts <= end.ts) }
+}
+
+/** @param {any[]} events */
+function countRestyled(events) {
+  return events
+    .filter(event => event.name === 'UpdateLayoutTree')
+    .reduce((total, event) => total + (event.args?.elementCount ?? 0), 0)
+}
+
+/**
  * Applies a change to an element and reverts it, then checks that Chromium
  * restyled only a few elements instead of the element's subtree.
  *
@@ -17,11 +51,7 @@ test.use({ seed: { settings: { currentLocale: 'en-US' } } })
  * @param {number} [maxRestyled]
  */
 async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10) {
-  const session = await page.context().newCDPSession(page)
-  const events = []
-  session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
-  await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
-  const subtreeSize = await page.locator(selector).evaluate((element, { name, change }) => {
+  const { result: subtreeSize, events } = await traceBetweenStamps(page, name, () => page.locator(selector).evaluate((element, { name, change }) => {
     const apply = () => {
       if (change.class) {
         const target = change.target ? element.querySelector(change.target) : element
@@ -61,18 +91,8 @@ async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10
     flushStyles()
     console.timeStamp(`${name} end`)
     return element.querySelectorAll('*').length
-  }, { name, change })
-  const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
-  await session.send('Tracing.end')
-  await complete
-  await session.detach()
-
-  const stamp = message => events.find(event => event.name === 'TimeStamp' && event.args?.data?.message === message)
-  const start = stamp(`${name} start`)
-  const end = stamp(`${name} end`)
-  const restyled = events
-    .filter(event => event.name === 'UpdateLayoutTree' && event.tid === start.tid && event.ts >= start.ts && event.ts <= end.ts)
-    .reduce((total, event) => total + (event.args?.elementCount ?? 0), 0)
+  }, { name, change }))
+  const restyled = countRestyled(events)
   console.log(`The ${name} restyled ${restyled} of ${subtreeSize} descendants`)
   expect(subtreeSize, `the ${name} needs a large subtree`).toBeGreaterThan(500)
   expect.soft(restyled, `the ${name} restyled the subtree`).toBeLessThan(maxRestyled)
@@ -101,6 +121,27 @@ test('scroller state changes restyle only the scroller', async ({ page }) => {
   const viewport = '.settingsContent[data-overlayscrollbars-viewport]'
   await expect(page.locator(`${viewport} > .os-scrollbar-vertical`)).toHaveClass(/os-scrollbar-visible/)
   await expectLocalRestyle(page, 'scrollbar state', viewport, { scrollbarState: true }, 30)
+})
+
+// The first Watch page of a session loads the player's styles. Custom
+// properties they declared on the root would restyle every element of the
+// page that Watch opens from, twice.
+test('loading the player styles does not restyle the page', async ({ page }) => {
+  await openSettings(page)
+  const { result: documentSize, events } = await traceBetweenStamps(page, 'player styles', () => page.evaluate(async () => {
+    const flushStyles = () => getComputedStyle(document.body).getPropertyValue('color')
+    flushStyles()
+    console.timeStamp('player styles start')
+    // The lazy Watch view resolves once its styles have loaded.
+    await window.$router.resolve('/watch/aaaaaaaaaaa').matched.at(-1).components.default.__asyncLoader()
+    flushStyles()
+    console.timeStamp('player styles end')
+    return document.body.querySelectorAll('*').length
+  }))
+  const restyled = countRestyled(events)
+  console.log(`Loading the player styles restyled ${restyled} of ${documentSize} elements`)
+  expect(documentSize, 'the page needs many elements').toBeGreaterThan(500)
+  expect(restyled, 'loading the player styles restyled the page').toBeLessThan(documentSize / 10)
 })
 
 test.describe('thumbnail grid', () => {
@@ -206,11 +247,7 @@ test.describe('player', () => {
       .filter(animation => animation.playState === 'running' && animation.timeline === document.timeline &&
         animation.effect?.getComputedTiming().iterations !== Infinity)
       .map(animation => animation.finished.catch(() => {}))))
-    const session = await page.context().newCDPSession(page)
-    const events = []
-    session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
-    await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
-    await video.evaluate(element => new Promise(resolve => {
+    const { events } = await traceBetweenStamps(page, 'seek bar refreshes', () => video.evaluate(element => new Promise(resolve => {
       const controls = element.ui.getControls()
       const seekBar = element.closest('.ftVideoPlayer').querySelector('.shaka-seek-bar')
       let refreshes = 0
@@ -224,16 +261,8 @@ test.describe('player', () => {
         resolve()
       }
       controls.addEventListener('timeandseekrangeupdated', refreshed)
-    }))
-    const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
-    await session.send('Tracing.end')
-    await complete
-    await session.detach()
-
-    const stamp = message => events.find(event => event.name === 'TimeStamp' && event.args?.data?.message === message)
-    const start = stamp('seek bar refreshes start')
-    const end = stamp('seek bar refreshes end')
-    const layouts = events.filter(event => event.name === 'Layout' && event.tid === start.tid && event.ts > start.ts && event.ts < end.ts)
+    })))
+    const layouts = events.filter(event => event.name === 'Layout')
     expect(layouts.length, 'layouts during eight paused seek bar refreshes').toBe(0)
   })
 })

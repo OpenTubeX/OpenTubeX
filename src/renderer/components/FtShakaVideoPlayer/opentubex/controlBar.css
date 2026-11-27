@@ -116,13 +116,6 @@
   box-shadow: 0 0 3px rgb(0 0 0 / 80%);
 }
 
-/* How far the pointer is between the strip's bottom (0) and the middle where precise seeking starts (1). */
-@property --ft-seek-precise-progress {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
 :deep(.ft-seek-filmstrip-hint) {
   position: absolute;
   inset-inline: 8px;

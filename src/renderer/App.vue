@@ -865,6 +865,7 @@ const pageSwipeNeighborIds = computed(() => {
 
 const topNav = useTemplateRef('topNav')
 const organizerSwipeActive = ref(false)
+const organizerPrewarming = ref(false)
 const pageSwipe = shallowRef(null)
 let pageSwipePointer = null
 let pageSwipeClickPointerId = null
@@ -1026,6 +1027,19 @@ async function finishPageSwipe(event, cancelled = false) {
     }
   } finally {
     pageSwipe.value = null
+  }
+}
+
+/** Lets the phone tab organizer draw once before its first opening, see its prewarm(). */
+async function prewarmTabOrganizer() {
+  const organizer = topNav.value?.organizerSwipe
+  if (!organizer || document.visibilityState !== 'visible' || pageSwipePointer || pageSwipe.value ||
+    organizerSwipeActive.value || isAnyPromptOpen.value || activeTabId.value !== presentedTabId.value) return
+  organizerPrewarming.value = true
+  try {
+    await organizer.prewarm()
+  } finally {
+    organizerPrewarming.value = false
   }
 }
 
@@ -1457,6 +1471,7 @@ function scheduleIdleStartupWork() {
   const run = () => {
     idleStartupWorkId = null
     preloadUtilityRoutes()
+    if (isCapacitor) prewarmTabOrganizer()
     // Chromium starts polling gamepads as soon as a page listens for them,
     // which blocks this thread until the main process has set that up.
     const startGamepadNavigation = () => initializeGamepadNavigation({
@@ -1910,7 +1925,7 @@ onMounted(async () => {
         removeCapacitorIntegrationListeners = cleanup
       })
     ))
-    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
+    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value || organizerPrewarming.value), tabsReady, tabId => navigation.isTabLoading(tabId))
     removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
   }
   // A failed load is no empty catalog, so it repairs no theme selections.

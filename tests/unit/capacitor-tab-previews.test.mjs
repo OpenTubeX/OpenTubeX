@@ -98,10 +98,11 @@ function setup(t, { decodeError, videos = [], filesystem } = {}) {
   const warn = t.mock.method(console, 'warn', () => {})
   const pageSwipe = shallowRef(null)
   const organizerSwipeActive = ref(false)
+  const organizerPrewarming = ref(false)
   const loadingTabs = new Set()
   const navigation = { isTabLoading: tabId => loadingTabs.has(tabId) }
   const dispose = vm.runInNewContext(initializePreviews, {
-    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed, navigation, tabsReady: Promise.resolve(),
+    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, organizerPrewarming, computed, navigation, tabsReady: Promise.resolve(),
   })
   t.after(() => {
     dispose()
@@ -160,6 +161,32 @@ test('a scheduled capture rechecks whether previews are enabled', async t => {
   assert.equal(getCapacitorTabPreview(state.tab), null)
 })
 
+/** Runs the phone tab organizer's gesture methods against a stubbed component. */
+function loadOrganizerSwipe(document, open, updates) {
+  const source = readFileSync(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
+  const methods = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
+  const ctx = vm.createContext({
+    props: { enabled: true },
+    open,
+    disposed: false,
+    document,
+    window: globalThis.window,
+    organizerGesture: ref(false),
+    skipDialogTransition: ref(false),
+    activeView: ref('open'),
+    prepareForTabOrganizer,
+    nextTick,
+    requestAnimationFrame: callback => setImmediate(callback),
+    presentedTabId: ref('tab'),
+    CSS: { escape: value => value },
+    dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
+    openTabsScrollRef: ref(null),
+    organizerSwipeProgress: distance => distance / 320,
+    createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
+  })
+  return vm.runInContext(`${methods}; organizerSwipe`, ctx)
+}
+
 for (const cancellation of ['none', 'direct', 'pointercancel']) {
   const cancelled = cancellation !== 'none'
   test(`organizer pull reuses its cached preview without waiting for an in-flight capture (cancellation: ${cancellation})`, async t => {
@@ -175,28 +202,8 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     const open = ref(false)
     state.document.querySelector = selector => selector === '.app > .routerView' ? {} : null
     state.document.querySelectorAll = () => open.value ? [{ getBoundingClientRect: () => ({ width: 375 }) }] : []
-    const source = readFileSync(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
-    const methods = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
     const updates = []
-    const ctx = vm.createContext({
-      props: { enabled: true },
-      open,
-      disposed: false,
-      document: state.document,
-      window: globalThis.window,
-      organizerGesture: ref(false),
-      skipDialogTransition: ref(false),
-      activeView: ref('open'),
-      prepareForTabOrganizer,
-      nextTick,
-      presentedTabId: ref('tab'),
-      CSS: { escape: value => value },
-      dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
-      openTabsScrollRef: ref(null),
-      organizerSwipeProgress: distance => distance / 320,
-      createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
-    })
-    const gesture = vm.runInContext(`${methods}; organizerSwipe`, ctx)
+    const gesture = loadOrganizerSwipe(state.document, open, updates)
     assert.equal(gesture.begin(), true)
     assert.equal(open.value, true, 'the organizer opens synchronously using the cached preview')
     gesture.update(160)
@@ -219,6 +226,29 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     assert.deepEqual(updates, cancelled ? [] : [0.5], 'layout preparation retains the latest finger position')
   })
 }
+
+// The app draws the organizer once after launch. Opening it meanwhile must
+// still work, and the prewarm must not close the real organizer.
+test('opening the organizer during its prewarm takes over', async t => {
+  const state = setup(t)
+  const open = ref(false)
+  state.document.querySelector = selector => selector === '.app > .routerView' ? {} : null
+  const updates = []
+  const gesture = loadOrganizerSwipe(state.document, open, updates)
+  const prewarm = gesture.prewarm()
+  assert.equal(open.value, true)
+  assert.equal(gesture.begin(), true, 'a real opening is not ignored')
+  gesture.update(160)
+  await prewarm
+  await new Promise(setImmediate)
+  assert.equal(open.value, true, 'the prewarm leaves the real organizer open')
+  assert.deepEqual(updates, [0.5])
+
+  gesture.cancel()
+  await gesture.prewarm()
+  assert.equal(open.value, false, 'the prewarm closes the organizer it opened')
+  assert.ok(updates.at(-1) > 0 && updates.at(-1) < 0.01, 'the prewarm opens the organizer only a little')
+})
 
 test('captured previews are restored after the app restarts', async t => {
   const state = setup(t)
