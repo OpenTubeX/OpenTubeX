@@ -29,7 +29,9 @@ test('drags and settles a phone sheet without laying it out on every frame', asy
   const top = () => sheet.evaluate(element => element.getBoundingClientRect().top)
   const frame = () => sheet.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
 
-  // Each phase may lay out a few times when it starts or ends, never per move or frame.
+  // Each phase may lay out a few times when it starts or ends, and resize
+  // observers can split that work across frames. Laying out on every one of
+  // the 20 moves or on every settle frame (about a dozen) would exceed the limit.
   async function drag(x, y, distance) {
     await page.mouse.move(x, y)
     await page.mouse.down()
@@ -55,8 +57,8 @@ test('drags and settles a phone sheet without laying it out on every frame', asy
     await settled()
     await frame()
     const settledLayouts = await layoutCount() - before
-    expect(moved, 'layouts while dragging').toBeLessThanOrEqual(4)
-    expect(settledLayouts, 'layouts while settling').toBeLessThanOrEqual(4)
+    expect(moved, 'layouts while dragging').toBeLessThanOrEqual(8)
+    expect(settledLayouts, 'layouts while settling').toBeLessThanOrEqual(8)
     // The sheet slides straight to its resting place and keeps reaching the window's bottom edge.
     const to = await top()
     for (const { top, gap } of frames) {

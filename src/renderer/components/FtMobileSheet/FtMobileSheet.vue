@@ -379,10 +379,15 @@ function moveDrag(event) {
       clearDrag()
       return
     }
+    // A sheet that is still settling continues from where it is on screen.
+    const transform = getComputedStyle(element).transform
+    const offset = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42
+    const held = motionTop.value !== null
     cancelBackGesture()
     animation?.cancel()
     element.style.willChange = 'transform'
     drag.restingTop = resolveTop(element, restingTop.value)
+    drag.startTop = (held ? motionLayoutTop : drag.restingTop) + offset
     drag.minTop = resolveTop(element, 'max(var(--app-safe-area-inset-top, 0px), 0px)')
     if (motionTop.value === null) holdLayout(restingTop.value, drag.restingTop)
     drag.active = true
@@ -390,7 +395,7 @@ function moveDrag(event) {
     // Keep taps targeted at the control; capture only after a vertical drag.
     drag.header.setPointerCapture(event.pointerId)
   }
-  drag.top = Math.max(drag.minTop, drag.restingTop + drag.distance)
+  drag.top = Math.max(drag.minTop, drag.startTop + drag.distance)
   // Pulled above its layout, the sheet fills the window, which lays it out once.
   if (drag.top < motionLayoutTop) holdLayout('0px', 0)
   element.style.transform = `translateY(${drag.top - motionLayoutTop}px)`
