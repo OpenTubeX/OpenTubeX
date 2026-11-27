@@ -83,35 +83,71 @@ public class MobileAppearanceSettingsTest {
                     assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
                         layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
                             layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
-                    JSONObject row = json(view, String.format("""
-                        (() => {
-                            const element = %s;
-                            const badge = element.querySelector('.performanceImpact');
-                            const text = badge.querySelector('.performanceImpactLabel').firstChild;
-                            const splitWords = Array.from(text.data.matchAll(/\\S+/g), word => {
-                                const range = document.createRange();
-                                range.setStart(text, word.index);
-                                range.setEnd(text, word.index + word[0].length);
-                                return range.getClientRects().length > 1 ? word[0] : null;
-                            }).filter(Boolean);
-                            const bounds = badge.getBoundingClientRect();
-                            const row = element.closest('.settingsRow');
-                            return {splitWords, badgeLeft: bounds.left, badgeRight: bounds.right,
-                                textLeft: row.querySelector('.settingsRowText').getBoundingClientRect().left,
-                                rowRight: row.getBoundingClientRect().right};
-                        })()
-                        """, rowSwitch));
-                    assertEquals("The row's badge keeps its words whole at " + scale + "%: " + row,
-                        0, row.getJSONArray("splitWords").length());
-                    assertTrue("The row's badge stays inside the row, from its text on, at " + scale + "%: " + row,
-                        row.getDouble("badgeLeft") >= row.getDouble("textLeft") - 1 &&
-                            row.getDouble("badgeRight") <= row.getDouble("rowRight") + 1);
+                    assertRowBadgeLayout(view, rowSwitch, scale + "%");
+                }
+                // On a 320dp phone at 150%, the text column is too narrow for the
+                // badge, which may then also use the space below the row's icon.
+                String density = shell("wm density");
+                java.util.regex.Matcher override = java.util.regex.Pattern.compile("Override density: (\\d+)").matcher(density);
+                String originalDensity = override.find() ? override.group(1) : "reset";
+                try {
+                    // The last size line is the override, if any, which CI sets.
+                    java.util.regex.Matcher size = java.util.regex.Pattern.compile("size: (\\d+)x(\\d+)").matcher(shell("wm size"));
+                    int width = 0;
+                    while (size.find()) {
+                        width = Math.min(Integer.parseInt(size.group(1)), Integer.parseInt(size.group(2)));
+                    }
+                    shell("wm density " + Math.round(width * 160 / 320.0));
+                    awaitCondition(view, "Math.abs(window.innerWidth * window.visualViewport.scale - 320) < 2");
+                    assertRowBadgeLayout(view, rowSwitch, "150% on a 320dp phone");
+                } finally {
+                    shell("wm density " + originalDensity);
                 }
             } finally {
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSettingsWindowOpen', false)");
                 restore(view);
             }
         }
+    }
+
+    private static void assertRowBadgeLayout(WebView view, String rowSwitch, String condition) throws Exception {
+        JSONObject row = json(view, String.format("""
+            (() => {
+                const element = %s;
+                const badge = element.querySelector('.performanceImpact');
+                const text = badge.querySelector('.performanceImpactLabel').firstChild;
+                const splitWords = Array.from(text.data.matchAll(/\\S+/g), word => {
+                    const range = document.createRange();
+                    range.setStart(text, word.index);
+                    range.setEnd(text, word.index + word[0].length);
+                    return range.getClientRects().length > 1 ? word[0] : null;
+                }).filter(Boolean);
+                const bounds = badge.getBoundingClientRect();
+                // The track is the label text's ::before, centered on the text.
+                const labelText = element.querySelector('.switch-label-text');
+                const labelBounds = labelText.getBoundingClientRect();
+                const track = getComputedStyle(labelText, '::before');
+                const trackLeft = labelBounds.left + parseFloat(track.left);
+                const trackTop = labelBounds.top + (labelBounds.height - parseFloat(track.height)) / 2;
+                const row = element.closest('.settingsRow');
+                const rowBounds = row.getBoundingClientRect();
+                return {splitWords, badgeLeft: bounds.left, badgeTop: bounds.top, badgeRight: bounds.right,
+                    trackLeft, trackTop, trackRight: trackLeft + parseFloat(track.width),
+                    trackBottom: trackTop + parseFloat(track.height),
+                    textLeft: row.querySelector('.settingsRowText').getBoundingClientRect().left,
+                    rowLeft: rowBounds.left, rowRight: rowBounds.right};
+            })()
+            """, rowSwitch));
+        assertEquals("The row's badge keeps its words whole at " + condition + ": " + row,
+            0, row.getJSONArray("splitWords").length());
+        assertTrue("The row's badge stays inside the row at " + condition + ": " + row,
+            row.getDouble("badgeLeft") >= row.getDouble("rowLeft") - 1 &&
+                row.getDouble("badgeRight") <= row.getDouble("rowRight") + 1);
+        assertTrue("The row's track stays below its text at " + condition + ": " + row,
+            Math.abs(row.getDouble("trackLeft") - row.getDouble("textLeft")) <= 1);
+        assertTrue("The row's badge sits beside the track or below it at " + condition + ": " + row,
+            row.getDouble("badgeLeft") >= row.getDouble("trackRight") ||
+                row.getDouble("badgeTop") >= row.getDouble("trackBottom"));
     }
 
     @Test
