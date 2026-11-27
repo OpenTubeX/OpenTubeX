@@ -100,6 +100,8 @@ import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import { getCenteredChapterScrollTop } from './chapterScroll'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useTabContext } from '../../tabs/TabContext'
+import { isRendered } from '../../helpers/rendered'
 
 const props = defineProps({
   chapters: {
@@ -182,9 +184,10 @@ function scheduleScrollClamp() {
   if (scrollFrame !== null) return
   scrollFrame = requestAnimationFrame(() => {
     scrollFrame = null
-    // A hidden tab has no layout and so no scroll range to judge; the
-    // observer runs again once the list is shown.
-    if (chaptersWrapper.value?.clientHeight > 0 && chaptersContent.value) {
+    // A hidden list has no scroll range to judge. A background tab keeps its
+    // layout without rendering it, and measuring it would lay out the hidden
+    // tab, so the list catches up once the tab shows again.
+    if (chaptersWrapper.value && isRendered(chaptersWrapper.value) && chaptersWrapper.value.clientHeight > 0 && chaptersContent.value) {
       clampOverlayScrollTop(chaptersWrapper.value, chaptersContent.value)
       // Nothing is left to scroll away from, so there is nothing to sync back to.
       if (!canScroll()) followCurrentChapter.value = true
@@ -192,6 +195,11 @@ function scheduleScrollClamp() {
     }
   })
 }
+
+const { isTabPresented } = useTabContext()
+watch(() => isTabPresented?.value, presented => {
+  if (presented) scheduleScrollClamp()
+})
 
 onMounted(() => {
   resizeObserver.observe(chaptersWrapper.value)
@@ -320,8 +328,9 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
   const container = chaptersWrapper.value
   const currentItem = chaptersContent.value?.children[currentIndex.value]
 
-  // Deferred and retried calls run a frame later; a manual scroll in between wins.
-  if (!followCurrentChapter.value || !container || !currentItem) {
+  // Deferred and retried calls run a frame later; a manual scroll in between
+  // wins. A background tab catches up once it shows again.
+  if (!followCurrentChapter.value || !container || !currentItem || !isRendered(container)) {
     return
   }
 

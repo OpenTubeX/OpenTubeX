@@ -233,6 +233,7 @@ import { ctrlFHandler, formatSubscriberCount } from '../../helpers/utils'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import { labeledSubscribeButtonWidth } from '../../helpers/subscribeButton'
 import { useTabContext } from '../../tabs/TabContext'
+import { isRendered } from '../../helpers/rendered'
 
 const props = defineProps({
   id: {
@@ -376,7 +377,9 @@ function updateTabsLayout() {
   const container = tabsContainer.value
   const content = tabsContent.value?.$el
   const more = moreTab.value
-  if (!container || !content || !more) return
+  // A background tab keeps its layout without rendering it. Showing it again
+  // observes the tabs again.
+  if (!container || !content || !more || !isRendered(container)) return
   const available = container.getBoundingClientRect().width + 0.5
   if (available <= 0.5) return
   const gap = px(getComputedStyle(content).columnGap)
@@ -445,7 +448,7 @@ const compactSubscribe = ref(false)
 /** Drops the subscribe label when the actions would not fit in one row. */
 function updateActionsLayout() {
   const row = actions.value
-  if (!row || !info.value) return
+  if (!row || !info.value || !isRendered(row)) return
   const available = info.value.getBoundingClientRect().width + 0.5
   if (available <= 0.5) return
   const children = [...row.children].filter(child => child.getBoundingClientRect().width > 0)

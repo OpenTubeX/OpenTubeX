@@ -192,6 +192,7 @@ import {
   showToast,
   writeFileWithPicker
 } from '../../helpers/utils'
+import { isRendered } from '../../helpers/rendered'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
@@ -413,7 +414,9 @@ watch(activeSegmentIndex, async (index) => {
   await nextTick()
   const list = segmentList.value
   const activeSegment = list?.querySelector(`[data-segment-index="${index}"]`)
-  if (!list || !activeSegment) {
+  // A background tab keeps its layout without rendering it, and measuring it
+  // would lay out the hidden tab. The next segment aligns once it shows.
+  if (!list || !activeSegment || !isRendered(list)) {
     return
   }
 

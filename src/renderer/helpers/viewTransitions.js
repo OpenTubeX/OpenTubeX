@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 
 import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
+import { isRendered } from './rendered'
 
 export const VIDEO_MORPH_NAME = 'video-morph'
 // Long enough to load a route's code from disk while the app is busy, and
@@ -48,13 +49,14 @@ export function requestWatchPageViewTransition(linkElement, { isShort, allowVisi
 
   const thumbnail = findThumbnail(linkElement)
 
-  // Players in hidden background tabs don't count because display: none
-  // elements aren't captured, nor do the transparent neighbor tabs kept laid
-  // out for page swipes, which TabContent excludes from the shared name.
+  // Players in background tabs don't count because the contents they hide
+  // aren't captured, nor do the transparent neighbor tabs kept laid out for
+  // page swipes, which TabContent excludes from the shared name. Checking
+  // visibility first keeps from laying out a background tab.
   // Recommendations explicitly allow a visible player: its name is assigned
   // only after the old thumbnail snapshot.
   const hasVisiblePlayer = !allowVisiblePlayer && Array.from(document.querySelectorAll('.videoPlayer'))
-    .some((el) => el.offsetParent !== null && !el.closest('.pageSwipePrewarm'))
+    .some((el) => isRendered(el) && el.offsetParent !== null && !el.closest('.pageSwipePrewarm'))
 
   if (thumbnail instanceof HTMLElement && !hasVisiblePlayer) {
     morphSourceElement = thumbnail

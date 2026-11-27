@@ -9,6 +9,7 @@ import {
 import { initializePageScrollbar, observePageScrollbarStart, observePageScrollbarVisibility } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
 import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarInsetTop, setAndroidPageScrollbarsHidden } from './androidUi'
+import { isRendered } from './rendered'
 
 /*
  * Chromium's own overlay scrollbars can't be styled and fade out when idle,
@@ -307,19 +308,14 @@ function create(element) {
    */
   function prepareUpdate(force) {
     if (!element.isConnected) return null
-    // A hidden container has nothing to scroll. It reports its size again
-    // once shown, so skip measuring it until then.
+    // A hidden container has nothing to scroll, and measuring one in a
+    // background tab would lay out the hidden tab. Its bars hide with it and
+    // keep their state: a background tab keeps its layout, and reports the
+    // sizes that changed meanwhile once shown, like a container that was
+    // display: none reports its size again.
     if (!isPage && !element.checkVisibility()) {
       instance.measurement = ''
-      return {
-        write() {
-          for (const bar of scrollbars) {
-            bar.usable = false
-            setClass(bar.scrollbar, 'os-scrollbar-visible', false)
-            setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
-          }
-        }
-      }
+      return null
     }
 
     const style = getComputedStyle(scrollElement)
@@ -900,6 +896,18 @@ export function updateOverlayScrollbars(element) {
 }
 
 /**
+ * Whether a nested container is hidden, such as in a background tab. Those
+ * keep their layout without rendering it, and their scroll position until
+ * shown, like a container that is display: none. Measuring or scrolling one
+ * would lay out the hidden tab.
+ *
+ * @param {HTMLElement} element
+ */
+function isSkipped(element) {
+  return element !== document.body && !isRendered(element)
+}
+
+/**
  * Restores a consumer-managed scroll position, for example after a scroll
  * container moves between layouts, and updates its bars for the new range.
  *
@@ -907,6 +915,7 @@ export function updateOverlayScrollbars(element) {
  * @param {number} scrollTop
  */
 export function restoreOverlayScrollTop(element, scrollTop) {
+  if (isSkipped(element)) return
   element.scrollTop = scrollTop
   const instance = instances.get(element)
   instance?.syncScrollPosition(true)
@@ -921,6 +930,7 @@ export function restoreOverlayScrollTop(element, scrollTop) {
  * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
  */
 export function clampOverlayScrollTop(element, contentElement = null) {
+  if (isSkipped(element)) return
   const isPage = element === document.body
   const scrollElement = isPage ? document.documentElement : element
   const maximumScrollTop = getMaximumOverlayScrollTop(
@@ -944,6 +954,7 @@ export function clampOverlayScrollTop(element, contentElement = null) {
  * @param {HTMLElement | null} contentElement
  */
 export function clampOverlayScrollLeft(element, contentElement = null) {
+  if (isSkipped(element)) return
   // scrollWidth stops at the padding box, but the content's borders are rendered too.
   const contentWidth = contentElement === null
     ? element.scrollWidth

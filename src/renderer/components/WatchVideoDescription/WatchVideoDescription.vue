@@ -481,17 +481,18 @@ function isShortDescription() {
 // To verify whether or not the description is too short for displaying
 // description controls, we need to check the description's dimensions.
 // A tab can mount while it isn't the one on screen (background preload, session
-// restore), in which case it is `display: none` and every dimension reads 0,
-// which would misdetect the description as short and leave it permanently
-// expanded with no collapse control. Only measure once the element has a real
-// layout, retrying when the tab is first presented.
+// restore). A hidden description reads 0 for every dimension, which would
+// misdetect it as short and leave it permanently expanded with no collapse
+// control, and measuring one in a background tab would lay out the hidden tab.
+// Only measure once the element is shown, retrying when the tab is first
+// presented.
 function measureDescription() {
   if (hasMeasured || props.alwaysExpanded) {
     return
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  if (!descriptionElem || (
+  if (!descriptionElem || descriptionElem.checkVisibility?.() === false || (
     descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
     (!hasMetadata.value || !descriptionCard.value?.$el?.clientHeight)
   )) {
@@ -507,6 +508,8 @@ function measureDescription() {
 }
 
 function updateDescriptionLayout() {
+  // A background tab updates it once presented.
+  if (descriptionCard.value?.$el?.checkVisibility?.() === false) return
   if (isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
     clampOverlayScrollTop(descriptionScroll.value, descriptionContentEnd.value)
   }
@@ -591,7 +594,10 @@ watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
 if (isTabPresented) {
   watch(isTabPresented, (presented) => {
     if (presented) {
-      nextTick(measureDescription)
+      nextTick(() => {
+        measureDescription()
+        updateDescriptionLayout()
+      })
     }
   })
 }

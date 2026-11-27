@@ -253,7 +253,7 @@ test.describe('compact navigation labels', () => {
       document.querySelector('.app').classList.add('capacitorPhoneLayout')
       const content = document.createElement('div')
       content.style.height = '3000px'
-      document.querySelector('.tabContent:not([inert]) > .routerView').append(content)
+      document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(content)
     })
     await expect(page.locator('.progressBar')).toBeVisible()
     await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeGreaterThan(3000)
@@ -275,7 +275,7 @@ test.describe('compact navigation labels', () => {
         await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeLessThan(previousHeight)
         await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - (document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight)))).toBeLessThanOrEqual(1)
       }
-      await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${height + 24 + 10}px`)
+      await expect(page.locator('.tabContent[aria-hidden="false"] > .routerView')).toHaveCSS('padding-bottom', `${height + 24 + 10}px`)
       await expect.poll(() => page.evaluate(() => {
         const nav = document.querySelector('.sideNav').getBoundingClientRect()
         const progress = document.querySelector('.progressBar').getBoundingClientRect()

@@ -312,6 +312,7 @@ import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/ov
 import { getPlaylistSkipAvailability, getPlaylistSortOrder, getSortedPlaylistItems, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
+import { isRendered } from '../../helpers/rendered'
 
 const props = defineProps({
   playlistId: {
@@ -1486,7 +1487,7 @@ watch(playlistItemsWrapper, (wrapper) => {
         container,
         items[items.length - 1] ?? null
       )
-      if (needsInitialCenter.value && container.clientHeight > 0) {
+      if (needsInitialCenter.value && isRendered(container) && container.clientHeight > 0) {
         centerCurrentVideo()
       }
       updatePlaylistPanelNearEnd()
@@ -1519,7 +1520,7 @@ onBeforeUnmount(stopObservingPlaylistItems)
 // Load later pages before the end of the panel scrolls into view.
 function updatePlaylistPanelNearEnd() {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
-  playlistPanelNearEnd.value = canLoadMorePlaylistVideos.value && container != null && container.clientHeight > 0 &&
+  playlistPanelNearEnd.value = canLoadMorePlaylistVideos.value && container != null && isRendered(container) && container.clientHeight > 0 &&
     container.scrollHeight - container.scrollTop - container.clientHeight < container.clientHeight * 2
 }
 
@@ -1610,12 +1611,13 @@ function applyScrollPosition(container, { index, offset }) {
 /**
  * @param {number} index
  * @returns {boolean} whether the scroll could actually be applied. It cannot
- * when the tab is hidden (`display: none`), because the list then has no layout.
+ * when the list is hidden, such as in a background tab, which keeps its layout
+ * without rendering it.
  */
 function scrollToVideo(index) {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
 
-  if (container == null || container.clientHeight === 0) {
+  if (container == null || !isRendered(container) || container.clientHeight === 0) {
     return false
   }
 

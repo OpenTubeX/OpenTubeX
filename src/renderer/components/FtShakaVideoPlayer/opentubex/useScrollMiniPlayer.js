@@ -577,8 +577,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // A Watch view hidden behind browsing pages cannot measure its player when
     // it docks again after Picture-in-Picture, and neither can a player that
     // replaces the mini player of the previous video. Both keep its last
-    // inline size. Hidden tabs still cannot dock.
-    if (!container.value?.offsetWidth && (watchNavigation?.detached.value || miniPlayerStartPending?.value)) {
+    // inline size. Hidden tabs still cannot dock. Background tabs keep their
+    // layout without rendering it, so their players count as hidden.
+    const hidden = container.value?.checkVisibility?.() === false || !container.value?.offsetWidth
+    if (hidden && (watchNavigation?.detached.value || miniPlayerStartPending?.value)) {
       return lastKnownInlinePlayerHeight
     }
     if (!scrollMiniPlayerActive.value) {

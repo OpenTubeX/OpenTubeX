@@ -26,7 +26,9 @@ export function getScrollMiniInlineLayoutHeight(container, lastKnownHeight = 0) 
     return 0
   }
 
-  const width = container.offsetWidth
+  // A background tab keeps its layout without rendering it, so its player
+  // counts as hidden, and measuring it would lay out the hidden tab.
+  const width = container.checkVisibility?.() === false ? 0 : container.offsetWidth
   if (width <= 0) {
     return 0
   }

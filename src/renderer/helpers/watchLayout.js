@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { applyAnimationSpeed } from './animationSpeed'
 import { getFixedBackgroundInset } from './fixedBackground'
 import { isReducedMotionEnabled } from './reducedMotion'
+import { isRendered } from './rendered'
 
 // Shared by the watch and external media pages, which use the same layout
 // (scss-partials/_watch-layout.scss).
@@ -128,7 +129,9 @@ export function createWatchLayoutAnimator() {
    */
   async function animate(layout, applyChange) {
     const elements = ANIMATED_AREAS.flatMap(selector => layout?.querySelector(selector) ?? [])
-    const reducedMotion = isReducedMotionEnabled()
+    // A background tab keeps its layout without rendering it, so measuring
+    // it would lay out the hidden tab for animations nobody sees.
+    const reducedMotion = isReducedMotionEnabled() || (layout != null && !isRendered(layout))
     // Measure before cancelling, so an interrupted animation continues from
     // where the areas are drawn instead of jumping to their final positions.
     const previousRects = reducedMotion ? [] : elements.map(element => element.getBoundingClientRect())

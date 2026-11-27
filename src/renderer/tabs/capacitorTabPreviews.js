@@ -109,7 +109,8 @@ export function initializeCapacitorTabPreviews(store, pageSwipe, tabsReady = Pro
 
 function hasVisibleOverlay() {
   return [...document.querySelectorAll('[role="dialog"], [role="menu"], .settingsWindow')]
-    .some(element => element.getBoundingClientRect().width > 0 && getComputedStyle(element).visibility !== 'hidden')
+    // Overlays left open in a background tab keep their layout, so their size alone doesn't tell.
+    .some(element => element.checkVisibility() && element.getBoundingClientRect().width > 0 && getComputedStyle(element).visibility !== 'hidden')
 }
 
 async function capturePage() {
