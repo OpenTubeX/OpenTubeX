@@ -178,7 +178,10 @@ function invidiousAPICall({ resource, id = '', params = {}, doLogError = true, s
           if (isYattee) {
             throw await createYatteeApiError(response)
           }
-          const json = await response.json().catch(() => null)
+          const json = await response.json().catch((error) => {
+            if (signal?.aborted || error?.name === 'AbortError') throw error
+            return null
+          })
           if (json !== null) return json
           throw createInvidiousHttpError(response.status, {
             instanceUrl,

@@ -3029,7 +3029,7 @@ Yattee Server:
     Not configured: Roit URL ho servijer Yattee en Arventennoù → Araokaet.
     HTTPS required: Ne c'hall Android lenn videoioù nemet eus servijerioù Yattee a implij HTTPS.
     Streams unavailable: N'haller ket kargañ froudoù ar video-mañ eus ar servijer Yattee. Implijit « Amprouiñ ar c'hennask » en Arventennoù → Araokaet evit gwiriañ ar servijer.
-    Unreachable: Dibosupl eo tizhout ar servijer Yattee ({instance}). Gwiriit an URL ha hag-eñ emañ ar servijer o vont en-dro e Arventennoù → Kempleshoc’h.
+    Unreachable: Dibosupl eo tizhout ar servijer Yattee ({instance}). Gwiriit an URL ha hag-eñ emañ ar servijer o vont en-dro e Arventennoù → Araokaet.
 Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.
 Update With Package Manager: 'Hizivaat gant {packageManager}:'
 Update Command Copied: 'Eilet eo bet an urzhiad hizivaat'
@@ -3142,7 +3142,7 @@ Text Translation:
   Translation failed: "C'hwitet eo an droidigezh"
 Invidious:
   Errors:
-    Not configured: N’eus bet kefluniet erounez Invidious ebet. Dibabit unan e Arventennoù → Kempleshoc’h.
-    Unreachable: Dibosupl eo tizhout an erounez Invidious ({instance}). Marteze emañ war-sav pe e stank ho kevreadenn. Klaskit un erounez all e Arventennoù → Kempleshoc’h.
-    Unreachable Web: Dibosupl eo tizhout an erounez Invidious ({instance}). Marteze emañ war-sav, e stank ho kevreadenn (evel ur VPN), pe e vank talbennoù CORS. Klaskit un erounez all e Arventennoù → Kempleshoc’h.
+    Not configured: N’eus bet kefluniet erounez Invidious ebet. Dibabit unan e Arventennoù → Araokaet.
+    Unreachable: Dibosupl eo tizhout an erounez Invidious ({instance}). Marteze emañ war-sav pe e stank ho kevreadenn. Klaskit un erounez all e Arventennoù → Araokaet.
+    Unreachable Web: Dibosupl eo tizhout an erounez Invidious ({instance}). Marteze emañ war-sav, e stank ho kevreadenn (evel ur VPN), pe e vank talbennoù CORS. Klaskit un erounez all e Arventennoù → Araokaet.
     Server error: An erounez Invidious ({instance}) he deus distroet ur fazi (HTTP {status}).
