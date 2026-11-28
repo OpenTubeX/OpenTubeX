@@ -239,6 +239,20 @@ test.describe('compact navigation labels', () => {
     await goTo(page, 'history')
     await page.evaluate(() => window.$store.commit('setHideLabelsSideBar', true))
     await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
+    // Hiding desktop side bar labels must not hide bottom navigation bar labels.
+    await page.evaluate(() => window.$store.commit('setNavigationBarLabels', 'all'))
+    await expect(primary.locator('.navLabel:visible')).toHaveCount(4)
+    await expect(more.locator('.navLabel')).toBeVisible()
+    await page.evaluate(() => window.$store.commit('setNavigationBarLabels', 'active'))
+    await expect(nav.locator('.navLabel:visible')).toHaveCount(1)
+    await expect(nav.locator('.inner > .navOption.router-link-active .navLabel')).toBeVisible()
+    await expect(more.locator('.navLabel')).toBeHidden()
+    await more.click()
+    await page.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
+    await expect(nav.locator('.navLabel:visible')).toHaveCount(1)
+    await expect(more.locator('.navLabel')).toBeVisible()
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
   })
 
   test('updates safe-area, progress and overflow insets when label modes change', { tag: '@scale' }, async ({ app, page }) => {

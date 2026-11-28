@@ -238,10 +238,6 @@
     display: block;
   }
 
-  .closed .navIconExpand {
-    block-size: 1.3em;
-  }
-
   .compactLabels .moreOptionNav {
     align-items: center;
     block-size: var(--mobile-nav-content-height);

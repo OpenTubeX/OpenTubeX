@@ -118,7 +118,7 @@
     font-weight: 700;
   }
 
-  .sideNav:is(.compactLabels, .hiddenLabels) .mobileNavItem::before,
+  .sideNav.compactLabels .mobileNavItem::before,
   .sideNav.activeLabelOnly .mobileNavItem:not(.router-link-active)::before {
     inset-block-start: calc((var(--mobile-nav-content-height) - 32px) / 2);
   }

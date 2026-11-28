@@ -164,12 +164,14 @@
   inset-inline-end: 20px;
 }
 
-.hiddenLabels {
-  inline-size: 50px;
-}
+@media only screen and (width > 680px) {
+  .hiddenLabels {
+    inline-size: 50px;
+  }
 
-.hiddenLabels .navLabel {
-  display: none;
+  .hiddenLabels .navLabel {
+    display: none;
+  }
 }
 
 .navIconExpand {
@@ -282,10 +284,6 @@
     block-size: 40px;
     padding: 0;
     padding-block: 10px;
-  }
-
-  .hiddenLabels {
-    inline-size: 100%;
   }
 
   .compactLabels .navOption:not(.mobileHidden) {
