@@ -225,12 +225,19 @@ function handoff(openDestination, { waitUntilCovered } = {}) {
     emit('closed')
     return
   }
-  // Move focus out of the dialog before closing so native <dialog> close does
-  // not return focus to the trigger button that opened the sheet.
-  if (document.activeElement instanceof HTMLElement && element.contains(document.activeElement)) {
-    document.activeElement.blur()
+  // Prevent native <dialog>.close() from returning focus to the trigger button
+  // while handing off to another overlay.
+  const trigger = previousFocus instanceof HTMLElement ? previousFocus : null
+  const triggerWasInert = trigger?.inert ?? false
+  if (trigger) trigger.inert = true
+  try {
+    if (document.activeElement instanceof HTMLElement && element.contains(document.activeElement)) {
+      document.activeElement.blur()
+    }
+    element.close()
+  } finally {
+    if (trigger) trigger.inert = triggerWasInert
   }
-  element.close()
   release(false, { restoreFocus: false })
   if (waitUntilCovered && !isReducedMotionEnabled() && !docked.value) {
     const token = ++handoffToken

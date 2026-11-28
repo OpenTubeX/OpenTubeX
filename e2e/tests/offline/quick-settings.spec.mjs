@@ -672,6 +672,10 @@ test.describe('quick settings menu', () => {
         const frames = []
         let firstCompactState = null
         let sawSettings = false
+        let triggerFocusCount = 0
+        const triggerElement = document.querySelector('.profileTrigger')
+        const onTriggerFocus = () => { triggerFocusCount++ }
+        triggerElement?.addEventListener('focus', onTriggerFocus)
         const getColorAlpha = color => {
           const legacy = /^rgba\(.*,\s*([\d.e+-]+)\)$/.exec(color)
           if (legacy) return Number(legacy[1])
@@ -701,7 +705,8 @@ test.describe('quick settings menu', () => {
           })
           const settled = sawSettings && !sheet && settings && !settings.classList.contains('settings-window-enter-active') && settingsOpacity >= 0.99
           if (settled || frames.length >= 180) {
-            resolve({ frames, firstCompactState, settled })
+            triggerElement?.removeEventListener('focus', onTriggerFocus)
+            resolve({ frames, firstCompactState, settled, triggerFocusCount })
             return
           }
           requestAnimationFrame(record)
@@ -712,6 +717,7 @@ test.describe('quick settings menu', () => {
 
       expect(trace.settled, 'handoff should settle with Settings visible and the sheet closed').toBe(true)
       expect(trace.firstCompactState, 'Settings should render in compact mode on its first frame').toBe(true)
+      expect(trace.triggerFocusCount, 'trigger button should not regain focus during handoff').toBe(0)
       const uncoveredFrames = trace.frames.filter(frame => frame.sheetEffectiveAlpha < 0.99 && frame.settingsOpacity < 0.99)
       expect(uncoveredFrames, 'underlying page should stay covered on every transition frame').toEqual([])
       await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)

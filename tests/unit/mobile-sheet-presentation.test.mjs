@@ -426,7 +426,18 @@ test('reopening a sheet as its closing animation resolves keeps it open', async 
 test('handoff exits modal mode immediately without stealing focus and closes once covered', async t => {
   const sheet = mountSheet(t)
   let triggerFocused = 0
-  sheet.document.activeElement = { isConnected: true, focus() { triggerFocused++ } }
+  let triggerInertDuringClose = null
+  const trigger = Object.assign(new sheet.HTMLElement(), {
+    isConnected: true,
+    inert: false,
+    focus() { triggerFocused++ }
+  })
+  const originalClose = sheet.element.close.bind(sheet.element)
+  sheet.element.close = () => {
+    triggerInertDuringClose = trigger.inert
+    originalClose()
+  }
+  sheet.document.activeElement = trigger
   sheet.props.belowPlayer = false
   sheet.props.open = true
   await sheet.settle()
@@ -443,6 +454,8 @@ test('handoff exits modal mode immediately without stealing focus and closes onc
   await sheet.settle()
 
   assert.equal(openedWhileNonModal, true, 'destination should open while sheet is non-modal')
+  assert.equal(triggerInertDuringClose, true, 'trigger must be inert while native close() runs')
+  assert.equal(trigger.inert, false, 'trigger inert state must be restored immediately after close()')
   assert.equal(sheet.element.inertAtShow, true, 'sheet must be inert before show() runs')
   assert.equal(sheet.element.classList.contains('handoffSheet'), true)
   assert.equal(triggerFocused, 0, 'handoff must not restore focus to the previous trigger')
