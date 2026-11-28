@@ -293,8 +293,8 @@ importers:
         specifier: ^3.53.4-build2
         version: 3.53.4-build2(patch_hash=579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7)
       '@vot.js/core':
-        specifier: ^3.2.4
-        version: 3.2.4(typescript@7.0.2)
+        specifier: ^3.2.5
+        version: 3.2.5(typescript@7.0.2)
       autolinker:
         specifier: ^4.1.5
         version: 4.1.5
@@ -1804,14 +1804,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vot.js/core@3.2.4':
-    resolution: {integrity: sha512-is6OntiNWXJu1ikwNUwdNmdfyVHr8GfnxosK0/e1aZ4O0vPawQGwswUuZ7SxyuQjjRnGJA08dvSxCgM0daZ4lg==}
+  '@vot.js/core@3.2.5':
+    resolution: {integrity: sha512-ztODRip8BBYSFjJbGFrHNxe6OodPvG/AdycrkvvBNlZ9WntYxqq2yYnX4dzgPt3R6UgdP0smljbFFfa9lXbkTw==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
 
-  '@vot.js/shared@3.2.4':
-    resolution: {integrity: sha512-8ElwD4ew0MNySwdoBA520Vw/TlolNzp+frVPRFG9sfnTLiNDptB9TWC2b+3emAZ5kda1zQt0yFhn9CiYZFOG7w==}
+  '@vot.js/shared@3.2.5':
+    resolution: {integrity: sha512-zV3b5ZRBq93aCcKSOEQO6VLx3z8RNdy2WVYNDCvLjwZzjLdHdXlmUgytb/+KAQztmM8jJiqFERmPk5/ufYHZ0Q==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
@@ -6029,12 +6029,12 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vot.js/core@3.2.4(typescript@7.0.2)':
+  '@vot.js/core@3.2.5(typescript@7.0.2)':
     dependencies:
-      '@vot.js/shared': 3.2.4(typescript@7.0.2)
+      '@vot.js/shared': 3.2.5(typescript@7.0.2)
       typescript: 7.0.2
 
-  '@vot.js/shared@3.2.4(typescript@7.0.2)':
+  '@vot.js/shared@3.2.5(typescript@7.0.2)':
     dependencies:
       '@bufbuild/protobuf': 2.17.0
       typescript: 7.0.2
