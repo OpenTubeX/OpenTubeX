@@ -163,6 +163,7 @@ export function downloadTemplateMenuItems({ target, customize, t, locale }) {
       label: t('Downloads.Customize Download'),
       icon: ['fas', 'sliders'],
       enabled: true,
+      nearAnchor: true,
       run: customize
     },
     { type: 'separator' },

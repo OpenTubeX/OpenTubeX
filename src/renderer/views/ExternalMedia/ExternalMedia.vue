@@ -360,13 +360,15 @@
                 <template #trailing>
                   <FtButton
                     v-if="downloadAvailable"
+                    ref="downloadButton"
                     class="downloadButton"
                     :title="t('Downloads.Download Video')"
                     :aria-label="t('Downloads.Download Video')"
+                    aria-haspopup="menu"
                     :icon="['fas', 'download']"
                     theme="secondary"
                     shape="square"
-                    @click="showDownloadPrompt = true"
+                    @click="openDownloadMenu"
                   >
                     <template #label>
                       <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
@@ -586,6 +588,8 @@ import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useIncognitoTab, useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { watchRouteForVideo } from '../../helpers/downloadPlayback'
+import { openButtonMenu } from '../../helpers/buttonMenu'
+import { downloadTemplateMenuItems } from '../../helpers/templateDownloads'
 import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
 import store from '../../store/index'
 
@@ -650,6 +654,21 @@ const historyEntry = computed(() => historyId.value ? store.getters.getHistoryCa
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const downloadButton = useTemplateRef('downloadButton')
+const downloadMenuItems = computed(() => downloadTemplateMenuItems({
+  target: () => ({
+    externalUrl: mediaUrl.value,
+    title: info.value?.title || mediaUrl.value,
+    thumbnail: thumbnail.value
+  }),
+  customize: () => { showDownloadPrompt.value = true },
+  t,
+  locale
+}))
+
+function openDownloadMenu() {
+  openButtonMenu(downloadButton.value.$el, downloadMenuItems, t('Downloads.Download Video'))
+}
 const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
 const currentPlaybackRate = ref(defaultPlaybackRate.value)
 /** @type {import('vue').Ref<string | null>} */
@@ -1674,7 +1693,12 @@ watch(() => route.query.url, url => {
 // it loads, the start position reads the link once extraction finishes, and
 // afterwards the player applies it once it has loaded.
 watch(() => route.query.timestamp, applyQueryTimestamp)
-watch(downloadAvailable, available => { if (!available) showDownloadPrompt.value = false })
+watch(downloadAvailable, available => {
+  if (!available) {
+    showDownloadPrompt.value = false
+    window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: downloadMenuItems }))
+  }
+})
 // The avatar of a channel that yt-dlp didn't name loads after the media
 watch(creatorAvatarUrl, url => {
   if (!url || loading.value || !source.value) return
@@ -1688,6 +1712,7 @@ useTabLifecycle({
   beforeDispose: savePositionOnExit,
 })
 onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: downloadMenuItems }))
   tabMediaCoordinator.setActionHandlers(tabId ?? 'web', 'playlist', {})
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)

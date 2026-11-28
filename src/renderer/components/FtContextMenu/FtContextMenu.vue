@@ -96,6 +96,7 @@
               <div
                 v-else-if="item.submenu"
                 class="submenuContainer"
+                :data-row-index="index"
                 @pointerenter="positionSubmenu"
                 @focusin="positionSubmenu"
               >
@@ -136,7 +137,7 @@
                       role="none"
                     >
                       <template
-                        v-for="(child, childIndex) in item.submenu"
+                        v-for="(child, childIndex) in getSubmenuRows(item, index)"
                         :key="child.actionId ?? `separator-${childIndex}`"
                       >
                         <div
@@ -152,6 +153,7 @@
                           :role="child.type === 'radio' ? 'menuitemradio' : 'menuitem'"
                           :aria-checked="child.type === 'radio' ? child.checked : undefined"
                           :disabled="!child.enabled"
+                          :data-near-anchor="child.nearAnchor ? '' : undefined"
                           @pointerdown.prevent
                           @click="execute(child)"
                         >
@@ -175,6 +177,7 @@
                 :role="item.type === 'radio' ? 'menuitemradio' : 'menuitem'"
                 :aria-checked="item.type === 'radio' ? item.checked : undefined"
                 :disabled="!item.enabled"
+                :data-near-anchor="item.nearAnchor ? '' : undefined"
                 @pointerdown.prevent
                 @click="execute(item)"
               >
@@ -227,6 +230,8 @@ const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
 // The pointer position the menu opened at, which its open animation expands from
 const anchor = ref({ x: 0, y: 0 })
+const anchorBottom = ref(false)
+const submenuAnchorBottom = ref(new Set())
 const submenusOpenStart = ref(false)
 const verticalTabLayout = ref(false)
 let openRequest = 0
@@ -280,10 +285,28 @@ const videoQuickActions = computed(() => {
   return actions.length === 4 ? actions : []
 })
 const quickActions = computed(() => tabColorMenu.value ? tabQuickActions.value : videoQuickActions.value)
+/**
+ * Moves items marked `nearAnchor` to the bottom when the menu opens above its
+ * trigger, keeping them closest to the pointer.
+ * @param {object[]} rows
+ * @param {boolean} nearBottom
+ */
+function orderNearAnchorRows(rows, nearBottom) {
+  if (!nearBottom) return collapseSeparators(rows)
+  const pinned = rows.filter(row => row.nearAnchor)
+  if (pinned.length === 0) return collapseSeparators(rows)
+  const rest = rows.filter(row => !row.nearAnchor)
+  return collapseSeparators([...rest, { type: 'separator' }, ...pinned])
+}
+
 const menuRows = computed(() => {
   const rows = displayedItems.value.filter(item => item !== tabColorMenu.value && !quickActions.value.includes(item))
-  return collapseSeparators(rows)
+  return orderNearAnchorRows(rows, anchorBottom.value)
 })
+
+function getSubmenuRows(item, index) {
+  return orderNearAnchorRows(item.submenu, submenuAnchorBottom.value.has(index))
+}
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = getFullscreenLayer()
@@ -534,6 +557,8 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request, foc
   items.value = menuItems
   resolveItemFavicons(items.value)
   sessionId.value = menuSessionId
+  anchorBottom.value = false
+  submenuAnchorBottom.value = new Set()
   position.value = { x: clientX, y: clientY }
   anchor.value = { x: clientX, y: clientY }
   submenusOpenStart.value = clientX > window.innerWidth / 2
@@ -569,12 +594,26 @@ async function showMenu(menuItems, menuSessionId, clientX, clientY, request, foc
     ? clientX - menuWidth
     : clientX
   const opensAbove = anchorTop !== undefined && clientY + menuHeight > window.innerHeight - 8 && anchorTop - menuHeight >= 8
+  const y = opensAbove ? anchorTop - menuHeight : Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
   if (opensAbove) anchor.value = { ...anchor.value, y: anchorTop }
   position.value = {
     x: Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8)),
-    y: opensAbove ? anchorTop - menuHeight : Math.max(8, Math.min(clientY, window.innerHeight - menuHeight - 8))
+    y
   }
-  if (localItems.value || focusFirstItem) menuRef.value.querySelector('button:enabled')?.focus({ preventScroll: true })
+  const nearBottom = opensAbove || (anchorTop !== undefined && (anchorTop + clientY) / 2 > y + menuHeight / 2)
+  if (nearBottom && menuRows.value.some(row => row.nearAnchor)) {
+    anchorBottom.value = true
+    await nextTick()
+    if (request !== openRequest || !menuRef.value) return
+    const scroller = menuRef.value.querySelector('.menuScroll')
+    if (scroller) restoreOverlayScrollTop(scroller, scroller.scrollHeight)
+  }
+  if (localItems.value || focusFirstItem) {
+    const targetButton = anchorBottom.value
+      ? menuRef.value.querySelector('button[data-near-anchor]:enabled')
+      : menuRef.value.querySelector('button:enabled')
+    ;(targetButton ?? menuRef.value.querySelector('button:enabled'))?.focus({ preventScroll: true })
+  }
 }
 
 function close(event) {
@@ -585,6 +624,8 @@ function close(event) {
   isOpen.value = false
   localItems.value = null
   touchFriendly.value = false
+  anchorBottom.value = false
+  submenuAnchorBottom.value = new Set()
   items.value = []
 }
 
@@ -627,6 +668,26 @@ function positionSubmenu(eventOrContainer) {
   container.classList.toggle('submenuOpenEnd', !opensToStart)
   container.style.setProperty('--submenu-left', `${clampedLeft}px`)
   container.style.setProperty('--submenu-top', `${top}px`)
+
+  const rowIndex = Number(container.dataset.rowIndex)
+  if (!Number.isNaN(rowIndex)) {
+    const row = menuRows.value[rowIndex]
+    if (row?.submenu?.some(child => child.nearAnchor)) {
+      const nearBottom = containerRect.top + containerRect.height / 2 > top + submenuHeight / 2
+      if (submenuAnchorBottom.value.has(rowIndex) !== nearBottom) {
+        const next = new Set(submenuAnchorBottom.value)
+        if (nearBottom) next.add(rowIndex)
+        else next.delete(rowIndex)
+        submenuAnchorBottom.value = next
+        const request = openRequest
+        nextTick().then(() => {
+          if (request !== openRequest || !submenu.isConnected) return
+          const scroller = submenu.querySelector('.submenuScroll')
+          if (scroller) restoreOverlayScrollTop(scroller, nearBottom ? scroller.scrollHeight : 0)
+        })
+      }
+    }
+  }
 }
 
 function positionOpenSubmenu() {
@@ -707,7 +768,9 @@ function handleKeydown(event) {
     return
   }
   if (forward && menuRef.value?.contains(focused) && focused.getAttribute('aria-haspopup') === 'menu') {
-    focused.parentElement.querySelector('.submenu button:enabled')?.focus()
+    const submenuEl = focused.parentElement.querySelector('.submenu')
+    const targetButton = submenuEl?.querySelector('button[data-near-anchor]:enabled')
+    ;(targetButton ?? submenuEl?.querySelector('button:enabled'))?.focus()
     return
   }
   const row = focused?.closest('.tabQuickActions, .tabColorPalette')
