@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   addChannelsToNamedGroups,
   filterSubscriptionsByGroup,
+  filterSubscriptionsForFeed,
   normalizeSubscriptionGroups,
   sortSubscribedChannels,
   SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS
@@ -17,16 +18,18 @@ test('synced groups keep only well-formed entries and unique channel IDs', () =>
   assert.deepEqual(normalizeSubscriptionGroups(null), [])
   assert.deepEqual(normalizeSubscriptionGroups('[]'), [])
   assert.deepEqual(normalizeSubscriptionGroups([
-    { id: 'music', name: ' Music ', channelIds: ['UCa', 'UCa', '', 3, 'UCb'] },
+    { id: 'music', name: ' Music ', channelIds: ['UCa', 'UCa', '', 3, 'UCb'], showInAll: true },
     { id: 'music', name: 'Duplicate ID', channelIds: [] },
     { id: 'blank', name: '   ', channelIds: [] },
     { id: '', name: 'No ID', channelIds: [] },
-    { id: 'no-channels', name: 'No Channels' },
+    { id: 'no-channels', name: 'No Channels', showInAll: 'false' },
+    { id: 'hidden', name: 'Hidden', channelIds: ['UCc'], showInAll: false },
     null,
     'group',
   ]), [
     { id: 'music', name: 'Music', channelIds: ['UCa', 'UCb'] },
     { id: 'no-channels', name: 'No Channels', channelIds: [] },
+    { id: 'hidden', name: 'Hidden', channelIds: ['UCc'], showInAll: false },
   ])
 })
 
@@ -36,6 +39,31 @@ test('a group limits subscriptions to its channels without changing their order'
   assert.deepEqual(
     filterSubscriptionsByGroup(subscriptions, { id: 'g', name: 'G', channelIds: ['UCc', 'UCa', 'UCx'] }),
     [{ id: 'UCa' }, { id: 'UCc' }]
+  )
+})
+
+test('groups hidden from All exclude only channels not in any visible group', () => {
+  const subscriptions = [{ id: 'UCa' }, { id: 'UCb' }, { id: 'UCc' }, { id: 'UCd' }, { id: 'UCu' }]
+  const visible = { id: 'visible', name: 'Visible', channelIds: ['UCa', 'UCb'] }
+  const hidden1 = { id: 'hidden1', name: 'Hidden 1', channelIds: ['UCb', 'UCc', 'UCd'], showInAll: false }
+  const hidden2 = { id: 'hidden2', name: 'Hidden 2', channelIds: ['UCd'], showInAll: false }
+
+  // No hidden groups keeps the original array reference
+  assert.equal(filterSubscriptionsForFeed(subscriptions, null, [visible]), subscriptions)
+  // A hidden group whose channels are all in another visible group or outside the profile also keeps the reference
+  assert.equal(
+    filterSubscriptionsForFeed(subscriptions, null, [visible, { id: 'h', name: 'H', channelIds: ['UCb', 'UCother'], showInAll: false }]),
+    subscriptions
+  )
+  // In All: UCb stays (also in visible), UCu stays (ungrouped), UCc & UCd are excluded (exclusively in hidden groups)
+  assert.deepEqual(
+    filterSubscriptionsForFeed(subscriptions, null, [visible, hidden1, hidden2]),
+    [{ id: 'UCa' }, { id: 'UCb' }, { id: 'UCu' }]
+  )
+  // Selecting a hidden group directly still shows its channels
+  assert.deepEqual(
+    filterSubscriptionsForFeed(subscriptions, hidden1, [visible, hidden1, hidden2]),
+    [{ id: 'UCb' }, { id: 'UCc' }, { id: 'UCd' }]
   )
 })
 
@@ -106,9 +134,9 @@ test('imported CSV group columns add channels to existing groups and create miss
   ])
 
   let nextId = 0
-  const groups = addChannelsToNamedGroups([{ id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz'], icon: 'code' }], channels, () => `new-${nextId++}`)
+  const groups = addChannelsToNamedGroups([{ id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz'], icon: 'code', showInAll: false }], channels, () => `new-${nextId++}`)
   assert.deepEqual(groups, [
-    { id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz', 'UCa'], icon: 'code' },
+    { id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz', 'UCa'], icon: 'code', showInAll: false },
     { id: 'new-0', name: 'Web Design', channelIds: ['UCa'] },
   ])
 })

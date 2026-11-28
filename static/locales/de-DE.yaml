@@ -3497,6 +3497,9 @@ Subscription Groups:
   Delete Failed: Die Gruppe konnte nicht gelöscht werden.
   Group Icon: Gruppensymbol
   No Icon: Kein Symbol
+  Show Channels in All: Kanäle unter „Alle“ anzeigen
+  Show Channels in All Description: Wenn deaktiviert, werden Kanäle, die nur in dieser Gruppe sind, im Abo-Feed „Alle“ ausgeblendet.
+  All Hidden From All: Alle Kanäle aus dem aktuellen Profil sind im Feed „Alle“ ausgeblendet.
 Clipboard:
   Copy failed: Kopieren in die Zwischenablage fehlgeschlagen
   Cannot access clipboard without a secure connection: Zugriff auf die Zwischenablage ist ohne sichere Verbindung nicht möglich

@@ -3025,6 +3025,9 @@ Subscription Groups:
   Delete Failed: Không thể xóa nhóm.
   Group Icon: Biểu tượng nhóm
   No Icon: Không có biểu tượng
+  Show Channels in All: Hiển thị kênh trong Tất cả
+  Show Channels in All Description: Khi tắt, các kênh chỉ thuộc nhóm này sẽ bị ẩn khỏi nguồn cấp đăng ký Tất cả.
+  All Hidden From All: Tất cả kênh trong hồ sơ hiện tại đều đang bị ẩn khỏi nguồn cấp Tất cả.
 Yattee Server:
   API Error (Click to copy): Lỗi máy chủ Yattee (Nhấn để copy)
   Unsupported page: Trang này không khả dụng với máy chủ Yattee. Hãy bật “{fallbackSetting}” để tải trang bằng API cục bộ.

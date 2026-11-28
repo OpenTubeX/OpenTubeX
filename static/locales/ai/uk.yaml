@@ -3063,6 +3063,9 @@ Subscription Groups:
   Delete Failed: Не вдалося видалити групу.
   Group Icon: Значок групи
   No Icon: Без значка
+  Show Channels in All: Показувати канали в «Усі»
+  Show Channels in All Description: Якщо вимкнено, канали, що належать лише до цієї групи, приховуються зі стрічки підписок «Усі».
+  All Hidden From All: Усі канали поточного профілю приховані зі стрічки «Усі».
 Yattee Server:
   API Error (Click to copy): Помилка сервера Yattee (натисніть, щоб скопіювати)
   Unsupported page: Ця сторінка недоступна із сервером Yattee. Увімкніть «{fallbackSetting}», щоб завантажити її через локальний API.

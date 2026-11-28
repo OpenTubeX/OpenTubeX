@@ -539,7 +539,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     pinnedPlaylistIds: [],
     pinnedChannels: [],
     pinnedChannelMetadata: {},
-    // Groups are independent of profiles: { id, name, channelIds }
+    // Groups are independent of profiles: { id, name, channelIds, icon?, showInAll? }
     subscriptionGroups: [],
     subscribedChannelsSortBy: 'name_ascending',
     subscribedChannelsCustomOrder: [],

@@ -3010,6 +3010,9 @@ Subscription Groups:
   Delete Failed: 無法刪除群組。
   Group Icon: 群組圖示
   No Icon: 無圖示
+  Show Channels in All: 在「全部」中顯示頻道
+  Show Channels in All Description: 停用後，僅屬於此群組的頻道將不會顯示在「全部」訂閱動態中。
+  All Hidden From All: 目前設定檔中的所有頻道皆已從「全部」動態中隱藏。
 Yattee Server:
   API Error (Click to copy): Yattee 伺服器錯誤（點擊複製）
   Unsupported page: 使用 Yattee 伺服器時無法開啟此頁面。請開啟「{fallbackSetting}」以透過本機 API 載入。

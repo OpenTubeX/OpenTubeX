@@ -3005,6 +3005,9 @@ Subscription Groups:
   Delete Failed: Impossible de supprimer le groupe.
   Group Icon: Icône du groupe
   No Icon: Aucune icône
+  Show Channels in All: Afficher les chaînes dans Tous
+  Show Channels in All Description: Lorsque cette option est désactivée, les chaînes présentes uniquement dans ce groupe sont masquées du flux d’abonnements Tous.
+  All Hidden From All: Toutes les chaînes du profil actuel sont masquées du flux Tous.
 Yattee Server:
   API Error (Click to copy): Erreur du serveur Yattee (Cliquez pour copier)
   Unsupported page: Cette page n’est pas disponible avec le serveur Yattee. Activez « {fallbackSetting} » pour la charger avec l’API locale.

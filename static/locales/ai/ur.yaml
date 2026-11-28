@@ -340,6 +340,9 @@ Subscription Groups:
   Delete Failed: گروپ حذف نہیں ہو سکا۔
   Group Icon: گروپ آئیکن
   No Icon: کوئی آئیکن نہیں
+  Show Channels in All: '"تمام" میں چینلز دکھائیں'
+  Show Channels in All Description: 'غیر فعال ہونے پر، صرف اس گروپ میں شامل چینلز "تمام" سبسکرپشن فیڈ سے پوشیدہ رہتے ہیں۔'
+  All Hidden From All: 'موجودہ پروفائل کے تمام چینلز "تمام" فیڈ سے پوشیدہ ہیں۔'
 Trending:
   Music: موسیقی
   Load Error: ٹرینڈنگ لوڈ نہیں ہو سکی۔

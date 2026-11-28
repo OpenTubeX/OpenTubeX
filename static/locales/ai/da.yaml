@@ -3104,6 +3104,9 @@ Subscription Groups:
   Delete Failed: Gruppen kunne ikke slettes.
   Group Icon: Gruppeikon
   No Icon: Intet ikon
+  Show Channels in All: Vis kanaler i Alle
+  Show Channels in All Description: Når deaktiveret, skjules kanaler, der kun findes i denne gruppe, fra abonnementsfeedet Alle.
+  All Hidden From All: Alle kanaler i den aktuelle profil er skjult fra feedet Alle.
 Yattee Server:
   API Error (Click to copy): Yattee-serverfejl (Klik for at kopiere)
   Unsupported page: Denne side er ikke tilgængelig med Yattee-serveren. Slå »{fallbackSetting}« til for at indlæse den med den lokale API.

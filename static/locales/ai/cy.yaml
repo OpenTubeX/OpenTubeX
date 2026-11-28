@@ -3046,6 +3046,9 @@ Subscription Groups:
   Delete Failed: Methu dileu'r grŵp.
   Group Icon: Eicon grŵp
   No Icon: Dim eicon
+  Show Channels in All: Dangos sianeli yn Pob un
+  Show Channels in All Description: Pan gaiff ei analluogi, mae sianeli sydd yn y grŵp hwn yn unig yn cael eu cuddio o’r ffrwd tanysgrifiadau Pob un.
+  All Hidden From All: Mae pob sianel yn y proffil cyfredol wedi’i chuddio o’r ffrwd Pob un.
 Yattee Server:
   API Error (Click to copy): Gwall Gweinydd Yattee (Cliciwch i'w gopïo)
   Unsupported page: Nid yw'r dudalen hon ar gael gyda'r gweinydd Yattee. Trowch “{fallbackSetting}” ymlaen i'w llwytho gyda'r API lleol.

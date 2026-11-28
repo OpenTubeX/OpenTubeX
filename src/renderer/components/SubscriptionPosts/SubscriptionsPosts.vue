@@ -79,7 +79,7 @@ const postsUnavailable = computed(() => store.getters.getBackendPreference === '
   !(process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback))
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'posts')
+  getSubscriptionsForFeed(store.getters.getActiveFeedSubscriptions, 'posts')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {

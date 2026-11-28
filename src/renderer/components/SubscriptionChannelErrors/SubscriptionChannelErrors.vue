@@ -157,7 +157,7 @@ const expanded = ref(false)
 const refreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
 
 const shownChannelsById = computed(() => {
-  return new Map(store.getters.getActiveGroupSubscriptions.map(channel => [channel.id, channel]))
+  return new Map(store.getters.getActiveFeedSubscriptions.map(channel => [channel.id, channel]))
 })
 
 // Refreshes cover the whole profile, so only the shown channels are listed.

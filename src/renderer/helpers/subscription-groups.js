@@ -15,6 +15,7 @@ export const SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS = {
  * @property {string} name
  * @property {string[]} channelIds
  * @property {string} [icon] a SUBSCRIPTION_GROUP_ICONS value
+ * @property {boolean} [showInAll] whether this group's channels appear in the All subscription feed (defaults to true)
  */
 
 /**
@@ -38,6 +39,7 @@ export function normalizeSubscriptionGroups(value) {
       name: group.name.trim(),
       channelIds: normalizeChannelIds(group.channelIds),
       ...(SUBSCRIPTION_GROUP_ICONS.includes(group.icon) ? { icon: group.icon } : {}),
+      ...(group.showInAll === false ? { showInAll: false } : {}),
     })
   }
   return groups
@@ -72,6 +74,36 @@ export function filterSubscriptionsByGroup(subscriptions, group) {
 
   const channelIds = new Set(group.channelIds)
   return subscriptions.filter(channel => channelIds.has(channel.id))
+}
+
+/**
+ * Subscriptions shown by the Subscriptions feeds for the active group.
+ * In the All feed (`group == null`), channels belonging exclusively to groups
+ * with `showInAll === false` are excluded; ungrouped channels and channels in
+ * at least one visible group stay included.
+ * @template {{ id: string }} T
+ * @param {T[]} subscriptions
+ * @param {SubscriptionGroup | null} group
+ * @param {SubscriptionGroup[]} [groups]
+ * @returns {T[]}
+ */
+export function filterSubscriptionsForFeed(subscriptions, group, groups = []) {
+  if (group != null) return filterSubscriptionsByGroup(subscriptions, group)
+
+  const hiddenChannelIds = new Set()
+  const shownChannelIds = new Set()
+  for (const candidate of groups) {
+    const target = candidate.showInAll === false ? hiddenChannelIds : shownChannelIds
+    for (const channelId of candidate.channelIds) {
+      target.add(channelId)
+    }
+  }
+  if (hiddenChannelIds.size === 0) return subscriptions
+
+  const isHidden = channel => hiddenChannelIds.has(channel.id) && !shownChannelIds.has(channel.id)
+  return subscriptions.some(isHidden)
+    ? subscriptions.filter(channel => !isHidden(channel))
+    : subscriptions
 }
 
 /**

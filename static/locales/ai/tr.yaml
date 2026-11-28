@@ -3007,6 +3007,9 @@ Subscription Groups:
   Delete Failed: Grup silinemedi.
   Group Icon: Grup simgesi
   No Icon: Simge yok
+  Show Channels in All: Kanalları Tümü bölümünde göster
+  Show Channels in All Description: Devre dışı bırakıldığında, yalnızca bu grupta yer alan kanallar Tümü abonelik akışından gizlenir.
+  All Hidden From All: Geçerli profildeki tüm kanallar Tümü akışından gizlendi.
 Yattee Server:
   API Error (Click to copy): Yattee Sunucusu Hatası (Kopyalamak için tıklayın)
   Unsupported page: Bu sayfa Yattee sunucusu ile kullanılamıyor. Yerel API ile yüklemek için “{fallbackSetting}” ayarını açın.

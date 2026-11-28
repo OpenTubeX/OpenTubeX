@@ -76,7 +76,7 @@ const getters = {
     let nextPremiereTimestamp = null
     const cache = getters.getVideoCache
     const includeCollaborations = getters.getIncludeSubscriptionCollaborations === true
-    const channels = getSubscriptionsForFeed(getters.getActiveGroupSubscriptions, 'videos')
+    const channels = getSubscriptionsForFeed(getters.getActiveFeedSubscriptions, 'videos')
     // Collaborations can also be cached as uploads or collaborations of other channels
     const videoIds = new Set()
     if (includeCollaborations) {

@@ -3007,6 +3007,9 @@ Subscription Groups:
   Delete Failed: グループを削除できませんでした。
   Group Icon: グループアイコン
   No Icon: アイコンなし
+  Show Channels in All: 「すべて」にチャンネルを表示
+  Show Channels in All Description: 無効にすると、このグループのみに属するチャンネルは「すべて」の登録チャンネルフィードから非表示になります。
+  All Hidden From All: 現在のプロファイルのすべてのチャンネルが「すべて」フィードから非表示になっています。
 Yattee Server:
   API Error (Click to copy): Yattee Server エラー（クリックしてコピー）
   Unsupported page: このページは Yattee サーバーでは利用できません。内部 API で読み込むには「{fallbackSetting}」をオンにしてください。

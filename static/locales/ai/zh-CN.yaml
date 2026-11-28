@@ -3007,6 +3007,9 @@ Subscription Groups:
   Delete Failed: 无法删除分组。
   Group Icon: 分组图标
   No Icon: 无图标
+  Show Channels in All: 在“全部”中显示频道
+  Show Channels in All Description: 禁用后，仅属于此分组的频道将不会显示在“全部”订阅动态中。
+  All Hidden From All: 当前配置文件中的所有频道均已从“全部”动态中隐藏。
 Yattee Server:
   API Error (Click to copy): Yattee 服务器错误（点击复制）
   Unsupported page: 使用 Yattee 服务器时无法打开此页面。开启“{fallbackSetting}”即可通过本地 API 加载。

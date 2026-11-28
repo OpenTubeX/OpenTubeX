@@ -357,6 +357,9 @@ Subscription Groups:
   Delete Failed: Die groep kon nie geskrap word nie.
   Group Icon: Groepikoon
   No Icon: Geen ikoon
+  Show Channels in All: Wys kanale in Alles
+  Show Channels in All Description: Wanneer gedeaktiveer, word kanale wat net in hierdie groep is, uit die Alles-intekeningstroom versteek.
+  All Hidden From All: Alle kanale in die huidige profiel word uit die Alles-stroom versteek.
 Trending:
   Trending: Stygend
   Music: Musiek

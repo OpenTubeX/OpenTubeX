@@ -706,7 +706,7 @@ function setPlatformFeedTabRef(tab, element) {
   else platformFeedTabRefs.delete(tab)
 }
 
-const activeSubscriptions = computed(() => store.getters.getActiveGroupSubscriptions)
+const activeSubscriptions = computed(() => store.getters.getActiveFeedSubscriptions)
 const hasSubscriptionGroups = computed(() => store.getters.getSubscriptionGroupList.length > 0)
 
 const activeSubscriptionList = computed(() => {

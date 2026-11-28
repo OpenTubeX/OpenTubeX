@@ -3010,6 +3010,9 @@ Subscription Groups:
   Delete Failed: Rühma ei õnnestunud kustutada.
   Group Icon: Rühma ikoon
   No Icon: Ikoonita
+  Show Channels in All: Kuva kanaleid vaates Kõik
+  Show Channels in All Description: Kui see on keelatud, peidetakse ainult sellesse gruppi kuuluvad kanalid tellimuste voost Kõik.
+  All Hidden From All: Kõik praeguse profiili kanalid on voost Kõik peidetud.
 Yattee Server:
   API Error (Click to copy): Yattee serveri viga (kopeerimiseks klõpsi)
   Unsupported page: See leht pole Yattee serveriga saadaval. Lülita sisse „{fallbackSetting}“, et laadida see kohaliku API kaudu.

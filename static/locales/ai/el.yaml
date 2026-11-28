@@ -3022,6 +3022,9 @@ Subscription Groups:
   Delete Failed: Δεν ήταν δυνατή η διαγραφή της ομάδας.
   Group Icon: Εικονίδιο ομάδας
   No Icon: Χωρίς εικονίδιο
+  Show Channels in All: Εμφάνιση καναλιών στο Όλα
+  Show Channels in All Description: Όταν είναι απενεργοποιημένο, τα κανάλια που ανήκουν μόνο σε αυτήν την ομάδα αποκρύπτονται από τη ροή συνδρομών Όλα.
+  All Hidden From All: Όλα τα κανάλια του τρέχοντος προφίλ είναι κρυμμένα από τη ροή Όλα.
 Yattee Server:
   API Error (Click to copy): Σφάλμα διακομιστή Yattee (Κάντε κλικ για αντιγραφή)
   Unsupported page: Αυτή η σελίδα δεν είναι διαθέσιμη με τον διακομιστή Yattee. Ενεργοποιήστε τη ρύθμιση «{fallbackSetting}» για να τη φορτώσετε με το τοπικό API.

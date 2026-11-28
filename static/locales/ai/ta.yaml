@@ -3072,6 +3072,9 @@ Subscription Groups:
   Delete Failed: குழுவை நீக்க முடியவில்லை.
   Group Icon: குழு சின்னம்
   No Icon: சின்னம் இல்லை
+  Show Channels in All: அனைத்தும் பிரிவில் அலைவரிசைகளைக் காட்டு
+  Show Channels in All Description: முடக்கப்பட்டால், இந்தக் குழுவில் மட்டும் உள்ள அலைவரிசைகள் அனைத்தும் சந்தா ஊட்டத்திலிருந்து மறைக்கப்படும்.
+  All Hidden From All: தற்போதைய சுயவிவரத்தில் உள்ள அனைத்து அலைவரிசைகளும் அனைத்தும் ஊட்டத்திலிருந்து மறைக்கப்பட்டுள்ளன.
 Yattee Server:
   API Error (Click to copy): Yattee சேவையகப் பிழை (நகலெடுக்க சொடுக்கு செய்க)
   Unsupported page: இந்தப் பக்கம் Yattee சேவையகத்துடன் கிடைக்காது. உள்ளக பநிஇ மூலம் இதை ஏற்ற “{fallbackSetting}” என்பதை இயக்கவும்.
