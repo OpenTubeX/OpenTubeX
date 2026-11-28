@@ -2270,6 +2270,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
   Add Playlist to Queue: "Lägg till spellistan i kön"
   Playlist Added to Queue: "Spellistan har lagts till i kön"
+  Sort By:
+    Default: Standard
 Change Format:
   yt-dlp Error Template: "yt-dlp kunde inte tillhandahålla strömmarna: {error}"
   Local Video File: Lokal videofil

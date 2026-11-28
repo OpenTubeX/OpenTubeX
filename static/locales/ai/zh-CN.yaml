@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "无法加载完整播放列表，已取消预加载。"
   Add Playlist to Queue: "将播放列表添加到队列"
   Playlist Added to Queue: "播放列表已添加到队列"
+  Sort By:
+    Default: 默认
 Change Format:
   yt-dlp Error Template: "yt-dlp 无法提供流：{error}"
   Local Video File: 本地视频文件

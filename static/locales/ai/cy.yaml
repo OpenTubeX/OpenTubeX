@@ -2306,6 +2306,8 @@ Playlist:
   Unavailable videos are hidden: Mae fideos nad ydynt ar gael wedi'u cuddio
   Add Playlist to Queue: "Ychwanegu'r rhestr chwarae at y ciw"
   Playlist Added to Queue: "Wedi ychwanegu'r rhestr chwarae at y ciw"
+  Sort By:
+    Default: Rhagosodedig
 Change Format:
   yt-dlp Error Template: "Ni allai yt-dlp ddarparu’r ffrydiau: {error}"
   Local Video File: Ffeil fideo leol

@@ -15,6 +15,7 @@
             playlistId: id,
             playlistType: videoPlaylistType,
             playlistItemId: startVideo.playlistItemId,
+            ...(!isUserPlaylist && sortOrder !== SORT_BY_VALUES.Custom ? { playlistSortOrder: sortOrder } : {}),
           },
         }"
         :data-tab-title="startVideoTitle"
@@ -458,6 +459,7 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { addingMissingVideos, addMissingPlaylistVideos, loadPlaylistVideos, scanPlaylistForUnavailableVideos, unavailableVideoScans } from '../../helpers/playlistTasks'
+import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isDurationSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY, normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
@@ -515,6 +517,10 @@ const props = defineProps({
   sortedVideos: {
     type: Array,
     required: true
+  },
+  sortOrder: {
+    type: String,
+    default: SORT_BY_VALUES.Custom,
   },
   viewCount: {
     type: Number,
@@ -727,9 +733,22 @@ function pickShuffledStartVideo() {
 watch(() => props.videos, pickShuffledStartVideo, { immediate: true })
 watch(() => selectedUserPlaylist.value?.shuffleByDefault, pickShuffledStartVideo)
 
-const startVideo = computed(() => shuffledStartVideo.value ?? {
-  videoId: props.firstVideoId,
-  playlistItemId: props.firstVideoPlaylistItemId,
+const startVideo = computed(() => {
+  if (shuffledStartVideo.value != null) return shuffledStartVideo.value
+  const firstSorted = !isUserPlaylist.value && props.sortOrder !== SORT_BY_VALUES.Custom
+    ? props.sortedVideos[0]
+    : null
+  if (firstSorted?.videoId) {
+    return {
+      videoId: firstSorted.videoId,
+      playlistItemId: firstSorted.playlistItemId ?? '',
+      title: firstSorted.title,
+    }
+  }
+  return {
+    videoId: props.firstVideoId,
+    playlistItemId: props.firstVideoPlaylistItemId,
+  }
 })
 const startVideoTitle = computed(() => startVideo.value.title ??
   props.videos.find(video => video.videoId === startVideo.value.videoId)?.title)
@@ -1073,7 +1092,7 @@ function copyPlaylist() {
 
 async function addPlaylistToQueue() {
   if (queueSnapshotPending.value) return
-  // Queue user playlists in their displayed sort order.
+  // Queue playlists in their displayed sort order.
   let videos = props.sortedVideos
   if (!isUserPlaylist.value) {
     queueSnapshotPending.value = true
@@ -1086,6 +1105,12 @@ async function addPlaylistToQueue() {
     queueSnapshotPending.value = false
     // Leaving the playlist while it loads cancels the action.
     if (!videos) return
+    if (props.sortOrder !== SORT_BY_VALUES.Custom) {
+      const items = isDurationSortOrder(props.sortOrder)
+        ? fillMissingPlaylistVideoDurations(videos, toRaw(historyCacheById.value)).items
+        : videos
+      videos = getSortedPlaylistItems(items, props.sortOrder, locale.value)
+    }
   }
   if (videos.length === 0) return
 

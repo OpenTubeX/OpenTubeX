@@ -2285,6 +2285,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Δεν ήταν δυνατή η φόρτωση ολόκληρης της λίστας, οπότε η προφόρτωση ακυρώθηκε."
   Add Playlist to Queue: "Προσθήκη λίστας αναπαραγωγής στην ουρά αναπαραγωγής"
   Playlist Added to Queue: "Η λίστα αναπαραγωγής προστέθηκε στην ουρά αναπαραγωγής"
+  Sort By:
+    Default: Προεπιλογή
 Change Format:
   yt-dlp Error Template: "Το yt-dlp δεν μπόρεσε να παρέχει τις ροές: {error}"
   Local Video File: Τοπικό αρχείο βίντεο

@@ -2336,6 +2336,8 @@ Playlist:
   Unavailable videos are hidden: Niet-beschikbare video's zijn verborgen
   Add Playlist to Queue: "Afspeellijst aan wachtrij toevoegen"
   Playlist Added to Queue: "Afspeellijst aan wachtrij toegevoegd"
+  Sort By:
+    Default: Standaard
 Change Format:
   yt-dlp Error Template: "yt-dlp kon de streams niet leveren: {error}"
   Local Video File: Lokaal videobestand

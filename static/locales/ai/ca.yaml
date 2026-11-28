@@ -2768,6 +2768,7 @@ Playlist:
     VideoDurationAscending: Durada (més curta)
     VideoDurationDescending: Durada (més llarga)
     Custom: Personalitzat
+    Default: Per defecte
   Preload Playlist: "Precarrega tots els vídeos"
   Preload Playlist Warning Title: "Voleu precarregar tots els vídeos?"
   Preload Playlist Warning: "La precàrrega sol·licita a YouTube cada vídeo d'aquesta llista de reproducció. Enviar moltes sol·licituds en poc temps pot fer que YouTube bloquegi temporalment la vostra adreça IP. Voleu continuar?"

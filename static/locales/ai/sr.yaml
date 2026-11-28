@@ -2348,6 +2348,8 @@ Playlist:
   Unavailable videos are hidden: Недоступни видео-снимци су скривени
   Add Playlist to Queue: "Додај плејлисту у ред за репродукцију"
   Playlist Added to Queue: "Плејлиста је додата у ред за репродукцију"
+  Sort By:
+    Default: Подразумевано
 Change Format:
   yt-dlp Error Template: "yt-dlp није могао да обезбеди стримове: {error}"
   Local Video File: Локална видео-датотека

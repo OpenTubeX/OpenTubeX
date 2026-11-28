@@ -3002,6 +3002,7 @@ Playlist:
     AuthorDescending: Autor (Z–A)
     VideoTitleAscending: Titel (A–Z)
     Custom: Benutzerdefiniert
+    Default: Standard
     VideoDurationAscending: Dauer (kürzeste)
     VideoDurationDescending: Dauer (längste)
     PublishedNewest: Veröffentlichungsdatum (neueste)

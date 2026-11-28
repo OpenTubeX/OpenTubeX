@@ -2321,6 +2321,8 @@ Playlist:
   Unavailable videos are hidden: مقاطع الفيديو غير المتاحة مخفية
   Add Playlist to Queue: "إضافة قائمة التشغيل إلى قائمة الانتظار"
   Playlist Added to Queue: "تمت إضافة قائمة التشغيل إلى قائمة الانتظار"
+  Sort By:
+    Default: الافتراضي
 Change Format:
   yt-dlp Error Template: "تعذّر على yt-dlp توفير التدفقات: {error}"
   Local Video File: ملف فيديو محلي

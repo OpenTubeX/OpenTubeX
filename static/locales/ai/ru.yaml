@@ -2237,6 +2237,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Не удалось загрузить весь плейлист, поэтому предзагрузка отменена."
   Add Playlist to Queue: "Добавить плейлист в очередь"
   Playlist Added to Queue: "Плейлист добавлен в очередь"
+  Sort By:
+    Default: По умолчанию
 Change Format:
   yt-dlp Error Template: "yt-dlp не смог получить потоки: {error}"
   Local Video File: Локальный видеофайл

@@ -2319,6 +2319,8 @@ Playlist:
   Unavailable videos are hidden: Videoclipurile indisponibile sunt ascunse
   Add Playlist to Queue: "Adaugă lista de redare în coadă"
   Playlist Added to Queue: "Lista de redare a fost adăugată în coadă"
+  Sort By:
+    Default: Implicit
 Change Format:
   yt-dlp Error Template: "yt-dlp nu a putut furniza fluxurile: {error}"
   Local Video File: Fișier video local

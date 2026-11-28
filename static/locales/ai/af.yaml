@@ -2533,6 +2533,8 @@ Playlist:
   Playlist Preload Partial: '{preloaded} van {requested} video’s vooraf gelaai. {failed} kon nie vooraf gelaai word nie.'
   Playlist Preload Pagination Failed: Die volledige afspeellys kon nie gelaai word nie, dus is voorlaai gekanselleer.
   Unavailable videos are hidden: Onbeskikbare video’s is versteek
+  Sort By:
+    Default: Verstek
 Change Format:
   yt-dlp Error Template: 'yt-dlp kon nie die strome verskaf nie: {error}'
   Local Video File: Plaaslike videolêer

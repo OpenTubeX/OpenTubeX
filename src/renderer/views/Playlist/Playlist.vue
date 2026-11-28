@@ -51,7 +51,8 @@
         :description="playlistDescription"
         :video-count="shownVideoCount"
         :videos="shownPlaylistItems"
-        :sorted-videos="sortedPlaylistItems"
+        :sorted-videos="availablePlaylistItems"
+        :sort-order="sortOrder"
         :view-count="viewCount"
         :total-playlist-duration="totalPlaylistDuration"
         :is-duration-approximate="isDurationApproximate"
@@ -107,11 +108,11 @@
         v-if="availablePlaylistItems.length > 0 || moreVideoDataAvailable"
       >
         <FtSelect
-          v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
+          v-if="isUserPlaylistRequested ? shownPlaylistItems.length > 1 : (availablePlaylistItems.length > 1 || !isSortOrderCustom)"
           class="sortSelect"
           :value="sortOrder"
           :select-names="sortBySelectNames"
-          :select-values="SORT_BY_SELECT_VALUES"
+          :select-values="sortBySelectValues"
           :placeholder="t('Global.Sort By')"
           :icon="sortOrderIcon"
           @change="updatePlaylistSortOrder"
@@ -125,6 +126,7 @@
             display="grid"
             :playlist-id="playlistId"
             :playlist-type="infoSource"
+            :playlist-sort-order="isUserPlaylistRequested || isSortOrderCustom ? '' : sortOrder"
             :show-video-with-last-viewed-playlist="true"
             :use-channels-hidden-preference="false"
             :use-hide-upcoming-premieres-preference="false"
@@ -157,12 +159,13 @@
           >
             <FtListVideoNumbered
               v-for="(item, index) in visiblePlaylistItems"
-              :key="`${item.videoId}-${item.playlistItemId || index}`"
+              :key="`${item.videoId}-${item.playlistItemId ?? item.index ?? index}`"
               class="playlistItem"
               :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :playlist-index="playlistItemPositions.get(item) ?? index"
+              :playlist-sort-order="isUserPlaylistRequested || isSortOrderCustom ? '' : sortOrder"
+              :playlist-index="playlistItemPositions.get(isUserPlaylistRequested ? (item.playlistItemId ?? item) : (item.index ?? item)) ?? index"
               :playlist-item-id="item.playlistItemId"
               appearance="result"
               :always-show-add-to-playlist-button="true"
@@ -207,7 +210,7 @@
           </div>
         </FtFlexBox>
         <FtAutoLoadNextPageWrapper
-          v-else-if="moreVideoDataAvailable && !isLoadingMore && !loadingPagesForSearch"
+          v-else-if="moreVideoDataAvailable && !isLoadingMore && !loadingPagesForSearch && !loadingPagesForSort"
           @load-next-page="getNextPage"
         >
           <FtFlexBox>
@@ -221,7 +224,7 @@
           </FtFlexBox>
         </FtAutoLoadNextPageWrapper>
         <div
-          v-if="isLoadingMore || loadingPagesForSearch"
+          v-if="isLoadingMore || loadingPagesForSearch || loadingPagesForSort"
           class="loadNextPageWrapper"
         >
           <FtLoader />
@@ -287,7 +290,7 @@ import {
   parseLocalPlaylistLastUpdated,
   updatePlaylistBookmarkMetadata,
 } from '../../helpers/playlist-bookmarks'
-import { fillMissingPlaylistVideoDurations, getPlaylistSortOrder, getSortedPlaylistItems, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
+import { fillMissingPlaylistVideoDurations, getPlaylistSortOrder, getRemotePlaylistSortOrderValues, getSortedPlaylistItems, isDurationSortOrder, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { usesYtDlpCookiesFor } from '../../../ytDlpCookieUses'
 import {
@@ -456,12 +459,35 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 
 const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
+const noPlaylistItemsPendingDeletion = computed(() => toBeDeletedPlaylistItemIds.value.length === 0)
+
+const shownPlaylistItems = computed(() => {
+  if (tempShownPlaylistItems.value != null) { return tempShownPlaylistItems.value }
+  if (noPlaylistItemsPendingDeletion.value) {
+    return playlistItems.value
+  }
+
+  const toBeDeletedPlaylistItemIds_ = toBeDeletedPlaylistItemIds.value
+  return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
+})
+
+const hasPublishedDates = computed(() =>
+  shownPlaylistItems.value.some(video => typeof video.published === 'number' && !isNaN(video.published) && video.published !== 0)
+)
+
+const remoteSortOrderValues = computed(() => getRemotePlaylistSortOrderValues(hasPublishedDates.value))
+
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
+const remoteSortOrder = ref(SORT_BY_VALUES.Custom)
 
-// Playlists without their own sort order follow the setting
+// Playlists without their own sort order follow the setting; remote playlists start in YouTube's order
 const sortOrder = computed(() => {
-  if (!isUserPlaylistRequested.value) { return SORT_BY_VALUES.Custom }
+  if (!isUserPlaylistRequested.value) {
+    return remoteSortOrderValues.value.includes(remoteSortOrder.value)
+      ? remoteSortOrder.value
+      : SORT_BY_VALUES.Custom
+  }
   return getPlaylistSortOrder(selectedUserPlaylist.value, userPlaylistSortOrder.value)
 })
 
@@ -751,10 +777,7 @@ const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Cust
 
 const sortedPlaylistItems = computed(() => {
   if (isSortedByYouTube(selectedUserPlaylist.value, sortOrder.value)) return shownPlaylistItems.value
-  if (
-    sortOrder.value === SORT_BY_VALUES.VideoDurationAscending ||
-    sortOrder.value === SORT_BY_VALUES.VideoDurationDescending
-  ) {
+  if (isDurationSortOrder(sortOrder.value)) {
     const playlistItems = getPlaylistItemsWithDuration()
     return getSortedPlaylistItems(playlistItems, sortOrder.value, locale.value)
   }
@@ -773,25 +796,34 @@ const loadingPagesForSearch = computed(() =>
   playlistInVideoSearchMode.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
 )
 
+// Sorting only sees loaded videos, so YouTube playlists load their remaining pages while sorted
+const loadingPagesForSort = computed(() =>
+  !isSortOrderCustom.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
+)
+
 // The download prompt's video selection lists every video, so it loads the remaining pages too
 const downloadVideoSelectionOpen = ref(false)
 const loadingPagesForDownload = computed(() =>
   downloadVideoSelectionOpen.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
 )
 
-watch([loadingPagesForSearch, loadingPagesForDownload, isLoadingMore, isLoading], () => {
-  if ((loadingPagesForSearch.value || loadingPagesForDownload.value) && !isLoadingMore.value && !isLoading.value) getNextPage()
+watch([loadingPagesForSearch, loadingPagesForSort, loadingPagesForDownload, isLoadingMore, isLoading], () => {
+  if ((loadingPagesForSearch.value || loadingPagesForSort.value || loadingPagesForDownload.value) && !isLoadingMore.value && !isLoading.value) getNextPage()
 })
 
 const sortOrderIcon = computed(() => getIconForSortPreference(sortOrder.value))
 
-const SORT_BY_SELECT_VALUES = Object.values(SORT_BY_VALUES)
+const USER_SORT_BY_SELECT_VALUES = Object.values(SORT_BY_VALUES)
+
+const sortBySelectValues = computed(() =>
+  isUserPlaylistRequested.value ? USER_SORT_BY_SELECT_VALUES : remoteSortOrderValues.value
+)
 
 const sortBySelectNames = computed(() => {
-  return SORT_BY_SELECT_VALUES.map((k) => {
+  return sortBySelectValues.value.map((k) => {
     switch (k) {
       case SORT_BY_VALUES.Custom:
-        return t('Playlist.Sort By.Custom')
+        return isUserPlaylistRequested.value ? t('Playlist.Sort By.Custom') : t('Playlist.Sort By.Default')
       case SORT_BY_VALUES.DateAddedNewest:
         return t('Playlist.Sort By.DateAddedNewest')
       case SORT_BY_VALUES.DateAddedOldest:
@@ -823,6 +855,10 @@ const sortBySelectNames = computed(() => {
  * @param {string} value
  */
 function updatePlaylistSortOrder(value) {
+  if (!isUserPlaylistRequested.value) {
+    remoteSortOrder.value = value
+    return
+  }
   store.dispatch('updatePlaylistSortOrder', { _id: playlistId.value, sortOrder: value })
 }
 
@@ -835,18 +871,6 @@ const totalPlaylistDuration = computed(() => {
 
 const isDurationApproximate = computed(() => {
   return shownPlaylistItems.value.some((video) => typeof video.lengthSeconds !== 'number')
-})
-
-const noPlaylistItemsPendingDeletion = computed(() => toBeDeletedPlaylistItemIds.value.length === 0)
-
-const shownPlaylistItems = computed(() => {
-  if (tempShownPlaylistItems.value != null) { return tempShownPlaylistItems.value }
-  if (noPlaylistItemsPendingDeletion.value) {
-    return playlistItems.value
-  }
-
-  const toBeDeletedPlaylistItemIds_ = toBeDeletedPlaylistItemIds.value
-  return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
 })
 
 // User playlist search results keep their playlist position. YouTube ones keep the number they
@@ -863,8 +887,13 @@ function shownPlaylistItemIndex(item) {
 }
 
 // The external player loads the whole YouTube playlist, so its start counts hidden videos too.
-// User playlists open single videos, and their copied duration-sorted items fall back to the row
-const playlistItemPositions = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item, index])))
+// Duration sorting can copy items missing a length, so match by stable item identity
+const playlistItemPositions = computed(() => new Map(
+  shownPlaylistItems.value.map((item, index) => [
+    isUserPlaylistRequested.value ? (item.playlistItemId ?? item) : (item.index ?? item),
+    index,
+  ])
+))
 
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
 
@@ -927,6 +956,8 @@ function resetState() {
   playlistErrorRetryable.value = false
   fetchedLocalPlaylistItemCount = 0
   downloadVideoSelectionOpen.value = false
+  remoteSortOrder.value = SORT_BY_VALUES.Custom
+  alreadyShownNotice = false
 }
 
 async function getPlaylistLocal() {
@@ -1718,6 +1749,8 @@ function cachePlaylistForWatchTransition(to) {
         channelName: channelName.value,
         channelId: channelId.value,
         items: availablePlaylistItems.value,
+        sortOrder: isUserPlaylistRequested.value ? undefined : sortOrder.value,
+        fetchedLocalPlaylistItemCount,
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,

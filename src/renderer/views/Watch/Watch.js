@@ -575,6 +575,7 @@ export default defineComponent({
       playlistSkipAvailability: { canPlayNext: true, canPlayPrevious: true },
       playlistId: '',
       playlistType: '',
+      playlistSortOrder: '',
       playlistItemId: null,
       /** @type {number|null} */
       timestamp: null,
@@ -5837,6 +5838,7 @@ export default defineComponent({
 
       if (this.playlistId == null || this.playlistId.length === 0) {
         this.playlistType = ''
+        this.playlistSortOrder = ''
         this.playlistItemId = null
         this.watchingPlaylist = false
         return
@@ -5855,6 +5857,7 @@ export default defineComponent({
         if (!removedOnceWatched && !this.selectedUserPlaylist.videos.some((video) => video.videoId === this.videoId)) {
           this.playlistId = ''
           this.playlistType = ''
+          this.playlistSortOrder = ''
           this.playlistItemId = null
           this.watchingPlaylist = false
           return
@@ -5862,6 +5865,7 @@ export default defineComponent({
 
         // If playlist ID matches a user playlist, it must be user playlist
         this.playlistType = 'user'
+        this.playlistSortOrder = ''
         this.watchingPlaylist = true
         return
       }
@@ -5871,6 +5875,9 @@ export default defineComponent({
       this.playlistType = this.tabRoute.query.playlistType
       if (this.playlistType !== 'user') {
         // Remote playlist
+        this.playlistSortOrder = typeof this.tabRoute.query.playlistSortOrder === 'string'
+          ? this.tabRoute.query.playlistSortOrder
+          : ''
         this.playlistItemId = null
         this.watchingPlaylist = true
         return
@@ -5882,6 +5889,7 @@ export default defineComponent({
         // Clear playlist data so that watch history will be properly updated
         this.playlistId = ''
         this.playlistType = ''
+        this.playlistSortOrder = ''
         this.playlistItemId = null
       }
       this.watchingPlaylist = this.selectedUserPlaylist != null

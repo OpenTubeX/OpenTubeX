@@ -1,5 +1,7 @@
 import { chooseSelectOption, test, expect, goTo } from '../../helpers/app.mjs'
 import { waitForPlayback } from '../../helpers/player.mjs'
+import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
+import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const lastUpdatedAt = 1_700_000_000_000
@@ -224,5 +226,215 @@ test.describe('a playlist synced from YouTube', () => {
     // YouTube has no title order, so that one sorts here.
     await chooseSelectOption(page.locator('.sortSelect select'), 'video_title_ascending')
     await expect(titles(page)).toHaveText(ascendingTitles)
+  })
+})
+
+test.describe('duration fallback on watch page', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        animationSpeed: 0,
+        playlistViewType: 'list',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+      },
+      history: [{
+        _id: 'durhist0002',
+        videoId: 'durhist0002',
+        title: 'Medium from history',
+        author: 'Test channel',
+        authorId: 'UC-test-channel-id',
+        lengthSeconds: 150,
+        timeWatched: lastUpdatedAt,
+        watchProgress: 10,
+        isWatched: false,
+      }],
+      playlists: [{
+        _id: 'duration-fallback',
+        playlistName: 'Duration fallback mix',
+        description: '',
+        protected: false,
+        lastUpdatedAt,
+        sortOrder: 'video_duration_ascending',
+        videos: [
+          { ...video('durhist0001', 'Longest video', 0), lengthSeconds: 300 },
+          { ...video('durhist0002', 'Medium from history', 1), lengthSeconds: 0 },
+          { ...video('durhist0003', 'Shortest video', 2), lengthSeconds: 60 },
+        ],
+      }],
+    },
+  })
+
+  test('orders user playlist videos by history fallback duration on both playlist and watch pages', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openPlaylist(page, 'Duration fallback mix')
+    const expectedOrder = ['Shortest video', 'Medium from history', 'Longest video']
+    await expect(titles(page)).toHaveText(expectedOrder)
+
+    await titles(page).first().click()
+    await waitForPlayback(page)
+    await expect(page.locator('.watchVideoPlaylist .playlistItem .h3Title')).toHaveText(expectedOrder)
+  })
+})
+
+test.describe('a remote YouTube playlist', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        animationSpeed: 0,
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test',
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        playlistViewType: 'list',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+      },
+    },
+  })
+
+  test('sorts multi-page YouTube playlists by duration and carries the order to queue and watch page', async ({ app, page }, testInfo) => {
+    await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await page.route('https://invidious.test/ggpht/**', route => fulfillVisualFixture(route, 'avatar'))
+    await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
+      json: {
+        title: 'Longest on page 2',
+        videoId: 'remp2long00',
+        viewCount: 1,
+        paid: false,
+        subCountText: '1',
+        likeCount: 1,
+        dislikeCount: 0,
+        genre: 'Education',
+        keywords: [],
+        author: 'Playlist channel',
+        authorId: 'UCplaylistchannel',
+        authorThumbnails: [],
+        description: '',
+        descriptionHtml: '',
+        published: 1_700_000_000,
+        recommendedVideos: [],
+        liveNow: false,
+        premiereTimestamp: 0,
+        isFamilyFriendly: true,
+        isPostLiveDvr: false,
+        isListed: true,
+        captions: [],
+        lengthSeconds: 900,
+        formatStreams: [],
+        adaptiveFormats: [],
+        videoThumbnails: [],
+      },
+    }))
+
+    const page1Videos = Array.from({ length: 100 }, (_, index) => ({
+      type: 'video',
+      title: `Page 1 video ${String(index + 1).padStart(3, '0')}`,
+      videoId: `remp1v${String(index).padStart(5, '0')}`,
+      author: 'Playlist channel',
+      authorId: 'UCplaylistchannel',
+      authorUrl: '/channel/UCplaylistchannel',
+      videoThumbnails: [],
+      index,
+      lengthSeconds: 120 + index,
+      liveNow: false,
+    }))
+    const page2Videos = [
+      {
+        type: 'video',
+        title: 'Shortest on page 2',
+        videoId: 'remp2short0',
+        author: 'Playlist channel',
+        authorId: 'UCplaylistchannel',
+        authorUrl: '/channel/UCplaylistchannel',
+        videoThumbnails: [],
+        index: 100,
+        lengthSeconds: 30,
+        liveNow: false,
+      },
+      {
+        type: 'video',
+        title: 'Longest on page 2',
+        videoId: 'remp2long00',
+        author: 'Playlist channel',
+        authorId: 'UCplaylistchannel',
+        authorUrl: '/channel/UCplaylistchannel',
+        videoThumbnails: [],
+        index: 101,
+        lengthSeconds: 900,
+        liveNow: false,
+      },
+    ]
+
+    await page.route(/\/api\/v1\/playlists\/remote-sort-test\?/, route => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') || 1)
+      const videosForPage = pageNumber === 1 ? page1Videos : page2Videos
+      return route.fulfill({
+        json: {
+          type: 'playlist',
+          title: 'Remote duration playlist',
+          playlistId: 'remote-sort-test',
+          author: 'Playlist channel',
+          authorId: 'UCplaylistchannel',
+          authorThumbnails: [{ url: 'https://yt3.ggpht.com/test=s76' }],
+          description: 'A remote playlist with varying video durations.',
+          descriptionHtml: '',
+          videoCount: 102,
+          viewCount: 500,
+          updated: 1_700_000_000,
+          videos: videosForPage,
+        },
+      })
+    })
+
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/playlist/remote-sort-test', makeActive: false }))
+    await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
+    await expect(page.locator('.playlistInfo .playlistTitle')).toHaveText('Remote duration playlist')
+
+    const sortSelect = page.locator('.sortSelect select')
+    await expect(sortSelect).toHaveValue('custom')
+    const optionValues = await sortSelect.locator('option').evaluateAll(options => options.map(option => option.value))
+    expect(optionValues).not.toContain('date_added_descending')
+    expect(optionValues).toContain('video_duration_ascending')
+    expect(optionValues).toContain('video_duration_descending')
+
+    // Sorting loads page 2 automatically so the shortest video on page 2 rises to the top.
+    await chooseSelectOption(sortSelect, 'video_duration_ascending')
+    await expect(titles(page).first()).toHaveText('Shortest on page 2')
+    await expect(page.locator('.playlistInfo .playlistThumbnail a')).toHaveAttribute('href', /\/watch\/remp2short0\b/)
+    await expect(page.locator('.playlistItems .playlistItem')).toHaveCount(102)
+    await expectImagesLoaded(page.locator('.playlistItemsCard .thumbnailImage:visible'))
+    await captureAppFramebuffer(app, testInfo, 'remote-playlist-sorted-duration-shortest')
+
+    await chooseSelectOption(sortSelect, 'video_duration_descending')
+    await expect(titles(page).first()).toHaveText('Longest on page 2')
+    await expect(page.locator('.playlistInfo .playlistThumbnail a')).toHaveAttribute('href', /\/watch\/remp2long00\b/)
+    await captureAppFramebuffer(app, testInfo, 'remote-playlist-sorted-duration-longest')
+
+    // Adding to the queue follows the active sort order.
+    await page.getByTitle('Add Playlist to Queue', { exact: true }).click()
+    await expect(page.getByText('Playlist added to queue', { exact: true })).toBeVisible()
+    const queuedFirst = await page.evaluate(() => window.$store.getters.getWatchQueue.slice(0, 2).map(item => item.videoId))
+    expect(queuedFirst).toEqual(['remp2long00', 'remp1v00099'])
+
+    // Opening a video in a new tab carries the remote sort order via the route query.
+    const visibleTabs = page.locator('.tab[data-tab-id]:visible')
+    const previousTabs = await visibleTabs.count()
+    await titles(page).first().click({ button: 'middle' })
+    await expect(visibleTabs).toHaveCount(previousTabs + 1)
+    await visibleTabs.last().click()
+    const newTabWatchPlaylist = page.locator('.watchVideoPlaylist:visible')
+    await expect(newTabWatchPlaylist.locator('.playlistItem')).toHaveCount(102)
+    await expect(newTabWatchPlaylist.locator('.playlistItem .h3Title').first()).toHaveText('Longest on page 2')
+
+    // Opening a video in the same tab carries the sorted order via the cache handoff.
+    await page.locator(`.tab[data-tab-id="${tab.id}"]:visible`).click()
+    await titles(page).first().click()
+    const watchPlaylist = page.locator('.watchVideoPlaylist:visible')
+    await expect(watchPlaylist.locator('.playlistItem')).toHaveCount(102)
+    await expect(watchPlaylist.locator('.playlistItem .h3Title').first()).toHaveText('Longest on page 2')
   })
 })

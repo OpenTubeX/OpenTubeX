@@ -2021,6 +2021,8 @@ Playlist:
   Unavailable videos are hidden: Niedostępne filmy są ukryte
   Add Playlist to Queue: "Dodaj playlistę do kolejki"
   Playlist Added to Queue: "Playlista dodana do kolejki"
+  Sort By:
+    Default: Domyślny
 Channels:
   Load More Channels: "Wczytaj więcej kanałów"
 

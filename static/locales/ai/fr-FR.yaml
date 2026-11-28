@@ -2268,6 +2268,8 @@ Playlist:
   Playlist Preload Pagination Failed: "La playlist complète n’a pas pu être chargée, le préchargement a donc été annulé."
   Add Playlist to Queue: "Ajouter la playlist à la file d’attente"
   Playlist Added to Queue: "Playlist ajoutée à la file d’attente"
+  Sort By:
+    Default: Par défaut
 Change Format:
   yt-dlp Error Template: "yt-dlp n’a pas pu fournir les flux : {error}"
   Local Video File: Fichier vidéo local

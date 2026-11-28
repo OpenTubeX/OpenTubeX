@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Celý playlist se nepodařilo načíst, přednačítání bylo zrušeno."
   Add Playlist to Queue: "Přidat playlist do fronty"
   Playlist Added to Queue: "Playlist byl přidán do fronty"
+  Sort By:
+    Default: Výchozí
 Change Format:
   yt-dlp Error Template: "yt-dlp nemohl poskytnout streamy: {error}"
   Local Video File: Místní soubor videa

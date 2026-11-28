@@ -2367,6 +2367,8 @@ Playlist:
   Unavailable videos are hidden: Недаступныя відэа схаваныя
   Add Playlist to Queue: "Дадаць плэй-ліст у чаргу"
   Playlist Added to Queue: "Плэй-ліст дададзены ў чаргу"
+  Sort By:
+    Default: Па змаўчанні
 Change Format:
   yt-dlp Error Template: "yt-dlp не змог атрымаць патокі: {error}"
   Local Video File: Лакальны відэафайл

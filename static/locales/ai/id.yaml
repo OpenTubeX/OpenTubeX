@@ -2296,6 +2296,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Daftar putar lengkap tidak dapat dimuat, sehingga pramuat dibatalkan."
   Add Playlist to Queue: "Tambahkan Daftar Putar ke Antrean"
   Playlist Added to Queue: "Daftar putar ditambahkan ke antrean"
+  Sort By:
+    Default: Default
 Change Format:
   yt-dlp Error Template: "yt-dlp tidak dapat menyediakan stream: {error}"
   Local Video File: Berkas video lokal

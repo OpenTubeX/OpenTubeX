@@ -2280,6 +2280,8 @@ Playlist:
   Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
   Add Playlist to Queue: "Ouzhpennañ ar roll-videoioù d'al lost"
   Playlist Added to Queue: "Ouzhpennet eo bet ar roll-videoioù d'al lost"
+  Sort By:
+    Default: Dre ziouer
 Change Format:
   yt-dlp Error Template: "N’en deus ket gallet yt-dlp pourchas al lanvioù: {error}"
   Local Video File: "Restr video lec'hel"

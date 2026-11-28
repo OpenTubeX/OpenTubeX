@@ -2285,6 +2285,8 @@ Playlist:
   Unavailable videos are hidden: Các video không có sẵn đã bị ẩn
   Add Playlist to Queue: "Thêm danh sách phát vào hàng đợi"
   Playlist Added to Queue: "Đã thêm danh sách phát vào hàng đợi"
+  Sort By:
+    Default: Mặc định
 Change Format:
   yt-dlp Error Template: "yt-dlp không thể cung cấp các luồng: {error}"
   Local Video File: Tệp video cục bộ

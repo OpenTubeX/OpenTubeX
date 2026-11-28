@@ -2278,6 +2278,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
   Add Playlist to Queue: "Lisää soittolista jonoon"
   Playlist Added to Queue: "Soittolista lisättiin jonoon"
+  Sort By:
+    Default: Oletus
 Change Format:
   yt-dlp Error Template: "yt-dlp ei voinut toimittaa suoratoistovirtoja: {error}"
   Local Video File: Paikallinen videotiedosto

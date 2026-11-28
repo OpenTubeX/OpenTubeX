@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "A teljes lejátszási lista nem tölthető be, ezért az előtöltés megszakadt."
   Add Playlist to Queue: "Lejátszási lista hozzáadása a lejátszási sorhoz"
   Playlist Added to Queue: "A lejátszási lista hozzáadva a lejátszási sorhoz"
+  Sort By:
+    Default: Alapértelmezett
 Change Format:
   yt-dlp Error Template: "A yt-dlp nem tudta biztosítani az adatfolyamokat: {error}"
   Local Video File: Helyi videófájl

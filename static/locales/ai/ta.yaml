@@ -2337,6 +2337,8 @@ Playlist:
   Unavailable videos are hidden: கிடைக்காத காணொளிகள் மறைக்கப்பட்டுள்ளன
   Add Playlist to Queue: "பிளேலிச்ட்டை வரிசையில் சேர்"
   Playlist Added to Queue: "பிளேலிச்ட் வரிசையில் சேர்க்கப்பட்டது"
+  Sort By:
+    Default: இயல்புநிலை
 Change Format:
   yt-dlp Error Template: "yt-dlp ஸ்ட்ரீம்களை வழங்க முடியவில்லை: {error}"
   Local Video File: உள்ளகக் காணொளிக் கோப்பு

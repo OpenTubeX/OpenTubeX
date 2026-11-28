@@ -2302,6 +2302,8 @@ Playlist:
   Unavailable videos are hidden: Недостъпните видеоклипове са скрити
   Add Playlist to Queue: "Добавяне на плейлиста към опашката"
   Playlist Added to Queue: "Плейлистът е добавен към опашката"
+  Sort By:
+    Default: По подразбиране
 Change Format:
   yt-dlp Error Template: "yt-dlp не успя да предостави потоците: {error}"
   Local Video File: Локален видеофайл

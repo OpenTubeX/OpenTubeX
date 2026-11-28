@@ -2285,6 +2285,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Ekki tókst að hlaða allan spilunarlistann og forhleðslu var hætt."
   Add Playlist to Queue: "Bæta spilunarlista í biðröð"
   Playlist Added to Queue: "Spilunarlista bætt í biðröð"
+  Sort By:
+    Default: Sjálfgefið
 Change Format:
   yt-dlp Error Template: "yt-dlp gat ekki sótt streymið: {error}"
   Local Video File: Staðbundin myndbandsskrá

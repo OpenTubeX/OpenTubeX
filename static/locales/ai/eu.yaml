@@ -2279,6 +2279,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
   Add Playlist to Queue: "Gehitu erreprodukzio-zerrenda ilarara"
   Playlist Added to Queue: "Erreprodukzio-zerrenda ilarara gehitu da"
+  Sort By:
+    Default: Lehenetsia
 Change Format:
   yt-dlp Error Template: "yt-dlp-k ezin izan ditu korronteak eman: {error}"
   Local Video File: Bideo-fitxategi lokala

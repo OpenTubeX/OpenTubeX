@@ -26,6 +26,30 @@ export function isPlaylistSortOrder(value) {
   return Object.values(SORT_BY_VALUES).includes(value)
 }
 
+/** @param {string} sortOrder */
+export function isDurationSortOrder(sortOrder) {
+  return sortOrder === SORT_BY_VALUES.VideoDurationAscending ||
+    sortOrder === SORT_BY_VALUES.VideoDurationDescending
+}
+
+/**
+ * Sort orders available for remote YouTube playlists, which have no date-added
+ * metadata and only have publish timestamps on some backends.
+ * @param {boolean} hasPublishedDates
+ */
+export function getRemotePlaylistSortOrderValues(hasPublishedDates) {
+  return [
+    SORT_BY_VALUES.Custom,
+    ...(hasPublishedDates ? [SORT_BY_VALUES.PublishedNewest, SORT_BY_VALUES.PublishedOldest] : []),
+    SORT_BY_VALUES.AuthorAscending,
+    SORT_BY_VALUES.AuthorDescending,
+    SORT_BY_VALUES.VideoTitleAscending,
+    SORT_BY_VALUES.VideoTitleDescending,
+    SORT_BY_VALUES.VideoDurationAscending,
+    SORT_BY_VALUES.VideoDurationDescending,
+  ]
+}
+
 /**
  * The sort order a user playlist shows: its own, or the setting.
  * @param {{ sortOrder?: unknown } | null | undefined} playlist
@@ -60,9 +84,7 @@ export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reverse
     sortOrder === SORT_BY_VALUES.VideoTitleAscending ||
     sortOrder === SORT_BY_VALUES.VideoTitleDescending ||
     sortOrder === SORT_BY_VALUES.AuthorAscending ||
-    sortOrder === SORT_BY_VALUES.AuthorDescending ||
-    sortOrder === SORT_BY_VALUES.VideoDurationAscending ||
-    sortOrder === SORT_BY_VALUES.VideoDurationDescending
+    sortOrder === SORT_BY_VALUES.AuthorDescending
   ) {
     collator = new Intl.Collator([locale, 'en'])
   }
@@ -268,13 +290,13 @@ function compareTwoPlaylistItems(a, b, sortOrder, collator) {
     case SORT_BY_VALUES.PublishedOldest:
       return publishedWithFallback(a) - publishedWithFallback(b)
     case SORT_BY_VALUES.VideoTitleAscending:
-      return collator.compare(a.title, b.title)
+      return collator.compare(a.title ?? '', b.title ?? '')
     case SORT_BY_VALUES.VideoTitleDescending:
-      return collator.compare(b.title, a.title)
+      return collator.compare(b.title ?? '', a.title ?? '')
     case SORT_BY_VALUES.AuthorAscending:
-      return collator.compare(a.author, b.author)
+      return collator.compare(a.author ?? '', b.author ?? '')
     case SORT_BY_VALUES.AuthorDescending:
-      return collator.compare(b.author, a.author)
+      return collator.compare(b.author ?? '', a.author ?? '')
     case SORT_BY_VALUES.VideoDurationAscending: {
       return videoDurationWithFallback(a) - videoDurationWithFallback(b)
     }

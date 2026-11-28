@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, ref, shallowRef, watch } from 'vue'
+import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const playlistsSource = readFileSync(new URL('../../src/renderer/helpers/playlists.js', import.meta.url), 'utf8')
@@ -53,6 +54,9 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     isLoading: ref(false),
     isFetchingPlaylistContinuation: ref(false),
     hasUnloadedPlaylistVideos: ref(false),
+    isUserPlaylist: computed(() => props.playlistType === 'user'),
+    remotePlaylistSortOrder: ref(SORT_BY_VALUES.Custom),
+    SORT_BY_VALUES,
     canPlayNextVideo: ref(true),
     router: {
       push(payload) { navigations.push(payload) },

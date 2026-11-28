@@ -2,9 +2,16 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, nextTick, reactive, ref, shallowRef, triggerRef, watch } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, toRaw, triggerRef, watch } from 'vue'
 
-import { getPlaylistSkipAvailability } from '../../src/renderer/helpers/playlists.js'
+import {
+  fillMissingPlaylistVideoDurations,
+  getPlaylistSkipAvailability,
+  getSortedPlaylistItems,
+  isDurationSortOrder,
+  isPlaylistSortOrder,
+  SORT_BY_VALUES,
+} from '../../src/renderer/helpers/playlists.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 
@@ -37,6 +44,7 @@ function harness({ random } = {}) {
   const unmountCallbacks = []
   const reversePlaylist = ref(false)
   const loopEnabled = ref(false)
+  const remotePlaylistSortOrder = ref(SORT_BY_VALUES.Custom)
   const context = {
     ...(random ? { Math: Object.create(Math, { random: { value: random } }) } : {}),
     onBeforeUnmount: callback => unmountCallbacks.push(callback),
@@ -53,6 +61,15 @@ function harness({ random } = {}) {
     shuffleEnabled,
     loopEnabled,
     reversePlaylist,
+    remotePlaylistSortOrder,
+    locale: ref('en-US'),
+    SORT_BY_VALUES,
+    isPlaylistSortOrder,
+    isDurationSortOrder,
+    fillMissingPlaylistVideoDurations,
+    getSortedPlaylistItems,
+    toRaw,
+    store: { commit() {}, getters: { getHistoryCacheById: {} } },
     computed,
     watch,
     nextTick,
@@ -71,7 +88,7 @@ function harness({ random } = {}) {
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     parseLocalPlaylistVideos: videos => videos,
-    parseVisibleLocalPlaylistVideos: videos => videos,
+    parseVisibleLocalPlaylistVideos: (videos, offset = 0) => videos.map((video, index) => ({ ...video, index: offset + index })),
     extractNumberFromString: value => Number(value),
     getLocalPlaylist: () => firstPage.promise,
     getLocalPlaylistContinuation: () => {
@@ -103,6 +120,7 @@ function harness({ random } = {}) {
     backendFallback,
     reversePlaylist,
     loopEnabled,
+    remotePlaylistSortOrder,
     get continuationRequests() { return continuationRequests },
     randomizedPlaylistItems,
     shuffleEnabled,
@@ -346,6 +364,7 @@ for (const [mode, enable] of [
   ['reversed', state => { state.reversePlaylist.value = true }],
   ['shuffled', state => { state.shuffleEnabled.value = true }],
   ['looped from its first video', state => { state.loopEnabled.value = true }],
+  ['sorted', state => { state.remotePlaylistSortOrder.value = SORT_BY_VALUES.VideoDurationAscending }],
 ]) {
   test(`a ${mode} playlist loads its remaining pages`, async () => {
     const state = harness()
@@ -363,6 +382,31 @@ for (const [mode, enable] of [
     assert.equal(state.playlistItems.value.length, 61)
   })
 }
+
+test('a sorted remote playlist waits for remaining pages before choosing the next video', async () => {
+  const state = harness()
+  state.props.videoId = 'short'
+  state.remotePlaylistSortOrder.value = SORT_BY_VALUES.VideoDurationAscending
+  const loading = state.load()
+  state.resolveFirstPage([
+    { videoId: 'short', lengthSeconds: 10 },
+    { videoId: 'long', lengthSeconds: 30 },
+  ])
+  await settle()
+
+  assert.equal(state.state.isWaitingForNextVideo.value, true)
+  assert.equal(state.state.nextVideo.value, null)
+
+  state.finishContinuation([{ videoId: 'medium', lengthSeconds: 20 }])
+  await loading
+
+  assert.equal(state.state.isWaitingForNextVideo.value, false)
+  assert.equal(state.state.nextVideo.value.videoId, 'medium')
+  assert.deepEqual(
+    state.playlistItems.value.map(video => [video.videoId, video.index]),
+    [['short', 0], ['medium', 2], ['long', 1]]
+  )
+})
 
 test('a failed page stops loading on demand and lets loop wrap around the loaded videos', async () => {
   const state = harness()

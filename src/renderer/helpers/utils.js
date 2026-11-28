@@ -39,6 +39,7 @@ export function getIconForSortPreference(sortPreference) {
     case 'latest_played_first':
     case 'date_added_descending':
     case 'published_descending':
+    case 'video_duration_descending':
     case 'last':
     case 'newest':
     case 'popular':
@@ -50,6 +51,7 @@ export function getIconForSortPreference(sortPreference) {
     case 'earliest_played_first':
     case 'date_added_ascending':
     case 'published_ascending':
+    case 'video_duration_ascending':
     case 'oldest':
     default:
       // quantity ascending

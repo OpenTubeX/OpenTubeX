@@ -2392,6 +2392,8 @@ Playlist:
   Playlist Preload Partial: '{requested} میں سے {preloaded} ویڈیوز پہلے سے لوڈ ہو گئیں۔ {failed} پہلے سے لوڈ نہیں ہو سکیں۔'
   Playlist Preload Pagination Failed: پوری پلے لسٹ لوڈ نہیں ہو سکی، اس لیے پہلے سے لوڈ کرنا منسوخ کر دیا گیا۔
   Unavailable videos are hidden: غیر دستیاب ویڈیوز پوشیدہ ہیں
+  Sort By:
+    Default: ڈیفالٹ
 Change Format:
   yt-dlp Error Template: 'yt-dlp اسٹریمز فراہم نہیں کر سکا: {error}'
   Local Video File: لوکل ویڈیو فائل
