@@ -2664,9 +2664,9 @@ KeyboardShortcutPrompt:
   Reassign: Gán lại
   Sections:
     App:
-      Tabs: "Ứng dụng:\_Thẻ"
-      Search and Page: "Ứng dụng:\_Tìm kiếm & Trang"
-      Window and View: "Ứng dụng:\_Cửa sổ & Chế độ xem"
+      Tabs: "Ứng dụng: Thẻ"
+      Search and Page: "Ứng dụng: Tìm kiếm & Trang"
+      Window and View: "Ứng dụng: Cửa sổ & Chế độ xem"
   New Tab: Tạo thẻ mới
   Close Tab: Đóng thẻ hiện tại
   Reload Tab: Tải lại thẻ hiện tại
@@ -3036,6 +3036,7 @@ Yattee Server:
     Not configured: Nhập URL máy chủ Yattee của bạn trong Cài đặt → Nâng cao.
     HTTPS required: Android chỉ có thể phát video từ các máy chủ Yattee sử dụng HTTPS.
     Streams unavailable: Không thể tải luồng của video này từ máy chủ Yattee. Hãy dùng “Kiểm tra kết nối” trong Cài đặt → Nâng cao để kiểm tra máy chủ.
+    Unreachable: Không thể kết nối đến máy chủ Yattee ({instance}). Hãy kiểm tra URL và xem máy chủ có đang chạy không trong Cài đặt → Nâng cao.
 Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.
 Update With Package Manager: 'Cập nhật bằng {packageManager}:'
 Update Command Copied: 'Đã sao chép lệnh cập nhật'
@@ -3146,3 +3147,9 @@ Incognito Tab: Thẻ ẩn danh
 Text Translation:
   Translating, please wait: Đang dịch, vui lòng chờ
   Translation failed: Không thể dịch
+Invidious:
+  Errors:
+    Not configured: Chưa cấu hình máy chủ Invidious nào. Hãy chọn một máy chủ trong Cài đặt → Nâng cao.
+    Unreachable: Không thể kết nối đến máy chủ Invidious ({instance}). Máy chủ có thể đang ngừng hoạt động hoặc chặn kết nối của bạn. Hãy thử máy chủ khác trong Cài đặt → Nâng cao.
+    Unreachable Web: Không thể kết nối đến máy chủ Invidious ({instance}). Máy chủ có thể đang ngừng hoạt động, chặn kết nối của bạn (chẳng hạn VPN) hoặc thiếu tiêu đề CORS. Hãy thử máy chủ khác trong Cài đặt → Nâng cao.
+    Server error: Máy chủ Invidious ({instance}) đã trả về lỗi (HTTP {status}).

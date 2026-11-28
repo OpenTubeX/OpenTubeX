@@ -2739,9 +2739,9 @@ KeyboardShortcutPrompt:
   Reassign: Tildel igen
   Sections:
     App:
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søgning og side"
-      Window and View: "App:\_Vindue og visning"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søgning og side"
+      Window and View: "App: Vindue og visning"
   New Tab: Opret en ny fane
   Close Tab: Luk den aktuelle fane
   Reload Tab: Genindlæs den aktuelle fane
@@ -3115,6 +3115,7 @@ Yattee Server:
     Not configured: Angiv URL'en til din Yattee-server under Indstillinger → Avanceret.
     HTTPS required: Android kan kun afspille videoer fra Yattee-servere, der bruger HTTPS.
     Streams unavailable: Streams til denne video kunne ikke indlæses fra Yattee-serveren. Brug »Test forbindelse« under Indstillinger → Avanceret for at kontrollere serveren.
+    Unreachable: Kunne ikke nå Yattee-serveren ({instance}). Tjek URL’en og om serveren kører i Indstillinger → Avanceret.
 Yattee Fallback Warning: Denne anmodning omgår din konfigurerede Yattee-server og opretter forbindelse direkte til YouTube, hvilket afslører din IP-adresse.
 Update With Package Manager: 'Opdater med {packageManager}:'
 Update Command Copied: 'Opdateringskommando kopieret'
@@ -3225,3 +3226,9 @@ Incognito Tab: Inkognitofane
 Text Translation:
   Translating, please wait: Oversætter. Vent venligst
   Translation failed: Oversættelsen mislykkedes
+Invidious:
+  Errors:
+    Not configured: Ingen Invidious-instans er konfigureret. Vælg en i Indstillinger → Avanceret.
+    Unreachable: Kunne ikke nå Invidious-instansen ({instance}). Den kan være nede eller blokere din forbindelse. Prøv en anden instans i Indstillinger → Avanceret.
+    Unreachable Web: Kunne ikke nå Invidious-instansen ({instance}). Den kan være nede, blokere din forbindelse (f.eks. en VPN) eller mangle CORS-headere. Prøv en anden instans i Indstillinger → Avanceret.
+    Server error: Invidious-instansen ({instance}) returnerede en fejl (HTTP {status}).

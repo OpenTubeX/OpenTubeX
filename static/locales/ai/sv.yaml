@@ -2646,9 +2646,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilldela om
   Sections:
     App:
-      Tabs: "App:\_Flikar"
-      Search and Page: "App:\_Sökning och sida"
-      Window and View: "App:\_Fönster och vy"
+      Tabs: "App: Flikar"
+      Search and Page: "App: Sökning och sida"
+      Window and View: "App: Fönster och vy"
   New Tab: Skapa en ny flik
   Close Tab: Stäng aktuell flik
   Reload Tab: Läs in aktuell flik igen
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Ange URL:en till din Yattee-server under Inställningar → Avancerat.
     HTTPS required: Android kan bara spela upp videor från Yattee-servrar som använder HTTPS.
     Streams unavailable: Det gick inte att läsa in videons strömmar från Yattee-servern. Använd ”Testa anslutningen” under Inställningar → Avancerat för att kontrollera servern.
+    Unreachable: Kunde inte nå Yattee-servern ({instance}). Kontrollera URL:en och att servern körs i Inställningar → Avancerat.
 Yattee Fallback Warning: Den här begäran kringgår din konfigurerade Yattee-server och ansluter direkt till YouTube, vilket avslöjar din IP-adress.
 Update With Package Manager: 'Uppdatera med {packageManager}:'
 Update Command Copied: 'Uppdateringskommandot har kopierats'
@@ -3128,3 +3129,9 @@ Incognito Tab: Inkognitoflik
 Text Translation:
   Translating, please wait: Översätter, vänta
   Translation failed: Översättningen misslyckades
+Invidious:
+  Errors:
+    Not configured: Ingen Invidious-instans är konfigurerad. Välj en i Inställningar → Avancerat.
+    Unreachable: Kunde inte nå Invidious-instansen ({instance}). Den kan vara nere eller blockera din anslutning. Prova en annan instans i Inställningar → Avancerat.
+    Unreachable Web: Kunde inte nå Invidious-instansen ({instance}). Den kan vara nere, blockera din anslutning (t.ex. en VPN) eller sakna CORS-rubriker. Prova en annan instans i Inställningar → Avancerat.
+    Server error: Invidious-instansen ({instance}) returnerade ett fel (HTTP {status}).

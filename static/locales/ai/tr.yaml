@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Yeniden Ata
   Sections:
     App:
-      Tabs: "Uygulama:\_Sekmeler"
-      Search and Page: "Uygulama:\_Arama ve Sayfa"
-      Window and View: "Uygulama:\_Pencere ve Görünüm"
+      Tabs: "Uygulama: Sekmeler"
+      Search and Page: "Uygulama: Arama ve Sayfa"
+      Window and View: "Uygulama: Pencere ve Görünüm"
   New Tab: Yeni bir sekme oluştur
   Close Tab: Geçerli sekmeyi kapat
   Reload Tab: Geçerli sekmeyi yeniden yükle
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Yattee sunucunuzun URL'sini Ayarlar → Gelişmiş bölümünde girin.
     HTTPS required: Android yalnızca HTTPS kullanan Yattee sunucularındaki videoları oynatabilir.
     Streams unavailable: Bu videonun akışları Yattee sunucusundan yüklenemedi. Sunucuyu denetlemek için Ayarlar → Gelişmiş bölümündeki “Bağlantıyı Test Et” düğmesini kullanın.
+    Unreachable: Yattee sunucusuna ({instance}) ulaşılamadı. Ayarlar → Gelişmiş bölümünden URL’yi ve sunucunun çalışıp çalışmadığını kontrol edin.
 Yattee Fallback Warning: Bu istek, yapılandırdığınız Yattee sunucusunu atlayarak doğrudan YouTube'a bağlanır ve IP adresinizi açığa çıkarır.
 Update With Package Manager: '{packageManager} ile güncelle:'
 Update Command Copied: 'Güncelleme komutu kopyalandı'
@@ -3128,3 +3129,9 @@ Incognito Tab: Gizli sekme
 Text Translation:
   Translating, please wait: Çevriliyor, lütfen bekleyin
   Translation failed: Çeviri başarısız oldu
+Invidious:
+  Errors:
+    Not configured: Yapılandırılmış bir Invidious örneği yok. Ayarlar → Gelişmiş bölümünden bir tane seçin.
+    Unreachable: Invidious örneğine ({instance}) ulaşılamadı. Çevrimdışı olabilir veya bağlantınızı engelliyor olabilir. Ayarlar → Gelişmiş bölümünden başka bir örnek deneyin.
+    Unreachable Web: Invidious örneğine ({instance}) ulaşılamadı. Çevrimdışı olabilir, bağlantınızı (örneğin bir VPN) engelliyor olabilir veya CORS başlıkları eksik olabilir. Ayarlar → Gelişmiş bölümünden başka bir örnek deneyin.
+    Server error: Invidious örneği ({instance}) bir hata döndürdü (HTTP {status}).

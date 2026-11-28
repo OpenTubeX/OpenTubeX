@@ -2681,9 +2681,9 @@ KeyboardShortcutPrompt:
   Reassign: Преназначаване
   Sections:
     App:
-      Tabs: "Приложение:\_Раздели"
-      Search and Page: "Приложение:\_Търсене и страница"
-      Window and View: "Приложение:\_Прозорец и изглед"
+      Tabs: "Приложение: Раздели"
+      Search and Page: "Приложение: Търсене и страница"
+      Window and View: "Приложение: Прозорец и изглед"
   New Tab: Създаване на нов раздел
   Close Tab: Затваряне на текущия раздел
   Reload Tab: Презареждане на текущия раздел
@@ -3055,6 +3055,7 @@ Yattee Server:
     Not configured: Въведете URL адреса на вашия сървър Yattee в Настройки → Разширени.
     HTTPS required: Android може да възпроизвежда видеа само от сървъри Yattee, които използват HTTPS.
     Streams unavailable: Потоците на това видео не можаха да бъдат заредени от сървъра Yattee. Използвайте „Тестване на връзката“ в Настройки → Разширени, за да проверите сървъра.
+    Unreachable: Неуспешно свързване със сървъра Yattee ({instance}). Проверете URL адреса и дали сървърът работи в Настройки → Разширени.
 Yattee Fallback Warning: Тази заявка заобикаля настроения от вас сървър Yattee и се свързва директно с YouTube, разкривайки вашия IP адрес.
 Update With Package Manager: 'Обновяване чрез {packageManager}:'
 Update Command Copied: 'Командата за обновяване е копирана'
@@ -3165,3 +3166,9 @@ Incognito Tab: Раздел „инкогнито“
 Text Translation:
   Translating, please wait: Превежда се. Моля, изчакайте…
   Translation failed: Преводът е неуспешен
+Invidious:
+  Errors:
+    Not configured: Няма конфигурирана инстанция на Invidious. Изберете една в Настройки → Разширени.
+    Unreachable: Неуспешно свързване с инстанцията на Invidious ({instance}). Може да не работи или да блокира връзката ви. Опитайте друга инстанция в Настройки → Разширени.
+    Unreachable Web: Неуспешно свързване с инстанцията на Invidious ({instance}). Може да не работи, да блокира връзката ви (например VPN) или да липсват CORS хедъри. Опитайте друга инстанция в Настройки → Разширени.
+    Server error: Инстанцията на Invidious ({instance}) върна грешка (HTTP {status}).

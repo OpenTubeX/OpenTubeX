@@ -3777,9 +3777,16 @@ Tooltips:
 # Toast Messages
 Local API Error (Click to copy): Local API Error (Click to copy)
 Invidious API Error (Click to copy): Invidious API Error (Click to copy)
+Invidious:
+  Errors:
+    Not configured: "No Invidious instance is configured. Select one in Settings → Advanced."
+    Unreachable: "Could not reach the Invidious instance ({instance}). It may be down or blocking your connection. Try another instance in Settings → Advanced."
+    Unreachable Web: "Could not reach the Invidious instance ({instance}). It may be down, blocking your connection (such as a VPN), or missing CORS headers. Try another instance in Settings → Advanced."
+    Server error: "The Invidious instance ({instance}) returned an error (HTTP {status})."
 Yattee Server:
   API Error (Click to copy): "Yattee Server Error (Click to copy)"
   Errors:
+    Unreachable: "Could not reach the Yattee server ({instance}). Check the URL and whether the server is running in Settings → Advanced."
     Invalid credentials: "The Yattee server rejected the username or password. Check them in Settings → Advanced."
     Rate limited: "The Yattee server is blocking sign-ins after too many failed attempts. Try again later."
     Streams not relayed: "The Yattee server did not relay the streams of this video. While videos are proxied through the server, OpenTubeX does not connect to YouTube directly."

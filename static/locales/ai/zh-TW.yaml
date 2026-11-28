@@ -2648,9 +2648,9 @@ KeyboardShortcutPrompt:
   Reassign: 重新指派
   Sections:
     App:
-      Tabs: "應用程式:\_分頁"
-      Search and Page: "應用程式:\_搜尋與頁面"
-      Window and View: "應用程式:\_視窗與檢視"
+      Tabs: "應用程式: 分頁"
+      Search and Page: "應用程式: 搜尋與頁面"
+      Window and View: "應用程式: 視窗與檢視"
   New Tab: 建立新分頁
   Close Tab: 關閉目前的分頁
   Reload Tab: 重新載入目前的分頁
@@ -3021,6 +3021,7 @@ Yattee Server:
     Not configured: 請在「設定」→「進階」中輸入您的 Yattee 伺服器 URL。
     HTTPS required: Android 只能播放來自使用 HTTPS 的 Yattee 伺服器的影片。
     Streams unavailable: 無法從 Yattee 伺服器載入此影片的串流。請使用「設定」→「進階」中的「測試連線」檢查伺服器。
+    Unreachable: 無法連線至 Yattee 伺服器（{instance}）。請在「設定 → 進階」中檢查 URL 以及伺服器是否正在執行。
 Yattee Fallback Warning: 此請求繞過了您設定的 Yattee 伺服器，直接連線至 YouTube，因而暴露您的 IP 位址。
 Update With Package Manager: '使用 {packageManager} 更新：'
 Update Command Copied: '已複製更新指令'
@@ -3131,3 +3132,9 @@ Incognito Tab: 無痕分頁
 Text Translation:
   Translating, please wait: 正在翻譯，請稍候
   Translation failed: 翻譯失敗
+Invidious:
+  Errors:
+    Not configured: 尚未設定 Invidious 執行個體。請在「設定 → 進階」中選擇一個。
+    Unreachable: 無法連線至 Invidious 執行個體（{instance}）。該執行個體可能已離線或封鎖了你的連線。請在「設定 → 進階」中嘗試其他執行個體。
+    Unreachable Web: 無法連線至 Invidious 執行個體（{instance}）。該執行個體可能已離線、封鎖了你的連線（例如 VPN）或缺少 CORS 標頭。請在「設定 → 進階」中嘗試其他執行個體。
+    Server error: Invidious 執行個體（{instance}）傳回了錯誤（HTTP {status}）。

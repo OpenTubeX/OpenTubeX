@@ -2613,9 +2613,9 @@ KeyboardShortcutPrompt:
   Reassign: Переназначить
   Sections:
     App:
-      Tabs: "Приложение:\_Вкладки"
-      Search and Page: "Приложение:\_Поиск и страницы"
-      Window and View: "Приложение:\_Окно и вид"
+      Tabs: "Приложение: Вкладки"
+      Search and Page: "Приложение: Поиск и страницы"
+      Window and View: "Приложение: Окно и вид"
   New Tab: Создать вкладку
   Close Tab: Закрыть текущую вкладку
   Reload Tab: Перезагрузить текущую вкладку
@@ -2986,6 +2986,7 @@ Yattee Server:
     Not configured: Укажите URL вашего сервера Yattee в разделе «Настройки» → «Дополнительно».
     HTTPS required: Android может воспроизводить видео только с серверов Yattee, использующих HTTPS.
     Streams unavailable: Не удалось загрузить потоки этого видео с сервера Yattee. Проверьте сервер кнопкой «Проверить подключение» в разделе «Настройки» → «Дополнительно».
+    Unreachable: Не удалось подключиться к серверу Yattee ({instance}). Проверьте URL и работает ли сервер в Настройки → Дополнительно.
 Yattee Fallback Warning: Этот запрос обходит настроенный вами сервер Yattee и подключается напрямую к YouTube, раскрывая ваш IP-адрес.
 Update With Package Manager: 'Обновить с помощью {packageManager}:'
 Update Command Copied: 'Команда обновления скопирована'
@@ -3112,3 +3113,9 @@ Incognito Tab: Вкладка инкогнито
 Text Translation:
   Translating, please wait: Перевод…
   Translation failed: Не удалось перевести
+Invidious:
+  Errors:
+    Not configured: Инстанс Invidious не настроен. Выберите его в Настройки → Дополнительно.
+    Unreachable: Не удалось подключиться к инстансу Invidious ({instance}). Возможно, он недоступен или блокирует ваше подключение. Попробуйте другой инстанс в Настройки → Дополнительно.
+    Unreachable Web: Не удалось подключиться к инстансу Invidious ({instance}). Возможно, он недоступен, блокирует ваше подключение (например, VPN) или не передаёт заголовки CORS. Попробуйте другой инстанс в Настройки → Дополнительно.
+    Server error: Инстанс Invidious ({instance}) вернул ошибку (HTTP {status}).

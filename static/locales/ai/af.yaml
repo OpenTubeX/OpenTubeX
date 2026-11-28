@@ -2899,6 +2899,7 @@ Yattee Server:
     Not configured: Voer die URL van u Yattee-bediener in Instellings → Gevorderd in.
     HTTPS required: Android kan slegs video’s speel van Yattee-bedieners wat HTTPS gebruik.
     Streams unavailable: Kon nie die strome van hierdie video van die Yattee-bediener laai nie. Gebruik Toets verbinding in Instellings → Gevorderd om die bediener na te gaan.
+    Unreachable: Kon nie die Yattee-bediener ({instance}) bereik nie. Kontroleer die URL en of die bediener loop onder Instellings → Gevorderd.
   Unsupported page: Hierdie blad is nie met die Yattee-bediener beskikbaar nie. Skakel “{fallbackSetting}” aan om dit met die lokale API te laai.
   Posts unavailable: Yattee-bedieners verskaf nie plasings nie. Skakel “{fallbackSetting}” aan om hulle met die lokale API te laai.
 The playlist is at the beginning. Enable loop to continue playing: Die afspeellys is aan die begin. Aktiveer herhaling om verder te speel
@@ -2920,9 +2921,9 @@ KeyboardShortcutPrompt:
   Reassign: Hertoeken
   Sections:
     App:
-      Tabs: "Toep:\_Oortjies"
-      Search and Page: "Toep:\_Soek en blad"
-      Window and View: "Toep:\_Venster en aansig"
+      Tabs: "Toep: Oortjies"
+      Search and Page: "Toep: Soek en blad"
+      Window and View: "Toep: Venster en aansig"
   New Tab: Skep ’n nuwe oortjie
   Close Tab: Sluit die huidige oortjie
   Reload Tab: Herlaai die huidige oortjie
@@ -3339,3 +3340,9 @@ Incognito Tab: Incognito-oortjie
 Text Translation:
   Translating, please wait: Vertaal tans, wag asseblief
   Translation failed: Vertaling het misluk
+Invidious:
+  Errors:
+    Not configured: Geen Invidious-instansie is gekonfigureer nie. Kies een onder Instellings → Gevorderd.
+    Unreachable: Kon nie die Invidious-instansie ({instance}) bereik nie. Dit is moontlik af of blokkeer jou verbinding. Probeer ’n ander instansie onder Instellings → Gevorderd.
+    Unreachable Web: Kon nie die Invidious-instansie ({instance}) bereik nie. Dit is moontlik af, blokkeer jou verbinding (soos ’n VPN), of kort CORS-koptekste. Probeer ’n ander instansie onder Instellings → Gevorderd.
+    Server error: Die Invidious-instansie ({instance}) het ’n fout teruggestuur (HTTP {status}).

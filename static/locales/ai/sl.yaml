@@ -3215,13 +3215,13 @@ KeyboardShortcutPrompt:
   Reassign: Prerazporedi
   Sections:
     Video:
-      Playback: "Videoposnetek:\_Predvajanje"
-      General: "Videoposnetek:\_Splošno"
+      Playback: "Videoposnetek: Predvajanje"
+      General: "Videoposnetek: Splošno"
     App:
-      General: "Aplikacija:\_Splošno"
-      Tabs: "Aplikacija:\_Zavihki"
-      Search and Page: "Aplikacija:\_Iskanje in stran"
-      Window and View: "Aplikacija:\_Okno in pogled"
+      General: "Aplikacija: Splošno"
+      Tabs: "Aplikacija: Zavihki"
+      Search and Page: "Aplikacija: Iskanje in stran"
+      Window and View: "Aplikacija: Okno in pogled"
   Show Keyboard Shortcuts: Prikaži bližnjice na tipkovnici
   History Backward: Pojdi eno stran nazaj
   History Forward: Pojdi eno stran naprej
@@ -3615,6 +3615,7 @@ Yattee Server:
     Not configured: Vnesite URL svojega strežnika Yattee v razdelku Nastavitve → Napredno.
     HTTPS required: Android lahko predvaja videoposnetke samo s strežnikov Yattee, ki uporabljajo HTTPS.
     Streams unavailable: Pretokov tega videoposnetka ni bilo mogoče naložiti s strežnika Yattee. Strežnik preverite z »Preizkusi povezavo« v razdelku Nastavitve → Napredno.
+    Unreachable: Ni bilo mogoče doseči strežnika Yattee ({instance}). Preverite URL in ali strežnik deluje v Nastavitve → Napredno.
 Yattee Fallback Warning: Ta zahteva zaobide nastavljeni strežnik Yattee in se poveže neposredno z YouTubom ter razkrije vaš naslov IP.
 Update With Package Manager: 'Posodobi z upravitljem {packageManager}:'
 Update Command Copied: 'Ukaz za posodobitev je kopiran'
@@ -3725,3 +3726,9 @@ Incognito Tab: Zavihek brez beleženja zgodovine
 Text Translation:
   Translating, please wait: Prevajanje. Počakajte …
   Translation failed: Prevajanje ni uspelo
+Invidious:
+  Errors:
+    Not configured: Noben primerek Invidious ni nastavljen. Izberite ga v Nastavitve → Napredno.
+    Unreachable: Ni bilo mogoče doseči primerka Invidious ({instance}). Morda ne deluje ali blokira vašo povezavo. Poskusite drug primerek v Nastavitve → Napredno.
+    Unreachable Web: Ni bilo mogoče doseči primerka Invidious ({instance}). Morda ne deluje, blokira vašo povezavo (npr. VPN) ali mu manjkajo glave CORS. Poskusite drug primerek v Nastavitve → Napredno.
+    Server error: Primerek Invidious ({instance}) je vrnil napako (HTTP {status}).

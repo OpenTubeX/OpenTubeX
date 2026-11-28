@@ -2751,9 +2751,9 @@ KeyboardShortcutPrompt:
   Reassign: اختصاص دوباره
   Sections:
     App:
-      Tabs: "برنامه:\_زبانه‌ها"
-      Search and Page: "برنامه:\_جست‌وجو و صفحه"
-      Window and View: "برنامه:\_پنجره و نما"
+      Tabs: "برنامه: زبانه‌ها"
+      Search and Page: "برنامه: جست‌وجو و صفحه"
+      Window and View: "برنامه: پنجره و نما"
   New Tab: ایجاد زبانه جدید
   Close Tab: بستن زبانه فعلی
   Reload Tab: بارگیری دوباره زبانه فعلی
@@ -3116,6 +3116,7 @@ Yattee Server:
     Not configured: نشانی سرور Yattee خود را در تنظیمات → پیشرفته وارد کنید.
     HTTPS required: Android فقط می‌تواند ویدیوها را از سرورهای Yattee که از HTTPS استفاده می‌کنند پخش کند.
     Streams unavailable: بارگیری جریان‌های این ویدیو از سرور Yattee ممکن نشد. برای بررسی سرور از «آزمایش اتصال» در تنظیمات → پیشرفته استفاده کنید.
+    Unreachable: دسترسی به سرور Yattee ({instance}) ممکن نشد. نشانی و فعال بودن سرور را در تنظیمات ← پیشرفته بررسی کنید.
 Yattee Fallback Warning: این درخواست سرور Yattee پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند.
 Update With Package Manager: 'به‌روزرسانی با {packageManager}:'
 Update Command Copied: 'فرمان به‌روزرسانی کپی شد'
@@ -3226,3 +3227,9 @@ Incognito Tab: زبانه ناشناس
 Text Translation:
   Translating, please wait: در حال ترجمه، لطفاً صبر کنید
   Translation failed: ترجمه ناموفق بود
+Invidious:
+  Errors:
+    Not configured: هیچ نمونهٔ Invidious تنظیم نشده است. یکی را در تنظیمات ← پیشرفته انتخاب کنید.
+    Unreachable: دسترسی به نمونهٔ Invidious ({instance}) ممکن نشد. ممکن است از کار افتاده باشد یا اتصال شما را مسدود کرده باشد. نمونهٔ دیگری را در تنظیمات ← پیشرفته امتحان کنید.
+    Unreachable Web: دسترسی به نمونهٔ Invidious ({instance}) ممکن نشد. ممکن است از کار افتاده باشد، اتصال شما (مانند VPN) را مسدود کرده باشد، یا سرآیندهای CORS را نداشته باشد. نمونهٔ دیگری را در تنظیمات ← پیشرفته امتحان کنید.
+    Server error: نمونهٔ Invidious ({instance}) خطا برگرداند (HTTP {status}).

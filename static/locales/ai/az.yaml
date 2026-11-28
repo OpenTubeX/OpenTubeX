@@ -3028,6 +3028,7 @@ Yattee Server:
     Not configured: Yattee serverinizin URL-ini Tənzimləmələr → Qabaqcıl bölməsində daxil edin.
     HTTPS required: Android yalnız HTTPS istifadə edən Yattee serverlərindəki videoları oynada bilər.
     Streams unavailable: Bu videonun axınları Yattee serverindən yüklənə bilmədi. Serveri yoxlamaq üçün Tənzimləmələr → Qabaqcıl bölməsində “Bağlantını yoxla” düyməsindən istifadə edin.
+    Unreachable: Yattee serverinə ({instance}) qoşulmaq olmadı. Ayarlar → Əlavə bölməsində URL-i və serverin işlədiyini yoxlayın.
 Yattee Fallback Warning: Bu sorğu konfiqurasiya etdiyiniz Yattee serverindən yan keçərək birbaşa YouTube-a qoşulur və IP ünvanınızı açıqlayır.
 Update With Package Manager: '{packageManager} ilə yeniləyin:'
 Update Command Copied: 'Yeniləmə əmri kopyalandı'
@@ -3138,3 +3139,9 @@ Incognito Tab: Gizli vərəq
 Text Translation:
   Translating, please wait: Tərcümə edilir, zəhmət olmasa gözləyin
   Translation failed: Tərcümə alınmadı
+Invidious:
+  Errors:
+    Not configured: Heç bir Invidious instansiyası quraşdırılmayıb. Ayarlar → Əlavə bölməsindən birini seçin.
+    Unreachable: Invidious instansiyasına ({instance}) qoşulmaq olmadı. O, işləmir və ya bağlantınızı bloklayır ola bilər. Ayarlar → Əlavə bölməsindən başqa instansiya sınayın.
+    Unreachable Web: Invidious instansiyasına ({instance}) qoşulmaq olmadı. O, işləmir, bağlantınızı bloklayır (məsələn, VPN) və ya CORS başlıqları çatışmır ola bilər. Ayarlar → Əlavə bölməsindən başqa instansiya sınayın.
+    Server error: Invidious instansiyası ({instance}) xəta qaytardı (HTTP {status}).

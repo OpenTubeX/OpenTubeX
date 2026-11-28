@@ -17,8 +17,14 @@ const PERMANENT_REQUEST_ERRORS = new Set([
   'net::ERR_DISALLOWED_URL_SCHEME',
   'net::ERR_UNKNOWN_URL_SCHEME',
 ])
+export function markNonNetworkError(error) {
+  if (error != null && typeof error === 'object') nonNetworkErrors.add(error)
+}
+
 export function isRecoverableNetworkError(error) {
-  return !nonNetworkErrors.has(error) && classifyRequestFailure(error) === 'network'
+  if (nonNetworkErrors.has(error)) return false
+  if (classifyRequestFailure(error) === 'network') return true
+  return error?.cause != null && error.cause !== error && isRecoverableNetworkError(error.cause)
 }
 
 /**

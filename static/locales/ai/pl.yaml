@@ -2260,6 +2260,7 @@ Yattee Server:
     Not configured: Wpisz adres URL swojego serwera Yattee w sekcji Ustawienia → Zaawansowane.
     HTTPS required: Android może odtwarzać filmy tylko z serwerów Yattee korzystających z HTTPS.
     Streams unavailable: Nie udało się wczytać strumieni tego filmu z serwera Yattee. Sprawdź serwer przyciskiem „Sprawdź połączenie” w sekcji Ustawienia → Zaawansowane.
+    Unreachable: Nie udało się połączyć z serwerem Yattee ({instance}). Sprawdź adres URL i czy serwer działa w Ustawienia → Zaawansowane.
 Yattee Fallback Warning: To żądanie pomija skonfigurowany serwer Yattee i łączy się bezpośrednio z YouTube, ujawniając Twój adres IP.
 Update With Package Manager: 'Zaktualizuj za pomocą {packageManager}:'
 Update Command Copied: 'Skopiowano polecenie aktualizacji'
@@ -2392,3 +2393,9 @@ Incognito Tab: Karta incognito
 Text Translation:
   Translating, please wait: Tłumaczenie, zaczekaj
   Translation failed: Nie udało się przetłumaczyć
+Invidious:
+  Errors:
+    Not configured: Nie skonfigurowano żadnej instancji Invidious. Wybierz jedną w Ustawienia → Zaawansowane.
+    Unreachable: Nie udało się połączyć z instancją Invidious ({instance}). Może być niedostępna lub blokować Twoje połączenie. Spróbuj innej instancji w Ustawienia → Zaawansowane.
+    Unreachable Web: Nie udało się połączyć z instancją Invidious ({instance}). Może być niedostępna, blokować Twoje połączenie (np. VPN) lub nie wysyłać nagłówków CORS. Spróbuj innej instancji w Ustawienia → Zaawansowane.
+    Server error: Instancja Invidious ({instance}) zwróciła błąd (HTTP {status}).

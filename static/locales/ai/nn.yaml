@@ -3000,13 +3000,13 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     Video:
-      Playback: "Video:\_Avspeling"
-      General: "Video:\_Generelt"
+      Playback: "Video: Avspeling"
+      General: "Video: Generelt"
     App:
-      General: "App:\_Generelt"
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søk og side"
-      Window and View: "App:\_Vindauge og vising"
+      General: "App: Generelt"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søk og side"
+      Window and View: "App: Vindauge og vising"
   Show Keyboard Shortcuts: Vis hurtigtastar
   History Backward: Gå éi side tilbake
   History Forward: Gå éi side fram
@@ -3414,6 +3414,7 @@ Yattee Server:
     Not configured: Skriv inn URL-en til Yattee-tenaren din under Innstillingar → Avansert.
     HTTPS required: Android kan berre spele av videoar frå Yattee-tenarar som brukar HTTPS.
     Streams unavailable: Kunne ikkje laste inn straumane til denne videoen frå Yattee-tenaren. Bruk «Test tilkopling» under Innstillingar → Avansert for å kontrollere tenaren.
+    Unreachable: Klarte ikkje å nå Yattee-tenaren ({instance}). Sjekk URL-en og om tenaren køyrer under Innstillingar → Avansert.
 Yattee Fallback Warning: Denne førespurnaden går utanom den konfigurerte Yattee-tenaren din og koplar direkte til YouTube, noko som avslører IP-adressa di.
 Update With Package Manager: 'Oppdater med {packageManager}:'
 Update Command Copied: 'Oppdateringskommandoen er kopiert'
@@ -3524,3 +3525,9 @@ Incognito Tab: Inkognitofane
 Text Translation:
   Translating, please wait: Omset, vent litt
   Translation failed: Klarte ikkje å omsetje teksten
+Invidious:
+  Errors:
+    Not configured: Ingen Invidious-instans er sett opp. Vel ein under Innstillingar → Avansert.
+    Unreachable: Klarte ikkje å nå Invidious-instansen ({instance}). Han kan vera nede eller blokkera tilkoplinga di. Prøv ein annan instans under Innstillingar → Avansert.
+    Unreachable Web: Klarte ikkje å nå Invidious-instansen ({instance}). Han kan vera nede, blokkera tilkoplinga di (til dømes ein VPN) eller mangla CORS-hovud. Prøv ein annan instans under Innstillingar → Avansert.
+    Server error: Invidious-instansen ({instance}) returnerte ein feil (HTTP {status}).

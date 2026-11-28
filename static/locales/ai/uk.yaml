@@ -2700,9 +2700,9 @@ KeyboardShortcutPrompt:
   Reassign: Перепризначити
   Sections:
     App:
-      Tabs: "Програма:\_Вкладки"
-      Search and Page: "Програма:\_Пошук і сторінка"
-      Window and View: "Програма:\_Вікно й вигляд"
+      Tabs: "Програма: Вкладки"
+      Search and Page: "Програма: Пошук і сторінка"
+      Window and View: "Програма: Вікно й вигляд"
   New Tab: Створити нову вкладку
   Close Tab: Закрити поточну вкладку
   Reload Tab: Перезавантажити поточну вкладку
@@ -3074,6 +3074,7 @@ Yattee Server:
     Not configured: Введіть URL-адресу свого сервера Yattee у розділі «Налаштування» → «Додатково».
     HTTPS required: Android може відтворювати відео лише із серверів Yattee, які використовують HTTPS.
     Streams unavailable: Не вдалося завантажити потоки цього відео із сервера Yattee. Перевірте сервер кнопкою «Перевірити з’єднання» у розділі «Налаштування» → «Додатково».
+    Unreachable: Не вдалося зв’язатися із сервером Yattee ({instance}). Перевірте URL і чи працює сервер у Налаштування → Додатково.
 Yattee Fallback Warning: Цей запит обходить налаштований вами сервер Yattee і підключається безпосередньо до YouTube, розкриваючи вашу IP-адресу.
 Update With Package Manager: 'Оновити за допомогою {packageManager}:'
 Update Command Copied: 'Команду оновлення скопійовано'
@@ -3184,3 +3185,9 @@ Incognito Tab: Вкладка в режимі анонімного перегл�
 Text Translation:
   Translating, please wait: Перекладаємо, зачекайте
   Translation failed: Не вдалося перекласти
+Invidious:
+  Errors:
+    Not configured: Жоден інстанс Invidious не налаштовано. Виберіть його в Налаштування → Додатково.
+    Unreachable: Не вдалося зв’язатися з інстансом Invidious ({instance}). Можливо, він не працює або блокує ваше з’єднання. Спробуйте інший інстанс у Налаштування → Додатково.
+    Unreachable Web: Не вдалося зв’язатися з інстансом Invidious ({instance}). Можливо, він не працює, блокує ваше з’єднання (наприклад, VPN) або не надсилає заголовки CORS. Спробуйте інший інстанс у Налаштування → Додатково.
+    Server error: Інстанс Invidious ({instance}) повернув помилку (HTTP {status}).

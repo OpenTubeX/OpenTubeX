@@ -2704,9 +2704,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuie
   Sections:
     App:
-      Tabs: "Aplicație:\_File"
-      Search and Page: "Aplicație:\_Căutare și pagină"
-      Window and View: "Aplicație:\_Fereastră și vizualizare"
+      Tabs: "Aplicație: File"
+      Search and Page: "Aplicație: Căutare și pagină"
+      Window and View: "Aplicație: Fereastră și vizualizare"
   New Tab: Creează o filă nouă
   Close Tab: Închide fila curentă
   Reload Tab: Reîncarcă fila curentă
@@ -3076,6 +3076,7 @@ Yattee Server:
     Not configured: Introduceți URL-ul serverului dvs. Yattee în Setări → Avansat.
     HTTPS required: Android poate reda videoclipuri doar de pe servere Yattee care folosesc HTTPS.
     Streams unavailable: Fluxurile acestui videoclip nu au putut fi încărcate de pe serverul Yattee. Folosiți „Testați conexiunea” în Setări → Avansat pentru a verifica serverul.
+    Unreachable: Nu s-a putut contacta serverul Yattee ({instance}). Verifică URL-ul și dacă serverul rulează în Setări → Avansat.
 Yattee Fallback Warning: Această cerere ocolește serverul Yattee configurat și se conectează direct la YouTube, expunându-vă adresa IP.
 Update With Package Manager: 'Actualizează cu {packageManager}:'
 Update Command Copied: 'Comanda de actualizare a fost copiată'
@@ -3186,3 +3187,9 @@ Incognito Tab: Filă incognito
 Text Translation:
   Translating, please wait: Se traduce, așteptați
   Translation failed: Traducerea a eșuat
+Invidious:
+  Errors:
+    Not configured: Nu este configurată nicio instanță Invidious. Selectează una în Setări → Avansat.
+    Unreachable: Nu s-a putut contacta instanța Invidious ({instance}). Este posibil să fie oprită sau să îți blocheze conexiunea. Încearcă o altă instanță în Setări → Avansat.
+    Unreachable Web: Nu s-a putut contacta instanța Invidious ({instance}). Este posibil să fie oprită, să îți blocheze conexiunea (de exemplu un VPN) sau să îi lipsească anteturile CORS. Încearcă o altă instanță în Setări → Avansat.
+    Server error: Instanța Invidious ({instance}) a returnat o eroare (HTTP {status}).

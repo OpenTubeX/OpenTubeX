@@ -3126,9 +3126,16 @@ Up Next: Nächster Titel
 # Toast Messages
 Local API Error (Click to copy): Lokaler API-Fehler (Zum Kopieren anklicken)
 Invidious API Error (Click to copy): Invidious-API-Fehler (Zum Kopieren anklicken)
+Invidious:
+  Errors:
+    Not configured: "Es ist keine Invidious-Instanz konfiguriert. Wähle eine unter Einstellungen → Erweitert aus."
+    Unreachable: "Die Invidious-Instanz ({instance}) ist nicht erreichbar. Sie ist möglicherweise offline oder blockiert deine Verbindung. Probiere eine andere Instanz unter Einstellungen → Erweitert."
+    Unreachable Web: "Die Invidious-Instanz ({instance}) ist nicht erreichbar. Sie ist möglicherweise offline, blockiert deine Verbindung (z. B. ein VPN) oder sendet keine CORS-Header. Probiere eine andere Instanz unter Einstellungen → Erweitert."
+    Server error: "Die Invidious-Instanz ({instance}) hat einen Fehler zurückgegeben (HTTP {status})."
 Yattee Server:
   API Error (Click to copy): "Yattee-Server-Fehler (Zum Kopieren anklicken)"
   Errors:
+    Unreachable: "Der Yattee-Server ({instance}) ist nicht erreichbar. Prüfe die URL und ob der Server läuft unter Einstellungen → Erweitert."
     Invalid credentials: "Der Yattee-Server hat den Benutzernamen oder das Passwort abgelehnt. Prüfe sie unter Einstellungen → Erweitert."
     Rate limited: "Der Yattee-Server blockiert Anmeldungen nach zu vielen Fehlversuchen. Versuche es später erneut."
     Streams not relayed: "Der Yattee-Server hat die Streams dieses Videos nicht weitergeleitet. Solange Videos über den Server geleitet werden, verbindet sich OpenTubeX nicht direkt mit YouTube."

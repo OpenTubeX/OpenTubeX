@@ -3182,9 +3182,9 @@ KeyboardShortcutPrompt:
       General: 'Video: General'
     App:
       General: 'Aplicación: General'
-      Tabs: "Aplicación:\_Pestañas"
-      Search and Page: "Aplicación:\_Búsqueda y página"
-      Window and View: "Aplicación:\_Ventana y vista"
+      Tabs: "Aplicación: Pestañas"
+      Search and Page: "Aplicación: Búsqueda y página"
+      Window and View: "Aplicación: Ventana y vista"
   Show Keyboard Shortcuts: Mostrar atajos de teclado
   History Backward: Retroceder una página
   History Forward: Avanzar una página
@@ -3584,6 +3584,7 @@ Yattee Server:
     Not configured: Ingresá la URL de tu servidor de Yattee en Configuraciones → Avanzado.
     HTTPS required: Android solo puede reproducir videos de servidores de Yattee que usen HTTPS.
     Streams unavailable: No se pudieron cargar las transmisiones de este video desde el servidor de Yattee. Usá «Probar conexión» en Configuraciones → Avanzado para revisar el servidor.
+    Unreachable: No se pudo conectar con el servidor Yattee ({instance}). Verificá la URL y si el servidor está funcionando en Configuración → Avanzado.
 Yattee Fallback Warning: Esta solicitud omite el servidor de Yattee que configuraste y se conecta directamente a YouTube, exponiendo tu dirección IP.
 Update With Package Manager: 'Actualizar con {packageManager}:'
 Update Command Copied: 'Comando de actualización copiado'
@@ -3694,3 +3695,9 @@ Incognito Tab: Pestaña de incógnito
 Text Translation:
   Translating, please wait: Traduciendo; esperá
   Translation failed: No se pudo traducir
+Invidious:
+  Errors:
+    Not configured: No hay ninguna instancia de Invidious configurada. Seleccioná una en Configuración → Avanzado.
+    Unreachable: No se pudo conectar con la instancia de Invidious ({instance}). Puede estar caída o bloqueando tu conexión. Probá otra instancia en Configuración → Avanzado.
+    Unreachable Web: No se pudo conectar con la instancia de Invidious ({instance}). Puede estar caída, bloqueando tu conexión (por ejemplo, una VPN) o no tener encabezados CORS. Probá otra instancia en Configuración → Avanzado.
+    Server error: La instancia de Invidious ({instance}) devolvió un error (HTTP {status}).

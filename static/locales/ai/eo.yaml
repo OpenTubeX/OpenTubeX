@@ -2691,6 +2691,7 @@ Yattee Server:
     Not configured: Enigu la URL de via Yattee-servilo en Agordoj → Altnivela.
     HTTPS required: Android povas ludi videaĵojn nur de Yattee-serviloj, kiuj uzas HTTPS.
     Streams unavailable: Ne eblis ŝargi la fluojn de ĉi tiu videaĵo el la Yattee-servilo. Uzu "Kontroli konekton" en Agordoj → Altnivela por kontroli la servilon.
+    Unreachable: Ne eblis atingi la Yattee-servilon ({instance}). Kontrolu la URL-on kaj ĉu la servilo funkcias en Agordoj → Altnivelaj.
   Unsupported page: Ĉi tiu paĝo ne disponeblas kun la Yattee-servilo. Ŝaltu “{fallbackSetting}” por ŝargi ĝin per la loka API.
   Posts unavailable: Yattee-serviloj ne provizas afiŝojn. Ŝaltu “{fallbackSetting}” por ŝargi ilin per la loka API.
 The playlist is at the beginning. Enable loop to continue playing: La ludlisto estas ĉe la komenco. Ŝaltu la ripetadon por daŭrigi la ludadon
@@ -2710,9 +2711,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasigni
   Sections:
     App:
-      Tabs: "Aplikaĵo:\_Langetoj"
-      Search and Page: "Aplikaĵo:\_Serĉo kaj paĝo"
-      Window and View: "Aplikaĵo:\_Fenestro kaj vido"
+      Tabs: "Aplikaĵo: Langetoj"
+      Search and Page: "Aplikaĵo: Serĉo kaj paĝo"
+      Window and View: "Aplikaĵo: Fenestro kaj vido"
   New Tab: Krei novan langeton
   Close Tab: Fermi la aktualan langeton
   Reload Tab: Reŝargi la aktualan langeton
@@ -3129,3 +3130,9 @@ Incognito Tab: Inkognita langeto
 Text Translation:
   Translating, please wait: Tradukado, bonvolu atendi
   Translation failed: Traduko malsukcesis
+Invidious:
+  Errors:
+    Not configured: Neniu Invidious-instanco estas agordita. Elektu unu en Agordoj → Altnivelaj.
+    Unreachable: Ne eblis atingi la Invidious-instancon ({instance}). Ĝi eble ne funkcias aŭ blokas vian konekton. Provu alian instancon en Agordoj → Altnivelaj.
+    Unreachable Web: Ne eblis atingi la Invidious-instancon ({instance}). Ĝi eble ne funkcias, blokas vian konekton (ekzemple VPN), aŭ mankas CORS-kaplinioj. Provu alian instancon en Agordoj → Altnivelaj.
+    Server error: La Invidious-instanco ({instance}) redonis eraron (HTTP {status}).

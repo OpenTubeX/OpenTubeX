@@ -2759,6 +2759,7 @@ Yattee Server:
     Not configured: سیٹنگز → ایڈوانسڈ میں اپنے Yattee سرور کا URL درج کریں۔
     HTTPS required: Android صرف HTTPS استعمال کرنے والے Yattee سرورز سے ویڈیوز چلا سکتا ہے۔
     Streams unavailable: Yattee سرور سے اس ویڈیو کی اسٹریمز لوڈ نہیں ہو سکیں۔ سرور چیک کرنے کے لیے سیٹنگز → ایڈوانسڈ میں کنکشن ٹیسٹ کریں استعمال کریں۔
+    Unreachable: Yattee سرور ({instance}) تک رسائی ممکن نہیں ہوئی۔ ترتیبات ← جدید میں URL اور سرور کے فعال ہونے کی جانچ کریں۔
   Unsupported page: یہ صفحہ Yattee سرور کے ساتھ دستیاب نہیں ہے۔ اسے لوکل API سے لوڈ کرنے کے لیے “{fallbackSetting}” آن کریں۔
   Posts unavailable: Yattee سرورز پوسٹس فراہم نہیں کرتے۔ انہیں لوکل API سے لوڈ کرنے کے لیے “{fallbackSetting}” آن کریں۔
 The playlist is at the beginning. Enable loop to continue playing: پلے لسٹ شروع میں ہے۔ چلانا جاری رکھنے کے لیے لوپ فعال کریں
@@ -2780,9 +2781,9 @@ KeyboardShortcutPrompt:
   Reassign: دوبارہ تفویض کریں
   Sections:
     App:
-      Tabs: "ایپ:\_ٹیبز"
-      Search and Page: "ایپ:\_تلاش اور صفحہ"
-      Window and View: "ایپ:\_ونڈو اور منظر"
+      Tabs: "ایپ: ٹیبز"
+      Search and Page: "ایپ: تلاش اور صفحہ"
+      Window and View: "ایپ: ونڈو اور منظر"
   New Tab: نیا ٹیب بنائیں
   Close Tab: موجودہ ٹیب بند کریں
   Reload Tab: موجودہ ٹیب دوبارہ لوڈ کریں
@@ -3199,3 +3200,9 @@ Incognito Tab: پوشیدگی ٹیب
 Text Translation:
   Translating, please wait: ترجمہ ہو رہا ہے، براہ کرم انتظار کریں
   Translation failed: ترجمہ ناکام ہو گیا
+Invidious:
+  Errors:
+    Not configured: کوئی Invidious انسٹینس ترتیب نہیں دیا گیا ہے۔ ترتیبات ← جدید میں سے ایک منتخب کریں۔
+    Unreachable: Invidious انسٹینس ({instance}) تک رسائی ممکن نہیں ہوئی۔ ہو سکتا ہے یہ بند ہو یا آپ کے کنکشن کو بلاک کر رہا ہو۔ ترتیبات ← جدید میں کوئی دوسرا انسٹینس آزمائیں۔
+    Unreachable Web: Invidious انسٹینس ({instance}) تک رسائی ممکن نہیں ہوئی۔ ہو سکتا ہے یہ بند ہو، آپ کے کنکشن (مثلاً VPN) کو بلاک کر رہا ہو، یا CORS ہیڈرز غائب ہوں۔ ترتیبات ← جدید میں کوئی دوسرا انسٹینس آزمائیں۔
+    Server error: Invidious انسٹینس ({instance}) نے ایک خرابی واپس کی (HTTP {status})۔

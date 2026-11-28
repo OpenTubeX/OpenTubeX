@@ -2646,9 +2646,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuir
   Sections:
     App:
-      Tabs: "Aplicação:\_Separadores"
-      Search and Page: "Aplicação:\_Pesquisa e página"
-      Window and View: "Aplicação:\_Janela e vista"
+      Tabs: "Aplicação: Separadores"
+      Search and Page: "Aplicação: Pesquisa e página"
+      Window and View: "Aplicação: Janela e vista"
   New Tab: Criar um novo separador
   Close Tab: Fechar o separador atual
   Reload Tab: Recarregar o separador atual
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Introduza o URL do seu servidor Yattee em Definições → Avançadas.
     HTTPS required: O Android só consegue reproduzir vídeos de servidores Yattee que utilizem HTTPS.
     Streams unavailable: Não foi possível carregar as transmissões deste vídeo a partir do servidor Yattee. Utilize «Testar ligação» em Definições → Avançadas para verificar o servidor.
+    Unreachable: Não foi possível alcançar o servidor Yattee ({instance}). Verifique o URL e se o servidor está em execução em Definições → Avançadas.
 Yattee Fallback Warning: Este pedido ignora o servidor Yattee configurado e liga-se diretamente ao YouTube, expondo o seu endereço IP.
 Update With Package Manager: 'Atualizar com {packageManager}:'
 Update Command Copied: 'Comando de atualização copiado'
@@ -3128,3 +3129,9 @@ Incognito Tab: Separador de navegação anónima
 Text Translation:
   Translating, please wait: A traduzir. Aguarde
   Translation failed: Falha na tradução
+Invidious:
+  Errors:
+    Not configured: Nenhuma instância do Invidious está configurada. Selecione uma em Definições → Avançadas.
+    Unreachable: Não foi possível alcançar a instância do Invidious ({instance}). Ela pode estar fora do ar ou bloqueando sua conexão. Tente outra instância em Definições → Avançadas.
+    Unreachable Web: Não foi possível alcançar a instância do Invidious ({instance}). Ela pode estar fora do ar, bloqueando sua conexão (como uma VPN) ou sem cabeçalhos CORS. Tente outra instância em Definições → Avançadas.
+    Server error: A instância do Invidious ({instance}) retornou um erro (HTTP {status}).
