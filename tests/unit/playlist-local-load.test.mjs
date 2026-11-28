@@ -88,7 +88,7 @@ function harness({ random } = {}) {
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     parseLocalPlaylistVideos: videos => videos,
-    parseVisibleLocalPlaylistVideos: videos => videos,
+    parseVisibleLocalPlaylistVideos: (videos, offset = 0) => videos.map((video, index) => ({ ...video, index: offset + index })),
     extractNumberFromString: value => Number(value),
     getLocalPlaylist: () => firstPage.promise,
     getLocalPlaylistContinuation: () => {
@@ -402,6 +402,10 @@ test('a sorted remote playlist waits for remaining pages before choosing the nex
 
   assert.equal(state.state.isWaitingForNextVideo.value, false)
   assert.equal(state.state.nextVideo.value.videoId, 'medium')
+  assert.deepEqual(
+    state.playlistItems.value.map(video => [video.videoId, video.index]),
+    [['short', 0], ['medium', 2], ['long', 1]]
+  )
 })
 
 test('a failed page stops loading on demand and lets loop wrap around the loaded videos', async () => {

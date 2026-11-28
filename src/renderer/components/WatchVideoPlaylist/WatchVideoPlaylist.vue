@@ -236,7 +236,7 @@
             :playlist-id="playlistId"
             :playlist-type="playlistType"
             :playlist-sort-order="!isUserPlaylist && remotePlaylistSortOrder !== SORT_BY_VALUES.Custom ? remotePlaylistSortOrder : ''"
-            :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
+            :playlist-index="!isUserPlaylist && typeof item.index === 'number' ? item.index : (reversePlaylist ? playlistItems.length - index - 1 : index)"
             :playlist-item-id="item.playlistItemId"
             :download-id="downloadId"
             :playlist-reverse="reversePlaylist"
@@ -303,7 +303,7 @@ import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
   getLocalPlaylistContinuation,
-  parseLocalPlaylistVideos,
+  parseLocalPlaylistPage,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
@@ -1177,9 +1177,12 @@ function filterVisiblePlaylistVideos(videos) {
   return videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
 }
 
-/** @param {object[]} items */
-function parseVisibleLocalPlaylistVideos(items) {
-  return filterVisiblePlaylistVideos(parseLocalPlaylistVideos(items))
+/**
+ * @param {object[]} items
+ * @param {number} [offset]
+ */
+function parseVisibleLocalPlaylistVideos(items, offset = 0) {
+  return filterVisiblePlaylistVideos(parseLocalPlaylistPage(items, offset))
 }
 
 /**
@@ -1261,14 +1264,17 @@ async function continueLoadingPlaylistPages() {
 /**
  * @param {import('youtubei.js').YT.Playlist | null} playlist the last loaded page
  * @param {string} [cachedContinuation] the next page of a playlist the Playlist page loaded
+ * @param {number} [offset] the number of raw playlist entries before the next page
  */
-function localPlaylistPageLoader(playlist, cachedContinuation) {
+function localPlaylistPageLoader(playlist, cachedContinuation, offset = 0) {
   return async () => {
     playlist = playlist == null
       ? await getLocalCachedFeedContinuation('playlist', cachedContinuation)
       : await getLocalPlaylistContinuation(playlist)
     if (playlist == null) return { videos: [], hasMore: false }
-    return { videos: parseVisibleLocalPlaylistVideos(playlist.items), hasMore: playlist.has_continuation }
+    const pageOffset = offset
+    offset += playlist.items.length
+    return { videos: parseVisibleLocalPlaylistVideos(playlist.items, pageOffset), hasMore: playlist.has_continuation }
   }
 }
 
@@ -1324,7 +1330,10 @@ function loadCachedPlaylistInformation(cachedPlaylist) {
     }), getInvidiousApiErrorMessage(backendPreference.value))
   } else if (process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null) {
     // The local API caches continuations, including when it was the fallback
-    setPlaylistPageLoader(localPlaylistPageLoader(null, cachedPlaylist.continuationData), t('Local API Error (Click to copy)'))
+    setPlaylistPageLoader(
+      localPlaylistPageLoader(null, cachedPlaylist.continuationData, cachedPlaylist.fetchedLocalPlaylistItemCount ?? videos.length),
+      t('Local API Error (Click to copy)')
+    )
   } else {
     setPlaylistPageLoader(null)
   }
@@ -1366,13 +1375,13 @@ async function getPlaylistInformationLocal() {
     channelName.value = channelName_
     channelId.value = playlist.info.author?.id
 
-    setPlaylistPageLoader(playlist.has_continuation ? localPlaylistPageLoader(playlist) : null, t('Local API Error (Click to copy)'))
+    setPlaylistPageLoader(playlist.has_continuation ? localPlaylistPageLoader(playlist, undefined, playlist.items.length) : null, t('Local API Error (Click to copy)'))
 
     // Show the first page right away; later pages load as playback approaches them.
     if (isPlaylistSortOrder(props.playlistSortOrder)) {
       remotePlaylistSortOrder.value = props.playlistSortOrder
     }
-    const firstPageVideos = parseVisibleLocalPlaylistVideos(playlist.items)
+    const firstPageVideos = parseVisibleLocalPlaylistVideos(playlist.items, 0)
     playlistItems.value = remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom
       ? sortPlaylistItemsForDisplay(firstPageVideos, remotePlaylistSortOrder.value)
       : applyReversePlaylistState(firstPageVideos)

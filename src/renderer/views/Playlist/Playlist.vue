@@ -1750,6 +1750,7 @@ function cachePlaylistForWatchTransition(to) {
         channelId: channelId.value,
         items: availablePlaylistItems.value,
         sortOrder: isUserPlaylistRequested.value ? undefined : sortOrder.value,
+        fetchedLocalPlaylistItemCount,
         continuationData: continuationData.value
           ? extractLocalCacheablePlaylistContinuation(continuationData.value)
           : null,
