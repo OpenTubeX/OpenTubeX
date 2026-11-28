@@ -34,13 +34,20 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const inlinePlayer = { getBoundingClientRect: () => ({ top: 50, bottom: 300 }) }
   const inlineElement = shallowRef(inlinePlayer)
   const animations = []
+  const classes = new Set()
   const element = {
     open: false,
+    modal: false,
     style: {},
+    classList: {
+      add: name => classes.add(name),
+      remove: name => classes.delete(name),
+      contains: name => classes.has(name)
+    },
     getBoundingClientRect: () => ({ top: 300, height: 500 }),
-    show() { this.open = true },
-    showModal() { this.open = true },
-    close() { this.open = false },
+    show() { this.open = true; this.modal = false },
+    showModal() { this.open = true; this.modal = true },
+    close() { this.open = false; this.modal = false },
     animate: (frames, options) => {
       const animation = {
         frames,
@@ -83,6 +90,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     settleAndroidBackAnimation,
     defineProps: () => props,
     defineEmits: () => (...args) => events.push(args),
+    defineExpose(exposed) { context.exposed = exposed },
     defineOptions() {},
     useTemplateRef: () => dialog,
     usePhoneLayout: () => landscape,
@@ -409,4 +417,55 @@ test('reopening a sheet as its closing animation resolves keeps it open', async 
   assert.equal(sheet.element.open, true, 'the reopened sheet must stay open')
   assert.equal(closingAnimation.playState, 'idle', 'the finished close animation must be canceled')
   assert.deepEqual(sheet.events, [], 'reopening must not emit a stale closed event')
+})
+
+test('handoff exits modal mode immediately without stealing focus and closes once covered', async t => {
+  const sheet = mountSheet(t)
+  let triggerFocused = 0
+  sheet.document.activeElement = { isConnected: true, focus() { triggerFocused++ } }
+  sheet.props.belowPlayer = false
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.element.open, true)
+  assert.equal(sheet.element.modal, true)
+
+  let finishCover
+  let openedWhileNonModal = false
+  sheet.props.open = false
+  sheet.exposed.handoff(
+    () => { openedWhileNonModal = sheet.element.open && !sheet.element.modal },
+    { waitUntilCovered: () => new Promise(resolve => { finishCover = resolve }) }
+  )
+  await sheet.settle()
+
+  assert.equal(openedWhileNonModal, true, 'destination should open while sheet is non-modal')
+  assert.equal(sheet.element.classList.contains('handoffSheet'), true)
+  assert.equal(triggerFocused, 0, 'handoff must not restore focus to the previous trigger')
+  assert.deepEqual(sheet.events, [], 'sheet stays open behind the entering destination until covered')
+
+  finishCover()
+  await sheet.settle()
+  assert.equal(sheet.element.open, false)
+  assert.equal(sheet.element.classList.contains('handoffSheet'), false)
+  assert.deepEqual(sheet.events, [['closed']])
+  assert.equal(triggerFocused, 0)
+})
+
+test('handoff closes immediately without keeping the sheet behind under reduced motion', async t => {
+  const sheet = mountSheet(t, null, { reducedMotion: true })
+  sheet.props.belowPlayer = false
+  sheet.props.open = true
+  await sheet.settle()
+
+  let openCount = 0
+  sheet.props.open = false
+  sheet.exposed.handoff(
+    () => { openCount++ },
+    { waitUntilCovered: () => new Promise(() => {}) }
+  )
+  await sheet.settle()
+
+  assert.equal(openCount, 1)
+  assert.equal(sheet.element.open, false)
+  assert.deepEqual(sheet.events, [['closed']])
 })

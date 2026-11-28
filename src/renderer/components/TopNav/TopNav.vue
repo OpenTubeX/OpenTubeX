@@ -257,13 +257,13 @@
           :compact-header="phoneLayout"
           :header-actions-overflow="headerShortcutsOverflow"
         >
-          <template #overflow-actions="{ close }">
+          <template #overflow-actions="{ openOverlay }">
             <template v-if="compactPhoneActions">
               <button
                 v-if="syncing && !hideHeaderSyncIndicator"
                 type="button"
                 class="phoneOverflowAction phoneOverflowSync"
-                @click="close(); openSyncSettings()"
+                @click="openOverlay(openSyncSettings)"
               >
                 <FtIcon
                   class="phoneOverflowIcon"
@@ -276,7 +276,7 @@
                 v-if="settingsWindowMinimized"
                 type="button"
                 class="phoneOverflowAction phoneOverflowRestore"
-                @click="close(); restoreSettingsWindow()"
+                @click="openOverlay(restoreSettingsWindow)"
               >
                 <FtIcon
                   class="phoneOverflowIcon"

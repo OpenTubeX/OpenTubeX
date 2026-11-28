@@ -93,10 +93,12 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
-    <!-- Leave keyframes avoid staging classes that restyle the settings subtree. -->
+    <!-- Keyframes avoid staging classes that restyle the settings subtree. -->
     <Transition
       name="settings-window"
       :css="!settingsWindowMorphing"
+      enter-from-class=""
+      enter-to-class=""
       leave-from-class=""
       leave-to-class=""
       v-bind="settingsWindowMorphing ? getUtilityWindowMorphHooks() : {}"
@@ -819,7 +821,7 @@ import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
 import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
-import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
+import { preloadResolvedRoute, preloadUtilityRoutes, SettingsWindow } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
 import { installFocusClearance } from './helpers/focusClearance'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
@@ -829,7 +831,6 @@ import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/
 import { collapseSeparators } from './helpers/menuSeparators'
 import { supportsYouTubeAccount } from './helpers/youtube-account-state'
 
-const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const SharedYoutubeLinkPrompt = defineAsyncComponent(() => import('./components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
 const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'))

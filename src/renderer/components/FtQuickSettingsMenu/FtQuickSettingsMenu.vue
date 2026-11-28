@@ -47,8 +47,10 @@
 
     <FtMobileSheet
       v-if="menuRendered || preview"
+      ref="mobileSheetRef"
       :enabled="phoneLayout"
       :open="menuOpen"
+      teleport
       :title="profilePanelOpen ? t('Profile.Profile Select') : t('Settings.Quick Settings.Quick Settings')"
       :back="profilePanelOpen"
       @closed="handleSheetClosed"
@@ -465,6 +467,7 @@
                   <slot
                     name="overflow-actions"
                     :close="closeMenu"
+                    :open-overlay="openOverlayFromOverflow"
                   />
                   <button
                     v-if="USING_ELECTRON"
@@ -517,6 +520,7 @@ import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtQuickSettingControl from '../FtQuickSettingControl/FtQuickSettingControl.vue'
 
 import store from '../../store/index'
+import { preloadUtilityRoutes } from '../../router/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { localeTranslationPercentages } from '../../i18n/index'
 import { finishTransition } from '../../helpers/animationSpeed'
@@ -570,7 +574,9 @@ let mouseDownOnTrigger = false
 let pointerDownInsideMenu = false
 let pendingSettingUpdateCount = 0
 /** @type {(() => void) | null} */
-let actionAfterClose = null
+let pendingPhoneAction = null
+let phoneActionScheduled = false
+const mobileSheetRef = useTemplateRef('mobileSheetRef')
 const triggerRef = useTemplateRef('triggerRef')
 const menuRef = useTemplateRef('menuRef')
 const mainScrollRef = useTemplateRef('mainScrollRef')
@@ -725,8 +731,9 @@ const defaultQuality = computed(() => {
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
   if (menuOpen.value) {
-    actionAfterClose = null
+    pendingPhoneAction = null
     profilePanelOpen.value = false
+    preloadUtilityRoutes()
     nextTick(() => {
       menuRef.value?.$el?.focus()
       const scrollViewport = mainScrollRef.value
@@ -748,9 +755,6 @@ function handleSheetClosed() {
   menuRendered.value = false
   menuOpen.value = false
   handleMenuAfterLeave()
-  const action = actionAfterClose
-  actionAfterClose = null
-  action?.()
 }
 
 function clampMainContentScroll() {
@@ -820,6 +824,7 @@ onMounted(() => {
   if (props.preview) nextTick(observeMainContent)
 })
 onBeforeUnmount(() => {
+  pendingPhoneAction = null
   window.removeEventListener('focus', handleWindowFocus)
   window.removeEventListener('blur', handleWindowBlur)
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
@@ -904,14 +909,111 @@ function handleMenuFocusOut(event) {
 }
 
 function closeMenu() {
-  actionAfterClose = null
+  pendingPhoneAction = null
   menuOpen.value = false
   triggerRef.value?.focus()
 }
 
 function closeMenuForAction() {
-  actionAfterClose = null
+  pendingPhoneAction = null
   menuOpen.value = false
+}
+
+function waitForSettingsWindowEnter() {
+  return new Promise(resolve => {
+    let settled = false
+    let stopOpenWatch = null
+    let observer = null
+    let mountTimer = null
+    const finish = () => {
+      if (settled) return
+      settled = true
+      stopOpenWatch?.()
+      observer?.disconnect()
+      if (mountTimer !== null) clearTimeout(mountTimer)
+      resolve()
+    }
+    const clearMountTimer = () => {
+      if (mountTimer !== null) {
+        clearTimeout(mountTimer)
+        mountTimer = null
+      }
+    }
+    mountTimer = setTimeout(finish, 1500)
+    stopOpenWatch = watch(() => store.getters.getSettingsWindowOpen, open => {
+      if (!open) finish()
+    })
+    const waitForAnimations = async element => {
+      clearMountTimer()
+      await new Promise(_resolve => requestAnimationFrame(_resolve))
+      if (settled || !element.isConnected || !store.getters.getSettingsWindowOpen) {
+        finish()
+        return
+      }
+      const animations = element.getAnimations?.() ?? []
+      if (animations.length > 0) {
+        await Promise.allSettled(animations.map(animation => animation.finished))
+      }
+      finish()
+    }
+    nextTick(() => {
+      if (settled || !store.getters.getSettingsWindowOpen) {
+        finish()
+        return
+      }
+      const existing = document.querySelector('.settingsWindow')
+      if (existing) {
+        waitForAnimations(existing)
+        return
+      }
+      observer = new MutationObserver(() => {
+        const element = document.querySelector('.settingsWindow')
+        if (element) {
+          observer?.disconnect()
+          observer = null
+          waitForAnimations(element)
+        }
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+    })
+  })
+}
+
+/**
+ * Hands off from the phone quick-settings sheet to another overlay without
+ * playing the sheet's dismiss animation first. Coalesced in a microtask so a
+ * later click in the same turn cancels an earlier one.
+ * @param {() => void} open
+ * @param {{ keepBehind?: boolean }} [options]
+ */
+function runPhoneAction(open, { keepBehind = false } = {}) {
+  if (!phoneLayout.value) {
+    closeMenuForAction()
+    open()
+    return
+  }
+  pendingPhoneAction = () => {
+    menuOpen.value = false
+    const sheet = mobileSheetRef.value
+    if (!sheet) {
+      open()
+      return
+    }
+    sheet.handoff(open, keepBehind ? { waitUntilCovered: waitForSettingsWindowEnter } : undefined)
+  }
+  if (!phoneActionScheduled) {
+    phoneActionScheduled = true
+    queueMicrotask(() => {
+      phoneActionScheduled = false
+      const run = pendingPhoneAction
+      pendingPhoneAction = null
+      run?.()
+    })
+  }
+}
+
+function openOverlayFromOverflow(open) {
+  runPhoneAction(open, { keepBehind: true })
 }
 
 function translateProfileName(profile) {
@@ -924,12 +1026,7 @@ function setActiveProfile(profile) {
 }
 
 function openProfileSettings() {
-  closeMenuForAction()
-  if (phoneLayout.value) {
-    actionAfterClose = () => store.dispatch('showSettingsWindow', 'profile')
-    return
-  }
-  store.dispatch('showSettingsWindow', 'profile')
+  runPhoneAction(() => store.dispatch('showSettingsWindow', 'profile'), { keepBehind: true })
 }
 
 /**
@@ -997,37 +1094,23 @@ function handleHideRecommendedVideos(value) {
 }
 
 function openSettings() {
-  closeMenuForAction()
-  if (phoneLayout.value) {
-    actionAfterClose = () => store.dispatch('toggleSettingsWindow')
-    return
-  }
-  store.dispatch('toggleSettingsWindow')
+  runPhoneAction(() => store.dispatch('toggleSettingsWindow'), { keepBehind: true })
 }
 
 function openDownloads() {
-  closeMenuForAction()
-  store.dispatch('showSettingsWindow', 'downloads')
+  runPhoneAction(() => store.dispatch('showSettingsWindow', 'downloads'), { keepBehind: true })
 }
 
 function openKeyboardShortcuts() {
-  closeMenuForAction()
-  store.dispatch('showKeyboardShortcutPrompt')
+  runPhoneAction(() => store.dispatch('showKeyboardShortcutPrompt'), { keepBehind: true })
 }
 
 function openCommandPalette() {
-  if (phoneLayout.value) {
-    actionAfterClose = () => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
-    menuOpen.value = false
-    return
-  }
-  menuOpen.value = false
-  window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
+  runPhoneAction(() => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT)))
 }
 
 function openAbout() {
-  closeMenuForAction()
-  store.dispatch('showSettingsWindow', 'about')
+  runPhoneAction(() => store.dispatch('showSettingsWindow', 'about'), { keepBehind: true })
 }
 
 </script>
