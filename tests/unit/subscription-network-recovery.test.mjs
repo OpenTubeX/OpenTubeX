@@ -921,6 +921,31 @@ test('error notification switches to a hidden group when only that group shows t
   assert.deepEqual(app.writes.filter(write => write.key === 'selectSubscriptionGroup').map(write => write.value), ['hidden-group'])
 })
 
+test('error notification ignores errors outside the active profile after a profile switch', async () => {
+  const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
+  app.getters.getActiveProfile = { _id: 'all', subscriptions: [{ id: 'UC5' }, { id: 'UC6' }] }
+  app.getters.getSubscriptionGroupList = [
+    { id: 'hidden-a', name: 'Hidden A', channelIds: ['UC5'], showInAll: false },
+    { id: 'hidden-b', name: 'Hidden B', channelIds: ['UC6'], showInAll: false }
+  ]
+  Object.defineProperty(app.getters, 'getActiveFeedSubscriptions', { value: [], configurable: true })
+  await app.refresh({ t: key => key })
+  assert.equal(app.toasts.length, 1)
+
+  // Switching to a profile containing only UC6 selects UC6's group, not UC5's
+  app.getters.getActiveProfile = { _id: 'other', subscriptions: [{ id: 'UC6' }] }
+  app.toasts[0][0].action()
+  await settle()
+  assert.deepEqual(app.writes.filter(write => write.key === 'selectSubscriptionGroup').map(write => write.value), ['hidden-b'])
+
+  // Switching to a profile containing neither channel leaves the group unchanged
+  app.writes.length = 0
+  app.getters.getActiveProfile = { _id: 'empty', subscriptions: [] }
+  app.toasts[0][0].action()
+  await settle()
+  assert.deepEqual(app.writes.filter(write => write.key === 'selectSubscriptionGroup'), [])
+})
+
 test('failures of channels outside the active profile need no notification', async () => {
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
   const profiles = [app.getters.getActiveProfile, { _id: 'other', subscriptions: [] }]

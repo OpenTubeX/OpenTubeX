@@ -3105,9 +3105,9 @@ Subscription Groups:
   Delete Failed: گروه حذف نشد.
   Group Icon: نماد گروه
   No Icon: بدون نماد
-  Show Channels in All: نمایش کانال‌ها در همه
-  Show Channels in All Description: در صورت غیرفعال بودن، کانال‌هایی که فقط در این گروه هستند از فید اشتراک‌های همه پنهان می‌شوند.
-  All Hidden From All: همه کانال‌های نمایه فعلی از فید همه پنهان شده‌اند.
+  Show Channels in All: نمایش کانال‌ها در «همه»
+  Show Channels in All Description: در صورت غیرفعال بودن، کانال‌هایی که فقط در این گروه هستند از فید اشتراک‌های «همه» پنهان می‌شوند.
+  All Hidden From All: همه کانال‌های نمایه فعلی از فید «همه» پنهان شده‌اند.
 Yattee Server:
   API Error (Click to copy): خطای سرور Yattee (برای کپی کلیک کنید)
   Unsupported page: این صفحه با سرور Yattee در دسترس نیست. برای بارگذاری آن با API محلی، «{fallbackSetting}» را روشن کنید.
