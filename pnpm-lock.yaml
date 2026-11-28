@@ -501,8 +501,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1(postcss@8.5.32)
       postcss-loader:
-        specifier: 8.2.1
-        version: 8.2.1(@rspack/core@2.3.3)(postcss@8.5.32)(typescript@7.0.2)
+        specifier: 8.2.2
+        version: 8.2.2(@rspack/core@2.3.3)(postcss@8.5.32)(typescript@7.0.2)
       postcss-scss:
         specifier: ^4.0.9
         version: 4.0.9(postcss@8.5.32)
@@ -3801,8 +3801,8 @@ packages:
     peerDependencies:
       postcss: ^8.5.0
 
-  postcss-loader@8.2.1:
-    resolution: {integrity: sha512-k98jtRzthjj3f76MYTs9JTpRqV1RaaMhEU0Lpw9OTmQZQdppg4B30VZ74BojuBHt3F4KyubHJoXCMUeM8Bqeow==}
+  postcss-loader@8.2.2:
+    resolution: {integrity: sha512-NMFUxyFeNHdQSnK0wewFwnkYwsjmohSZzGUBTjcxPMJzOOf7BVANeU8rljwkfjuWhZVRSGgCaXwV6YSkfETeyg==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
@@ -8363,7 +8363,7 @@ snapshots:
       postcss: 8.5.32
       postcss-safe-parser: 7.1.0(postcss@8.5.32)
 
-  postcss-loader@8.2.1(@rspack/core@2.3.3)(postcss@8.5.32)(typescript@7.0.2):
+  postcss-loader@8.2.2(@rspack/core@2.3.3)(postcss@8.5.32)(typescript@7.0.2):
     dependencies:
       cosmiconfig: 9.0.2(typescript@7.0.2)
       jiti: 2.7.0

@@ -181,7 +181,7 @@
     "node-gyp": "^13.1.0",
     "postcss": "^8.5.32",
     "postcss-html": "^2.0.1",
-    "postcss-loader": "8.2.1",
+    "postcss-loader": "8.2.2",
     "postcss-scss": "^4.0.9",
     "rspack-vue-loader": "^17.7.2",
     "sass": "^1.108.2",
