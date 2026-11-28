@@ -672,10 +672,20 @@ test.describe('quick settings menu', () => {
         const frames = []
         let firstCompactState = null
         let sawSettings = false
+        const getColorAlpha = color => {
+          const legacy = /^rgba\(.*,\s*([\d.e+-]+)\)$/.exec(color)
+          if (legacy) return Number(legacy[1])
+          const modern = /\/\s*([\d.e+-]+)(%?)\s*\)$/.exec(color)
+          if (modern) return Number(modern[1]) / (modern[2] ? 100 : 1)
+          return color === 'transparent' ? 0 : 1
+        }
         const record = () => {
           const sheet = document.querySelector('.mobileSheet[open]')
           const settings = document.querySelector('.settingsWindow')
-          const sheetOpacity = sheet ? Number.parseFloat(getComputedStyle(sheet).opacity) : 0
+          const sheetStyle = sheet ? getComputedStyle(sheet) : null
+          const sheetOpacity = sheetStyle ? Number.parseFloat(sheetStyle.opacity) : 0
+          const sheetBackgroundAlpha = sheetStyle ? getColorAlpha(sheetStyle.backgroundColor) : 0
+          const sheetEffectiveAlpha = sheetOpacity * sheetBackgroundAlpha
           const settingsOpacity = settings ? Number.parseFloat(getComputedStyle(settings).opacity) : 0
           if (settings && firstCompactState === null) {
             firstCompactState = settings.querySelector('.settingsPage')?.classList.contains('compactSettings') ?? false
@@ -685,6 +695,8 @@ test.describe('quick settings menu', () => {
             hasSheet: Boolean(sheet),
             hasSettings: Boolean(settings),
             sheetOpacity,
+            sheetBackgroundAlpha,
+            sheetEffectiveAlpha,
             settingsOpacity
           })
           const settled = sawSettings && !sheet && settings && !settings.classList.contains('settings-window-enter-active') && settingsOpacity >= 0.99
@@ -700,7 +712,7 @@ test.describe('quick settings menu', () => {
 
       expect(trace.settled, 'handoff should settle with Settings visible and the sheet closed').toBe(true)
       expect(trace.firstCompactState, 'Settings should render in compact mode on its first frame').toBe(true)
-      const uncoveredFrames = trace.frames.filter(frame => frame.sheetOpacity < 0.99 && frame.settingsOpacity < 0.99)
+      const uncoveredFrames = trace.frames.filter(frame => frame.sheetEffectiveAlpha < 0.99 && frame.settingsOpacity < 0.99)
       expect(uncoveredFrames, 'underlying page should stay covered on every transition frame').toEqual([])
       await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
       await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.settingsWindow')))).toBe(true)

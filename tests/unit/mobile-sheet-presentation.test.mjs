@@ -38,14 +38,17 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const element = {
     open: false,
     modal: false,
+    inert: false,
+    inertAtShow: null,
     style: {},
     classList: {
       add: name => classes.add(name),
       remove: name => classes.delete(name),
       contains: name => classes.has(name)
     },
+    contains: () => false,
     getBoundingClientRect: () => ({ top: 300, height: 500 }),
-    show() { this.open = true; this.modal = false },
+    show() { this.open = true; this.modal = false; this.inertAtShow = this.inert },
     showModal() { this.open = true; this.modal = true },
     close() { this.open = false; this.modal = false },
     animate: (frames, options) => {
@@ -82,6 +85,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     nextTick,
     document,
     window,
+    HTMLElement: class {},
     innerHeight: 800,
     isAppHidden: () => !!document.hidden,
     isReducedMotionEnabled: () => reducedMotion,
@@ -439,6 +443,7 @@ test('handoff exits modal mode immediately without stealing focus and closes onc
   await sheet.settle()
 
   assert.equal(openedWhileNonModal, true, 'destination should open while sheet is non-modal')
+  assert.equal(sheet.element.inertAtShow, true, 'sheet must be inert before show() runs')
   assert.equal(sheet.element.classList.contains('handoffSheet'), true)
   assert.equal(triggerFocused, 0, 'handoff must not restore focus to the previous trigger')
   assert.deepEqual(sheet.events, [], 'sheet stays open behind the entering destination until covered')
@@ -446,6 +451,7 @@ test('handoff exits modal mode immediately without stealing focus and closes onc
   finishCover()
   await sheet.settle()
   assert.equal(sheet.element.open, false)
+  assert.equal(sheet.element.inert, false)
   assert.equal(sheet.element.classList.contains('handoffSheet'), false)
   assert.deepEqual(sheet.events, [['closed']])
   assert.equal(triggerFocused, 0)

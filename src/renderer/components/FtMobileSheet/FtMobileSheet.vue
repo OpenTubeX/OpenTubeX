@@ -195,8 +195,11 @@ function finishHandoff(emitClosed = true) {
   handoffToken++
   handingOff.value = false
   const element = dialog.value
-  element?.classList.remove('handoffSheet')
-  if (element?.open) element.close()
+  if (element) {
+    element.inert = false
+    element.classList.remove('handoffSheet')
+    if (element.open) element.close()
+  }
   updateMobileSheetRootClass()
   if (emitClosed) emit('closed')
 }
@@ -222,11 +225,19 @@ function handoff(openDestination, { waitUntilCovered } = {}) {
     emit('closed')
     return
   }
+  // Move focus out of the dialog before closing so native <dialog> close does
+  // not return focus to the trigger button that opened the sheet.
+  if (document.activeElement instanceof HTMLElement && element.contains(document.activeElement)) {
+    document.activeElement.blur()
+  }
   element.close()
   release(false, { restoreFocus: false })
   if (waitUntilCovered && !isReducedMotionEnabled() && !docked.value) {
     const token = ++handoffToken
     handingOff.value = true
+    // Set inert synchronously before show() so dialog focusing steps cannot
+    // focus a control inside the retained sheet before Vue flushes :inert.
+    element.inert = true
     element.classList.add('handoffSheet')
     element.show()
     updateMobileSheetRootClass()
@@ -581,8 +592,11 @@ onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', updateVisibility)
   pictureInPictureObserver.disconnect()
   presentationObserver?.disconnect()
-  dialog.value?.classList.remove('handoffSheet')
-  dialog.value?.close()
+  if (dialog.value) {
+    dialog.value.inert = false
+    dialog.value.classList.remove('handoffSheet')
+    dialog.value.close()
+  }
   release()
 })
 </script>
