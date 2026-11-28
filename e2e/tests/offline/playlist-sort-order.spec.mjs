@@ -299,6 +299,36 @@ test.describe('a remote YouTube playlist', () => {
   test('sorts multi-page YouTube playlists by duration and carries the order to queue and watch page', async ({ app, page }, testInfo) => {
     await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await page.route('https://invidious.test/ggpht/**', route => fulfillVisualFixture(route, 'avatar'))
+    await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
+      json: {
+        title: 'Longest on page 2',
+        videoId: 'remp2long00',
+        viewCount: 1,
+        paid: false,
+        subCountText: '1',
+        likeCount: 1,
+        dislikeCount: 0,
+        genre: 'Education',
+        keywords: [],
+        author: 'Playlist channel',
+        authorId: 'UCplaylistchannel',
+        authorThumbnails: [],
+        description: '',
+        descriptionHtml: '',
+        published: 1_700_000_000,
+        recommendedVideos: [],
+        liveNow: false,
+        premiereTimestamp: 0,
+        isFamilyFriendly: true,
+        isPostLiveDvr: false,
+        isListed: true,
+        captions: [],
+        lengthSeconds: 900,
+        formatStreams: [],
+        adaptiveFormats: [],
+        videoThumbnails: [],
+      },
+    }))
 
     const page1Videos = Array.from({ length: 100 }, (_, index) => ({
       type: 'video',
@@ -390,9 +420,20 @@ test.describe('a remote YouTube playlist', () => {
     const queuedFirst = await page.evaluate(() => window.$store.getters.getWatchQueue.slice(0, 2).map(item => item.videoId))
     expect(queuedFirst).toEqual(['remp2long00', 'remp1v00099'])
 
-    // Opening a video carries the sorted order to the watch page playlist panel.
+    // Opening a video in a new tab carries the remote sort order via the route query.
+    const visibleTabs = page.locator('.tab[data-tab-id]:visible')
+    const previousTabs = await visibleTabs.count()
+    await titles(page).first().click({ button: 'middle' })
+    await expect(visibleTabs).toHaveCount(previousTabs + 1)
+    await visibleTabs.last().click()
+    const newTabWatchPlaylist = page.locator('.watchVideoPlaylist:visible')
+    await expect(newTabWatchPlaylist.locator('.playlistItem')).toHaveCount(102)
+    await expect(newTabWatchPlaylist.locator('.playlistItem .h3Title').first()).toHaveText('Longest on page 2')
+
+    // Opening a video in the same tab carries the sorted order via the cache handoff.
+    await page.locator(`.tab[data-tab-id="${tab.id}"]:visible`).click()
     await titles(page).first().click()
-    const watchPlaylist = page.locator('.watchVideoPlaylist')
+    const watchPlaylist = page.locator('.watchVideoPlaylist:visible')
     await expect(watchPlaylist.locator('.playlistItem')).toHaveCount(102)
     await expect(watchPlaylist.locator('.playlistItem .h3Title').first()).toHaveText('Longest on page 2')
   })

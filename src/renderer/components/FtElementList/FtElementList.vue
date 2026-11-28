@@ -31,6 +31,7 @@
       :search-query-text="searchQueryText"
       :playlist-id="playlistId"
       :playlist-type="playlistType"
+      :playlist-sort-order="playlistSortOrder"
       :playlist-item-id="result.playlistItemId"
       :is-video-dragging="isVideoDragging"
       :video-dragging-possible="videoDraggingPossible"
@@ -149,6 +150,10 @@ const props = defineProps({
   playlistType: {
     type: String,
     default: null
+  },
+  playlistSortOrder: {
+    type: String,
+    default: ''
   },
   isVideoDragging: {
     type: Boolean,

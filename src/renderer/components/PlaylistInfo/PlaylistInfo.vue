@@ -15,6 +15,7 @@
             playlistId: id,
             playlistType: videoPlaylistType,
             playlistItemId: startVideo.playlistItemId,
+            ...(!isUserPlaylist && sortOrder !== SORT_BY_VALUES.Custom ? { playlistSortOrder: sortOrder } : {}),
           },
         }"
         :data-tab-title="startVideoTitle"

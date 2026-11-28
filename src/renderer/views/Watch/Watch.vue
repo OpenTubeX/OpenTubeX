@@ -1290,6 +1290,7 @@
             :auto-skip-unavailable="skipUnavailablePlaylistVideo && $store.getters.getSkipUnavailablePlaylistVideos"
             :playlist-id="playlistId"
             :playlist-type="playlistType"
+            :playlist-sort-order="playlistSortOrder"
             :video-id="videoId"
             :playlist-item-id="playlistItemId"
             :download-id="preferredDownload ? String(preferredDownload.id) : ''"

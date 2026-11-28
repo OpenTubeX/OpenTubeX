@@ -675,6 +675,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  playlistSortOrder: {
+    type: String,
+    default: ''
+  },
   playlistItemId: {
     type: String,
     default: null
@@ -2200,6 +2204,10 @@ const watchPageLinkQuery = computed(() => {
 
   if (playlistItemIdFinal.value) {
     query.playlistItemId = playlistItemIdFinal.value
+  }
+
+  if (props.playlistId && props.playlistSortOrder) {
+    query.playlistSortOrder = props.playlistSortOrder
   }
 
   if (linkDownloadId.value) {

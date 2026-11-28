@@ -235,6 +235,7 @@
             :data="item"
             :playlist-id="playlistId"
             :playlist-type="playlistType"
+            :playlist-sort-order="!isUserPlaylist && remotePlaylistSortOrder !== SORT_BY_VALUES.Custom ? remotePlaylistSortOrder : ''"
             :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
             :playlist-item-id="item.playlistItemId"
             :download-id="downloadId"
@@ -322,6 +323,10 @@ const props = defineProps({
   playlistType: {
     type: String,
     default: null
+  },
+  playlistSortOrder: {
+    type: String,
+    default: ''
   },
   videoId: {
     type: String,
@@ -584,7 +589,11 @@ const playlistPageLinkTo = computed(() => ({
 
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
-const remotePlaylistSortOrder = ref(SORT_BY_VALUES.Custom)
+const remotePlaylistSortOrder = ref(
+  !isUserPlaylist.value && isPlaylistSortOrder(props.playlistSortOrder)
+    ? props.playlistSortOrder
+    : SORT_BY_VALUES.Custom
+)
 
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
@@ -749,7 +758,9 @@ watch(() => props.playlistId, () => {
   pendingProgressBarIndex = null
   progressBarTargetIndex.value = -1
   resetUnavailableSkipChain()
-  remotePlaylistSortOrder.value = SORT_BY_VALUES.Custom
+  remotePlaylistSortOrder.value = !isUserPlaylist.value && isPlaylistSortOrder(props.playlistSortOrder)
+    ? props.playlistSortOrder
+    : SORT_BY_VALUES.Custom
   reversePlaylist.value = storedReversePlaylist.value
   applyShuffleByDefault()
 
@@ -1118,6 +1129,9 @@ function playlistItemRoute(item) {
       playlistId: props.playlistId,
       playlistType: props.playlistType,
       playlistItemId: item.playlistItemId,
+      ...(!isUserPlaylist.value && remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom
+        ? { playlistSortOrder: remotePlaylistSortOrder.value }
+        : {}),
       ...(downloadId ? { downloadId } : {})
     }
   }
@@ -1300,7 +1314,7 @@ function loadCachedPlaylistInformation(cachedPlaylist) {
   channelId.value = cachedPlaylist.channelId
   remotePlaylistSortOrder.value = !isUserPlaylist.value && isPlaylistSortOrder(cachedPlaylist.sortOrder)
     ? cachedPlaylist.sortOrder
-    : SORT_BY_VALUES.Custom
+    : (!isUserPlaylist.value && isPlaylistSortOrder(props.playlistSortOrder) ? props.playlistSortOrder : SORT_BY_VALUES.Custom)
 
   const nextInvidiousPage = cachedPlaylist.nextInvidiousPage ?? null
   const videos = cachedPlaylist.items.slice()
@@ -1355,7 +1369,13 @@ async function getPlaylistInformationLocal() {
     setPlaylistPageLoader(playlist.has_continuation ? localPlaylistPageLoader(playlist) : null, t('Local API Error (Click to copy)'))
 
     // Show the first page right away; later pages load as playback approaches them.
-    playlistItems.value = applyReversePlaylistState(parseVisibleLocalPlaylistVideos(playlist.items))
+    if (isPlaylistSortOrder(props.playlistSortOrder)) {
+      remotePlaylistSortOrder.value = props.playlistSortOrder
+    }
+    const firstPageVideos = parseVisibleLocalPlaylistVideos(playlist.items)
+    playlistItems.value = remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom
+      ? sortPlaylistItemsForDisplay(firstPageVideos, remotePlaylistSortOrder.value)
+      : applyReversePlaylistState(firstPageVideos)
     if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
   } catch (err) {
@@ -1398,7 +1418,13 @@ async function getPlaylistInformationInvidious() {
     )
 
     // Show the first page right away; later pages load as playback approaches them.
-    playlistItems.value = applyReversePlaylistState(filterVisiblePlaylistVideos(result.videos))
+    if (isPlaylistSortOrder(props.playlistSortOrder)) {
+      remotePlaylistSortOrder.value = props.playlistSortOrder
+    }
+    const firstPageVideos = filterVisiblePlaylistVideos(result.videos)
+    playlistItems.value = remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom
+      ? sortPlaylistItemsForDisplay(firstPageVideos, remotePlaylistSortOrder.value)
+      : applyReversePlaylistState(firstPageVideos)
     if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
   } catch (err) {

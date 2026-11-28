@@ -46,6 +46,7 @@
         :data="data"
         :playlist-id="playlistId"
         :playlist-type="playlistType"
+        :playlist-sort-order="playlistSortOrder"
         :playlist-index="playlistIndex"
         :thumbnail-index="videoIndex"
         :playlist-reverse="playlistReverse"
@@ -114,6 +115,10 @@ const props = defineProps({
   playlistType: {
     type: String,
     default: null
+  },
+  playlistSortOrder: {
+    type: String,
+    default: ''
   },
   playlistIndex: {
     type: Number,
