@@ -374,12 +374,14 @@ test.describe('a remote YouTube playlist', () => {
     // Sorting loads page 2 automatically so the shortest video on page 2 rises to the top.
     await chooseSelectOption(sortSelect, 'video_duration_ascending')
     await expect(titles(page).first()).toHaveText('Shortest on page 2')
+    await expect(page.locator('.playlistInfo .playlistThumbnail a')).toHaveAttribute('href', /\/watch\/remp2short0\b/)
     await expect(page.locator('.playlistItems .playlistItem')).toHaveCount(102)
     await expectImagesLoaded(page.locator('.playlistItemsCard .thumbnailImage:visible'))
     await captureAppFramebuffer(app, testInfo, 'remote-playlist-sorted-duration-shortest')
 
     await chooseSelectOption(sortSelect, 'video_duration_descending')
     await expect(titles(page).first()).toHaveText('Longest on page 2')
+    await expect(page.locator('.playlistInfo .playlistThumbnail a')).toHaveAttribute('href', /\/watch\/remp2long00\b/)
     await captureAppFramebuffer(app, testInfo, 'remote-playlist-sorted-duration-longest')
 
     // Adding to the queue follows the active sort order.

@@ -51,7 +51,7 @@
         :description="playlistDescription"
         :video-count="shownVideoCount"
         :videos="shownPlaylistItems"
-        :sorted-videos="sortedPlaylistItems"
+        :sorted-videos="availablePlaylistItems"
         :sort-order="sortOrder"
         :view-count="viewCount"
         :total-playlist-duration="totalPlaylistDuration"

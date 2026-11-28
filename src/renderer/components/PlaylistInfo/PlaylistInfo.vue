@@ -732,9 +732,22 @@ function pickShuffledStartVideo() {
 watch(() => props.videos, pickShuffledStartVideo, { immediate: true })
 watch(() => selectedUserPlaylist.value?.shuffleByDefault, pickShuffledStartVideo)
 
-const startVideo = computed(() => shuffledStartVideo.value ?? {
-  videoId: props.firstVideoId,
-  playlistItemId: props.firstVideoPlaylistItemId,
+const startVideo = computed(() => {
+  if (shuffledStartVideo.value != null) return shuffledStartVideo.value
+  const firstSorted = !isUserPlaylist.value && props.sortOrder !== SORT_BY_VALUES.Custom
+    ? props.sortedVideos[0]
+    : null
+  if (firstSorted?.videoId) {
+    return {
+      videoId: firstSorted.videoId,
+      playlistItemId: firstSorted.playlistItemId ?? '',
+      title: firstSorted.title,
+    }
+  }
+  return {
+    videoId: props.firstVideoId,
+    playlistItemId: props.firstVideoPlaylistItemId,
+  }
 })
 const startVideoTitle = computed(() => startVideo.value.title ??
   props.videos.find(video => video.videoId === startVideo.value.videoId)?.title)
