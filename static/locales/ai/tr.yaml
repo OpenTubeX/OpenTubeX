@@ -2647,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Yeniden Ata
   Sections:
     App:
-      Tabs: "Uygulama: Sekmeler"
-      Search and Page: "Uygulama: Arama ve Sayfa"
-      Window and View: "Uygulama: Pencere ve Görünüm"
+      Tabs: "Uygulama:\_Sekmeler"
+      Search and Page: "Uygulama:\_Arama ve Sayfa"
+      Window and View: "Uygulama:\_Pencere ve Görünüm"
   New Tab: Yeni bir sekme oluştur
   Close Tab: Geçerli sekmeyi kapat
   Reload Tab: Geçerli sekmeyi yeniden yükle

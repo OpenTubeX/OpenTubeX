@@ -2648,9 +2648,9 @@ KeyboardShortcutPrompt:
   Reassign: Átrendelés
   Sections:
     App:
-      Tabs: "Alkalmazás: Lapok"
-      Search and Page: "Alkalmazás: Keresés és oldal"
-      Window and View: "Alkalmazás: Ablak és nézet"
+      Tabs: "Alkalmazás:\_Lapok"
+      Search and Page: "Alkalmazás:\_Keresés és oldal"
+      Window and View: "Alkalmazás:\_Ablak és nézet"
   New Tab: Új lap létrehozása
   Close Tab: Aktuális lap bezárása
   Reload Tab: Aktuális lap újratöltése

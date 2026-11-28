@@ -2647,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Přiřadit znovu
   Sections:
     App:
-      Tabs: "Aplikace: Karty"
-      Search and Page: "Aplikace: Hledání a stránka"
-      Window and View: "Aplikace: Okno a zobrazení"
+      Tabs: "Aplikace:\_Karty"
+      Search and Page: "Aplikace:\_Hledání a stránka"
+      Window and View: "Aplikace:\_Okno a zobrazení"
   New Tab: Vytvořit novou kartu
   Close Tab: Zavřít aktuální kartu
   Reload Tab: Znovu načíst aktuální kartu

@@ -2702,9 +2702,9 @@ KeyboardShortcutPrompt:
   Reassign: Перепризначити
   Sections:
     App:
-      Tabs: "Програма: Вкладки"
-      Search and Page: "Програма: Пошук і сторінка"
-      Window and View: "Програма: Вікно й вигляд"
+      Tabs: "Програма:\_Вкладки"
+      Search and Page: "Програма:\_Пошук і сторінка"
+      Window and View: "Програма:\_Вікно й вигляд"
   New Tab: Створити нову вкладку
   Close Tab: Закрити поточну вкладку
   Reload Tab: Перезавантажити поточну вкладку

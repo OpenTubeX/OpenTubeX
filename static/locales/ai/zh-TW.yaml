@@ -2650,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: 重新指派
   Sections:
     App:
-      Tabs: "應用程式: 分頁"
-      Search and Page: "應用程式: 搜尋與頁面"
-      Window and View: "應用程式: 視窗與檢視"
+      Tabs: "應用程式:\_分頁"
+      Search and Page: "應用程式:\_搜尋與頁面"
+      Window and View: "應用程式:\_視窗與檢視"
   New Tab: 建立新分頁
   Close Tab: 關閉目前的分頁
   Reload Tab: 重新載入目前的分頁

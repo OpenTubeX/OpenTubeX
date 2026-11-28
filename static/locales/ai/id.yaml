@@ -2674,9 +2674,9 @@ KeyboardShortcutPrompt:
   Reassign: Tetapkan ulang
   Sections:
     App:
-      Tabs: "Aplikasi: Tab"
-      Search and Page: "Aplikasi: Pencarian & Halaman"
-      Window and View: "Aplikasi: Jendela & Tampilan"
+      Tabs: "Aplikasi:\_Tab"
+      Search and Page: "Aplikasi:\_Pencarian & Halaman"
+      Window and View: "Aplikasi:\_Jendela & Tampilan"
   New Tab: Buat tab baru
   Close Tab: Tutup tab saat ini
   Reload Tab: Muat ulang tab saat ini

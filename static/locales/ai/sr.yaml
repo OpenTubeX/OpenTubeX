@@ -2735,9 +2735,9 @@ KeyboardShortcutPrompt:
   Reassign: Поново додели
   Sections:
     App:
-      Tabs: "Апликација: Картице"
-      Search and Page: "Апликација: Претрага и страница"
-      Window and View: "Апликација: Прозор и приказ"
+      Tabs: "Апликација:\_Картице"
+      Search and Page: "Апликација:\_Претрага и страница"
+      Window and View: "Апликација:\_Прозор и приказ"
   New Tab: Направи нову картицу
   Close Tab: Затвори тренутну картицу
   Reload Tab: Поново учитај тренутну картицу

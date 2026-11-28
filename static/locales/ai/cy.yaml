@@ -2687,9 +2687,9 @@ KeyboardShortcutPrompt:
   Reassign: Ailaseinio
   Sections:
     App:
-      Tabs: "Ap: Tabiau"
-      Search and Page: "Ap: Chwilio a thudalen"
-      Window and View: "Ap: Ffenestr a golwg"
+      Tabs: "Ap:\_Tabiau"
+      Search and Page: "Ap:\_Chwilio a thudalen"
+      Window and View: "Ap:\_Ffenestr a golwg"
   New Tab: Creu tab newydd
   Close Tab: Cau'r tab presennol
   Reload Tab: Ail-lwytho'r tab presennol

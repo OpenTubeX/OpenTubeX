@@ -2650,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: Määra ümber
   Sections:
     App:
-      Tabs: "Rakendus: Vahelehed"
-      Search and Page: "Rakendus: Otsing ja leht"
-      Window and View: "Rakendus: Aken ja vaade"
+      Tabs: "Rakendus:\_Vahelehed"
+      Search and Page: "Rakendus:\_Otsing ja leht"
+      Window and View: "Rakendus:\_Aken ja vaade"
   New Tab: Loo uus vaheleht
   Close Tab: Sulge aktiivne vaheleht
   Reload Tab: Laadi aktiivne vaheleht uuesti

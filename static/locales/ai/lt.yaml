@@ -3116,13 +3116,13 @@ KeyboardShortcutPrompt:
   Reassign: Priskirti iš naujo
   Sections:
     Video:
-      Playback: "Vaizdo įrašas: Atkūrimas"
-      General: "Vaizdo įrašas: Bendra"
+      Playback: "Vaizdo įrašas:\_Atkūrimas"
+      General: "Vaizdo įrašas:\_Bendra"
     App:
-      General: "Programa: Bendra"
-      Tabs: "Programa: Kortelės"
-      Search and Page: "Programa: Paieška ir puslapis"
-      Window and View: "Programa: Langas ir rodinys"
+      General: "Programa:\_Bendra"
+      Tabs: "Programa:\_Kortelės"
+      Search and Page: "Programa:\_Paieška ir puslapis"
+      Window and View: "Programa:\_Langas ir rodinys"
   Show Keyboard Shortcuts: Rodyti sparčiuosius klavišus
   History Backward: Grįžti vienu puslapiu atgal
   History Forward: Eiti vienu puslapiu pirmyn

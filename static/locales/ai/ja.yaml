@@ -2647,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: 割り当て直す
   Sections:
     App:
-      Tabs: "アプリ: タブ"
-      Search and Page: "アプリ: 検索とページ"
-      Window and View: "アプリ: ウィンドウと表示"
+      Tabs: "アプリ:\_タブ"
+      Search and Page: "アプリ:\_検索とページ"
+      Window and View: "アプリ:\_ウィンドウと表示"
   New Tab: 新しいタブを作成
   Close Tab: 現在のタブを閉じる
   Reload Tab: 現在のタブを再読み込み

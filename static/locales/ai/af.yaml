@@ -2922,9 +2922,9 @@ KeyboardShortcutPrompt:
   Reassign: Hertoeken
   Sections:
     App:
-      Tabs: "Toep: Oortjies"
-      Search and Page: "Toep: Soek en blad"
-      Window and View: "Toep: Venster en aansig"
+      Tabs: "Toep:\_Oortjies"
+      Search and Page: "Toep:\_Soek en blad"
+      Window and View: "Toep:\_Venster en aansig"
   New Tab: Skep ’n nuwe oortjie
   Close Tab: Sluit die huidige oortjie
   Reload Tab: Herlaai die huidige oortjie

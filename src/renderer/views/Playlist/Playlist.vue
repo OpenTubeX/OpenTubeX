@@ -163,7 +163,7 @@
               :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :playlist-index="playlistItemPositions.get(isUserPlaylistRequested ? item : (item.index ?? item)) ?? index"
+              :playlist-index="playlistItemPositions.get(isUserPlaylistRequested ? (item.playlistItemId ?? item) : (item.index ?? item)) ?? index"
               :playlist-item-id="item.playlistItemId"
               appearance="result"
               :always-show-add-to-playlist-button="true"
@@ -885,9 +885,12 @@ function shownPlaylistItemIndex(item) {
 }
 
 // The external player loads the whole YouTube playlist, so its start counts hidden videos too.
-// Duration sorting can copy items missing a length, so remote playlists match by their original index
+// Duration sorting can copy items missing a length, so match by stable item identity
 const playlistItemPositions = computed(() => new Map(
-  shownPlaylistItems.value.map((item, index) => [isUserPlaylistRequested.value ? item : (item.index ?? item), index])
+  shownPlaylistItems.value.map((item, index) => [
+    isUserPlaylistRequested.value ? (item.playlistItemId ?? item) : (item.index ?? item),
+    index,
+  ])
 ))
 
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)

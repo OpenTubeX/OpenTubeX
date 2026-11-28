@@ -2741,9 +2741,9 @@ KeyboardShortcutPrompt:
   Reassign: Tildel igen
   Sections:
     App:
-      Tabs: "App: Faner"
-      Search and Page: "App: Søgning og side"
-      Window and View: "App: Vindue og visning"
+      Tabs: "App:\_Faner"
+      Search and Page: "App:\_Søgning og side"
+      Window and View: "App:\_Vindue og visning"
   New Tab: Opret en ny fane
   Close Tab: Luk den aktuelle fane
   Reload Tab: Genindlæs den aktuelle fane

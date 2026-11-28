@@ -3001,13 +3001,13 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     Video:
-      Playback: "Video: Avspeling"
-      General: "Video: Generelt"
+      Playback: "Video:\_Avspeling"
+      General: "Video:\_Generelt"
     App:
-      General: "App: Generelt"
-      Tabs: "App: Faner"
-      Search and Page: "App: Søk og side"
-      Window and View: "App: Vindauge og vising"
+      General: "App:\_Generelt"
+      Tabs: "App:\_Faner"
+      Search and Page: "App:\_Søk og side"
+      Window and View: "App:\_Vindauge og vising"
   Show Keyboard Shortcuts: Vis hurtigtastar
   History Backward: Gå éi side tilbake
   History Forward: Gå éi side fram

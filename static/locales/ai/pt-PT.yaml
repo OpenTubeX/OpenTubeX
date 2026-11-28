@@ -2650,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuir
   Sections:
     App:
-      Tabs: "Aplicação: Separadores"
-      Search and Page: "Aplicação: Pesquisa e página"
-      Window and View: "Aplicação: Janela e vista"
+      Tabs: "Aplicação:\_Separadores"
+      Search and Page: "Aplicação:\_Pesquisa e página"
+      Window and View: "Aplicação:\_Janela e vista"
   New Tab: Criar um novo separador
   Close Tab: Fechar o separador atual
   Reload Tab: Recarregar o separador atual

@@ -2719,9 +2719,9 @@ KeyboardShortcutPrompt:
   Reassign: Opnieuw toewijzen
   Sections:
     App:
-      Tabs: "App: Tabbladen"
-      Search and Page: "App: Zoeken en pagina"
-      Window and View: "App: Venster en weergave"
+      Tabs: "App:\_Tabbladen"
+      Search and Page: "App:\_Zoeken en pagina"
+      Window and View: "App:\_Venster en weergave"
   New Tab: Nieuw tabblad maken
   Close Tab: Huidig tabblad sluiten
   Reload Tab: Huidig tabblad opnieuw laden

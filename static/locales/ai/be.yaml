@@ -2755,9 +2755,9 @@ KeyboardShortcutPrompt:
   Reassign: Перапрызначыць
   Sections:
     App:
-      Tabs: "Праграма: Укладкі"
-      Search and Page: "Праграма: Пошук і старонка"
-      Window and View: "Праграма: Акно і выгляд"
+      Tabs: "Праграма:\_Укладкі"
+      Search and Page: "Праграма:\_Пошук і старонка"
+      Window and View: "Праграма:\_Акно і выгляд"
   New Tab: Стварыць новую ўкладку
   Close Tab: Закрыць бягучую ўкладку
   Reload Tab: Перазагрузіць бягучую ўкладку

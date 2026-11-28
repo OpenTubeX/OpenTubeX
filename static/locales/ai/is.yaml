@@ -2663,9 +2663,9 @@ KeyboardShortcutPrompt:
   Reassign: Úthluta upp á nýtt
   Sections:
     App:
-      Tabs: "Forrit: Flipar"
-      Search and Page: "Forrit: Leit og síða"
-      Window and View: "Forrit: Gluggi og sýn"
+      Tabs: "Forrit:\_Flipar"
+      Search and Page: "Forrit:\_Leit og síða"
+      Window and View: "Forrit:\_Gluggi og sýn"
   New Tab: Stofna nýjan flipa
   Close Tab: Loka núverandi flipa
   Reload Tab: Endurhlaða núverandi flipa

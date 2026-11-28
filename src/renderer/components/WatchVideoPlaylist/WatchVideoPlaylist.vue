@@ -523,10 +523,11 @@ const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value ==
 // Until the last page loads, the loaded videos are not the whole playlist.
 const canLoadMorePlaylistVideos = computed(() => hasUnloadedPlaylistVideos.value && !playlistContinuationFailed.value)
 
-// The current video may still be on an unloaded page, so do not fall back to
-// the playlist start while later pages can still load.
+// The current video may still be on an unloaded page, and a sorted remote
+// playlist may receive a video that belongs before the current next entry,
+// so do not select or wrap to the next video while later pages can still load.
 const isWaitingForNextVideo = computed(() => canLoadMorePlaylistVideos.value &&
-  (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value))
+  (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value || remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom))
 
 // A page that is still loading or failed to load may hold the current video;
 // wrapping to the first or last entry would jump away from its real neighbors.

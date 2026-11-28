@@ -2652,9 +2652,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     App:
-      Tabs: "App: Faner"
-      Search and Page: "App: Søk og side"
-      Window and View: "App: Vindu og visning"
+      Tabs: "App:\_Faner"
+      Search and Page: "App:\_Søk og side"
+      Window and View: "App:\_Vindu og visning"
   New Tab: Opprett en ny fane
   Close Tab: Lukk den gjeldende fanen
   Reload Tab: Last inn den gjeldende fanen på nytt

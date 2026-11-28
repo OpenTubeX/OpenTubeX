@@ -2683,9 +2683,9 @@ KeyboardShortcutPrompt:
   Reassign: Преназначаване
   Sections:
     App:
-      Tabs: "Приложение: Раздели"
-      Search and Page: "Приложение: Търсене и страница"
-      Window and View: "Приложение: Прозорец и изглед"
+      Tabs: "Приложение:\_Раздели"
+      Search and Page: "Приложение:\_Търсене и страница"
+      Window and View: "Приложение:\_Прозорец и изглед"
   New Tab: Създаване на нов раздел
   Close Tab: Затваряне на текущия раздел
   Reload Tab: Презареждане на текущия раздел

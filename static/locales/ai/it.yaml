@@ -2647,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Riassegna
   Sections:
     App:
-      Tabs: "App: Schede"
-      Search and Page: "App: Ricerca e pagina"
-      Window and View: "App: Finestra e visualizzazione"
+      Tabs: "App:\_Schede"
+      Search and Page: "App:\_Ricerca e pagina"
+      Window and View: "App:\_Finestra e visualizzazione"
   New Tab: Crea una nuova scheda
   Close Tab: Chiudi la scheda corrente
   Reload Tab: Ricarica la scheda corrente

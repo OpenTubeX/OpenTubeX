@@ -2712,9 +2712,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasigni
   Sections:
     App:
-      Tabs: "Aplikaĵo: Langetoj"
-      Search and Page: "Aplikaĵo: Serĉo kaj paĝo"
-      Window and View: "Aplikaĵo: Fenestro kaj vido"
+      Tabs: "Aplikaĵo:\_Langetoj"
+      Search and Page: "Aplikaĵo:\_Serĉo kaj paĝo"
+      Window and View: "Aplikaĵo:\_Fenestro kaj vido"
   New Tab: Krei novan langeton
   Close Tab: Fermi la aktualan langeton
   Reload Tab: Reŝargi la aktualan langeton

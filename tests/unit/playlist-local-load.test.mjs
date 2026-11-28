@@ -383,6 +383,27 @@ for (const [mode, enable] of [
   })
 }
 
+test('a sorted remote playlist waits for remaining pages before choosing the next video', async () => {
+  const state = harness()
+  state.props.videoId = 'short'
+  state.remotePlaylistSortOrder.value = SORT_BY_VALUES.VideoDurationAscending
+  const loading = state.load()
+  state.resolveFirstPage([
+    { videoId: 'short', lengthSeconds: 10 },
+    { videoId: 'long', lengthSeconds: 30 },
+  ])
+  await settle()
+
+  assert.equal(state.state.isWaitingForNextVideo.value, true)
+  assert.equal(state.state.nextVideo.value, null)
+
+  state.finishContinuation([{ videoId: 'medium', lengthSeconds: 20 }])
+  await loading
+
+  assert.equal(state.state.isWaitingForNextVideo.value, false)
+  assert.equal(state.state.nextVideo.value.videoId, 'medium')
+})
+
 test('a failed page stops loading on demand and lets loop wrap around the loaded videos', async () => {
   const state = harness()
   state.loopEnabled.value = true

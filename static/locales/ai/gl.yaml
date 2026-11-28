@@ -2711,9 +2711,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasignar
   Sections:
     App:
-      Tabs: "Aplicación: Lapelas"
-      Search and Page: "Aplicación: Busca e páxina"
-      Window and View: "Aplicación: Xanela e vista"
+      Tabs: "Aplicación:\_Lapelas"
+      Search and Page: "Aplicación:\_Busca e páxina"
+      Window and View: "Aplicación:\_Xanela e vista"
   New Tab: Crear unha lapela nova
   Close Tab: Pechar a lapela actual
   Reload Tab: Recargar a lapela actual

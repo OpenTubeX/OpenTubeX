@@ -2782,9 +2782,9 @@ KeyboardShortcutPrompt:
   Reassign: دوبارہ تفویض کریں
   Sections:
     App:
-      Tabs: "ایپ: ٹیبز"
-      Search and Page: "ایپ: تلاش اور صفحہ"
-      Window and View: "ایپ: ونڈو اور منظر"
+      Tabs: "ایپ:\_ٹیبز"
+      Search and Page: "ایپ:\_تلاش اور صفحہ"
+      Window and View: "ایپ:\_ونڈو اور منظر"
   New Tab: نیا ٹیب بنائیں
   Close Tab: موجودہ ٹیب بند کریں
   Reload Tab: موجودہ ٹیب دوبارہ لوڈ کریں

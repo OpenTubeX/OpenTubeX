@@ -2648,9 +2648,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilldela om
   Sections:
     App:
-      Tabs: "App: Flikar"
-      Search and Page: "App: Sökning och sida"
-      Window and View: "App: Fönster och vy"
+      Tabs: "App:\_Flikar"
+      Search and Page: "App:\_Sökning och sida"
+      Window and View: "App:\_Fönster och vy"
   New Tab: Skapa en ny flik
   Close Tab: Stäng aktuell flik
   Reload Tab: Läs in aktuell flik igen

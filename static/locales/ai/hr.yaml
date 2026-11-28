@@ -2687,9 +2687,9 @@ KeyboardShortcutPrompt:
   Reassign: Ponovno dodijeli
   Sections:
     App:
-      Tabs: "Aplikacija: Kartice"
-      Search and Page: "Aplikacija: Pretraživanje i stranica"
-      Window and View: "Aplikacija: Prozor i prikaz"
+      Tabs: "Aplikacija:\_Kartice"
+      Search and Page: "Aplikacija:\_Pretraživanje i stranica"
+      Window and View: "Aplikacija:\_Prozor i prikaz"
   New Tab: Stvori novu karticu
   Close Tab: Zatvori trenutačnu karticu
   Reload Tab: Ponovno učitaj trenutačnu karticu

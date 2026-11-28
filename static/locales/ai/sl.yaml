@@ -3216,13 +3216,13 @@ KeyboardShortcutPrompt:
   Reassign: Prerazporedi
   Sections:
     Video:
-      Playback: "Videoposnetek: Predvajanje"
-      General: "Videoposnetek: Splošno"
+      Playback: "Videoposnetek:\_Predvajanje"
+      General: "Videoposnetek:\_Splošno"
     App:
-      General: "Aplikacija: Splošno"
-      Tabs: "Aplikacija: Zavihki"
-      Search and Page: "Aplikacija: Iskanje in stran"
-      Window and View: "Aplikacija: Okno in pogled"
+      General: "Aplikacija:\_Splošno"
+      Tabs: "Aplikacija:\_Zavihki"
+      Search and Page: "Aplikacija:\_Iskanje in stran"
+      Window and View: "Aplikacija:\_Okno in pogled"
   Show Keyboard Shortcuts: Prikaži bližnjice na tipkovnici
   History Backward: Pojdi eno stran nazaj
   History Forward: Pojdi eno stran naprej

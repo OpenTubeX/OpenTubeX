@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Réassigner
   Sections:
     App:
-      Tabs: "Application : onglets"
-      Search and Page: "Application : recherche et page"
-      Window and View: "Application : fenêtre et affichage"
+      Tabs: "Application :\_onglets"
+      Search and Page: "Application :\_recherche et page"
+      Window and View: "Application :\_fenêtre et affichage"
   New Tab: Créer un nouvel onglet
   Close Tab: Fermer l’onglet actuel
   Reload Tab: Recharger l’onglet actuel

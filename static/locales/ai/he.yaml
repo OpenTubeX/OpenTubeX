@@ -2710,9 +2710,9 @@ KeyboardShortcutPrompt:
   Reassign: הקצאה מחדש
   Sections:
     App:
-      Tabs: "יישום: לשוניות"
-      Search and Page: "יישום: חיפוש ודף"
-      Window and View: "יישום: חלון ותצוגה"
+      Tabs: "יישום:\_לשוניות"
+      Search and Page: "יישום:\_חיפוש ודף"
+      Window and View: "יישום:\_חלון ותצוגה"
   New Tab: יצירת לשונית חדשה
   Close Tab: סגירת הלשונית הנוכחית
   Reload Tab: טעינת הלשונית הנוכחית מחדש

@@ -2656,9 +2656,9 @@ KeyboardShortcutPrompt:
   Reassign: Määritä uudelleen
   Sections:
     App:
-      Tabs: "Sovellus: Välilehdet"
-      Search and Page: "Sovellus: Haku ja sivu"
-      Window and View: "Sovellus: Ikkuna ja näkymä"
+      Tabs: "Sovellus:\_Välilehdet"
+      Search and Page: "Sovellus:\_Haku ja sivu"
+      Window and View: "Sovellus:\_Ikkuna ja näkymä"
   New Tab: Luo uusi välilehti
   Close Tab: Sulje nykyinen välilehti
   Reload Tab: Lataa nykyinen välilehti uudelleen

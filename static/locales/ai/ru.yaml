@@ -2615,9 +2615,9 @@ KeyboardShortcutPrompt:
   Reassign: Переназначить
   Sections:
     App:
-      Tabs: "Приложение: Вкладки"
-      Search and Page: "Приложение: Поиск и страницы"
-      Window and View: "Приложение: Окно и вид"
+      Tabs: "Приложение:\_Вкладки"
+      Search and Page: "Приложение:\_Поиск и страницы"
+      Window and View: "Приложение:\_Окно и вид"
   New Tab: Создать вкладку
   Close Tab: Закрыть текущую вкладку
   Reload Tab: Перезагрузить текущую вкладку

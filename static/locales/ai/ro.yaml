@@ -2706,9 +2706,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuie
   Sections:
     App:
-      Tabs: "Aplicație: File"
-      Search and Page: "Aplicație: Căutare și pagină"
-      Window and View: "Aplicație: Fereastră și vizualizare"
+      Tabs: "Aplicație:\_File"
+      Search and Page: "Aplicație:\_Căutare și pagină"
+      Window and View: "Aplicație:\_Fereastră și vizualizare"
   New Tab: Creează o filă nouă
   Close Tab: Închide fila curentă
   Reload Tab: Reîncarcă fila curentă

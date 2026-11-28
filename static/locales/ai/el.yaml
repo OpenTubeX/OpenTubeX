@@ -2663,9 +2663,9 @@ KeyboardShortcutPrompt:
   Reassign: Νέα αντιστοίχιση
   Sections:
     App:
-      Tabs: "Εφαρμογή: Καρτέλες"
-      Search and Page: "Εφαρμογή: Αναζήτηση και σελίδα"
-      Window and View: "Εφαρμογή: Παράθυρο και προβολή"
+      Tabs: "Εφαρμογή:\_Καρτέλες"
+      Search and Page: "Εφαρμογή:\_Αναζήτηση και σελίδα"
+      Window and View: "Εφαρμογή:\_Παράθυρο και προβολή"
   New Tab: Δημιουργία νέας καρτέλας
   Close Tab: Κλείσιμο τρέχουσας καρτέλας
   Reload Tab: Επαναφόρτωση τρέχουσας καρτέλας

@@ -3268,13 +3268,13 @@ KeyboardShortcutPrompt:
   Reassign: Torna a assignar
   Sections:
     Video:
-      Playback: "Vídeo: Reproducció"
-      General: "Vídeo: General"
+      Playback: "Vídeo:\_Reproducció"
+      General: "Vídeo:\_General"
     App:
-      General: "Aplicació: General"
-      Tabs: "Aplicació: Pestanyes"
-      Search and Page: "Aplicació: Cerca i pàgina"
-      Window and View: "Aplicació: Finestra i vista"
+      General: "Aplicació:\_General"
+      Tabs: "Aplicació:\_Pestanyes"
+      Search and Page: "Aplicació:\_Cerca i pàgina"
+      Window and View: "Aplicació:\_Finestra i vista"
   Show Keyboard Shortcuts: Mostra les dreceres de teclat
   History Backward: Torna una pàgina enrere
   History Forward: Avança una pàgina

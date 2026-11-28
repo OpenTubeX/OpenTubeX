@@ -2608,9 +2608,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasignar
   Sections:
     App:
-      Tabs: "Aplicación: Pestañas"
-      Search and Page: "Aplicación: Búsqueda y página"
-      Window and View: "Aplicación: Ventana y vista"
+      Tabs: "Aplicación:\_Pestañas"
+      Search and Page: "Aplicación:\_Búsqueda y página"
+      Window and View: "Aplicación:\_Ventana y vista"
   New Tab: Crear una pestaña nueva
   Close Tab: Cerrar la pestaña actual
   Reload Tab: Recargar la pestaña actual
