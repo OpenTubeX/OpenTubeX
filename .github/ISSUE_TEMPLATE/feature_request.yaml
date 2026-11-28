@@ -73,6 +73,7 @@ body:
         - Android
         - iOS
         - iPadOS
+        - Web
         - Other
     validations:
       required: true

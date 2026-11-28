@@ -4,7 +4,7 @@
 ### Guidelines
 <!-- Please ensure you've completed all of the following. -->
 - [ ] I have encountered this bug in the [latest release of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX/releases). (required)
-- [ ] I have encountered this bug in the [official downloads of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX#official-downloads). (required)
+- [ ] I have encountered this bug in the [official downloads](https://github.com/OpenTubeX/OpenTubeX#official-downloads) or [official web app image](https://opentubex.org/docs/self-hosting/) of OpenTubeX. (required)
 - [ ] I have [searched the issue tracker for **open and closed** issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success. (required)
 - [ ] I have searched the [documentation](https://opentubex.org/docs/) for information that matches the description of the bug I want to file, without success. (required)
 - [ ] This issue contains only one bug. (required)
@@ -67,6 +67,7 @@ Required.
 - [ ] Android
 - [ ] iOS
 - [ ] iPadOS
+- [ ] Web
 - [ ] Other
 
 ### Operating System Version
@@ -110,7 +111,15 @@ Required.
 - [ ] RPM repository
 - [ ] Portable .zip / .7z
 - [ ] AUR
+- [ ] Web app (Docker / Podman)
 - [ ] other
+
+### Browser (Web App Only)
+<!--
+If using the web app, which browser and version are you using, and is the OpenTubeX Local API browser extension installed?
+Example:
+Firefox 138 (with Local API extension), Chromium 136, or Safari 18.4
+-->
 
 ### Architecture
 <!--
@@ -135,7 +144,7 @@ Required.
 
 ### Stream Extraction Method
 <!--
-Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite does not show this setting; select Built-in.
+Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite and the web app do not show this setting; select Built-in.
 Check one.
 Required.
 -->

@@ -14,7 +14,7 @@ body:
       options:
         - label: I have encountered this bug in the [latest release of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX/releases).
           required: true
-        - label: I have encountered this bug in the [official downloads of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX#official-downloads).
+        - label: I have encountered this bug in the [official downloads](https://github.com/OpenTubeX/OpenTubeX#official-downloads) or [official web app image](https://opentubex.org/docs/self-hosting/) of OpenTubeX.
           required: true
         - label: I have [searched the issue tracker for **open and closed** issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
           required: true
@@ -81,6 +81,7 @@ body:
         - Android
         - iOS
         - iPadOS
+        - Web
         - Other
     validations:
       required: true
@@ -123,9 +124,17 @@ body:
         - RPM repository
         - Portable .zip / .7z
         - AUR
+        - Web app (Docker / Podman)
         - other
     validations:
       required: true
+  - type: input
+    attributes:
+      label: Browser (Web App Only)
+      description: If using the web app, which browser and version are you using, and is the OpenTubeX Local API browser extension installed?
+      placeholder: e.g. Firefox 138 (with Local API extension), Chromium 136, or Safari 18.4
+    validations:
+      required: false
   - type: dropdown
     attributes:
       label: Architecture
@@ -150,7 +159,7 @@ body:
   - type: dropdown
     attributes:
       label: Stream Extraction Method
-      description: Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite does not show this setting; select Built-in.
+      description: Which stream extraction method is selected in Settings > Advanced > Video and metadata providers? OpenTubeX Lite and the web app do not show this setting; select Built-in.
       multiple: false
       options:
         - Built-in

@@ -57,6 +57,7 @@ Required.
 - [ ] Android
 - [ ] iOS
 - [ ] iPadOS
+- [ ] Web
 - [ ] Other
 
 ### Operating System Version
