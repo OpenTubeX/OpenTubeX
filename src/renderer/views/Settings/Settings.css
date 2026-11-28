@@ -53,14 +53,21 @@
 
 .settingsWindow.settings-window-enter-active {
   transform-origin: center;
-  transition:
-    opacity var(--motion-fast-effects),
-    transform var(--motion-default-spatial);
+  animation:
+    settings-window-enter-opacity var(--motion-fast-effects),
+    settings-window-enter-transform var(--motion-default-spatial);
 }
 
-.settingsWindow.settings-window-enter-from {
-  opacity: 0;
-  transform: translateY(8px) scale(0.98);
+@keyframes settings-window-enter-opacity {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes settings-window-enter-transform {
+  from {
+    transform: translateY(8px) scale(0.98);
+  }
 }
 
 /* A closing window must not take clicks meant for the controls it uncovers. */

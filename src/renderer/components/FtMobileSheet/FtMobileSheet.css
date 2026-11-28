@@ -150,6 +150,27 @@
   display: none;
 }
 
+/* Stays opaque behind an entering full-screen utility window so the underlying
+   page does not flash in between, while fading its own content out. */
+.mobileSheet[open].handoffSheet {
+  z-index: 8;
+  pointer-events: none;
+}
+
+.mobileSheet[open].handoffSheet > * {
+  animation: mobile-sheet-handoff-content var(--motion-fast-effects) forwards;
+}
+
+@keyframes mobile-sheet-handoff-content {
+  to {
+    opacity: 0;
+  }
+}
+
+:root[data-reduced-motion='reduce'] .mobileSheet[open].handoffSheet > * {
+  animation: none;
+}
+
 .dockedSheet .mobileSheetHeader::before {
   content: '';
   position: absolute;

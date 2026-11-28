@@ -62,7 +62,10 @@ const MODAL_BACKDROP = ':scope > :is(.prompt, .tabOrganizerBackdrop, .commandPal
  * anywhere, so this checks the document rather than one component.
  */
 export function updateMobileSheetRootClass() {
-  document.documentElement.classList.toggle('appMobileSheetOpen', document.querySelector('.mobileSheet[open]') !== null)
+  document.documentElement.classList.toggle(
+    'appMobileSheetOpen',
+    document.querySelector('.mobileSheet[open]:not(.handoffSheet)') !== null
+  )
 }
 
 /**

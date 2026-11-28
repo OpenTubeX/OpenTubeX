@@ -661,6 +661,77 @@ test.describe('quick settings menu', () => {
     await expect(page.getByRole('dialog', { name: 'Command palette' })).toHaveCount(0)
   })
 
+  test('hands off from the phone sheet to Settings and About without exposing the page underneath', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 812 })
+    const trigger = page.locator('.profileTrigger')
+
+    const measureHandoff = async (clickSelector) => {
+      await trigger.click()
+      await expect(page.locator('.mobileSheet[open]')).toBeVisible()
+      const trace = await page.evaluate(selector => new Promise(resolve => {
+        const frames = []
+        let firstCompactState = null
+        let sawSettings = false
+        let triggerFocusCount = 0
+        const triggerElement = document.querySelector('.profileTrigger')
+        const onTriggerFocus = () => { triggerFocusCount++ }
+        triggerElement?.addEventListener('focus', onTriggerFocus)
+        const getColorAlpha = color => {
+          const legacy = /^rgba\(.*,\s*([\d.e+-]+)\)$/.exec(color)
+          if (legacy) return Number(legacy[1])
+          const modern = /\/\s*([\d.e+-]+)(%?)\s*\)$/.exec(color)
+          if (modern) return Number(modern[1]) / (modern[2] ? 100 : 1)
+          return color === 'transparent' ? 0 : 1
+        }
+        const record = () => {
+          const sheet = document.querySelector('.mobileSheet[open]')
+          const settings = document.querySelector('.settingsWindow')
+          const sheetStyle = sheet ? getComputedStyle(sheet) : null
+          const sheetOpacity = sheetStyle ? Number.parseFloat(sheetStyle.opacity) : 0
+          const sheetBackgroundAlpha = sheetStyle ? getColorAlpha(sheetStyle.backgroundColor) : 0
+          const sheetEffectiveAlpha = sheetOpacity * sheetBackgroundAlpha
+          const settingsOpacity = settings ? Number.parseFloat(getComputedStyle(settings).opacity) : 0
+          if (settings && firstCompactState === null) {
+            firstCompactState = settings.querySelector('.settingsPage')?.classList.contains('compactSettings') ?? false
+          }
+          if (settings) sawSettings = true
+          frames.push({
+            hasSheet: Boolean(sheet),
+            hasSettings: Boolean(settings),
+            sheetOpacity,
+            sheetBackgroundAlpha,
+            sheetEffectiveAlpha,
+            settingsOpacity
+          })
+          const settled = sawSettings && !sheet && settings && !settings.classList.contains('settings-window-enter-active') && settingsOpacity >= 0.99
+          if (settled || frames.length >= 180) {
+            triggerElement?.removeEventListener('focus', onTriggerFocus)
+            resolve({ frames, firstCompactState, settled, triggerFocusCount })
+            return
+          }
+          requestAnimationFrame(record)
+        }
+        document.querySelector(selector).click()
+        requestAnimationFrame(record)
+      }), clickSelector)
+
+      expect(trace.settled, 'handoff should settle with Settings visible and the sheet closed').toBe(true)
+      expect(trace.firstCompactState, 'Settings should render in compact mode on its first frame').toBe(true)
+      expect(trace.triggerFocusCount, 'trigger button should not regain focus during handoff').toBe(0)
+      const uncoveredFrames = trace.frames.filter(frame => frame.sheetEffectiveAlpha < 0.99 && frame.settingsOpacity < 0.99)
+      expect(uncoveredFrames, 'underlying page should stay covered on every transition frame').toEqual([])
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.settingsWindow')))).toBe(true)
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toHaveCount(0)
+    }
+
+    // Verify both first open and cached reopen for Settings, plus a sibling utility view.
+    await measureHandoff('.allSettingsShortcut')
+    await measureHandoff('.allSettingsShortcut')
+    await measureHandoff('.menuLinks button:last-of-type')
+  })
+
   test('clears the open state when leaving the phone layout', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     const trigger = page.locator('.profileTrigger')

@@ -582,7 +582,6 @@ const settingsSearchSubsectionTargets = computed(() => ({
     target: t('Settings.Storage Settings.Search History')
   }]
 }))
-const isInDesktopView = ref(true)
 const isMaximized = ref(false)
 const isNarrowLayout = ref(window.innerWidth < SETTINGS_DESKTOP_WIDTH_THRESHOLD)
 const activeSection = ref(
@@ -683,6 +682,9 @@ let preservedScrollPositions = []
 const windowBounds = ref(getInitialBounds())
 const isMaximizationForced = computed(() => IS_CAPACITOR || isNarrowLayout.value)
 const isWindowMaximized = computed(() => isMaximized.value || isMaximizationForced.value)
+const isInDesktopView = ref(
+  (isWindowMaximized.value ? window.innerWidth : windowBounds.value.width) >= SETTINGS_DESKTOP_WIDTH_THRESHOLD
+)
 const windowStyle = computed(() => isWindowMaximized.value
   ? {
       left: '0',

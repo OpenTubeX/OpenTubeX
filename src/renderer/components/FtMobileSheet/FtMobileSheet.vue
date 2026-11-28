@@ -2,14 +2,21 @@
   <Teleport
     to=".app"
     defer
-    :disabled="!docked || fullscreen"
+    :disabled="(!docked && !(enabled && props.teleport)) || fullscreen"
   >
     <dialog
       v-bind="$attrs"
       ref="dialog"
       class="mobileSheet"
-      :class="{ dockedSheet: docked, compactSheet: compact && enabled, bottomSheet: compact && bottom && enabled, mobileSheetEnabled: enabled }"
+      :class="{
+        dockedSheet: docked,
+        compactSheet: compact && enabled,
+        bottomSheet: compact && bottom && enabled,
+        mobileSheetEnabled: enabled,
+        handoffSheet: handingOff
+      }"
       :style="sheetStyle"
+      :inert="handingOff || undefined"
       :role="enabled ? null : 'presentation'"
       :aria-label="enabled ? title : null"
       v-on="enabled && headerSelector ? { pointerdownCapture: startContentHeaderDrag, clickCapture: filterContentHeaderClick } : {}"
@@ -92,6 +99,9 @@ const props = defineProps({
   bottom: { type: Boolean, default: false },
   belowPlayer: { type: Boolean, default: false },
   fullscreen: { type: Boolean, default: false },
+  // Teleports non-docked sheets to .app so non-modal handoffs escape ancestor
+  // containing blocks (such as TopNav's container query) and stack under overlays.
+  teleport: { type: Boolean, default: false },
   headerSelector: { type: String, default: '' }
 })
 const emit = defineEmits(['close', 'back', 'closed', 'suspend', 'resume'])
@@ -172,11 +182,85 @@ let resumePlayback = null
 let openingSequence = 0
 let presentationSuspended = false
 let backAnimation = null
+const handingOff = ref(false)
+let handoffToken = 0
 
 function cancelBackGesture() {
   backAnimation?.cancel()
   backAnimation = null
 }
+
+function finishHandoff(emitClosed = true) {
+  if (!handingOff.value) return
+  handoffToken++
+  handingOff.value = false
+  const element = dialog.value
+  if (element) {
+    element.inert = false
+    element.classList.remove('handoffSheet')
+    if (element.open) element.close()
+  }
+  updateMobileSheetRootClass()
+  if (emitClosed) emit('closed')
+}
+
+/**
+ * Closes a modal sheet immediately without playing its dismiss animation or
+ * returning focus to its trigger, so a destination overlay can open right away.
+ * When `waitUntilCovered` is provided (and motion is enabled), keeps the sheet
+ * non-modally behind the destination (z-index: 8) until it finishes entering.
+ *
+ * @param {() => void} openDestination
+ * @param {{ waitUntilCovered?: () => Promise<void> }} [options]
+ */
+function handoff(openDestination, { waitUntilCovered } = {}) {
+  openingSequence++
+  const element = dialog.value
+  cancelBackGesture()
+  animation?.cancel()
+  closing = false
+  if (!element || !element.open) {
+    release(false, { restoreFocus: false })
+    openDestination()
+    emit('closed')
+    return
+  }
+  // Prevent native <dialog>.close() from returning focus to the trigger button
+  // while handing off to another overlay.
+  const trigger = previousFocus instanceof HTMLElement ? previousFocus : null
+  const triggerWasInert = trigger?.inert ?? false
+  if (trigger) trigger.inert = true
+  try {
+    if (document.activeElement instanceof HTMLElement && element.contains(document.activeElement)) {
+      document.activeElement.blur()
+    }
+    element.close()
+  } finally {
+    if (trigger) trigger.inert = triggerWasInert
+  }
+  release(false, { restoreFocus: false })
+  if (waitUntilCovered && !isReducedMotionEnabled() && !docked.value) {
+    const token = ++handoffToken
+    handingOff.value = true
+    // Set inert synchronously before show() so dialog focusing steps cannot
+    // focus a control inside the retained sheet before Vue flushes :inert.
+    element.inert = true
+    element.classList.add('handoffSheet')
+    element.show()
+    updateMobileSheetRootClass()
+    openDestination()
+    Promise.resolve(waitUntilCovered()).finally(() => {
+      if (token !== handoffToken) return
+      finishHandoff(true)
+    })
+    return
+  }
+  updateMobileSheetRootClass()
+  openDestination()
+  emit('closed')
+}
+
+defineExpose({ handoff })
 
 watch(dialog, (element, _previous, onCleanup) => {
   if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !element) return
@@ -251,6 +335,10 @@ watch(() => getInlinePlayer?.(), observeInlinePlayer, { flush: 'post' })
 watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement, suspended], async ([element, enabled, open], previous) => {
   const sequence = ++openingSequence
   if (!element) return
+  if (handingOff.value) {
+    if (enabled && !open && !suspended.value) return
+    finishHandoff(false)
+  }
   if (!enabled || !open || suspended.value) cancelBackGesture()
   if (suspended.value && enabled && open) {
     if (element.open) {
@@ -472,7 +560,7 @@ function handleClick(event) {
   if (props.enabled) event.stopPropagation()
 }
 
-function release(preservePresentation = false) {
+function release(preservePresentation = false, { restoreFocus = true } = {}) {
   cancelBackGesture()
   closing = false
   if (!preservePresentation) {
@@ -493,7 +581,9 @@ function release(preservePresentation = false) {
   resetMotion()
   unlockBodyScroll()
   locked = false
-  if (!preservePresentation && !anotherPanelOpen && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
+  if (!preservePresentation && restoreFocus && !anotherPanelOpen && previousFocus?.isConnected) {
+    previousFocus.focus({ preventScroll: true })
+  }
 }
 // KeepAlive moves an open sheet in and out of the document without closing it.
 // Vue caches a KeepAlive hook's wrapper on the function, which would retain
@@ -503,11 +593,17 @@ onDeactivated(() => updateMobileSheetRootClass())
 
 onBeforeUnmount(() => {
   openingSequence++
+  handoffToken++
+  handingOff.value = false
   document.removeEventListener('fullscreenchange', updatePresentation)
   document.removeEventListener('visibilitychange', updateVisibility)
   pictureInPictureObserver.disconnect()
   presentationObserver?.disconnect()
-  dialog.value?.close()
+  if (dialog.value) {
+    dialog.value.inert = false
+    dialog.value.classList.remove('handoffSheet')
+    dialog.value.close()
+  }
   release()
 })
 </script>

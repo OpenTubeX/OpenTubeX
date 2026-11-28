@@ -1,5 +1,5 @@
 import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
-import { defineAsyncComponent, h, markRaw, shallowRef } from 'vue'
+import { defineAsyncComponent, h } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { getFixedInternalRouteTitle } from '../../internalRoutes'
 
@@ -73,26 +73,16 @@ const TwitchPage = createAsyncRoute(() => import('../views/TwitchPage/TwitchPage
 const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
 const Post = createAsyncRoute(() => import('../views/Post.vue'))
 
-function createPreloadedRoute(name, loader) {
-  const loadedComponent = shallowRef(defineAsyncComponent(loader))
-  const preload = () => loader().then(({ default: component }) => {
-    loadedComponent.value = markRaw(component)
-  }).catch((error) => {
-    console.error(`Failed to preload ${name}`, error)
+let settingsWindowRequest = null
+const loadSettingsWindow = () => {
+  settingsWindowRequest ??= import('../views/Settings/Settings.vue').catch((error) => {
+    settingsWindowRequest = null
+    throw error
   })
-  const component = {
-    name,
-    setup: () => () => h(loadedComponent.value)
-  }
-  routePreloaders.set(component, preload)
-
-  return {
-    component,
-    preload,
-  }
+  return settingsWindowRequest
 }
 
-const settingsWindowRoute = createPreloadedRoute('SettingsWindowRoute', () => import('../views/Settings/Settings.vue'))
+export const SettingsWindow = defineAsyncComponent(loadSettingsWindow)
 const Stats = createAsyncRoute(() => import('../views/Stats/Stats.vue'))
 
 // Keep Settings in its own chunk so its styles retain their established load
@@ -100,7 +90,11 @@ const Stats = createAsyncRoute(() => import('../views/Stats/Stats.vue'))
 // rendered, avoiding startup contention without leaving the first navigation
 // to pay its full parse cost.
 export function preloadUtilityRoutes() {
-  return settingsWindowRoute.preload()
+  return loadSettingsWindow()
+    .then(() => SettingsWindow.__asyncLoader?.())
+    .catch((error) => {
+      console.error('Failed to preload SettingsWindow', error)
+    })
 }
 
 export const routes = [
