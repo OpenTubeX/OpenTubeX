@@ -2717,9 +2717,9 @@ KeyboardShortcutPrompt:
   Reassign: Opnieuw toewijzen
   Sections:
     App:
-      Tabs: "App:\_Tabbladen"
-      Search and Page: "App:\_Zoeken en pagina"
-      Window and View: "App:\_Venster en weergave"
+      Tabs: "App: Tabbladen"
+      Search and Page: "App: Zoeken en pagina"
+      Window and View: "App: Venster en weergave"
   New Tab: Nieuw tabblad maken
   Close Tab: Huidig tabblad sluiten
   Reload Tab: Huidig tabblad opnieuw laden
@@ -3091,6 +3091,7 @@ Yattee Server:
     Not configured: Voer de URL van je Yattee-server in via Instellingen → Geavanceerd.
     HTTPS required: Android kan alleen video's afspelen van Yattee-servers die HTTPS gebruiken.
     Streams unavailable: De streams van deze video konden niet van de Yattee-server worden geladen. Gebruik ‘Verbinding testen’ via Instellingen → Geavanceerd om de server te controleren.
+    Unreachable: Kan de Yattee-server ({instance}) niet bereiken. Controleer de URL en of de server actief is in Instellingen → Geavanceerd.
 Yattee Fallback Warning: Dit verzoek omzeilt je ingestelde Yattee-server en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld.
 Update With Package Manager: 'Bijwerken met {packageManager}:'
 Update Command Copied: 'Bijwerkopdracht gekopieerd'
@@ -3201,3 +3202,9 @@ Incognito Tab: Incognitotabblad
 Text Translation:
   Translating, please wait: Vertalen, even geduld
   Translation failed: Vertalen mislukt
+Invidious:
+  Errors:
+    Not configured: Er is geen Invidious-instantie geconfigureerd. Kies er een in Instellingen → Geavanceerd.
+    Unreachable: Kan de Invidious-instantie ({instance}) niet bereiken. Mogelijk is deze offline of blokkeert hij je verbinding. Probeer een andere instantie in Instellingen → Geavanceerd.
+    Unreachable Web: Kan de Invidious-instantie ({instance}) niet bereiken. Mogelijk is deze offline, blokkeert hij je verbinding (zoals een VPN) of ontbreken CORS-headers. Probeer een andere instantie in Instellingen → Geavanceerd.
+    Server error: De Invidious-instantie ({instance}) heeft een fout teruggegeven (HTTP {status}).

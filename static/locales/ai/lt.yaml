@@ -3115,13 +3115,13 @@ KeyboardShortcutPrompt:
   Reassign: Priskirti iš naujo
   Sections:
     Video:
-      Playback: "Vaizdo įrašas:\_Atkūrimas"
-      General: "Vaizdo įrašas:\_Bendra"
+      Playback: "Vaizdo įrašas: Atkūrimas"
+      General: "Vaizdo įrašas: Bendra"
     App:
-      General: "Programa:\_Bendra"
-      Tabs: "Programa:\_Kortelės"
-      Search and Page: "Programa:\_Paieška ir puslapis"
-      Window and View: "Programa:\_Langas ir rodinys"
+      General: "Programa: Bendra"
+      Tabs: "Programa: Kortelės"
+      Search and Page: "Programa: Paieška ir puslapis"
+      Window and View: "Programa: Langas ir rodinys"
   Show Keyboard Shortcuts: Rodyti sparčiuosius klavišus
   History Backward: Grįžti vienu puslapiu atgal
   History Forward: Eiti vienu puslapiu pirmyn
@@ -3521,6 +3521,7 @@ Yattee Server:
     Not configured: Įveskite savo Yattee serverio URL dalyje Nustatymai → Išplėstiniai.
     HTTPS required: Android gali leisti vaizdo įrašus tik iš Yattee serverių, kurie naudoja HTTPS.
     Streams unavailable: Nepavyko įkelti šio vaizdo įrašo srautų iš Yattee serverio. Patikrinkite serverį mygtuku „Tikrinti ryšį“ dalyje Nustatymai → Išplėstiniai.
+    Unreachable: Nepavyko pasiekti „Yattee“ serverio ({instance}). Patikrinkite URL ir ar serveris veikia skiltyje Nustatymai → Išplėstiniai.
 Yattee Fallback Warning: Ši užklausa apeina jūsų sukonfigūruotą Yattee serverį ir jungiasi tiesiogiai prie YouTube, atskleisdama jūsų IP adresą.
 Update With Package Manager: 'Atnaujinti naudojant {packageManager}:'
 Update Command Copied: 'Atnaujinimo komanda nukopijuota'
@@ -3631,3 +3632,9 @@ Incognito Tab: Inkognito kortelė
 Text Translation:
   Translating, please wait: Verčiama, palaukite
   Translation failed: Nepavyko išversti
+Invidious:
+  Errors:
+    Not configured: Nesukonfigūruotas joks „Invidious“ egzempliorius. Pasirinkite vieną skiltyje Nustatymai → Išplėstiniai.
+    Unreachable: Nepavyko pasiekti „Invidious“ egzemplioriaus ({instance}). Jis gali neveikti arba blokuoti jūsų ryšį. Išbandykite kitą egzempliorių skiltyje Nustatymai → Išplėstiniai.
+    Unreachable Web: Nepavyko pasiekti „Invidious“ egzemplioriaus ({instance}). Jis gali neveikti, blokuoti jūsų ryšį (pvz., VPN) arba neturėti CORS antraščių. Išbandykite kitą egzempliorių skiltyje Nustatymai → Išplėstiniai.
+    Server error: „Invidious“ egzempliorius ({instance}) grąžino klaidą (HTTP {status}).

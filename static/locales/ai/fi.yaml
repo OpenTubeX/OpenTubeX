@@ -2654,9 +2654,9 @@ KeyboardShortcutPrompt:
   Reassign: Määritä uudelleen
   Sections:
     App:
-      Tabs: "Sovellus:\_Välilehdet"
-      Search and Page: "Sovellus:\_Haku ja sivu"
-      Window and View: "Sovellus:\_Ikkuna ja näkymä"
+      Tabs: "Sovellus: Välilehdet"
+      Search and Page: "Sovellus: Haku ja sivu"
+      Window and View: "Sovellus: Ikkuna ja näkymä"
   New Tab: Luo uusi välilehti
   Close Tab: Sulje nykyinen välilehti
   Reload Tab: Lataa nykyinen välilehti uudelleen
@@ -3027,6 +3027,7 @@ Yattee Server:
     Not configured: Anna Yattee-palvelimesi URL-osoite kohdassa Asetukset → Lisäasetukset.
     HTTPS required: Android voi toistaa videoita vain Yattee-palvelimilta, jotka käyttävät HTTPS:ää.
     Streams unavailable: Tämän videon striimejä ei voitu ladata Yattee-palvelimelta. Tarkista palvelin toiminnolla ”Testaa yhteys” kohdassa Asetukset → Lisäasetukset.
+    Unreachable: Yattee-palvelimeen ({instance}) ei saatu yhteyttä. Tarkista URL ja että palvelin on käynnissä kohdasta Asetukset → Lisäasetukset.
 Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.
 Update With Package Manager: 'Päivitä käyttäen {packageManager}:'
 Update Command Copied: 'Päivityskomento kopioitu'
@@ -3137,3 +3138,9 @@ Incognito Tab: Incognito-välilehti
 Text Translation:
   Translating, please wait: Käännetään, odota
   Translation failed: Kääntäminen epäonnistui
+Invidious:
+  Errors:
+    Not configured: Invidious-instanssia ei ole määritetty. Valitse instanssi kohdasta Asetukset → Lisäasetukset.
+    Unreachable: Invidious-instanssiin ({instance}) ei saatu yhteyttä. Se saattaa olla pois käytöstä tai estää yhteytesi. Kokeile toista instanssia kohdasta Asetukset → Lisäasetukset.
+    Unreachable Web: Invidious-instanssiin ({instance}) ei saatu yhteyttä. Se saattaa olla pois käytöstä, estää yhteytesi (esim. VPN) tai siitä puuttuvat CORS-otsikot. Kokeile toista instanssia kohdasta Asetukset → Lisäasetukset.
+    Server error: Invidious-instanssi ({instance}) palautti virheen (HTTP {status}).

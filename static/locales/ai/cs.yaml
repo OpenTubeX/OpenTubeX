@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Přiřadit znovu
   Sections:
     App:
-      Tabs: "Aplikace:\_Karty"
-      Search and Page: "Aplikace:\_Hledání a stránka"
-      Window and View: "Aplikace:\_Okno a zobrazení"
+      Tabs: "Aplikace: Karty"
+      Search and Page: "Aplikace: Hledání a stránka"
+      Window and View: "Aplikace: Okno a zobrazení"
   New Tab: Vytvořit novou kartu
   Close Tab: Zavřít aktuální kartu
   Reload Tab: Znovu načíst aktuální kartu
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Zadejte URL svého serveru Yattee v Nastavení → Pokročilé.
     HTTPS required: Android dokáže přehrávat videa pouze ze serverů Yattee, které používají HTTPS.
     Streams unavailable: Streamy tohoto videa se nepodařilo načíst ze serveru Yattee. Server zkontrolujete pomocí „Otestovat připojení“ v Nastavení → Pokročilé.
+    Unreachable: Nepodařilo se spojit se serverem Yattee ({instance}). Zkontrolujte URL a zda server běží v Nastavení → Pokročilé.
 Yattee Fallback Warning: Tento požadavek obchází nastavený server Yattee a připojuje se přímo k YouTube, čímž odhaluje vaši IP adresu.
 Update With Package Manager: 'Aktualizovat pomocí {packageManager}:'
 Update Command Copied: 'Příkaz pro aktualizaci zkopírován'
@@ -3128,3 +3129,9 @@ Incognito Tab: Anonymní karta
 Text Translation:
   Translating, please wait: Překládání, čekejte
   Translation failed: Překlad se nezdařil
+Invidious:
+  Errors:
+    Not configured: Není nastavena žádná instance Invidious. Vyberte ji v Nastavení → Pokročilé.
+    Unreachable: Nepodařilo se spojit s instancí Invidious ({instance}). Může být nedostupná nebo blokovat vaše připojení. Zkuste jinou instanci v Nastavení → Pokročilé.
+    Unreachable Web: Nepodařilo se spojit s instancí Invidious ({instance}). Může být nedostupná, blokovat vaše připojení (např. VPN) nebo jí chybí hlavičky CORS. Zkuste jinou instanci v Nastavení → Pokročilé.
+    Server error: Instance Invidious ({instance}) vrátila chybu (HTTP {status}).

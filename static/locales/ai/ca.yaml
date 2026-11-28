@@ -3267,13 +3267,13 @@ KeyboardShortcutPrompt:
   Reassign: Torna a assignar
   Sections:
     Video:
-      Playback: "Vídeo:\_Reproducció"
-      General: "Vídeo:\_General"
+      Playback: "Vídeo: Reproducció"
+      General: "Vídeo: General"
     App:
-      General: "Aplicació:\_General"
-      Tabs: "Aplicació:\_Pestanyes"
-      Search and Page: "Aplicació:\_Cerca i pàgina"
-      Window and View: "Aplicació:\_Finestra i vista"
+      General: "Aplicació: General"
+      Tabs: "Aplicació: Pestanyes"
+      Search and Page: "Aplicació: Cerca i pàgina"
+      Window and View: "Aplicació: Finestra i vista"
   Show Keyboard Shortcuts: Mostra les dreceres de teclat
   History Backward: Torna una pàgina enrere
   History Forward: Avança una pàgina
@@ -3665,6 +3665,7 @@ Yattee Server:
     Not configured: Introduïu l'URL del vostre servidor Yattee a Configuració → Avançat.
     HTTPS required: Android només pot reproduir vídeos de servidors Yattee que utilitzin HTTPS.
     Streams unavailable: No s'han pogut carregar els fluxos d'aquest vídeo des del servidor Yattee. Feu servir «Prova la connexió» a Configuració → Avançat per comprovar el servidor.
+    Unreachable: No s’ha pogut accedir al servidor Yattee ({instance}). Comproveu l’URL i si el servidor s’està executant a Configuració → Avançat.
 Yattee Fallback Warning: Aquesta sol·licitud omet el servidor Yattee que heu configurat i es connecta directament a YouTube, exposant la vostra adreça IP.
 Update With Package Manager: 'Actualitza amb {packageManager}:'
 Update Command Copied: 'S''ha copiat l''ordre d''actualització'
@@ -3775,3 +3776,9 @@ Incognito Tab: Pestanya d’incògnit
 Text Translation:
   Translating, please wait: S'està traduint; espereu
   Translation failed: Ha fallat la traducció
+Invidious:
+  Errors:
+    Not configured: No hi ha cap instància d’Invidious configurada. Seleccioneu-ne una a Configuració → Avançat.
+    Unreachable: No s’ha pogut accedir a la instància d’Invidious ({instance}). Pot estar fora de servei o bloquejar la vostra connexió. Proveu una altra instància a Configuració → Avançat.
+    Unreachable Web: No s’ha pogut accedir a la instància d’Invidious ({instance}). Pot estar fora de servei, bloquejar la vostra connexió (com ara una VPN) o no tenir capçaleres CORS. Proveu una altra instància a Configuració → Avançat.
+    Server error: La instància d’Invidious ({instance}) ha retornat un error (HTTP {status}).

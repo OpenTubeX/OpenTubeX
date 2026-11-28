@@ -2655,9 +2655,9 @@ KeyboardShortcutPrompt:
   Reassign: Esleitu berriz
   Sections:
     App:
-      Tabs: "Aplikazioa:\_Fitxak"
-      Search and Page: "Aplikazioa:\_Bilaketa eta orria"
-      Window and View: "Aplikazioa:\_Leihoa eta ikuspegia"
+      Tabs: "Aplikazioa: Fitxak"
+      Search and Page: "Aplikazioa: Bilaketa eta orria"
+      Window and View: "Aplikazioa: Leihoa eta ikuspegia"
   New Tab: Sortu fitxa berria
   Close Tab: Itxi uneko fitxa
   Reload Tab: Kargatu berriro uneko fitxa
@@ -3028,6 +3028,7 @@ Yattee Server:
     Not configured: Sartu zure Yattee zerbitzariaren URLa Ezarpenak → Aurreratua atalean.
     HTTPS required: Android-ek HTTPS erabiltzen duten Yattee zerbitzarietako bideoak soilik erreproduzi ditzake.
     Streams unavailable: Ezin izan dira bideo honen jarioak Yattee zerbitzaritik kargatu. Erabili «Probatu konexioa» Ezarpenak → Aurreratua atalean zerbitzaria egiaztatzeko.
+    Unreachable: Ezin izan da Yattee zerbitzariarekin ({instance}) konektatu. Egiaztatu URLa eta zerbitzaria martxan dagoen Ezarpenak → Aurreratua atalean.
 Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.
 Update With Package Manager: 'Eguneratu {packageManager} erabiliz:'
 Update Command Copied: 'Eguneratze-komandoa kopiatu da'
@@ -3138,3 +3139,9 @@ Incognito Tab: Ezkutuko fitxa
 Text Translation:
   Translating, please wait: Itzultzen; itxaron
   Translation failed: Ezin izan da itzuli
+Invidious:
+  Errors:
+    Not configured: Ez dago Invidious instantziarik konfiguratuta. Hautatu bat Ezarpenak → Aurreratua atalean.
+    Unreachable: Ezin izan da Invidious instantziarekin ({instance}) konektatu. Baliteke erorita egotea edo zure konexioa blokeatzea. Probatu beste instantzia bat Ezarpenak → Aurreratua atalean.
+    Unreachable Web: Ezin izan da Invidious instantziarekin ({instance}) konektatu. Baliteke erorita egotea, zure konexioa blokeatzea (adibidez, VPN bat) edo CORS goibururik ez izatea. Probatu beste instantzia bat Ezarpenak → Aurreratua atalean.
+    Server error: Invidious instantziak ({instance}) errorea itzuli du (HTTP {status}).

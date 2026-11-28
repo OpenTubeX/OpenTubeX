@@ -2733,9 +2733,9 @@ KeyboardShortcutPrompt:
   Reassign: Поново додели
   Sections:
     App:
-      Tabs: "Апликација:\_Картице"
-      Search and Page: "Апликација:\_Претрага и страница"
-      Window and View: "Апликација:\_Прозор и приказ"
+      Tabs: "Апликација: Картице"
+      Search and Page: "Апликација: Претрага и страница"
+      Window and View: "Апликација: Прозор и приказ"
   New Tab: Направи нову картицу
   Close Tab: Затвори тренутну картицу
   Reload Tab: Поново учитај тренутну картицу
@@ -3107,6 +3107,7 @@ Yattee Server:
     Not configured: Унесите URL свог Yattee сервера у одељку Подешавања → Напредно.
     HTTPS required: Android може да репродукује видео снимке само са Yattee сервера који користе HTTPS.
     Streams unavailable: Није могуће учитати стримове овог видео-снимка са Yattee сервера. Проверите сервер помоћу „Тестирај везу“ у одељку Подешавања → Напредно.
+    Unreachable: Није могуће приступити Yattee серверу ({instance}). Проверите URL и да ли сервер ради у Подешавања → Напредно.
 Yattee Fallback Warning: Овај захтев заобилази подешени Yattee сервер и повезује се директно са YouTube-ом, откривајући вашу IP адресу.
 Update With Package Manager: 'Ажурирај помоћу {packageManager}:'
 Update Command Copied: 'Команда за ажурирање је копирана'
@@ -3217,3 +3218,9 @@ Incognito Tab: Картица без архивирања
 Text Translation:
   Translating, please wait: Превођење, сачекајте
   Translation failed: Превођење није успело
+Invidious:
+  Errors:
+    Not configured: Ниједна Invidious инстанца није подешена. Изаберите једну у Подешавања → Напредно.
+    Unreachable: Није могуће приступити Invidious инстанци ({instance}). Можда не ради или блокира вашу везу. Покушајте другу инстанцу у Подешавања → Напредно.
+    Unreachable Web: Није могуће приступити Invidious инстанци ({instance}). Можда не ради, блокира вашу везу (нпр. VPN) или недостају CORS заглавља. Покушајте другу инстанцу у Подешавања → Напредно.
+    Server error: Invidious инстанца ({instance}) је вратила грешку (HTTP {status}).

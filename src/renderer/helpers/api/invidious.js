@@ -12,7 +12,9 @@ import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { createAbortError } from './requestErrors.js'
+import { createInvidiousHttpError, formatApiFetchError } from './invidiousErrors.js'
 import { waitForRequest } from './requestWait.js'
+import { isRecoverableNetworkError, markNonNetworkError } from '../networkRecovery.js'
 import {
   YatteeUnsupportedError,
   createYatteeResponseError,
@@ -143,19 +145,45 @@ export async function invidiousFetch(url, signal) {
 }
 
 function invidiousAPICall({ resource, id = '', params = {}, doLogError = true, subResource = '', signal }) {
-  if (isYatteeBackend() && getCurrentInstanceUrl() === '') {
-    return Promise.reject(new Error(i18n.global.t('Yattee Server.Errors.Not configured')))
+  const isYattee = isYatteeBackend()
+  const instanceUrl = getCurrentInstanceUrl()
+  if (instanceUrl === '') {
+    return Promise.reject(new Error(
+      isYattee
+        ? i18n.global.t('Yattee Server.Errors.Not configured')
+        : i18n.global.t('Invidious.Errors.Not configured')
+    ))
   }
 
   return new Promise((resolve, reject) => {
     // Yattee servers redirect paths with a trailing slash, using the wrong scheme behind TLS proxies
-    const path = isYatteeBackend() && id === '' ? resource : resource + '/' + id
-    const requestUrl = getCurrentInstanceUrl() + '/api/v1/' + path + (!isNullOrEmpty(subResource) ? `/${subResource}` : '') + '?' + new URLSearchParams(params).toString()
+    const path = isYattee && id === '' ? resource : resource + '/' + id
+    const requestUrl = instanceUrl + '/api/v1/' + path + (!isNullOrEmpty(subResource) ? `/${subResource}` : '') + '?' + new URLSearchParams(params).toString()
     invidiousFetch(requestUrl, signal)
+      .catch((error) => {
+        const formatted = formatApiFetchError(error, {
+          instanceUrl,
+          isYattee,
+          isWeb: !process.env.IS_ELECTRON && !process.env.IS_CAPACITOR,
+          t: i18n.global.t
+        })
+        if (formatted !== error && !isRecoverableNetworkError(error)) {
+          markNonNetworkError(formatted)
+        }
+        throw formatted
+      })
       .then(async (response) => {
-        // Yattee servers report errors with HTTP status codes and a `detail` message
-        if (!response.ok && isYatteeBackend()) {
-          throw await createYatteeApiError(response)
+        if (!response.ok) {
+          // Yattee servers report errors with HTTP status codes and a `detail` message
+          if (isYattee) {
+            throw await createYatteeApiError(response)
+          }
+          const json = await response.json().catch(() => null)
+          if (json !== null) return json
+          throw createInvidiousHttpError(response.status, {
+            instanceUrl,
+            t: i18n.global.t
+          })
         }
 
         return response.json()

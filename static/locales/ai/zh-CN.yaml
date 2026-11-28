@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: 重新分配
   Sections:
     App:
-      Tabs: "应用：\_标签页"
-      Search and Page: "应用：\_搜索与页面"
-      Window and View: "应用：\_窗口与视图"
+      Tabs: "应用： 标签页"
+      Search and Page: "应用： 搜索与页面"
+      Window and View: "应用： 窗口与视图"
   New Tab: 新建标签页
   Close Tab: 关闭当前标签页
   Reload Tab: 重新加载当前标签页
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: 请在“设置”→“高级”中输入你的 Yattee 服务器 URL。
     HTTPS required: Android 只能播放来自使用 HTTPS 的 Yattee 服务器的视频。
     Streams unavailable: 无法从 Yattee 服务器加载此视频的流。请使用“设置”→“高级”中的“测试连接”检查服务器。
+    Unreachable: 无法连接到 Yattee 服务器（{instance}）。请在“设置 → 高级”中检查 URL 以及服务器是否正在运行。
 Yattee Fallback Warning: 此请求绕过了你配置的 Yattee 服务器，直接连接到 YouTube，从而暴露你的 IP 地址。
 Update With Package Manager: '使用 {packageManager} 更新：'
 Update Command Copied: '已复制更新命令'
@@ -3128,3 +3129,9 @@ Incognito Tab: 无痕标签页
 Text Translation:
   Translating, please wait: 正在翻译，请稍候
   Translation failed: 翻译失败
+Invidious:
+  Errors:
+    Not configured: 未配置 Invidious 实例。请在“设置 → 高级”中选择一个实例。
+    Unreachable: 无法连接到 Invidious 实例（{instance}）。该实例可能已离线或屏蔽了你的连接。请在“设置 → 高级”中尝试其他实例。
+    Unreachable Web: 无法连接到 Invidious 实例（{instance}）。该实例可能已离线、屏蔽了你的连接（例如 VPN）或缺少 CORS 响应头。请在“设置 → 高级”中尝试其他实例。
+    Server error: Invidious 实例（{instance}）返回了错误（HTTP {status}）。

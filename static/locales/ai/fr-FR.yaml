@@ -2643,9 +2643,9 @@ KeyboardShortcutPrompt:
   Reassign: Réassigner
   Sections:
     App:
-      Tabs: "Application :\_onglets"
-      Search and Page: "Application :\_recherche et page"
-      Window and View: "Application :\_fenêtre et affichage"
+      Tabs: "Application : onglets"
+      Search and Page: "Application : recherche et page"
+      Window and View: "Application : fenêtre et affichage"
   New Tab: Créer un nouvel onglet
   Close Tab: Fermer l’onglet actuel
   Reload Tab: Recharger l’onglet actuel
@@ -3016,6 +3016,7 @@ Yattee Server:
     Not configured: Saisissez l’URL de votre serveur Yattee dans Paramètres → Avancé.
     HTTPS required: Android ne peut lire que les vidéos provenant de serveurs Yattee qui utilisent HTTPS.
     Streams unavailable: Impossible de charger les flux de cette vidéo depuis le serveur Yattee. Utilisez « Tester la connexion » dans Paramètres → Avancé pour vérifier le serveur.
+    Unreachable: Impossible de joindre le serveur Yattee ({instance}). Vérifiez l’URL et que le serveur fonctionne dans Paramètres → Avancé.
 Yattee Fallback Warning: Cette requête contourne votre serveur Yattee configuré et se connecte directement à YouTube, exposant votre adresse IP.
 Update With Package Manager: 'Mettre à jour avec {packageManager} :'
 Update Command Copied: 'Commande de mise à jour copiée'
@@ -3126,3 +3127,9 @@ Incognito Tab: Onglet de navigation privée
 Text Translation:
   Translating, please wait: Traduction en cours, veuillez patienter
   Translation failed: Échec de la traduction
+Invidious:
+  Errors:
+    Not configured: Aucune instance Invidious n’est configurée. Sélectionnez-en une dans Paramètres → Avancé.
+    Unreachable: Impossible de joindre l’instance Invidious ({instance}). Elle est peut-être hors ligne ou bloque votre connexion. Essayez une autre instance dans Paramètres → Avancé.
+    Unreachable Web: Impossible de joindre l’instance Invidious ({instance}). Elle est peut-être hors ligne, bloque votre connexion (par exemple un VPN) ou ne renvoie pas les en-têtes CORS. Essayez une autre instance dans Paramètres → Avancé.
+    Server error: L’instance Invidious ({instance}) a renvoyé une erreur (HTTP {status}).

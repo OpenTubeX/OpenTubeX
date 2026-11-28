@@ -2646,9 +2646,9 @@ KeyboardShortcutPrompt:
   Reassign: Átrendelés
   Sections:
     App:
-      Tabs: "Alkalmazás:\_Lapok"
-      Search and Page: "Alkalmazás:\_Keresés és oldal"
-      Window and View: "Alkalmazás:\_Ablak és nézet"
+      Tabs: "Alkalmazás: Lapok"
+      Search and Page: "Alkalmazás: Keresés és oldal"
+      Window and View: "Alkalmazás: Ablak és nézet"
   New Tab: Új lap létrehozása
   Close Tab: Aktuális lap bezárása
   Reload Tab: Aktuális lap újratöltése
@@ -3019,6 +3019,7 @@ Yattee Server:
     Not configured: Adja meg Yattee-kiszolgálója URL-jét a Beállítások → Speciális menüben.
     HTTPS required: Az Android csak HTTPS-t használó Yattee-kiszolgálókról tud videókat lejátszani.
     Streams unavailable: A videó streamjeit nem sikerült betölteni a Yattee-kiszolgálóról. Ellenőrizze a kiszolgálót a Beállítások → Speciális menü „Kapcsolat tesztelése” gombjával.
+    Unreachable: Nem érhető el a Yattee-szerver ({instance}). Ellenőrizd az URL-t és hogy fut-e a szerver a Beállítások → Haladó menüben.
 Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.
 Update With Package Manager: 'Frissítés a(z) {packageManager} segítségével:'
 Update Command Copied: 'Frissítési parancs másolva'
@@ -3129,3 +3130,9 @@ Incognito Tab: Inkognitólap
 Text Translation:
   Translating, please wait: Fordítás folyamatban, kis türelmet
   Translation failed: Nem sikerült a fordítás
+Invidious:
+  Errors:
+    Not configured: Nincs beállítva Invidious-példány. Válassz egyet a Beállítások → Haladó menüben.
+    Unreachable: Nem érhető el az Invidious-példány ({instance}). Lehet, hogy nem működik vagy blokkolja a kapcsolatodat. Próbálj másik példányt a Beállítások → Haladó menüben.
+    Unreachable Web: Nem érhető el az Invidious-példány ({instance}). Lehet, hogy nem működik, blokkolja a kapcsolatodat (például VPN miatt), vagy hiányoznak a CORS-fejlécek. Próbálj másik példányt a Beállítások → Haladó menüben.
+    Server error: Az Invidious-példány ({instance}) hibát adott vissza (HTTP {status}).

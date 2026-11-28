@@ -2708,9 +2708,9 @@ KeyboardShortcutPrompt:
   Reassign: הקצאה מחדש
   Sections:
     App:
-      Tabs: "יישום:\_לשוניות"
-      Search and Page: "יישום:\_חיפוש ודף"
-      Window and View: "יישום:\_חלון ותצוגה"
+      Tabs: "יישום: לשוניות"
+      Search and Page: "יישום: חיפוש ודף"
+      Window and View: "יישום: חלון ותצוגה"
   New Tab: יצירת לשונית חדשה
   Close Tab: סגירת הלשונית הנוכחית
   Reload Tab: טעינת הלשונית הנוכחית מחדש
@@ -3082,6 +3082,7 @@ Yattee Server:
     Not configured: יש להזין את כתובת שרת Yattee שלך בהגדרות → מתקדם.
     HTTPS required: Android יכול להפעיל רק סרטונים משרתי Yattee שמשתמשים ב־HTTPS.
     Streams unavailable: לא ניתן לטעון את הזרמים של הסרטון הזה משרת Yattee. יש להשתמש ב„בדיקת החיבור” בהגדרות → מתקדם כדי לבדוק את השרת.
+    Unreachable: לא ניתן להתחבר לשרת Yattee ({instance}). בדקו את הכתובת והאם השרת פועל בהגדרות ← מתקדם.
 Yattee Fallback Warning: בקשה זו עוקפת את שרת Yattee שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך.
 Update With Package Manager: 'עדכון באמצעות {packageManager}:'
 Update Command Copied: 'פקודת העדכון הועתקה'
@@ -3192,3 +3193,9 @@ Incognito Tab: כרטיסיית גלישה בסתר
 Text Translation:
   Translating, please wait: מתבצע תרגום, נא להמתין
   Translation failed: התרגום נכשל
+Invidious:
+  Errors:
+    Not configured: לא הוגדר שרת Invidious. בחרו אחד בהגדרות ← מתקדם.
+    Unreachable: לא ניתן להתחבר לשרת Invidious ({instance}). ייתכן שהוא לא פעיל או חוסם את החיבור שלך. נסו שרת אחר בהגדרות ← מתקדם.
+    Unreachable Web: לא ניתן להתחבר לשרת Invidious ({instance}). ייתכן שהוא לא פעיל, חוסם את החיבור שלך (כגון VPN) או חסרות לו כותרות CORS. נסו שרת אחר בהגדרות ← מתקדם.
+    Server error: שרת Invidious ({instance}) החזיר שגיאה (HTTP {status}).

@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Priradiť znova
   Sections:
     App:
-      Tabs: "Aplikácia:\_Karty"
-      Search and Page: "Aplikácia:\_Hľadanie a stránka"
-      Window and View: "Aplikácia:\_Okno a zobrazenie"
+      Tabs: "Aplikácia: Karty"
+      Search and Page: "Aplikácia: Hľadanie a stránka"
+      Window and View: "Aplikácia: Okno a zobrazenie"
   New Tab: Vytvoriť novú kartu
   Close Tab: Zavrieť aktuálnu kartu
   Reload Tab: Znova načítať aktuálnu kartu
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Zadajte adresu URL svojho servera Yattee v časti Nastavenia → Rozšírené.
     HTTPS required: Android dokáže prehrávať videá iba zo serverov Yattee, ktoré používajú HTTPS.
     Streams unavailable: Streamy tohto videa sa nepodarilo načítať zo servera Yattee. Server skontrolujte pomocou „Testovať pripojenie“ v časti Nastavenia → Rozšírené.
+    Unreachable: Nepodarilo sa spojiť so serverom Yattee ({instance}). Skontrolujte URL a či server beží v Nastavenia → Pokročilé.
 Yattee Fallback Warning: Táto požiadavka obchádza nastavený server Yattee a pripája sa priamo k YouTube, čím odhaľuje vašu IP adresu.
 Update With Package Manager: 'Aktualizovať pomocou {packageManager}:'
 Update Command Copied: 'Príkaz na aktualizáciu bol skopírovaný'
@@ -3128,3 +3129,9 @@ Incognito Tab: Karta inkognito
 Text Translation:
   Translating, please wait: Prekladá sa, čakajte
   Translation failed: Preklad zlyhal
+Invidious:
+  Errors:
+    Not configured: Nie je nastavená žiadna inštancia Invidious. Vyberte ju v Nastavenia → Pokročilé.
+    Unreachable: Nepodarilo sa spojiť s inštanciou Invidious ({instance}). Môže byť nedostupná alebo blokovať vaše pripojenie. Skúste inú inštanciu v Nastavenia → Pokročilé.
+    Unreachable Web: Nepodarilo sa spojiť s inštanciou Invidious ({instance}). Môže byť nedostupná, blokovať vaše pripojenie (napr. VPN) alebo jej chýbajú hlavičky CORS. Skúste inú inštanciu v Nastavenia → Pokročilé.
+    Server error: Inštancia Invidious ({instance}) vrátila chybu (HTTP {status}).

@@ -2685,9 +2685,9 @@ KeyboardShortcutPrompt:
   Reassign: Ailaseinio
   Sections:
     App:
-      Tabs: "Ap:\_Tabiau"
-      Search and Page: "Ap:\_Chwilio a thudalen"
-      Window and View: "Ap:\_Ffenestr a golwg"
+      Tabs: "Ap: Tabiau"
+      Search and Page: "Ap: Chwilio a thudalen"
+      Window and View: "Ap: Ffenestr a golwg"
   New Tab: Creu tab newydd
   Close Tab: Cau'r tab presennol
   Reload Tab: Ail-lwytho'r tab presennol
@@ -3057,6 +3057,7 @@ Yattee Server:
     Not configured: Rhowch URL eich gweinydd Yattee yn Gosodiadau → Uwch.
     HTTPS required: Dim ond fideos o weinyddion Yattee sy'n defnyddio HTTPS y gall Android eu chwarae.
     Streams unavailable: Methu llwytho ffrydiau'r fideo hwn o'r gweinydd Yattee. Defnyddiwch “Profi'r Cysylltiad” yn Gosodiadau → Uwch i wirio'r gweinydd.
+    Unreachable: Methodd â chyrraedd y gweinydd Yattee ({instance}). Gwiriwch yr URL ac a yw’r gweinydd yn rhedeg yn Gosodiadau → Uwch.
 Yattee Fallback Warning: Mae'r cais hwn yn osgoi'r gweinydd Yattee rydych wedi'i ffurfweddu ac yn cysylltu'n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP.
 Update With Package Manager: 'Diweddaru gyda {packageManager}:'
 Update Command Copied: 'Wedi copïo''r gorchymyn diweddaru'
@@ -3167,3 +3168,9 @@ Incognito Tab: Tab incognito
 Text Translation:
   Translating, please wait: Wrthi'n cyfieithu; arhoswch
   Translation failed: Methodd y cyfieithu
+Invidious:
+  Errors:
+    Not configured: Nid oes enghraifft Invidious wedi’i ffurfweddu. Dewiswch un yn Gosodiadau → Uwch.
+    Unreachable: Methodd â chyrraedd yr enghraifft Invidious ({instance}). Efallai ei bod i lawr neu’n rhwystro’ch cysylltiad. Rhowch gynnig ar enghraifft arall yn Gosodiadau → Uwch.
+    Unreachable Web: Methodd â chyrraedd yr enghraifft Invidious ({instance}). Efallai ei bod i lawr, yn rhwystro’ch cysylltiad (megis VPN), neu heb benynnau CORS. Rhowch gynnig ar enghraifft arall yn Gosodiadau → Uwch.
+    Server error: Dychwelodd yr enghraifft Invidious ({instance}) wall (HTTP {status}).

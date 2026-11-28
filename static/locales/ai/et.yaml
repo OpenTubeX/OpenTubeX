@@ -2648,9 +2648,9 @@ KeyboardShortcutPrompt:
   Reassign: Määra ümber
   Sections:
     App:
-      Tabs: "Rakendus:\_Vahelehed"
-      Search and Page: "Rakendus:\_Otsing ja leht"
-      Window and View: "Rakendus:\_Aken ja vaade"
+      Tabs: "Rakendus: Vahelehed"
+      Search and Page: "Rakendus: Otsing ja leht"
+      Window and View: "Rakendus: Aken ja vaade"
   New Tab: Loo uus vaheleht
   Close Tab: Sulge aktiivne vaheleht
   Reload Tab: Laadi aktiivne vaheleht uuesti
@@ -3021,6 +3021,7 @@ Yattee Server:
     Not configured: Sisesta oma Yattee serveri URL jaotises Seadistused → Täpsemad seaded.
     HTTPS required: Android saab esitada videoid ainult Yattee serveritest, mis kasutavad HTTPS-i.
     Streams unavailable: Selle video vooge ei õnnestunud Yattee serverist laadida. Kontrolli serverit nupuga „Testi ühendust“ jaotises Seadistused → Täpsemad seaded.
+    Unreachable: Yattee serveriga ({instance}) ei saadud ühendust. Kontrolli URL-i ja kas server töötab jaotises Seaded → Täpsemad.
 Yattee Fallback Warning: See päring läheb sinu seadistatud Yattee serverist mööda ja ühendub otse YouTube'iga, avaldades sinu IP-aadressi.
 Update With Package Manager: 'Uuenda {packageManager} abil:'
 Update Command Copied: 'Uuenduskäsk kopeeriti'
@@ -3131,3 +3132,9 @@ Incognito Tab: Inkognito vahekaart
 Text Translation:
   Translating, please wait: Tõlkimine, palun oota
   Translation failed: Tõlge nurjus
+Invidious:
+  Errors:
+    Not configured: Ühtegi Invidious-i eksemplari pole seadistatud. Vali üks jaotises Seaded → Täpsemad.
+    Unreachable: Invidious-i eksemplariga ({instance}) ei saadud ühendust. See võib olla maas või blokeerida sinu ühendust. Proovi teist eksemplari jaotises Seaded → Täpsemad.
+    Unreachable Web: Invidious-i eksemplariga ({instance}) ei saadud ühendust. See võib olla maas, blokeerida sinu ühendust (nt VPN) või sellel võivad puududa CORS-päised. Proovi teist eksemplari jaotises Seaded → Täpsemad.
+    Server error: Invidious-i eksemplar ({instance}) tagastas vea (HTTP {status}).

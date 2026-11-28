@@ -2645,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Riassegna
   Sections:
     App:
-      Tabs: "App:\_Schede"
-      Search and Page: "App:\_Ricerca e pagina"
-      Window and View: "App:\_Finestra e visualizzazione"
+      Tabs: "App: Schede"
+      Search and Page: "App: Ricerca e pagina"
+      Window and View: "App: Finestra e visualizzazione"
   New Tab: Crea una nuova scheda
   Close Tab: Chiudi la scheda corrente
   Reload Tab: Ricarica la scheda corrente
@@ -3018,6 +3018,7 @@ Yattee Server:
     Not configured: Inserisci l’URL del tuo server Yattee in Impostazioni → Avanzate.
     HTTPS required: Android può riprodurre solo video provenienti da server Yattee che usano HTTPS.
     Streams unavailable: Impossibile caricare i flussi di questo video dal server Yattee. Usa «Verifica connessione» in Impostazioni → Avanzate per controllare il server.
+    Unreachable: Impossibile raggiungere il server Yattee ({instance}). Controlla l’URL e che il server sia attivo in Impostazioni → Avanzate.
 Yattee Fallback Warning: Questa richiesta aggira il server Yattee configurato e si connette direttamente a YouTube, esponendo il tuo indirizzo IP.
 Update With Package Manager: 'Aggiorna con {packageManager}:'
 Update Command Copied: 'Comando di aggiornamento copiato'
@@ -3128,3 +3129,9 @@ Incognito Tab: Scheda in incognito
 Text Translation:
   Translating, please wait: Traduzione in corso, attendi
   Translation failed: Traduzione non riuscita
+Invidious:
+  Errors:
+    Not configured: Nessuna istanza Invidious configurata. Selezionane una in Impostazioni → Avanzate.
+    Unreachable: Impossibile raggiungere l’istanza Invidious ({instance}). Potrebbe essere offline o bloccare la tua connessione. Prova un’altra istanza in Impostazioni → Avanzate.
+    Unreachable Web: Impossibile raggiungere l’istanza Invidious ({instance}). Potrebbe essere offline, bloccare la tua connessione (ad esempio una VPN) o non inviare gli header CORS. Prova un’altra istanza in Impostazioni → Avanzate.
+    Server error: L’istanza Invidious ({instance}) ha restituito un errore (HTTP {status}).

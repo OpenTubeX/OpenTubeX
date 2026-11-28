@@ -2672,9 +2672,9 @@ KeyboardShortcutPrompt:
   Reassign: Tetapkan ulang
   Sections:
     App:
-      Tabs: "Aplikasi:\_Tab"
-      Search and Page: "Aplikasi:\_Pencarian & Halaman"
-      Window and View: "Aplikasi:\_Jendela & Tampilan"
+      Tabs: "Aplikasi: Tab"
+      Search and Page: "Aplikasi: Pencarian & Halaman"
+      Window and View: "Aplikasi: Jendela & Tampilan"
   New Tab: Buat tab baru
   Close Tab: Tutup tab saat ini
   Reload Tab: Muat ulang tab saat ini
@@ -3045,6 +3045,7 @@ Yattee Server:
     Not configured: Masukkan URL server Yattee Anda di Pengaturan → Lanjutan.
     HTTPS required: Android hanya dapat memutar video dari server Yattee yang menggunakan HTTPS.
     Streams unavailable: Tidak dapat memuat stream video ini dari server Yattee. Gunakan “Uji Koneksi” di Pengaturan → Lanjutan untuk memeriksa server.
+    Unreachable: Tidak dapat menghubungi server Yattee ({instance}). Periksa URL dan apakah server berjalan di Pengaturan → Lanjutan.
 Yattee Fallback Warning: Permintaan ini melewati server Yattee yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda.
 Update With Package Manager: 'Perbarui dengan {packageManager}:'
 Update Command Copied: 'Perintah pembaruan disalin'
@@ -3155,3 +3156,9 @@ Incognito Tab: Tab penyamaran
 Text Translation:
   Translating, please wait: Menerjemahkan, harap tunggu
   Translation failed: Terjemahan gagal
+Invidious:
+  Errors:
+    Not configured: Belum ada instans Invidious yang dikonfigurasi. Pilih satu di Pengaturan → Lanjutan.
+    Unreachable: Tidak dapat menghubungi instans Invidious ({instance}). Instans mungkin sedang mati atau memblokir koneksi Anda. Coba instans lain di Pengaturan → Lanjutan.
+    Unreachable Web: Tidak dapat menghubungi instans Invidious ({instance}). Instans mungkin sedang mati, memblokir koneksi Anda (misalnya VPN), atau tidak memiliki header CORS. Coba instans lain di Pengaturan → Lanjutan.
+    Server error: Instans Invidious ({instance}) mengembalikan kesalahan (HTTP {status}).

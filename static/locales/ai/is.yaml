@@ -2661,9 +2661,9 @@ KeyboardShortcutPrompt:
   Reassign: Úthluta upp á nýtt
   Sections:
     App:
-      Tabs: "Forrit:\_Flipar"
-      Search and Page: "Forrit:\_Leit og síða"
-      Window and View: "Forrit:\_Gluggi og sýn"
+      Tabs: "Forrit: Flipar"
+      Search and Page: "Forrit: Leit og síða"
+      Window and View: "Forrit: Gluggi og sýn"
   New Tab: Stofna nýjan flipa
   Close Tab: Loka núverandi flipa
   Reload Tab: Endurhlaða núverandi flipa
@@ -3034,6 +3034,7 @@ Yattee Server:
     Not configured: Sláðu inn slóð Yattee-netþjónsins þíns í Stillingar → Ítarlegt.
     HTTPS required: Android getur aðeins spilað myndskeið frá Yattee-netþjónum sem nota HTTPS.
     Streams unavailable: Ekki tókst að hlaða streymum þessa myndskeiðs frá Yattee-netþjóninum. Notaðu „Prófa tengingu“ í Stillingar → Ítarlegt til að athuga netþjóninn.
+    Unreachable: Ekki tókst að ná sambandi við Yattee-þjóninn ({instance}). Athugaðu slóðina og hvort þjónninn sé í gangi í Stillingar → Ítarlegt.
 Yattee Fallback Warning: Þessi beiðni fer fram hjá Yattee-netþjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína.
 Update With Package Manager: 'Uppfæra með {packageManager}:'
 Update Command Copied: 'Uppfærsluskipun afrituð'
@@ -3144,3 +3145,9 @@ Incognito Tab: Huliðsflipi
 Text Translation:
   Translating, please wait: Þýði, bíddu aðeins
   Translation failed: Ekki tókst að þýða
+Invidious:
+  Errors:
+    Not configured: Ekkert Invidious-tilvik er stillt. Veldu eitt í Stillingar → Ítarlegt.
+    Unreachable: Ekki tókst að ná sambandi við Invidious-tilvikið ({instance}). Það gæti verið niðri eða lokað á tenginguna þína. Prófaðu annað tilvik í Stillingar → Ítarlegt.
+    Unreachable Web: Ekki tókst að ná sambandi við Invidious-tilvikið ({instance}). Það gæti verið niðri, lokað á tenginguna þína (t.d. VPN) eða vantað CORS-hausa. Prófaðu annað tilvik í Stillingar → Ítarlegt.
+    Server error: Invidious-tilvikið ({instance}) skilaði villu (HTTP {status}).

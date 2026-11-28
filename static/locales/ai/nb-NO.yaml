@@ -2650,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     App:
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søk og side"
-      Window and View: "App:\_Vindu og visning"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søk og side"
+      Window and View: "App: Vindu og visning"
   New Tab: Opprett en ny fane
   Close Tab: Lukk den gjeldende fanen
   Reload Tab: Last inn den gjeldende fanen på nytt
@@ -3022,6 +3022,7 @@ Yattee Server:
     Not configured: Skriv inn URL-en til Yattee-tjeneren din under Innstillinger → Avansert.
     HTTPS required: Android kan bare spille av videoer fra Yattee-tjenere som bruker HTTPS.
     Streams unavailable: Kunne ikke laste inn strømmene til denne videoen fra Yattee-tjeneren. Bruk «Test tilkobling» under Innstillinger → Avansert for å kontrollere tjeneren.
+    Unreachable: Kunne ikke nå Yattee-serveren ({instance}). Sjekk URL-en og om serveren kjører under Innstillinger → Avansert.
 Yattee Fallback Warning: Denne forespørselen omgår den konfigurerte Yattee-tjeneren din og kobler direkte til YouTube, noe som avslører IP-adressen din.
 Update With Package Manager: 'Oppdater med {packageManager}:'
 Update Command Copied: 'Oppdateringskommandoen er kopiert'
@@ -3132,3 +3133,9 @@ Incognito Tab: Inkognitofane
 Text Translation:
   Translating, please wait: Oversetter, vent litt
   Translation failed: Oversettelsen mislyktes
+Invidious:
+  Errors:
+    Not configured: Ingen Invidious-instans er konfigurert. Velg en under Innstillinger → Avansert.
+    Unreachable: Kunne ikke nå Invidious-instansen ({instance}). Den kan være nede eller blokkere tilkoblingen din. Prøv en annen instans under Innstillinger → Avansert.
+    Unreachable Web: Kunne ikke nå Invidious-instansen ({instance}). Den kan være nede, blokkere tilkoblingen din (for eksempel en VPN) eller mangle CORS-hoder. Prøv en annen instans under Innstillinger → Avansert.
+    Server error: Invidious-instansen ({instance}) returnerte en feil (HTTP {status}).

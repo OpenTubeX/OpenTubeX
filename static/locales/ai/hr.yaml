@@ -2685,9 +2685,9 @@ KeyboardShortcutPrompt:
   Reassign: Ponovno dodijeli
   Sections:
     App:
-      Tabs: "Aplikacija:\_Kartice"
-      Search and Page: "Aplikacija:\_Pretraživanje i stranica"
-      Window and View: "Aplikacija:\_Prozor i prikaz"
+      Tabs: "Aplikacija: Kartice"
+      Search and Page: "Aplikacija: Pretraživanje i stranica"
+      Window and View: "Aplikacija: Prozor i prikaz"
   New Tab: Stvori novu karticu
   Close Tab: Zatvori trenutačnu karticu
   Reload Tab: Ponovno učitaj trenutačnu karticu
@@ -3059,6 +3059,7 @@ Yattee Server:
     Not configured: Unesite URL svog Yattee poslužitelja u odjeljku Postavke → Napredno.
     HTTPS required: Android može reproducirati videa samo s Yattee poslužitelja koji koriste HTTPS.
     Streams unavailable: Streamove ovog videozapisa nije moguće učitati s Yattee poslužitelja. Provjerite poslužitelj pomoću „Testiraj vezu” u odjeljku Postavke → Napredno.
+    Unreachable: Nije moguće pristupiti Yattee poslužitelju ({instance}). Provjerite URL i radi li poslužitelj u Postavke → Napredno.
 Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.
 Update With Package Manager: 'Ažuriraj pomoću {packageManager}:'
 Update Command Copied: 'Naredba za ažuriranje kopirana'
@@ -3169,3 +3170,9 @@ Incognito Tab: Anonimna kartica
 Text Translation:
   Translating, please wait: Pričekajte, prevodi se
   Translation failed: Prevođenje nije uspjelo
+Invidious:
+  Errors:
+    Not configured: Nijedna Invidious instanca nije postavljena. Odaberite jednu u Postavke → Napredno.
+    Unreachable: Nije moguće pristupiti Invidious instanci ({instance}). Možda ne radi ili blokira vašu vezu. Pokušajte drugu instancu u Postavke → Napredno.
+    Unreachable Web: Nije moguće pristupiti Invidious instanci ({instance}). Možda ne radi, blokira vašu vezu (npr. VPN) ili nedostaju CORS zaglavlja. Pokušajte drugu instancu u Postavke → Napredno.
+    Server error: Invidious instanca ({instance}) vratila je pogrešku (HTTP {status}).

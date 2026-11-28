@@ -2599,9 +2599,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuir
   Sections:
     App:
-      Tabs: "Aplicativo:\_Guias"
-      Search and Page: "Aplicativo:\_Pesquisa e página"
-      Window and View: "Aplicativo:\_Janela e vista"
+      Tabs: "Aplicativo: Guias"
+      Search and Page: "Aplicativo: Pesquisa e página"
+      Window and View: "Aplicativo: Janela e vista"
   New Tab: Criar uma nova guia
   Close Tab: Fechar a guia atual
   Reload Tab: Recarregar a guia atual
@@ -2964,6 +2964,7 @@ Yattee Server:
     Not configured: Insira o URL do seu servidor Yattee em Configurações → Avançadas.
     HTTPS required: O Android só pode reproduzir vídeos de servidores Yattee que usam HTTPS.
     Streams unavailable: Não foi possível carregar as transmissões deste vídeo do servidor Yattee. Use “Testar conexão” em Configurações → Avançadas para verificar o servidor.
+    Unreachable: Não foi possível acessar o servidor Yattee ({instance}). Verifique a URL e se o servidor está em execução em Configurações → Avançado.
 Yattee Fallback Warning: Esta solicitação ignora o servidor Yattee configurado e se conecta diretamente ao YouTube, expondo seu endereço IP.
 Update With Package Manager: 'Atualizar com {packageManager}:'
 Update Command Copied: 'Comando de atualização copiado'
@@ -3090,3 +3091,9 @@ Incognito Tab: Guia anônima
 Text Translation:
   Translating, please wait: Traduzindo. Aguarde
   Translation failed: Falha na tradução
+Invidious:
+  Errors:
+    Not configured: Nenhuma instância do Invidious está configurada. Selecione uma em Configurações → Avançado.
+    Unreachable: Não foi possível acessar a instância do Invidious ({instance}). Ela pode estar fora do ar ou bloqueando sua conexão. Tente outra instância em Configurações → Avançado.
+    Unreachable Web: Não foi possível acessar a instância do Invidious ({instance}). Ela pode estar fora do ar, bloqueando sua conexão (como uma VPN) ou sem cabeçalhos CORS. Tente outra instância em Configurações → Avançado.
+    Server error: A instância do Invidious ({instance}) retornou um erro (HTTP {status}).

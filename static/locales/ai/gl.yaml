@@ -2709,9 +2709,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasignar
   Sections:
     App:
-      Tabs: "Aplicación:\_Lapelas"
-      Search and Page: "Aplicación:\_Busca e páxina"
-      Window and View: "Aplicación:\_Xanela e vista"
+      Tabs: "Aplicación: Lapelas"
+      Search and Page: "Aplicación: Busca e páxina"
+      Window and View: "Aplicación: Xanela e vista"
   New Tab: Crear unha lapela nova
   Close Tab: Pechar a lapela actual
   Reload Tab: Recargar a lapela actual
@@ -3083,6 +3083,7 @@ Yattee Server:
     Not configured: Introduce a URL do teu servidor Yattee en Axustes → Avanzado.
     HTTPS required: Android só pode reproducir vídeos de servidores Yattee que usen HTTPS.
     Streams unavailable: Non se puideron cargar as transmisións deste vídeo desde o servidor Yattee. Usa «Probar a conexión» en Axustes → Avanzado para comprobar o servidor.
+    Unreachable: Non se puido contactar co servidor Yattee ({instance}). Comproba o URL e se o servidor está en execución en Configuración → Avanzado.
 Yattee Fallback Warning: Esta solicitude omite o servidor Yattee que configuraches e conéctase directamente a YouTube, expoñendo o teu enderezo IP.
 Update With Package Manager: 'Actualizar con {packageManager}:'
 Update Command Copied: 'Copiouse a orde de actualización'
@@ -3193,3 +3194,9 @@ Incognito Tab: Lapela de incógnito
 Text Translation:
   Translating, please wait: Traducindo; agarda
   Translation failed: Produciuse un erro ao traducir
+Invidious:
+  Errors:
+    Not configured: Non hai ningunha instancia de Invidious configurada. Selecciona unha en Configuración → Avanzado.
+    Unreachable: Non se puido contactar coa instancia de Invidious ({instance}). Pode estar caída ou bloqueando a túa conexión. Proba outra instancia en Configuración → Avanzado.
+    Unreachable Web: Non se puido contactar coa instancia de Invidious ({instance}). Pode estar caída, bloqueando a túa conexión (como unha VPN) ou sen cabeceiras CORS. Proba outra instancia en Configuración → Avanzado.
+    Server error: A instancia de Invidious ({instance}) devolveu un erro (HTTP {status}).
