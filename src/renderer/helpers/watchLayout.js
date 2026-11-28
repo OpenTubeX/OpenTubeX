@@ -301,12 +301,21 @@ export function createWatchLayoutAnimator() {
 
     // Every transform here applies around its element's top left corner. A
     // child's offset from its anchoring edge keeps it there.
-    // Text in one half of the card stays at that half's edge, like a like
-    // count at the end. Text across the middle, like a comment, stays at
-    // the inline start.
+    // Items in a centered row stay centered in it together. Otherwise, text in
+    // one half of the card stays at that half's edge, like a like count at the
+    // end, and text across the middle, like a comment, stays at the inline
+    // start.
     const middle = (to.left + to.right) / 2
-    const children = counterScaledContent(card).map(child => {
+    const children = counterScaledContent(card).map(({ child, centeredIn, centerY }) => {
       const rect = child.getBoundingClientRect()
+      if (centeredIn) {
+        const container = centeredIn.getBoundingClientRect()
+        return {
+          child,
+          x: rect.left - (container.left + container.right) / 2,
+          y: rect.top - (centerY ? (container.top + container.bottom) / 2 : to.top),
+        }
+      }
       const content = textExtent(child) ?? rect
       const atRight = content.left >= middle || (content.right > middle && rtl)
       return { child, x: rect.left - (atRight ? to.right : to.left), y: rect.top - to.top }
@@ -374,16 +383,28 @@ export function createWatchLayoutAnimator() {
    * stay whole, so a group of buttons can't come apart.
    * @param {HTMLElement} element
    * @param {number} [depth]
-   * @returns {HTMLElement[]}
+   * @param {HTMLElement | null} [centeredIn]
+   * @param {boolean} [centerY]
+   * @returns {{ child: HTMLElement, centeredIn: HTMLElement | null, centerY: boolean }[]}
    */
-  function counterScaledContent(element, depth = 0) {
+  function counterScaledContent(element, depth = 0, centeredIn = null, centerY = false) {
     return [...element.children].flatMap(child => {
       if (!(child instanceof HTMLElement) || child.classList.contains('fixedBackgroundLayer')) { return [] }
       const style = getComputedStyle(child)
       const flex = style.display === 'flex' && child.children.length > 1
       const split = (flex || (style.display === 'grid' && child.children.length > 1)) && depth === 0
       const stack = flex && style.flexDirection.startsWith('column') && depth < COUNTER_SCALE_DEPTH
-      return split || stack ? counterScaledContent(child, depth + 1) : [child]
+      if (!split && !stack) { return [{ child, centeredIn, centerY }] }
+      const column = flex && style.flexDirection.startsWith('column')
+      const horizontal = column ? style.alignItems : style.justifyContent
+      const vertical = column ? style.justifyContent : style.alignItems
+      const centersChildren = !centeredIn && horizontal.split(' ').includes('center')
+      return counterScaledContent(
+        child,
+        depth + 1,
+        centersChildren ? child : centeredIn,
+        centersChildren ? vertical.split(' ').includes('center') : centerY,
+      )
     })
   }
 
