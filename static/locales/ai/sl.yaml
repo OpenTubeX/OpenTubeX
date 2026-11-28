@@ -3604,6 +3604,9 @@ Subscription Groups:
   Delete Failed: Skupine ni bilo mogoče izbrisati.
   Group Icon: Ikona skupine
   No Icon: Brez ikone
+  Show Channels in All: Prikaži kanale v Vse
+  Show Channels in All Description: Ko je onemogočeno, so kanali, ki pripadajo samo tej skupini, skriti iz vira naročnin Vse.
+  All Hidden From All: Vsi kanali v trenutnem profilu so skriti iz vira Vse.
 Yattee Server:
   API Error (Click to copy): Napaka strežnika Yattee (kliknite za kopiranje)
   Unsupported page: Ta stran s strežnikom Yattee ni na voljo. Vklopite nastavitev »{fallbackSetting}«, da jo naložite z lokalnim APV.

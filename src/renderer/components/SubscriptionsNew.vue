@@ -324,7 +324,7 @@ for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
 // Cache updates are batched during large refreshes, but local filtering and
 // sort choices should affect the list immediately.
 watch([
-  () => getNewSubscriptionFeedOptions(store.getters.getActiveGroupSubscriptions),
+  () => getNewSubscriptionFeedOptions(store.getters.getActiveFeedSubscriptions),
   () => store.getters.getSubscriptionSeenVideos,
   () => store.getters.getSubscriptionSeenPosts,
   () => [

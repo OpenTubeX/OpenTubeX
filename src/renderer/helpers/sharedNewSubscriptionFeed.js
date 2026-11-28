@@ -57,11 +57,13 @@ function createFeed(getSubscriptions) {
 }
 
 const profile = createFeed(() => store.getters.getActiveProfile.subscriptions)
-const group = createFeed(() => store.getters.getActiveGroupSubscriptions)
+const group = createFeed(() => store.getters.getActiveFeedSubscriptions)
 
-// Without an active group, the Subscriptions page lists the same channels as Home.
+// Reuse the profile feed whenever the active feed view shows all profile channels.
 const groupFeed = computed(() => (
-  store.getters.getActiveSubscriptionGroup == null ? profile.feed.value : group.feed.value
+  store.getters.getActiveFeedSubscriptions === store.getters.getActiveProfile.subscriptions
+    ? profile.feed.value
+    : group.feed.value
 ))
 
 /**

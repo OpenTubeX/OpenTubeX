@@ -3048,6 +3048,9 @@ Subscription Groups:
   Delete Failed: تعذّر حذف المجموعة.
   Group Icon: أيقونة المجموعة
   No Icon: بلا أيقونة
+  Show Channels in All: إظهار القنوات في الكل
+  Show Channels in All Description: عند تعطيله، تُخفى القنوات الموجودة في هذه المجموعة فقط من خلاصة الاشتراكات «الكل».
+  All Hidden From All: جميع القنوات في الملف الشخصي الحالي مخفية من خلاصة «الكل».
 Yattee Server:
   API Error (Click to copy): خطأ خادم Yattee (انقر للنسخ)
   Unsupported page: هذه الصفحة غير متاحة مع خادم Yattee. فعّل «{fallbackSetting}» لتحميلها باستخدام الواجهة البرمجية المحلية.

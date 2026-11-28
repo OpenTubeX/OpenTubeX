@@ -3007,6 +3007,9 @@ Subscription Groups:
   Delete Failed: Skupinu sa nepodarilo vymazať.
   Group Icon: Ikona skupiny
   No Icon: Bez ikony
+  Show Channels in All: Zobrazovať kanály vo Všetko
+  Show Channels in All Description: Ak je vypnuté, kanály zaradené iba v tejto skupine sa skryjú z informačného kanála odberov Všetko.
+  All Hidden From All: Všetky kanály v aktuálnom profile sú skryté z informačného kanála Všetko.
 Yattee Server:
   API Error (Click to copy): Chyba servera Yattee (kliknite pre kopírovanie)
   Unsupported page: Táto stránka nie je so serverom Yattee dostupná. Zapnite možnosť „{fallbackSetting}“, aby sa načítala pomocou lokálneho API.

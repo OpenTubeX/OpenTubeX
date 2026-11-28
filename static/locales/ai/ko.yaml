@@ -3464,6 +3464,9 @@ Subscription Groups:
   Delete Failed: 그룹을 삭제하지 못했습니다.
   Group Icon: 그룹 아이콘
   No Icon: 아이콘 없음
+  Show Channels in All: 전체에 채널 표시
+  Show Channels in All Description: 비활성화하면 이 그룹에만 속한 채널은 전체 구독 피드에서 숨겨집니다.
+  All Hidden From All: 현재 프로필의 모든 채널이 전체 피드에서 숨겨져 있습니다.
 Yattee Server:
   API Error (Click to copy): Yattee 서버 오류(복사하려면 클릭)
   Unsupported page: 이 페이지는 Yattee 서버에서 사용할 수 없습니다. 로컬 API로 불러오려면 “{fallbackSetting}”을(를) 켜세요.

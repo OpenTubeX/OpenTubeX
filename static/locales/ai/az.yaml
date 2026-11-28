@@ -3017,6 +3017,9 @@ Subscription Groups:
   Delete Failed: Qrupu silmək mümkün olmadı.
   Group Icon: Qrup nişanı
   No Icon: Nişan yoxdur
+  Show Channels in All: Kanalları Hamısı bölməsində göstər
+  Show Channels in All Description: Deaktiv edildikdə, yalnız bu qrupda olan kanallar Hamısı abunəlik lentindən gizlədilir.
+  All Hidden From All: Cari profildəki bütün kanallar Hamısı lentindən gizlədilib.
 Yattee Server:
   API Error (Click to copy): Yattee Server Xətası (Köçürmək üçün kliklə)
   Unsupported page: Bu səhifə Yattee serveri ilə əlçatan deyil. Onu yerli API ilə yükləmək üçün “{fallbackSetting}” seçimini aktiv edin.

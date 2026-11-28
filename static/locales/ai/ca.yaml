@@ -3654,6 +3654,9 @@ Subscription Groups:
   Delete Failed: No s'ha pogut suprimir el grup.
   Group Icon: Icona del grup
   No Icon: Sense icona
+  Show Channels in All: Mostra els canals a Tots
+  Show Channels in All Description: Si està desactivat, els canals que només són en aquest grup s'oculten del canal de subscripcions Tots.
+  All Hidden From All: Tots els canals del perfil actual estan ocults del canal Tots.
 Yattee Server:
   API Error (Click to copy): S'ha produït un error en el servidor Yattee (feu clic per copiar-lo)
   Unsupported page: Aquesta pàgina no està disponible amb el servidor Yattee. Activeu «{fallbackSetting}» per carregar-la amb l'API local.

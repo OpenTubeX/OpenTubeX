@@ -3065,6 +3065,9 @@ Subscription Groups:
   Delete Failed: Grupul nu a putut fi șters.
   Group Icon: Pictograma grupului
   No Icon: Fără pictogramă
+  Show Channels in All: Afișează canalele în Toate
+  Show Channels in All Description: Când este dezactivată, canalele care aparțin doar acestui grup sunt ascunse din fluxul de abonamente Toate.
+  All Hidden From All: Toate canalele din profilul curent sunt ascunse din fluxul Toate.
 Yattee Server:
   API Error (Click to copy): Eroare server Yattee (Faceți clic pentru a copia)
   Unsupported page: Această pagină nu este disponibilă cu serverul Yattee. Activați „{fallbackSetting}” pentru a o încărca prin API-ul local.

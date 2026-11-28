@@ -3017,6 +3017,9 @@ Subscription Groups:
   Delete Failed: Ezin izan da taldea ezabatu.
   Group Icon: Taldearen ikonoa
   No Icon: Ikonorik gabe
+  Show Channels in All: Erakutsi kanalak Guztiak atalean
+  Show Channels in All Description: Desgaituta dagoenean, talde honetan soilik dauden kanalak Guztiak harpidetzen jarioko bistatik ezkutatzen dira.
+  All Hidden From All: Uneko profileko kanal guztiak Guztiak jarioko bistatik ezkutatuta daude.
 Yattee Server:
   API Error (Click to copy): Yattee zerbitzariak huts egin du (klikatu kopiatzeko)
   Unsupported page: Orri hau ez dago erabilgarri Yattee zerbitzariarekin. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.

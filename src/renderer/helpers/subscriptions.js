@@ -46,6 +46,7 @@ import {
   showToastOnAllTabs,
 } from './utils'
 import { getSubscriptionsForFeed, listsSubscriptionChannelError } from './subscription-channels'
+import { filterSubscriptionsForFeed } from './subscription-groups'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
@@ -516,10 +517,20 @@ export function notifyNewSubscriptionChannelErrors(errors, t) {
     message: t('Subscriptions.Channel Errors.Toast'),
     icon: ['fas', 'circle-exclamation'],
     action: () => {
-      // The box only lists the selected group's channels
-      const groupChannelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
-      if (!hiddenErrors.every(({ channelId }) => groupChannelIds.has(channelId))) {
-        store.dispatch('selectSubscriptionGroup', null)
+      // The box only lists the channels shown by the active feed view
+      const shownChannelIds = new Set(store.getters.getActiveFeedSubscriptions.map(channel => channel.id))
+      if (!hiddenErrors.every(({ channelId }) => shownChannelIds.has(channelId))) {
+        const groups = store.getters.getSubscriptionGroupList ?? []
+        const allChannelIds = new Set(
+          filterSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, null, groups).map(channel => channel.id)
+        )
+        if (hiddenErrors.every(({ channelId }) => allChannelIds.has(channelId))) {
+          store.dispatch('selectSubscriptionGroup', null)
+        } else {
+          const matchingGroup = groups.find(group => hiddenErrors.every(({ channelId }) => group.channelIds.includes(channelId))) ??
+            groups.find(group => group.channelIds.includes(hiddenErrors[0].channelId))
+          store.dispatch('selectSubscriptionGroup', matchingGroup?.id ?? null)
+        }
       }
       const { feed } = hiddenErrors[0]
       openInternalPath({

@@ -3016,6 +3016,9 @@ Subscription Groups:
   Delete Failed: Ryhmää ei voitu poistaa.
   Group Icon: Ryhmän kuvake
   No Icon: Ei kuvaketta
+  Show Channels in All: Näytä kanavat Kaikki-syötteessä
+  Show Channels in All Description: Kun tämä on pois käytöstä, vain tähän ryhmään kuuluvat kanavat piilotetaan Kaikki-tilaussyötteestä.
+  All Hidden From All: Kaikki nykyisen profiilin kanavat on piilotettu Kaikki-syötteestä.
 Yattee Server:
   API Error (Click to copy): Yattee-palvelimen virhe (Kopioi napsauttamalla)
   Unsupported page: Tämä sivu ei ole käytettävissä Yattee-palvelimen kanssa. Ota käyttöön ”{fallbackSetting}”, niin sivu ladataan paikallisella API:lla.

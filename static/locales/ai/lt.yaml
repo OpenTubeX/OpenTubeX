@@ -3510,6 +3510,9 @@ Subscription Groups:
   Delete Failed: Nepavyko ištrinti grupės.
   Group Icon: Grupės piktograma
   No Icon: Be piktogramos
+  Show Channels in All: Rodyti kanalus skiltyje Visi
+  Show Channels in All Description: Išjungus, tik šiai grupei priklausantys kanalai paslepiami iš prenumeratų srauto Visi.
+  All Hidden From All: Visi dabartinio profilio kanalai yra paslėpti iš srauto Visi.
 Yattee Server:
   API Error (Click to copy): Yattee serverio klaida (spustelėkite, jei norite kopijuoti)
   Unsupported page: Šis puslapis nepasiekiamas naudojant Yattee serverį. Įjunkite „{fallbackSetting}“, kad jį įkeltumėte naudodami vietinį API.

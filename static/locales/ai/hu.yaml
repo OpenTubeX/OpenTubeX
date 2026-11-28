@@ -3008,6 +3008,9 @@ Subscription Groups:
   Delete Failed: Nem sikerült törölni a csoportot.
   Group Icon: Csoportikon
   No Icon: Nincs ikon
+  Show Channels in All: Csatornák megjelenítése az Összes lapon
+  Show Channels in All Description: Kikapcsolva a csak ehhez a csoporthoz tartozó csatornák rejtve maradnak az Összes feliratkozási hírfolyamban.
+  All Hidden From All: Az aktuális profil összes csatornája rejtve van az Összes hírfolyamból.
 Yattee Server:
   API Error (Click to copy): Yattee-kiszolgáló hiba (Kattintson a másoláshoz)
   Unsupported page: Ez az oldal nem érhető el a Yattee-kiszolgálóval. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjön be.

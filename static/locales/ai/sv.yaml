@@ -3007,6 +3007,9 @@ Subscription Groups:
   Delete Failed: Det gick inte att ta bort gruppen.
   Group Icon: Gruppikon
   No Icon: Ingen ikon
+  Show Channels in All: Visa kanaler i Alla
+  Show Channels in All Description: När detta är inaktiverat döljs kanaler som bara ingår i den här gruppen från prenumerationsflödet Alla.
+  All Hidden From All: Alla kanaler i den aktuella profilen är dolda från flödet Alla.
 Yattee Server:
   API Error (Click to copy): Fel i Yattee-servern (klicka för att kopiera)
   Unsupported page: Den här sidan är inte tillgänglig via Yattee-servern. Aktivera ”{fallbackSetting}” för att läsa in den med det lokala API:et.

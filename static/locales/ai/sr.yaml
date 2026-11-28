@@ -3096,6 +3096,9 @@ Subscription Groups:
   Delete Failed: Није могуће избрисати групу.
   Group Icon: Икона групе
   No Icon: Без иконе
+  Show Channels in All: Прикажи канале у Све
+  Show Channels in All Description: Када је онемогућено, канали који припадају само овој групи сакривени су из фида претплата Све.
+  All Hidden From All: Сви канали у тренутном профилу су сакривени из фида Све.
 Yattee Server:
   API Error (Click to copy): Грешка Yattee сервера (Кликнути за копирање)
   Unsupported page: Ова страница није доступна са Yattee сервером. Укључите „{fallbackSetting}“ да бисте је учитали помоћу локалног API-ја.

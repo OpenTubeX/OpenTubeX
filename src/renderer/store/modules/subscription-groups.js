@@ -1,6 +1,7 @@
 import i18n from '../../i18n/index'
 import {
   filterSubscriptionsByGroup,
+  filterSubscriptionsForFeed,
   normalizeChannelIds,
   normalizeSubscriptionGroups,
   sortSubscriptionGroups
@@ -49,6 +50,15 @@ const getters = {
   /** Subscriptions of the active profile, limited to the active group */
   getActiveGroupSubscriptions: (_state, getters) => {
     return filterSubscriptionsByGroup(getters.getActiveProfile.subscriptions, getters.getActiveSubscriptionGroup)
+  },
+
+  /** Subscriptions shown by the Subscriptions feeds for the active group */
+  getActiveFeedSubscriptions: (_state, getters) => {
+    return filterSubscriptionsForFeed(
+      getters.getActiveProfile.subscriptions,
+      getters.getActiveSubscriptionGroup,
+      getters.getSubscriptionGroupList
+    )
   },
 
   getSubscribedChannelsCustomOrderList: (_state, _getters, rootState) => {

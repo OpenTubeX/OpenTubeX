@@ -52,6 +52,7 @@ function seed(settings = {}, subscriptions = CHANNELS) {
 
 const groups = page => page.getByRole('tablist', { name: 'Groups' })
 const channelNames = page => page.locator('#subscribedChannelsList .channelName')
+const editorChannels = editor => editor.locator('.channelPicker').getByRole('checkbox')
 const storedGroups = page => page.evaluate(() => window.$store.getters.getSubscriptionGroupList)
 const feedVideo = (page, title) => page.locator('#subscriptionsPanel .ft-list-video').filter({ hasText: title })
 
@@ -164,7 +165,7 @@ test.describe('saving subscription groups', () => {
       await goTo(page, 'subscribedchannels')
       await expect(page.getByText('Your channel list is currently empty.')).toBeVisible()
       await page.getByRole('button', { name: 'New Group' }).click()
-      await expect(page.getByRole('dialog', { name: 'New Group' }).getByRole('checkbox'))
+      await expect(editorChannels(page.getByRole('dialog', { name: 'New Group' })))
         .toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
     })
   })
@@ -190,7 +191,7 @@ test.describe('picking channels for a group', () => {
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
     await editor.getByRole('searchbox', { name: 'Search Channels' }).fill('Channel 59')
-    await expect(editor.getByRole('checkbox')).toHaveCount(1)
+    await expect(editorChannels(editor)).toHaveCount(1)
     await expect.poll(() => scroller.evaluate(element => ({
       scrollTop: element.scrollTop,
       overflows: element.scrollHeight > element.clientHeight + 1
@@ -210,7 +211,7 @@ test.describe('picking from many channels', () => {
     await page.getByRole('button', { name: 'New Group' }).click()
 
     const editor = page.getByRole('dialog', { name: 'New Group' })
-    const checkboxes = editor.getByRole('checkbox')
+    const checkboxes = editorChannels(editor)
     await expect(checkboxes).toHaveCount(100)
     await expect(checkboxes.last()).toHaveText('Channel 099')
 
@@ -242,11 +243,11 @@ test.describe('picking from many channels', () => {
       await page.getByRole('button', { name: 'New Group' }).click()
 
       const editor = page.getByRole('dialog', { name: 'New Group' })
-      await expect(editor.getByRole('checkbox')).toHaveCount(100)
+      await expect(editorChannels(editor)).toHaveCount(100)
       const loadMore = editor.getByRole('button', { name: 'Load More Channels' })
       await loadMore.focus()
       await page.keyboard.press('Enter')
-      await expect(editor.getByRole('checkbox')).toHaveCount(200)
+      await expect(editorChannels(editor)).toHaveCount(200)
       await expect(editor.getByRole('checkbox', { name: 'Channel 100' })).toBeFocused()
 
       // The next page's button replaces the one the dialog had when it opened.
@@ -304,7 +305,7 @@ test.describe('editing subscription groups', () => {
     await page.getByRole('button', { name: 'Edit Group' }).click()
     const editor = page.getByRole('dialog', { name: 'Edit Group' })
     // Members come first
-    await expect(editor.getByRole('checkbox')).toHaveText(['Alpha Channel', 'Gamma Channel', 'Beta Channel'])
+    await expect(editorChannels(editor)).toHaveText(['Alpha Channel', 'Gamma Channel', 'Beta Channel'])
     await expect(editor.getByText('2 selected')).toBeVisible()
     await editor.getByRole('textbox', { name: 'Group Name' }).fill('Songs')
     await editor.getByRole('checkbox', { name: 'Alpha Channel' }).click()
@@ -688,5 +689,99 @@ test.describe('refresh errors in a group', () => {
     await expect(errorChannels).toHaveText(['Alpha Channel', 'Gamma Channel'])
     await groups(page).getByRole('tab', { name: 'All' }).click()
     await expect(errorChannels).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+  })
+})
+
+test.describe('hiding subscription groups from the All feed', () => {
+  const newVideoCache = CHANNELS.map((channel, index) => {
+    const entry = cacheEntry(channel, index)
+    return {
+      ...entry,
+      videos: entry.videos.map(video => ({ ...video, isNewInSubscriptionFeed: true }))
+    }
+  })
+
+  test.use({
+    seed: {
+      ...seed({
+        subscriptionGroups: [
+          { id: 'visible', name: 'Visible', channelIds: [ALPHA] },
+          { id: 'niche', name: 'Niche', channelIds: [ALPHA, BETA] }
+        ]
+      }),
+      subscriptionCache: newVideoCache
+    }
+  })
+
+  test('hides channels exclusive to group-only groups from All feeds without affecting other tabs or pages', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Beta Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Gamma Channel upload')).toBeVisible()
+
+    // Edit Niche and turn off "Show channels in All"
+    await groups(page).getByRole('tab', { name: 'Niche' }).click()
+    await page.getByRole('button', { name: 'Edit Group' }).click()
+    const editor = page.getByRole('dialog', { name: 'Edit Group' })
+    const showInAllSwitch = editor.getByRole('checkbox', { name: 'Show channels in All' })
+    await expect(showInAllSwitch).toBeChecked()
+    await editor.locator('label', { hasText: 'Show channels in All' }).click()
+    await expect(showInAllSwitch).not.toBeChecked()
+    await editor.getByRole('button', { name: 'Save' }).click()
+    await expect(editor).toBeHidden()
+
+    // Niche tab still shows its own channels
+    await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Beta Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Gamma Channel upload')).toBeHidden()
+
+    // All tab excludes Beta (exclusive to Niche), keeps Alpha (also in Visible) and Gamma (ungrouped)
+    await groups(page).getByRole('tab', { name: 'All' }).click()
+    await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Gamma Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Beta Channel upload')).toBeHidden()
+
+    // New feed tab respects the same All filter
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Gamma Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Beta Channel upload')).toBeHidden()
+
+    // Channels page All tab still shows every subscribed channel
+    await goTo(page, 'subscribedchannels')
+    await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+
+    // Setting persists across relaunch
+    expect((await storedGroups(page)).find(group => group.id === 'niche')).toEqual({
+      id: 'niche',
+      name: 'Niche',
+      channelIds: [ALPHA, BETA],
+      showInAll: false
+    })
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscriptions')
+    await expect(groups(page).getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
+    await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Gamma Channel upload')).toBeVisible()
+    await expect(feedVideo(page, 'Beta Channel upload')).toBeHidden()
+  })
+
+  test.describe('when every subscribed channel is hidden from All', () => {
+    test.use({
+      seed: seed({
+        subscriptionGroups: [
+          { id: 'only', name: 'Only', channelIds: [ALPHA, BETA, GAMMA], showInAll: false }
+        ]
+      })
+    })
+
+    test('shows an empty message on the All feed while the group tab shows its videos', async ({ page }) => {
+      await goTo(page, 'subscriptions')
+      await expect(page.getByText('All channels in the current profile are hidden from the All feed.')).toBeVisible()
+      await groups(page).getByRole('tab', { name: 'Only' }).click()
+      await expect(feedVideo(page, 'Alpha Channel upload')).toBeVisible()
+      await expect(feedVideo(page, 'Beta Channel upload')).toBeVisible()
+      await expect(feedVideo(page, 'Gamma Channel upload')).toBeVisible()
+    })
   })
 })

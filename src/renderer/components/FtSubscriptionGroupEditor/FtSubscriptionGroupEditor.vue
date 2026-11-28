@@ -60,29 +60,65 @@
             @click="setDisplayedChannelsSelected(false)"
           />
         </FtButtonGroup>
+        <Teleport
+          defer
+          :to="phoneOptionsRef"
+          :disabled="!isCompactLayout || phoneOptionsRef === null"
+        >
+          <FtToggleSwitch
+            class="showInAllToggle"
+            :label="t('Subscription Groups.Show Channels in All')"
+            :tooltip="t('Subscription Groups.Show Channels in All Description')"
+            :default-value="showInAll"
+            compact
+            @change="showInAll = $event"
+          />
+        </Teleport>
       </div>
     </template>
     <div
-      class="iconPicker"
-      role="group"
-      :aria-label="t('Subscription Groups.Group Icon')"
+      v-show="isCompactLayout"
+      ref="phoneOptionsRef"
+      class="phoneGroupOptions"
+    />
+    <details
+      class="iconPickerDisclosure"
+      :open="!isCompactLayout"
     >
-      <button
-        v-for="option in iconOptions"
-        :key="option.icon ?? ''"
-        type="button"
-        class="iconOption"
-        :aria-pressed="icon === option.icon"
-        :aria-label="option.label"
-        :title="option.label"
-        @click="icon = option.icon"
-      >
+      <summary class="iconPickerSummary">
         <FtIcon
-          :icon="['fas', option.icon ?? 'ban']"
+          :icon="['fas', icon ?? 'ban']"
           aria-hidden="true"
         />
-      </button>
-    </div>
+        <span>{{ t('Subscription Groups.Group Icon') }}</span>
+        <FtIcon
+          class="iconPickerChevron"
+          :icon="['fas', 'angle-down']"
+          aria-hidden="true"
+        />
+      </summary>
+      <div
+        class="iconPicker"
+        role="group"
+        :aria-label="t('Subscription Groups.Group Icon')"
+      >
+        <button
+          v-for="option in iconOptions"
+          :key="option.icon ?? ''"
+          type="button"
+          class="iconOption"
+          :aria-pressed="icon === option.icon"
+          :aria-label="option.label"
+          :title="option.label"
+          @click="icon = option.icon"
+        >
+          <FtIcon
+            :icon="['fas', option.icon ?? 'ban']"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+    </details>
     <p
       v-if="channels.length === 0"
       class="message"
@@ -122,7 +158,7 @@
       </FtAutoLoadNextPageWrapper>
     </template>
     <template #footer>
-      <FtButtonGroup>
+      <FtButtonGroup class="editorFooterActions">
         <FtButton
           v-if="group !== null"
           theme="destructive"
@@ -163,7 +199,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
@@ -173,6 +209,7 @@ import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
@@ -206,6 +243,7 @@ const title = computed(() => {
 const name = ref(props.group?.name ?? '')
 /** @type {import('vue').Ref<string | null>} */
 const icon = ref(props.group?.icon ?? null)
+const showInAll = ref(props.group?.showInAll !== false)
 
 const iconOptions = computed(() => {
   const labels = getTabGroupIconLabels(t)
@@ -289,9 +327,21 @@ function setDisplayedChannelsSelected(included) {
 }
 
 const nameInput = useTemplateRef('nameInput')
+const phoneOptionsRef = useTemplateRef('phoneOptionsRef')
+
+const compactLayoutQuery = window.matchMedia('(max-width: 680px)')
+const isCompactLayout = ref(compactLayoutQuery.matches)
+function updateCompactLayout(event) {
+  isCompactLayout.value = event.matches
+}
 
 onMounted(() => {
+  compactLayoutQuery.addEventListener('change', updateCompactLayout)
   nextTick(() => nameInput.value?.focus())
+})
+
+onBeforeUnmount(() => {
+  compactLayoutQuery.removeEventListener('change', updateCompactLayout)
 })
 
 async function save() {
@@ -302,7 +352,8 @@ async function save() {
   const group = {
     name: trimmedName,
     channelIds: [...selected],
-    ...(icon.value === null ? {} : { icon: icon.value })
+    ...(icon.value === null ? {} : { icon: icon.value }),
+    ...(showInAll.value ? {} : { showInAll: false })
   }
   let saved
   try {

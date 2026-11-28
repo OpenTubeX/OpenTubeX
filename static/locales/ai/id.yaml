@@ -3034,6 +3034,9 @@ Subscription Groups:
   Delete Failed: Tidak dapat menghapus grup.
   Group Icon: Ikon grup
   No Icon: Tanpa ikon
+  Show Channels in All: Tampilkan saluran di Semua
+  Show Channels in All Description: Saat dinonaktifkan, saluran yang hanya ada di grup ini disembunyikan dari umpan langganan Semua.
+  All Hidden From All: Semua saluran di profil saat ini disembunyikan dari umpan Semua.
 Yattee Server:
   API Error (Click to copy): Galat Server Yattee (Klik untuk menyalin)
   Unsupported page: Halaman ini tidak tersedia dengan server Yattee. Aktifkan “{fallbackSetting}” untuk memuatnya dengan API lokal.

@@ -3023,6 +3023,9 @@ Subscription Groups:
   Delete Failed: Ekki tókst að eyða hópnum.
   Group Icon: Hóptákn
   No Icon: Ekkert tákn
+  Show Channels in All: Sýna rásir í Allt
+  Show Channels in All Description: Þegar slökkt er á þessu eru rásir sem tilheyra aðeins þessum hópi faldar í áskriftarstraumnum Allt.
+  All Hidden From All: Allar rásir í núverandi sniði eru faldar í straumnum Allt.
 Yattee Server:
   API Error (Click to copy): Villa í Yattee-netþjóni (smella til að afrita)
   Unsupported page: Þessi síða er ekki tiltæk með Yattee-netþjóninum. Kveiktu á „{fallbackSetting}“ til að sækja hana með staðværa API-kerfisviðmótinu.

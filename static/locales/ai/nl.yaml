@@ -3080,6 +3080,9 @@ Subscription Groups:
   Delete Failed: De groep kon niet worden verwijderd.
   Group Icon: Groepspictogram
   No Icon: Geen pictogram
+  Show Channels in All: Kanalen weergeven in Alles
+  Show Channels in All Description: Indien uitgeschakeld worden kanalen die alleen in deze groep zitten verborgen in de abonnementsfeed Alles.
+  All Hidden From All: Alle kanalen in het huidige profiel zijn verborgen in de feed Alles.
 Yattee Server:
   API Error (Click to copy): Fout in Yattee-server (Klik om te kopiëren)
   Unsupported page: Deze pagina is niet beschikbaar met de Yattee-server. Schakel ‘{fallbackSetting}’ in om deze met de lokale API te laden.

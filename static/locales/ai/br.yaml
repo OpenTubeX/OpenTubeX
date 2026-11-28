@@ -3018,6 +3018,9 @@ Subscription Groups:
   Delete Failed: N'eus ket bet gallet dilemel ar strollad.
   Group Icon: Arlun ar strollad
   No Icon: Arlun ebet
+  Show Channels in All: Diskouez ar chadennoù e An holl
+  Show Channels in All Description: Pa vez diweredekaet, ar chadennoù a zo er strollad-mañ hepken a vez kuzhet diouzh al lanv koumanantoù An holl.
+  All Hidden From All: Kuzhet eo holl chadennoù ar profil bremanel diouzh al lanv An holl.
 Yattee Server:
   API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
   Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."

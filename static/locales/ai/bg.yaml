@@ -3044,6 +3044,9 @@ Subscription Groups:
   Delete Failed: Групата не можа да бъде изтрита.
   Group Icon: Икона на групата
   No Icon: Без икона
+  Show Channels in All: Показване на каналите във „Всички“
+  Show Channels in All Description: Когато е изключено, каналите, които са само в тази група, се скриват от емисията с абонаменти „Всички“.
+  All Hidden From All: Всички канали от текущия профил са скрити от емисията „Всички“.
 Yattee Server:
   API Error (Click to copy): Грешка в сървъра Yattee (щракнете за копиране)
   Unsupported page: Тази страница не е достъпна със сървъра Yattee. Включете „{fallbackSetting}“, за да я заредите чрез локалния интерфейс.

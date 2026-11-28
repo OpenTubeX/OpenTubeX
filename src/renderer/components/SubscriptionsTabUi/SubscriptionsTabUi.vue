@@ -42,6 +42,12 @@
         {{ $t('Subscription Groups.Empty Group') }}
       </p>
       <p
+        v-else-if="allFeedHiddenByGroups"
+        class="message"
+      >
+        {{ $t('Subscription Groups.All Hidden From All') }}
+      </p>
+      <p
         v-else-if="onlyShowNew"
         class="message"
       >
@@ -225,7 +231,11 @@ const activeProfileHasSubscriptions = computed(() => {
 const channelErrorFeeds = computed(() => props.errorFeeds ?? (props.refreshTab === null ? [] : [props.refreshTab]))
 
 const activeGroupIsEmpty = computed(() => {
-  return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0
+  return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveFeedSubscriptions.length === 0
+})
+
+const allFeedHiddenByGroups = computed(() => {
+  return store.getters.getActiveSubscriptionGroup === null && store.getters.getActiveFeedSubscriptions.length === 0
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
