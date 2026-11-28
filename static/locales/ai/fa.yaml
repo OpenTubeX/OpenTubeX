@@ -2366,6 +2366,8 @@ Playlist:
   Unavailable videos are hidden: ویدیوهای در دسترس‌نبوده پنهان هستند
   Add Playlist to Queue: "افزودن فهرست پخش به صف"
   Playlist Added to Queue: "فهرست پخش به صف افزوده شد"
+  Sort By:
+    Default: پیش‌فرض
 Change Format:
   yt-dlp Error Template: "yt-dlp نتوانست جریان‌ها را فراهم کند: {error}"
   Local Video File: فایل ویدیویی محلی
@@ -2751,9 +2753,9 @@ KeyboardShortcutPrompt:
   Reassign: اختصاص دوباره
   Sections:
     App:
-      Tabs: "برنامه:\_زبانه‌ها"
-      Search and Page: "برنامه:\_جست‌وجو و صفحه"
-      Window and View: "برنامه:\_پنجره و نما"
+      Tabs: "برنامه: زبانه‌ها"
+      Search and Page: "برنامه: جست‌وجو و صفحه"
+      Window and View: "برنامه: پنجره و نما"
   New Tab: ایجاد زبانه جدید
   Close Tab: بستن زبانه فعلی
   Reload Tab: بارگیری دوباره زبانه فعلی

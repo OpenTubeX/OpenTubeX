@@ -2353,6 +2353,8 @@ Playlist:
   Unavailable videos are hidden: Utilgængelige videoer er skjult
   Add Playlist to Queue: "Føj playliste til kø"
   Playlist Added to Queue: "Playlisten er føjet til køen"
+  Sort By:
+    Default: Standard
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikke levere streamene: {error}"
   Local Video File: Lokal videofil
@@ -2739,9 +2741,9 @@ KeyboardShortcutPrompt:
   Reassign: Tildel igen
   Sections:
     App:
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søgning og side"
-      Window and View: "App:\_Vindue og visning"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søgning og side"
+      Window and View: "App: Vindue og visning"
   New Tab: Opret en ny fane
   Close Tab: Luk den aktuelle fane
   Reload Tab: Genindlæs den aktuelle fane

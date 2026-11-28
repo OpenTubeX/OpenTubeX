@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "无法加载完整播放列表，已取消预加载。"
   Add Playlist to Queue: "将播放列表添加到队列"
   Playlist Added to Queue: "播放列表已添加到队列"
+  Sort By:
+    Default: 默认
 Change Format:
   yt-dlp Error Template: "yt-dlp 无法提供流：{error}"
   Local Video File: 本地视频文件
@@ -2645,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: 重新分配
   Sections:
     App:
-      Tabs: "应用：\_标签页"
-      Search and Page: "应用：\_搜索与页面"
-      Window and View: "应用：\_窗口与视图"
+      Tabs: "应用： 标签页"
+      Search and Page: "应用： 搜索与页面"
+      Window and View: "应用： 窗口与视图"
   New Tab: 新建标签页
   Close Tab: 关闭当前标签页
   Reload Tab: 重新加载当前标签页

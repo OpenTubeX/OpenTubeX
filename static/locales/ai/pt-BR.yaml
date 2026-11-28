@@ -2223,6 +2223,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
   Add Playlist to Queue: "Adicionar playlist à fila"
   Playlist Added to Queue: "Playlist adicionada à fila"
+  Sort By:
+    Default: Padrão
 Change Format:
   yt-dlp Error Template: "O yt-dlp não conseguiu fornecer os streams: {error}"
   Local Video File: Arquivo de vídeo local
@@ -2599,9 +2601,9 @@ KeyboardShortcutPrompt:
   Reassign: Reatribuir
   Sections:
     App:
-      Tabs: "Aplicativo:\_Guias"
-      Search and Page: "Aplicativo:\_Pesquisa e página"
-      Window and View: "Aplicativo:\_Janela e vista"
+      Tabs: "Aplicativo: Guias"
+      Search and Page: "Aplicativo: Pesquisa e página"
+      Window and View: "Aplicativo: Janela e vista"
   New Tab: Criar uma nova guia
   Close Tab: Fechar a guia atual
   Reload Tab: Recarregar a guia atual

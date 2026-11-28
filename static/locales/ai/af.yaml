@@ -2530,6 +2530,8 @@ Playlist:
   Playlist Preload Partial: '{preloaded} van {requested} video’s vooraf gelaai. {failed} kon nie vooraf gelaai word nie.'
   Playlist Preload Pagination Failed: Die volledige afspeellys kon nie gelaai word nie, dus is voorlaai gekanselleer.
   Unavailable videos are hidden: Onbeskikbare video’s is versteek
+  Sort By:
+    Default: Verstek
 Change Format:
   yt-dlp Error Template: 'yt-dlp kon nie die strome verskaf nie: {error}'
   Local Video File: Plaaslike videolêer
@@ -2920,9 +2922,9 @@ KeyboardShortcutPrompt:
   Reassign: Hertoeken
   Sections:
     App:
-      Tabs: "Toep:\_Oortjies"
-      Search and Page: "Toep:\_Soek en blad"
-      Window and View: "Toep:\_Venster en aansig"
+      Tabs: "Toep: Oortjies"
+      Search and Page: "Toep: Soek en blad"
+      Window and View: "Toep: Venster en aansig"
   New Tab: Skep ’n nuwe oortjie
   Close Tab: Sluit die huidige oortjie
   Reload Tab: Herlaai die huidige oortjie

@@ -2285,6 +2285,8 @@ Playlist:
   Unavailable videos are hidden: Các video không có sẵn đã bị ẩn
   Add Playlist to Queue: "Thêm danh sách phát vào hàng đợi"
   Playlist Added to Queue: "Đã thêm danh sách phát vào hàng đợi"
+  Sort By:
+    Default: Mặc định
 Change Format:
   yt-dlp Error Template: "yt-dlp không thể cung cấp các luồng: {error}"
   Local Video File: Tệp video cục bộ
@@ -2664,9 +2666,9 @@ KeyboardShortcutPrompt:
   Reassign: Gán lại
   Sections:
     App:
-      Tabs: "Ứng dụng:\_Thẻ"
-      Search and Page: "Ứng dụng:\_Tìm kiếm & Trang"
-      Window and View: "Ứng dụng:\_Cửa sổ & Chế độ xem"
+      Tabs: "Ứng dụng: Thẻ"
+      Search and Page: "Ứng dụng: Tìm kiếm & Trang"
+      Window and View: "Ứng dụng: Cửa sổ & Chế độ xem"
   New Tab: Tạo thẻ mới
   Close Tab: Đóng thẻ hiện tại
   Reload Tab: Tải lại thẻ hiện tại

@@ -2337,6 +2337,8 @@ Playlist:
   Unavailable videos are hidden: கிடைக்காத காணொளிகள் மறைக்கப்பட்டுள்ளன
   Add Playlist to Queue: "பிளேலிச்ட்டை வரிசையில் சேர்"
   Playlist Added to Queue: "பிளேலிச்ட் வரிசையில் சேர்க்கப்பட்டது"
+  Sort By:
+    Default: இயல்புநிலை
 Change Format:
   yt-dlp Error Template: "yt-dlp ஸ்ட்ரீம்களை வழங்க முடியவில்லை: {error}"
   Local Video File: உள்ளகக் காணொளிக் கோப்பு
@@ -2718,9 +2720,9 @@ KeyboardShortcutPrompt:
   Reassign: மீண்டும் ஒதுக்கு
   Sections:
     App:
-      Tabs: "செயலி:\_தாவல்கள்"
-      Search and Page: "செயலி:\_தேடலும் பக்கமும்"
-      Window and View: "செயலி:\_சாளரமும் காட்சியும்"
+      Tabs: "செயலி: தாவல்கள்"
+      Search and Page: "செயலி: தேடலும் பக்கமும்"
+      Window and View: "செயலி: சாளரமும் காட்சியும்"
   New Tab: புதிய தாவலை உருவாக்கு
   Close Tab: தற்போதைய தாவலை மூடு
   Reload Tab: தற்போதைய தாவலை மீண்டும் ஏற்று

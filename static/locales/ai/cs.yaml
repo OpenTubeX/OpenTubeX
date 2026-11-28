@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Celý playlist se nepodařilo načíst, přednačítání bylo zrušeno."
   Add Playlist to Queue: "Přidat playlist do fronty"
   Playlist Added to Queue: "Playlist byl přidán do fronty"
+  Sort By:
+    Default: Výchozí
 Change Format:
   yt-dlp Error Template: "yt-dlp nemohl poskytnout streamy: {error}"
   Local Video File: Místní soubor videa
@@ -2645,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Přiřadit znovu
   Sections:
     App:
-      Tabs: "Aplikace:\_Karty"
-      Search and Page: "Aplikace:\_Hledání a stránka"
-      Window and View: "Aplikace:\_Okno a zobrazení"
+      Tabs: "Aplikace: Karty"
+      Search and Page: "Aplikace: Hledání a stránka"
+      Window and View: "Aplikace: Okno a zobrazení"
   New Tab: Vytvořit novou kartu
   Close Tab: Zavřít aktuální kartu
   Reload Tab: Znovu načíst aktuální kartu

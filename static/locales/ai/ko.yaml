@@ -2635,6 +2635,7 @@ Playlist:
     VideoDurationAscending: 재생 시간 (짧은순)
     VideoDurationDescending: 재생 시간 (긴순)
     Custom: 사용자 지정
+    Default: 기본값
   Preload Playlist: "모든 동영상 미리 불러오기"
   Preload Playlist Warning Title: "모든 동영상을 미리 불러올까요?"
   Preload Playlist Warning: "미리 불러오기는 이 재생목록의 모든 동영상을 YouTube에 요청합니다. 짧은 시간에 많은 요청을 보내면 YouTube가 IP 주소를 일시적으로 차단할 수 있습니다. 계속하시겠습니까?"
@@ -3078,13 +3079,13 @@ KeyboardShortcutPrompt:
   Reassign: 다시 할당
   Sections:
     Video:
-      Playback: "동영상:\_재생"
-      General: "동영상:\_일반"
+      Playback: "동영상: 재생"
+      General: "동영상: 일반"
     App:
-      General: "앱:\_일반"
-      Tabs: "앱:\_탭"
-      Search and Page: "앱:\_검색 및 페이지"
-      Window and View: "앱:\_창 및 보기"
+      General: "앱: 일반"
+      Tabs: "앱: 탭"
+      Search and Page: "앱: 검색 및 페이지"
+      Window and View: "앱: 창 및 보기"
   Show Keyboard Shortcuts: 키보드 단축키 표시
   History Backward: 한 페이지 뒤로 이동
   History Forward: 한 페이지 앞으로 이동

@@ -309,7 +309,7 @@ import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../
 import { navigationDownloadId } from '../../helpers/downloadPlayback'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getPlaylistSkipAvailability, getPlaylistSortOrder, getSortedPlaylistItems, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
+import { fillMissingPlaylistVideoDurations, getPlaylistSkipAvailability, getPlaylistSortOrder, getSortedPlaylistItems, isDurationSortOrder, isPlaylistSortOrder, isSortedByYouTube, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 import { isRendered } from '../../helpers/rendered'
@@ -537,8 +537,9 @@ const PLAYLIST_PRELOAD_DISTANCE = 50
 
 const needsMorePlaylistVideos = computed(() => {
   if (!canLoadMorePlaylistVideos.value) return false
-  // Reversed playback starts at the end and shuffle picks from the whole playlist.
-  if (reversePlaylist.value || shuffleEnabled.value || playlistPanelNearEnd.value) return true
+  // Reversed playback starts at the end, shuffle picks from the whole playlist,
+  // and a sorted remote playlist needs every page to order its videos accurately.
+  if (reversePlaylist.value || shuffleEnabled.value || playlistPanelNearEnd.value || remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom) return true
   if (playlistItems.value.length < requestedPlaylistVideoCount.value) return true
   const index = currentVideoIndexZeroBased.value
   // -1: the current video is on a later page. Loop steps back from the first video to the last.
@@ -582,6 +583,7 @@ const playlistPageLinkTo = computed(() => ({
 
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
+const remotePlaylistSortOrder = ref(SORT_BY_VALUES.Custom)
 
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
@@ -746,6 +748,7 @@ watch(() => props.playlistId, () => {
   pendingProgressBarIndex = null
   progressBarTargetIndex.value = -1
   resetUnavailableSkipChain()
+  remotePlaylistSortOrder.value = SORT_BY_VALUES.Custom
   reversePlaylist.value = storedReversePlaylist.value
   applyShuffleByDefault()
 
@@ -1171,7 +1174,12 @@ function parseVisibleLocalPlaylistVideos(items) {
  */
 function appendPlaylistVideos(newVideos) {
   if (newVideos.length === 0) return
-  if (reversePlaylist.value) {
+  if (remotePlaylistSortOrder.value !== SORT_BY_VALUES.Custom) {
+    playlistItems.value = sortPlaylistItemsForDisplay(
+      playlistItems.value.concat(newVideos),
+      remotePlaylistSortOrder.value
+    )
+  } else if (reversePlaylist.value) {
     playlistItems.value = newVideos.toReversed().concat(playlistItems.value)
   } else {
     playlistItems.value.push(...newVideos)
@@ -1266,7 +1274,20 @@ function invidiousPlaylistPageLoader(playlistId, loaded, { videoCount, pageNumbe
 }
 
 /**
- * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null, nextInvidiousPage?: number | null }} cachedPlaylist
+ * Sorts playlist items for playback and display, falling back to history
+ * durations when sorting by length so the watch page matches the playlist page.
+ * @param {VideoData[]} videos
+ * @param {string} order
+ */
+function sortPlaylistItemsForDisplay(videos, order) {
+  const items = isDurationSortOrder(order)
+    ? fillMissingPlaylistVideoDurations(videos, toRaw(store.getters.getHistoryCacheById)).items
+    : videos
+  return getSortedPlaylistItems(items, order, locale.value, reversePlaylist.value)
+}
+
+/**
+ * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], sortOrder?: string, continuationData: string | null, nextInvidiousPage?: number | null }} cachedPlaylist
  */
 function loadCachedPlaylistInformation(cachedPlaylist) {
   getPlaylistInfoRun = true
@@ -1276,6 +1297,9 @@ function loadCachedPlaylistInformation(cachedPlaylist) {
   playlistTotalVideoCount.value = cachedPlaylist.totalVideoCount
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
+  remotePlaylistSortOrder.value = !isUserPlaylist.value && isPlaylistSortOrder(cachedPlaylist.sortOrder)
+    ? cachedPlaylist.sortOrder
+    : SORT_BY_VALUES.Custom
 
   const nextInvidiousPage = cachedPlaylist.nextInvidiousPage ?? null
   const videos = cachedPlaylist.items.slice()
@@ -1293,7 +1317,7 @@ function loadCachedPlaylistInformation(cachedPlaylist) {
   // Playback must not wait for later pages when the next video is already cached.
   // A sort preference can finish saving after the page cached its previous order.
   playlistItems.value = isUserPlaylist.value
-    ? getSortedPlaylistItems(videos, appliedSortOrder.value, locale.value, reversePlaylist.value)
+    ? sortPlaylistItemsForDisplay(videos, appliedSortOrder.value)
     : applyReversePlaylistState(videos.slice())
   // Shuffle stays enabled across playlists, so rebuild the order from this one.
   if (shuffleEnabled.value) shufflePlaylistItems()
@@ -1408,7 +1432,7 @@ function parseUserPlaylist(playlist) {
     prevVideoBeforeDeletion.value = targetVideoIndex >= 0 ? playlistItems.value[targetVideoIndex] : null
   }
 
-  playlistItems.value = getSortedPlaylistItems(playlist.videos, appliedSortOrder.value, locale.value, reversePlaylist.value)
+  playlistItems.value = sortPlaylistItemsForDisplay(playlist.videos, appliedSortOrder.value)
 
   isLoading.value = false
 }

@@ -2327,6 +2327,8 @@ Playlist:
   Unavailable videos are hidden: סרטונים לא זמינים מוסתרים
   Add Playlist to Queue: "הוספת רשימת הנגינה לתור"
   Playlist Added to Queue: "רשימת הנגינה נוספה לתור"
+  Sort By:
+    Default: ברירת מחדל
 Change Format:
   yt-dlp Error Template: "yt-dlp לא הצליח לספק את הזרמים: {error}"
   Local Video File: קובץ וידאו מקומי
@@ -2708,9 +2710,9 @@ KeyboardShortcutPrompt:
   Reassign: הקצאה מחדש
   Sections:
     App:
-      Tabs: "יישום:\_לשוניות"
-      Search and Page: "יישום:\_חיפוש ודף"
-      Window and View: "יישום:\_חלון ותצוגה"
+      Tabs: "יישום: לשוניות"
+      Search and Page: "יישום: חיפוש ודף"
+      Window and View: "יישום: חלון ותצוגה"
   New Tab: יצירת לשונית חדשה
   Close Tab: סגירת הלשונית הנוכחית
   Reload Tab: טעינת הלשונית הנוכחית מחדש

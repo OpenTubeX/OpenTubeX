@@ -3280,6 +3280,7 @@ Playlist:
     VideoDurationAscending: Duration (Shortest)
     VideoDurationDescending: Duration (Longest)
     Custom: Custom
+    Default: Default
 
 # On Video Watch Page
 #* Published

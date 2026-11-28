@@ -2321,6 +2321,8 @@ Playlist:
   Unavailable videos are hidden: Недоступні відео приховано
   Add Playlist to Queue: "Додати список відтворення до черги"
   Playlist Added to Queue: "Список відтворення додано до черги"
+  Sort By:
+    Default: Типово
 Change Format:
   yt-dlp Error Template: "yt-dlp не зміг отримати потоки: {error}"
   Local Video File: Локальний відеофайл
@@ -2700,9 +2702,9 @@ KeyboardShortcutPrompt:
   Reassign: Перепризначити
   Sections:
     App:
-      Tabs: "Програма:\_Вкладки"
-      Search and Page: "Програма:\_Пошук і сторінка"
-      Window and View: "Програма:\_Вікно й вигляд"
+      Tabs: "Програма: Вкладки"
+      Search and Page: "Програма: Пошук і сторінка"
+      Window and View: "Програма: Вікно й вигляд"
   New Tab: Створити нову вкладку
   Close Tab: Закрити поточну вкладку
   Reload Tab: Перезавантажити поточну вкладку

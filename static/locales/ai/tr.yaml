@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Oynatma listesinin tamamı yüklenemediği için önceden yükleme iptal edildi."
   Add Playlist to Queue: "Oynatma Listesini Kuyruğa Ekle"
   Playlist Added to Queue: "Oynatma listesi kuyruğa eklendi"
+  Sort By:
+    Default: Varsayılan
 Change Format:
   yt-dlp Error Template: "yt-dlp akışları sağlayamadı: {error}"
   Local Video File: Yerel video dosyası
@@ -2645,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Yeniden Ata
   Sections:
     App:
-      Tabs: "Uygulama:\_Sekmeler"
-      Search and Page: "Uygulama:\_Arama ve Sayfa"
-      Window and View: "Uygulama:\_Pencere ve Görünüm"
+      Tabs: "Uygulama: Sekmeler"
+      Search and Page: "Uygulama: Arama ve Sayfa"
+      Window and View: "Uygulama: Pencere ve Görünüm"
   New Tab: Yeni bir sekme oluştur
   Close Tab: Geçerli sekmeyi kapat
   Reload Tab: Geçerli sekmeyi yeniden yükle

@@ -2330,6 +2330,8 @@ Playlist:
   Unavailable videos are hidden: Os vídeos non dispoñibles están ocultos
   Add Playlist to Queue: "Engadir a lista de reprodución á cola"
   Playlist Added to Queue: "Engadiuse a lista de reprodución á cola"
+  Sort By:
+    Default: Por defecto
 Change Format:
   yt-dlp Error Template: "yt-dlp non puido proporcionar os fluxos: {error}"
   Local Video File: Ficheiro de vídeo local
@@ -2709,9 +2711,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasignar
   Sections:
     App:
-      Tabs: "Aplicación:\_Lapelas"
-      Search and Page: "Aplicación:\_Busca e páxina"
-      Window and View: "Aplicación:\_Xanela e vista"
+      Tabs: "Aplicación: Lapelas"
+      Search and Page: "Aplicación: Busca e páxina"
+      Window and View: "Aplicación: Xanela e vista"
   New Tab: Crear unha lapela nova
   Close Tab: Pechar a lapela actual
   Reload Tab: Recargar a lapela actual

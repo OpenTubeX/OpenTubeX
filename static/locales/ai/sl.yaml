@@ -2745,6 +2745,7 @@ Playlist:
     VideoDurationAscending: Trajanje (najkrajši)
     VideoDurationDescending: Trajanje (najdaljši)
     Custom: Po meri
+    Default: Privzeto
   Preload Playlist: "Prednaloži vse videoposnetke"
   Preload Playlist Warning Title: "Prednaložiti vse videoposnetke?"
   Preload Playlist Warning: "Prednalaganje od YouTuba zahteva vsak videoposnetek s tega seznama predvajanja. Pošiljanje veliko zahtev v kratkem času lahko povzroči, da YouTube začasno blokira vaš naslov IP. Ali želite nadaljevati?"
@@ -3215,13 +3216,13 @@ KeyboardShortcutPrompt:
   Reassign: Prerazporedi
   Sections:
     Video:
-      Playback: "Videoposnetek:\_Predvajanje"
-      General: "Videoposnetek:\_Splošno"
+      Playback: "Videoposnetek: Predvajanje"
+      General: "Videoposnetek: Splošno"
     App:
-      General: "Aplikacija:\_Splošno"
-      Tabs: "Aplikacija:\_Zavihki"
-      Search and Page: "Aplikacija:\_Iskanje in stran"
-      Window and View: "Aplikacija:\_Okno in pogled"
+      General: "Aplikacija: Splošno"
+      Tabs: "Aplikacija: Zavihki"
+      Search and Page: "Aplikacija: Iskanje in stran"
+      Window and View: "Aplikacija: Okno in pogled"
   Show Keyboard Shortcuts: Prikaži bližnjice na tipkovnici
   History Backward: Pojdi eno stran nazaj
   History Forward: Pojdi eno stran naprej

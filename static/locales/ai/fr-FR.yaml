@@ -2268,6 +2268,8 @@ Playlist:
   Playlist Preload Pagination Failed: "La playlist complète n’a pas pu être chargée, le préchargement a donc été annulé."
   Add Playlist to Queue: "Ajouter la playlist à la file d’attente"
   Playlist Added to Queue: "Playlist ajoutée à la file d’attente"
+  Sort By:
+    Default: Par défaut
 Change Format:
   yt-dlp Error Template: "yt-dlp n’a pas pu fournir les flux : {error}"
   Local Video File: Fichier vidéo local
@@ -2643,9 +2645,9 @@ KeyboardShortcutPrompt:
   Reassign: Réassigner
   Sections:
     App:
-      Tabs: "Application :\_onglets"
-      Search and Page: "Application :\_recherche et page"
-      Window and View: "Application :\_fenêtre et affichage"
+      Tabs: "Application : onglets"
+      Search and Page: "Application : recherche et page"
+      Window and View: "Application : fenêtre et affichage"
   New Tab: Créer un nouvel onglet
   Close Tab: Fermer l’onglet actuel
   Reload Tab: Recharger l’onglet actuel

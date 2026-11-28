@@ -2280,6 +2280,8 @@ Playlist:
   Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
   Add Playlist to Queue: "Ouzhpennañ ar roll-videoioù d'al lost"
   Playlist Added to Queue: "Ouzhpennet eo bet ar roll-videoioù d'al lost"
+  Sort By:
+    Default: Dre ziouer
 Change Format:
   yt-dlp Error Template: "N’en deus ket gallet yt-dlp pourchas al lanvioù: {error}"
   Local Video File: "Restr video lec'hel"
@@ -2656,9 +2658,9 @@ KeyboardShortcutPrompt:
   Reassign: "Adverkañ"
   Sections:
     App:
-      Tabs: "Arload:\_Ivinelloù"
-      Search and Page: "Arload:\_Klask & Pajenn"
-      Window and View: "Arload:\_Prenestr & Gwel"
+      Tabs: "Arload: Ivinelloù"
+      Search and Page: "Arload: Klask & Pajenn"
+      Window and View: "Arload: Prenestr & Gwel"
   New Tab: "Krouiñ un ivinell nevez"
   Close Tab: "Serriñ an ivinell vremanel"
   Reload Tab: "Adkargañ an ivinell vremanel"
@@ -3020,8 +3022,8 @@ Subscription Groups:
   No Icon: Arlun ebet
 Yattee Server:
   API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
-  Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."
-  Posts unavailable: "Ne bourchas ket ar servijerioù Yattee pennadoù. Gweredekait «\_{fallbackSetting}\_» evit o c'hargañ gant an API lec'hel."
+  Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait « {fallbackSetting} » evit he c'hargañ gant an API lec'hel."
+  Posts unavailable: "Ne bourchas ket ar servijerioù Yattee pennadoù. Gweredekait « {fallbackSetting} » evit o c'hargañ gant an API lec'hel."
   Errors:
     Invalid credentials: Nac'het en deus ar servijer Yattee an anv implijer pe ar ger-tremen. Gwiriit anezho en Arventennoù → Araokaet.
     Rate limited: Stankañ a ra ar servijer Yattee ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.

@@ -2,9 +2,16 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, nextTick, ref, shallowRef, triggerRef } from 'vue'
+import { computed, nextTick, ref, shallowRef, toRaw, triggerRef } from 'vue'
 
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../src/renderer/helpers/api/invidious-playlists.js'
+import {
+  fillMissingPlaylistVideoDurations,
+  getSortedPlaylistItems,
+  isDurationSortOrder,
+  isPlaylistSortOrder,
+  SORT_BY_VALUES,
+} from '../../src/renderer/helpers/playlists.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 
@@ -36,6 +43,14 @@ function harness(pages, { needed = true } = {}) {
     playlistContinuationFailed,
     needsMorePlaylistVideos: computed(() => hasUnloadedPlaylistVideos.value && !playlistContinuationFailed.value && needsNextPage.value),
     reversePlaylist: ref(false),
+    remotePlaylistSortOrder: ref(SORT_BY_VALUES.Custom),
+    locale: ref('en-US'),
+    SORT_BY_VALUES,
+    isPlaylistSortOrder,
+    isDurationSortOrder,
+    fillMissingPlaylistVideoDurations,
+    getSortedPlaylistItems,
+    toRaw,
     nextTick,
     triggerRef,
     updatePlaylistPanelNearEnd() {},
@@ -49,7 +64,7 @@ function harness(pages, { needed = true } = {}) {
     backendFallback: ref(false),
     isUserPlaylist: ref(false),
     playlistCacheTabId: 'web',
-    store: { commit() {} },
+    store: { commit() {}, getters: { getHistoryCacheById: {} } },
     hasMoreInvidiousPlaylistPages,
     mergeInvidiousPlaylistVideos,
     invidiousGetPlaylistInfo: async (_id, page = 1) => {
@@ -121,4 +136,33 @@ test('a failed later Invidious page keeps the videos already shown', async () =>
   assert.equal(context.playlistItems.value.length, 200)
   assert.equal(context.hasUnloadedPlaylistVideos.value, true)
   assert.equal(context.isFetchingPlaylistContinuation.value, false)
+})
+
+test('a duration-sorted cached Invidious playlist merges later pages in sorted order', async () => {
+  const firstPage = [
+    { ...video(0), lengthSeconds: 100 },
+    { ...video(1), lengthSeconds: 300 },
+  ]
+  const secondPage = [
+    { ...video(1), lengthSeconds: 300 },
+    { ...video(2), lengthSeconds: 50 },
+    { ...video(3), lengthSeconds: 200 },
+  ]
+  const { context, requests, loadCachedPlaylistInformation } = harness([firstPage, secondPage])
+  await loadCachedPlaylistInformation({
+    id: 'long-playlist',
+    title: 'Long',
+    totalVideoCount: 4,
+    channelName: 'Channel',
+    channelId: 'channel',
+    items: firstPage,
+    sortOrder: SORT_BY_VALUES.VideoDurationAscending,
+    continuationData: null,
+    nextInvidiousPage: 2,
+  })
+  assert.deepEqual(requests, [2])
+  assert.deepEqual(
+    context.playlistItems.value.map(item => [item.videoId, item.lengthSeconds]),
+    [['video2', 50], ['video0', 100], ['video3', 200], ['video1', 300]]
+  )
 })

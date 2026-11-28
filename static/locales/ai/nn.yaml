@@ -2559,6 +2559,7 @@ Playlist:
     VideoDurationAscending: Lengd (kortaste)
     VideoDurationDescending: Lengd (lengste)
     Custom: Eigendefinert
+    Default: Standard
   Preload Playlist: "Førehandslast alle videoar"
   Preload Playlist Warning Title: "Førehandslaste alle videoar?"
   Preload Playlist Warning: "Førehandslasting hentar kvar video i denne spelelista frå YouTube. Mange førespurnader på kort tid kan føre til at YouTube mellombels blokkerer IP-adressa di. Vil du halde fram?"
@@ -3000,13 +3001,13 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     Video:
-      Playback: "Video:\_Avspeling"
-      General: "Video:\_Generelt"
+      Playback: "Video: Avspeling"
+      General: "Video: Generelt"
     App:
-      General: "App:\_Generelt"
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søk og side"
-      Window and View: "App:\_Vindauge og vising"
+      General: "App: Generelt"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søk og side"
+      Window and View: "App: Vindauge og vising"
   Show Keyboard Shortcuts: Vis hurtigtastar
   History Backward: Gå éi side tilbake
   History Forward: Gå éi side fram

@@ -2348,6 +2348,8 @@ Playlist:
   Unavailable videos are hidden: Недоступни видео-снимци су скривени
   Add Playlist to Queue: "Додај плејлисту у ред за репродукцију"
   Playlist Added to Queue: "Плејлиста је додата у ред за репродукцију"
+  Sort By:
+    Default: Подразумевано
 Change Format:
   yt-dlp Error Template: "yt-dlp није могао да обезбеди стримове: {error}"
   Local Video File: Локална видео-датотека
@@ -2733,9 +2735,9 @@ KeyboardShortcutPrompt:
   Reassign: Поново додели
   Sections:
     App:
-      Tabs: "Апликација:\_Картице"
-      Search and Page: "Апликација:\_Претрага и страница"
-      Window and View: "Апликација:\_Прозор и приказ"
+      Tabs: "Апликација: Картице"
+      Search and Page: "Апликација: Претрага и страница"
+      Window and View: "Апликација: Прозор и приказ"
   New Tab: Направи нову картицу
   Close Tab: Затвори тренутну картицу
   Reload Tab: Поново учитај тренутну картицу

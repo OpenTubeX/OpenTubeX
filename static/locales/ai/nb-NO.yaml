@@ -2274,6 +2274,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Hele spillelisten kunne ikke lastes, så forhåndslastingen ble avbrutt."
   Add Playlist to Queue: "Legg spilleliste i kø"
   Playlist Added to Queue: "Spillelisten er lagt i køen"
+  Sort By:
+    Default: Standard
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikke hente strømmene: {error}"
   Local Video File: Lokal videofil
@@ -2650,9 +2652,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilordne på nytt
   Sections:
     App:
-      Tabs: "App:\_Faner"
-      Search and Page: "App:\_Søk og side"
-      Window and View: "App:\_Vindu og visning"
+      Tabs: "App: Faner"
+      Search and Page: "App: Søk og side"
+      Window and View: "App: Vindu og visning"
   New Tab: Opprett en ny fane
   Close Tab: Lukk den gjeldende fanen
   Reload Tab: Last inn den gjeldende fanen på nytt

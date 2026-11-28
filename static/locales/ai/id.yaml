@@ -2296,6 +2296,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Daftar putar lengkap tidak dapat dimuat, sehingga pramuat dibatalkan."
   Add Playlist to Queue: "Tambahkan Daftar Putar ke Antrean"
   Playlist Added to Queue: "Daftar putar ditambahkan ke antrean"
+  Sort By:
+    Default: Default
 Change Format:
   yt-dlp Error Template: "yt-dlp tidak dapat menyediakan stream: {error}"
   Local Video File: Berkas video lokal
@@ -2672,9 +2674,9 @@ KeyboardShortcutPrompt:
   Reassign: Tetapkan ulang
   Sections:
     App:
-      Tabs: "Aplikasi:\_Tab"
-      Search and Page: "Aplikasi:\_Pencarian & Halaman"
-      Window and View: "Aplikasi:\_Jendela & Tampilan"
+      Tabs: "Aplikasi: Tab"
+      Search and Page: "Aplikasi: Pencarian & Halaman"
+      Window and View: "Aplikasi: Jendela & Tampilan"
   New Tab: Buat tab baru
   Close Tab: Tutup tab saat ini
   Reload Tab: Muat ulang tab saat ini

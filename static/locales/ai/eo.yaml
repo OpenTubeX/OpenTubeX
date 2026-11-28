@@ -2324,6 +2324,8 @@ Playlist:
   Playlist Preload Complete: 'Antaŭŝargitaj videaĵoj: {count}.'
   Playlist Preload Partial: Antaŭŝargis {preloaded} el {requested} videaĵoj. {failed} ne povis esti antaŭŝargitaj.
   Playlist Preload Pagination Failed: La tuta ludlisto ne povis esti ŝargita, do la antaŭŝargado estis nuligita.
+  Sort By:
+    Default: Defaŭlta
 Change Format:
   yt-dlp Error Template: 'yt-dlp ne povis provizi la fluojn: {error}'
   Local Video File: Loka videodosiero
@@ -2710,9 +2712,9 @@ KeyboardShortcutPrompt:
   Reassign: Reasigni
   Sections:
     App:
-      Tabs: "Aplikaĵo:\_Langetoj"
-      Search and Page: "Aplikaĵo:\_Serĉo kaj paĝo"
-      Window and View: "Aplikaĵo:\_Fenestro kaj vido"
+      Tabs: "Aplikaĵo: Langetoj"
+      Search and Page: "Aplikaĵo: Serĉo kaj paĝo"
+      Window and View: "Aplikaĵo: Fenestro kaj vido"
   New Tab: Krei novan langeton
   Close Tab: Fermi la aktualan langeton
   Reload Tab: Reŝargi la aktualan langeton

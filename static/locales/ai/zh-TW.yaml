@@ -2272,6 +2272,8 @@ Playlist:
   Playlist Preload Pagination Failed: "無法載入完整播放清單，已取消預先載入。"
   Add Playlist to Queue: "將播放清單加入佇列"
   Playlist Added to Queue: "播放清單已加入佇列"
+  Sort By:
+    Default: 預設
 Change Format:
   yt-dlp Error Template: "yt-dlp 無法提供串流：{error}"
   Local Video File: 本機影片檔案
@@ -2648,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: 重新指派
   Sections:
     App:
-      Tabs: "應用程式:\_分頁"
-      Search and Page: "應用程式:\_搜尋與頁面"
-      Window and View: "應用程式:\_視窗與檢視"
+      Tabs: "應用程式: 分頁"
+      Search and Page: "應用程式: 搜尋與頁面"
+      Window and View: "應用程式: 視窗與檢視"
   New Tab: 建立新分頁
   Close Tab: 關閉目前的分頁
   Reload Tab: 重新載入目前的分頁

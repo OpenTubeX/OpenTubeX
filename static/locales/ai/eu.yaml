@@ -2279,6 +2279,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
   Add Playlist to Queue: "Gehitu erreprodukzio-zerrenda ilarara"
   Playlist Added to Queue: "Erreprodukzio-zerrenda ilarara gehitu da"
+  Sort By:
+    Default: Lehenetsia
 Change Format:
   yt-dlp Error Template: "yt-dlp-k ezin izan ditu korronteak eman: {error}"
   Local Video File: Bideo-fitxategi lokala
@@ -2655,9 +2657,9 @@ KeyboardShortcutPrompt:
   Reassign: Esleitu berriz
   Sections:
     App:
-      Tabs: "Aplikazioa:\_Fitxak"
-      Search and Page: "Aplikazioa:\_Bilaketa eta orria"
-      Window and View: "Aplikazioa:\_Leihoa eta ikuspegia"
+      Tabs: "Aplikazioa: Fitxak"
+      Search and Page: "Aplikazioa: Bilaketa eta orria"
+      Window and View: "Aplikazioa: Leihoa eta ikuspegia"
   New Tab: Sortu fitxa berria
   Close Tab: Itxi uneko fitxa
   Reload Tab: Kargatu berriro uneko fitxa

@@ -2237,6 +2237,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Не удалось загрузить весь плейлист, поэтому предзагрузка отменена."
   Add Playlist to Queue: "Добавить плейлист в очередь"
   Playlist Added to Queue: "Плейлист добавлен в очередь"
+  Sort By:
+    Default: По умолчанию
 Change Format:
   yt-dlp Error Template: "yt-dlp не смог получить потоки: {error}"
   Local Video File: Локальный видеофайл
@@ -2613,9 +2615,9 @@ KeyboardShortcutPrompt:
   Reassign: Переназначить
   Sections:
     App:
-      Tabs: "Приложение:\_Вкладки"
-      Search and Page: "Приложение:\_Поиск и страницы"
-      Window and View: "Приложение:\_Окно и вид"
+      Tabs: "Приложение: Вкладки"
+      Search and Page: "Приложение: Поиск и страницы"
+      Window and View: "Приложение: Окно и вид"
   New Tab: Создать вкладку
   Close Tab: Закрыть текущую вкладку
   Reload Tab: Перезагрузить текущую вкладку

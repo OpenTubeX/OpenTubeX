@@ -2270,6 +2270,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
   Add Playlist to Queue: "Lägg till spellistan i kön"
   Playlist Added to Queue: "Spellistan har lagts till i kön"
+  Sort By:
+    Default: Standard
 Change Format:
   yt-dlp Error Template: "yt-dlp kunde inte tillhandahålla strömmarna: {error}"
   Local Video File: Lokal videofil
@@ -2646,9 +2648,9 @@ KeyboardShortcutPrompt:
   Reassign: Tilldela om
   Sections:
     App:
-      Tabs: "App:\_Flikar"
-      Search and Page: "App:\_Sökning och sida"
-      Window and View: "App:\_Fönster och vy"
+      Tabs: "App: Flikar"
+      Search and Page: "App: Sökning och sida"
+      Window and View: "App: Fönster och vy"
   New Tab: Skapa en ny flik
   Close Tab: Stäng aktuell flik
   Reload Tab: Läs in aktuell flik igen

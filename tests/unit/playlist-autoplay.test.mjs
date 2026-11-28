@@ -2,8 +2,15 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, nextTick, reactive, ref, shallowRef, triggerRef, watch as observe } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, toRaw, triggerRef, watch as observe } from 'vue'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
+import {
+  fillMissingPlaylistVideoDurations,
+  getSortedPlaylistItems,
+  isDurationSortOrder,
+  isPlaylistSortOrder,
+  SORT_BY_VALUES,
+} from '../../src/renderer/helpers/playlists.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
@@ -51,6 +58,14 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     playlistPanelNearEnd: ref(false),
     requestedPlaylistVideoCount: ref(0),
     reversePlaylist: ref(false),
+    remotePlaylistSortOrder: ref(SORT_BY_VALUES.Custom),
+    locale: ref('en-US'),
+    SORT_BY_VALUES,
+    isPlaylistSortOrder,
+    isDurationSortOrder,
+    fillMissingPlaylistVideoDurations,
+    getSortedPlaylistItems,
+    toRaw,
     updatePlaylistPanelNearEnd() {},
     isLoading,
     playlistItems,
@@ -59,7 +74,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     playlistTotalVideoCount: ref(0),
     channelName: ref(''),
     channelId: ref(''),
-    store: { commit() {} },
+    store: { commit() {}, getters: { getHistoryCacheById: {} } },
     playlistCacheTabId: 'android-tab',
     navigationDownloadId: () => undefined,
     process: { env: { SUPPORTS_LOCAL_API: true } },

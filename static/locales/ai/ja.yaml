@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "再生リスト全体を読み込めなかったため、先読みを中止しました。"
   Add Playlist to Queue: "再生リストをキューに追加"
   Playlist Added to Queue: "再生リストをキューに追加しました"
+  Sort By:
+    Default: デフォルト
 Change Format:
   yt-dlp Error Template: "yt-dlpでストリームを取得できませんでした: {error}"
   Local Video File: ローカル動画ファイル
@@ -2645,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: 割り当て直す
   Sections:
     App:
-      Tabs: "アプリ:\_タブ"
-      Search and Page: "アプリ:\_検索とページ"
-      Window and View: "アプリ:\_ウィンドウと表示"
+      Tabs: "アプリ: タブ"
+      Search and Page: "アプリ: 検索とページ"
+      Window and View: "アプリ: ウィンドウと表示"
   New Tab: 新しいタブを作成
   Close Tab: 現在のタブを閉じる
   Reload Tab: 現在のタブを再読み込み

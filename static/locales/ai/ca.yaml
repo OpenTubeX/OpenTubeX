@@ -2768,6 +2768,7 @@ Playlist:
     VideoDurationAscending: Durada (més curta)
     VideoDurationDescending: Durada (més llarga)
     Custom: Personalitzat
+    Default: Per defecte
   Preload Playlist: "Precarrega tots els vídeos"
   Preload Playlist Warning Title: "Voleu precarregar tots els vídeos?"
   Preload Playlist Warning: "La precàrrega sol·licita a YouTube cada vídeo d'aquesta llista de reproducció. Enviar moltes sol·licituds en poc temps pot fer que YouTube bloquegi temporalment la vostra adreça IP. Voleu continuar?"
@@ -3267,13 +3268,13 @@ KeyboardShortcutPrompt:
   Reassign: Torna a assignar
   Sections:
     Video:
-      Playback: "Vídeo:\_Reproducció"
-      General: "Vídeo:\_General"
+      Playback: "Vídeo: Reproducció"
+      General: "Vídeo: General"
     App:
-      General: "Aplicació:\_General"
-      Tabs: "Aplicació:\_Pestanyes"
-      Search and Page: "Aplicació:\_Cerca i pàgina"
-      Window and View: "Aplicació:\_Finestra i vista"
+      General: "Aplicació: General"
+      Tabs: "Aplicació: Pestanyes"
+      Search and Page: "Aplicació: Cerca i pàgina"
+      Window and View: "Aplicació: Finestra i vista"
   Show Keyboard Shortcuts: Mostra les dreceres de teclat
   History Backward: Torna una pàgina enrere
   History Forward: Avança una pàgina

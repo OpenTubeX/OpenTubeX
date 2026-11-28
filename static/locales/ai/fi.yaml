@@ -2278,6 +2278,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
   Add Playlist to Queue: "Lisää soittolista jonoon"
   Playlist Added to Queue: "Soittolista lisättiin jonoon"
+  Sort By:
+    Default: Oletus
 Change Format:
   yt-dlp Error Template: "yt-dlp ei voinut toimittaa suoratoistovirtoja: {error}"
   Local Video File: Paikallinen videotiedosto
@@ -2654,9 +2656,9 @@ KeyboardShortcutPrompt:
   Reassign: Määritä uudelleen
   Sections:
     App:
-      Tabs: "Sovellus:\_Välilehdet"
-      Search and Page: "Sovellus:\_Haku ja sivu"
-      Window and View: "Sovellus:\_Ikkuna ja näkymä"
+      Tabs: "Sovellus: Välilehdet"
+      Search and Page: "Sovellus: Haku ja sivu"
+      Window and View: "Sovellus: Ikkuna ja näkymä"
   New Tab: Luo uusi välilehti
   Close Tab: Sulje nykyinen välilehti
   Reload Tab: Lataa nykyinen välilehti uudelleen

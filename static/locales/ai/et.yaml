@@ -2271,6 +2271,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Tervet esitusloendit ei saanud laadida, seega eellaadimine tühistati."
   Add Playlist to Queue: "Lisa esitusloend esitusjärjekorda"
   Playlist Added to Queue: "Esitusloend lisati esitusjärjekorda"
+  Sort By:
+    Default: Vaikimisi
 Change Format:
   yt-dlp Error Template: "yt-dlp ei saanud vooge hankida: {error}"
   Local Video File: Kohalik videofail
@@ -2648,9 +2650,9 @@ KeyboardShortcutPrompt:
   Reassign: Määra ümber
   Sections:
     App:
-      Tabs: "Rakendus:\_Vahelehed"
-      Search and Page: "Rakendus:\_Otsing ja leht"
-      Window and View: "Rakendus:\_Aken ja vaade"
+      Tabs: "Rakendus: Vahelehed"
+      Search and Page: "Rakendus: Otsing ja leht"
+      Window and View: "Rakendus: Aken ja vaade"
   New Tab: Loo uus vaheleht
   Close Tab: Sulge aktiivne vaheleht
   Reload Tab: Laadi aktiivne vaheleht uuesti

@@ -2269,6 +2269,8 @@ Playlist:
   Playlist Preload Pagination Failed: "Celý zoznam sa nepodarilo načítať, preto bolo prednačítanie zrušené."
   Add Playlist to Queue: "Pridať playlist do poradia"
   Playlist Added to Queue: "Playlist bol pridaný do poradia"
+  Sort By:
+    Default: Predvolené
 Change Format:
   yt-dlp Error Template: "yt-dlp nedokázal poskytnúť streamy: {error}"
   Local Video File: Miestny súbor videa
@@ -2645,9 +2647,9 @@ KeyboardShortcutPrompt:
   Reassign: Priradiť znova
   Sections:
     App:
-      Tabs: "Aplikácia:\_Karty"
-      Search and Page: "Aplikácia:\_Hľadanie a stránka"
-      Window and View: "Aplikácia:\_Okno a zobrazenie"
+      Tabs: "Aplikácia: Karty"
+      Search and Page: "Aplikácia: Hľadanie a stránka"
+      Window and View: "Aplikácia: Okno a zobrazenie"
   New Tab: Vytvoriť novú kartu
   Close Tab: Zavrieť aktuálnu kartu
   Reload Tab: Znova načítať aktuálnu kartu

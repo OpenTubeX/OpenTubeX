@@ -2600,6 +2600,7 @@ Playlist:
     VideoDurationAscending: Duración (Más corta)
     VideoDurationDescending: Duración (más larga)
     Custom: Personalizado
+    Default: Predeterminado
   Preload Playlist: "Precargar todos los vídeos"
   Preload Playlist Warning Title: "¿Precargar todos los vídeos?"
   Preload Playlist Warning: "La precarga solicita a YouTube cada vídeo de esta lista de reproducción. Enviar muchas solicitudes en poco tiempo puede hacer que YouTube bloquee temporalmente tu dirección IP. ¿Quieres continuar?"
@@ -3057,9 +3058,9 @@ KeyboardShortcutPrompt:
       General: 'Video: General'
     App:
       General: 'Aplicación: General'
-      Tabs: "Aplicación:\_Pestañas"
-      Search and Page: "Aplicación:\_Búsqueda y página"
-      Window and View: "Aplicación:\_Ventana y vista"
+      Tabs: "Aplicación: Pestañas"
+      Search and Page: "Aplicación: Búsqueda y página"
+      Window and View: "Aplicación: Ventana y vista"
   Show Keyboard Shortcuts: Mostrar atajos de teclado
   History Backward: Retroceder una página
   History Forward: Avanzar una página

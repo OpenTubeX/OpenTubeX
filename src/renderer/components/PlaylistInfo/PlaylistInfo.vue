@@ -458,6 +458,7 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { addingMissingVideos, addMissingPlaylistVideos, loadPlaylistVideos, scanPlaylistForUnavailableVideos, unavailableVideoScans } from '../../helpers/playlistTasks'
+import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isDurationSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY, normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
@@ -515,6 +516,10 @@ const props = defineProps({
   sortedVideos: {
     type: Array,
     required: true
+  },
+  sortOrder: {
+    type: String,
+    default: SORT_BY_VALUES.Custom,
   },
   viewCount: {
     type: Number,
@@ -1073,7 +1078,7 @@ function copyPlaylist() {
 
 async function addPlaylistToQueue() {
   if (queueSnapshotPending.value) return
-  // Queue user playlists in their displayed sort order.
+  // Queue playlists in their displayed sort order.
   let videos = props.sortedVideos
   if (!isUserPlaylist.value) {
     queueSnapshotPending.value = true
@@ -1086,6 +1091,12 @@ async function addPlaylistToQueue() {
     queueSnapshotPending.value = false
     // Leaving the playlist while it loads cancels the action.
     if (!videos) return
+    if (props.sortOrder !== SORT_BY_VALUES.Custom) {
+      const items = isDurationSortOrder(props.sortOrder)
+        ? fillMissingPlaylistVideoDurations(videos, toRaw(historyCacheById.value)).items
+        : videos
+      videos = getSortedPlaylistItems(items, props.sortOrder, locale.value)
+    }
   }
   if (videos.length === 0) return
 
